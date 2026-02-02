@@ -32,16 +32,20 @@ enum class EncodingFormat : uint8_t {
 };
 
 /**
- * @brief Transport protocol types
+ * @brief Link layer types (matches Python E3LinkLayer)
  */
-enum class TransportType : uint8_t {
-    POSIX = 0,       ///< POSIX sockets (generic, uses TCP by default)
-    POSIX_TCP = 1,   ///< POSIX TCP sockets
-    POSIX_SCTP = 2,  ///< POSIX SCTP sockets (O-RAN standard)
-    POSIX_IPC = 3,   ///< POSIX Unix Domain Sockets
-    ZMQ = 10,        ///< ZeroMQ (generic, uses IPC by default)
-    ZMQ_TCP = 11,    ///< ZeroMQ over TCP
-    ZMQ_IPC = 12     ///< ZeroMQ over IPC
+enum class E3LinkLayer : uint8_t {
+    ZMQ = 0,     ///< ZeroMQ-based transport
+    POSIX = 1    ///< POSIX socket-based transport
+};
+
+/**
+ * @brief Transport layer types (matches Python E3TransportLayer)
+ */
+enum class E3TransportLayer : uint8_t {
+    SCTP = 0,    ///< SCTP (O-RAN standard)
+    TCP = 1,     ///< TCP
+    IPC = 2      ///< Unix Domain Sockets / IPC
 };
 
 /**
@@ -308,7 +312,10 @@ struct E3Config {
     std::string ran_identifier;
     
     // Transport configuration
-    TransportType transport{TransportType::POSIX};
+    E3LinkLayer link_layer{E3LinkLayer::ZMQ};
+    E3TransportLayer transport_layer{E3TransportLayer::IPC};
+    
+    // Endpoints
     std::string setup_endpoint{"ipc:///tmp/dapps/setup"};
     std::string subscriber_endpoint{"ipc:///tmp/dapps/dapp_socket"};
     std::string publisher_endpoint{"ipc:///tmp/dapps/e3_socket"};
@@ -443,6 +450,29 @@ struct SubscriptionEntry {
         case AgentState::STOPPED: return "Stopped";
         case AgentState::ERROR: return "Error";
         default: return "Unknown";
+    }
+}
+
+/**
+ * @brief Convert E3LinkLayer to string representation
+ */
+[[nodiscard]] inline const char* link_layer_to_string(E3LinkLayer layer) noexcept {
+    switch (layer) {
+        case E3LinkLayer::ZMQ: return "zmq";
+        case E3LinkLayer::POSIX: return "posix";
+        default: return "unknown";
+    }
+}
+
+/**
+ * @brief Convert E3TransportLayer to string representation
+ */
+[[nodiscard]] inline const char* transport_layer_to_string(E3TransportLayer layer) noexcept {
+    switch (layer) {
+        case E3TransportLayer::SCTP: return "sctp";
+        case E3TransportLayer::TCP: return "tcp";
+        case E3TransportLayer::IPC: return "ipc";
+        default: return "unknown";
     }
 }
 
