@@ -20,6 +20,11 @@ install(DIRECTORY include/libe3
     FILES_MATCHING PATTERN "*.hpp"
 )
 
+# Install generated version header
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/libe3/version.hpp
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libe3
+)
+
 # Install ASN.1 generated headers
 install(DIRECTORY ${ASN1_GENERATED_DIR}/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libe3/asn1

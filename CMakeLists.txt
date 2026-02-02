@@ -6,8 +6,16 @@
 
 cmake_minimum_required(VERSION 3.16)
 
+# Read version from VERSION file before project() call
+set(VERSION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/VERSION")
+if(NOT EXISTS "${VERSION_FILE}")
+    message(FATAL_ERROR "VERSION file not found at ${VERSION_FILE}")
+endif()
+file(READ "${VERSION_FILE}" LIBE3_VERSION)
+string(STRIP "${LIBE3_VERSION}" LIBE3_VERSION)
+
 project(libe3
-    VERSION 0.1.0
+    VERSION ${LIBE3_VERSION}
     DESCRIPTION "Vendor-neutral E3AP C++ library for RAN integration"
     LANGUAGES CXX C
 )
@@ -30,6 +38,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(libe3Options)
 include(libe3Compiler)
 include(libe3Dependencies)
+include(libe3Version)
 
 # ============================================================================
 # ASN.1 Messages Library

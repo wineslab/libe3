@@ -8,6 +8,7 @@
 #include "libe3/e3_agent.hpp"
 #include "libe3/e3_interface.hpp"
 #include "libe3/logger.hpp"
+#include "libe3/version.hpp"
 
 namespace libe3 {
 
