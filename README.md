@@ -2,6 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://isocpp.org/)
+[![Version](https://img.shields.io/badge/version-0.0.1-green.svg)](VERSION)
 
 **libe3** is a standalone, vendor-neutral C++ library for implementing the E3AP (E3 Application Protocol) in RAN functions such as DU, CU-CP, and CU-UP. It provides a clean object-oriented API for RAN vendors while hiding transport, encoding, and protocol complexity.
 
@@ -9,12 +10,12 @@
 
 - **Vendor-Neutral API**: Clean E3Agent facade that hides implementation details
 - **Multiple Transports**: Support for ZeroMQ and POSIX sockets (TCP, SCTP, Unix Domain)
-- **Multiple Encodings**: JSON (built-in) with ASN.1 placeholder
+- **Multiple Encodings**: ASN.1 APER (primary) and JSON encoders
 - **Service Model Extensions**: Easy-to-implement SM interface for custom functionality
 - **Simulation Mode**: Test without real RAN infrastructure
 - **Thread-Safe**: Proper synchronization for concurrent dApp operations
 - **Modern C++17**: Uses std::variant, std::optional, RAII patterns
-- **Lightweight**: No heavy external dependencies
+- **Lightweight**: Minimal external dependencies
 
 ## Architecture
 
@@ -263,6 +264,12 @@ libe3/
 ├── CMakeLists.txt           # Main build configuration
 ├── README.md                # This file
 ├── LICENSE                  # Apache 2.0 license
+├── VERSION                  # Version file (used by CMake)
+├── build_libe3              # Build script
+├── cmake/
+│   ├── libe3Version.cmake   # Version configuration
+│   ├── libe3_version.hpp.in # Version header template
+│   └── ...                  # Other CMake modules
 ├── include/
 │   └── libe3/
 │       ├── libe3.hpp        # Umbrella header
@@ -271,12 +278,29 @@ libe3/
 │       ├── e3_connector.hpp # Transport interface
 │       ├── e3_encoder.hpp   # Encoder interface
 │       └── ...
+├── messages/
+│   ├── asn1/                # ASN.1 definitions
+│   └── CMakeLists.txt       # ASN.1 build config
 ├── src/
 │   ├── core/                # Core implementations
 │   ├── connector/           # Transport implementations
 │   └── encoder/             # Encoder implementations
 ├── tests/                   # Unit tests
 └── examples/                # Example applications
+```
+
+## Versioning
+
+The library version is managed via the `VERSION` file in the project root. During compilation, CMake reads this file and generates `libe3/version.hpp` with the version macros:
+
+```cpp
+#include <libe3/libe3.hpp>
+
+// Access version information
+const char* ver = libe3::version();  // e.g., "0.0.1"
+
+int major, minor, patch;
+libe3::version(major, minor, patch);  // e.g., 0, 0, 1
 ```
 
 ## Integration with spear-dApp
