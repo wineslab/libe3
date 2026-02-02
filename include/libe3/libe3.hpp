@@ -25,19 +25,6 @@
 // Service Model interface for custom SMs
 #include "sm_interface.hpp"
 
-// Optional: Direct access to encoder/connector interfaces
-// (usually not needed by library users)
-#include "e3_encoder.hpp"
-#include "e3_connector.hpp"
-
-// Optional: Subscription manager access
-// (usually accessed through E3Agent)
-#include "subscription_manager.hpp"
-
-// Optional: Response queue
-// (usually accessed through E3Agent)
-#include "response_queue.hpp"
-
 namespace libe3 {
 
 /**
