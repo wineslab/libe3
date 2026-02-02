@@ -2,7 +2,6 @@
  * @file zmq_connector.cpp
  * @brief ZeroMQ connector implementation
  *
- * Ported from the original C implementation's zeromq_* functions in e3_connector.c
  *
  * SPDX-License-Identifier: Apache-2.0
  */

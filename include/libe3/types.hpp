@@ -321,7 +321,7 @@ struct E3Config {
     std::string publisher_endpoint{"ipc:///tmp/dapps/e3_socket"};
     
     // Encoding format
-    EncodingFormat encoding{EncodingFormat::JSON};
+    EncodingFormat encoding{EncodingFormat::ASN1};
     
     // Timeouts (milliseconds)
     uint32_t connect_timeout_ms{5000};

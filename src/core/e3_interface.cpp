@@ -62,10 +62,11 @@ ErrorCode E3Interface::init() {
     // Create connector (unless in simulation mode)
     if (!config_.simulation_mode) {
         connector_ = create_connector(
-            config_.transport,
+            config_.link_layer,
+            config_.transport_layer,
             config_.setup_endpoint,
-            config_.inbound_endpoint,
-            config_.outbound_endpoint,
+            config_.subscriber_endpoint,
+            config_.publisher_endpoint,
             config_.io_threads
         );
         

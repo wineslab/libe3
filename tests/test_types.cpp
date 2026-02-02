@@ -137,7 +137,7 @@ TEST(E3Config_defaults) {
     
     ASSERT_EQ(config.link_layer, E3LinkLayer::POSIX);
     ASSERT_EQ(config.transport_layer, E3TransportLayer::IPC);
-    ASSERT_EQ(config.encoding, EncodingFormat::JSON);
+    ASSERT_EQ(config.encoding, EncodingFormat::ASN1);
     ASSERT_FALSE(config.simulation_mode);
 }
 

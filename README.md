@@ -56,6 +56,29 @@
 
 ### Building
 
+The easiest way to build libe3 is using the provided build script:
+
+```bash
+cd libe3
+
+# Basic release build
+./build_libe3
+
+# Debug build with tests
+./build_libe3 -g -t
+
+# Clean build with Ninja
+./build_libe3 -c --ninja
+
+# Install dependencies first (Ubuntu/Fedora/Arch/macOS)
+./build_libe3 -I
+
+# See all options
+./build_libe3 --help
+```
+
+Alternatively, you can use CMake directly:
+
 ```bash
 cd libe3
 mkdir build && cd build
@@ -70,16 +93,18 @@ make -j$(nproc)
 | `LIBE3_BUILD_TESTS` | ON | Build unit tests |
 | `LIBE3_BUILD_EXAMPLES` | ON | Build examples |
 | `LIBE3_ENABLE_ZMQ` | ON | Enable ZeroMQ transport |
-| `LIBE3_ENABLE_ASN1` | OFF | Enable ASN.1 encoding |
+| `LIBE3_ENABLE_ASN1` | ON | Enable ASN.1 encoding |
 | `LIBE3_ENABLE_ASAN` | OFF | Enable AddressSanitizer |
 | `LIBE3_ENABLE_TSAN` | OFF | Enable ThreadSanitizer |
 
 ### Running Tests
 
 ```bash
-make test
-# or
-ctest --output-on-failure
+# With build script
+./build_libe3 -t
+
+# Or manually
+cd build && ctest --output-on-failure
 ```
 
 ## Usage

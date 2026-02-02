@@ -1,0 +1,79 @@
+E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
+
+    E3-SetupRequest ::= SEQUENCE {
+        id                   E3-MessageID,
+        dAppIdentifier       INTEGER (0..100),
+        ranFunctionList      SEQUENCE OF INTEGER (0..255),
+        type                 E3-ActionType
+    }
+
+    E3-SetupResponse ::= SEQUENCE {
+        id                   E3-MessageID,
+        requestId            E3-MessageID,
+        responseCode         E3-ResponseCode,
+        ranFunctionList      SEQUENCE OF INTEGER (0..255)
+    }
+
+    E3-SubscriptionRequest ::= SEQUENCE {
+        id                   E3-MessageID,
+        dAppIdentifier       INTEGER (0..100),
+        type                 E3-ActionType,
+        ranFunctionIdentifier   INTEGER (0..100)
+    }
+
+    E3-SubscriptionResponse ::= SEQUENCE {
+        id                   E3-MessageID,
+        requestId            E3-MessageID,
+        responseCode         E3-ResponseCode
+    }
+
+    E3-IndicationMessage ::= SEQUENCE {
+        id                   E3-MessageID,
+        dAppIdentifier       INTEGER (0..100),
+        protocolData         OCTET STRING (SIZE (1..32768))
+    }
+
+    E3-ControlAction ::= SEQUENCE {
+        id                   E3-MessageID,
+        dAppIdentifier       INTEGER (0..100),
+        ranFunctionIdentifier   INTEGER (0..100),
+        actionData           OCTET STRING (SIZE (1..32768))
+    }
+
+    E3-DAppReport ::= SEQUENCE {
+        id                      E3-MessageID,
+        dAppIdentifier          INTEGER (0..100),
+        ranFunctionIdentifier   INTEGER (0..100),
+        reportData              OCTET STRING (SIZE (1..32768))
+    }
+
+    E3-XAppControlAction ::= SEQUENCE {
+        id                      E3-MessageID,
+        dAppIdentifier          INTEGER (0..100),
+        ranFunctionIdentifier   INTEGER (0..100),
+        xAppControlData         OCTET STRING (SIZE (1..32768))
+    }
+
+    E3-MessageAck ::= SEQUENCE {
+        id                   E3-MessageID,
+        requestId            E3-MessageID,
+        responseCode         E3-ResponseCode
+    }
+
+    E3-MessageID ::= INTEGER (1..100)
+    E3-ActionType ::= ENUMERATED { insert(0), update(1), delete(2) }
+    E3-ResponseCode ::= ENUMERATED { positive(0), negative(1) }
+
+    E3-PDU ::= CHOICE {
+        setupRequest          [0] E3-SetupRequest,
+        setupResponse         [1] E3-SetupResponse,
+        subscriptionRequest   [2] E3-SubscriptionRequest,
+        subscriptionResponse  [3] E3-SubscriptionResponse,
+        indicationMessage     [4] E3-IndicationMessage,
+        controlAction         [5] E3-ControlAction,
+        dAppReport            [6] E3-DAppReport,
+        xAppControlAction     [7] E3-XAppControlAction,
+        messageAck            [8] E3-MessageAck
+    }
+
+END

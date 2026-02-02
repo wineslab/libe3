@@ -1,0 +1,481 @@
+/**
+ * @file asn1_encoder.cpp
+ * @brief ASN.1 APER Encoder implementation
+ *
+ * Ported from the original C implementation's e3ap_handler.c ASN.1 functions.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include "asn1_encoder.hpp"
+#include "libe3/logger.hpp"
+
+// ASN.1 generated headers
+extern "C" {
+#include "E3-PDU.h"
+#include "E3-SetupRequest.h"
+#include "E3-SetupResponse.h"
+#include "E3-SubscriptionRequest.h"
+#include "E3-SubscriptionResponse.h"
+#include "E3-IndicationMessage.h"
+#include "E3-ControlAction.h"
+#include "E3-DAppReport.h"
+#include "E3-XAppControlAction.h"
+#include "E3-MessageAck.h"
+}
+
+#include <atomic>
+#include <cstring>
+
+namespace libe3 {
+
+namespace {
+constexpr const char* LOG_TAG = "Asn1Enc";
+
+// Thread-safe message ID counter
+std::atomic<uint32_t> next_message_id{1};
+
+uint32_t generate_message_id() {
+    uint32_t id = next_message_id.fetch_add(1);
+    // Wrap around to stay within valid range (1-100)
+    if (id > 100) {
+        id = (id % 100) + 1;
+        next_message_id.store(id + 1);
+    }
+    return id;
+}
+
+} // anonymous namespace
+
+// ============================================================================
+// Encoding
+// ============================================================================
+
+EncodeResult<EncodedMessage> Asn1E3Encoder::encode(const Pdu& pdu) {
+    E3_PDU* asn1_pdu = pdu_to_asn1(pdu);
+    if (!asn1_pdu) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to convert PDU to ASN.1";
+        return tl::unexpected(ErrorCode::ENCODING_ERROR);
+    }
+
+    // Allocate buffer for encoding
+    std::vector<uint8_t> buffer(BUFFER_SIZE);
+    
+    // Encode using ASN.1 APER
+    asn_enc_rval_t enc_rval = aper_encode_to_buffer(
+        &asn_DEF_E3_PDU,
+        nullptr,
+        asn1_pdu,
+        buffer.data(),
+        buffer.size()
+    );
+    
+    if (enc_rval.encoded == -1) {
+        E3_LOG_ERROR(LOG_TAG) << "APER encoding failed for type: " 
+                              << (enc_rval.failed_type ? enc_rval.failed_type->name : "Unknown");
+        ASN_STRUCT_FREE(asn_DEF_E3_PDU, asn1_pdu);
+        return tl::unexpected(ErrorCode::ENCODING_ERROR);
+    }
+    
+    // Resize buffer to actual encoded size
+    buffer.resize(enc_rval.encoded);
+    
+    ASN_STRUCT_FREE(asn_DEF_E3_PDU, asn1_pdu);
+    
+    EncodedMessage msg;
+    msg.buffer = std::move(buffer);
+    msg.format = EncodingFormat::ASN1;
+    
+    E3_LOG_DEBUG(LOG_TAG) << "Encoded PDU: " << enc_rval.encoded << " bytes";
+    return msg;
+}
+
+// ============================================================================
+// Decoding
+// ============================================================================
+
+EncodeResult<Pdu> Asn1E3Encoder::decode(const EncodedMessage& encoded) {
+    return decode(encoded.buffer.data(), encoded.buffer.size());
+}
+
+EncodeResult<Pdu> Asn1E3Encoder::decode(const uint8_t* data, size_t size) {
+    if (!data || size == 0) {
+        return tl::unexpected(ErrorCode::INVALID_PARAM);
+    }
+    
+    // Decode ASN.1 buffer
+    E3_PDU* asn1_pdu = nullptr;
+    asn_dec_rval_t dec_rval = aper_decode(
+        nullptr,
+        &asn_DEF_E3_PDU,
+        reinterpret_cast<void**>(&asn1_pdu),
+        data,
+        size,
+        0, 0
+    );
+    
+    if (dec_rval.code != RC_OK) {
+        E3_LOG_ERROR(LOG_TAG) << "APER decoding failed with code " << dec_rval.code;
+        if (asn1_pdu) {
+            ASN_STRUCT_FREE(asn_DEF_E3_PDU, asn1_pdu);
+        }
+        return tl::unexpected(ErrorCode::DECODING_ERROR);
+    }
+    
+    // Convert to generic PDU
+    Pdu pdu = asn1_to_pdu(asn1_pdu);
+    
+    ASN_STRUCT_FREE(asn_DEF_E3_PDU, asn1_pdu);
+    
+    return pdu;
+}
+
+// ============================================================================
+// PDU Conversion: Generic -> ASN.1
+// ============================================================================
+
+E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
+    E3_PDU* asn1_pdu = static_cast<E3_PDU*>(calloc(1, sizeof(E3_PDU)));
+    if (!asn1_pdu) {
+        return nullptr;
+    }
+    
+    switch (pdu.type) {
+        case PduType::SETUP_REQUEST: {
+            const auto* req = std::get_if<SetupRequest>(&pdu.choice);
+            if (!req) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->present = E3_PDU_PR_setupRequest;
+            asn1_pdu->choice.setupRequest = static_cast<E3_SetupRequest_t*>(
+                calloc(1, sizeof(E3_SetupRequest_t)));
+            if (!asn1_pdu->choice.setupRequest) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->choice.setupRequest->id = pdu.message_id ? pdu.message_id : generate_message_id();
+            asn1_pdu->choice.setupRequest->dAppIdentifier = req->dapp_identifier;
+            asn1_pdu->choice.setupRequest->type = static_cast<long>(req->action_type);
+            
+            // Handle RAN function list
+            for (const auto& rf : req->ran_functions) {
+                long* func_id = static_cast<long*>(malloc(sizeof(long)));
+                *func_id = rf.ran_function_id;
+                ASN_SEQUENCE_ADD(&asn1_pdu->choice.setupRequest->ranFunctionList, func_id);
+            }
+            break;
+        }
+        
+        case PduType::SETUP_RESPONSE: {
+            const auto* resp = std::get_if<SetupResponse>(&pdu.choice);
+            if (!resp) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->present = E3_PDU_PR_setupResponse;
+            asn1_pdu->choice.setupResponse = static_cast<E3_SetupResponse_t*>(
+                calloc(1, sizeof(E3_SetupResponse_t)));
+            if (!asn1_pdu->choice.setupResponse) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->choice.setupResponse->id = pdu.message_id ? pdu.message_id : generate_message_id();
+            asn1_pdu->choice.setupResponse->requestId = resp->request_id;
+            asn1_pdu->choice.setupResponse->responseCode = 
+                (resp->result == SetupResult::SUCCESS) ? 0 : 1;
+            
+            for (uint32_t func_id : resp->accepted_ran_functions) {
+                long* id = static_cast<long*>(malloc(sizeof(long)));
+                *id = func_id;
+                ASN_SEQUENCE_ADD(&asn1_pdu->choice.setupResponse->ranFunctionList, id);
+            }
+            break;
+        }
+        
+        case PduType::SUBSCRIPTION_REQUEST: {
+            const auto* req = std::get_if<SubscriptionRequest>(&pdu.choice);
+            if (!req) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->present = E3_PDU_PR_subscriptionRequest;
+            asn1_pdu->choice.subscriptionRequest = static_cast<E3_SubscriptionRequest_t*>(
+                calloc(1, sizeof(E3_SubscriptionRequest_t)));
+            if (!asn1_pdu->choice.subscriptionRequest) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->choice.subscriptionRequest->id = pdu.message_id ? pdu.message_id : generate_message_id();
+            asn1_pdu->choice.subscriptionRequest->dAppIdentifier = req->dapp_identifier;
+            asn1_pdu->choice.subscriptionRequest->type = static_cast<long>(req->action_type);
+            // Note: Original protocol only supports one RAN function per subscription request
+            if (!req->ran_functions_to_subscribe.empty()) {
+                asn1_pdu->choice.subscriptionRequest->ranFunctionIdentifier = 
+                    req->ran_functions_to_subscribe[0];
+            }
+            break;
+        }
+        
+        case PduType::SUBSCRIPTION_RESPONSE: {
+            const auto* resp = std::get_if<SubscriptionResponse>(&pdu.choice);
+            if (!resp) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->present = E3_PDU_PR_subscriptionResponse;
+            asn1_pdu->choice.subscriptionResponse = static_cast<E3_SubscriptionResponse_t*>(
+                calloc(1, sizeof(E3_SubscriptionResponse_t)));
+            if (!asn1_pdu->choice.subscriptionResponse) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->choice.subscriptionResponse->id = pdu.message_id ? pdu.message_id : generate_message_id();
+            asn1_pdu->choice.subscriptionResponse->requestId = resp->request_id;
+            asn1_pdu->choice.subscriptionResponse->responseCode = 
+                resp->accepted_ran_functions.empty() ? 1 : 0;
+            break;
+        }
+        
+        case PduType::INDICATION_MESSAGE: {
+            const auto* msg = std::get_if<IndicationMessage>(&pdu.choice);
+            if (!msg) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->present = E3_PDU_PR_indicationMessage;
+            asn1_pdu->choice.indicationMessage = static_cast<E3_IndicationMessage_t*>(
+                calloc(1, sizeof(E3_IndicationMessage_t)));
+            if (!asn1_pdu->choice.indicationMessage) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->choice.indicationMessage->id = pdu.message_id ? pdu.message_id : generate_message_id();
+            asn1_pdu->choice.indicationMessage->dAppIdentifier = msg->dapp_identifier;
+            
+            // Copy protocol data
+            OCTET_STRING_fromBuf(&asn1_pdu->choice.indicationMessage->protocolData,
+                reinterpret_cast<const char*>(msg->protocol_data.data()),
+                msg->protocol_data.size());
+            break;
+        }
+        
+        case PduType::CONTROL_ACTION: {
+            const auto* action = std::get_if<ControlAction>(&pdu.choice);
+            if (!action) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->present = E3_PDU_PR_controlAction;
+            asn1_pdu->choice.controlAction = static_cast<E3_ControlAction_t*>(
+                calloc(1, sizeof(E3_ControlAction_t)));
+            if (!asn1_pdu->choice.controlAction) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->choice.controlAction->id = pdu.message_id ? pdu.message_id : generate_message_id();
+            asn1_pdu->choice.controlAction->dAppIdentifier = action->dapp_identifier;
+            asn1_pdu->choice.controlAction->ranFunctionIdentifier = action->ran_function_identifier;
+            
+            OCTET_STRING_fromBuf(&asn1_pdu->choice.controlAction->actionData,
+                reinterpret_cast<const char*>(action->action_data.data()),
+                action->action_data.size());
+            break;
+        }
+        
+        case PduType::DAPP_REPORT: {
+            const auto* report = std::get_if<DAppReport>(&pdu.choice);
+            if (!report) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->present = E3_PDU_PR_dAppReport;
+            asn1_pdu->choice.dAppReport = static_cast<E3_DAppReport_t*>(
+                calloc(1, sizeof(E3_DAppReport_t)));
+            if (!asn1_pdu->choice.dAppReport) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->choice.dAppReport->id = pdu.message_id ? pdu.message_id : generate_message_id();
+            asn1_pdu->choice.dAppReport->dAppIdentifier = report->dapp_identifier;
+            asn1_pdu->choice.dAppReport->ranFunctionIdentifier = report->ran_function_identifier;
+            
+            OCTET_STRING_fromBuf(&asn1_pdu->choice.dAppReport->reportData,
+                reinterpret_cast<const char*>(report->report_data.data()),
+                report->report_data.size());
+            break;
+        }
+        
+        case PduType::XAPP_CONTROL_ACTION: {
+            const auto* action = std::get_if<XAppControlAction>(&pdu.choice);
+            if (!action) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->present = E3_PDU_PR_xAppControlAction;
+            asn1_pdu->choice.xAppControlAction = static_cast<E3_XAppControlAction_t*>(
+                calloc(1, sizeof(E3_XAppControlAction_t)));
+            if (!asn1_pdu->choice.xAppControlAction) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->choice.xAppControlAction->id = pdu.message_id ? pdu.message_id : generate_message_id();
+            asn1_pdu->choice.xAppControlAction->dAppIdentifier = action->dapp_identifier;
+            asn1_pdu->choice.xAppControlAction->ranFunctionIdentifier = action->ran_function_identifier;
+            
+            OCTET_STRING_fromBuf(&asn1_pdu->choice.xAppControlAction->xAppControlData,
+                reinterpret_cast<const char*>(action->xapp_control_data.data()),
+                action->xapp_control_data.size());
+            break;
+        }
+        
+        case PduType::MESSAGE_ACK: {
+            const auto* ack = std::get_if<MessageAck>(&pdu.choice);
+            if (!ack) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->present = E3_PDU_PR_messageAck;
+            asn1_pdu->choice.messageAck = static_cast<E3_MessageAck_t*>(
+                calloc(1, sizeof(E3_MessageAck_t)));
+            if (!asn1_pdu->choice.messageAck) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->choice.messageAck->id = pdu.message_id ? pdu.message_id : generate_message_id();
+            asn1_pdu->choice.messageAck->requestId = ack->original_message_id;
+            asn1_pdu->choice.messageAck->responseCode = 
+                (ack->result == ErrorCode::SUCCESS) ? 0 : 1;
+            break;
+        }
+        
+        default:
+            free(asn1_pdu);
+            return nullptr;
+    }
+    
+    return asn1_pdu;
+}
+
+// ============================================================================
+// PDU Conversion: ASN.1 -> Generic
+// ============================================================================
+
+Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
+    Pdu pdu;
+    
+    switch (asn1_pdu->present) {
+        case E3_PDU_PR_setupRequest: {
+            pdu.type = PduType::SETUP_REQUEST;
+            pdu.message_id = asn1_pdu->choice.setupRequest->id;
+            
+            SetupRequest req;
+            req.dapp_identifier = asn1_pdu->choice.setupRequest->dAppIdentifier;
+            req.action_type = static_cast<ActionType>(asn1_pdu->choice.setupRequest->type);
+            
+            // Extract RAN function list
+            int count = asn1_pdu->choice.setupRequest->ranFunctionList.list.count;
+            for (int i = 0; i < count; i++) {
+                RanFunctionDefinition def;
+                def.ran_function_id = *asn1_pdu->choice.setupRequest->ranFunctionList.list.array[i];
+                req.ran_functions.push_back(def);
+            }
+            
+            pdu.choice = req;
+            break;
+        }
+        
+        case E3_PDU_PR_setupResponse: {
+            pdu.type = PduType::SETUP_RESPONSE;
+            pdu.message_id = asn1_pdu->choice.setupResponse->id;
+            
+            SetupResponse resp;
+            resp.request_id = asn1_pdu->choice.setupResponse->requestId;
+            resp.result = (asn1_pdu->choice.setupResponse->responseCode == 0) 
+                ? SetupResult::SUCCESS : SetupResult::FAILURE;
+            
+            int count = asn1_pdu->choice.setupResponse->ranFunctionList.list.count;
+            for (int i = 0; i < count; i++) {
+                resp.accepted_ran_functions.push_back(
+                    *asn1_pdu->choice.setupResponse->ranFunctionList.list.array[i]);
+            }
+            
+            pdu.choice = resp;
+            break;
+        }
+        
+        case E3_PDU_PR_subscriptionRequest: {
+            pdu.type = PduType::SUBSCRIPTION_REQUEST;
+            pdu.message_id = asn1_pdu->choice.subscriptionRequest->id;
+            
+            SubscriptionRequest req;
+            req.dapp_identifier = asn1_pdu->choice.subscriptionRequest->dAppIdentifier;
+            req.action_type = static_cast<ActionType>(asn1_pdu->choice.subscriptionRequest->type);
+            req.ran_functions_to_subscribe.push_back(
+                asn1_pdu->choice.subscriptionRequest->ranFunctionIdentifier);
+            
+            pdu.choice = req;
+            break;
+        }
+        
+        case E3_PDU_PR_subscriptionResponse: {
+            pdu.type = PduType::SUBSCRIPTION_RESPONSE;
+            pdu.message_id = asn1_pdu->choice.subscriptionResponse->id;
+            
+            SubscriptionResponse resp;
+            resp.request_id = asn1_pdu->choice.subscriptionResponse->requestId;
+            // Note: response_code 0 = positive, 1 = negative
+            if (asn1_pdu->choice.subscriptionResponse->responseCode == 0) {
+                // Positive - would need to track which function was accepted
+            }
+            
+            pdu.choice = resp;
+            break;
+        }
+        
+        case E3_PDU_PR_indicationMessage: {
+            pdu.type = PduType::INDICATION_MESSAGE;
+            pdu.message_id = asn1_pdu->choice.indicationMessage->id;
+            
+            IndicationMessage msg;
+            msg.dapp_identifier = asn1_pdu->choice.indicationMessage->dAppIdentifier;
+            
+            // Copy protocol data
+            const OCTET_STRING_t* data = &asn1_pdu->choice.indicationMessage->protocolData;
+            msg.protocol_data.assign(data->buf, data->buf + data->size);
+            
+            pdu.choice = msg;
+            break;
+        }
+        
+        case E3_PDU_PR_controlAction: {
+            pdu.type = PduType::CONTROL_ACTION;
+            pdu.message_id = asn1_pdu->choice.controlAction->id;
+            
+            ControlAction action;
+            action.dapp_identifier = asn1_pdu->choice.controlAction->dAppIdentifier;
+            action.ran_function_identifier = asn1_pdu->choice.controlAction->ranFunctionIdentifier;
+            
+            const OCTET_STRING_t* data = &asn1_pdu->choice.controlAction->actionData;
+            action.action_data.assign(data->buf, data->buf + data->size);
+            
+            pdu.choice = action;
+            break;
+        }
+        
+        case E3_PDU_PR_dAppReport: {
+            pdu.type = PduType::DAPP_REPORT;
+            pdu.message_id = asn1_pdu->choice.dAppReport->id;
+            
+            DAppReport report;
+            report.dapp_identifier = asn1_pdu->choice.dAppReport->dAppIdentifier;
+            report.ran_function_identifier = asn1_pdu->choice.dAppReport->ranFunctionIdentifier;
+            
+            const OCTET_STRING_t* data = &asn1_pdu->choice.dAppReport->reportData;
+            report.report_data.assign(data->buf, data->buf + data->size);
+            
+            pdu.choice = report;
+            break;
+        }
+        
+        case E3_PDU_PR_xAppControlAction: {
+            pdu.type = PduType::XAPP_CONTROL_ACTION;
+            pdu.message_id = asn1_pdu->choice.xAppControlAction->id;
+            
+            XAppControlAction action;
+            action.dapp_identifier = asn1_pdu->choice.xAppControlAction->dAppIdentifier;
+            action.ran_function_identifier = asn1_pdu->choice.xAppControlAction->ranFunctionIdentifier;
+            
+            const OCTET_STRING_t* data = &asn1_pdu->choice.xAppControlAction->xAppControlData;
+            action.xapp_control_data.assign(data->buf, data->buf + data->size);
+            
+            pdu.choice = action;
+            break;
+        }
+        
+        case E3_PDU_PR_messageAck: {
+            pdu.type = PduType::MESSAGE_ACK;
+            pdu.message_id = asn1_pdu->choice.messageAck->id;
+            
+            MessageAck ack;
+            ack.original_message_id = asn1_pdu->choice.messageAck->requestId;
+            ack.result = (asn1_pdu->choice.messageAck->responseCode == 0)
+                ? ErrorCode::SUCCESS : ErrorCode::GENERIC_ERROR;
+            
+            pdu.choice = ack;
+            break;
+        }
+        
+        default:
+            E3_LOG_ERROR(LOG_TAG) << "Unknown ASN.1 PDU type: " << asn1_pdu->present;
+            break;
+    }
+    
+    return pdu;
+}
+
+} // namespace libe3
