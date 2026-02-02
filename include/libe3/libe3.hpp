@@ -10,11 +10,8 @@
 #ifndef LIBE3_LIBE3_HPP
 #define LIBE3_LIBE3_HPP
 
-// Version information
-#define LIBE3_VERSION_MAJOR 0
-#define LIBE3_VERSION_MINOR 1
-#define LIBE3_VERSION_PATCH 0
-#define LIBE3_VERSION_STRING "0.1.0"
+// Version information (generated from VERSION file)
+#include "version.hpp"
 
 // Core types
 #include "types.hpp"
