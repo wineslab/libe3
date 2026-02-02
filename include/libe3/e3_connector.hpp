@@ -99,9 +99,14 @@ public:
     virtual void dispose() = 0;
 
     /**
-     * @brief Get the transport type
+     * @brief Get the link layer type
      */
-    [[nodiscard]] virtual TransportType transport_type() const noexcept = 0;
+    [[nodiscard]] virtual E3LinkLayer link_layer() const noexcept = 0;
+
+    /**
+     * @brief Get the transport layer type
+     */
+    [[nodiscard]] virtual E3TransportLayer transport_layer() const noexcept = 0;
 
     /**
      * @brief Check if connector is connected
@@ -134,9 +139,10 @@ protected:
 /**
  * @brief Factory function to create appropriate connector
  *
- * Creates a connector instance based on the transport type specified.
+ * Creates a connector instance based on the link and transport layers specified.
  *
- * @param transport Transport type to use
+ * @param link_layer Link layer to use (ZMQ or POSIX)
+ * @param transport_layer Transport layer to use (SCTP, TCP, or IPC)
  * @param setup_endpoint Endpoint for setup channel
  * @param inbound_endpoint Endpoint for inbound channel
  * @param outbound_endpoint Endpoint for outbound channel
@@ -144,7 +150,8 @@ protected:
  * @return Unique pointer to created connector, nullptr on failure
  */
 [[nodiscard]] std::unique_ptr<E3Connector> create_connector(
-    TransportType transport,
+    E3LinkLayer link_layer,
+    E3TransportLayer transport_layer,
     const std::string& setup_endpoint,
     const std::string& inbound_endpoint,
     const std::string& outbound_endpoint,

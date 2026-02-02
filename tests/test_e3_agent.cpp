@@ -78,7 +78,8 @@ TEST(E3Agent_construction) {
 TEST(E3Agent_config_access) {
     E3Config config;
     config.ran_identifier = "my-unique-ran";
-    config.transport = TransportType::POSIX;
+    config.link_layer = E3LinkLayer::POSIX;
+    config.transport_layer = E3TransportLayer::IPC;
     config.encoding = EncodingFormat::JSON;
     config.simulation_mode = true;
     

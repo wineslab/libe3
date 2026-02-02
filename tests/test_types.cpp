@@ -135,7 +135,8 @@ TEST(E3Config_defaults) {
     E3Config config;
     config.ran_identifier = "test";
     
-    ASSERT_EQ(config.transport, TransportType::POSIX);
+    ASSERT_EQ(config.link_layer, E3LinkLayer::POSIX);
+    ASSERT_EQ(config.transport_layer, E3TransportLayer::IPC);
     ASSERT_EQ(config.encoding, EncodingFormat::JSON);
     ASSERT_FALSE(config.simulation_mode);
 }
@@ -143,13 +144,26 @@ TEST(E3Config_defaults) {
 TEST(E3Config_zmq) {
     E3Config config;
     config.ran_identifier = "zmq-ran";
-    config.transport = TransportType::ZMQ;
+    config.link_layer = E3LinkLayer::ZMQ;
+    config.transport_layer = E3TransportLayer::TCP;
     config.setup_endpoint = "tcp://localhost:5555";
     config.subscriber_endpoint = "tcp://localhost:5556";
     config.publisher_endpoint = "tcp://localhost:5557";
     
-    ASSERT_EQ(config.transport, TransportType::ZMQ);
+    ASSERT_EQ(config.link_layer, E3LinkLayer::ZMQ);
+    ASSERT_EQ(config.transport_layer, E3TransportLayer::TCP);
     ASSERT_STREQ(config.setup_endpoint.c_str(), "tcp://localhost:5555");
+}
+
+TEST(E3LinkLayer_to_string) {
+    ASSERT_STREQ(link_layer_to_string(E3LinkLayer::ZMQ), "zmq");
+    ASSERT_STREQ(link_layer_to_string(E3LinkLayer::POSIX), "posix");
+}
+
+TEST(E3TransportLayer_to_string) {
+    ASSERT_STREQ(transport_layer_to_string(E3TransportLayer::SCTP), "sctp");
+    ASSERT_STREQ(transport_layer_to_string(E3TransportLayer::TCP), "tcp");
+    ASSERT_STREQ(transport_layer_to_string(E3TransportLayer::IPC), "ipc");
 }
 
 TEST(RanFunctionDefinition_fields) {

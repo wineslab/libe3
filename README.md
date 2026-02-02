@@ -93,7 +93,8 @@ int main() {
     // Configure the agent
     libe3::E3Config config;
     config.ran_identifier = "my-ran-001";
-    config.transport = libe3::TransportType::POSIX;
+    config.link_layer = libe3::E3LinkLayer::POSIX;
+    config.transport_layer = libe3::E3TransportLayer::IPC;
     config.encoding = libe3::EncodingFormat::JSON;
     
     // Create and configure agent
@@ -205,7 +206,8 @@ Configuration structure for the agent.
 | Field | Type | Description |
 |-------|------|-------------|
 | `ran_identifier` | string | Unique RAN identifier |
-| `transport` | TransportType | POSIX, ZMQ |
+| `link_layer` | E3LinkLayer | ZMQ, POSIX |
+| `transport_layer` | E3TransportLayer | SCTP, TCP, IPC |
 | `encoding` | EncodingFormat | JSON, ASN1 |
 | `simulation_mode` | bool | Enable simulation mode |
 | `setup_endpoint` | string | Setup connection endpoint |

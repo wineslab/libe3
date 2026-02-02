@@ -30,7 +30,8 @@ int main() {
     // Configure the E3 agent
     libe3::E3Config config;
     config.ran_identifier = "example-ran-001";
-    config.transport = libe3::TransportType::POSIX;
+    config.link_layer = libe3::E3LinkLayer::POSIX;
+    config.transport_layer = libe3::E3TransportLayer::IPC;
     config.encoding = libe3::EncodingFormat::JSON;
     config.simulation_mode = true;  // For this example, use simulation mode
     

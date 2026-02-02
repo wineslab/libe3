@@ -312,7 +312,7 @@ struct E3Config {
     std::string ran_identifier;
     
     // Transport configuration
-    E3LinkLayer link_layer{E3LinkLayer::ZMQ};
+    E3LinkLayer link_layer{E3LinkLayer::POSIX};
     E3TransportLayer transport_layer{E3TransportLayer::IPC};
     
     // Endpoints

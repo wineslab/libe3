@@ -24,13 +24,13 @@ constexpr const char* IPC_BASE_DIR = "/tmp/dapps";
 }
 
 ZmqE3Connector::ZmqE3Connector(
-    TransportType transport,
+    E3TransportLayer transport_layer,
     const std::string& setup_endpoint,
     const std::string& inbound_endpoint,
     const std::string& outbound_endpoint,
     size_t io_threads
 )
-    : transport_type_(transport)
+    : transport_layer_(transport_layer)
     , io_threads_(io_threads)
 {
     setup_endpoint_ = setup_endpoint;
@@ -64,7 +64,7 @@ ErrorCode ZmqE3Connector::setup_initial_connection() {
     }
     
     // Create IPC directory if using IPC transport
-    if (transport_type_ == TransportType::ZMQ_IPC) {
+    if (transport_layer_ == E3TransportLayer::IPC) {
         struct stat st{};
         if (stat(IPC_BASE_DIR, &st) == -1) {
             if (mkdir(IPC_BASE_DIR, 0777) == -1) {
@@ -102,7 +102,7 @@ ErrorCode ZmqE3Connector::setup_initial_connection() {
     }
     
     // Set IPC permissions if needed
-    if (transport_type_ == TransportType::ZMQ_IPC) {
+    if (transport_layer_ == E3TransportLayer::IPC) {
         setup_ipc_permissions(setup_endpoint_);
     }
     
@@ -168,7 +168,7 @@ ErrorCode ZmqE3Connector::setup_inbound_connection() {
         return ErrorCode::CONNECTION_FAILED;
     }
     
-    if (transport_type_ == TransportType::ZMQ_IPC) {
+    if (transport_layer_ == E3TransportLayer::IPC) {
         setup_ipc_permissions(inbound_endpoint_);
     }
     
@@ -210,7 +210,7 @@ ErrorCode ZmqE3Connector::setup_outbound_connection() {
         return ErrorCode::CONNECTION_FAILED;
     }
     
-    if (transport_type_ == TransportType::ZMQ_IPC) {
+    if (transport_layer_ == E3TransportLayer::IPC) {
         setup_ipc_permissions(outbound_endpoint_);
     }
     
@@ -257,7 +257,7 @@ void ZmqE3Connector::dispose() {
     }
     
     // Clean up IPC files if using IPC transport
-    if (transport_type_ == TransportType::ZMQ_IPC) {
+    if (transport_layer_ == E3TransportLayer::IPC) {
         // Extract file paths from IPC endpoints (ipc:///path)
         auto extract_path = [](const std::string& endpoint) -> std::string {
             const std::string prefix = "ipc://";

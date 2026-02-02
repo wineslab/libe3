@@ -22,7 +22,7 @@ namespace libe3 {
 class ZmqE3Connector : public E3Connector {
 public:
     ZmqE3Connector(
-        TransportType transport,
+        E3TransportLayer transport_layer,
         const std::string& setup_endpoint,
         const std::string& inbound_endpoint,
         const std::string& outbound_endpoint,
@@ -40,8 +40,12 @@ public:
     [[nodiscard]] ErrorCode send(const std::vector<uint8_t>& data) override;
     void dispose() override;
     
-    [[nodiscard]] TransportType transport_type() const noexcept override {
-        return transport_type_;
+    [[nodiscard]] E3LinkLayer link_layer() const noexcept override {
+        return E3LinkLayer::ZMQ;
+    }
+    
+    [[nodiscard]] E3TransportLayer transport_layer() const noexcept override {
+        return transport_layer_;
     }
     
     [[nodiscard]] bool is_connected() const noexcept override {
@@ -49,7 +53,7 @@ public:
     }
 
 private:
-    TransportType transport_type_;
+    E3TransportLayer transport_layer_;
     size_t io_threads_;
     
     void* context_{nullptr};

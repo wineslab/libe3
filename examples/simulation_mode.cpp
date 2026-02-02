@@ -91,7 +91,8 @@ int main() {
     libe3::E3Config config;
     config.ran_identifier = "simulated-ran";
     config.simulation_mode = true;   // <-- Key setting for simulation
-    config.transport = libe3::TransportType::POSIX;
+    config.link_layer = libe3::E3LinkLayer::POSIX;
+    config.transport_layer = libe3::E3TransportLayer::IPC;
     config.encoding = libe3::EncodingFormat::JSON;
     
     libe3::E3Agent agent(std::move(config));

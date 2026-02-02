@@ -30,12 +30,12 @@ constexpr uint16_t DEFAULT_OUTBOUND_PORT = 9991;
 }
 
 PosixE3Connector::PosixE3Connector(
-    TransportType transport,
+    E3TransportLayer transport_layer,
     const std::string& setup_endpoint,
     const std::string& inbound_endpoint,
     const std::string& outbound_endpoint
 )
-    : transport_type_(transport)
+    : transport_layer_(transport_layer)
     , setup_connection_socket_(UNUSED_SOCKET)
     , inbound_connection_socket_(UNUSED_SOCKET)
     , outbound_connection_socket_(UNUSED_SOCKET)
@@ -59,7 +59,7 @@ ErrorCode PosixE3Connector::setup_initial_connection() {
     int ret;
     
     // Create IPC directory if needed
-    if (transport_type_ == TransportType::POSIX_IPC) {
+    if (transport_layer_ == E3TransportLayer::IPC) {
         struct stat st{};
         if (stat(IPC_BASE_DIR, &st) == -1) {
             if (mkdir(IPC_BASE_DIR, 0777) == -1 && errno != EEXIST) {
@@ -70,7 +70,7 @@ ErrorCode PosixE3Connector::setup_initial_connection() {
         chmod(IPC_BASE_DIR, 0777);
     }
     
-    if (transport_type_ == TransportType::POSIX_SCTP) {
+    if (transport_layer_ == E3TransportLayer::SCTP) {
         sock = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
@@ -78,7 +78,7 @@ ErrorCode PosixE3Connector::setup_initial_connection() {
         addr.sin_addr.s_addr = INADDR_ANY;
         ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
     }
-    else if (transport_type_ == TransportType::POSIX_TCP) {
+    else if (transport_layer_ == E3TransportLayer::TCP) {
         sock = socket(AF_INET, SOCK_STREAM, 0);
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
@@ -86,7 +86,7 @@ ErrorCode PosixE3Connector::setup_initial_connection() {
         addr.sin_addr.s_addr = INADDR_ANY;
         ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
     }
-    else { // POSIX_IPC
+    else { // IPC
         sock = socket(AF_UNIX, SOCK_STREAM, 0);
         struct sockaddr_un addr{};
         addr.sun_family = AF_UNIX;
@@ -162,7 +162,7 @@ ErrorCode PosixE3Connector::setup_inbound_connection() {
     int sock;
     int ret;
     
-    if (transport_type_ == TransportType::POSIX_SCTP) {
+    if (transport_layer_ == E3TransportLayer::SCTP) {
         sock = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
@@ -170,7 +170,7 @@ ErrorCode PosixE3Connector::setup_inbound_connection() {
         addr.sin_addr.s_addr = INADDR_ANY;
         ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
     }
-    else if (transport_type_ == TransportType::POSIX_TCP) {
+    else if (transport_layer_ == E3TransportLayer::TCP) {
         sock = socket(AF_INET, SOCK_STREAM, 0);
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
@@ -178,7 +178,7 @@ ErrorCode PosixE3Connector::setup_inbound_connection() {
         addr.sin_addr.s_addr = INADDR_ANY;
         ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
     }
-    else { // POSIX_IPC
+    else { // IPC
         sock = socket(AF_UNIX, SOCK_STREAM, 0);
         struct sockaddr_un addr{};
         addr.sun_family = AF_UNIX;
@@ -239,7 +239,7 @@ ErrorCode PosixE3Connector::setup_outbound_connection() {
     int sock;
     int ret;
     
-    if (transport_type_ == TransportType::POSIX_SCTP) {
+    if (transport_layer_ == E3TransportLayer::SCTP) {
         sock = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
@@ -247,7 +247,7 @@ ErrorCode PosixE3Connector::setup_outbound_connection() {
         addr.sin_addr.s_addr = INADDR_ANY;
         ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
     }
-    else if (transport_type_ == TransportType::POSIX_TCP) {
+    else if (transport_layer_ == E3TransportLayer::TCP) {
         sock = socket(AF_INET, SOCK_STREAM, 0);
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
@@ -255,7 +255,7 @@ ErrorCode PosixE3Connector::setup_outbound_connection() {
         addr.sin_addr.s_addr = INADDR_ANY;
         ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
     }
-    else { // POSIX_IPC
+    else { // IPC
         sock = socket(AF_UNIX, SOCK_STREAM, 0);
         struct sockaddr_un addr{};
         addr.sun_family = AF_UNIX;
@@ -337,7 +337,7 @@ void PosixE3Connector::dispose() {
     }
     
     // Clean up IPC files
-    if (transport_type_ == TransportType::POSIX_IPC) {
+    if (transport_layer_ == E3TransportLayer::IPC) {
         unlink(setup_endpoint_.c_str());
         unlink(inbound_endpoint_.c_str());
         unlink(outbound_endpoint_.c_str());

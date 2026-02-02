@@ -65,7 +65,8 @@ using ControlCallback = std::function<ErrorCode(
  * ```cpp
  * // Create agent with configuration
  * libe3::E3Config config;
- * config.transport = libe3::TransportType::ZMQ_IPC;
+ * config.link_layer = libe3::E3LinkLayer::ZMQ;
+ * config.transport_layer = libe3::E3TransportLayer::IPC;
  * config.encoding = libe3::EncodingFormat::JSON;
  *
  * libe3::E3Agent agent(config);

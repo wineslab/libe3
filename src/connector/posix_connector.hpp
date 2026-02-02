@@ -21,7 +21,7 @@ namespace libe3 {
 class PosixE3Connector : public E3Connector {
 public:
     PosixE3Connector(
-        TransportType transport,
+        E3TransportLayer transport_layer,
         const std::string& setup_endpoint,
         const std::string& inbound_endpoint,
         const std::string& outbound_endpoint
@@ -38,8 +38,12 @@ public:
     [[nodiscard]] ErrorCode send(const std::vector<uint8_t>& data) override;
     void dispose() override;
     
-    [[nodiscard]] TransportType transport_type() const noexcept override {
-        return transport_type_;
+    [[nodiscard]] E3LinkLayer link_layer() const noexcept override {
+        return E3LinkLayer::POSIX;
+    }
+    
+    [[nodiscard]] E3TransportLayer transport_layer() const noexcept override {
+        return transport_layer_;
     }
     
     [[nodiscard]] bool is_connected() const noexcept override {
@@ -47,7 +51,7 @@ public:
     }
 
 private:
-    TransportType transport_type_;
+    E3TransportLayer transport_layer_;
     
     int setup_socket_{-1};
     int setup_connection_socket_{-1};
