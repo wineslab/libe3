@@ -69,7 +69,6 @@ enum class ResponseCode : uint8_t {
  * @brief E3AP PDU types
  */
 enum class PduType : uint8_t {
-    EMPTY = -1,
     SETUP_REQUEST = 0,
     SETUP_RESPONSE = 1,
     SUBSCRIPTION_REQUEST = 2,
@@ -269,7 +268,7 @@ using PduChoice = std::variant<
  * @brief Generic E3AP PDU structure
  */
 struct Pdu {
-    PduType type{PduType::EMPTY};
+    PduType type{PduType::SETUP_REQUEST};
     PduChoice choice;
     uint32_t message_id{0};        ///< Unique message identifier
     uint64_t timestamp{0};         ///< Message timestamp (milliseconds since epoch)
@@ -381,7 +380,7 @@ struct SubscriptionEntry {
         case PduType::DAPP_REPORT: return "DAppReport";
         case PduType::XAPP_CONTROL_ACTION: return "XAppControlAction";
         case PduType::MESSAGE_ACK: return "MessageAck";
-        default: return "Empty";
+        default: return "unknown";
     }
 }
 
