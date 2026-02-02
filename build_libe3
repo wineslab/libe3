@@ -35,6 +35,7 @@ VERBOSE=0
 JOBS=$(nproc)
 ARCH_NATIVE=0
 RUN_TESTS=0
+FATAL_ERRORS=0
 
 # Terminal colors
 RED='\033[0;31m'
@@ -120,6 +121,7 @@ Testing:
 Other:
 ------
   --arch-native           Enable -march=native compiler flag
+  --fatal-errors          Stop compilation on first error (-Wfatal-errors)
   --cmake-opt "OPTS"      Pass additional options to CMake
   -h, --help              Show this help message
 
@@ -245,6 +247,12 @@ configure_cmake() {
         cmake_args+=("-DCMAKE_CXX_FLAGS=-march=native")
     fi
     
+    # Fatal errors - stop on first error
+    if [ $FATAL_ERRORS -eq 1 ]; then
+        cmake_args+=("-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS:+$CMAKE_CXX_FLAGS }-Wfatal-errors")
+        cmake_args+=("-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS:+$CMAKE_C_FLAGS }-Wfatal-errors")
+    fi
+    
     # Install prefix
     if [ -n "$INSTALL_PREFIX" ]; then
         cmake_args+=("-DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX")
@@ -328,6 +336,7 @@ print_summary() {
     echo "  ASN.1 Encoding: $([ $ENABLE_ASN1 -eq 1 ] && echo 'enabled' || echo 'disabled')"
     echo "  AddressSan:     $([ $ENABLE_ASAN -eq 1 ] && echo 'enabled' || echo 'disabled')"
     echo "  ThreadSan:      $([ $ENABLE_TSAN -eq 1 ] && echo 'enabled' || echo 'disabled')"
+    echo "  Fatal Errors:   $([ $FATAL_ERRORS -eq 1 ] && echo 'enabled' || echo 'disabled')"
     echo "======================================"
     echo ""
 }
@@ -455,6 +464,10 @@ main() {
                 ;;
             --arch-native)
                 ARCH_NATIVE=1
+                shift
+                ;;
+            --fatal-errors)
+                FATAL_ERRORS=1
                 shift
                 ;;
             --cmake-opt)

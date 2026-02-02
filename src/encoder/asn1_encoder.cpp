@@ -55,7 +55,7 @@ EncodeResult<EncodedMessage> Asn1E3Encoder::encode(const Pdu& pdu) {
     E3_PDU* asn1_pdu = pdu_to_asn1(pdu);
     if (!asn1_pdu) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to convert PDU to ASN.1";
-        return tl::unexpected(ErrorCode::ENCODING_ERROR);
+        return tl::unexpected(ErrorCode::ENCODE_FAILED);
     }
 
     // Allocate buffer for encoding
@@ -74,7 +74,7 @@ EncodeResult<EncodedMessage> Asn1E3Encoder::encode(const Pdu& pdu) {
         E3_LOG_ERROR(LOG_TAG) << "APER encoding failed for type: " 
                               << (enc_rval.failed_type ? enc_rval.failed_type->name : "Unknown");
         ASN_STRUCT_FREE(asn_DEF_E3_PDU, asn1_pdu);
-        return tl::unexpected(ErrorCode::ENCODING_ERROR);
+        return tl::unexpected(ErrorCode::ENCODE_FAILED);
     }
     
     // Resize buffer to actual encoded size
@@ -119,7 +119,7 @@ EncodeResult<Pdu> Asn1E3Encoder::decode(const uint8_t* data, size_t size) {
         if (asn1_pdu) {
             ASN_STRUCT_FREE(asn_DEF_E3_PDU, asn1_pdu);
         }
-        return tl::unexpected(ErrorCode::DECODING_ERROR);
+        return tl::unexpected(ErrorCode::ENCODE_FAILED);
     }
     
     // Convert to generic PDU
