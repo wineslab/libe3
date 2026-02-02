@@ -16,7 +16,13 @@ std::atomic<uint32_t> message_id_counter{1};
 }
 
 uint32_t E3Encoder::generate_message_id() {
-    return message_id_counter.fetch_add(1, std::memory_order_relaxed);
+    uint32_t id = message_id_counter.fetch_add(1, std::memory_order_relaxed);
+    // Wrap around to stay within valid range (1-100)
+    if (id > 100) {
+        id = (id % 100) + 1;
+        message_id_counter.store(id + 1, std::memory_order_relaxed);
+    }
+    return id;
 }
 
 // Convenience method implementations
