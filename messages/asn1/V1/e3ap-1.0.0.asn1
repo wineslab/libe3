@@ -2,9 +2,10 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
 
     E3-SetupRequest ::= SEQUENCE {
         id                   E3-MessageID,
-        dAppIdentifier       INTEGER (0..100),
-        ranFunctionList      SEQUENCE OF INTEGER (0..255),
-        type                 E3-ActionType
+        e3apProtocolVersion  E3-Version,
+        dAppName             IA5String (SIZE (1..50)),
+        dAppVersion          E3-Version,
+        vendor               IA5String (SIZE (1..30))
     }
 
     E3-SetupResponse ::= SEQUENCE {
@@ -61,6 +62,7 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     }
 
     E3-MessageID ::= INTEGER (1..100)
+    E3-Version ::= IA5String (SIZE (1..11))
     E3-ActionType ::= ENUMERATED { insert(0), update(1), delete(2) }
     E3-ResponseCode ::= ENUMERATED { positive(0), negative(1) }
 

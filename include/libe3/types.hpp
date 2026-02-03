@@ -172,9 +172,11 @@ struct RanFunctionDefinition {
  * @brief E3AP Setup Request structure
  */
 struct SetupRequest {
-    std::string ran_identifier;
-    uint32_t protocol_version{LIBE3_PROTOCOL_VERSION};
-    std::vector<RanFunctionDefinition> ran_functions;
+    uint32_t id;                         ///< Message ID
+    std::string e3ap_protocol_version;  ///< E3AP protocol version (e.g., "0.0.0")
+    std::string dapp_name;               ///< Name of the dApp
+    std::string dapp_version;            ///< Version of the dApp (e.g., "0.0.0")
+    std::string vendor;                  ///< Vendor name (max 30 chars)
 };
 
 /**

@@ -73,18 +73,11 @@ std::vector<uint8_t> JsonE3Encoder::hex_to_binary(const std::string& hex) {
 
 nlohmann::json JsonE3Encoder::encode_setup_request(const SetupRequest& req) const {
     nlohmann::json j;
-    j["ran_identifier"] = req.ran_identifier;
-    j["protocol_version"] = req.protocol_version;
-    
-    nlohmann::json ran_funcs = nlohmann::json::array();
-    for (const auto& rf : req.ran_functions) {
-        ran_funcs.push_back({
-            {"ran_function_id", rf.ran_function_id},
-            {"sm_name", rf.sm_name},
-            {"sm_version", rf.sm_version}
-        });
-    }
-    j["ran_functions"] = ran_funcs;
+    j["id"] = req.id;
+    j["e3ap_protocol_version"] = req.e3ap_protocol_version;
+    j["dapp_name"] = req.dapp_name;
+    j["dapp_version"] = req.dapp_version;
+    j["vendor"] = req.vendor;
     
     return j;
 }
@@ -159,18 +152,11 @@ nlohmann::json JsonE3Encoder::encode_message_ack(const MessageAck& ack) const {
 
 SetupRequest JsonE3Encoder::decode_setup_request(const nlohmann::json& j) const {
     SetupRequest req;
-    req.ran_identifier = j.value("ran_identifier", "");
-    req.protocol_version = j.value("protocol_version", LIBE3_PROTOCOL_VERSION);
-    
-    if (j.contains("ran_functions") && j["ran_functions"].is_array()) {
-        for (const auto& rf : j["ran_functions"]) {
-            RanFunctionDefinition def;
-            def.ran_function_id = rf.value("ran_function_id", 0u);
-            def.sm_name = rf.value("sm_name", "");
-            def.sm_version = rf.value("sm_version", "");
-            req.ran_functions.push_back(def);
-        }
-    }
+    req.id = j.value("id", 0u);
+    req.e3ap_protocol_version = j.value("e3ap_protocol_version", "");
+    req.dapp_name = j.value("dapp_name", "");
+    req.dapp_version = j.value("dapp_version", "");
+    req.vendor = j.value("vendor", "");
     
     return req;
 }

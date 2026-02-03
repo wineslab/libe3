@@ -22,10 +22,11 @@ TEST(JsonEncoder_encode_setup_request) {
     
     Pdu pdu(PduType::SETUP_REQUEST);
     SetupRequest req;
-    req.ran_identifier = "test-ran";
-    req.protocol_version = 1;
-    req.ran_functions.push_back({100, "SM1", "1.0"});
-    req.ran_functions.push_back({200, "SM2", "2.0"});
+    req.id = 42;
+    req.e3ap_protocol_version = "1.0.0";
+    req.dapp_name = "TestDApp";
+    req.dapp_version = "2.0.0";
+    req.vendor = "TestVendor";
     pdu.choice = req;
     
     auto encoded = encoder->encode(pdu);
@@ -35,8 +36,8 @@ TEST(JsonEncoder_encode_setup_request) {
     // Verify JSON contains expected fields
     std::string json(encoded.second.begin(), encoded.second.end());
     ASSERT_TRUE(json.find("SETUP_REQUEST") != std::string::npos);
-    ASSERT_TRUE(json.find("test-ran") != std::string::npos);
-    ASSERT_TRUE(json.find("SM1") != std::string::npos);
+    ASSERT_TRUE(json.find("TestDApp") != std::string::npos);
+    ASSERT_TRUE(json.find("TestVendor") != std::string::npos);
 }
 
 TEST(JsonEncoder_encode_decode_setup_request) {
@@ -44,9 +45,11 @@ TEST(JsonEncoder_encode_decode_setup_request) {
     
     Pdu original(PduType::SETUP_REQUEST);
     SetupRequest req;
-    req.ran_identifier = "my-ran-001";
-    req.protocol_version = 1;
-    req.ran_functions.push_back({111, "KPM", "2.0"});
+    req.id = 99;
+    req.e3ap_protocol_version = "1.0.0";
+    req.dapp_name = "MyDApp";
+    req.dapp_version = "1.2.3";
+    req.vendor = "MyVendor";
     original.choice = req;
     original.message_id = 12345;
     
@@ -58,9 +61,10 @@ TEST(JsonEncoder_encode_decode_setup_request) {
     ASSERT_EQ(decoded.second.type, PduType::SETUP_REQUEST);
     
     auto& restored = std::get<SetupRequest>(decoded.second.choice);
-    ASSERT_STREQ(restored.ran_identifier.c_str(), "my-ran-001");
-    ASSERT_EQ(restored.ran_functions.size(), 1u);
-    ASSERT_EQ(restored.ran_functions[0].ran_function_id, 111u);
+    ASSERT_EQ(restored.id, 99u);
+    ASSERT_STREQ(restored.dapp_name.c_str(), "MyDApp");
+    ASSERT_STREQ(restored.e3ap_protocol_version.c_str(), "1.0.0");
+    ASSERT_STREQ(restored.vendor.c_str(), "MyVendor");
 }
 
 TEST(JsonEncoder_encode_setup_response) {

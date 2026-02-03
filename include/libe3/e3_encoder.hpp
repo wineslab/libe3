@@ -76,11 +76,16 @@ public:
 
     /**
      * @brief Create and encode a Setup Request PDU
+     * @param e3ap_protocol_version E3AP protocol version string (e.g., "0.0.0")
+     * @param dapp_name Name of the dApp
+     * @param dapp_version Version of the dApp (e.g., "0.0.0")
+     * @param vendor Vendor name (max 30 chars)
      */
     [[nodiscard]] EncodeResult<EncodedMessage> encode_setup_request(
-        uint32_t dapp_identifier,
-        const std::vector<uint32_t>& ran_function_list,
-        ActionType action_type
+        const std::string& e3ap_protocol_version,
+        const std::string& dapp_name,
+        const std::string& dapp_version,
+        const std::string& vendor
     );
 
     /**

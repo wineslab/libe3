@@ -28,16 +28,18 @@ uint32_t E3Encoder::generate_message_id() {
 // Convenience method implementations
 
 EncodeResult<EncodedMessage> E3Encoder::encode_setup_request(
-    uint32_t dapp_identifier,
-    const std::vector<uint32_t>& ran_function_list,
-    ActionType action_type
+    const std::string& e3ap_protocol_version,
+    const std::string& dapp_name,
+    const std::string& dapp_version,
+    const std::string& vendor
 ) {
     Pdu pdu(PduType::SETUP_REQUEST);
     SetupRequest req;
-    req.id = generate_message_id();
-    req.dapp_identifier = dapp_identifier;
-    req.ran_function_list = ran_function_list;
-    req.type = action_type;
+    req.e3ap_protocol_version = e3ap_protocol_version;
+    req.dapp_name = dapp_name;
+    req.dapp_version = dapp_version;
+    req.vendor = vendor;
+    pdu.message_id = generate_message_id();
     pdu.choice = req;
     return encode(pdu);
 }

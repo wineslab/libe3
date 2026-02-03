@@ -136,15 +136,26 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             if (!asn1_pdu->choice.setupRequest) { free(asn1_pdu); return nullptr; }
             
             asn1_pdu->choice.setupRequest->id = pdu.message_id ? pdu.message_id : E3Encoder::generate_message_id();
-            asn1_pdu->choice.setupRequest->dAppIdentifier = req->dapp_identifier;
-            asn1_pdu->choice.setupRequest->type = static_cast<long>(req->action_type);
             
-            // Handle RAN function list
-            for (const auto& rf : req->ran_functions) {
-                long* func_id = static_cast<long*>(malloc(sizeof(long)));
-                *func_id = rf.ran_function_id;
-                ASN_SEQUENCE_ADD(&asn1_pdu->choice.setupRequest->ranFunctionList, func_id);
-            }
+            // Set e3apProtocolVersion string
+            OCTET_STRING_fromBuf(&asn1_pdu->choice.setupRequest->e3apProtocolVersion,
+                req->e3ap_protocol_version.c_str(),
+                req->e3ap_protocol_version.size());
+            
+            // Set dAppName string
+            OCTET_STRING_fromBuf(&asn1_pdu->choice.setupRequest->dAppName,
+                req->dapp_name.c_str(),
+                req->dapp_name.size());
+            
+            // Set dAppVersion string
+            OCTET_STRING_fromBuf(&asn1_pdu->choice.setupRequest->dAppVersion,
+                req->dapp_version.c_str(),
+                req->dapp_version.size());
+            
+            // Set vendor string
+            OCTET_STRING_fromBuf(&asn1_pdu->choice.setupRequest->vendor,
+                req->vendor.c_str(),
+                req->vendor.size());
             break;
         }
         
@@ -319,16 +330,23 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             pdu.message_id = asn1_pdu->choice.setupRequest->id;
             
             SetupRequest req;
-            req.dapp_identifier = asn1_pdu->choice.setupRequest->dAppIdentifier;
-            req.action_type = static_cast<ActionType>(asn1_pdu->choice.setupRequest->type);
+            req.id = asn1_pdu->choice.setupRequest->id;
             
-            // Extract RAN function list
-            int count = asn1_pdu->choice.setupRequest->ranFunctionList.list.count;
-            for (int i = 0; i < count; i++) {
-                RanFunctionDefinition def;
-                def.ran_function_id = *asn1_pdu->choice.setupRequest->ranFunctionList.list.array[i];
-                req.ran_functions.push_back(def);
-            }
+            // Extract e3apProtocolVersion string
+            const OCTET_STRING_t* proto_ver = &asn1_pdu->choice.setupRequest->e3apProtocolVersion;
+            req.e3ap_protocol_version.assign(reinterpret_cast<const char*>(proto_ver->buf), proto_ver->size);
+            
+            // Extract dAppName string
+            const OCTET_STRING_t* dapp_name = &asn1_pdu->choice.setupRequest->dAppName;
+            req.dapp_name.assign(reinterpret_cast<const char*>(dapp_name->buf), dapp_name->size);
+            
+            // Extract dAppVersion string
+            const OCTET_STRING_t* dapp_ver = &asn1_pdu->choice.setupRequest->dAppVersion;
+            req.dapp_version.assign(reinterpret_cast<const char*>(dapp_ver->buf), dapp_ver->size);
+            
+            // Extract vendor string
+            const OCTET_STRING_t* vendor = &asn1_pdu->choice.setupRequest->vendor;
+            req.vendor.assign(reinterpret_cast<const char*>(vendor->buf), vendor->size);
             
             pdu.choice = req;
             break;
