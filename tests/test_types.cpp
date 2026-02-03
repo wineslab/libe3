@@ -20,8 +20,8 @@ TEST(PduType_values) {
 }
 
 TEST(ErrorCode_values) {
-    ASSERT_EQ(ErrorCode::SUCCESS, ErrorCode::SUCCESS);
-    ASSERT_NE(ErrorCode::SUCCESS, ErrorCode::GENERIC_ERROR);
+    ASSERT_TRUE(ErrorCode::SUCCESS == ErrorCode::SUCCESS);
+    ASSERT_TRUE(ErrorCode::SUCCESS != ErrorCode::GENERIC_ERROR);
 }
 
 TEST(ErrorCode_to_string) {
@@ -43,47 +43,60 @@ TEST(AgentState_to_string) {
 
 TEST(Pdu_construction) {
     Pdu pdu(PduType::SETUP_REQUEST);
-    ASSERT_EQ(pdu.type, PduType::SETUP_REQUEST);
+    ASSERT_TRUE(pdu.type == PduType::SETUP_REQUEST);
     ASSERT_GT(pdu.timestamp, 0u);
     ASSERT_EQ(pdu.message_id, 0u);
 }
 
 TEST(SetupRequest_fields) {
     SetupRequest req;
-    req.ran_identifier = "test-ran-001";
-    req.protocol_version = LIBE3_PROTOCOL_VERSION;
-    req.ran_functions.push_back({100, "SM1", "1.0"});
-    req.ran_functions.push_back({200, "SM2", "2.0"});
+    req.id = 1;
+    req.e3ap_protocol_version = "1.0.0";
+    req.dapp_name = "TestDApp";
+    req.dapp_version = "1.0.0";
+    req.vendor = "TestVendor";
     
-    ASSERT_STREQ(req.ran_identifier.c_str(), "test-ran-001");
-    ASSERT_EQ(req.protocol_version, LIBE3_PROTOCOL_VERSION);
-    ASSERT_EQ(req.ran_functions.size(), 2u);
-    ASSERT_EQ(req.ran_functions[0].ran_function_id, 100u);
-    ASSERT_STREQ(req.ran_functions[1].sm_name.c_str(), "SM2");
+    ASSERT_EQ(req.id, 1u);
+    ASSERT_STREQ(req.e3ap_protocol_version.c_str(), "1.0.0");
+    ASSERT_STREQ(req.dapp_name.c_str(), "TestDApp");
+    ASSERT_STREQ(req.dapp_version.c_str(), "1.0.0");
+    ASSERT_STREQ(req.vendor.c_str(), "TestVendor");
 }
 
 TEST(SetupResponse_fields) {
     SetupResponse resp;
-    resp.result = SetupResult::SUCCESS;
-    resp.accepted_ran_functions.push_back(100);
-    resp.accepted_ran_functions.push_back(200);
-    resp.rejected_ran_functions.clear();
+    resp.id = 1;
+    resp.request_id = 100;
+    resp.response_code = ResponseCode::POSITIVE;
+    resp.e3ap_protocol_version = "1.0.0";
+    resp.dapp_identifier = 42;
     
-    ASSERT_EQ(resp.result, SetupResult::SUCCESS);
-    ASSERT_EQ(resp.accepted_ran_functions.size(), 2u);
-    ASSERT_TRUE(resp.rejected_ran_functions.empty());
+    ASSERT_EQ(resp.id, 1u);
+    ASSERT_EQ(resp.request_id, 100u);
+    ASSERT_TRUE(resp.response_code == ResponseCode::POSITIVE);
+    ASSERT_TRUE(resp.e3ap_protocol_version.has_value());
+    ASSERT_TRUE(resp.dapp_identifier.has_value());
 }
 
 TEST(SubscriptionRequest_fields) {
     SubscriptionRequest req;
+    req.id = 1;
     req.dapp_identifier = 42;
-    req.ran_functions_to_subscribe.push_back(100);
-    req.ran_functions_to_subscribe.push_back(200);
-    req.ran_functions_to_unsubscribe.push_back(300);
+    req.type = ActionType::INSERT;
+    req.ran_function_identifier = 100;
+    req.telemetry_identifier_list = {1, 2, 3};
+    req.control_identifier_list = {10, 20};
+    req.subscription_time = 3600;
+    req.periodicity = 100;
     
+    ASSERT_EQ(req.id, 1u);
     ASSERT_EQ(req.dapp_identifier, 42u);
-    ASSERT_EQ(req.ran_functions_to_subscribe.size(), 2u);
-    ASSERT_EQ(req.ran_functions_to_unsubscribe.size(), 1u);
+    ASSERT_TRUE(req.type == ActionType::INSERT);
+    ASSERT_EQ(req.ran_function_identifier, 100u);
+    ASSERT_EQ(req.telemetry_identifier_list.size(), 3u);
+    ASSERT_EQ(req.control_identifier_list.size(), 2u);
+    ASSERT_TRUE(req.subscription_time.has_value());
+    ASSERT_TRUE(req.periodicity.has_value());
 }
 
 TEST(ControlAction_fields) {
@@ -110,35 +123,34 @@ TEST(IndicationMessage_fields) {
 TEST(Pdu_with_SetupRequest) {
     Pdu pdu(PduType::SETUP_REQUEST);
     SetupRequest req;
-    req.ran_identifier = "my-ran";
+    req.dapp_name = "my-dapp";
     pdu.choice = req;
     
     ASSERT_TRUE(std::holds_alternative<SetupRequest>(pdu.choice));
     auto& stored = std::get<SetupRequest>(pdu.choice);
-    ASSERT_STREQ(stored.ran_identifier.c_str(), "my-ran");
+    ASSERT_STREQ(stored.dapp_name.c_str(), "my-dapp");
 }
 
 TEST(Pdu_with_SubscriptionResponse) {
     Pdu pdu(PduType::SUBSCRIPTION_RESPONSE);
     SubscriptionResponse resp;
-    resp.dapp_identifier = 77;
-    resp.accepted_ran_functions.push_back(111);
-    resp.rejected_ran_functions.push_back(222);
+    resp.id = 1;
+    resp.request_id = 77;
+    resp.response_code = ResponseCode::POSITIVE;
     pdu.choice = resp;
     
     ASSERT_TRUE(std::holds_alternative<SubscriptionResponse>(pdu.choice));
     auto& stored = std::get<SubscriptionResponse>(pdu.choice);
-    ASSERT_EQ(stored.dapp_identifier, 77u);
+    ASSERT_EQ(stored.request_id, 77u);
 }
 
 TEST(E3Config_defaults) {
     E3Config config;
     config.ran_identifier = "test";
     
-    ASSERT_EQ(config.link_layer, E3LinkLayer::POSIX);
-    ASSERT_EQ(config.transport_layer, E3TransportLayer::IPC);
-    ASSERT_EQ(config.encoding, EncodingFormat::ASN1);
-    ASSERT_FALSE(config.simulation_mode);
+    ASSERT_TRUE(config.link_layer == E3LinkLayer::POSIX);
+    ASSERT_TRUE(config.transport_layer == E3TransportLayer::IPC);
+    ASSERT_TRUE(config.encoding == EncodingFormat::ASN1);
 }
 
 TEST(E3Config_zmq) {
@@ -150,8 +162,8 @@ TEST(E3Config_zmq) {
     config.subscriber_endpoint = "tcp://localhost:5556";
     config.publisher_endpoint = "tcp://localhost:5557";
     
-    ASSERT_EQ(config.link_layer, E3LinkLayer::ZMQ);
-    ASSERT_EQ(config.transport_layer, E3TransportLayer::TCP);
+    ASSERT_TRUE(config.link_layer == E3LinkLayer::ZMQ);
+    ASSERT_TRUE(config.transport_layer == E3TransportLayer::TCP);
     ASSERT_STREQ(config.setup_endpoint.c_str(), "tcp://localhost:5555");
 }
 
@@ -190,13 +202,13 @@ TEST(DAppReport_fields) {
 
 TEST(MessageAck_fields) {
     MessageAck ack;
-    ack.original_message_id = 12345;
-    ack.result = ErrorCode::SUCCESS;
-    ack.message = "OK";
+    ack.id = 100;
+    ack.request_id = 12345;
+    ack.response_code = ResponseCode::POSITIVE;
     
-    ASSERT_EQ(ack.original_message_id, 12345u);
-    ASSERT_EQ(ack.result, ErrorCode::SUCCESS);
-    ASSERT_STREQ(ack.message.c_str(), "OK");
+    ASSERT_EQ(ack.id, 100u);
+    ASSERT_EQ(ack.request_id, 12345u);
+    ASSERT_TRUE(ack.response_code == ResponseCode::POSITIVE);
 }
 
 int main() {

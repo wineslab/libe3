@@ -22,6 +22,7 @@ extern "C" {
 #include "E3-ControlAction.h"
 #include "E3-DAppReport.h"
 #include "E3-XAppControlAction.h"
+#include "E3-ReleaseMessage.h"
 #include "E3-MessageAck.h"
 }
 
@@ -258,10 +259,10 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 calloc(1, sizeof(E3_SubscriptionResponse_t)));
             if (!asn1_pdu->choice.subscriptionResponse) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.subscriptionResponse->id = pdu.message_id ? pdu.message_id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.subscriptionResponse->id = resp->id ? resp->id : E3Encoder::generate_message_id();
             asn1_pdu->choice.subscriptionResponse->requestId = resp->request_id;
             asn1_pdu->choice.subscriptionResponse->responseCode = 
-                resp->accepted_ran_functions.empty() ? 1 : 0;
+                (resp->response_code == ResponseCode::POSITIVE) ? 0 : 1;
             break;
         }
         
@@ -350,10 +351,24 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 calloc(1, sizeof(E3_MessageAck_t)));
             if (!asn1_pdu->choice.messageAck) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.messageAck->id = pdu.message_id ? pdu.message_id : E3Encoder::generate_message_id();
-            asn1_pdu->choice.messageAck->requestId = ack->original_message_id;
+            asn1_pdu->choice.messageAck->id = ack->id ? ack->id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.messageAck->requestId = ack->request_id;
             asn1_pdu->choice.messageAck->responseCode = 
-                (ack->result == ErrorCode::SUCCESS) ? 0 : 1;
+                (ack->response_code == ResponseCode::POSITIVE) ? 0 : 1;
+            break;
+        }
+        
+        case PduType::RELEASE_MESSAGE: {
+            const auto* msg = std::get_if<ReleaseMessage>(&pdu.choice);
+            if (!msg) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->present = E3_PDU_PR_releaseMessage;
+            asn1_pdu->choice.releaseMessage = static_cast<E3_ReleaseMessage_t*>(
+                calloc(1, sizeof(E3_ReleaseMessage_t)));
+            if (!asn1_pdu->choice.releaseMessage) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->choice.releaseMessage->id = msg->id ? msg->id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.releaseMessage->dAppIdentifier = msg->dapp_identifier;
             break;
         }
         
@@ -423,10 +438,10 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             }
             
             // Extract ranFunctionList
-            int count = asn1_pdu->choice.setupResponse->ranFunctionList.list.count;
+            int count = asn1_pdu->choice.setupResponse->ranFunctionList->list.count;
             for (int i = 0; i < count; i++) {
                 E3_RanFunctionDefinition_t* asn_func = 
-                    asn1_pdu->choice.setupResponse->ranFunctionList.list.array[i];
+                    asn1_pdu->choice.setupResponse->ranFunctionList->list.array[i];
                 RanFunctionDef func;
                 func.ran_function_identifier = asn_func->ranFunctionIdentifier;
                 func.ran_function_data.assign(
@@ -482,11 +497,10 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             pdu.message_id = asn1_pdu->choice.subscriptionResponse->id;
             
             SubscriptionResponse resp;
+            resp.id = asn1_pdu->choice.subscriptionResponse->id;
             resp.request_id = asn1_pdu->choice.subscriptionResponse->requestId;
-            // Note: response_code 0 = positive, 1 = negative
-            if (asn1_pdu->choice.subscriptionResponse->responseCode == 0) {
-                // Positive - would need to track which function was accepted
-            }
+            resp.response_code = (asn1_pdu->choice.subscriptionResponse->responseCode == 0)
+                ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
             
             pdu.choice = resp;
             break;
@@ -557,11 +571,24 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             pdu.message_id = asn1_pdu->choice.messageAck->id;
             
             MessageAck ack;
-            ack.original_message_id = asn1_pdu->choice.messageAck->requestId;
-            ack.result = (asn1_pdu->choice.messageAck->responseCode == 0)
-                ? ErrorCode::SUCCESS : ErrorCode::GENERIC_ERROR;
+            ack.id = asn1_pdu->choice.messageAck->id;
+            ack.request_id = asn1_pdu->choice.messageAck->requestId;
+            ack.response_code = (asn1_pdu->choice.messageAck->responseCode == 0)
+                ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
             
             pdu.choice = ack;
+            break;
+        }
+        
+        case E3_PDU_PR_releaseMessage: {
+            pdu.type = PduType::RELEASE_MESSAGE;
+            pdu.message_id = asn1_pdu->choice.releaseMessage->id;
+            
+            ReleaseMessage msg;
+            msg.id = asn1_pdu->choice.releaseMessage->id;
+            msg.dapp_identifier = asn1_pdu->choice.releaseMessage->dAppIdentifier;
+            
+            pdu.choice = msg;
             break;
         }
         

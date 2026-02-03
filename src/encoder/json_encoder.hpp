@@ -38,6 +38,7 @@ private:
     [[nodiscard]] nlohmann::json encode_control_action(const ControlAction& action) const;
     [[nodiscard]] nlohmann::json encode_dapp_report(const DAppReport& report) const;
     [[nodiscard]] nlohmann::json encode_xapp_control_action(const XAppControlAction& action) const;
+    [[nodiscard]] nlohmann::json encode_release_message(const ReleaseMessage& msg) const;
     [[nodiscard]] nlohmann::json encode_message_ack(const MessageAck& ack) const;
 
     // Helper methods for decoding JSON to PDU types
@@ -49,6 +50,7 @@ private:
     [[nodiscard]] ControlAction decode_control_action(const nlohmann::json& j) const;
     [[nodiscard]] DAppReport decode_dapp_report(const nlohmann::json& j) const;
     [[nodiscard]] XAppControlAction decode_xapp_control_action(const nlohmann::json& j) const;
+    [[nodiscard]] ReleaseMessage decode_release_message(const nlohmann::json& j) const;
     [[nodiscard]] MessageAck decode_message_ack(const nlohmann::json& j) const;
 
     // Binary data encoding helpers (hex string)

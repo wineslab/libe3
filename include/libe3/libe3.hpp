@@ -11,7 +11,7 @@
 #define LIBE3_LIBE3_HPP
 
 // Version information (generated from VERSION file)
-#include "version.hpp"
+#include <libe3/version.hpp>
 
 // Core types
 #include "types.hpp"

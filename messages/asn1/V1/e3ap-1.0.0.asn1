@@ -14,7 +14,7 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         responseCode         E3-ResponseCode,
         e3apProtocolVersion  UTF8String (SIZE (1..16)) OPTIONAL,
         dAppIdentifier       E3-DAppID OPTIONAL,
-        ranFunctionList      SEQUENCE OF E3-RanFunctionDefinition (0..255) OPTIONAL
+        ranFunctionList      SEQUENCE OF E3-RanFunctionDefinition OPTIONAL
     }
 
     E3-SubscriptionRequest ::= SEQUENCE {

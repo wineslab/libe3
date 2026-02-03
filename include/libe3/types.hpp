@@ -77,7 +77,8 @@ enum class PduType : uint8_t {
     CONTROL_ACTION = 5,
     DAPP_REPORT = 6,
     XAPP_CONTROL_ACTION = 7,
-    MESSAGE_ACK = 8
+    RELEASE_MESSAGE = 8,
+    MESSAGE_ACK = 9
 };
 
 /**
@@ -209,15 +210,16 @@ struct SubscriptionRequest {
  * @brief E3AP Subscription Response structure
  */
 struct SubscriptionResponse {
-    uint32_t dapp_identifier{0};
-    std::vector<uint32_t> accepted_ran_functions;
-    std::vector<uint32_t> rejected_ran_functions;
+    uint32_t id{0};                              ///< Message ID
+    uint32_t request_id{0};                      ///< ID of the corresponding SubscriptionRequest
+    ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
 };
 
 /**
  * @brief E3AP Indication Message structure
  */
 struct IndicationMessage {
+    uint32_t id{0};                      ///< Message ID
     uint32_t dapp_identifier{0};
     std::vector<uint8_t> protocol_data;
 };
@@ -226,6 +228,7 @@ struct IndicationMessage {
  * @brief E3AP Control Action structure
  */
 struct ControlAction {
+    uint32_t id{0};                      ///< Message ID
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0};
     std::vector<uint8_t> action_data;
@@ -235,15 +238,16 @@ struct ControlAction {
  * @brief E3AP Message Acknowledgment structure
  */
 struct MessageAck {
-    uint32_t original_message_id{0};
-    ErrorCode result{ErrorCode::SUCCESS};
-    std::string message;
+    uint32_t id{0};                      ///< Message ID
+    uint32_t request_id{0};              ///< ID of the request being acknowledged
+    ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
 };
 
 /**
  * @brief E3AP dApp Report structure
  */
 struct DAppReport {
+    uint32_t id{0};                      ///< Message ID
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0};
     std::vector<uint8_t> report_data;
@@ -253,9 +257,18 @@ struct DAppReport {
  * @brief E3AP xApp Control Action structure
  */
 struct XAppControlAction {
+    uint32_t id{0};                      ///< Message ID
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0};
     std::vector<uint8_t> xapp_control_data;
+};
+
+/**
+ * @brief E3AP Release Message structure
+ */
+struct ReleaseMessage {
+    uint32_t id{0};                      ///< Message ID
+    uint32_t dapp_identifier{0};         ///< dApp identifier
 };
 
 /**
@@ -270,6 +283,7 @@ using PduChoice = std::variant<
     ControlAction,
     DAppReport,
     XAppControlAction,
+    ReleaseMessage,
     MessageAck
 >;
 
@@ -385,6 +399,7 @@ struct SubscriptionEntry {
         case PduType::CONTROL_ACTION: return "ControlAction";
         case PduType::DAPP_REPORT: return "DAppReport";
         case PduType::XAPP_CONTROL_ACTION: return "XAppControlAction";
+        case PduType::RELEASE_MESSAGE: return "ReleaseMessage";
         case PduType::MESSAGE_ACK: return "MessageAck";
         default: return "unknown";
     }

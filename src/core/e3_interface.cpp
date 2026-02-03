@@ -59,23 +59,19 @@ ErrorCode E3Interface::init() {
     // Create response queue
     response_queue_ = std::make_unique<ResponseQueue>();
     
-    // Create connector (unless in simulation mode)
-    if (!config_.simulation_mode) {
-        connector_ = create_connector(
-            config_.link_layer,
-            config_.transport_layer,
-            config_.setup_endpoint,
-            config_.subscriber_endpoint,
-            config_.publisher_endpoint,
-            config_.io_threads
-        );
-        
-        if (!connector_) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to create connector";
-            return ErrorCode::INTERNAL_ERROR;
-        }
-    } else {
-        E3_LOG_INFO(LOG_TAG) << "Running in SIMULATION MODE";
+    // Create connector
+    connector_ = create_connector(
+        config_.link_layer,
+        config_.transport_layer,
+        config_.setup_endpoint,
+        config_.subscriber_endpoint,
+        config_.publisher_endpoint,
+        config_.io_threads
+    );
+    
+    if (!connector_) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to create connector";
+        return ErrorCode::INTERNAL_ERROR;
     }
     
     state_.store(AgentState::INITIALIZED);
@@ -95,14 +91,12 @@ ErrorCode E3Interface::start() {
     E3_LOG_INFO(LOG_TAG) << "Starting E3Interface";
     should_stop_.store(false);
     
-    if (!config_.simulation_mode) {
-        // Set up initial connection
-        ErrorCode conn_result = connector_->setup_initial_connection();
-        if (conn_result != ErrorCode::SUCCESS) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to setup initial connection";
-            state_.store(AgentState::ERROR);
-            return conn_result;
-        }
+    // Set up initial connection
+    ErrorCode conn_result = connector_->setup_initial_connection();
+    if (conn_result != ErrorCode::SUCCESS) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to setup initial connection";
+        state_.store(AgentState::ERROR);
+        return conn_result;
     }
     
     state_.store(AgentState::CONNECTED);
@@ -164,7 +158,7 @@ ErrorCode E3Interface::queue_outbound(Pdu pdu) {
     if (!response_queue_) {
         return ErrorCode::NOT_INITIALIZED;
     }
-    return response_queue_->push(std::move(pdu));
+    return response_queue_->push(pdu);
 }
 
 std::vector<uint32_t> E3Interface::get_available_ran_functions() const {
@@ -185,12 +179,6 @@ void E3Interface::setup_loop() {
     auto available_ran_functions = SmRegistry::instance().get_available_ran_functions();
     
     while (!should_stop_.load()) {
-        if (config_.simulation_mode) {
-            // In simulation mode, just sleep
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            continue;
-        }
-        
         std::vector<uint8_t> buffer;
         int ret = connector_->recv_setup_request(buffer);
         
@@ -229,22 +217,15 @@ void E3Interface::setup_loop() {
 void E3Interface::subscriber_loop() {
     E3_LOG_INFO(LOG_TAG) << "Subscriber loop started";
     
-    if (!config_.simulation_mode) {
-        ErrorCode result = connector_->setup_inbound_connection();
-        if (result != ErrorCode::SUCCESS) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to setup inbound connection";
-            return;
-        }
+    ErrorCode result = connector_->setup_inbound_connection();
+    if (result != ErrorCode::SUCCESS) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to setup inbound connection";
+        return;
     }
     
     std::vector<uint8_t> buffer;
     
     while (!should_stop_.load()) {
-        if (config_.simulation_mode) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            continue;
-        }
-        
         int ret = connector_->receive(buffer);
         
         if (ret <= 0) {
@@ -301,35 +282,27 @@ void E3Interface::publisher_loop() {
     // Ignore SIGPIPE to handle closed connections gracefully
     signal(SIGPIPE, SIG_IGN);
     
-    if (!config_.simulation_mode) {
-        // Retry outbound connection setup
-        ErrorCode result;
-        do {
-            std::this_thread::sleep_for(std::chrono::seconds(3));
-            if (should_stop_.load()) return;
-            
-            E3_LOG_INFO(LOG_TAG) << "Trying to setup outbound connection";
-            result = connector_->setup_outbound_connection();
-        } while (result != ErrorCode::SUCCESS && !should_stop_.load());
+    // Retry outbound connection setup
+    ErrorCode result;
+    do {
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+        if (should_stop_.load()) return;
         
-        if (result != ErrorCode::SUCCESS) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to setup outbound connection";
-            return;
-        }
-        E3_LOG_INFO(LOG_TAG) << "Outbound connection established";
+        E3_LOG_INFO(LOG_TAG) << "Trying to setup outbound connection";
+        result = connector_->setup_outbound_connection();
+    } while (result != ErrorCode::SUCCESS && !should_stop_.load());
+    
+    if (result != ErrorCode::SUCCESS) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to setup outbound connection";
+        return;
     }
+    E3_LOG_INFO(LOG_TAG) << "Outbound connection established";
     
     while (!should_stop_.load()) {
         // Pop from queue (blocking)
         auto pdu_opt = response_queue_->pop(std::chrono::milliseconds(100));
         
         if (!pdu_opt) {
-            continue;
-        }
-        
-        if (config_.simulation_mode) {
-            E3_LOG_DEBUG(LOG_TAG) << "Simulation: would send " 
-                                  << pdu_type_to_string(pdu_opt->type);
             continue;
         }
         
@@ -417,12 +390,22 @@ void E3Interface::handle_setup_request(const SetupRequest& request) {
     }
     
     // Create and send response
-    auto available_ran_functions = SmRegistry::instance().get_available_ran_functions();
+    // Get available RAN functions and convert to RanFunctionDef list
+    auto available_ran_function_ids = SmRegistry::instance().get_available_ran_functions();
+    std::vector<RanFunctionDef> ran_function_list;
+    for (auto id : available_ran_function_ids) {
+        RanFunctionDef func;
+        func.ran_function_identifier = id;
+        // TODO: Get actual RAN function data from SM registry
+        ran_function_list.push_back(func);
+    }
     
     auto encode_result = encoder_->encode_setup_response(
         request.id,
         response_code,
-        available_ran_functions
+        std::nullopt,  // e3ap_protocol_version
+        assigned_dapp_id,  // dapp_identifier
+        ran_function_list
     );
     
     if (!encode_result) {
@@ -430,13 +413,11 @@ void E3Interface::handle_setup_request(const SetupRequest& request) {
         return;
     }
     
-    if (!config_.simulation_mode) {
-        ErrorCode send_result = connector_->send_response(encode_result->buffer);
-        if (send_result != ErrorCode::SUCCESS) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to send setup response";
-        } else {
-            E3_LOG_INFO(LOG_TAG) << "Sent setup response";
-        }
+    ErrorCode send_result = connector_->send_response(encode_result->buffer);
+    if (send_result != ErrorCode::SUCCESS) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to send setup response";
+    } else {
+        E3_LOG_INFO(LOG_TAG) << "Sent setup response";
     }
 }
 
