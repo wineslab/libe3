@@ -133,14 +133,6 @@ constexpr size_t DEFAULT_BUFFER_SIZE = 60000;
 constexpr uint32_t LIBE3_PROTOCOL_VERSION = 1;
 
 /**
- * @brief E3AP Setup result
- */
-enum class SetupResult : uint8_t {
-    SUCCESS = 0,
-    FAILURE = 1
-};
-
-/**
  * @brief Encoded message wrapper
  *
  * Unified wrapper for encoded data regardless of format used.
@@ -180,13 +172,23 @@ struct SetupRequest {
 };
 
 /**
+ * @brief RAN Function Definition for Setup Response
+ */
+struct RanFunctionDef {
+    uint32_t ran_function_identifier{0};
+    std::vector<uint8_t> ran_function_data;
+};
+
+/**
  * @brief E3AP Setup Response structure
  */
 struct SetupResponse {
-    SetupResult result{SetupResult::FAILURE};
-    std::vector<uint32_t> accepted_ran_functions;
-    std::vector<uint32_t> rejected_ran_functions;
-    std::string message;
+    uint32_t id{0};                              ///< Message ID
+    uint32_t request_id{0};                      ///< ID of the corresponding SetupRequest
+    ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
+    std::optional<std::string> e3ap_protocol_version;   ///< E3AP protocol version (optional)
+    std::optional<uint32_t> dapp_identifier;            ///< Assigned dApp identifier (optional)
+    std::vector<RanFunctionDef> ran_function_list;      ///< List of available RAN functions (optional)
 };
 
 /**

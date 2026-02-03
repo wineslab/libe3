@@ -30,11 +30,6 @@ PduType string_to_pdu_type(const std::string& s) {
     return PduType::SETUP_REQUEST; // Default
 }
 
-SetupResult string_to_setup_result(const std::string& s) {
-    if (s == "SUCCESS" || s == "success") return SetupResult::SUCCESS;
-    return SetupResult::FAILURE;
-}
-
 ErrorCode string_to_error_code(const std::string& s) {
     if (s == "SUCCESS" || s == "success" || s == "Success") return ErrorCode::SUCCESS;
     if (s == "INVALID_PARAM") return ErrorCode::INVALID_PARAM;
@@ -84,10 +79,25 @@ nlohmann::json JsonE3Encoder::encode_setup_request(const SetupRequest& req) cons
 
 nlohmann::json JsonE3Encoder::encode_setup_response(const SetupResponse& resp) const {
     nlohmann::json j;
-    j["result"] = (resp.result == SetupResult::SUCCESS) ? "SUCCESS" : "FAILURE";
-    j["accepted_ran_functions"] = resp.accepted_ran_functions;
-    j["rejected_ran_functions"] = resp.rejected_ran_functions;
-    j["message"] = resp.message;
+    j["id"] = resp.id;
+    j["request_id"] = resp.request_id;
+    j["response_code"] = (resp.response_code == ResponseCode::POSITIVE) ? "positive" : "negative";
+    if (resp.e3ap_protocol_version.has_value()) {
+        j["e3ap_protocol_version"] = resp.e3ap_protocol_version.value();
+    }
+    if (resp.dapp_identifier.has_value()) {
+        j["dapp_identifier"] = resp.dapp_identifier.value();
+    }
+    if (!resp.ran_function_list.empty()) {
+        nlohmann::json ran_funcs = nlohmann::json::array();
+        for (const auto& func : resp.ran_function_list) {
+            nlohmann::json func_obj;
+            func_obj["ran_function_identifier"] = func.ran_function_identifier;
+            func_obj["ran_function_data"] = binary_to_hex(func.ran_function_data);
+            ran_funcs.push_back(func_obj);
+        }
+        j["ran_function_list"] = ran_funcs;
+    }
     return j;
 }
 
@@ -163,10 +173,26 @@ SetupRequest JsonE3Encoder::decode_setup_request(const nlohmann::json& j) const 
 
 SetupResponse JsonE3Encoder::decode_setup_response(const nlohmann::json& j) const {
     SetupResponse resp;
-    resp.result = string_to_setup_result(j.value("result", "FAILURE"));
-    resp.accepted_ran_functions = j.value("accepted_ran_functions", std::vector<uint32_t>{});
-    resp.rejected_ran_functions = j.value("rejected_ran_functions", std::vector<uint32_t>{});
-    resp.message = j.value("message", "");
+    resp.id = j.value("id", 0u);
+    resp.request_id = j.value("request_id", 0u);
+    
+    std::string response_code_str = j.value("response_code", "negative");
+    resp.response_code = (response_code_str == "positive") ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
+    
+    if (j.contains("e3ap_protocol_version")) {
+        resp.e3ap_protocol_version = j["e3ap_protocol_version"].get<std::string>();
+    }
+    if (j.contains("dapp_identifier")) {
+        resp.dapp_identifier = j["dapp_identifier"].get<uint32_t>();
+    }
+    if (j.contains("ran_function_list")) {
+        for (const auto& func_obj : j["ran_function_list"]) {
+            RanFunctionDef func;
+            func.ran_function_identifier = func_obj.value("ran_function_identifier", 0u);
+            func.ran_function_data = hex_to_binary(func_obj.value("ran_function_data", ""));
+            resp.ran_function_list.push_back(func);
+        }
+    }
     return resp;
 }
 

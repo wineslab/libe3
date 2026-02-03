@@ -90,11 +90,18 @@ public:
 
     /**
      * @brief Create and encode a Setup Response PDU
+     * @param request_id ID of the corresponding SetupRequest
+     * @param response_code Response code (positive/negative)
+     * @param e3ap_protocol_version E3AP protocol version (optional)
+     * @param dapp_identifier Assigned dApp identifier (optional)
+     * @param ran_function_list List of available RAN functions (optional)
      */
     [[nodiscard]] EncodeResult<EncodedMessage> encode_setup_response(
         uint32_t request_id,
         ResponseCode response_code,
-        const std::vector<uint32_t>& ran_function_list
+        const std::optional<std::string>& e3ap_protocol_version = std::nullopt,
+        const std::optional<uint32_t>& dapp_identifier = std::nullopt,
+        const std::vector<RanFunctionDef>& ran_function_list = {}
     );
 
     /**

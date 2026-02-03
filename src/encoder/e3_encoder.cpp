@@ -47,13 +47,17 @@ EncodeResult<EncodedMessage> E3Encoder::encode_setup_request(
 EncodeResult<EncodedMessage> E3Encoder::encode_setup_response(
     uint32_t request_id,
     ResponseCode response_code,
-    const std::vector<uint32_t>& ran_function_list
+    const std::optional<std::string>& e3ap_protocol_version,
+    const std::optional<uint32_t>& dapp_identifier,
+    const std::vector<RanFunctionDef>& ran_function_list
 ) {
     Pdu pdu(PduType::SETUP_RESPONSE);
     SetupResponse resp;
     resp.id = generate_message_id();
     resp.request_id = request_id;
     resp.response_code = response_code;
+    resp.e3ap_protocol_version = e3ap_protocol_version;
+    resp.dapp_identifier = dapp_identifier;
     resp.ran_function_list = ran_function_list;
     pdu.choice = resp;
     return encode(pdu);

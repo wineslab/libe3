@@ -15,6 +15,7 @@ extern "C" {
 #include "E3-PDU.h"
 #include "E3-SetupRequest.h"
 #include "E3-SetupResponse.h"
+#include "E3-RanFunctionDefinition.h"
 #include "E3-SubscriptionRequest.h"
 #include "E3-SubscriptionResponse.h"
 #include "E3-IndicationMessage.h"
@@ -168,15 +169,38 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 calloc(1, sizeof(E3_SetupResponse_t)));
             if (!asn1_pdu->choice.setupResponse) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.setupResponse->id = pdu.message_id ? pdu.message_id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.setupResponse->id = resp->id ? resp->id : E3Encoder::generate_message_id();
             asn1_pdu->choice.setupResponse->requestId = resp->request_id;
             asn1_pdu->choice.setupResponse->responseCode = 
-                (resp->result == SetupResult::SUCCESS) ? 0 : 1;
+                (resp->response_code == ResponseCode::POSITIVE) ? 0 : 1;
             
-            for (uint32_t func_id : resp->accepted_ran_functions) {
-                long* id = static_cast<long*>(malloc(sizeof(long)));
-                *id = func_id;
-                ASN_SEQUENCE_ADD(&asn1_pdu->choice.setupResponse->ranFunctionList, id);
+            // Set optional e3apProtocolVersion
+            if (resp->e3ap_protocol_version.has_value()) {
+                asn1_pdu->choice.setupResponse->e3apProtocolVersion = 
+                    static_cast<OCTET_STRING_t*>(calloc(1, sizeof(OCTET_STRING_t)));
+                OCTET_STRING_fromBuf(asn1_pdu->choice.setupResponse->e3apProtocolVersion,
+                    resp->e3ap_protocol_version.value().c_str(),
+                    resp->e3ap_protocol_version.value().size());
+            }
+            
+            // Set optional dAppIdentifier
+            if (resp->dapp_identifier.has_value()) {
+                asn1_pdu->choice.setupResponse->dAppIdentifier = 
+                    static_cast<long*>(malloc(sizeof(long)));
+                *asn1_pdu->choice.setupResponse->dAppIdentifier = resp->dapp_identifier.value();
+            }
+            
+            // Set optional ranFunctionList
+            if (!resp->ran_function_list.empty()) {
+                for (const auto& func : resp->ran_function_list) {
+                    E3_RanFunctionDefinition_t* ran_func = 
+                        static_cast<E3_RanFunctionDefinition_t*>(calloc(1, sizeof(E3_RanFunctionDefinition_t)));
+                    ran_func->ranFunctionIdentifier = func.ran_function_identifier;
+                    OCTET_STRING_fromBuf(&ran_func->ranFunctionData,
+                        reinterpret_cast<const char*>(func.ran_function_data.data()),
+                        func.ran_function_data.size());
+                    ASN_SEQUENCE_ADD(&asn1_pdu->choice.setupResponse->ranFunctionList, ran_func);
+                }
             }
             break;
         }
@@ -357,14 +381,34 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             pdu.message_id = asn1_pdu->choice.setupResponse->id;
             
             SetupResponse resp;
+            resp.id = asn1_pdu->choice.setupResponse->id;
             resp.request_id = asn1_pdu->choice.setupResponse->requestId;
-            resp.result = (asn1_pdu->choice.setupResponse->responseCode == 0) 
-                ? SetupResult::SUCCESS : SetupResult::FAILURE;
+            resp.response_code = (asn1_pdu->choice.setupResponse->responseCode == 0) 
+                ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
             
+            // Extract optional e3apProtocolVersion
+            if (asn1_pdu->choice.setupResponse->e3apProtocolVersion) {
+                const OCTET_STRING_t* proto_ver = asn1_pdu->choice.setupResponse->e3apProtocolVersion;
+                resp.e3ap_protocol_version = std::string(
+                    reinterpret_cast<const char*>(proto_ver->buf), proto_ver->size);
+            }
+            
+            // Extract optional dAppIdentifier
+            if (asn1_pdu->choice.setupResponse->dAppIdentifier) {
+                resp.dapp_identifier = *asn1_pdu->choice.setupResponse->dAppIdentifier;
+            }
+            
+            // Extract ranFunctionList
             int count = asn1_pdu->choice.setupResponse->ranFunctionList.list.count;
             for (int i = 0; i < count; i++) {
-                resp.accepted_ran_functions.push_back(
-                    *asn1_pdu->choice.setupResponse->ranFunctionList.list.array[i]);
+                E3_RanFunctionDefinition_t* asn_func = 
+                    asn1_pdu->choice.setupResponse->ranFunctionList.list.array[i];
+                RanFunctionDef func;
+                func.ran_function_identifier = asn_func->ranFunctionIdentifier;
+                func.ran_function_data.assign(
+                    asn_func->ranFunctionData.buf,
+                    asn_func->ranFunctionData.buf + asn_func->ranFunctionData.size);
+                resp.ran_function_list.push_back(func);
             }
             
             pdu.choice = resp;
