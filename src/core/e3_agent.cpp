@@ -255,10 +255,6 @@ const E3Config& E3Agent::config() const noexcept {
     return impl_->config;
 }
 
-bool E3Agent::is_simulation_mode() const noexcept {
-    return impl_->config.simulation_mode;
-}
-
 // =========================================================================
 // Statistics
 // =========================================================================

@@ -142,13 +142,6 @@ public:
         dapp_report_handler_ = std::move(handler);
     }
 
-    /**
-     * @brief Check if running in simulation mode
-     */
-    [[nodiscard]] bool is_simulation_mode() const noexcept { 
-        return config_.simulation_mode; 
-    }
-
 private:
     // Configuration
     E3Config config_;

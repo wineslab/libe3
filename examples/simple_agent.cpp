@@ -33,7 +33,6 @@ int main() {
     config.link_layer = libe3::E3LinkLayer::POSIX;
     config.transport_layer = libe3::E3TransportLayer::IPC;
     config.encoding = libe3::EncodingFormat::JSON;
-    config.simulation_mode = true;  // For this example, use simulation mode
     
     // Create the agent
     libe3::E3Agent agent(std::move(config));

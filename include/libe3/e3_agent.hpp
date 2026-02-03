@@ -254,14 +254,6 @@ public:
      */
     [[nodiscard]] const E3Config& config() const noexcept;
 
-    /**
-     * @brief Check if running in simulation mode
-     *
-     * In simulation mode, the agent operates without a real transport
-     * connection, useful for unit testing.
-     */
-    [[nodiscard]] bool is_simulation_mode() const noexcept;
-
     // =========================================================================
     // Statistics
     // =========================================================================

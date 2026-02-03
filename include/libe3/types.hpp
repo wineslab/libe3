@@ -332,9 +332,6 @@ struct E3Config {
     size_t receive_buffer_size{DEFAULT_BUFFER_SIZE};
     size_t send_buffer_size{DEFAULT_BUFFER_SIZE};
     
-    // Simulation mode (for testing without real RAN)
-    bool simulation_mode{false};
-    
     // Threading
     size_t io_threads{2};
     
