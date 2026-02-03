@@ -38,29 +38,37 @@ void SubscriptionManager::set_sm_lifecycle_callback(SmLifecycleCallback callback
 // dApp Registration Management
 // =========================================================================
 
-ErrorCode SubscriptionManager::register_dapp(uint32_t dapp_id) {
-    if (dapp_id > MAX_DAPP_ID) {
-        E3_LOG_ERROR(LOG_TAG) << "Invalid dApp ID " << dapp_id << " (must be 0-100)";
-        return ErrorCode::INVALID_PARAM;
-    }
-
+std::pair<ErrorCode, uint32_t> SubscriptionManager::register_dapp() {
     std::unique_lock lock(mutex_);
 
-    if (registered_dapps_.count(dapp_id) > 0) {
-        E3_LOG_WARN(LOG_TAG) << "dApp " << dapp_id << " is already registered";
-        return ErrorCode::SUBSCRIPTION_EXISTS;
+    // Find the next available dApp ID
+    uint32_t assigned_id = next_dapp_id_;
+    uint32_t attempts = 0;
+    
+    // Search for an available ID (handle wrap-around and gaps from unregistered dApps)
+    while (registered_dapps_.count(assigned_id) > 0 && attempts <= MAX_DAPP_ID) {
+        assigned_id = (assigned_id + 1) % (MAX_DAPP_ID + 1);
+        attempts++;
+    }
+    
+    if (attempts > MAX_DAPP_ID) {
+        E3_LOG_ERROR(LOG_TAG) << "No available dApp IDs (max " << MAX_DAPP_ID + 1 << " dApps reached)";
+        return {ErrorCode::INTERNAL_ERROR, 0};
     }
 
     DAppEntry entry;
-    entry.dapp_identifier = dapp_id;
+    entry.dapp_identifier = assigned_id;
     entry.registered_time = std::chrono::steady_clock::now();
-    registered_dapps_[dapp_id] = entry;
+    registered_dapps_[assigned_id] = entry;
 
     // Initialize empty subscription set for this dApp
-    dapp_subscriptions_[dapp_id] = {};
+    dapp_subscriptions_[assigned_id] = {};
+    
+    // Update next_dapp_id_ for the next registration
+    next_dapp_id_ = (assigned_id + 1) % (MAX_DAPP_ID + 1);
 
-    E3_LOG_INFO(LOG_TAG) << "dApp " << dapp_id << " registered successfully";
-    return ErrorCode::SUCCESS;
+    E3_LOG_INFO(LOG_TAG) << "dApp registered successfully with ID " << assigned_id;
+    return {ErrorCode::SUCCESS, assigned_id};
 }
 
 ErrorCode SubscriptionManager::unregister_dapp(uint32_t dapp_id) {

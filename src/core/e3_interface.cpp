@@ -397,30 +397,28 @@ void E3Interface::sm_data_handler_loop() {
 // =========================================================================
 
 void E3Interface::handle_setup_request(const SetupRequest& request) {
-    E3_LOG_INFO(LOG_TAG) << "Handling setup request from dApp " << request.dapp_identifier
-                         << " (action=" << action_type_to_string(request.type) << ")";
+    E3_LOG_INFO(LOG_TAG) << "Handling setup request (action=" << action_type_to_string(request.type) << ")";
     
     ResponseCode response_code = ResponseCode::NEGATIVE;
+    uint32_t assigned_dapp_id = 0;
     
     switch (request.type) {
         case ActionType::INSERT: {
-            ErrorCode result = subscription_manager_->register_dapp(request.dapp_identifier);
+            auto [result, dapp_id] = subscription_manager_->register_dapp();
+            assigned_dapp_id = dapp_id;
             
             if (result == ErrorCode::SUCCESS) {
                 response_code = ResponseCode::POSITIVE;
-                E3_LOG_INFO(LOG_TAG) << "dApp " << request.dapp_identifier << " registered";
-            } else if (result == ErrorCode::SUBSCRIPTION_EXISTS) {
-                // Already registered - still send positive response
-                response_code = ResponseCode::POSITIVE;
-                E3_LOG_WARN(LOG_TAG) << "dApp " << request.dapp_identifier << " already registered";
+                E3_LOG_INFO(LOG_TAG) << "dApp registered with assigned ID " << assigned_dapp_id;
             } else {
-                E3_LOG_ERROR(LOG_TAG) << "Failed to register dApp " << request.dapp_identifier;
+                E3_LOG_ERROR(LOG_TAG) << "Failed to register dApp: " << error_code_to_string(result);
             }
             break;
         }
         
         case ActionType::DELETE: {
             ErrorCode result = subscription_manager_->unregister_dapp(request.dapp_identifier);
+            assigned_dapp_id = request.dapp_identifier;
             
             if (result == ErrorCode::SUCCESS) {
                 response_code = ResponseCode::POSITIVE;

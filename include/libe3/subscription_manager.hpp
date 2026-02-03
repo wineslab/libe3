@@ -14,6 +14,7 @@
 #include "types.hpp"
 #include <mutex>
 #include <shared_mutex>
+#include <utility>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
@@ -75,12 +76,14 @@ public:
     /**
      * @brief Register a dApp from E3 Setup Request
      *
-     * @param dapp_id dApp identifier (0-100 per spec)
-     * @return ErrorCode::SUCCESS on success
-     * @return ErrorCode::INVALID_PARAM if dapp_id > 100
-     * @return ErrorCode::SUBSCRIPTION_EXISTS if already registered
+     * The SubscriptionManager assigns a unique dApp ID automatically.
+     *
+     * @return std::pair containing:
+     *         - ErrorCode::SUCCESS on success, or error code on failure
+     *         - The assigned dApp ID (valid only if ErrorCode::SUCCESS)
+     * @return ErrorCode::INTERNAL_ERROR if no IDs available (max 101 dApps)
      */
-    [[nodiscard]] ErrorCode register_dapp(uint32_t dapp_id);
+    [[nodiscard]] std::pair<ErrorCode, uint32_t> register_dapp();
 
     /**
      * @brief Unregister a dApp and clean up all its subscriptions
@@ -197,6 +200,9 @@ private:
     
     // Callback for SM lifecycle events
     SmLifecycleCallback sm_lifecycle_callback_;
+    
+    // Next dApp ID to assign (0-100 per spec)
+    uint32_t next_dapp_id_{0};
 
     /**
      * @brief Check if SM should be started/stopped and invoke callback
