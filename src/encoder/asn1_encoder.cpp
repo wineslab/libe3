@@ -214,13 +214,37 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 calloc(1, sizeof(E3_SubscriptionRequest_t)));
             if (!asn1_pdu->choice.subscriptionRequest) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.subscriptionRequest->id = pdu.message_id ? pdu.message_id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.subscriptionRequest->id = req->id ? req->id : E3Encoder::generate_message_id();
             asn1_pdu->choice.subscriptionRequest->dAppIdentifier = req->dapp_identifier;
-            asn1_pdu->choice.subscriptionRequest->type = static_cast<long>(req->action_type);
-            // Note: Original protocol only supports one RAN function per subscription request
-            if (!req->ran_functions_to_subscribe.empty()) {
-                asn1_pdu->choice.subscriptionRequest->ranFunctionIdentifier = 
-                    req->ran_functions_to_subscribe[0];
+            asn1_pdu->choice.subscriptionRequest->type = static_cast<long>(req->type);
+            asn1_pdu->choice.subscriptionRequest->ranFunctionIdentifier = req->ran_function_identifier;
+            
+            // Encode telemetryIdentifierList
+            for (uint32_t tel_id : req->telemetry_identifier_list) {
+                long* id = static_cast<long*>(malloc(sizeof(long)));
+                *id = tel_id;
+                ASN_SEQUENCE_ADD(&asn1_pdu->choice.subscriptionRequest->telemetryIdentifierList, id);
+            }
+            
+            // Encode controlIdentifierList
+            for (uint32_t ctrl_id : req->control_identifier_list) {
+                long* id = static_cast<long*>(malloc(sizeof(long)));
+                *id = ctrl_id;
+                ASN_SEQUENCE_ADD(&asn1_pdu->choice.subscriptionRequest->controlIdentifierList, id);
+            }
+            
+            // Set optional subscriptionTime
+            if (req->subscription_time.has_value()) {
+                asn1_pdu->choice.subscriptionRequest->subscriptionTime = 
+                    static_cast<long*>(malloc(sizeof(long)));
+                *asn1_pdu->choice.subscriptionRequest->subscriptionTime = req->subscription_time.value();
+            }
+            
+            // Set optional periodicity
+            if (req->periodicity.has_value()) {
+                asn1_pdu->choice.subscriptionRequest->periodicity = 
+                    static_cast<long*>(malloc(sizeof(long)));
+                *asn1_pdu->choice.subscriptionRequest->periodicity = req->periodicity.value();
             }
             break;
         }
@@ -420,10 +444,34 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             pdu.message_id = asn1_pdu->choice.subscriptionRequest->id;
             
             SubscriptionRequest req;
+            req.id = asn1_pdu->choice.subscriptionRequest->id;
             req.dapp_identifier = asn1_pdu->choice.subscriptionRequest->dAppIdentifier;
-            req.action_type = static_cast<ActionType>(asn1_pdu->choice.subscriptionRequest->type);
-            req.ran_functions_to_subscribe.push_back(
-                asn1_pdu->choice.subscriptionRequest->ranFunctionIdentifier);
+            req.type = static_cast<ActionType>(asn1_pdu->choice.subscriptionRequest->type);
+            req.ran_function_identifier = asn1_pdu->choice.subscriptionRequest->ranFunctionIdentifier;
+            
+            // Decode telemetryIdentifierList
+            int tel_count = asn1_pdu->choice.subscriptionRequest->telemetryIdentifierList.list.count;
+            for (int i = 0; i < tel_count; i++) {
+                req.telemetry_identifier_list.push_back(
+                    *asn1_pdu->choice.subscriptionRequest->telemetryIdentifierList.list.array[i]);
+            }
+            
+            // Decode controlIdentifierList
+            int ctrl_count = asn1_pdu->choice.subscriptionRequest->controlIdentifierList.list.count;
+            for (int i = 0; i < ctrl_count; i++) {
+                req.control_identifier_list.push_back(
+                    *asn1_pdu->choice.subscriptionRequest->controlIdentifierList.list.array[i]);
+            }
+            
+            // Decode optional subscriptionTime
+            if (asn1_pdu->choice.subscriptionRequest->subscriptionTime) {
+                req.subscription_time = *asn1_pdu->choice.subscriptionRequest->subscriptionTime;
+            }
+            
+            // Decode optional periodicity
+            if (asn1_pdu->choice.subscriptionRequest->periodicity) {
+                req.periodicity = *asn1_pdu->choice.subscriptionRequest->periodicity;
+            }
             
             pdu.choice = req;
             break;

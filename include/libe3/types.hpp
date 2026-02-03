@@ -195,9 +195,14 @@ struct SetupResponse {
  * @brief E3AP Subscription Request structure
  */
 struct SubscriptionRequest {
-    uint32_t dapp_identifier{0};
-    std::vector<uint32_t> ran_functions_to_subscribe;
-    std::vector<uint32_t> ran_functions_to_unsubscribe;
+    uint32_t id{0};                                  ///< Message ID
+    uint32_t dapp_identifier{0};                     ///< dApp identifier
+    ActionType type{ActionType::INSERT};             ///< Action type (insert/update/delete)
+    uint32_t ran_function_identifier{0};             ///< RAN function to subscribe to
+    std::vector<uint32_t> telemetry_identifier_list; ///< List of telemetry identifiers
+    std::vector<uint32_t> control_identifier_list;   ///< List of control identifiers
+    std::optional<uint32_t> subscription_time;       ///< How long to keep the subscription (0-3600 sec)
+    std::optional<uint32_t> periodicity;             ///< How often to send indication messages (0-1000 ms)
 };
 
 /**

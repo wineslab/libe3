@@ -66,7 +66,11 @@ EncodeResult<EncodedMessage> E3Encoder::encode_setup_response(
 EncodeResult<EncodedMessage> E3Encoder::encode_subscription_request(
     uint32_t dapp_identifier,
     ActionType action_type,
-    uint32_t ran_function_identifier
+    uint32_t ran_function_identifier,
+    const std::vector<uint32_t>& telemetry_identifier_list,
+    const std::vector<uint32_t>& control_identifier_list,
+    const std::optional<uint32_t>& subscription_time,
+    const std::optional<uint32_t>& periodicity
 ) {
     Pdu pdu(PduType::SUBSCRIPTION_REQUEST);
     SubscriptionRequest req;
@@ -74,6 +78,10 @@ EncodeResult<EncodedMessage> E3Encoder::encode_subscription_request(
     req.dapp_identifier = dapp_identifier;
     req.type = action_type;
     req.ran_function_identifier = ran_function_identifier;
+    req.telemetry_identifier_list = telemetry_identifier_list;
+    req.control_identifier_list = control_identifier_list;
+    req.subscription_time = subscription_time;
+    req.periodicity = periodicity;
     pdu.choice = req;
     return encode(pdu);
 }

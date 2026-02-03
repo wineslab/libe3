@@ -103,9 +103,18 @@ nlohmann::json JsonE3Encoder::encode_setup_response(const SetupResponse& resp) c
 
 nlohmann::json JsonE3Encoder::encode_subscription_request(const SubscriptionRequest& req) const {
     nlohmann::json j;
+    j["id"] = req.id;
     j["dapp_identifier"] = req.dapp_identifier;
-    j["ran_functions_to_subscribe"] = req.ran_functions_to_subscribe;
-    j["ran_functions_to_unsubscribe"] = req.ran_functions_to_unsubscribe;
+    j["type"] = static_cast<int>(req.type);
+    j["ran_function_identifier"] = req.ran_function_identifier;
+    j["telemetry_identifier_list"] = req.telemetry_identifier_list;
+    j["control_identifier_list"] = req.control_identifier_list;
+    if (req.subscription_time.has_value()) {
+        j["subscription_time"] = req.subscription_time.value();
+    }
+    if (req.periodicity.has_value()) {
+        j["periodicity"] = req.periodicity.value();
+    }
     return j;
 }
 
@@ -198,9 +207,18 @@ SetupResponse JsonE3Encoder::decode_setup_response(const nlohmann::json& j) cons
 
 SubscriptionRequest JsonE3Encoder::decode_subscription_request(const nlohmann::json& j) const {
     SubscriptionRequest req;
+    req.id = j.value("id", 0u);
     req.dapp_identifier = j.value("dapp_identifier", 0u);
-    req.ran_functions_to_subscribe = j.value("ran_functions_to_subscribe", std::vector<uint32_t>{});
-    req.ran_functions_to_unsubscribe = j.value("ran_functions_to_unsubscribe", std::vector<uint32_t>{});
+    req.type = static_cast<ActionType>(j.value("type", 0));
+    req.ran_function_identifier = j.value("ran_function_identifier", 0u);
+    req.telemetry_identifier_list = j.value("telemetry_identifier_list", std::vector<uint32_t>{});
+    req.control_identifier_list = j.value("control_identifier_list", std::vector<uint32_t>{});
+    if (j.contains("subscription_time")) {
+        req.subscription_time = j["subscription_time"].get<uint32_t>();
+    }
+    if (j.contains("periodicity")) {
+        req.periodicity = j["periodicity"].get<uint32_t>();
+    }
     return req;
 }
 

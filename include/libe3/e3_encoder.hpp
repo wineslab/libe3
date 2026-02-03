@@ -106,11 +106,22 @@ public:
 
     /**
      * @brief Create and encode a Subscription Request PDU
+     * @param dapp_identifier dApp identifier
+     * @param action_type Action type (insert/update/delete)
+     * @param ran_function_identifier RAN function to subscribe to
+     * @param telemetry_identifier_list List of telemetry identifiers
+     * @param control_identifier_list List of control identifiers
+     * @param subscription_time How long to keep the subscription (0-3600 sec, optional)
+     * @param periodicity How often to send indication messages (0-1000 ms, optional)
      */
     [[nodiscard]] EncodeResult<EncodedMessage> encode_subscription_request(
         uint32_t dapp_identifier,
         ActionType action_type,
-        uint32_t ran_function_identifier
+        uint32_t ran_function_identifier,
+        const std::vector<uint32_t>& telemetry_identifier_list,
+        const std::vector<uint32_t>& control_identifier_list,
+        const std::optional<uint32_t>& subscription_time = std::nullopt,
+        const std::optional<uint32_t>& periodicity = std::nullopt
     );
 
     /**
