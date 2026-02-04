@@ -79,22 +79,32 @@ public:
     /**
      * @brief Get SM name
      */
-    [[nodiscard]] virtual std::string name() const = 0;
+    virtual std::string name() const = 0;
 
     /**
      * @brief Get SM version
      */
-    [[nodiscard]] virtual uint32_t version() const = 0;
+    virtual uint32_t version() const = 0;
 
     /**
      * @brief Get RAN function IDs handled by this SM
      */
-    [[nodiscard]] virtual std::vector<uint32_t> ran_function_ids() const = 0;
+    virtual std::vector<uint32_t> ran_function_ids() const = 0;
+
+    /**
+     * @brief Get telemetry IDs supported by this SM
+     */
+    virtual std::vector<uint32_t> telemetry_ids() const = 0;
+
+    /**
+     * @brief Get control IDs supported by this SM
+     */
+    virtual std::vector<uint32_t> control_ids() const = 0;
 
     /**
      * @brief Check if SM handles a specific RAN function
      */
-    [[nodiscard]] bool handles_ran_function(uint32_t ran_function_id) const {
+    bool handles_ran_function(uint32_t ran_function_id) const {
         auto ids = ran_function_ids();
         return std::find(ids.begin(), ids.end(), ran_function_id) != ids.end();
     }
@@ -105,7 +115,7 @@ public:
      * Called when the SM is first registered.
      * @return ErrorCode::SUCCESS on success
      */
-    [[nodiscard]] virtual ErrorCode init() = 0;
+    virtual ErrorCode init() = 0;
 
     /**
      * @brief Destroy the SM and release resources
@@ -120,7 +130,7 @@ public:
      * Called when the first dApp subscribes to this SM's RAN function.
      * @return ErrorCode::SUCCESS on success
      */
-    [[nodiscard]] virtual ErrorCode start() = 0;
+    virtual ErrorCode start() = 0;
 
     /**
      * @brief Stop the SM processing
@@ -132,17 +142,17 @@ public:
     /**
      * @brief Check if SM is currently running
      */
-    [[nodiscard]] virtual bool is_running() const = 0;
+    virtual bool is_running() const = 0;
 
     /**
      * @brief Process a control action from a dApp
      *
-     * @param ran_function_id The RAN function this action is for
+     * @param control_action_id The control action ID for this action
      * @param action_data E3SM-encoded control action data
      * @return ErrorCode::SUCCESS on success
      */
-    [[nodiscard]] virtual ErrorCode process_control_action(
-        uint32_t ran_function_id,
+    virtual ErrorCode process_control_action(
+        uint32_t control_action_id,
         const std::vector<uint8_t>& action_data
     ) = 0;
 
@@ -201,19 +211,19 @@ public:
      * @return ErrorCode::SUCCESS on success
      * @return ErrorCode::SM_ALREADY_REGISTERED if SM for this RAN function exists
      */
-    [[nodiscard]] ErrorCode register_sm(std::unique_ptr<ServiceModel> sm);
+    ErrorCode register_sm(std::unique_ptr<ServiceModel> sm);
 
     /**
      * @brief Register a Service Model factory
      *
      * Use this to defer SM creation until needed.
      */
-    [[nodiscard]] ErrorCode register_sm_factory(uint32_t ran_function_id, SmFactory factory);
+    ErrorCode register_sm_factory(uint32_t ran_function_id, SmFactory factory);
 
     /**
      * @brief Unregister a Service Model by RAN function ID
      */
-    [[nodiscard]] ErrorCode unregister_sm(uint32_t ran_function_id);
+    ErrorCode unregister_sm(uint32_t ran_function_id);
 
     /**
      * @brief Get SM by RAN function ID
@@ -221,27 +231,27 @@ public:
      * @param ran_function_id RAN function ID to look up
      * @return Pointer to SM, nullptr if not found
      */
-    [[nodiscard]] ServiceModel* get_by_ran_function(uint32_t ran_function_id);
+    ServiceModel* get_by_ran_function(uint32_t ran_function_id);
 
     /**
      * @brief Get all available RAN function IDs
      */
-    [[nodiscard]] std::vector<uint32_t> get_available_ran_functions() const;
+    std::vector<uint32_t> get_available_ran_functions() const;
 
     /**
      * @brief Start SM for a RAN function
      */
-    [[nodiscard]] ErrorCode start_sm(uint32_t ran_function_id);
+    ErrorCode start_sm(uint32_t ran_function_id);
 
     /**
      * @brief Stop SM for a RAN function
      */
-    [[nodiscard]] ErrorCode stop_sm(uint32_t ran_function_id);
+    ErrorCode stop_sm(uint32_t ran_function_id);
 
     /**
      * @brief Check if SM is running
      */
-    [[nodiscard]] bool is_sm_running(uint32_t ran_function_id) const;
+    bool is_sm_running(uint32_t ran_function_id) const;
 
     /**
      * @brief Clear all registered SMs

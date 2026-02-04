@@ -65,7 +65,7 @@ EncodeResult<EncodedMessage> Asn1E3Encoder::encode(const Pdu& pdu) {
     }
     
     // Resize buffer to actual encoded size
-    buffer.resize(enc_rval.encoded);
+    buffer.resize(static_cast<size_t>(enc_rval.encoded));
     
     ASN_STRUCT_FREE(asn_DEF_E3_PDU, asn1_pdu);
     
@@ -142,22 +142,22 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             // Set e3apProtocolVersion string
             OCTET_STRING_fromBuf(&asn1_pdu->choice.setupRequest->e3apProtocolVersion,
                 req->e3ap_protocol_version.c_str(),
-                req->e3ap_protocol_version.size());
+                static_cast<int>(req->e3ap_protocol_version.size()));
             
             // Set dAppName string
             OCTET_STRING_fromBuf(&asn1_pdu->choice.setupRequest->dAppName,
                 req->dapp_name.c_str(),
-                req->dapp_name.size());
+                static_cast<int>(req->dapp_name.size()));
             
             // Set dAppVersion string
             OCTET_STRING_fromBuf(&asn1_pdu->choice.setupRequest->dAppVersion,
                 req->dapp_version.c_str(),
-                req->dapp_version.size());
+                static_cast<int>(req->dapp_version.size()));
             
             // Set vendor string
             OCTET_STRING_fromBuf(&asn1_pdu->choice.setupRequest->vendor,
                 req->vendor.c_str(),
-                req->vendor.size());
+                static_cast<int>(req->vendor.size()));
             break;
         }
         
@@ -199,7 +199,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                     ran_func->ranFunctionIdentifier = func.ran_function_identifier;
                     OCTET_STRING_fromBuf(&ran_func->ranFunctionData,
                         reinterpret_cast<const char*>(func.ran_function_data.data()),
-                        func.ran_function_data.size());
+                        static_cast<int>(func.ran_function_data.size()));
                     ASN_SEQUENCE_ADD(&asn1_pdu->choice.setupResponse->ranFunctionList, ran_func);
                 }
             }
@@ -281,7 +281,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             // Copy protocol data
             OCTET_STRING_fromBuf(&asn1_pdu->choice.indicationMessage->protocolData,
                 reinterpret_cast<const char*>(msg->protocol_data.data()),
-                msg->protocol_data.size());
+                static_cast<int>(msg->protocol_data.size()));
             break;
         }
         
@@ -300,7 +300,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             
             OCTET_STRING_fromBuf(&asn1_pdu->choice.controlAction->actionData,
                 reinterpret_cast<const char*>(action->action_data.data()),
-                action->action_data.size());
+                static_cast<int>(action->action_data.size()));
             break;
         }
         
@@ -319,7 +319,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             
             OCTET_STRING_fromBuf(&asn1_pdu->choice.dAppReport->reportData,
                 reinterpret_cast<const char*>(report->report_data.data()),
-                report->report_data.size());
+                static_cast<int>(report->report_data.size()));
             break;
         }
         
@@ -338,7 +338,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             
             OCTET_STRING_fromBuf(&asn1_pdu->choice.xAppControlAction->xAppControlData,
                 reinterpret_cast<const char*>(action->xapp_control_data.data()),
-                action->xapp_control_data.size());
+                static_cast<int>(action->xapp_control_data.size()));
             break;
         }
         
@@ -390,10 +390,10 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
     switch (asn1_pdu->present) {
         case E3_PDU_PR_setupRequest: {
             pdu.type = PduType::SETUP_REQUEST;
-            pdu.message_id = asn1_pdu->choice.setupRequest->id;
+            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.setupRequest->id);
             
             SetupRequest req;
-            req.id = asn1_pdu->choice.setupRequest->id;
+            req.id = static_cast<uint32_t>(asn1_pdu->choice.setupRequest->id);
             
             // Extract e3apProtocolVersion string
             const OCTET_STRING_t* proto_ver = &asn1_pdu->choice.setupRequest->e3apProtocolVersion;
@@ -417,11 +417,11 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
         
         case E3_PDU_PR_setupResponse: {
             pdu.type = PduType::SETUP_RESPONSE;
-            pdu.message_id = asn1_pdu->choice.setupResponse->id;
+            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.setupResponse->id);
             
             SetupResponse resp;
-            resp.id = asn1_pdu->choice.setupResponse->id;
-            resp.request_id = asn1_pdu->choice.setupResponse->requestId;
+            resp.id = static_cast<uint32_t>(asn1_pdu->choice.setupResponse->id);
+            resp.request_id = static_cast<uint32_t>(asn1_pdu->choice.setupResponse->requestId);
             resp.response_code = (asn1_pdu->choice.setupResponse->responseCode == 0) 
                 ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
             
@@ -443,7 +443,7 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
                 E3_RanFunctionDefinition_t* asn_func = 
                     asn1_pdu->choice.setupResponse->ranFunctionList->list.array[i];
                 RanFunctionDef func;
-                func.ran_function_identifier = asn_func->ranFunctionIdentifier;
+                func.ran_function_identifier = static_cast<uint32_t>(asn_func->ranFunctionIdentifier);
                 func.ran_function_data.assign(
                     asn_func->ranFunctionData.buf,
                     asn_func->ranFunctionData.buf + asn_func->ranFunctionData.size);
@@ -456,26 +456,26 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
         
         case E3_PDU_PR_subscriptionRequest: {
             pdu.type = PduType::SUBSCRIPTION_REQUEST;
-            pdu.message_id = asn1_pdu->choice.subscriptionRequest->id;
+            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionRequest->id);
             
             SubscriptionRequest req;
-            req.id = asn1_pdu->choice.subscriptionRequest->id;
-            req.dapp_identifier = asn1_pdu->choice.subscriptionRequest->dAppIdentifier;
+            req.id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionRequest->id);
+            req.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.subscriptionRequest->dAppIdentifier);
             req.type = static_cast<ActionType>(asn1_pdu->choice.subscriptionRequest->type);
-            req.ran_function_identifier = asn1_pdu->choice.subscriptionRequest->ranFunctionIdentifier;
+            req.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->choice.subscriptionRequest->ranFunctionIdentifier);
             
             // Decode telemetryIdentifierList
             int tel_count = asn1_pdu->choice.subscriptionRequest->telemetryIdentifierList.list.count;
             for (int i = 0; i < tel_count; i++) {
                 req.telemetry_identifier_list.push_back(
-                    *asn1_pdu->choice.subscriptionRequest->telemetryIdentifierList.list.array[i]);
+                    static_cast<uint32_t>(*asn1_pdu->choice.subscriptionRequest->telemetryIdentifierList.list.array[i]));
             }
             
             // Decode controlIdentifierList
             int ctrl_count = asn1_pdu->choice.subscriptionRequest->controlIdentifierList.list.count;
             for (int i = 0; i < ctrl_count; i++) {
                 req.control_identifier_list.push_back(
-                    *asn1_pdu->choice.subscriptionRequest->controlIdentifierList.list.array[i]);
+                    static_cast<uint32_t>(*asn1_pdu->choice.subscriptionRequest->controlIdentifierList.list.array[i]));
             }
             
             // Decode optional subscriptionTime
@@ -494,11 +494,11 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
         
         case E3_PDU_PR_subscriptionResponse: {
             pdu.type = PduType::SUBSCRIPTION_RESPONSE;
-            pdu.message_id = asn1_pdu->choice.subscriptionResponse->id;
+            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionResponse->id);
             
             SubscriptionResponse resp;
-            resp.id = asn1_pdu->choice.subscriptionResponse->id;
-            resp.request_id = asn1_pdu->choice.subscriptionResponse->requestId;
+            resp.id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionResponse->id);
+            resp.request_id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionResponse->requestId);
             resp.response_code = (asn1_pdu->choice.subscriptionResponse->responseCode == 0)
                 ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
             
@@ -508,10 +508,10 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
         
         case E3_PDU_PR_indicationMessage: {
             pdu.type = PduType::INDICATION_MESSAGE;
-            pdu.message_id = asn1_pdu->choice.indicationMessage->id;
+            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.indicationMessage->id);
             
             IndicationMessage msg;
-            msg.dapp_identifier = asn1_pdu->choice.indicationMessage->dAppIdentifier;
+            msg.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.indicationMessage->dAppIdentifier);
             
             // Copy protocol data
             const OCTET_STRING_t* data = &asn1_pdu->choice.indicationMessage->protocolData;
@@ -523,11 +523,11 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
         
         case E3_PDU_PR_controlAction: {
             pdu.type = PduType::CONTROL_ACTION;
-            pdu.message_id = asn1_pdu->choice.controlAction->id;
+            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.controlAction->id);
             
             ControlAction action;
-            action.dapp_identifier = asn1_pdu->choice.controlAction->dAppIdentifier;
-            action.ran_function_identifier = asn1_pdu->choice.controlAction->ranFunctionIdentifier;
+            action.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.controlAction->dAppIdentifier);
+            action.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->choice.controlAction->ranFunctionIdentifier);
             
             const OCTET_STRING_t* data = &asn1_pdu->choice.controlAction->actionData;
             action.action_data.assign(data->buf, data->buf + data->size);
@@ -538,11 +538,11 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
         
         case E3_PDU_PR_dAppReport: {
             pdu.type = PduType::DAPP_REPORT;
-            pdu.message_id = asn1_pdu->choice.dAppReport->id;
+            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.dAppReport->id);
             
             DAppReport report;
-            report.dapp_identifier = asn1_pdu->choice.dAppReport->dAppIdentifier;
-            report.ran_function_identifier = asn1_pdu->choice.dAppReport->ranFunctionIdentifier;
+            report.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.dAppReport->dAppIdentifier);
+            report.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->choice.dAppReport->ranFunctionIdentifier);
             
             const OCTET_STRING_t* data = &asn1_pdu->choice.dAppReport->reportData;
             report.report_data.assign(data->buf, data->buf + data->size);
@@ -553,11 +553,11 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
         
         case E3_PDU_PR_xAppControlAction: {
             pdu.type = PduType::XAPP_CONTROL_ACTION;
-            pdu.message_id = asn1_pdu->choice.xAppControlAction->id;
+            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.xAppControlAction->id);
             
             XAppControlAction action;
-            action.dapp_identifier = asn1_pdu->choice.xAppControlAction->dAppIdentifier;
-            action.ran_function_identifier = asn1_pdu->choice.xAppControlAction->ranFunctionIdentifier;
+            action.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.xAppControlAction->dAppIdentifier);
+            action.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->choice.xAppControlAction->ranFunctionIdentifier);
             
             const OCTET_STRING_t* data = &asn1_pdu->choice.xAppControlAction->xAppControlData;
             action.xapp_control_data.assign(data->buf, data->buf + data->size);
@@ -568,11 +568,11 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
         
         case E3_PDU_PR_messageAck: {
             pdu.type = PduType::MESSAGE_ACK;
-            pdu.message_id = asn1_pdu->choice.messageAck->id;
+            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.messageAck->id);
             
             MessageAck ack;
-            ack.id = asn1_pdu->choice.messageAck->id;
-            ack.request_id = asn1_pdu->choice.messageAck->requestId;
+            ack.id = static_cast<uint32_t>(asn1_pdu->choice.messageAck->id);
+            ack.request_id = static_cast<uint32_t>(asn1_pdu->choice.messageAck->requestId);
             ack.response_code = (asn1_pdu->choice.messageAck->responseCode == 0)
                 ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
             
@@ -582,11 +582,11 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
         
         case E3_PDU_PR_releaseMessage: {
             pdu.type = PduType::RELEASE_MESSAGE;
-            pdu.message_id = asn1_pdu->choice.releaseMessage->id;
+            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.releaseMessage->id);
             
             ReleaseMessage msg;
-            msg.id = asn1_pdu->choice.releaseMessage->id;
-            msg.dapp_identifier = asn1_pdu->choice.releaseMessage->dAppIdentifier;
+            msg.id = static_cast<uint32_t>(asn1_pdu->choice.releaseMessage->id);
+            msg.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.releaseMessage->dAppIdentifier);
             
             pdu.choice = msg;
             break;

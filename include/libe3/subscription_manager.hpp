@@ -83,7 +83,7 @@ public:
      *         - The assigned dApp ID (valid only if ErrorCode::SUCCESS)
      * @return ErrorCode::INTERNAL_ERROR if no IDs available (max 101 dApps)
      */
-    [[nodiscard]] std::pair<ErrorCode, uint32_t> register_dapp();
+    std::pair<ErrorCode, uint32_t> register_dapp();
 
     /**
      * @brief Unregister a dApp and clean up all its subscriptions
@@ -92,7 +92,7 @@ public:
      * @return ErrorCode::SUCCESS on success
      * @return ErrorCode::DAPP_NOT_REGISTERED if dApp not found
      */
-    [[nodiscard]] ErrorCode unregister_dapp(uint32_t dapp_id);
+    ErrorCode unregister_dapp(uint32_t dapp_id);
 
     /**
      * @brief Check if a dApp is registered
@@ -100,12 +100,12 @@ public:
      * @param dapp_id dApp identifier
      * @return true if registered
      */
-    [[nodiscard]] bool is_dapp_registered(uint32_t dapp_id) const;
+    bool is_dapp_registered(uint32_t dapp_id) const;
 
     /**
      * @brief Get list of registered dApp IDs
      */
-    [[nodiscard]] std::vector<uint32_t> get_registered_dapps() const;
+    std::vector<uint32_t> get_registered_dapps() const;
 
     // =========================================================================
     // Subscription Management (E3 Subscription flow)
@@ -120,7 +120,7 @@ public:
      * @return ErrorCode::DAPP_NOT_REGISTERED if dApp not registered
      * @return ErrorCode::SUBSCRIPTION_EXISTS if already subscribed
      */
-    [[nodiscard]] ErrorCode add_subscription(uint32_t dapp_id, uint32_t ran_function_id);
+    ErrorCode add_subscription(uint32_t dapp_id, uint32_t ran_function_id);
 
     /**
      * @brief Remove a subscription between dApp and RAN function
@@ -130,27 +130,27 @@ public:
      * @return ErrorCode::SUCCESS on success
      * @return ErrorCode::SUBSCRIPTION_NOT_FOUND if subscription doesn't exist
      */
-    [[nodiscard]] ErrorCode remove_subscription(uint32_t dapp_id, uint32_t ran_function_id);
+    ErrorCode remove_subscription(uint32_t dapp_id, uint32_t ran_function_id);
 
     /**
      * @brief Check if dApp is subscribed to a RAN function
      */
-    [[nodiscard]] bool is_subscribed(uint32_t dapp_id, uint32_t ran_function_id) const;
+    bool is_subscribed(uint32_t dapp_id, uint32_t ran_function_id) const;
 
     /**
      * @brief Get all RAN functions a dApp is subscribed to
      */
-    [[nodiscard]] std::vector<uint32_t> get_dapp_subscriptions(uint32_t dapp_id) const;
+    std::vector<uint32_t> get_dapp_subscriptions(uint32_t dapp_id) const;
 
     /**
      * @brief Get all dApps subscribed to a RAN function
      */
-    [[nodiscard]] std::vector<uint32_t> get_subscribed_dapps(uint32_t ran_function_id) const;
+    std::vector<uint32_t> get_subscribed_dapps(uint32_t ran_function_id) const;
 
     /**
      * @brief Get count of subscribers for a RAN function
      */
-    [[nodiscard]] size_t get_subscriber_count(uint32_t ran_function_id) const;
+    size_t get_subscriber_count(uint32_t ran_function_id) const;
 
     // =========================================================================
     // RAN Function Management
@@ -159,12 +159,12 @@ public:
     /**
      * @brief Get all RAN functions that have at least one subscriber
      */
-    [[nodiscard]] std::vector<uint32_t> get_active_ran_functions() const;
+    std::vector<uint32_t> get_active_ran_functions() const;
 
     /**
      * @brief Check if any dApp is subscribed to a RAN function
      */
-    [[nodiscard]] bool has_subscribers(uint32_t ran_function_id) const;
+    bool has_subscribers(uint32_t ran_function_id) const;
 
     // =========================================================================
     // Statistics
@@ -173,12 +173,12 @@ public:
     /**
      * @brief Get total number of registered dApps
      */
-    [[nodiscard]] size_t dapp_count() const;
+    size_t dapp_count() const;
 
     /**
      * @brief Get total number of active subscriptions
      */
-    [[nodiscard]] size_t subscription_count() const;
+    size_t subscription_count() const;
 
     /**
      * @brief Clear all registrations and subscriptions

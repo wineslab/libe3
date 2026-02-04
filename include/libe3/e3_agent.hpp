@@ -128,7 +128,7 @@ public:
      * @return ErrorCode::SUCCESS on success
      * @return ErrorCode::ALREADY_INITIALIZED if already initialized
      */
-    [[nodiscard]] ErrorCode init();
+    ErrorCode init();
 
     /**
      * @brief Start the agent
@@ -138,7 +138,7 @@ public:
      *
      * @return ErrorCode::SUCCESS on success
      */
-    [[nodiscard]] ErrorCode start();
+    ErrorCode start();
 
     /**
      * @brief Stop the agent
@@ -151,12 +151,12 @@ public:
     /**
      * @brief Get current agent state
      */
-    [[nodiscard]] AgentState state() const noexcept;
+    AgentState state() const noexcept;
 
     /**
      * @brief Check if agent is running
      */
-    [[nodiscard]] bool is_running() const noexcept;
+    bool is_running() const noexcept;
 
     // =========================================================================
     // Service Model Registration
@@ -173,14 +173,14 @@ public:
      * @return ErrorCode::SM_ALREADY_REGISTERED if RAN function already has SM
      * @return ErrorCode::STATE_ERROR if agent is already running
      */
-    [[nodiscard]] ErrorCode register_sm(std::unique_ptr<ServiceModel> sm);
+    ErrorCode register_sm(std::unique_ptr<ServiceModel> sm);
 
     /**
      * @brief Get available RAN function IDs
      *
      * Returns the RAN function IDs from all registered Service Models.
      */
-    [[nodiscard]] std::vector<uint32_t> get_available_ran_functions() const;
+    std::vector<uint32_t> get_available_ran_functions() const;
 
     // =========================================================================
     // Callbacks
@@ -217,7 +217,7 @@ public:
      * @param data E3SM-encoded indication data
      * @return ErrorCode::SUCCESS on success
      */
-    [[nodiscard]] ErrorCode send_indication(
+    ErrorCode send_indication(
         uint32_t dapp_id,
         const std::vector<uint8_t>& data
     );
@@ -225,7 +225,7 @@ public:
     /**
      * @brief Get list of registered dApp IDs
      */
-    [[nodiscard]] std::vector<uint32_t> get_registered_dapps() const;
+    std::vector<uint32_t> get_registered_dapps() const;
 
     /**
      * @brief Get subscriptions for a dApp
@@ -233,7 +233,7 @@ public:
      * @param dapp_id dApp identifier
      * @return List of RAN function IDs the dApp is subscribed to
      */
-    [[nodiscard]] std::vector<uint32_t> get_dapp_subscriptions(uint32_t dapp_id) const;
+    std::vector<uint32_t> get_dapp_subscriptions(uint32_t dapp_id) const;
 
     /**
      * @brief Get subscribers for a RAN function
@@ -241,7 +241,7 @@ public:
      * @param ran_function_id RAN function identifier
      * @return List of dApp IDs subscribed to this RAN function
      */
-    [[nodiscard]] std::vector<uint32_t> get_ran_function_subscribers(
+    std::vector<uint32_t> get_ran_function_subscribers(
         uint32_t ran_function_id
     ) const;
 
@@ -252,7 +252,7 @@ public:
     /**
      * @brief Get current configuration
      */
-    [[nodiscard]] const E3Config& config() const noexcept;
+    const E3Config& config() const noexcept;
 
     // =========================================================================
     // Statistics
@@ -261,12 +261,12 @@ public:
     /**
      * @brief Get number of registered dApps
      */
-    [[nodiscard]] size_t dapp_count() const;
+    size_t dapp_count() const;
 
     /**
      * @brief Get total number of active subscriptions
      */
-    [[nodiscard]] size_t subscription_count() const;
+    size_t subscription_count() const;
 
 private:
     struct Impl;

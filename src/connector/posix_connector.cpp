@@ -140,7 +140,7 @@ int PosixE3Connector::recv_setup_request(std::vector<uint8_t>& buffer) {
         return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
     }
     
-    buffer.resize(ret);
+    buffer.resize(static_cast<size_t>(ret));
     E3_LOG_DEBUG(LOG_TAG) << "Received setup request: " << ret << " bytes";
     return static_cast<int>(ret);
 }
@@ -367,19 +367,19 @@ int PosixE3Connector::send_in_chunks(int sockfd, const uint8_t* buffer, size_t b
     
     size_t total_sent = 0;
     while (total_sent < buffer_size) {
-        ssize_t bytes_to_send = std::min(static_cast<size_t>(CHUNK_SIZE), buffer_size - total_sent);
+        ssize_t bytes_to_send = static_cast<ssize_t>(std::min(static_cast<size_t>(CHUNK_SIZE), buffer_size - total_sent));
         
         ssize_t chunk_sent = 0;
         while (chunk_sent < bytes_to_send) {
             ssize_t sent_chunk = ::send(sockfd, buffer + total_sent + chunk_sent, 
-                                       bytes_to_send - chunk_sent, 0);
+                                       static_cast<size_t>(bytes_to_send - chunk_sent), 0);
             if (sent_chunk == -1) {
                 E3_LOG_ERROR(LOG_TAG) << "Failed to send data: " << strerror(errno);
                 return -1;
             }
             chunk_sent += sent_chunk;
         }
-        total_sent += chunk_sent;
+        total_sent += static_cast<size_t>(chunk_sent);
     }
     
     return 0;

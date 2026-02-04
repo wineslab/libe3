@@ -50,14 +50,14 @@ public:
      * @param pdu PDU to encode
      * @return Encoded message on success, error code on failure
      */
-    [[nodiscard]] virtual EncodeResult<EncodedMessage> encode(const Pdu& pdu) = 0;
+    virtual EncodeResult<EncodedMessage> encode(const Pdu& pdu) = 0;
 
     /**
      * @brief Decode bytes to a PDU
      * @param encoded Encoded message to decode
      * @return Decoded PDU on success, error code on failure
      */
-    [[nodiscard]] virtual EncodeResult<Pdu> decode(const EncodedMessage& encoded) = 0;
+    virtual EncodeResult<Pdu> decode(const EncodedMessage& encoded) = 0;
 
     /**
      * @brief Decode bytes to a PDU
@@ -65,12 +65,12 @@ public:
      * @param size Size of data
      * @return Decoded PDU on success, error code on failure
      */
-    [[nodiscard]] virtual EncodeResult<Pdu> decode(const uint8_t* data, size_t size) = 0;
+    virtual EncodeResult<Pdu> decode(const uint8_t* data, size_t size) = 0;
 
     /**
      * @brief Get the encoding format
      */
-    [[nodiscard]] virtual EncodingFormat format() const noexcept = 0;
+    virtual EncodingFormat format() const noexcept = 0;
 
     // Convenience methods for creating specific PDUs
 
@@ -81,7 +81,7 @@ public:
      * @param dapp_version Version of the dApp (e.g., "0.0.0")
      * @param vendor Vendor name (max 30 chars)
      */
-    [[nodiscard]] EncodeResult<EncodedMessage> encode_setup_request(
+    EncodeResult<EncodedMessage> encode_setup_request(
         const std::string& e3ap_protocol_version,
         const std::string& dapp_name,
         const std::string& dapp_version,
@@ -96,7 +96,7 @@ public:
      * @param dapp_identifier Assigned dApp identifier (optional)
      * @param ran_function_list List of available RAN functions (optional)
      */
-    [[nodiscard]] EncodeResult<EncodedMessage> encode_setup_response(
+    EncodeResult<EncodedMessage> encode_setup_response(
         uint32_t request_id,
         ResponseCode response_code,
         const std::optional<std::string>& e3ap_protocol_version = std::nullopt,
@@ -114,7 +114,7 @@ public:
      * @param subscription_time How long to keep the subscription (0-3600 sec, optional)
      * @param periodicity How often to send indication messages (0-1000 ms, optional)
      */
-    [[nodiscard]] EncodeResult<EncodedMessage> encode_subscription_request(
+    EncodeResult<EncodedMessage> encode_subscription_request(
         uint32_t dapp_identifier,
         ActionType action_type,
         uint32_t ran_function_identifier,
@@ -127,7 +127,7 @@ public:
     /**
      * @brief Create and encode a Subscription Response PDU
      */
-    [[nodiscard]] EncodeResult<EncodedMessage> encode_subscription_response(
+    EncodeResult<EncodedMessage> encode_subscription_response(
         uint32_t request_id,
         ResponseCode response_code
     );
@@ -135,7 +135,7 @@ public:
     /**
      * @brief Create and encode an Indication Message PDU
      */
-    [[nodiscard]] EncodeResult<EncodedMessage> encode_indication_message(
+    EncodeResult<EncodedMessage> encode_indication_message(
         uint32_t dapp_identifier,
         const std::vector<uint8_t>& protocol_data
     );
@@ -143,7 +143,7 @@ public:
     /**
      * @brief Create and encode a Control Action PDU
      */
-    [[nodiscard]] EncodeResult<EncodedMessage> encode_control_action(
+    EncodeResult<EncodedMessage> encode_control_action(
         uint32_t dapp_identifier,
         uint32_t ran_function_identifier,
         const std::vector<uint8_t>& action_data
@@ -152,7 +152,7 @@ public:
     /**
      * @brief Create and encode a dApp Report PDU
      */
-    [[nodiscard]] EncodeResult<EncodedMessage> encode_dapp_report(
+    EncodeResult<EncodedMessage> encode_dapp_report(
         uint32_t dapp_identifier,
         uint32_t ran_function_identifier,
         const std::vector<uint8_t>& report_data
@@ -161,7 +161,7 @@ public:
     /**
      * @brief Create and encode an xApp Control Action PDU
      */
-    [[nodiscard]] EncodeResult<EncodedMessage> encode_xapp_control_action(
+    EncodeResult<EncodedMessage> encode_xapp_control_action(
         uint32_t dapp_identifier,
         uint32_t ran_function_identifier,
         const std::vector<uint8_t>& xapp_control_data
@@ -170,7 +170,7 @@ public:
     /**
      * @brief Create and encode a Message Acknowledgment PDU
      */
-    [[nodiscard]] EncodeResult<EncodedMessage> encode_message_ack(
+    EncodeResult<EncodedMessage> encode_message_ack(
         uint32_t request_id,
         ResponseCode response_code
     );
@@ -181,7 +181,7 @@ protected:
     /**
      * @brief Generate unique message ID
      */
-    [[nodiscard]] static uint32_t generate_message_id();
+    static uint32_t generate_message_id();
 };
 
 /**
@@ -192,7 +192,7 @@ protected:
  * @param format Encoding format to use
  * @return Unique pointer to created encoder, nullptr on failure
  */
-[[nodiscard]] std::unique_ptr<E3Encoder> create_encoder(EncodingFormat format);
+std::unique_ptr<E3Encoder> create_encoder(EncodingFormat format);
 
 } // namespace libe3
 

@@ -75,7 +75,7 @@ public:
     /**
      * @brief Get current log level
      */
-    [[nodiscard]] LogLevel level() const noexcept {
+    LogLevel level() const noexcept {
         return level_;
     }
 
@@ -101,7 +101,7 @@ public:
     /**
      * @brief Check if a level should be logged
      */
-    [[nodiscard]] bool should_log(LogLevel level) const noexcept {
+    bool should_log(LogLevel level) const noexcept {
         return static_cast<int>(level) <= static_cast<int>(level_);
     }
 
@@ -139,7 +139,7 @@ private:
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
 
-    [[nodiscard]] static const char* level_to_string(LogLevel level) noexcept {
+    static const char* level_to_string(LogLevel level) noexcept {
         switch (level) {
             case LogLevel::ERROR: return "ERROR";
             case LogLevel::WARN:  return "WARN ";

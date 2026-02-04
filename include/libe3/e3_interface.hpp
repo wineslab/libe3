@@ -72,7 +72,7 @@ public:
      * Creates connector, encoder, and initializes internal state.
      * @return ErrorCode::SUCCESS on success
      */
-    [[nodiscard]] ErrorCode init();
+    ErrorCode init();
 
     /**
      * @brief Start the interface processing loops
@@ -80,7 +80,7 @@ public:
      * Spawns the subscriber, publisher, and SM data handler threads.
      * @return ErrorCode::SUCCESS on success
      */
-    [[nodiscard]] ErrorCode start();
+    ErrorCode start();
 
     /**
      * @brief Stop the interface
@@ -92,43 +92,43 @@ public:
     /**
      * @brief Get current state
      */
-    [[nodiscard]] AgentState state() const noexcept { return state_.load(); }
+    AgentState state() const noexcept { return state_.load(); }
 
     /**
      * @brief Check if interface is running
      */
-    [[nodiscard]] bool is_running() const noexcept { 
+    bool is_running() const noexcept { 
         return state_.load() == AgentState::RUNNING; 
     }
 
     /**
      * @brief Get the subscription manager
      */
-    [[nodiscard]] SubscriptionManager& subscription_manager() noexcept { 
+    SubscriptionManager& subscription_manager() noexcept { 
         return *subscription_manager_; 
     }
 
     /**
      * @brief Get the response queue for outbound messages
      */
-    [[nodiscard]] ResponseQueue& response_queue() noexcept { 
+    ResponseQueue& response_queue() noexcept { 
         return *response_queue_; 
     }
 
     /**
      * @brief Queue a PDU for outbound transmission
      */
-    [[nodiscard]] ErrorCode queue_outbound(Pdu pdu);
+    ErrorCode queue_outbound(Pdu pdu);
 
     /**
      * @brief Get available RAN functions
      */
-    [[nodiscard]] std::vector<uint32_t> get_available_ran_functions() const;
+    std::vector<uint32_t> get_available_ran_functions() const;
 
     /**
      * @brief Register a Service Model
      */
-    [[nodiscard]] ErrorCode register_sm(std::unique_ptr<ServiceModel> sm);
+    ErrorCode register_sm(std::unique_ptr<ServiceModel> sm);
 
     // =========================================================================
     // Event Handlers - Set by E3Agent

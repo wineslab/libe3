@@ -30,7 +30,7 @@ namespace libe3 {
 /**
  * @brief Get libe3 version string
  */
-[[nodiscard]] inline const char* version() noexcept {
+inline const char* version() noexcept {
     return LIBE3_VERSION_STRING;
 }
 

@@ -29,17 +29,17 @@ public:
     ~Asn1E3Encoder() override = default;
 
     // E3Encoder interface
-    [[nodiscard]] EncodeResult<EncodedMessage> encode(const Pdu& pdu) override;
-    [[nodiscard]] EncodeResult<Pdu> decode(const EncodedMessage& encoded) override;
-    [[nodiscard]] EncodeResult<Pdu> decode(const uint8_t* data, size_t size) override;
-    [[nodiscard]] EncodingFormat format() const noexcept override { return EncodingFormat::ASN1; }
+    EncodeResult<EncodedMessage> encode(const Pdu& pdu) override;
+    EncodeResult<Pdu> decode(const EncodedMessage& encoded) override;
+    EncodeResult<Pdu> decode(const uint8_t* data, size_t size) override;
+    EncodingFormat format() const noexcept override { return EncodingFormat::ASN1; }
 
 private:
     static constexpr size_t BUFFER_SIZE = 65536;
 
     // Encoding helpers
-    [[nodiscard]] E3_PDU* pdu_to_asn1(const Pdu& pdu) const;
-    [[nodiscard]] Pdu asn1_to_pdu(const E3_PDU* asn1_pdu) const;
+    E3_PDU* pdu_to_asn1(const Pdu& pdu) const;
+    Pdu asn1_to_pdu(const E3_PDU* asn1_pdu) const;
 };
 
 } // namespace libe3

@@ -123,7 +123,7 @@ int ZmqE3Connector::recv_setup_request(std::vector<uint8_t>& buffer) {
         return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
     }
     
-    buffer.resize(ret);
+    buffer.resize(static_cast<size_t>(ret));
     E3_LOG_DEBUG(LOG_TAG) << "Received setup request: " << ret << " bytes";
     return ret;
 }
@@ -187,7 +187,7 @@ int ZmqE3Connector::receive(std::vector<uint8_t>& buffer) {
         return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
     }
     
-    buffer.resize(ret);
+    buffer.resize(static_cast<size_t>(ret));
     E3_LOG_TRACE(LOG_TAG) << "Received: " << ret << " bytes";
     return ret;
 }

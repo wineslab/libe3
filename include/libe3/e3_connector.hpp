@@ -45,7 +45,7 @@ public:
      * This establishes the REQ/REP channel used for E3 Setup procedures.
      * @return ErrorCode::SUCCESS on success, error code otherwise
      */
-    [[nodiscard]] virtual ErrorCode setup_initial_connection() = 0;
+    virtual ErrorCode setup_initial_connection() = 0;
 
     /**
      * @brief Receive a setup request
@@ -54,14 +54,14 @@ public:
      * @param buffer Buffer to store received data
      * @return Number of bytes received, or negative error code
      */
-    [[nodiscard]] virtual int recv_setup_request(std::vector<uint8_t>& buffer) = 0;
+    virtual int recv_setup_request(std::vector<uint8_t>& buffer) = 0;
 
     /**
      * @brief Send a setup response
      * @param data Response data to send
      * @return ErrorCode::SUCCESS on success, error code otherwise
      */
-    [[nodiscard]] virtual ErrorCode send_response(const std::vector<uint8_t>& data) = 0;
+    virtual ErrorCode send_response(const std::vector<uint8_t>& data) = 0;
 
     /**
      * @brief Set up the inbound connection (SUB channel)
@@ -69,14 +69,14 @@ public:
      * This establishes the channel for receiving control actions from dApps.
      * @return ErrorCode::SUCCESS on success, error code otherwise
      */
-    [[nodiscard]] virtual ErrorCode setup_inbound_connection() = 0;
+    virtual ErrorCode setup_inbound_connection() = 0;
 
     /**
      * @brief Receive data from the inbound channel
      * @param buffer Buffer to store received data
      * @return Number of bytes received, or negative error code
      */
-    [[nodiscard]] virtual int receive(std::vector<uint8_t>& buffer) = 0;
+    virtual int receive(std::vector<uint8_t>& buffer) = 0;
 
     /**
      * @brief Set up the outbound connection (PUB channel)
@@ -84,14 +84,14 @@ public:
      * This establishes the channel for sending indications to dApps.
      * @return ErrorCode::SUCCESS on success, error code otherwise
      */
-    [[nodiscard]] virtual ErrorCode setup_outbound_connection() = 0;
+    virtual ErrorCode setup_outbound_connection() = 0;
 
     /**
      * @brief Send data on the outbound channel
      * @param data Data to send
      * @return ErrorCode::SUCCESS on success, error code otherwise
      */
-    [[nodiscard]] virtual ErrorCode send(const std::vector<uint8_t>& data) = 0;
+    virtual ErrorCode send(const std::vector<uint8_t>& data) = 0;
 
     /**
      * @brief Clean up and release all resources
@@ -101,32 +101,32 @@ public:
     /**
      * @brief Get the link layer type
      */
-    [[nodiscard]] virtual E3LinkLayer link_layer() const noexcept = 0;
+    virtual E3LinkLayer link_layer() const noexcept = 0;
 
     /**
      * @brief Get the transport layer type
      */
-    [[nodiscard]] virtual E3TransportLayer transport_layer() const noexcept = 0;
+    virtual E3TransportLayer transport_layer() const noexcept = 0;
 
     /**
      * @brief Check if connector is connected
      */
-    [[nodiscard]] virtual bool is_connected() const noexcept = 0;
+    virtual bool is_connected() const noexcept = 0;
 
     /**
      * @brief Get setup endpoint
      */
-    [[nodiscard]] const std::string& setup_endpoint() const noexcept { return setup_endpoint_; }
+    const std::string& setup_endpoint() const noexcept { return setup_endpoint_; }
 
     /**
      * @brief Get inbound endpoint
      */
-    [[nodiscard]] const std::string& inbound_endpoint() const noexcept { return inbound_endpoint_; }
+    const std::string& inbound_endpoint() const noexcept { return inbound_endpoint_; }
 
     /**
      * @brief Get outbound endpoint
      */
-    [[nodiscard]] const std::string& outbound_endpoint() const noexcept { return outbound_endpoint_; }
+    const std::string& outbound_endpoint() const noexcept { return outbound_endpoint_; }
 
 protected:
     E3Connector() = default;
@@ -149,7 +149,7 @@ protected:
  * @param io_threads Number of I/O threads (for ZMQ)
  * @return Unique pointer to created connector, nullptr on failure
  */
-[[nodiscard]] std::unique_ptr<E3Connector> create_connector(
+std::unique_ptr<E3Connector> create_connector(
     E3LinkLayer link_layer,
     E3TransportLayer transport_layer,
     const std::string& setup_endpoint,

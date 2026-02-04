@@ -29,6 +29,14 @@ public:
         return {id_};
     }
     
+    std::vector<uint32_t> telemetry_ids() const override {
+        return {1, 2, 3};  // Example telemetry IDs
+    }
+    
+    std::vector<uint32_t> control_ids() const override {
+        return {10, 20};  // Example control IDs
+    }
+    
     ErrorCode init() override {
         return ErrorCode::SUCCESS;
     }
@@ -49,7 +57,7 @@ public:
     bool is_running() const override { return running_; }
     
     ErrorCode process_control_action(
-        uint32_t /*ran_function_id*/,
+        uint32_t /*control_action_id*/,
         const std::vector<uint8_t>& /*action_data*/) override {
         return ErrorCode::SUCCESS;
     }
@@ -104,7 +112,7 @@ TEST(E3Agent_init_already_initialized) {
     
     E3Agent agent(std::move(config));
     
-    agent.init();
+    auto first = agent.init();
     auto result = agent.init();
     ASSERT_EQ(error_to_int(result), error_to_int(ErrorCode::ALREADY_INITIALIZED));
 }

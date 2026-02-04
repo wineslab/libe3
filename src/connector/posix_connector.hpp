@@ -29,24 +29,24 @@ public:
     
     ~PosixE3Connector() override;
 
-    [[nodiscard]] ErrorCode setup_initial_connection() override;
-    [[nodiscard]] int recv_setup_request(std::vector<uint8_t>& buffer) override;
-    [[nodiscard]] ErrorCode send_response(const std::vector<uint8_t>& data) override;
-    [[nodiscard]] ErrorCode setup_inbound_connection() override;
-    [[nodiscard]] int receive(std::vector<uint8_t>& buffer) override;
-    [[nodiscard]] ErrorCode setup_outbound_connection() override;
-    [[nodiscard]] ErrorCode send(const std::vector<uint8_t>& data) override;
+    ErrorCode setup_initial_connection() override;
+    int recv_setup_request(std::vector<uint8_t>& buffer) override;
+    ErrorCode send_response(const std::vector<uint8_t>& data) override;
+    ErrorCode setup_inbound_connection() override;
+    int receive(std::vector<uint8_t>& buffer) override;
+    ErrorCode setup_outbound_connection() override;
+    ErrorCode send(const std::vector<uint8_t>& data) override;
     void dispose() override;
     
-    [[nodiscard]] E3LinkLayer link_layer() const noexcept override {
+    E3LinkLayer link_layer() const noexcept override {
         return E3LinkLayer::POSIX;
     }
     
-    [[nodiscard]] E3TransportLayer transport_layer() const noexcept override {
+    E3TransportLayer transport_layer() const noexcept override {
         return transport_layer_;
     }
     
-    [[nodiscard]] bool is_connected() const noexcept override {
+    bool is_connected() const noexcept override {
         return connected_;
     }
 

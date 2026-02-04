@@ -12,6 +12,7 @@
 #include <iostream>
 #include <csignal>
 #include <atomic>
+#include <thread>
 
 static std::atomic<bool> g_running{true};
 
@@ -44,6 +45,7 @@ int main() {
         std::cout << "Received control action from dApp " << dapp_id
                   << " for RAN function " << ran_function_id
                   << " (" << data.size() << " bytes)\n";
+        return libe3::ErrorCode::SUCCESS;
     });
     
     // Set up indication callback

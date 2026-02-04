@@ -33,12 +33,29 @@ public:
     
     KpmServiceModel() = default;
     
-    uint32_t id() const override { return RAN_FUNCTION_ID; }
     std::string name() const override { return "KPM"; }
-    std::string version() const override { return "2.0.0"; }
+    uint32_t version() const override { return 2; }
     
     std::vector<uint32_t> ran_function_ids() const override {
         return {RAN_FUNCTION_ID};
+    }
+    
+    std::vector<uint32_t> telemetry_ids() const override {
+        return {1001, 1002, 1003};  // KPM telemetry: throughput, latency, cell load
+    }
+    
+    std::vector<uint32_t> control_ids() const override {
+        return {2001};  // KPM control: collection parameters
+    }
+    
+    libe3::ErrorCode init() override {
+        std::cout << "[KPM] Initializing KPM Service Model\n";
+        return libe3::ErrorCode::SUCCESS;
+    }
+    
+    void destroy() override {
+        std::cout << "[KPM] Destroying KPM Service Model\n";
+        stop();
     }
     
     libe3::ErrorCode start() override {
@@ -53,42 +70,29 @@ public:
         return libe3::ErrorCode::SUCCESS;
     }
     
-    libe3::ErrorCode stop() override {
+    void stop() override {
         std::cout << "[KPM] Stopping KPM Service Model\n";
         running_ = false;
         
         if (collector_thread_.joinable()) {
             collector_thread_.join();
         }
-        
-        return libe3::ErrorCode::SUCCESS;
     }
     
     bool is_running() const override {
         return running_;
     }
     
-    std::optional<std::vector<uint8_t>> poll_indication_data() override {
-        std::lock_guard<std::mutex> lock(data_mutex_);
-        if (!pending_data_.empty()) {
-            auto data = std::move(pending_data_);
-            pending_data_.clear();
-            return data;
-        }
-        return std::nullopt;
-    }
-    
-    libe3::ErrorCode handle_control_action(const std::vector<uint8_t>& data) override {
-        std::cout << "[KPM] Received control action (" << data.size() << " bytes)\n";
+    libe3::ErrorCode process_control_action(
+        uint32_t control_action_id,
+        const std::vector<uint8_t>& data) override {
+        std::cout << "[KPM] Received control action " << control_action_id
+                  << " (" << data.size() << " bytes)\n";
         
-        // Parse and apply control action
+        // Parse and apply control action based on control_action_id
         // In a real implementation, this would modify data collection parameters
         
         return libe3::ErrorCode::SUCCESS;
-    }
-    
-    void set_indication_callback(IndicationCallback callback) override {
-        indication_callback_ = std::move(callback);
     }
 
 private:
@@ -104,19 +108,11 @@ private:
             // Create simulated KPM data
             std::vector<uint8_t> kpm_data = create_kpm_report(sequence++);
             
-            // Store for polling
-            {
-                std::lock_guard<std::mutex> lock(data_mutex_);
-                pending_data_ = kpm_data;
-            }
-            
-            // Also trigger callback if set
-            if (indication_callback_) {
-                auto now = std::chrono::system_clock::now();
-                auto timestamp = static_cast<uint64_t>(
-                    now.time_since_epoch().count());
-                indication_callback_(RAN_FUNCTION_ID, kpm_data, timestamp);
-            }
+            // Deliver indication data using base class method
+            auto now = std::chrono::system_clock::now();
+            auto timestamp = static_cast<uint64_t>(
+                now.time_since_epoch().count());
+            deliver_indication(RAN_FUNCTION_ID, std::move(kpm_data), timestamp);
         }
     }
     
@@ -147,9 +143,6 @@ private:
     
     std::atomic<bool> running_{false};
     std::thread collector_thread_;
-    std::mutex data_mutex_;
-    std::vector<uint8_t> pending_data_;
-    IndicationCallback indication_callback_;
 };
 
 /**
@@ -162,12 +155,29 @@ class RcServiceModel : public libe3::ServiceModel {
 public:
     static constexpr uint32_t RAN_FUNCTION_ID = 200;
     
-    uint32_t id() const override { return RAN_FUNCTION_ID; }
     std::string name() const override { return "RC"; }
-    std::string version() const override { return "1.0.0"; }
+    uint32_t version() const override { return 1; }
     
     std::vector<uint32_t> ran_function_ids() const override {
         return {RAN_FUNCTION_ID};
+    }
+    
+    std::vector<uint32_t> telemetry_ids() const override {
+        return {};  // RC typically doesn't provide telemetry
+    }
+    
+    std::vector<uint32_t> control_ids() const override {
+        return {3001, 3002, 3003};  // RC control: handover, cell config, power
+    }
+    
+    libe3::ErrorCode init() override {
+        std::cout << "[RC] Initializing RC Service Model\n";
+        return libe3::ErrorCode::SUCCESS;
+    }
+    
+    void destroy() override {
+        std::cout << "[RC] Destroying RC Service Model\n";
+        stop();
     }
     
     libe3::ErrorCode start() override {
@@ -176,34 +186,27 @@ public:
         return libe3::ErrorCode::SUCCESS;
     }
     
-    libe3::ErrorCode stop() override {
+    void stop() override {
         std::cout << "[RC] Stopping RC Service Model\n";
         running_ = false;
-        return libe3::ErrorCode::SUCCESS;
     }
     
     bool is_running() const override { return running_; }
     
-    std::optional<std::vector<uint8_t>> poll_indication_data() override {
-        return std::nullopt;  // RC typically responds to control actions only
-    }
-    
-    libe3::ErrorCode handle_control_action(const std::vector<uint8_t>& data) override {
-        std::cout << "[RC] Executing control action (" << data.size() << " bytes)\n";
+    libe3::ErrorCode process_control_action(
+        uint32_t control_action_id,
+        const std::vector<uint8_t>& data) override {
+        std::cout << "[RC] Executing control action " << control_action_id
+                  << " (" << data.size() << " bytes)\n";
         
-        // Parse control action type and execute
+        // Parse control action type and execute based on control_action_id
         // Examples: trigger handover, modify cell parameters, etc.
         
         return libe3::ErrorCode::SUCCESS;
     }
-    
-    void set_indication_callback(IndicationCallback callback) override {
-        indication_callback_ = std::move(callback);
-    }
 
 private:
     std::atomic<bool> running_{false};
-    IndicationCallback indication_callback_;
 };
 
 int main() {
@@ -216,7 +219,6 @@ int main() {
     // Configure the E3 agent
     libe3::E3Config config;
     config.ran_identifier = "custom-sm-ran";
-    config.simulation_mode = true;
     
     // Create the agent
     libe3::E3Agent agent(std::move(config));
@@ -254,6 +256,7 @@ int main() {
         std::cout << "Control action: dApp=" << dapp_id 
                   << " ran_func=" << ran_func_id
                   << " size=" << data.size() << "\n";
+        return libe3::ErrorCode::SUCCESS;
     });
     
     agent.set_indication_callback([](uint32_t dapp_id, uint32_t ran_func_id,

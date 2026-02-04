@@ -146,10 +146,10 @@ struct EncodedMessage {
     EncodedMessage(std::vector<uint8_t> buf, EncodingFormat fmt)
         : buffer(std::move(buf)), format(fmt) {}
     
-    [[nodiscard]] size_t size() const noexcept { return buffer.size(); }
-    [[nodiscard]] bool empty() const noexcept { return buffer.empty(); }
-    [[nodiscard]] const uint8_t* data() const noexcept { return buffer.data(); }
-    [[nodiscard]] uint8_t* data() noexcept { return buffer.data(); }
+    size_t size() const noexcept { return buffer.size(); }
+    bool empty() const noexcept { return buffer.empty(); }
+    const uint8_t* data() const noexcept { return buffer.data(); }
+    uint8_t* data() noexcept { return buffer.data(); }
 };
 
 /**
@@ -317,12 +317,12 @@ struct Pdu {
      * @brief Get PDU data with type checking
      */
     template<typename T>
-    [[nodiscard]] T* get_if() noexcept {
+    T* get_if() noexcept {
         return std::get_if<T>(&choice);
     }
 
     template<typename T>
-    [[nodiscard]] const T* get_if() const noexcept {
+    const T* get_if() const noexcept {
         return std::get_if<T>(&choice);
     }
 };
@@ -389,7 +389,7 @@ struct SubscriptionEntry {
 /**
  * @brief Convert PduType to string representation
  */
-[[nodiscard]] inline const char* pdu_type_to_string(PduType type) noexcept {
+inline const char* pdu_type_to_string(PduType type) noexcept {
     switch (type) {
         case PduType::SETUP_REQUEST: return "SetupRequest";
         case PduType::SETUP_RESPONSE: return "SetupResponse";
@@ -408,7 +408,7 @@ struct SubscriptionEntry {
 /**
  * @brief Convert ActionType to string representation
  */
-[[nodiscard]] inline const char* action_type_to_string(ActionType type) noexcept {
+inline const char* action_type_to_string(ActionType type) noexcept {
     switch (type) {
         case ActionType::INSERT: return "insert";
         case ActionType::UPDATE: return "update";
@@ -420,7 +420,7 @@ struct SubscriptionEntry {
 /**
  * @brief Convert ResponseCode to string representation
  */
-[[nodiscard]] inline const char* response_code_to_string(ResponseCode code) noexcept {
+inline const char* response_code_to_string(ResponseCode code) noexcept {
     switch (code) {
         case ResponseCode::POSITIVE: return "positive";
         case ResponseCode::NEGATIVE: return "negative";
@@ -431,7 +431,7 @@ struct SubscriptionEntry {
 /**
  * @brief Convert ErrorCode to string representation
  */
-[[nodiscard]] inline const char* error_code_to_string(ErrorCode code) noexcept {
+inline const char* error_code_to_string(ErrorCode code) noexcept {
     switch (code) {
         case ErrorCode::SUCCESS: return "Success";
         case ErrorCode::INVALID_PARAM: return "Invalid parameter";
@@ -460,7 +460,7 @@ struct SubscriptionEntry {
 /**
  * @brief Convert AgentState to string representation
  */
-[[nodiscard]] inline const char* agent_state_to_string(AgentState state) noexcept {
+inline const char* agent_state_to_string(AgentState state) noexcept {
     switch (state) {
         case AgentState::UNINITIALIZED: return "Uninitialized";
         case AgentState::INITIALIZED: return "Initialized";
@@ -477,7 +477,7 @@ struct SubscriptionEntry {
 /**
  * @brief Convert E3LinkLayer to string representation
  */
-[[nodiscard]] inline const char* link_layer_to_string(E3LinkLayer layer) noexcept {
+inline const char* link_layer_to_string(E3LinkLayer layer) noexcept {
     switch (layer) {
         case E3LinkLayer::ZMQ: return "zmq";
         case E3LinkLayer::POSIX: return "posix";
@@ -488,7 +488,7 @@ struct SubscriptionEntry {
 /**
  * @brief Convert E3TransportLayer to string representation
  */
-[[nodiscard]] inline const char* transport_layer_to_string(E3TransportLayer layer) noexcept {
+inline const char* transport_layer_to_string(E3TransportLayer layer) noexcept {
     switch (layer) {
         case E3TransportLayer::SCTP: return "sctp";
         case E3TransportLayer::TCP: return "tcp";
