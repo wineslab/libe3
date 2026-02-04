@@ -56,6 +56,10 @@ private:
     // Binary data encoding helpers (hex string)
     static std::string binary_to_hex(const std::vector<uint8_t>& data);
     static std::vector<uint8_t> hex_to_binary(const std::string& hex);
+
+    // Helper methods for type conversions
+    PduType string_to_pdu_type(const std::string& s) const;
+    ErrorCode string_to_error_code(const std::string& s) const;
 };
 
 } // namespace libe3

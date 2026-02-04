@@ -181,7 +181,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                     static_cast<OCTET_STRING_t*>(calloc(1, sizeof(OCTET_STRING_t)));
                 OCTET_STRING_fromBuf(asn1_pdu->choice.setupResponse->e3apProtocolVersion,
                     resp->e3ap_protocol_version.value().c_str(),
-                    resp->e3ap_protocol_version.value().size());
+                    static_cast<int>(resp->e3ap_protocol_version.value().size()));
             }
             
             // Set optional dAppIdentifier

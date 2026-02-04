@@ -233,7 +233,7 @@ void E3Interface::subscriber_loop() {
             continue;
         }
         
-        auto decode_result = encoder_->decode(buffer.data(), ret);
+        auto decode_result = encoder_->decode(buffer.data(), static_cast<size_t>(ret));
         if (!decode_result) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to decode PDU in subscriber";
             continue;

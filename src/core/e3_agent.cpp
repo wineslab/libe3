@@ -147,7 +147,7 @@ ErrorCode E3Agent::register_sm(std::unique_ptr<ServiceModel> sm) {
     if (impl_->indication_callback) {
         auto ran_funcs = sm->ran_function_ids();
         sm->set_indication_callback(
-            [this](uint32_t ran_func, std::vector<uint8_t> data, uint64_t timestamp) {
+            [this](uint32_t ran_func, std::vector<uint8_t> data, [[maybe_unused]] uint64_t timestamp) {
                 // Get subscribers for this RAN function
                 auto subscribers = impl_->interface->subscription_manager()
                     .get_subscribed_dapps(ran_func);

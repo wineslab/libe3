@@ -112,7 +112,7 @@ TEST(E3Agent_init_already_initialized) {
     
     E3Agent agent(std::move(config));
     
-    auto first = agent.init();
+    agent.init();
     auto result = agent.init();
     ASSERT_EQ(error_to_int(result), error_to_int(ErrorCode::ALREADY_INITIALIZED));
 }

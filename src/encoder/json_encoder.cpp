@@ -16,8 +16,14 @@ namespace {
 
 constexpr const char* LOG_TAG = "JsonEnc";
 
-// Helper to convert PduType string back to enum
-PduType string_to_pdu_type(const std::string& s) {
+} // anonymous namespace
+
+
+// ============================================================================
+// Helper methods for type conversions
+// ============================================================================
+
+PduType JsonE3Encoder::string_to_pdu_type(const std::string& s) const {
     if (s == "SetupRequest") return PduType::SETUP_REQUEST;
     if (s == "SetupResponse") return PduType::SETUP_RESPONSE;
     if (s == "SubscriptionRequest") return PduType::SUBSCRIPTION_REQUEST;
@@ -31,15 +37,13 @@ PduType string_to_pdu_type(const std::string& s) {
     return PduType::SETUP_REQUEST; // Default
 }
 
-ErrorCode string_to_error_code(const std::string& s) {
-    if (s == "SUCCESS" || s == "success" || s == "Success") return ErrorCode::SUCCESS;
+ErrorCode JsonE3Encoder::string_to_error_code(const std::string& s) const {
+    if (s == "SUCCESS") return ErrorCode::SUCCESS;
     if (s == "INVALID_PARAM") return ErrorCode::INVALID_PARAM;
-    if (s == "TIMEOUT" || s == "Timeout") return ErrorCode::TIMEOUT;
-    if (s == "NOT_FOUND" || s == "Not found") return ErrorCode::NOT_FOUND;
+    if (s == "TIMEOUT") return ErrorCode::TIMEOUT;
+    if (s == "NOT_FOUND") return ErrorCode::NOT_FOUND;
     return ErrorCode::GENERIC_ERROR;
 }
-
-} // anonymous namespace
 
 // ============================================================================
 // Binary encoding helpers
