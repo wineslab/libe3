@@ -250,8 +250,16 @@ void E3Interface::subscriber_loop() {
                 break;
             }
             
-            case PduType::CONTROL_ACTION: {
-                auto* action = std::get_if<ControlAction>(&pdu.choice);
+            case PduType::SUBSCRIPTION_DELETE: {
+                auto* del = std::get_if<SubscriptionDelete>(&pdu.choice);
+                if (del) {
+                    handle_subscription_delete(*del);
+                }
+                break;
+            }
+            
+            case PduType::DAPP_CONTROL_ACTION: {
+                auto* action = std::get_if<DAppControlAction>(&pdu.choice);
                 if (action) {
                     handle_control_action(*action);
                 }
@@ -405,6 +413,7 @@ void E3Interface::handle_setup_request(const SetupRequest& request) {
         response_code,
         std::nullopt,  // e3ap_protocol_version
         assigned_dapp_id,  // dapp_identifier
+        config_.ran_identifier,  // ran_identifier
         ran_function_list
     );
     
@@ -423,55 +432,30 @@ void E3Interface::handle_setup_request(const SetupRequest& request) {
 
 void E3Interface::handle_subscription_request(const SubscriptionRequest& request) {
     E3_LOG_INFO(LOG_TAG) << "Handling subscription request from dApp " << request.dapp_identifier
-                         << " for RAN function " << request.ran_function_identifier
-                         << " (action=" << action_type_to_string(request.type) << ")";
+                         << " for RAN function " << request.ran_function_identifier;
     
     ResponseCode response_code = ResponseCode::NEGATIVE;
+    uint32_t subscription_id = 0;
     
-    switch (request.type) {
-        case ActionType::INSERT: {
-            // Check if dApp is registered
-            if (!subscription_manager_->is_dapp_registered(request.dapp_identifier)) {
-                E3_LOG_ERROR(LOG_TAG) << "dApp " << request.dapp_identifier << " not registered";
-                break;
-            }
-            
-            ErrorCode result = subscription_manager_->add_subscription(
-                request.dapp_identifier,
-                request.ran_function_identifier
-            );
-            
-            if (result == ErrorCode::SUCCESS || result == ErrorCode::SUBSCRIPTION_EXISTS) {
-                response_code = ResponseCode::POSITIVE;
-                E3_LOG_INFO(LOG_TAG) << "Subscription added: dApp " << request.dapp_identifier
-                                     << " -> RAN function " << request.ran_function_identifier;
-            } else {
-                E3_LOG_ERROR(LOG_TAG) << "Failed to add subscription: " 
-                                      << error_code_to_string(result);
-            }
-            break;
-        }
+    // Check if dApp is registered
+    if (!subscription_manager_->is_dapp_registered(request.dapp_identifier)) {
+        E3_LOG_ERROR(LOG_TAG) << "dApp " << request.dapp_identifier << " not registered";
+    } else {
+        auto [result, sub_id] = subscription_manager_->add_subscription(
+            request.dapp_identifier,
+            request.ran_function_identifier
+        );
+        subscription_id = sub_id;
         
-        case ActionType::DELETE: {
-            ErrorCode result = subscription_manager_->remove_subscription(
-                request.dapp_identifier,
-                request.ran_function_identifier
-            );
-            
-            if (result == ErrorCode::SUCCESS) {
-                response_code = ResponseCode::POSITIVE;
-                E3_LOG_INFO(LOG_TAG) << "Subscription removed: dApp " << request.dapp_identifier
-                                     << " -> RAN function " << request.ran_function_identifier;
-            } else {
-                E3_LOG_ERROR(LOG_TAG) << "Failed to remove subscription: "
-                                      << error_code_to_string(result);
-            }
-            break;
+        if (result == ErrorCode::SUCCESS || result == ErrorCode::SUBSCRIPTION_EXISTS) {
+            response_code = ResponseCode::POSITIVE;
+            E3_LOG_INFO(LOG_TAG) << "Subscription added: dApp " << request.dapp_identifier
+                                 << " -> RAN function " << request.ran_function_identifier
+                                 << " (subscription_id=" << subscription_id << ")";
+        } else {
+            E3_LOG_ERROR(LOG_TAG) << "Failed to add subscription: " 
+                                  << error_code_to_string(result);
         }
-        
-        default:
-            E3_LOG_WARN(LOG_TAG) << "Unsupported action type in subscription request";
-            break;
     }
     
     // Create and queue response
@@ -480,14 +464,48 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
     resp.id = 0; // Will be set by encoder
     resp.request_id = request.id;
     resp.response_code = response_code;
+    if (response_code == ResponseCode::POSITIVE) {
+        resp.subscription_id = subscription_id;
+    }
     response_pdu.choice = resp;
     
     queue_outbound(std::move(response_pdu));
 }
 
-void E3Interface::handle_control_action(const ControlAction& action) {
+void E3Interface::handle_subscription_delete(const SubscriptionDelete& del) {
+    E3_LOG_INFO(LOG_TAG) << "Handling subscription delete from dApp " << del.dapp_identifier
+                         << " for subscription " << del.subscription_id;
+    
+    ResponseCode response_code = ResponseCode::NEGATIVE;
+    
+    ErrorCode result = subscription_manager_->remove_subscription_by_id(
+        del.dapp_identifier,
+        del.subscription_id
+    );
+    
+    if (result == ErrorCode::SUCCESS) {
+        response_code = ResponseCode::POSITIVE;
+        E3_LOG_INFO(LOG_TAG) << "Subscription " << del.subscription_id << " removed for dApp " << del.dapp_identifier;
+    } else {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to remove subscription: "
+                              << error_code_to_string(result);
+    }
+    
+    // Create and queue ack response
+    Pdu response_pdu(PduType::MESSAGE_ACK);
+    MessageAck ack;
+    ack.id = 0; // Will be set by encoder
+    ack.request_id = del.id;
+    ack.response_code = response_code;
+    response_pdu.choice = ack;
+    
+    queue_outbound(std::move(response_pdu));
+}
+
+void E3Interface::handle_control_action(const DAppControlAction& action) {
     E3_LOG_INFO(LOG_TAG) << "Handling control action from dApp " << action.dapp_identifier
                          << " for RAN function " << action.ran_function_identifier
+                         << " control " << action.control_identifier
                          << " (" << action.action_data.size() << " bytes)";
     
     // Find SM for this RAN function

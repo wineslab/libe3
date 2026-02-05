@@ -35,7 +35,7 @@ TEST(JsonEncoder_encode_setup_request) {
     
     // Verify JSON contains expected fields
     std::string json(encoded->buffer.begin(), encoded->buffer.end());
-    ASSERT_TRUE(json.find("SETUP_REQUEST") != std::string::npos);
+    ASSERT_TRUE(json.find("SetupRequest") != std::string::npos);
     ASSERT_TRUE(json.find("TestDApp") != std::string::npos);
     ASSERT_TRUE(json.find("TestVendor") != std::string::npos);
 }
@@ -82,7 +82,7 @@ TEST(JsonEncoder_encode_setup_response) {
     ASSERT_TRUE(encoded.has_value());
     
     std::string json(encoded->buffer.begin(), encoded->buffer.end());
-    ASSERT_TRUE(json.find("SETUP_RESPONSE") != std::string::npos);
+    ASSERT_TRUE(json.find("SetupResponse") != std::string::npos);
 }
 
 TEST(JsonEncoder_encode_decode_subscription_request) {
@@ -92,7 +92,6 @@ TEST(JsonEncoder_encode_decode_subscription_request) {
     SubscriptionRequest req;
     req.id = 1;
     req.dapp_identifier = 42;
-    req.type = ActionType::INSERT;
     req.ran_function_identifier = 100;
     req.telemetry_identifier_list = {1, 2, 3};
     req.control_identifier_list = {10, 20};
@@ -107,6 +106,28 @@ TEST(JsonEncoder_encode_decode_subscription_request) {
     auto& restored = std::get<SubscriptionRequest>(decoded->choice);
     ASSERT_EQ(restored.dapp_identifier, 42u);
     ASSERT_EQ(restored.ran_function_identifier, 100u);
+}
+
+TEST(JsonEncoder_encode_decode_subscription_delete) {
+    auto encoder = create_encoder();
+    
+    Pdu original(PduType::SUBSCRIPTION_DELETE);
+    SubscriptionDelete del;
+    del.id = 1;
+    del.dapp_identifier = 42;
+    del.subscription_id = 77;
+    original.choice = del;
+    
+    auto encoded = encoder->encode(original);
+    ASSERT_TRUE(encoded.has_value());
+    
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+    ASSERT_TRUE(decoded->type == PduType::SUBSCRIPTION_DELETE);
+    
+    auto& restored = std::get<SubscriptionDelete>(decoded->choice);
+    ASSERT_EQ(restored.dapp_identifier, 42u);
+    ASSERT_EQ(restored.subscription_id, 77u);
 }
 
 TEST(JsonEncoder_encode_decode_subscription_response) {
@@ -135,6 +156,7 @@ TEST(JsonEncoder_encode_decode_indication_message) {
     Pdu original(PduType::INDICATION_MESSAGE);
     IndicationMessage msg;
     msg.dapp_identifier = 77;
+    msg.ran_function_identifier = 55;
     msg.protocol_data = {0x01, 0x02, 0x03, 0x04, 0xAB, 0xCD};
     original.choice = msg;
     
@@ -146,6 +168,7 @@ TEST(JsonEncoder_encode_decode_indication_message) {
     
     auto& restored = std::get<IndicationMessage>((*decoded).choice);
     ASSERT_EQ(restored.dapp_identifier, 77u);
+    ASSERT_EQ(restored.ran_function_identifier, 55u);
     ASSERT_EQ(restored.protocol_data.size(), 6u);
     ASSERT_EQ(restored.protocol_data[4], 0xAB);
 }
@@ -153,10 +176,11 @@ TEST(JsonEncoder_encode_decode_indication_message) {
 TEST(JsonEncoder_encode_decode_control_action) {
     auto encoder = create_encoder();
     
-    Pdu original(PduType::CONTROL_ACTION);
-    ControlAction action;
+    Pdu original(PduType::DAPP_CONTROL_ACTION);
+    DAppControlAction action;
     action.dapp_identifier = 123;
     action.ran_function_identifier = 456;
+    action.control_identifier = 789;
     action.action_data = {0xDE, 0xAD, 0xBE, 0xEF};
     original.choice = action;
     
@@ -166,9 +190,10 @@ TEST(JsonEncoder_encode_decode_control_action) {
     auto decoded = encoder->decode(*encoded);
     ASSERT_TRUE(decoded.has_value());
     
-    auto& restored = std::get<ControlAction>(decoded->choice);
+    auto& restored = std::get<DAppControlAction>(decoded->choice);
     ASSERT_EQ(restored.dapp_identifier, 123u);
     ASSERT_EQ(restored.ran_function_identifier, 456u);
+    ASSERT_EQ(restored.control_identifier, 789u);
     ASSERT_EQ(restored.action_data.size(), 4u);
 }
 

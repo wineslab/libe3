@@ -214,11 +214,13 @@ public:
      * @brief Send an indication message to a specific dApp
      *
      * @param dapp_id Target dApp identifier
+     * @param ran_function_id RAN function identifier
      * @param data E3SM-encoded indication data
      * @return ErrorCode::SUCCESS on success
      */
     ErrorCode send_indication(
         uint32_t dapp_id,
+        uint32_t ran_function_id,
         const std::vector<uint8_t>& data
     );
 

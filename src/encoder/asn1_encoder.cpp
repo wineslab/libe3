@@ -17,9 +17,10 @@ extern "C" {
 #include "E3-SetupResponse.h"
 #include "E3-RanFunctionDefinition.h"
 #include "E3-SubscriptionRequest.h"
+#include "E3-SubscriptionDelete.h"
 #include "E3-SubscriptionResponse.h"
 #include "E3-IndicationMessage.h"
-#include "E3-ControlAction.h"
+#include "E3-DAppControlAction.h"
 #include "E3-DAppReport.h"
 #include "E3-XAppControlAction.h"
 #include "E3-ReleaseMessage.h"
@@ -191,12 +192,32 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 *asn1_pdu->choice.setupResponse->dAppIdentifier = resp->dapp_identifier.value();
             }
             
+            // Set mandatory ranIdentifier
+            OCTET_STRING_fromBuf(&asn1_pdu->choice.setupResponse->ranIdentifier,
+                resp->ran_identifier.c_str(),
+                static_cast<int>(resp->ran_identifier.size()));
+            
             // Set optional ranFunctionList
             if (!resp->ran_function_list.empty()) {
                 for (const auto& func : resp->ran_function_list) {
                     E3_RanFunctionDefinition_t* ran_func = 
                         static_cast<E3_RanFunctionDefinition_t*>(calloc(1, sizeof(E3_RanFunctionDefinition_t)));
                     ran_func->ranFunctionIdentifier = func.ran_function_identifier;
+                    
+                    // Encode telemetryIdentifierList
+                    for (uint32_t tel_id : func.telemetry_identifier_list) {
+                        long* id = static_cast<long*>(malloc(sizeof(long)));
+                        *id = tel_id;
+                        ASN_SEQUENCE_ADD(&ran_func->telemetryIdentifierList, id);
+                    }
+                    
+                    // Encode controlIdentifierList
+                    for (uint32_t ctrl_id : func.control_identifier_list) {
+                        long* id = static_cast<long*>(malloc(sizeof(long)));
+                        *id = ctrl_id;
+                        ASN_SEQUENCE_ADD(&ran_func->controlIdentifierList, id);
+                    }
+                    
                     OCTET_STRING_fromBuf(&ran_func->ranFunctionData,
                         reinterpret_cast<const char*>(func.ran_function_data.data()),
                         static_cast<int>(func.ran_function_data.size()));
@@ -217,7 +238,6 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             
             asn1_pdu->choice.subscriptionRequest->id = req->id ? req->id : E3Encoder::generate_message_id();
             asn1_pdu->choice.subscriptionRequest->dAppIdentifier = req->dapp_identifier;
-            asn1_pdu->choice.subscriptionRequest->type = static_cast<long>(req->type);
             asn1_pdu->choice.subscriptionRequest->ranFunctionIdentifier = req->ran_function_identifier;
             
             // Encode telemetryIdentifierList
@@ -240,13 +260,21 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                     static_cast<long*>(malloc(sizeof(long)));
                 *asn1_pdu->choice.subscriptionRequest->subscriptionTime = req->subscription_time.value();
             }
+            break;
+        }
+        
+        case PduType::SUBSCRIPTION_DELETE: {
+            const auto* del = std::get_if<SubscriptionDelete>(&pdu.choice);
+            if (!del) { free(asn1_pdu); return nullptr; }
             
-            // Set optional periodicity
-            if (req->periodicity.has_value()) {
-                asn1_pdu->choice.subscriptionRequest->periodicity = 
-                    static_cast<long*>(malloc(sizeof(long)));
-                *asn1_pdu->choice.subscriptionRequest->periodicity = req->periodicity.value();
-            }
+            asn1_pdu->present = E3_PDU_PR_subscriptionDelete;
+            asn1_pdu->choice.subscriptionDelete = static_cast<E3_SubscriptionDelete_t*>(
+                calloc(1, sizeof(E3_SubscriptionDelete_t)));
+            if (!asn1_pdu->choice.subscriptionDelete) { free(asn1_pdu); return nullptr; }
+            
+            asn1_pdu->choice.subscriptionDelete->id = del->id ? del->id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.subscriptionDelete->dAppIdentifier = del->dapp_identifier;
+            asn1_pdu->choice.subscriptionDelete->subscriptionId = del->subscription_id;
             break;
         }
         
@@ -263,6 +291,13 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             asn1_pdu->choice.subscriptionResponse->requestId = resp->request_id;
             asn1_pdu->choice.subscriptionResponse->responseCode = 
                 (resp->response_code == ResponseCode::POSITIVE) ? 0 : 1;
+            
+            // Set optional subscriptionId
+            if (resp->subscription_id.has_value()) {
+                asn1_pdu->choice.subscriptionResponse->subscriptionId = 
+                    static_cast<long*>(malloc(sizeof(long)));
+                *asn1_pdu->choice.subscriptionResponse->subscriptionId = resp->subscription_id.value();
+            }
             break;
         }
         
@@ -277,6 +312,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             
             asn1_pdu->choice.indicationMessage->id = pdu.message_id ? pdu.message_id : E3Encoder::generate_message_id();
             asn1_pdu->choice.indicationMessage->dAppIdentifier = msg->dapp_identifier;
+            asn1_pdu->choice.indicationMessage->ranFunctionIdentifier = msg->ran_function_identifier;
             
             // Copy protocol data
             OCTET_STRING_fromBuf(&asn1_pdu->choice.indicationMessage->protocolData,
@@ -285,20 +321,21 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             break;
         }
         
-        case PduType::CONTROL_ACTION: {
-            const auto* action = std::get_if<ControlAction>(&pdu.choice);
+        case PduType::DAPP_CONTROL_ACTION: {
+            const auto* action = std::get_if<DAppControlAction>(&pdu.choice);
             if (!action) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->present = E3_PDU_PR_controlAction;
-            asn1_pdu->choice.controlAction = static_cast<E3_ControlAction_t*>(
-                calloc(1, sizeof(E3_ControlAction_t)));
-            if (!asn1_pdu->choice.controlAction) { free(asn1_pdu); return nullptr; }
+            asn1_pdu->present = E3_PDU_PR_dAppControlAction;
+            asn1_pdu->choice.dAppControlAction = static_cast<E3_DAppControlAction_t*>(
+                calloc(1, sizeof(E3_DAppControlAction_t)));
+            if (!asn1_pdu->choice.dAppControlAction) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.controlAction->id = pdu.message_id ? pdu.message_id : E3Encoder::generate_message_id();
-            asn1_pdu->choice.controlAction->dAppIdentifier = action->dapp_identifier;
-            asn1_pdu->choice.controlAction->ranFunctionIdentifier = action->ran_function_identifier;
+            asn1_pdu->choice.dAppControlAction->id = pdu.message_id ? pdu.message_id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.dAppControlAction->dAppIdentifier = action->dapp_identifier;
+            asn1_pdu->choice.dAppControlAction->ranFunctionIdentifier = action->ran_function_identifier;
+            asn1_pdu->choice.dAppControlAction->controlIdentifier = action->control_identifier;
             
-            OCTET_STRING_fromBuf(&asn1_pdu->choice.controlAction->actionData,
+            OCTET_STRING_fromBuf(&asn1_pdu->choice.dAppControlAction->actionData,
                 reinterpret_cast<const char*>(action->action_data.data()),
                 static_cast<int>(action->action_data.size()));
             break;
@@ -437,17 +474,38 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
                 resp.dapp_identifier = *asn1_pdu->choice.setupResponse->dAppIdentifier;
             }
             
+            // Extract mandatory ranIdentifier
+            const OCTET_STRING_t* ran_id = &asn1_pdu->choice.setupResponse->ranIdentifier;
+            resp.ran_identifier.assign(reinterpret_cast<const char*>(ran_id->buf), ran_id->size);
+            
             // Extract ranFunctionList
-            int count = asn1_pdu->choice.setupResponse->ranFunctionList->list.count;
-            for (int i = 0; i < count; i++) {
-                E3_RanFunctionDefinition_t* asn_func = 
-                    asn1_pdu->choice.setupResponse->ranFunctionList->list.array[i];
-                RanFunctionDef func;
-                func.ran_function_identifier = static_cast<uint32_t>(asn_func->ranFunctionIdentifier);
-                func.ran_function_data.assign(
-                    asn_func->ranFunctionData.buf,
-                    asn_func->ranFunctionData.buf + asn_func->ranFunctionData.size);
-                resp.ran_function_list.push_back(func);
+            if (asn1_pdu->choice.setupResponse->ranFunctionList) {
+                int count = asn1_pdu->choice.setupResponse->ranFunctionList->list.count;
+                for (int i = 0; i < count; i++) {
+                    E3_RanFunctionDefinition_t* asn_func = 
+                        asn1_pdu->choice.setupResponse->ranFunctionList->list.array[i];
+                    RanFunctionDef func;
+                    func.ran_function_identifier = static_cast<uint32_t>(asn_func->ranFunctionIdentifier);
+                    
+                    // Decode telemetryIdentifierList
+                    int tel_count = asn_func->telemetryIdentifierList.list.count;
+                    for (int j = 0; j < tel_count; j++) {
+                        func.telemetry_identifier_list.push_back(
+                            static_cast<uint32_t>(*asn_func->telemetryIdentifierList.list.array[j]));
+                    }
+                    
+                    // Decode controlIdentifierList
+                    int ctrl_count = asn_func->controlIdentifierList.list.count;
+                    for (int j = 0; j < ctrl_count; j++) {
+                        func.control_identifier_list.push_back(
+                            static_cast<uint32_t>(*asn_func->controlIdentifierList.list.array[j]));
+                    }
+                    
+                    func.ran_function_data.assign(
+                        asn_func->ranFunctionData.buf,
+                        asn_func->ranFunctionData.buf + asn_func->ranFunctionData.size);
+                    resp.ran_function_list.push_back(func);
+                }
             }
             
             pdu.choice = resp;
@@ -461,7 +519,6 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             SubscriptionRequest req;
             req.id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionRequest->id);
             req.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.subscriptionRequest->dAppIdentifier);
-            req.type = static_cast<ActionType>(asn1_pdu->choice.subscriptionRequest->type);
             req.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->choice.subscriptionRequest->ranFunctionIdentifier);
             
             // Decode telemetryIdentifierList
@@ -483,12 +540,20 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
                 req.subscription_time = *asn1_pdu->choice.subscriptionRequest->subscriptionTime;
             }
             
-            // Decode optional periodicity
-            if (asn1_pdu->choice.subscriptionRequest->periodicity) {
-                req.periodicity = *asn1_pdu->choice.subscriptionRequest->periodicity;
-            }
-            
             pdu.choice = req;
+            break;
+        }
+        
+        case E3_PDU_PR_subscriptionDelete: {
+            pdu.type = PduType::SUBSCRIPTION_DELETE;
+            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionDelete->id);
+            
+            SubscriptionDelete del;
+            del.id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionDelete->id);
+            del.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.subscriptionDelete->dAppIdentifier);
+            del.subscription_id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionDelete->subscriptionId);
+            
+            pdu.choice = del;
             break;
         }
         
@@ -502,6 +567,11 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             resp.response_code = (asn1_pdu->choice.subscriptionResponse->responseCode == 0)
                 ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
             
+            // Decode optional subscriptionId
+            if (asn1_pdu->choice.subscriptionResponse->subscriptionId) {
+                resp.subscription_id = *asn1_pdu->choice.subscriptionResponse->subscriptionId;
+            }
+            
             pdu.choice = resp;
             break;
         }
@@ -511,7 +581,9 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.indicationMessage->id);
             
             IndicationMessage msg;
+            msg.id = static_cast<uint32_t>(asn1_pdu->choice.indicationMessage->id);
             msg.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.indicationMessage->dAppIdentifier);
+            msg.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->choice.indicationMessage->ranFunctionIdentifier);
             
             // Copy protocol data
             const OCTET_STRING_t* data = &asn1_pdu->choice.indicationMessage->protocolData;
@@ -521,15 +593,17 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             break;
         }
         
-        case E3_PDU_PR_controlAction: {
-            pdu.type = PduType::CONTROL_ACTION;
-            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.controlAction->id);
+        case E3_PDU_PR_dAppControlAction: {
+            pdu.type = PduType::DAPP_CONTROL_ACTION;
+            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.dAppControlAction->id);
             
-            ControlAction action;
-            action.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.controlAction->dAppIdentifier);
-            action.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->choice.controlAction->ranFunctionIdentifier);
+            DAppControlAction action;
+            action.id = static_cast<uint32_t>(asn1_pdu->choice.dAppControlAction->id);
+            action.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.dAppControlAction->dAppIdentifier);
+            action.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->choice.dAppControlAction->ranFunctionIdentifier);
+            action.control_identifier = static_cast<uint32_t>(asn1_pdu->choice.dAppControlAction->controlIdentifier);
             
-            const OCTET_STRING_t* data = &asn1_pdu->choice.controlAction->actionData;
+            const OCTET_STRING_t* data = &asn1_pdu->choice.dAppControlAction->actionData;
             action.action_data.assign(data->buf, data->buf + data->size);
             
             pdu.choice = action;

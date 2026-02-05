@@ -49,6 +49,7 @@ EncodeResult<EncodedMessage> E3Encoder::encode_setup_response(
     ResponseCode response_code,
     const std::optional<std::string>& e3ap_protocol_version,
     const std::optional<uint32_t>& dapp_identifier,
+    const std::string& ran_identifier,
     const std::vector<RanFunctionDef>& ran_function_list
 ) {
     Pdu pdu(PduType::SETUP_RESPONSE);
@@ -58,6 +59,7 @@ EncodeResult<EncodedMessage> E3Encoder::encode_setup_response(
     resp.response_code = response_code;
     resp.e3ap_protocol_version = e3ap_protocol_version;
     resp.dapp_identifier = dapp_identifier;
+    resp.ran_identifier = ran_identifier;
     resp.ran_function_list = ran_function_list;
     pdu.choice = resp;
     return encode(pdu);
@@ -65,63 +67,78 @@ EncodeResult<EncodedMessage> E3Encoder::encode_setup_response(
 
 EncodeResult<EncodedMessage> E3Encoder::encode_subscription_request(
     uint32_t dapp_identifier,
-    ActionType action_type,
     uint32_t ran_function_identifier,
     const std::vector<uint32_t>& telemetry_identifier_list,
     const std::vector<uint32_t>& control_identifier_list,
-    const std::optional<uint32_t>& subscription_time,
-    const std::optional<uint32_t>& periodicity
+    const std::optional<uint32_t>& subscription_time
 ) {
     Pdu pdu(PduType::SUBSCRIPTION_REQUEST);
     SubscriptionRequest req;
     req.id = generate_message_id();
     req.dapp_identifier = dapp_identifier;
-    req.type = action_type;
     req.ran_function_identifier = ran_function_identifier;
     req.telemetry_identifier_list = telemetry_identifier_list;
     req.control_identifier_list = control_identifier_list;
     req.subscription_time = subscription_time;
-    req.periodicity = periodicity;
     pdu.choice = req;
+    return encode(pdu);
+}
+
+EncodeResult<EncodedMessage> E3Encoder::encode_subscription_delete(
+    uint32_t dapp_identifier,
+    uint32_t subscription_id
+) {
+    Pdu pdu(PduType::SUBSCRIPTION_DELETE);
+    SubscriptionDelete del;
+    del.id = generate_message_id();
+    del.dapp_identifier = dapp_identifier;
+    del.subscription_id = subscription_id;
+    pdu.choice = del;
     return encode(pdu);
 }
 
 EncodeResult<EncodedMessage> E3Encoder::encode_subscription_response(
     uint32_t request_id,
-    ResponseCode response_code
+    ResponseCode response_code,
+    const std::optional<uint32_t>& subscription_id
 ) {
     Pdu pdu(PduType::SUBSCRIPTION_RESPONSE);
     SubscriptionResponse resp;
     resp.id = generate_message_id();
     resp.request_id = request_id;
     resp.response_code = response_code;
+    resp.subscription_id = subscription_id;
     pdu.choice = resp;
     return encode(pdu);
 }
 
 EncodeResult<EncodedMessage> E3Encoder::encode_indication_message(
     uint32_t dapp_identifier,
+    uint32_t ran_function_identifier,
     const std::vector<uint8_t>& protocol_data
 ) {
     Pdu pdu(PduType::INDICATION_MESSAGE);
     IndicationMessage msg;
     msg.id = generate_message_id();
     msg.dapp_identifier = dapp_identifier;
+    msg.ran_function_identifier = ran_function_identifier;
     msg.protocol_data = protocol_data;
     pdu.choice = msg;
     return encode(pdu);
 }
 
-EncodeResult<EncodedMessage> E3Encoder::encode_control_action(
+EncodeResult<EncodedMessage> E3Encoder::encode_dapp_control_action(
     uint32_t dapp_identifier,
     uint32_t ran_function_identifier,
+    uint32_t control_identifier,
     const std::vector<uint8_t>& action_data
 ) {
-    Pdu pdu(PduType::CONTROL_ACTION);
-    ControlAction action;
+    Pdu pdu(PduType::DAPP_CONTROL_ACTION);
+    DAppControlAction action;
     action.id = generate_message_id();
     action.dapp_identifier = dapp_identifier;
     action.ran_function_identifier = ran_function_identifier;
+    action.control_identifier = control_identifier;
     action.action_data = action_data;
     pdu.choice = action;
     return encode(pdu);

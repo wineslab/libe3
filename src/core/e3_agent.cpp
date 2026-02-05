@@ -67,7 +67,7 @@ ErrorCode E3Agent::init() {
     // Set up control action handler
     if (impl_->control_callback) {
         impl_->interface->set_control_action_handler(
-            [this](const ControlAction& action) {
+            [this](const DAppControlAction& action) {
                 if (impl_->control_callback) {
                     impl_->control_callback(
                         action.dapp_identifier,
@@ -158,6 +158,7 @@ ErrorCode E3Agent::register_sm(std::unique_ptr<ServiceModel> sm) {
                     Pdu pdu(PduType::INDICATION_MESSAGE);
                     IndicationMessage msg;
                     msg.dapp_identifier = dapp_id;
+                    msg.ran_function_identifier = ran_func;
                     msg.protocol_data = data;
                     pdu.choice = msg;
                     
@@ -191,7 +192,7 @@ void E3Agent::set_control_callback(ControlCallback callback) {
     
     if (impl_->interface) {
         impl_->interface->set_control_action_handler(
-            [this](const ControlAction& action) {
+            [this](const DAppControlAction& action) {
                 if (impl_->control_callback) {
                     impl_->control_callback(
                         action.dapp_identifier,
@@ -212,7 +213,11 @@ void E3Agent::set_indication_callback(IndicationCallback callback) {
 // Manual Operations
 // =========================================================================
 
-ErrorCode E3Agent::send_indication(uint32_t dapp_id, const std::vector<uint8_t>& data) {
+ErrorCode E3Agent::send_indication(
+    uint32_t dapp_id,
+    uint32_t ran_function_id,
+    const std::vector<uint8_t>& data
+) {
     if (!impl_->interface || !impl_->interface->is_running()) {
         return ErrorCode::NOT_INITIALIZED;
     }
@@ -220,6 +225,7 @@ ErrorCode E3Agent::send_indication(uint32_t dapp_id, const std::vector<uint8_t>&
     Pdu pdu(PduType::INDICATION_MESSAGE);
     IndicationMessage msg;
     msg.dapp_identifier = dapp_id;
+    msg.ran_function_identifier = ran_function_id;
     msg.protocol_data = data;
     pdu.choice = msg;
     

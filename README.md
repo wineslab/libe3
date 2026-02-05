@@ -220,7 +220,7 @@ The main facade class for RAN vendors.
 | `register_sm(sm)` | Register a Service Model |
 | `set_control_callback(cb)` | Set control action handler |
 | `set_indication_callback(cb)` | Set indication handler |
-| `send_indication(dapp_id, data)` | Send indication to specific dApp |
+| `send_indication(dapp_id, ran_function_id, data)` | Send indication to specific dApp |
 | `get_registered_dapps()` | Get list of registered dApps |
 | `dapp_count()` | Number of registered dApps |
 | `subscription_count()` | Number of active subscriptions |

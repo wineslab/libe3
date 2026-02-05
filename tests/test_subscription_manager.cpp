@@ -61,14 +61,14 @@ TEST(SubscriptionManager_unregister_dapp) {
 TEST(SubscriptionManager_unregister_nonexistent) {
     SubscriptionManager mgr;
     auto result = mgr.unregister_dapp(999);
-    ASSERT_TRUE(result == ErrorCode::NOT_FOUND);
+    ASSERT_TRUE(result == ErrorCode::DAPP_NOT_REGISTERED);
 }
 
 TEST(SubscriptionManager_add_subscription) {
     SubscriptionManager mgr;
     
     auto [reg_result, dapp_id] = mgr.register_dapp();
-    auto result = mgr.add_subscription(dapp_id, 200);
+    auto [result, sub_id] = mgr.add_subscription(dapp_id, 200);
     ASSERT_TRUE(result == ErrorCode::SUCCESS);
     ASSERT_EQ(mgr.subscription_count(), 1u);
     ASSERT_TRUE(mgr.is_subscribed(dapp_id, 200));
@@ -76,15 +76,15 @@ TEST(SubscriptionManager_add_subscription) {
 
 TEST(SubscriptionManager_add_subscription_unregistered_dapp) {
     SubscriptionManager mgr;
-    auto result = mgr.add_subscription(100, 200);
-    ASSERT_TRUE(result == ErrorCode::NOT_FOUND);
+    auto [result, sub_id] = mgr.add_subscription(100, 200);
+    ASSERT_TRUE(result == ErrorCode::DAPP_NOT_REGISTERED);
 }
 
 TEST(SubscriptionManager_add_subscription_duplicate) {
     SubscriptionManager mgr;
     auto [reg_result, dapp_id] = mgr.register_dapp();
     mgr.add_subscription(dapp_id, 200);
-    auto result = mgr.add_subscription(dapp_id, 200);
+    auto [result, sub_id] = mgr.add_subscription(dapp_id, 200);
     ASSERT_TRUE(result == ErrorCode::SUBSCRIPTION_EXISTS);
 }
 
@@ -103,7 +103,7 @@ TEST(SubscriptionManager_remove_subscription_not_found) {
     SubscriptionManager mgr;
     auto [reg_result, dapp_id] = mgr.register_dapp();
     auto result = mgr.remove_subscription(dapp_id, 999);
-    ASSERT_TRUE(result == ErrorCode::NOT_FOUND);
+    ASSERT_TRUE(result == ErrorCode::SUBSCRIPTION_NOT_FOUND);
 }
 
 TEST(SubscriptionManager_get_subscribed_dapps) {
@@ -242,8 +242,8 @@ TEST(SubscriptionManager_thread_safety) {
                 uint32_t dapp_id = dapp_ids[static_cast<size_t>(t)];
                 uint32_t sm_id = static_cast<uint32_t>(i % 5);
                 
-                auto add_result = mgr.add_subscription(dapp_id, sm_id);
-                if (add_result == ErrorCode::SUCCESS || add_result == ErrorCode::SUBSCRIPTION_EXISTS) {
+                auto [add_err, sub_id] = mgr.add_subscription(dapp_id, sm_id);
+                if (add_err == ErrorCode::SUCCESS || add_err == ErrorCode::SUBSCRIPTION_EXISTS) {
                     ++success_count;
                 } else {
                     ++error_count;

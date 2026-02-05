@@ -27,9 +27,10 @@ PduType JsonE3Encoder::string_to_pdu_type(const std::string& s) const {
     if (s == "SetupRequest") return PduType::SETUP_REQUEST;
     if (s == "SetupResponse") return PduType::SETUP_RESPONSE;
     if (s == "SubscriptionRequest") return PduType::SUBSCRIPTION_REQUEST;
+    if (s == "SubscriptionDelete") return PduType::SUBSCRIPTION_DELETE;
     if (s == "SubscriptionResponse") return PduType::SUBSCRIPTION_RESPONSE;
     if (s == "IndicationMessage") return PduType::INDICATION_MESSAGE;
-    if (s == "ControlAction") return PduType::CONTROL_ACTION;
+    if (s == "DAppControlAction") return PduType::DAPP_CONTROL_ACTION;
     if (s == "DAppReport") return PduType::DAPP_REPORT;
     if (s == "XAppControlAction") return PduType::XAPP_CONTROL_ACTION;
     if (s == "ReleaseMessage") return PduType::RELEASE_MESSAGE;
@@ -93,11 +94,14 @@ nlohmann::json JsonE3Encoder::encode_setup_response(const SetupResponse& resp) c
     if (resp.dapp_identifier.has_value()) {
         j["dapp_identifier"] = resp.dapp_identifier.value();
     }
+    j["ran_identifier"] = resp.ran_identifier;
     if (!resp.ran_function_list.empty()) {
         nlohmann::json ran_funcs = nlohmann::json::array();
         for (const auto& func : resp.ran_function_list) {
             nlohmann::json func_obj;
             func_obj["ran_function_identifier"] = func.ran_function_identifier;
+            func_obj["telemetry_identifier_list"] = func.telemetry_identifier_list;
+            func_obj["control_identifier_list"] = func.control_identifier_list;
             func_obj["ran_function_data"] = binary_to_hex(func.ran_function_data);
             ran_funcs.push_back(func_obj);
         }
@@ -110,16 +114,20 @@ nlohmann::json JsonE3Encoder::encode_subscription_request(const SubscriptionRequ
     nlohmann::json j;
     j["id"] = req.id;
     j["dapp_identifier"] = req.dapp_identifier;
-    j["type"] = static_cast<int>(req.type);
     j["ran_function_identifier"] = req.ran_function_identifier;
     j["telemetry_identifier_list"] = req.telemetry_identifier_list;
     j["control_identifier_list"] = req.control_identifier_list;
     if (req.subscription_time.has_value()) {
         j["subscription_time"] = req.subscription_time.value();
     }
-    if (req.periodicity.has_value()) {
-        j["periodicity"] = req.periodicity.value();
-    }
+    return j;
+}
+
+nlohmann::json JsonE3Encoder::encode_subscription_delete(const SubscriptionDelete& del) const {
+    nlohmann::json j;
+    j["id"] = del.id;
+    j["dapp_identifier"] = del.dapp_identifier;
+    j["subscription_id"] = del.subscription_id;
     return j;
 }
 
@@ -128,6 +136,9 @@ nlohmann::json JsonE3Encoder::encode_subscription_response(const SubscriptionRes
     j["id"] = resp.id;
     j["request_id"] = resp.request_id;
     j["response_code"] = (resp.response_code == ResponseCode::POSITIVE) ? "positive" : "negative";
+    if (resp.subscription_id.has_value()) {
+        j["subscription_id"] = resp.subscription_id.value();
+    }
     return j;
 }
 
@@ -135,15 +146,17 @@ nlohmann::json JsonE3Encoder::encode_indication_message(const IndicationMessage&
     nlohmann::json j;
     j["id"] = msg.id;
     j["dapp_identifier"] = msg.dapp_identifier;
+    j["ran_function_identifier"] = msg.ran_function_identifier;
     j["protocol_data"] = binary_to_hex(msg.protocol_data);
     return j;
 }
 
-nlohmann::json JsonE3Encoder::encode_control_action(const ControlAction& action) const {
+nlohmann::json JsonE3Encoder::encode_dapp_control_action(const DAppControlAction& action) const {
     nlohmann::json j;
     j["id"] = action.id;
     j["dapp_identifier"] = action.dapp_identifier;
     j["ran_function_identifier"] = action.ran_function_identifier;
+    j["control_identifier"] = action.control_identifier;
     j["action_data"] = binary_to_hex(action.action_data);
     return j;
 }
@@ -203,10 +216,13 @@ SetupResponse JsonE3Encoder::decode_setup_response(const nlohmann::json& j) cons
     if (j.contains("dapp_identifier")) {
         resp.dapp_identifier = j["dapp_identifier"].get<uint32_t>();
     }
+    resp.ran_identifier = j.value("ran_identifier", "");
     if (j.contains("ran_function_list")) {
         for (const auto& func_obj : j["ran_function_list"]) {
             RanFunctionDef func;
             func.ran_function_identifier = func_obj.value("ran_function_identifier", 0u);
+            func.telemetry_identifier_list = func_obj.value("telemetry_identifier_list", std::vector<uint32_t>{});
+            func.control_identifier_list = func_obj.value("control_identifier_list", std::vector<uint32_t>{});
             func.ran_function_data = hex_to_binary(func_obj.value("ran_function_data", ""));
             resp.ran_function_list.push_back(func);
         }
@@ -218,17 +234,21 @@ SubscriptionRequest JsonE3Encoder::decode_subscription_request(const nlohmann::j
     SubscriptionRequest req;
     req.id = j.value("id", 0u);
     req.dapp_identifier = j.value("dapp_identifier", 0u);
-    req.type = static_cast<ActionType>(j.value("type", 0));
     req.ran_function_identifier = j.value("ran_function_identifier", 0u);
     req.telemetry_identifier_list = j.value("telemetry_identifier_list", std::vector<uint32_t>{});
     req.control_identifier_list = j.value("control_identifier_list", std::vector<uint32_t>{});
     if (j.contains("subscription_time")) {
         req.subscription_time = j["subscription_time"].get<uint32_t>();
     }
-    if (j.contains("periodicity")) {
-        req.periodicity = j["periodicity"].get<uint32_t>();
-    }
     return req;
+}
+
+SubscriptionDelete JsonE3Encoder::decode_subscription_delete(const nlohmann::json& j) const {
+    SubscriptionDelete del;
+    del.id = j.value("id", 0u);
+    del.dapp_identifier = j.value("dapp_identifier", 0u);
+    del.subscription_id = j.value("subscription_id", 0u);
+    return del;
 }
 
 SubscriptionResponse JsonE3Encoder::decode_subscription_response(const nlohmann::json& j) const {
@@ -237,6 +257,9 @@ SubscriptionResponse JsonE3Encoder::decode_subscription_response(const nlohmann:
     resp.request_id = j.value("request_id", 0u);
     std::string response_code_str = j.value("response_code", "negative");
     resp.response_code = (response_code_str == "positive") ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
+    if (j.contains("subscription_id")) {
+        resp.subscription_id = j["subscription_id"].get<uint32_t>();
+    }
     return resp;
 }
 
@@ -244,15 +267,17 @@ IndicationMessage JsonE3Encoder::decode_indication_message(const nlohmann::json&
     IndicationMessage msg;
     msg.id = j.value("id", 0u);
     msg.dapp_identifier = j.value("dapp_identifier", 0u);
+    msg.ran_function_identifier = j.value("ran_function_identifier", 0u);
     msg.protocol_data = hex_to_binary(j.value("protocol_data", ""));
     return msg;
 }
 
-ControlAction JsonE3Encoder::decode_control_action(const nlohmann::json& j) const {
-    ControlAction action;
+DAppControlAction JsonE3Encoder::decode_dapp_control_action(const nlohmann::json& j) const {
+    DAppControlAction action;
     action.id = j.value("id", 0u);
     action.dapp_identifier = j.value("dapp_identifier", 0u);
     action.ran_function_identifier = j.value("ran_function_identifier", 0u);
+    action.control_identifier = j.value("control_identifier", 0u);
     action.action_data = hex_to_binary(j.value("action_data", ""));
     return action;
 }
@@ -324,14 +349,17 @@ EncodeResult<EncodedMessage> JsonE3Encoder::encode(const Pdu& pdu) {
             else if constexpr (std::is_same_v<T, SubscriptionRequest>) {
                 data = encode_subscription_request(arg);
             }
+            else if constexpr (std::is_same_v<T, SubscriptionDelete>) {
+                data = encode_subscription_delete(arg);
+            }
             else if constexpr (std::is_same_v<T, SubscriptionResponse>) {
                 data = encode_subscription_response(arg);
             }
             else if constexpr (std::is_same_v<T, IndicationMessage>) {
                 data = encode_indication_message(arg);
             }
-            else if constexpr (std::is_same_v<T, ControlAction>) {
-                data = encode_control_action(arg);
+            else if constexpr (std::is_same_v<T, DAppControlAction>) {
+                data = encode_dapp_control_action(arg);
             }
             else if constexpr (std::is_same_v<T, DAppReport>) {
                 data = encode_dapp_report(arg);
@@ -409,14 +437,17 @@ EncodeResult<Pdu> JsonE3Encoder::decode(const uint8_t* data, size_t size) {
             case PduType::SUBSCRIPTION_REQUEST:
                 pdu.choice = decode_subscription_request(j);
                 break;
+            case PduType::SUBSCRIPTION_DELETE:
+                pdu.choice = decode_subscription_delete(j);
+                break;
             case PduType::SUBSCRIPTION_RESPONSE:
                 pdu.choice = decode_subscription_response(j);
                 break;
             case PduType::INDICATION_MESSAGE:
                 pdu.choice = decode_indication_message(j);
                 break;
-            case PduType::CONTROL_ACTION:
-                pdu.choice = decode_control_action(j);
+            case PduType::DAPP_CONTROL_ACTION:
+                pdu.choice = decode_dapp_control_action(j);
                 break;
             case PduType::DAPP_REPORT:
                 pdu.choice = decode_dapp_report(j);

@@ -94,6 +94,7 @@ public:
      * @param response_code Response code (positive/negative)
      * @param e3ap_protocol_version E3AP protocol version (optional)
      * @param dapp_identifier Assigned dApp identifier (optional)
+     * @param ran_identifier RAN identifier
      * @param ran_function_list List of available RAN functions (optional)
      */
     EncodeResult<EncodedMessage> encode_setup_response(
@@ -101,51 +102,71 @@ public:
         ResponseCode response_code,
         const std::optional<std::string>& e3ap_protocol_version = std::nullopt,
         const std::optional<uint32_t>& dapp_identifier = std::nullopt,
+        const std::string& ran_identifier = "",
         const std::vector<RanFunctionDef>& ran_function_list = {}
     );
 
     /**
      * @brief Create and encode a Subscription Request PDU
      * @param dapp_identifier dApp identifier
-     * @param action_type Action type (insert/update/delete)
      * @param ran_function_identifier RAN function to subscribe to
      * @param telemetry_identifier_list List of telemetry identifiers
      * @param control_identifier_list List of control identifiers
      * @param subscription_time How long to keep the subscription (0-3600 sec, optional)
-     * @param periodicity How often to send indication messages (0-1000 ms, optional)
      */
     EncodeResult<EncodedMessage> encode_subscription_request(
         uint32_t dapp_identifier,
-        ActionType action_type,
         uint32_t ran_function_identifier,
         const std::vector<uint32_t>& telemetry_identifier_list,
         const std::vector<uint32_t>& control_identifier_list,
-        const std::optional<uint32_t>& subscription_time = std::nullopt,
-        const std::optional<uint32_t>& periodicity = std::nullopt
+        const std::optional<uint32_t>& subscription_time = std::nullopt
+    );
+
+    /**
+     * @brief Create and encode a Subscription Delete PDU
+     * @param dapp_identifier dApp identifier
+     * @param subscription_id Subscription ID to delete
+     */
+    EncodeResult<EncodedMessage> encode_subscription_delete(
+        uint32_t dapp_identifier,
+        uint32_t subscription_id
     );
 
     /**
      * @brief Create and encode a Subscription Response PDU
+     * @param request_id ID of the corresponding SubscriptionRequest
+     * @param response_code Response code (positive/negative)
+     * @param subscription_id Subscription ID (optional)
      */
     EncodeResult<EncodedMessage> encode_subscription_response(
         uint32_t request_id,
-        ResponseCode response_code
+        ResponseCode response_code,
+        const std::optional<uint32_t>& subscription_id = std::nullopt
     );
 
     /**
      * @brief Create and encode an Indication Message PDU
+     * @param dapp_identifier dApp identifier
+     * @param ran_function_identifier RAN function identifier
+     * @param protocol_data Protocol data
      */
     EncodeResult<EncodedMessage> encode_indication_message(
         uint32_t dapp_identifier,
+        uint32_t ran_function_identifier,
         const std::vector<uint8_t>& protocol_data
     );
 
     /**
-     * @brief Create and encode a Control Action PDU
+     * @brief Create and encode a dApp Control Action PDU
+     * @param dapp_identifier dApp identifier
+     * @param ran_function_identifier RAN function identifier
+     * @param control_identifier Control identifier
+     * @param action_data Action data
      */
-    EncodeResult<EncodedMessage> encode_control_action(
+    EncodeResult<EncodedMessage> encode_dapp_control_action(
         uint32_t dapp_identifier,
         uint32_t ran_function_identifier,
+        uint32_t control_identifier,
         const std::vector<uint8_t>& action_data
     );
 

@@ -72,13 +72,14 @@ enum class PduType : uint8_t {
     SETUP_REQUEST = 0,
     SETUP_RESPONSE = 1,
     SUBSCRIPTION_REQUEST = 2,
-    SUBSCRIPTION_RESPONSE = 3,
-    INDICATION_MESSAGE = 4,
-    CONTROL_ACTION = 5,
-    DAPP_REPORT = 6,
-    XAPP_CONTROL_ACTION = 7,
-    RELEASE_MESSAGE = 8,
-    MESSAGE_ACK = 9
+    SUBSCRIPTION_DELETE = 3,
+    SUBSCRIPTION_RESPONSE = 4,
+    INDICATION_MESSAGE = 5,
+    DAPP_CONTROL_ACTION = 6,
+    DAPP_REPORT = 7,
+    XAPP_CONTROL_ACTION = 8,
+    RELEASE_MESSAGE = 9,
+    MESSAGE_ACK = 10
 };
 
 /**
@@ -177,6 +178,8 @@ struct SetupRequest {
  */
 struct RanFunctionDef {
     uint32_t ran_function_identifier{0};
+    std::vector<uint32_t> telemetry_identifier_list;  ///< List of telemetry identifiers
+    std::vector<uint32_t> control_identifier_list;    ///< List of control identifiers
     std::vector<uint8_t> ran_function_data;
 };
 
@@ -189,6 +192,7 @@ struct SetupResponse {
     ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
     std::optional<std::string> e3ap_protocol_version;   ///< E3AP protocol version (optional)
     std::optional<uint32_t> dapp_identifier;            ///< Assigned dApp identifier (optional)
+    std::string ran_identifier;                         ///< RAN identifier (mandatory)
     std::vector<RanFunctionDef> ran_function_list;      ///< List of available RAN functions (optional)
 };
 
@@ -198,12 +202,19 @@ struct SetupResponse {
 struct SubscriptionRequest {
     uint32_t id{0};                                  ///< Message ID
     uint32_t dapp_identifier{0};                     ///< dApp identifier
-    ActionType type{ActionType::INSERT};             ///< Action type (insert/update/delete)
     uint32_t ran_function_identifier{0};             ///< RAN function to subscribe to
     std::vector<uint32_t> telemetry_identifier_list; ///< List of telemetry identifiers
     std::vector<uint32_t> control_identifier_list;   ///< List of control identifiers
     std::optional<uint32_t> subscription_time;       ///< How long to keep the subscription (0-3600 sec)
-    std::optional<uint32_t> periodicity;             ///< How often to send indication messages (0-1000 ms)
+};
+
+/**
+ * @brief E3AP Subscription Delete structure
+ */
+struct SubscriptionDelete {
+    uint32_t id{0};                      ///< Message ID
+    uint32_t dapp_identifier{0};         ///< dApp identifier
+    uint32_t subscription_id{0};         ///< Subscription ID to delete
 };
 
 /**
@@ -213,6 +224,7 @@ struct SubscriptionResponse {
     uint32_t id{0};                              ///< Message ID
     uint32_t request_id{0};                      ///< ID of the corresponding SubscriptionRequest
     ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
+    std::optional<uint32_t> subscription_id;     ///< Subscription ID (optional)
 };
 
 /**
@@ -221,16 +233,18 @@ struct SubscriptionResponse {
 struct IndicationMessage {
     uint32_t id{0};                      ///< Message ID
     uint32_t dapp_identifier{0};
+    uint32_t ran_function_identifier{0}; ///< RAN function identifier
     std::vector<uint8_t> protocol_data;
 };
 
 /**
- * @brief E3AP Control Action structure
+ * @brief E3AP dApp Control Action structure
  */
-struct ControlAction {
+struct DAppControlAction {
     uint32_t id{0};                      ///< Message ID
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0};
+    uint32_t control_identifier{0};      ///< Control identifier
     std::vector<uint8_t> action_data;
 };
 
@@ -278,9 +292,10 @@ using PduChoice = std::variant<
     SetupRequest,
     SetupResponse,
     SubscriptionRequest,
+    SubscriptionDelete,
     SubscriptionResponse,
     IndicationMessage,
-    ControlAction,
+    DAppControlAction,
     DAppReport,
     XAppControlAction,
     ReleaseMessage,
@@ -394,9 +409,10 @@ inline const char* pdu_type_to_string(PduType type) noexcept {
         case PduType::SETUP_REQUEST: return "SetupRequest";
         case PduType::SETUP_RESPONSE: return "SetupResponse";
         case PduType::SUBSCRIPTION_REQUEST: return "SubscriptionRequest";
+        case PduType::SUBSCRIPTION_DELETE: return "SubscriptionDelete";
         case PduType::SUBSCRIPTION_RESPONSE: return "SubscriptionResponse";
         case PduType::INDICATION_MESSAGE: return "IndicationMessage";
-        case PduType::CONTROL_ACTION: return "ControlAction";
+        case PduType::DAPP_CONTROL_ACTION: return "DAppControlAction";
         case PduType::DAPP_REPORT: return "DAppReport";
         case PduType::XAPP_CONTROL_ACTION: return "XAppControlAction";
         case PduType::RELEASE_MESSAGE: return "ReleaseMessage";

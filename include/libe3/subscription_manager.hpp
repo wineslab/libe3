@@ -116,11 +116,13 @@ public:
      *
      * @param dapp_id dApp identifier
      * @param ran_function_id RAN function identifier (0-255)
-     * @return ErrorCode::SUCCESS on success
+     * @return std::pair containing:
+     *         - ErrorCode::SUCCESS on success, or error code on failure
+     *         - The assigned subscription ID (valid only if ErrorCode::SUCCESS)
      * @return ErrorCode::DAPP_NOT_REGISTERED if dApp not registered
      * @return ErrorCode::SUBSCRIPTION_EXISTS if already subscribed
      */
-    ErrorCode add_subscription(uint32_t dapp_id, uint32_t ran_function_id);
+    std::pair<ErrorCode, uint32_t> add_subscription(uint32_t dapp_id, uint32_t ran_function_id);
 
     /**
      * @brief Remove a subscription between dApp and RAN function
@@ -131,6 +133,16 @@ public:
      * @return ErrorCode::SUBSCRIPTION_NOT_FOUND if subscription doesn't exist
      */
     ErrorCode remove_subscription(uint32_t dapp_id, uint32_t ran_function_id);
+
+    /**
+     * @brief Remove a subscription by its ID
+     *
+     * @param dapp_id dApp identifier
+     * @param subscription_id Subscription ID
+     * @return ErrorCode::SUCCESS on success
+     * @return ErrorCode::SUBSCRIPTION_NOT_FOUND if subscription doesn't exist
+     */
+    ErrorCode remove_subscription_by_id(uint32_t dapp_id, uint32_t subscription_id);
 
     /**
      * @brief Check if dApp is subscribed to a RAN function
@@ -198,11 +210,25 @@ private:
     // RAN function ID -> set of subscribed dApp IDs (reverse index for fast lookup)
     std::unordered_map<uint32_t, std::unordered_set<uint32_t>> ran_function_subscribers_;
     
+    // Subscription ID -> (dApp ID, RAN function ID) mapping
+    std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> subscription_ids_;
+    
+    // (dApp ID, RAN function ID) -> Subscription ID reverse mapping
+    std::unordered_map<uint64_t, uint32_t> subscription_id_reverse_;
+    
     // Callback for SM lifecycle events
     SmLifecycleCallback sm_lifecycle_callback_;
     
     // Next dApp ID to assign (0-100 per spec)
     uint32_t next_dapp_id_{0};
+    
+    // Next subscription ID to assign
+    uint32_t next_subscription_id_{1};
+    
+    // Helper to create composite key for subscription
+    static uint64_t make_sub_key(uint32_t dapp_id, uint32_t ran_func_id) {
+        return (static_cast<uint64_t>(dapp_id) << 32) | ran_func_id;
+    }
 
     /**
      * @brief Check if SM should be started/stopped and invoke callback

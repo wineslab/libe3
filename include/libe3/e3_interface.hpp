@@ -33,7 +33,7 @@ class E3Agent;
  */
 using SetupRequestHandler = std::function<ResponseCode(const SetupRequest&, SetupResponse&)>;
 using SubscriptionRequestHandler = std::function<ResponseCode(const SubscriptionRequest&)>;
-using E3ControlActionHandler = std::function<void(const ControlAction&)>;
+using E3ControlActionHandler = std::function<void(const DAppControlAction&)>;
 using DAppReportHandler = std::function<void(const DAppReport&)>;
 
 /**
@@ -205,9 +205,14 @@ private:
     void handle_subscription_request(const SubscriptionRequest& request);
 
     /**
+     * @brief Handle E3 Subscription Delete
+     */
+    void handle_subscription_delete(const SubscriptionDelete& del);
+
+    /**
      * @brief Handle E3 Control Action
      */
-    void handle_control_action(const ControlAction& action);
+    void handle_control_action(const DAppControlAction& action);
 
     /**
      * @brief Handle dApp Report

@@ -16,7 +16,9 @@ TEST(PduType_values) {
     ASSERT_EQ(static_cast<int>(PduType::SETUP_REQUEST), 0);
     ASSERT_EQ(static_cast<int>(PduType::SETUP_RESPONSE), 1);
     ASSERT_EQ(static_cast<int>(PduType::SUBSCRIPTION_REQUEST), 2);
-    ASSERT_EQ(static_cast<int>(PduType::INDICATION_MESSAGE), 4);
+    ASSERT_EQ(static_cast<int>(PduType::SUBSCRIPTION_DELETE), 3);
+    ASSERT_EQ(static_cast<int>(PduType::SUBSCRIPTION_RESPONSE), 4);
+    ASSERT_EQ(static_cast<int>(PduType::INDICATION_MESSAGE), 5);
 }
 
 TEST(ErrorCode_to_string) {
@@ -60,43 +62,54 @@ TEST(SetupResponse_fields) {
     resp.response_code = ResponseCode::POSITIVE;
     resp.e3ap_protocol_version = "1.0.0";
     resp.dapp_identifier = 42;
+    resp.ran_identifier = "test-ran";
     
     ASSERT_EQ(resp.id, 1u);
     ASSERT_EQ(resp.request_id, 100u);
     ASSERT_TRUE(resp.response_code == ResponseCode::POSITIVE);
     ASSERT_TRUE(resp.e3ap_protocol_version.has_value());
     ASSERT_TRUE(resp.dapp_identifier.has_value());
+    ASSERT_STREQ(resp.ran_identifier.c_str(), "test-ran");
 }
 
 TEST(SubscriptionRequest_fields) {
     SubscriptionRequest req;
     req.id = 1;
     req.dapp_identifier = 42;
-    req.type = ActionType::INSERT;
     req.ran_function_identifier = 100;
     req.telemetry_identifier_list = {1, 2, 3};
     req.control_identifier_list = {10, 20};
     req.subscription_time = 3600;
-    req.periodicity = 100;
     
     ASSERT_EQ(req.id, 1u);
     ASSERT_EQ(req.dapp_identifier, 42u);
-    ASSERT_TRUE(req.type == ActionType::INSERT);
     ASSERT_EQ(req.ran_function_identifier, 100u);
     ASSERT_EQ(req.telemetry_identifier_list.size(), 3u);
     ASSERT_EQ(req.control_identifier_list.size(), 2u);
     ASSERT_TRUE(req.subscription_time.has_value());
-    ASSERT_TRUE(req.periodicity.has_value());
 }
 
-TEST(ControlAction_fields) {
-    ControlAction action;
+TEST(SubscriptionDelete_fields) {
+    SubscriptionDelete del;
+    del.id = 1;
+    del.dapp_identifier = 42;
+    del.subscription_id = 77;
+    
+    ASSERT_EQ(del.id, 1u);
+    ASSERT_EQ(del.dapp_identifier, 42u);
+    ASSERT_EQ(del.subscription_id, 77u);
+}
+
+TEST(DAppControlAction_fields) {
+    DAppControlAction action;
     action.dapp_identifier = 123;
     action.ran_function_identifier = 456;
+    action.control_identifier = 789;
     action.action_data = {0x01, 0x02, 0x03, 0x04};
     
     ASSERT_EQ(action.dapp_identifier, 123u);
     ASSERT_EQ(action.ran_function_identifier, 456u);
+    ASSERT_EQ(action.control_identifier, 789u);
     ASSERT_EQ(action.action_data.size(), 4u);
     ASSERT_EQ(action.action_data[0], 0x01);
 }
@@ -104,9 +117,11 @@ TEST(ControlAction_fields) {
 TEST(IndicationMessage_fields) {
     IndicationMessage msg;
     msg.dapp_identifier = 99;
+    msg.ran_function_identifier = 55;
     msg.protocol_data = {0xDE, 0xAD, 0xBE, 0xEF};
     
     ASSERT_EQ(msg.dapp_identifier, 99u);
+    ASSERT_EQ(msg.ran_function_identifier, 55u);
     ASSERT_EQ(msg.protocol_data.size(), 4u);
 }
 
