@@ -25,8 +25,8 @@ public:
     std::string name() const override { return "TestSM"; }
     uint32_t version() const override { return 1; }
     
-    std::vector<uint32_t> ran_function_ids() const override {
-        return {id_};
+    uint32_t ran_function_id() const override {
+        return id_;
     }
     
     std::vector<uint32_t> telemetry_ids() const override {
@@ -38,6 +38,13 @@ public:
     }
     
     ErrorCode init() override {
+        // Register control callbacks
+        register_control_callback(10, [](const std::vector<uint8_t>&) {
+            return ErrorCode::SUCCESS;
+        });
+        register_control_callback(20, [](const std::vector<uint8_t>&) {
+            return ErrorCode::SUCCESS;
+        });
         return ErrorCode::SUCCESS;
     }
     
@@ -56,15 +63,9 @@ public:
     
     bool is_running() const override { return running_; }
     
-    ErrorCode process_control_action(
-        uint32_t /*control_action_id*/,
-        const std::vector<uint8_t>& /*action_data*/) override {
-        return ErrorCode::SUCCESS;
-    }
-    
     // Test helper to trigger indication
     void trigger_indication(const std::vector<uint8_t>& data) {
-        deliver_indication(id_, data, 
+        deliver_indication(data, 
             static_cast<uint64_t>(std::chrono::system_clock::now().time_since_epoch().count()));
     }
 

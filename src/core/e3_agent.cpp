@@ -106,7 +106,7 @@ ErrorCode E3Agent::start() {
 }
 
 void E3Agent::stop() {
-    if (!impl_->interface) {
+    if (!impl_ || !impl_->interface) {
         return;
     }
     
@@ -116,14 +116,14 @@ void E3Agent::stop() {
 }
 
 AgentState E3Agent::state() const noexcept {
-    if (!impl_->interface) {
+    if (!impl_ || !impl_->interface) {
         return AgentState::UNINITIALIZED;
     }
     return impl_->interface->state();
 }
 
 bool E3Agent::is_running() const noexcept {
-    return impl_->interface && impl_->interface->is_running();
+    return impl_ && impl_->interface && impl_->interface->is_running();
 }
 
 // =========================================================================
@@ -145,7 +145,6 @@ ErrorCode E3Agent::register_sm(std::unique_ptr<ServiceModel> sm) {
     
     // Set up indication callback on the SM
     if (impl_->indication_callback) {
-        auto ran_funcs = sm->ran_function_ids();
         sm->set_indication_callback(
             [this](uint32_t ran_func, std::vector<uint8_t> data, [[maybe_unused]] uint64_t timestamp) {
                 // Get subscribers for this RAN function

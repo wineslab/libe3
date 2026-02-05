@@ -19,6 +19,7 @@
 #include <string>
 #include <atomic>
 #include <mutex>
+#include <unordered_map>
 
 namespace libe3 {
 
@@ -36,14 +37,12 @@ struct SmIndicationData {
 };
 
 /**
- * @brief Callback type for processing control actions from dApps
+ * @brief Callback type for handling a specific control action within an SM
  *
- * @param ran_function_id The RAN function this action is for
  * @param action_data The control action data (E3SM-encoded)
  * @return ErrorCode::SUCCESS on success, error code on failure
  */
-using ControlActionHandler = std::function<ErrorCode(
-    uint32_t ran_function_id,
+using ControlActionCallback = std::function<ErrorCode(
     const std::vector<uint8_t>& action_data
 )>;
 
@@ -87,9 +86,9 @@ public:
     virtual uint32_t version() const = 0;
 
     /**
-     * @brief Get RAN function IDs handled by this SM
+     * @brief Get RAN function ID for this SM
      */
-    virtual std::vector<uint32_t> ran_function_ids() const = 0;
+    virtual uint32_t ran_function_id() const = 0;
 
     /**
      * @brief Get telemetry IDs supported by this SM
@@ -100,14 +99,6 @@ public:
      * @brief Get control IDs supported by this SM
      */
     virtual std::vector<uint32_t> control_ids() const = 0;
-
-    /**
-     * @brief Check if SM handles a specific RAN function
-     */
-    bool handles_ran_function(uint32_t ran_function_id) const {
-        auto ids = ran_function_ids();
-        return std::find(ids.begin(), ids.end(), ran_function_id) != ids.end();
-    }
 
     /**
      * @brief Initialize the SM
@@ -147,14 +138,22 @@ public:
     /**
      * @brief Process a control action from a dApp
      *
-     * @param control_action_id The control action ID for this action
+     * Dispatches to the registered control callback for the given control ID.
+     *
+     * @param control_id The control action ID
      * @param action_data E3SM-encoded control action data
-     * @return ErrorCode::SUCCESS on success
+     * @return ErrorCode::SUCCESS on success, ErrorCode::NOT_FOUND if no callback registered
      */
-    virtual ErrorCode process_control_action(
-        uint32_t control_action_id,
+    ErrorCode process_control_action(
+        uint32_t control_id,
         const std::vector<uint8_t>& action_data
-    ) = 0;
+    ) {
+        auto it = control_callbacks_.find(control_id);
+        if (it != control_callbacks_.end()) {
+            return it->second(action_data);
+        }
+        return ErrorCode::NOT_FOUND;
+    }
 
     /**
      * @brief Set callback for delivering indication data
@@ -170,20 +169,40 @@ protected:
     ServiceModel() = default;
 
     /**
+     * @brief Register a control action callback for a specific control ID
+     *
+     * @param control_id The control ID to register the callback for
+     * @param callback The callback function to handle this control action
+     */
+    void register_control_callback(uint32_t control_id, ControlActionCallback callback) {
+        control_callbacks_[control_id] = std::move(callback);
+    }
+
+    /**
+     * @brief Unregister a control action callback
+     *
+     * @param control_id The control ID to unregister
+     */
+    void unregister_control_callback(uint32_t control_id) {
+        control_callbacks_.erase(control_id);
+    }
+
+    /**
      * @brief Deliver indication data to the E3 agent
      *
      * Call this from your SM implementation when indication data is ready.
+     * Uses the SM's own RAN function ID automatically.
      */
-    void deliver_indication(uint32_t ran_function_id,
-                           std::vector<uint8_t> encoded_data,
+    void deliver_indication(std::vector<uint8_t> encoded_data,
                            uint64_t timestamp = 0) {
         if (indication_callback_) {
-            indication_callback_(ran_function_id, std::move(encoded_data), timestamp);
+            indication_callback_(ran_function_id(), std::move(encoded_data), timestamp);
         }
     }
 
 private:
     IndicationDataCallback indication_callback_;
+    std::unordered_map<uint32_t, ControlActionCallback> control_callbacks_;
 };
 
 /**

@@ -36,8 +36,8 @@ public:
     std::string name() const override { return "KPM"; }
     uint32_t version() const override { return 2; }
     
-    std::vector<uint32_t> ran_function_ids() const override {
-        return {RAN_FUNCTION_ID};
+    uint32_t ran_function_id() const override {
+        return RAN_FUNCTION_ID;
     }
     
     std::vector<uint32_t> telemetry_ids() const override {
@@ -50,6 +50,14 @@ public:
     
     libe3::ErrorCode init() override {
         std::cout << "[KPM] Initializing KPM Service Model\n";
+        
+        // Register control callbacks
+        register_control_callback(2001, [](const std::vector<uint8_t>& data) {
+            std::cout << "[KPM] Received control action 2001 (" 
+                      << data.size() << " bytes)\n";
+            return libe3::ErrorCode::SUCCESS;
+        });
+        
         return libe3::ErrorCode::SUCCESS;
     }
     
@@ -82,18 +90,6 @@ public:
     bool is_running() const override {
         return running_;
     }
-    
-    libe3::ErrorCode process_control_action(
-        uint32_t control_action_id,
-        const std::vector<uint8_t>& data) override {
-        std::cout << "[KPM] Received control action " << control_action_id
-                  << " (" << data.size() << " bytes)\n";
-        
-        // Parse and apply control action based on control_action_id
-        // In a real implementation, this would modify data collection parameters
-        
-        return libe3::ErrorCode::SUCCESS;
-    }
 
 private:
     void collect_metrics() {
@@ -112,7 +108,7 @@ private:
             auto now = std::chrono::system_clock::now();
             auto timestamp = static_cast<uint64_t>(
                 now.time_since_epoch().count());
-            deliver_indication(RAN_FUNCTION_ID, std::move(kpm_data), timestamp);
+            deliver_indication(std::move(kpm_data), timestamp);
         }
     }
     
@@ -158,8 +154,8 @@ public:
     std::string name() const override { return "RC"; }
     uint32_t version() const override { return 1; }
     
-    std::vector<uint32_t> ran_function_ids() const override {
-        return {RAN_FUNCTION_ID};
+    uint32_t ran_function_id() const override {
+        return RAN_FUNCTION_ID;
     }
     
     std::vector<uint32_t> telemetry_ids() const override {
@@ -172,6 +168,21 @@ public:
     
     libe3::ErrorCode init() override {
         std::cout << "[RC] Initializing RC Service Model\n";
+        
+        // Register control callbacks
+        register_control_callback(3001, [](const std::vector<uint8_t>& data) {
+            std::cout << "[RC] Executing handover control (" << data.size() << " bytes)\n";
+            return libe3::ErrorCode::SUCCESS;
+        });
+        register_control_callback(3002, [](const std::vector<uint8_t>& data) {
+            std::cout << "[RC] Executing cell config control (" << data.size() << " bytes)\n";
+            return libe3::ErrorCode::SUCCESS;
+        });
+        register_control_callback(3003, [](const std::vector<uint8_t>& data) {
+            std::cout << "[RC] Executing power control (" << data.size() << " bytes)\n";
+            return libe3::ErrorCode::SUCCESS;
+        });
+        
         return libe3::ErrorCode::SUCCESS;
     }
     
@@ -192,18 +203,6 @@ public:
     }
     
     bool is_running() const override { return running_; }
-    
-    libe3::ErrorCode process_control_action(
-        uint32_t control_action_id,
-        const std::vector<uint8_t>& data) override {
-        std::cout << "[RC] Executing control action " << control_action_id
-                  << " (" << data.size() << " bytes)\n";
-        
-        // Parse control action type and execute based on control_action_id
-        // Examples: trigger handover, modify cell parameters, etc.
-        
-        return libe3::ErrorCode::SUCCESS;
-    }
 
 private:
     std::atomic<bool> running_{false};

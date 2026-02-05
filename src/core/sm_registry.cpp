@@ -27,14 +27,12 @@ ErrorCode SmRegistry::register_sm(std::unique_ptr<ServiceModel> sm) {
 
     std::lock_guard lock(mutex_);
 
-    auto ran_funcs = sm->ran_function_ids();
+    uint32_t ran_func = sm->ran_function_id();
     
-    // Check for conflicts
-    for (uint32_t ran_func : ran_funcs) {
-        if (sms_.count(ran_func) > 0) {
-            E3_LOG_ERROR(LOG_TAG) << "SM already registered for RAN function " << ran_func;
-            return ErrorCode::SM_ALREADY_REGISTERED;
-        }
+    // Check for conflict
+    if (sms_.count(ran_func) > 0) {
+        E3_LOG_ERROR(LOG_TAG) << "SM already registered for RAN function " << ran_func;
+        return ErrorCode::SM_ALREADY_REGISTERED;
     }
 
     // Initialize the SM
@@ -44,22 +42,10 @@ ErrorCode SmRegistry::register_sm(std::unique_ptr<ServiceModel> sm) {
         return init_result;
     }
 
-    // Register for all RAN functions
-    for (uint32_t ran_func : ran_funcs) {
-        E3_LOG_INFO(LOG_TAG) << "Registered SM '" << sm->name() 
-                             << "' for RAN function " << ran_func;
-    }
+    E3_LOG_INFO(LOG_TAG) << "Registered SM '" << sm->name() 
+                         << "' for RAN function " << ran_func;
 
-    // Store with first RAN function as key (SM owns all its RAN functions)
-    if (!ran_funcs.empty()) {
-        uint32_t primary_ran_func = ran_funcs[0];
-        sms_[primary_ran_func] = std::move(sm);
-        
-        // Create aliases for other RAN functions
-        for (size_t i = 1; i < ran_funcs.size(); ++i) {
-            // Note: We only store in the primary slot, get_by_ran_function handles lookup
-        }
-    }
+    sms_[ran_func] = std::move(sm);
 
     return ErrorCode::SUCCESS;
 }
@@ -109,17 +95,10 @@ ErrorCode SmRegistry::unregister_sm(uint32_t ran_function_id) {
 ServiceModel* SmRegistry::get_by_ran_function(uint32_t ran_function_id) {
     std::lock_guard lock(mutex_);
 
-    // Check direct registration
+    // Direct lookup
     auto it = sms_.find(ran_function_id);
     if (it != sms_.end()) {
         return it->second.get();
-    }
-
-    // Check all SMs for one that handles this RAN function
-    for (auto& [id, sm] : sms_) {
-        if (sm->handles_ran_function(ran_function_id)) {
-            return sm.get();
-        }
     }
 
     // Check if there's a factory for this RAN function
@@ -145,45 +124,31 @@ std::vector<uint32_t> SmRegistry::get_available_ran_functions() const {
     std::lock_guard lock(mutex_);
 
     std::vector<uint32_t> result;
+    result.reserve(sms_.size() + factories_.size());
     
     for (const auto& [id, sm] : sms_) {
-        auto ran_funcs = sm->ran_function_ids();
-        result.insert(result.end(), ran_funcs.begin(), ran_funcs.end());
+        result.push_back(id);
     }
 
     for (const auto& [id, factory] : factories_) {
         result.push_back(id);
     }
 
-    // Remove duplicates
     std::sort(result.begin(), result.end());
-    result.erase(std::unique(result.begin(), result.end()), result.end());
-
     return result;
 }
 
 ErrorCode SmRegistry::start_sm(uint32_t ran_function_id) {
     std::lock_guard lock(mutex_);
 
-    ServiceModel* sm = nullptr;
-    
-    // Find SM (either direct or by checking all SMs)
     auto it = sms_.find(ran_function_id);
-    if (it != sms_.end()) {
-        sm = it->second.get();
-    } else {
-        for (auto& [id, s] : sms_) {
-            if (s->handles_ran_function(ran_function_id)) {
-                sm = s.get();
-                break;
-            }
-        }
-    }
-
-    if (!sm) {
+    if (it == sms_.end()) {
+        E3_LOG_ERROR(LOG_TAG) << "SM not found for RAN function " << ran_function_id;
         E3_LOG_ERROR(LOG_TAG) << "SM not found for RAN function " << ran_function_id;
         return ErrorCode::SM_NOT_FOUND;
     }
+
+    auto& sm = it->second;
 
     if (sm->is_running()) {
         E3_LOG_DEBUG(LOG_TAG) << "SM already running for RAN function " << ran_function_id;
@@ -203,23 +168,12 @@ ErrorCode SmRegistry::start_sm(uint32_t ran_function_id) {
 ErrorCode SmRegistry::stop_sm(uint32_t ran_function_id) {
     std::lock_guard lock(mutex_);
 
-    ServiceModel* sm = nullptr;
-    
     auto it = sms_.find(ran_function_id);
-    if (it != sms_.end()) {
-        sm = it->second.get();
-    } else {
-        for (auto& [id, s] : sms_) {
-            if (s->handles_ran_function(ran_function_id)) {
-                sm = s.get();
-                break;
-            }
-        }
-    }
-
-    if (!sm) {
+    if (it == sms_.end()) {
         return ErrorCode::SM_NOT_FOUND;
     }
+
+    auto& sm = it->second;
 
     if (!sm->is_running()) {
         return ErrorCode::SUCCESS;
@@ -236,12 +190,6 @@ bool SmRegistry::is_sm_running(uint32_t ran_function_id) const {
     auto it = sms_.find(ran_function_id);
     if (it != sms_.end()) {
         return it->second->is_running();
-    }
-
-    for (const auto& [id, sm] : sms_) {
-        if (sm->handles_ran_function(ran_function_id)) {
-            return sm->is_running();
-        }
     }
 
     return false;

@@ -404,7 +404,11 @@ void E3Interface::handle_setup_request(const SetupRequest& request) {
     for (auto id : available_ran_function_ids) {
         RanFunctionDef func;
         func.ran_function_identifier = id;
-        // TODO: Get actual RAN function data from SM registry
+        ServiceModel* sm = SmRegistry::instance().get_by_ran_function(id);
+        if (sm) {
+            func.telemetry_identifier_list = sm->telemetry_ids();
+            func.control_identifier_list = sm->control_ids();
+        }
         ran_function_list.push_back(func);
     }
     
@@ -513,7 +517,7 @@ void E3Interface::handle_control_action(const DAppControlAction& action) {
     
     if (sm && sm->is_running()) {
         ErrorCode result = sm->process_control_action(
-            action.ran_function_identifier,
+            action.control_identifier,
             action.action_data
         );
         
