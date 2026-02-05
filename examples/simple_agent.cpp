@@ -13,6 +13,8 @@
 #include <csignal>
 #include <atomic>
 #include <thread>
+#include <cstring>
+#include <getopt.h>
 
 static std::atomic<bool> g_running{true};
 
@@ -20,7 +22,77 @@ void signal_handler(int) {
     g_running = false;
 }
 
-int main() {
+void print_usage(const char* program_name) {
+    std::cout << "Usage: " << program_name << " [OPTIONS]\n\n"
+              << "Options:\n"
+              << "  -l, --link <layer>       Link layer: zmq, posix (default: posix)\n"
+              << "  -t, --transport <layer>  Transport layer: sctp, tcp, ipc (default: ipc)\n"
+              << "  -e, --encoding <format>  Encoding format: asn1, json (default: json)\n"
+              << "  -h, --help               Show this help message\n";
+}
+
+libe3::E3LinkLayer parse_link_layer(const char* str) {
+    if (std::strcmp(str, "zmq") == 0) return libe3::E3LinkLayer::ZMQ;
+    if (std::strcmp(str, "posix") == 0) return libe3::E3LinkLayer::POSIX;
+    std::cerr << "Invalid link layer: " << str << ". Using default (zmq).\n";
+    return libe3::E3LinkLayer::POSIX;
+}
+
+libe3::E3TransportLayer parse_transport_layer(const char* str) {
+    if (std::strcmp(str, "sctp") == 0) return libe3::E3TransportLayer::SCTP;
+    if (std::strcmp(str, "tcp") == 0) return libe3::E3TransportLayer::TCP;
+    if (std::strcmp(str, "ipc") == 0) return libe3::E3TransportLayer::IPC;
+    std::cerr << "Invalid transport layer: " << str << ". Using default (ipc).\n";
+    return libe3::E3TransportLayer::IPC;
+}
+
+libe3::EncodingFormat parse_encoding(const char* str) {
+    if (std::strcmp(str, "asn1") == 0) return libe3::EncodingFormat::ASN1;
+    if (std::strcmp(str, "json") == 0) return libe3::EncodingFormat::JSON;
+    std::cerr << "Invalid encoding format: " << str << ". Using default (asn1).\n";
+    return libe3::EncodingFormat::JSON;
+}
+
+int main(int argc, char* argv[]) {
+    // Default configuration
+    libe3::E3LinkLayer link_layer = libe3::E3LinkLayer::ZMQ;
+    libe3::E3TransportLayer transport_layer = libe3::E3TransportLayer::IPC;
+    libe3::EncodingFormat encoding = libe3::EncodingFormat::ASN1;
+    std::string ran_id = "example-ran-001";
+
+    // Command-line options
+    static struct option long_options[] = {
+        {"link",      required_argument, nullptr, 'l'},
+        {"transport", required_argument, nullptr, 't'},
+        {"encoding",  required_argument, nullptr, 'e'},
+        {"help",      no_argument,       nullptr, 'h'},
+        {nullptr,     0,                 nullptr,  0 }
+    };
+
+    int opt;
+    while ((opt = getopt_long(argc, argv, "l:t:e:r:h", long_options, nullptr)) != -1) {
+        switch (opt) {
+            case 'l':
+                link_layer = parse_link_layer(optarg);
+                break;
+            case 't':
+                transport_layer = parse_transport_layer(optarg);
+                break;
+            case 'e':
+                encoding = parse_encoding(optarg);
+                break;
+            case 'r':
+                ran_id = optarg;
+                break;
+            case 'h':
+                print_usage(argv[0]);
+                return 0;
+            default:
+                print_usage(argv[0]);
+                return 1;
+        }
+    }
+
     std::cout << "libe3 Simple Agent Example\n";
     std::cout << "Version: " << LIBE3_VERSION_STRING << "\n\n";
     
@@ -30,10 +102,16 @@ int main() {
     
     // Configure the E3 agent
     libe3::E3Config config;
-    config.ran_identifier = "example-ran-001";
-    config.link_layer = libe3::E3LinkLayer::POSIX;
-    config.transport_layer = libe3::E3TransportLayer::IPC;
-    config.encoding = libe3::EncodingFormat::JSON;
+    config.ran_identifier = ran_id;
+    config.link_layer = link_layer;
+    config.transport_layer = transport_layer;
+    config.encoding = encoding;
+    
+    std::cout << "Configuration:\n"
+              << "  RAN ID: " << ran_id << "\n"
+              << "  Link layer: " << libe3::link_layer_to_string(link_layer) << "\n"
+              << "  Transport layer: " << libe3::transport_layer_to_string(transport_layer) << "\n"
+              << "  Encoding: " << (encoding == libe3::EncodingFormat::JSON ? "json" : "asn1") << "\n\n";
     
     // Create the agent
     libe3::E3Agent agent(std::move(config));
