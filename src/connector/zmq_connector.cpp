@@ -20,6 +20,7 @@ namespace libe3 {
 namespace {
 constexpr const char* LOG_TAG = "ZmqConn";
 constexpr const char* IPC_BASE_DIR = "/tmp/dapps";
+constexpr int RECV_TIMEOUT_MS = 500;  // Timeout for graceful shutdown
 }
 
 ZmqE3Connector::ZmqE3Connector(
@@ -94,6 +95,10 @@ ErrorCode ZmqE3Connector::setup_initial_connection() {
         return ErrorCode::CONNECTION_FAILED;
     }
     
+    // Set receive timeout to allow graceful shutdown
+    int recv_timeout = RECV_TIMEOUT_MS;
+    zmq_setsockopt(setup_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+    
     int ret = zmq_bind(setup_socket_, setup_endpoint_.c_str());
     if (ret != 0) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to bind setup socket: " << zmq_strerror(errno);
@@ -119,6 +124,10 @@ int ZmqE3Connector::recv_setup_request(std::vector<uint8_t>& buffer) {
     buffer.resize(DEFAULT_BUFFER_SIZE);
     int ret = zmq_recv(setup_socket_, buffer.data(), buffer.size(), 0);
     if (ret < 0) {
+        if (errno == EAGAIN) {
+            // Timeout - return 0 to indicate no data (allows shutdown check)
+            return 0;
+        }
         E3_LOG_ERROR(LOG_TAG) << "Failed to receive setup request: " << zmq_strerror(errno);
         return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
     }
@@ -161,6 +170,10 @@ ErrorCode ZmqE3Connector::setup_inbound_connection() {
     int conflate = 1;
     zmq_setsockopt(inbound_socket_, ZMQ_CONFLATE, &conflate, sizeof(conflate));
     
+    // Set receive timeout to allow graceful shutdown
+    int recv_timeout = RECV_TIMEOUT_MS;
+    zmq_setsockopt(inbound_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+    
     int ret = zmq_bind(inbound_socket_, inbound_endpoint_.c_str());
     if (ret != 0) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to bind inbound socket: " << zmq_strerror(errno);
@@ -183,6 +196,10 @@ int ZmqE3Connector::receive(std::vector<uint8_t>& buffer) {
     buffer.resize(DEFAULT_BUFFER_SIZE);
     int ret = zmq_recv(inbound_socket_, buffer.data(), buffer.size(), 0);
     if (ret < 0) {
+        if (errno == EAGAIN) {
+            // Timeout - return 0 to indicate no data (allows shutdown check)
+            return 0;
+        }
         E3_LOG_ERROR(LOG_TAG) << "Failed to receive: " << zmq_strerror(errno);
         return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
     }

@@ -25,9 +25,9 @@ void signal_handler(int) {
 void print_usage(const char* program_name) {
     std::cout << "Usage: " << program_name << " [OPTIONS]\n\n"
               << "Options:\n"
-              << "  -l, --link <layer>       Link layer: zmq, posix (default: posix)\n"
+              << "  -l, --link <layer>       Link layer: zmq, posix (default: zmq)\n"
               << "  -t, --transport <layer>  Transport layer: sctp, tcp, ipc (default: ipc)\n"
-              << "  -e, --encoding <format>  Encoding format: asn1, json (default: json)\n"
+              << "  -e, --encoding <format>  Encoding format: asn1, json (default: asn1)\n"
               << "  -h, --help               Show this help message\n";
 }
 
