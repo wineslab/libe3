@@ -39,6 +39,7 @@ public:
     ErrorCode setup_outbound_connection() override;
     ErrorCode send(const std::vector<uint8_t>& data) override;
     void dispose() override;
+    void shutdown() override;
     
     E3LinkLayer link_layer() const noexcept override {
         return E3LinkLayer::ZMQ;

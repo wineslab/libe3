@@ -9,6 +9,7 @@
 #define LIBE3_POSIX_CONNECTOR_HPP
 
 #include "libe3/e3_connector.hpp"
+#include <atomic>
 
 namespace libe3 {
 
@@ -37,6 +38,7 @@ public:
     ErrorCode setup_outbound_connection() override;
     ErrorCode send(const std::vector<uint8_t>& data) override;
     void dispose() override;
+    void shutdown() override;
     
     E3LinkLayer link_layer() const noexcept override {
         return E3LinkLayer::POSIX;
@@ -61,6 +63,7 @@ private:
     int outbound_connection_socket_{-1};
     
     bool connected_{false};
+    std::atomic<bool> shutdown_requested_{false};
     
     static constexpr int CHUNK_SIZE = 8192;
     static constexpr int UNUSED_SOCKET = -2;

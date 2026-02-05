@@ -120,6 +120,7 @@ enum class ErrorCode : int {
     STATE_ERROR = -17,
     SM_START_FAILED = -18,
     NOT_FOUND = -19,
+    CANCELLED = -20,
     GENERIC_ERROR = -100
 };
 
@@ -350,7 +351,7 @@ struct E3Config {
     std::string ran_identifier;
     
     // Transport configuration
-    E3LinkLayer link_layer{E3LinkLayer::POSIX};
+    E3LinkLayer link_layer{E3LinkLayer::ZMQ};
     E3TransportLayer transport_layer{E3TransportLayer::IPC};
     
     // Endpoints
@@ -469,6 +470,7 @@ inline const char* error_code_to_string(ErrorCode code) noexcept {
         case ErrorCode::STATE_ERROR: return "State error";
         case ErrorCode::SM_START_FAILED: return "Service Model start failed";
         case ErrorCode::NOT_FOUND: return "Not found";
+        case ErrorCode::CANCELLED: return "Operation cancelled";
         default: return "Unknown error";
     }
 }

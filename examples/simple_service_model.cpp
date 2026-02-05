@@ -265,14 +265,6 @@ int main() {
                   << " size=" << data.size() << "\n";
     });
     
-    // Initialize and start
-    auto init_result = agent.init();
-    if (init_result != libe3::ErrorCode::SUCCESS) {
-        std::cerr << "Failed to initialize: "
-                  << libe3::error_code_to_string(init_result) << "\n";
-        return 1;
-    }
-    
     auto start_result = agent.start();
     if (start_result != libe3::ErrorCode::SUCCESS) {
         std::cerr << "Failed to start: "

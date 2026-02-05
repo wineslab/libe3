@@ -97,6 +97,14 @@ public:
      * @brief Clean up and release all resources
      */
     virtual void dispose() = 0;
+    
+    /**
+     * @brief Interrupt blocking operations for shutdown
+     *
+     * Called before joining threads to unblock any blocking socket operations.
+     * Default implementation does nothing (for connectors that use timeouts).
+     */
+    virtual void shutdown() {}
 
     /**
      * @brief Get the link layer type

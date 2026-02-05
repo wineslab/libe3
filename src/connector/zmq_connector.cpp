@@ -300,6 +300,13 @@ void ZmqE3Connector::dispose() {
     E3_LOG_INFO(LOG_TAG) << "ZMQ connector disposed";
 }
 
+void ZmqE3Connector::shutdown() {
+    // ZMQ uses ZMQ_RCVTIMEO for timeout-based shutdown.
+    // The receive loops will wake up periodically and check should_stop_.
+    // No additional action needed here.
+    E3_LOG_DEBUG(LOG_TAG) << "ZMQ connector shutdown requested";
+}
+
 void ZmqE3Connector::setup_ipc_permissions(const std::string& endpoint) {
     // Extract file path from IPC endpoint (ipc:///path)
     const std::string prefix = "ipc://";

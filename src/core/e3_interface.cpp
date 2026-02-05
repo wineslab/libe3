@@ -128,6 +128,11 @@ void E3Interface::stop() {
         response_queue_->shutdown();
     }
     
+    // Interrupt blocking socket operations
+    if (connector_) {
+        connector_->shutdown();
+    }
+    
     // Join threads
     if (setup_thread_ && setup_thread_->joinable()) {
         setup_thread_->join();
