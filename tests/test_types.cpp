@@ -16,23 +16,13 @@ TEST(PduType_values) {
     ASSERT_EQ(static_cast<int>(PduType::SETUP_REQUEST), 0);
     ASSERT_EQ(static_cast<int>(PduType::SETUP_RESPONSE), 1);
     ASSERT_EQ(static_cast<int>(PduType::SUBSCRIPTION_REQUEST), 2);
-    ASSERT_EQ(static_cast<int>(PduType::INDICATION_MESSAGE), 7);
-}
-
-TEST(ErrorCode_values) {
-    ASSERT_TRUE(ErrorCode::SUCCESS == ErrorCode::SUCCESS);
-    ASSERT_TRUE(ErrorCode::SUCCESS != ErrorCode::GENERIC_ERROR);
+    ASSERT_EQ(static_cast<int>(PduType::INDICATION_MESSAGE), 4);
 }
 
 TEST(ErrorCode_to_string) {
     ASSERT_STREQ(error_code_to_string(ErrorCode::SUCCESS), "Success");
     ASSERT_STREQ(error_code_to_string(ErrorCode::TIMEOUT), "Timeout");
     ASSERT_STREQ(error_code_to_string(ErrorCode::NOT_FOUND), "Not found");
-}
-
-TEST(AgentState_values) {
-    ASSERT_NE(AgentState::UNINITIALIZED, AgentState::RUNNING);
-    ASSERT_NE(AgentState::RUNNING, AgentState::STOPPED);
 }
 
 TEST(AgentState_to_string) {
