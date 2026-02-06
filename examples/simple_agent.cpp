@@ -22,6 +22,52 @@ void signal_handler(int) {
     g_running = false;
 }
 
+class TestServiceModel : public libe3::ServiceModel {
+public:
+    static constexpr uint32_t RAN_FUNCTION_ID = 1;
+
+    std::string name() const override { return "TEST"; }
+    uint32_t version() const override { return 1; }
+
+    uint32_t ran_function_id() const override {
+        return RAN_FUNCTION_ID;
+    }
+
+    std::vector<uint32_t> telemetry_ids() const override {
+        return {1};
+    }
+
+    std::vector<uint32_t> control_ids() const override {
+        return {1};
+    }
+
+    libe3::ErrorCode init() override {
+        register_control_callback(1, [](const std::vector<uint8_t>& data) {
+            std::cout << "[TEST] Control action 1 (" << data.size() << " bytes)\n";
+            return libe3::ErrorCode::SUCCESS;
+        });
+        return libe3::ErrorCode::SUCCESS;
+    }
+
+    void destroy() override {
+        stop();
+    }
+
+    libe3::ErrorCode start() override {
+        running_ = true;
+        return libe3::ErrorCode::SUCCESS;
+    }
+
+    void stop() override {
+        running_ = false;
+    }
+
+    bool is_running() const override { return running_; }
+
+private:
+    std::atomic<bool> running_{false};
+};
+
 void print_usage(const char* program_name) {
     std::cout << "Usage: " << program_name << " [OPTIONS]\n\n"
               << "Options:\n"
@@ -115,6 +161,14 @@ int main(int argc, char* argv[]) {
     
     // Create the agent
     libe3::E3Agent agent(std::move(config));
+
+    // Register a test service model
+    auto sm_result = agent.register_sm(std::make_unique<TestServiceModel>());
+    if (sm_result != libe3::ErrorCode::SUCCESS) {
+        std::cerr << "Failed to register Test SM: "
+                  << libe3::error_code_to_string(sm_result) << "\n";
+        return 1;
+    }
     
     // Set up control action callback
     agent.set_control_callback([](uint32_t dapp_id, 
@@ -157,7 +211,7 @@ int main(int argc, char* argv[]) {
     
     // Main loop
     while (g_running) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::seconds(5));
         
         // Print statistics periodically
         std::cout << "  dApps: " << agent.dapp_count()

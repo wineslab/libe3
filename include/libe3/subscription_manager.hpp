@@ -219,8 +219,8 @@ private:
     // Callback for SM lifecycle events
     SmLifecycleCallback sm_lifecycle_callback_;
     
-    // Next dApp ID to assign (0-100 per spec)
-    uint32_t next_dapp_id_{0};
+    // Next dApp ID to assign (1-100 per spec)
+    uint32_t next_dapp_id_{1};
     
     // Next subscription ID to assign
     uint32_t next_subscription_id_{1};

@@ -22,6 +22,7 @@ constexpr auto SM_POLL_INTERVAL = std::chrono::milliseconds(10);
 E3Interface::E3Interface(const E3Config& config)
     : config_(config)
 {
+    Logger::instance().set_log_file("/tmp/e3_agent.log");
     Logger::instance().set_level(config.log_level);
     E3_LOG_INFO(LOG_TAG) << "E3Interface created";
 }
@@ -192,11 +193,13 @@ void E3Interface::setup_loop() {
             E3_LOG_DEBUG(LOG_TAG) << "No setup request received";
             continue;
         }
+
+        E3_LOG_INFO(LOG_TAG) << "Setup request received: " << ret << " bytes";
         
         // Decode the setup request
         auto decode_result = encoder_->decode(buffer.data(), static_cast<size_t>(ret));
         if (!decode_result) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to decode setup request";
+            E3_LOG_ERROR(LOG_TAG) << "Failed to decode setup request; ret=" << ret;
             continue;
         }
         
@@ -427,15 +430,16 @@ void E3Interface::handle_setup_request(const SetupRequest& request) {
     );
     
     if (!encode_result) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to encode setup response";
+        E3_LOG_ERROR(LOG_TAG) << "Failed to encode setup response for request id " << request.id;
         return;
     }
     
     ErrorCode send_result = connector_->send_response(encode_result->buffer);
     if (send_result != ErrorCode::SUCCESS) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to send setup response";
+        E3_LOG_ERROR(LOG_TAG) << "Failed to send setup response for request id " << request.id
+                              << "; error=" << error_code_to_string(send_result);
     } else {
-        E3_LOG_INFO(LOG_TAG) << "Sent setup response";
+        E3_LOG_INFO(LOG_TAG) << "Sent setup response for request id " << request.id;
     }
 }
 

@@ -14,7 +14,8 @@ namespace libe3 {
 
 namespace {
 constexpr const char* LOG_TAG = "SubMgr";
-constexpr uint32_t MAX_DAPP_ID = 100;
+constexpr uint32_t MAX_DAPP_ID = 100; 
+constexpr uint32_t MIN_DAPP_ID = 1;
 }
 
 SubscriptionManager::SubscriptionManager() {
@@ -49,12 +50,16 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::register_dapp() {
     
     // Search for an available ID (handle wrap-around and gaps from unregistered dApps)
     while (registered_dapps_.count(assigned_id) > 0 && attempts <= MAX_DAPP_ID) {
-        assigned_id = (assigned_id + 1) % (MAX_DAPP_ID + 1);
+        assigned_id++;
+        if (assigned_id > MAX_DAPP_ID) {
+            assigned_id = MIN_DAPP_ID;
+        }
         attempts++;
     }
     
     if (attempts > MAX_DAPP_ID) {
-        E3_LOG_ERROR(LOG_TAG) << "No available dApp IDs (max " << MAX_DAPP_ID + 1 << " dApps reached)";
+        E3_LOG_ERROR(LOG_TAG) << "No available dApp IDs (range " << MIN_DAPP_ID
+                              << ".." << MAX_DAPP_ID << ")";
         return {ErrorCode::INTERNAL_ERROR, 0};
     }
 
@@ -67,7 +72,10 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::register_dapp() {
     dapp_subscriptions_[assigned_id] = {};
     
     // Update next_dapp_id_ for the next registration
-    next_dapp_id_ = (assigned_id + 1) % (MAX_DAPP_ID + 1);
+    next_dapp_id_ = assigned_id + 1;
+    if (next_dapp_id_ > MAX_DAPP_ID) {
+        next_dapp_id_ = MIN_DAPP_ID;
+    }
 
     E3_LOG_INFO(LOG_TAG) << "dApp registered successfully with ID " << assigned_id;
     return {ErrorCode::SUCCESS, assigned_id};

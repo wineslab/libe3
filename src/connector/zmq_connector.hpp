@@ -65,6 +65,7 @@ private:
     bool connected_{false};
     
     void setup_ipc_permissions(const std::string& path);
+    bool reset_setup_socket();
 };
 
 } // namespace libe3

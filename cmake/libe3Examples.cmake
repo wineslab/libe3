@@ -10,7 +10,3 @@ endif()
 add_executable(example_simple_agent examples/simple_agent.cpp)
 target_link_libraries(example_simple_agent PRIVATE libe3::libe3)
 
-# Example: Custom Service Model
-add_executable(example_custom_sm examples/simple_service_model.cpp)
-target_link_libraries(example_custom_sm PRIVATE libe3::libe3)
-
