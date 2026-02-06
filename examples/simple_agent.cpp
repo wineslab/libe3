@@ -22,11 +22,11 @@ void signal_handler(int) {
     g_running = false;
 }
 
-class TestServiceModel : public libe3::ServiceModel {
+class SimpleServiceModel : public libe3::ServiceModel {
 public:
     static constexpr uint32_t RAN_FUNCTION_ID = 1;
 
-    std::string name() const override { return "TEST"; }
+    std::string name() const override { return "SIMPLE"; }
     uint32_t version() const override { return 1; }
 
     uint32_t ran_function_id() const override {
@@ -43,7 +43,7 @@ public:
 
     libe3::ErrorCode init() override {
         register_control_callback(1, [](const std::vector<uint8_t>& data) {
-            std::cout << "[TEST] Control action 1 (" << data.size() << " bytes)\n";
+            std::cout << "[SIMPLE] Control action 1 (" << data.size() << " bytes)\n";
             return libe3::ErrorCode::SUCCESS;
         });
         return libe3::ErrorCode::SUCCESS;
@@ -162,38 +162,20 @@ int main(int argc, char* argv[]) {
     // Create the agent
     libe3::E3Agent agent(std::move(config));
 
-    // Register a test service model
-    auto sm_result = agent.register_sm(std::make_unique<TestServiceModel>());
-    if (sm_result != libe3::ErrorCode::SUCCESS) {
-        std::cerr << "Failed to register Test SM: "
-                  << libe3::error_code_to_string(sm_result) << "\n";
-        return 1;
-    }
-    
-    // Set up control action callback
-    agent.set_control_callback([](uint32_t dapp_id, 
-                                  uint32_t ran_function_id,
-                                  const std::vector<uint8_t>& data) {
-        std::cout << "Received control action from dApp " << dapp_id
-                  << " for RAN function " << ran_function_id
-                  << " (" << data.size() << " bytes)\n";
-        return libe3::ErrorCode::SUCCESS;
-    });
-    
-    // Set up indication callback
-    agent.set_indication_callback([](uint32_t dapp_id,
-                                     uint32_t ran_function_id,
-                                     const std::vector<uint8_t>& data) {
-        std::cout << "Sending indication to dApp " << dapp_id
-                  << " for RAN function " << ran_function_id
-                  << " (" << data.size() << " bytes)\n";
-    });
-    
     // Initialize the agent
     auto init_result = agent.init();
-    if (init_result != libe3::ErrorCode::SUCCESS) {
+    if (init_result != libe3::ErrorCode::SUCCESS && 
+        init_result != libe3::ErrorCode::ALREADY_INITIALIZED) {
         std::cerr << "Failed to initialize agent: " 
                   << libe3::error_code_to_string(init_result) << "\n";
+        return 1;
+    }
+
+    // Register the simple service model
+    auto sm_result = agent.register_sm(std::make_unique<SimpleServiceModel>());
+    if (sm_result != libe3::ErrorCode::SUCCESS) {
+        std::cerr << "Failed to register Simple SM: "
+                  << libe3::error_code_to_string(sm_result) << "\n";
         return 1;
     }
     
@@ -209,13 +191,46 @@ int main(int argc, char* argv[]) {
     std::cout << "State: " << libe3::agent_state_to_string(agent.state()) << "\n";
     std::cout << "Press Ctrl+C to stop...\n\n";
     
-    // Main loop
+    // Main loop — periodically send mock indication data to subscribers
+    uint32_t seq = 0;
     while (g_running) {
         std::this_thread::sleep_for(std::chrono::seconds(5));
         
         // Print statistics periodically
         std::cout << "  dApps: " << agent.dapp_count()
                   << ", Subscriptions: " << agent.subscription_count() << "\n";
+        
+        // Deliver mock indication data to every dApp subscribed to the simple SM
+        auto subscribers = agent.get_ran_function_subscribers(
+            SimpleServiceModel::RAN_FUNCTION_ID);
+        
+        if (!subscribers.empty()) {
+            // Build a small mock payload: 4-byte sequence number + 12 bytes of fake metrics
+            std::vector<uint8_t> mock_data(16);
+            mock_data[0] = static_cast<uint8_t>((seq >> 24) & 0xFF);
+            mock_data[1] = static_cast<uint8_t>((seq >> 16) & 0xFF);
+            mock_data[2] = static_cast<uint8_t>((seq >>  8) & 0xFF);
+            mock_data[3] = static_cast<uint8_t>((seq      ) & 0xFF);
+            // Fill remaining bytes with a simple pattern
+            for (size_t i = 4; i < mock_data.size(); ++i) {
+                mock_data[i] = static_cast<uint8_t>(i + seq);
+            }
+            
+            for (uint32_t dapp_id : subscribers) {
+                auto rc = agent.send_indication(
+                    dapp_id, SimpleServiceModel::RAN_FUNCTION_ID, mock_data);
+                if (rc == libe3::ErrorCode::SUCCESS) {
+                    std::cout << "  -> Sent indication #" << seq
+                              << " to dApp " << dapp_id
+                              << " (" << mock_data.size() << " bytes)\n";
+                } else {
+                    std::cerr << "  -> Failed to send indication to dApp "
+                              << dapp_id << ": "
+                              << libe3::error_code_to_string(rc) << "\n";
+                }
+            }
+            ++seq;
+        }
     }
     
     std::cout << "\nStopping agent...\n";

@@ -540,11 +540,6 @@ void E3Interface::handle_control_action(const DAppControlAction& action) {
         E3_LOG_ERROR(LOG_TAG) << "No running SM found for RAN function " 
                               << action.ran_function_identifier;
     }
-    
-    // Also invoke user callback if set
-    if (control_action_handler_) {
-        control_action_handler_(action);
-    }
 }
 
 void E3Interface::handle_dapp_report(const DAppReport& report) {

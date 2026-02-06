@@ -33,7 +33,6 @@ class E3Agent;
  */
 using SetupRequestHandler = std::function<ResponseCode(const SetupRequest&, SetupResponse&)>;
 using SubscriptionRequestHandler = std::function<ResponseCode(const SubscriptionRequest&)>;
-using E3ControlActionHandler = std::function<void(const DAppControlAction&)>;
 using DAppReportHandler = std::function<void(const DAppReport&)>;
 
 /**
@@ -134,10 +133,6 @@ public:
     // Event Handlers - Set by E3Agent
     // =========================================================================
 
-    void set_control_action_handler(E3ControlActionHandler handler) {
-        control_action_handler_ = std::move(handler);
-    }
-
     void set_dapp_report_handler(DAppReportHandler handler) {
         dapp_report_handler_ = std::move(handler);
     }
@@ -163,7 +158,6 @@ private:
     std::unique_ptr<std::thread> sm_data_thread_;
 
     // Event handlers
-    E3ControlActionHandler control_action_handler_;
     DAppReportHandler dapp_report_handler_;
 
     // =========================================================================

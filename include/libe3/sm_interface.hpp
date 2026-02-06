@@ -27,16 +27,6 @@ namespace libe3 {
 class ServiceModel;
 
 /**
- * @brief SM indication data for passing data from SM to publisher
- */
-struct SmIndicationData {
-    uint32_t ran_function_id{0};
-    std::vector<uint8_t> encoded_data;
-    uint64_t timestamp{0};
-    bool ready{false};
-};
-
-/**
  * @brief Callback type for handling a specific control action within an SM
  *
  * @param action_data The control action data (E3SM-encoded)
@@ -44,19 +34,6 @@ struct SmIndicationData {
  */
 using ControlActionCallback = std::function<ErrorCode(
     const std::vector<uint8_t>& action_data
-)>;
-
-/**
- * @brief Callback type for receiving indication data from SM
- *
- * @param ran_function_id The RAN function providing data
- * @param encoded_data E3SM-encoded indication data
- * @param timestamp Timestamp of the data
- */
-using IndicationDataCallback = std::function<void(
-    uint32_t ran_function_id,
-    std::vector<uint8_t> encoded_data,
-    uint64_t timestamp
 )>;
 
 /**
@@ -155,16 +132,6 @@ public:
         return ErrorCode::NOT_FOUND;
     }
 
-    /**
-     * @brief Set callback for delivering indication data
-     *
-     * The SM implementation should call this callback when it has
-     * indication data ready to be sent to subscribers.
-     */
-    void set_indication_callback(IndicationDataCallback callback) {
-        indication_callback_ = std::move(callback);
-    }
-
 protected:
     ServiceModel() = default;
 
@@ -187,21 +154,7 @@ protected:
         control_callbacks_.erase(control_id);
     }
 
-    /**
-     * @brief Deliver indication data to the E3 agent
-     *
-     * Call this from your SM implementation when indication data is ready.
-     * Uses the SM's own RAN function ID automatically.
-     */
-    void deliver_indication(std::vector<uint8_t> encoded_data,
-                           uint64_t timestamp = 0) {
-        if (indication_callback_) {
-            indication_callback_(ran_function_id(), std::move(encoded_data), timestamp);
-        }
-    }
-
 private:
-    IndicationDataCallback indication_callback_;
     std::unordered_map<uint32_t, ControlActionCallback> control_callbacks_;
 };
 

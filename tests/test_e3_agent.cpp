@@ -62,12 +62,6 @@ public:
     }
     
     bool is_running() const override { return running_; }
-    
-    // Test helper to trigger indication
-    void trigger_indication(const std::vector<uint8_t>& data) {
-        deliver_indication(data, 
-            static_cast<uint64_t>(std::chrono::system_clock::now().time_since_epoch().count()));
-    }
 
 private:
     uint32_t id_;
@@ -157,27 +151,20 @@ TEST(E3Agent_register_null_sm) {
     ASSERT_EQ(error_to_int(result), error_to_int(ErrorCode::INVALID_PARAM));
 }
 
-TEST(E3Agent_control_callback) {
+TEST(E3Agent_sm_control_dispatch) {
     E3Config config;
-    config.ran_identifier = "callback-test";
+    config.ran_identifier = "control-test";
     
     E3Agent agent(std::move(config));
     
-    uint32_t received_dapp = 0;
-    uint32_t received_ran_func = 0;
-    std::vector<uint8_t> received_data;
-    
-    agent.set_control_callback([&](uint32_t dapp, uint32_t ran_func, 
-                                   const std::vector<uint8_t>& data) -> ErrorCode {
-        received_dapp = dapp;
-        received_ran_func = ran_func;
-        received_data = data;
-        return ErrorCode::SUCCESS;
-    });
+    // Control actions are handled by the SM's registered control callbacks,
+    // not by the E3Agent directly.
+    auto sm = std::make_unique<TestServiceModel>(100);
+    auto result = agent.register_sm(std::move(sm));
+    ASSERT_EQ(error_to_int(result), error_to_int(ErrorCode::SUCCESS));
     
     agent.init();
     
-    // Verify callback is set (actual invocation requires full setup)
     ASSERT_EQ(state_to_int(agent.state()), state_to_int(AgentState::INITIALIZED));
 }
 

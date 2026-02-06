@@ -22,8 +22,6 @@ constexpr const char* LOG_TAG = "E3Agent";
 struct E3Agent::Impl {
     E3Config config;
     std::unique_ptr<E3Interface> interface;
-    ControlCallback control_callback;
-    IndicationCallback indication_callback;
     
     explicit Impl(E3Config cfg) : config(std::move(cfg)) {}
 };
@@ -62,21 +60,6 @@ ErrorCode E3Agent::init() {
         E3_LOG_ERROR(LOG_TAG) << "Failed to initialize interface: " 
                               << error_code_to_string(result);
         return result;
-    }
-    
-    // Set up control action handler
-    if (impl_->control_callback) {
-        impl_->interface->set_control_action_handler(
-            [this](const DAppControlAction& action) {
-                if (impl_->control_callback) {
-                    impl_->control_callback(
-                        action.dapp_identifier,
-                        action.ran_function_identifier,
-                        action.action_data
-                    );
-                }
-            }
-        );
     }
     
     E3_LOG_INFO(LOG_TAG) << "E3Agent initialized successfully";
@@ -143,35 +126,6 @@ ErrorCode E3Agent::register_sm(std::unique_ptr<ServiceModel> sm) {
         }
     }
     
-    // Set up indication callback on the SM
-    if (impl_->indication_callback) {
-        sm->set_indication_callback(
-            [this](uint32_t ran_func, std::vector<uint8_t> data, [[maybe_unused]] uint64_t timestamp) {
-                // Get subscribers for this RAN function
-                auto subscribers = impl_->interface->subscription_manager()
-                    .get_subscribed_dapps(ran_func);
-                
-                // Deliver to each subscriber
-                for (uint32_t dapp_id : subscribers) {
-                    // Queue indication message
-                    Pdu pdu(PduType::INDICATION_MESSAGE);
-                    IndicationMessage msg;
-                    msg.dapp_identifier = dapp_id;
-                    msg.ran_function_identifier = ran_func;
-                    msg.protocol_data = data;
-                    pdu.choice = msg;
-                    
-                    impl_->interface->queue_outbound(std::move(pdu));
-                    
-                    // Also invoke user callback
-                    if (impl_->indication_callback) {
-                        impl_->indication_callback(dapp_id, ran_func, data);
-                    }
-                }
-            }
-        );
-    }
-    
     return impl_->interface->register_sm(std::move(sm));
 }
 
@@ -180,32 +134,6 @@ std::vector<uint32_t> E3Agent::get_available_ran_functions() const {
         return {};
     }
     return impl_->interface->get_available_ran_functions();
-}
-
-// =========================================================================
-// Callbacks
-// =========================================================================
-
-void E3Agent::set_control_callback(ControlCallback callback) {
-    impl_->control_callback = std::move(callback);
-    
-    if (impl_->interface) {
-        impl_->interface->set_control_action_handler(
-            [this](const DAppControlAction& action) {
-                if (impl_->control_callback) {
-                    impl_->control_callback(
-                        action.dapp_identifier,
-                        action.ran_function_identifier,
-                        action.action_data
-                    );
-                }
-            }
-        );
-    }
-}
-
-void E3Agent::set_indication_callback(IndicationCallback callback) {
-    impl_->indication_callback = std::move(callback);
 }
 
 // =========================================================================
