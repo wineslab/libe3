@@ -19,6 +19,16 @@ constexpr const char* LOG_TAG = "E3Iface";
 constexpr auto SM_POLL_INTERVAL = std::chrono::milliseconds(10);
 }
 
+uint32_t E3Interface::generate_message_id() {
+    uint32_t id = message_id_counter_.fetch_add(1, std::memory_order_relaxed);
+    // Wrap around to stay within valid range (1-100)
+    if (id > 100) {
+        id = (id % 100) + 1;
+        message_id_counter_.store(id + 1, std::memory_order_relaxed);
+    }
+    return id;
+}
+
 E3Interface::E3Interface(const E3Config& config)
     : config_(config)
 {
@@ -421,6 +431,7 @@ void E3Interface::handle_setup_request(const SetupRequest& request) {
     }
     
     auto encode_result = encoder_->encode_setup_response(
+        generate_message_id(),
         request.id,
         response_code,
         std::nullopt,  // e3ap_protocol_version
@@ -474,8 +485,9 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
     // Create and queue response
     Pdu response_pdu(PduType::SUBSCRIPTION_RESPONSE);
     SubscriptionResponse resp;
-    resp.id = 0; // Will be set by encoder
+    resp.id = generate_message_id();
     resp.request_id = request.id;
+    resp.dapp_identifier = request.dapp_identifier;
     resp.response_code = response_code;
     if (response_code == ResponseCode::POSITIVE) {
         resp.subscription_id = subscription_id;
@@ -507,7 +519,7 @@ void E3Interface::handle_subscription_delete(const SubscriptionDelete& del) {
     // Create and queue ack response
     Pdu response_pdu(PduType::MESSAGE_ACK);
     MessageAck ack;
-    ack.id = 0; // Will be set by encoder
+    ack.id = generate_message_id();
     ack.request_id = del.id;
     ack.response_code = response_code;
     response_pdu.choice = ack;

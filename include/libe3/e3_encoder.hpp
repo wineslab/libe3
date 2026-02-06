@@ -76,12 +76,14 @@ public:
 
     /**
      * @brief Create and encode a Setup Request PDU
+     * @param message_id Unique message ID
      * @param e3ap_protocol_version E3AP protocol version string (e.g., "0.0.0")
      * @param dapp_name Name of the dApp
      * @param dapp_version Version of the dApp (e.g., "0.0.0")
      * @param vendor Vendor name (max 30 chars)
      */
     EncodeResult<EncodedMessage> encode_setup_request(
+        uint32_t message_id,
         const std::string& e3ap_protocol_version,
         const std::string& dapp_name,
         const std::string& dapp_version,
@@ -90,6 +92,7 @@ public:
 
     /**
      * @brief Create and encode a Setup Response PDU
+     * @param message_id Unique message ID
      * @param request_id ID of the corresponding SetupRequest
      * @param response_code Response code (positive/negative)
      * @param e3ap_protocol_version E3AP protocol version (optional)
@@ -98,6 +101,7 @@ public:
      * @param ran_function_list List of available RAN functions (optional)
      */
     EncodeResult<EncodedMessage> encode_setup_response(
+        uint32_t message_id,
         uint32_t request_id,
         ResponseCode response_code,
         const std::optional<std::string>& e3ap_protocol_version = std::nullopt,
@@ -108,6 +112,7 @@ public:
 
     /**
      * @brief Create and encode a Subscription Request PDU
+     * @param message_id Unique message ID
      * @param dapp_identifier dApp identifier
      * @param ran_function_identifier RAN function to subscribe to
      * @param telemetry_identifier_list List of telemetry identifiers
@@ -115,6 +120,7 @@ public:
      * @param subscription_time How long to keep the subscription (0-3600 sec, optional)
      */
     EncodeResult<EncodedMessage> encode_subscription_request(
+        uint32_t message_id,
         uint32_t dapp_identifier,
         uint32_t ran_function_identifier,
         const std::vector<uint32_t>& telemetry_identifier_list,
@@ -124,33 +130,41 @@ public:
 
     /**
      * @brief Create and encode a Subscription Delete PDU
+     * @param message_id Unique message ID
      * @param dapp_identifier dApp identifier
      * @param subscription_id Subscription ID to delete
      */
     EncodeResult<EncodedMessage> encode_subscription_delete(
+        uint32_t message_id,
         uint32_t dapp_identifier,
         uint32_t subscription_id
     );
 
     /**
      * @brief Create and encode a Subscription Response PDU
+     * @param message_id Unique message ID
      * @param request_id ID of the corresponding SubscriptionRequest
+     * @param dapp_identifier dApp identifier
      * @param response_code Response code (positive/negative)
      * @param subscription_id Subscription ID (optional)
      */
     EncodeResult<EncodedMessage> encode_subscription_response(
+        uint32_t message_id,
         uint32_t request_id,
+        uint32_t dapp_identifier,
         ResponseCode response_code,
         const std::optional<uint32_t>& subscription_id = std::nullopt
     );
 
     /**
      * @brief Create and encode an Indication Message PDU
+     * @param message_id Unique message ID
      * @param dapp_identifier dApp identifier
      * @param ran_function_identifier RAN function identifier
      * @param protocol_data Protocol data
      */
     EncodeResult<EncodedMessage> encode_indication_message(
+        uint32_t message_id,
         uint32_t dapp_identifier,
         uint32_t ran_function_identifier,
         const std::vector<uint8_t>& protocol_data
@@ -158,12 +172,14 @@ public:
 
     /**
      * @brief Create and encode a dApp Control Action PDU
+     * @param message_id Unique message ID
      * @param dapp_identifier dApp identifier
      * @param ran_function_identifier RAN function identifier
      * @param control_identifier Control identifier
      * @param action_data Action data
      */
     EncodeResult<EncodedMessage> encode_dapp_control_action(
+        uint32_t message_id,
         uint32_t dapp_identifier,
         uint32_t ran_function_identifier,
         uint32_t control_identifier,
@@ -172,8 +188,10 @@ public:
 
     /**
      * @brief Create and encode a dApp Report PDU
+     * @param message_id Unique message ID
      */
     EncodeResult<EncodedMessage> encode_dapp_report(
+        uint32_t message_id,
         uint32_t dapp_identifier,
         uint32_t ran_function_identifier,
         const std::vector<uint8_t>& report_data
@@ -181,8 +199,10 @@ public:
 
     /**
      * @brief Create and encode an xApp Control Action PDU
+     * @param message_id Unique message ID
      */
     EncodeResult<EncodedMessage> encode_xapp_control_action(
+        uint32_t message_id,
         uint32_t dapp_identifier,
         uint32_t ran_function_identifier,
         const std::vector<uint8_t>& xapp_control_data
@@ -190,19 +210,16 @@ public:
 
     /**
      * @brief Create and encode a Message Acknowledgment PDU
+     * @param message_id Unique message ID
      */
     EncodeResult<EncodedMessage> encode_message_ack(
+        uint32_t message_id,
         uint32_t request_id,
         ResponseCode response_code
     );
 
 protected:
     E3Encoder() = default;
-
-    /**
-     * @brief Generate unique message ID
-     */
-    static uint32_t generate_message_id();
 };
 
 /**

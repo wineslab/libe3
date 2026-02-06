@@ -36,6 +36,7 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     E3-SubscriptionResponse ::= SEQUENCE {
         id                   E3-MessageID,
         requestId            E3-MessageID,
+        dAppIdentifier       E3-DAppID,
         responseCode         E3-ResponseCode,
         subscriptionId       INTEGER (0..100) OPTIONAL
     }

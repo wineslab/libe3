@@ -135,6 +135,7 @@ nlohmann::json JsonE3Encoder::encode_subscription_response(const SubscriptionRes
     nlohmann::json j;
     j["id"] = resp.id;
     j["request_id"] = resp.request_id;
+    j["dapp_identifier"] = resp.dapp_identifier;
     j["response_code"] = (resp.response_code == ResponseCode::POSITIVE) ? "positive" : "negative";
     if (resp.subscription_id.has_value()) {
         j["subscription_id"] = resp.subscription_id.value();
@@ -255,6 +256,7 @@ SubscriptionResponse JsonE3Encoder::decode_subscription_response(const nlohmann:
     SubscriptionResponse resp;
     resp.id = j.value("id", 0u);
     resp.request_id = j.value("request_id", 0u);
+    resp.dapp_identifier = j.value("dapp_identifier", 0u);
     std::string response_code_str = j.value("response_code", "negative");
     resp.response_code = (response_code_str == "positive") ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
     if (j.contains("subscription_id")) {

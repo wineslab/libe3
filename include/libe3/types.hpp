@@ -224,6 +224,7 @@ struct SubscriptionDelete {
 struct SubscriptionResponse {
     uint32_t id{0};                              ///< Message ID
     uint32_t request_id{0};                      ///< ID of the corresponding SubscriptionRequest
+    uint32_t dapp_identifier{0};                  ///< dApp identifier
     ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
     std::optional<uint32_t> subscription_id;     ///< Subscription ID (optional)
 };

@@ -226,6 +226,14 @@ private:
      * @brief Callback for SM lifecycle changes
      */
     void on_sm_lifecycle_change(uint32_t ran_function_id, bool should_start);
+
+    /**
+     * @brief Generate unique message ID (1-100, wrapping)
+     */
+    uint32_t generate_message_id();
+
+    // Message ID counter
+    std::atomic<uint32_t> message_id_counter_{1};
 };
 
 } // namespace libe3

@@ -7,27 +7,13 @@
 
 #include "libe3/e3_encoder.hpp"
 #include "libe3/logger.hpp"
-#include <atomic>
 
 namespace libe3 {
-
-namespace {
-std::atomic<uint32_t> message_id_counter{1};
-}
-
-uint32_t E3Encoder::generate_message_id() {
-    uint32_t id = message_id_counter.fetch_add(1, std::memory_order_relaxed);
-    // Wrap around to stay within valid range (1-100)
-    if (id > 100) {
-        id = (id % 100) + 1;
-        message_id_counter.store(id + 1, std::memory_order_relaxed);
-    }
-    return id;
-}
 
 // Convenience method implementations
 
 EncodeResult<EncodedMessage> E3Encoder::encode_setup_request(
+    uint32_t message_id,
     const std::string& e3ap_protocol_version,
     const std::string& dapp_name,
     const std::string& dapp_version,
@@ -35,16 +21,18 @@ EncodeResult<EncodedMessage> E3Encoder::encode_setup_request(
 ) {
     Pdu pdu(PduType::SETUP_REQUEST);
     SetupRequest req;
+    req.id = message_id;
     req.e3ap_protocol_version = e3ap_protocol_version;
     req.dapp_name = dapp_name;
     req.dapp_version = dapp_version;
     req.vendor = vendor;
-    pdu.message_id = generate_message_id();
+    pdu.message_id = message_id;
     pdu.choice = req;
     return encode(pdu);
 }
 
 EncodeResult<EncodedMessage> E3Encoder::encode_setup_response(
+    uint32_t message_id,
     uint32_t request_id,
     ResponseCode response_code,
     const std::optional<std::string>& e3ap_protocol_version,
@@ -54,7 +42,7 @@ EncodeResult<EncodedMessage> E3Encoder::encode_setup_response(
 ) {
     Pdu pdu(PduType::SETUP_RESPONSE);
     SetupResponse resp;
-    resp.id = generate_message_id();
+    resp.id = message_id;
     resp.request_id = request_id;
     resp.response_code = response_code;
     resp.e3ap_protocol_version = e3ap_protocol_version;
@@ -66,6 +54,7 @@ EncodeResult<EncodedMessage> E3Encoder::encode_setup_response(
 }
 
 EncodeResult<EncodedMessage> E3Encoder::encode_subscription_request(
+    uint32_t message_id,
     uint32_t dapp_identifier,
     uint32_t ran_function_identifier,
     const std::vector<uint32_t>& telemetry_identifier_list,
@@ -74,7 +63,7 @@ EncodeResult<EncodedMessage> E3Encoder::encode_subscription_request(
 ) {
     Pdu pdu(PduType::SUBSCRIPTION_REQUEST);
     SubscriptionRequest req;
-    req.id = generate_message_id();
+    req.id = message_id;
     req.dapp_identifier = dapp_identifier;
     req.ran_function_identifier = ran_function_identifier;
     req.telemetry_identifier_list = telemetry_identifier_list;
@@ -85,12 +74,13 @@ EncodeResult<EncodedMessage> E3Encoder::encode_subscription_request(
 }
 
 EncodeResult<EncodedMessage> E3Encoder::encode_subscription_delete(
+    uint32_t message_id,
     uint32_t dapp_identifier,
     uint32_t subscription_id
 ) {
     Pdu pdu(PduType::SUBSCRIPTION_DELETE);
     SubscriptionDelete del;
-    del.id = generate_message_id();
+    del.id = message_id;
     del.dapp_identifier = dapp_identifier;
     del.subscription_id = subscription_id;
     pdu.choice = del;
@@ -98,14 +88,17 @@ EncodeResult<EncodedMessage> E3Encoder::encode_subscription_delete(
 }
 
 EncodeResult<EncodedMessage> E3Encoder::encode_subscription_response(
+    uint32_t message_id,
     uint32_t request_id,
+    uint32_t dapp_identifier,
     ResponseCode response_code,
     const std::optional<uint32_t>& subscription_id
 ) {
     Pdu pdu(PduType::SUBSCRIPTION_RESPONSE);
     SubscriptionResponse resp;
-    resp.id = generate_message_id();
+    resp.id = message_id;
     resp.request_id = request_id;
+    resp.dapp_identifier = dapp_identifier;
     resp.response_code = response_code;
     resp.subscription_id = subscription_id;
     pdu.choice = resp;
@@ -113,13 +106,14 @@ EncodeResult<EncodedMessage> E3Encoder::encode_subscription_response(
 }
 
 EncodeResult<EncodedMessage> E3Encoder::encode_indication_message(
+    uint32_t message_id,
     uint32_t dapp_identifier,
     uint32_t ran_function_identifier,
     const std::vector<uint8_t>& protocol_data
 ) {
     Pdu pdu(PduType::INDICATION_MESSAGE);
     IndicationMessage msg;
-    msg.id = generate_message_id();
+    msg.id = message_id;
     msg.dapp_identifier = dapp_identifier;
     msg.ran_function_identifier = ran_function_identifier;
     msg.protocol_data = protocol_data;
@@ -128,6 +122,7 @@ EncodeResult<EncodedMessage> E3Encoder::encode_indication_message(
 }
 
 EncodeResult<EncodedMessage> E3Encoder::encode_dapp_control_action(
+    uint32_t message_id,
     uint32_t dapp_identifier,
     uint32_t ran_function_identifier,
     uint32_t control_identifier,
@@ -135,7 +130,7 @@ EncodeResult<EncodedMessage> E3Encoder::encode_dapp_control_action(
 ) {
     Pdu pdu(PduType::DAPP_CONTROL_ACTION);
     DAppControlAction action;
-    action.id = generate_message_id();
+    action.id = message_id;
     action.dapp_identifier = dapp_identifier;
     action.ran_function_identifier = ran_function_identifier;
     action.control_identifier = control_identifier;
@@ -145,13 +140,14 @@ EncodeResult<EncodedMessage> E3Encoder::encode_dapp_control_action(
 }
 
 EncodeResult<EncodedMessage> E3Encoder::encode_dapp_report(
+    uint32_t message_id,
     uint32_t dapp_identifier,
     uint32_t ran_function_identifier,
     const std::vector<uint8_t>& report_data
 ) {
     Pdu pdu(PduType::DAPP_REPORT);
     DAppReport report;
-    report.id = generate_message_id();
+    report.id = message_id;
     report.dapp_identifier = dapp_identifier;
     report.ran_function_identifier = ran_function_identifier;
     report.report_data = report_data;
@@ -160,13 +156,14 @@ EncodeResult<EncodedMessage> E3Encoder::encode_dapp_report(
 }
 
 EncodeResult<EncodedMessage> E3Encoder::encode_xapp_control_action(
+    uint32_t message_id,
     uint32_t dapp_identifier,
     uint32_t ran_function_identifier,
     const std::vector<uint8_t>& xapp_control_data
 ) {
     Pdu pdu(PduType::XAPP_CONTROL_ACTION);
     XAppControlAction action;
-    action.id = generate_message_id();
+    action.id = message_id;
     action.dapp_identifier = dapp_identifier;
     action.ran_function_identifier = ran_function_identifier;
     action.xapp_control_data = xapp_control_data;
@@ -175,12 +172,13 @@ EncodeResult<EncodedMessage> E3Encoder::encode_xapp_control_action(
 }
 
 EncodeResult<EncodedMessage> E3Encoder::encode_message_ack(
+    uint32_t message_id,
     uint32_t request_id,
     ResponseCode response_code
 ) {
     Pdu pdu(PduType::MESSAGE_ACK);
     MessageAck ack;
-    ack.id = generate_message_id();
+    ack.id = message_id;
     ack.request_id = request_id;
     ack.response_code = response_code;
     pdu.choice = ack;

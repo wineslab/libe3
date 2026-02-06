@@ -138,7 +138,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 calloc(1, sizeof(E3_SetupRequest_t)));
             if (!asn1_pdu->choice.setupRequest) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.setupRequest->id = pdu.message_id ? pdu.message_id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.setupRequest->id = pdu.message_id;
             
             // Set e3apProtocolVersion string
             OCTET_STRING_fromBuf(&asn1_pdu->choice.setupRequest->e3apProtocolVersion,
@@ -171,7 +171,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 calloc(1, sizeof(E3_SetupResponse_t)));
             if (!asn1_pdu->choice.setupResponse) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.setupResponse->id = resp->id ? resp->id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.setupResponse->id = resp->id;
             asn1_pdu->choice.setupResponse->requestId = resp->request_id;
             asn1_pdu->choice.setupResponse->responseCode = 
                 (resp->response_code == ResponseCode::POSITIVE) ? 0 : 1;
@@ -236,7 +236,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 calloc(1, sizeof(E3_SubscriptionRequest_t)));
             if (!asn1_pdu->choice.subscriptionRequest) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.subscriptionRequest->id = req->id ? req->id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.subscriptionRequest->id = req->id;
             asn1_pdu->choice.subscriptionRequest->dAppIdentifier = req->dapp_identifier;
             asn1_pdu->choice.subscriptionRequest->ranFunctionIdentifier = req->ran_function_identifier;
             
@@ -272,7 +272,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 calloc(1, sizeof(E3_SubscriptionDelete_t)));
             if (!asn1_pdu->choice.subscriptionDelete) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.subscriptionDelete->id = del->id ? del->id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.subscriptionDelete->id = del->id;
             asn1_pdu->choice.subscriptionDelete->dAppIdentifier = del->dapp_identifier;
             asn1_pdu->choice.subscriptionDelete->subscriptionId = del->subscription_id;
             break;
@@ -287,8 +287,9 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 calloc(1, sizeof(E3_SubscriptionResponse_t)));
             if (!asn1_pdu->choice.subscriptionResponse) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.subscriptionResponse->id = resp->id ? resp->id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.subscriptionResponse->id = resp->id;
             asn1_pdu->choice.subscriptionResponse->requestId = resp->request_id;
+            asn1_pdu->choice.subscriptionResponse->dAppIdentifier = resp->dapp_identifier;
             asn1_pdu->choice.subscriptionResponse->responseCode = 
                 (resp->response_code == ResponseCode::POSITIVE) ? 0 : 1;
             
@@ -310,7 +311,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 calloc(1, sizeof(E3_IndicationMessage_t)));
             if (!asn1_pdu->choice.indicationMessage) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.indicationMessage->id = pdu.message_id ? pdu.message_id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.indicationMessage->id = pdu.message_id;
             asn1_pdu->choice.indicationMessage->dAppIdentifier = msg->dapp_identifier;
             asn1_pdu->choice.indicationMessage->ranFunctionIdentifier = msg->ran_function_identifier;
             
@@ -330,7 +331,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 calloc(1, sizeof(E3_DAppControlAction_t)));
             if (!asn1_pdu->choice.dAppControlAction) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.dAppControlAction->id = pdu.message_id ? pdu.message_id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.dAppControlAction->id = pdu.message_id;
             asn1_pdu->choice.dAppControlAction->dAppIdentifier = action->dapp_identifier;
             asn1_pdu->choice.dAppControlAction->ranFunctionIdentifier = action->ran_function_identifier;
             asn1_pdu->choice.dAppControlAction->controlIdentifier = action->control_identifier;
@@ -350,7 +351,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 calloc(1, sizeof(E3_DAppReport_t)));
             if (!asn1_pdu->choice.dAppReport) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.dAppReport->id = pdu.message_id ? pdu.message_id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.dAppReport->id = pdu.message_id;
             asn1_pdu->choice.dAppReport->dAppIdentifier = report->dapp_identifier;
             asn1_pdu->choice.dAppReport->ranFunctionIdentifier = report->ran_function_identifier;
             
@@ -369,7 +370,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 calloc(1, sizeof(E3_XAppControlAction_t)));
             if (!asn1_pdu->choice.xAppControlAction) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.xAppControlAction->id = pdu.message_id ? pdu.message_id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.xAppControlAction->id = pdu.message_id;
             asn1_pdu->choice.xAppControlAction->dAppIdentifier = action->dapp_identifier;
             asn1_pdu->choice.xAppControlAction->ranFunctionIdentifier = action->ran_function_identifier;
             
@@ -388,7 +389,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 calloc(1, sizeof(E3_MessageAck_t)));
             if (!asn1_pdu->choice.messageAck) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.messageAck->id = ack->id ? ack->id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.messageAck->id = ack->id;
             asn1_pdu->choice.messageAck->requestId = ack->request_id;
             asn1_pdu->choice.messageAck->responseCode = 
                 (ack->response_code == ResponseCode::POSITIVE) ? 0 : 1;
@@ -404,7 +405,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                 calloc(1, sizeof(E3_ReleaseMessage_t)));
             if (!asn1_pdu->choice.releaseMessage) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.releaseMessage->id = msg->id ? msg->id : E3Encoder::generate_message_id();
+            asn1_pdu->choice.releaseMessage->id = msg->id;
             asn1_pdu->choice.releaseMessage->dAppIdentifier = msg->dapp_identifier;
             break;
         }
@@ -564,6 +565,7 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             SubscriptionResponse resp;
             resp.id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionResponse->id);
             resp.request_id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionResponse->requestId);
+            resp.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.subscriptionResponse->dAppIdentifier);
             resp.response_code = (asn1_pdu->choice.subscriptionResponse->responseCode == 0)
                 ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
             
