@@ -15,6 +15,8 @@
 #include <thread>
 #include <cstring>
 #include <getopt.h>
+// Simple SM wrappers
+#include "sm_simple/e3sm_simple_wrapper.hpp"
 
 static std::atomic<bool> g_running{true};
 
@@ -43,7 +45,12 @@ public:
 
     libe3::ErrorCode init() override {
         register_control_callback(1, [](const std::vector<uint8_t>& data) {
-            std::cout << "[SIMPLE] Control action 1 (" << data.size() << " bytes)\n";
+            int sampling = 0;
+            if (libe3_examples::decode_simple_control(data, sampling)) {
+                std::cout << "[SIMPLE] Control action 1: samplingThreshold=" << sampling << "\n";
+            } else {
+                std::cout << "[SIMPLE] Control action 1: failed to decode (" << data.size() << " bytes)\n";
+            }
             return libe3::ErrorCode::SUCCESS;
         });
         return libe3::ErrorCode::SUCCESS;
@@ -56,6 +63,15 @@ public:
     libe3::ErrorCode start() override {
         running_ = true;
         return libe3::ErrorCode::SUCCESS;
+    }
+
+    std::vector<uint8_t> ran_function_data() const override {
+        const std::string name = "SIMPLE";
+        std::vector<uint8_t> out;
+        if (libe3_examples::encode_ran_function_data(name, out)) {
+            return out;
+        }
+        return {};
     }
 
     void stop() override {
@@ -194,7 +210,7 @@ int main(int argc, char* argv[]) {
     // Main loop — periodically send mock indication data to subscribers
     uint32_t seq = 0;
     while (g_running) {
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::this_thread::sleep_for(std::chrono::seconds(2));
         
         // Print statistics periodically
         std::cout << "  dApps: " << agent.dapp_count()
@@ -205,28 +221,27 @@ int main(int argc, char* argv[]) {
             SimpleServiceModel::RAN_FUNCTION_ID);
         
         if (!subscribers.empty()) {
-            // Build a small mock payload: 4-byte sequence number + 12 bytes of fake metrics
-            std::vector<uint8_t> mock_data(16);
-            mock_data[0] = static_cast<uint8_t>((seq >> 24) & 0xFF);
-            mock_data[1] = static_cast<uint8_t>((seq >> 16) & 0xFF);
-            mock_data[2] = static_cast<uint8_t>((seq >>  8) & 0xFF);
-            mock_data[3] = static_cast<uint8_t>((seq      ) & 0xFF);
-            // Fill remaining bytes with a simple pattern
-            for (size_t i = 4; i < mock_data.size(); ++i) {
-                mock_data[i] = static_cast<uint8_t>(i + seq);
-            }
-            
-            for (uint32_t dapp_id : subscribers) {
-                auto rc = agent.send_indication(
-                    dapp_id, SimpleServiceModel::RAN_FUNCTION_ID, mock_data);
-                if (rc == libe3::ErrorCode::SUCCESS) {
-                    std::cout << "  -> Sent indication #" << seq
-                              << " to dApp " << dapp_id
-                              << " (" << mock_data.size() << " bytes)\n";
-                } else {
-                    std::cerr << "  -> Failed to send indication to dApp "
-                              << dapp_id << ": "
-                              << libe3::error_code_to_string(rc) << "\n";
+            // Build a structured Simple-Indication and encode it
+            libe3_examples::SimpleIndication si;
+            si.data1 = seq;
+            si.timestamp = static_cast<uint32_t>(time(NULL));
+
+            std::vector<uint8_t> encoded;
+            if (!libe3_examples::encode_simple_indication(si, encoded)) {
+                std::cerr << "Failed to encode Simple-Indication\n";
+            } else {
+                for (uint32_t dapp_id : subscribers) {
+                    auto rc = agent.send_indication(
+                        dapp_id, SimpleServiceModel::RAN_FUNCTION_ID, encoded);
+                    if (rc == libe3::ErrorCode::SUCCESS) {
+                        std::cout << "  -> Sent indication #" << seq
+                                  << " to dApp " << dapp_id
+                                  << " (" << encoded.size() << " bytes)\n";
+                    } else {
+                        std::cerr << "  -> Failed to send indication to dApp "
+                                  << dapp_id << ": "
+                                  << libe3::error_code_to_string(rc) << "\n";
+                    }
                 }
             }
             ++seq;

@@ -32,6 +32,21 @@ add_custom_command(OUTPUT ${e3ap_source} ${e3ap_headers}
     COMMENT "Generating E3AP ASN.1 source files from ${CMAKE_CURRENT_SOURCE_DIR}/${E3AP_GRAMMAR}"
 )
 
+# Optionally generate sources for the simple service model (e3sm_simple.asn)
+if(LIBE3_BUILD_EXAMPLES)
+    # Include example-only CMake snippet which generates the simple ASN grammar
+    include(${CMAKE_CURRENT_SOURCE_DIR}/../examples/sm_simple/CMakeLists.txt)
+
+    # If the examples CMake exported generated lists, append them into the
+    # asn1 sources so they are compiled only when examples are enabled.
+    if(DEFINED E3SM_SIMPLE_GENERATED_SRCS)
+        list(APPEND e3ap_source ${E3SM_SIMPLE_GENERATED_SRCS})
+    endif()
+    if(DEFINED E3SM_SIMPLE_GENERATED_HDRS)
+        list(APPEND e3ap_headers ${E3SM_SIMPLE_GENERATED_HDRS})
+    endif()
+endif()
+
 # Create ASN.1 library
 add_library(asn1_e3ap ${e3ap_source})
 set_target_properties(asn1_e3ap PROPERTIES LINKER_LANGUAGE C)

@@ -423,6 +423,8 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
         if (sm) {
             func.telemetry_identifier_list = sm->telemetry_ids();
             func.control_identifier_list = sm->control_ids();
+            // Include optional RAN-function-specific opaque data provided by the SM
+            func.ran_function_data = sm->ran_function_data();
         }
         ran_function_list.push_back(func);
     }

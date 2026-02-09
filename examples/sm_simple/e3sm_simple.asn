@@ -1,0 +1,54 @@
+-- Simple Service Model ASN.1 Definitions
+-- This service model extends E3 messages for the example application
+--
+
+SIMPLE-SM DEFINITIONS AUTOMATIC TAGS ::= BEGIN
+
+-- ============================================================================
+-- RAN FUNCTION DATA MESSAGE STRUCTURES
+-- ============================================================================
+
+-- Simple Indication (random data from RAN)
+Simple-RanFunctionData  ::= SEQUENCE {
+    name                   UTF8String (SIZE (0..100))  -- Name of the SM
+}
+
+-- ============================================================================
+-- INDICATION MESSAGE STRUCTURES
+-- ============================================================================
+
+-- Simple Indication (random data from RAN)
+Simple-Indication ::= SEQUENCE {
+    data1                   INTEGER (0..32768),              -- Random data
+    timestamp               INTEGER (0..2147483647) OPTIONAL -- Unix timestamp when samples were captured
+}
+
+-- ============================================================================
+-- CONTROL ACTION STRUCTURES  
+-- ============================================================================
+
+-- Simple Control (main control message used by dApp)
+Simple-Control ::= SEQUENCE {
+    samplingThreshold       INTEGER (0..100) OPTIONAL        -- Sampling delivery ratio
+}
+
+-- ============================================================================
+-- xAPP CONTROL ACTION STRUCTURES  
+-- ============================================================================
+
+
+-- Simple Configuration Control
+Simple-ConfigControl ::= SEQUENCE {
+    enable                  BOOLEAN                -- Enable/disable data delivery
+}
+
+-- ============================================================================
+-- DAPP REPORT STRUCTURES 
+-- ============================================================================
+
+Simple-DAppReport ::= SEQUENCE {
+    bin1                INTEGER (0..100)
+}
+
+
+END

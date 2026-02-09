@@ -78,6 +78,14 @@ public:
     virtual std::vector<uint32_t> control_ids() const = 0;
 
     /**
+     * @brief Optional RAN-function-specific opaque data
+     *
+     * Returns a byte vector that will be included in the SetupResponse
+     * ranFunctionList->ranFunctionData OCTET STRING. Default is empty.
+     */
+    virtual std::vector<uint8_t> ran_function_data() const { return {}; }
+
+    /**
      * @brief Initialize the SM
      *
      * Called when the SM is first registered.
