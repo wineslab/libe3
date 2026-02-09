@@ -214,6 +214,11 @@ private:
     void handle_dapp_report(const DAppReport& report);
 
     /**
+     * @brief Handle dApp Report
+     */
+    void handle_release_message(const ReleaseMessage &release);
+
+    /**
      * @brief Handle dApp disconnection
      */
     void handle_dapp_disconnection(uint32_t dapp_id);

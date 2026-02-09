@@ -288,6 +288,14 @@ void E3Interface::subscriber_loop() {
                 break;
             }
             
+            case PduType::RELEASE_MESSAGE: {
+                auto* release = std::get_if<ReleaseMessage>(&pdu.choice);
+                if (release) {
+                    handle_release_message(*release);
+                }
+                break;
+            }
+
             default:
                 E3_LOG_WARN(LOG_TAG) << "Received unexpected PDU type: " 
                                      << pdu_type_to_string(pdu.type);
@@ -568,6 +576,12 @@ void E3Interface::handle_dapp_report(const DAppReport& report) {
     if (dapp_report_handler_) {
         dapp_report_handler_(report);
     }
+}
+
+void E3Interface::handle_release_message(const ReleaseMessage& release) {
+    E3_LOG_INFO(LOG_TAG) << "Handling release message from dApp " << release.dapp_identifier;
+
+    handle_dapp_disconnection(release.dapp_identifier);
 }
 
 void E3Interface::handle_dapp_disconnection(uint32_t dapp_id) {
