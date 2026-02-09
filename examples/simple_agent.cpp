@@ -168,6 +168,8 @@ int main(int argc, char* argv[]) {
     config.link_layer = link_layer;
     config.transport_layer = transport_layer;
     config.encoding = encoding;
+    // Enable debug logging for diagnostics
+    config.log_level = 4;
     
     std::cout << "Configuration:\n"
               << "  RAN ID: " << ran_id << "\n"

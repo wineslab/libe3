@@ -197,7 +197,6 @@ void E3Interface::setup_loop() {
         
         if (ret <= 0) {
             if (should_stop_.load()) break;
-            E3_LOG_DEBUG(LOG_TAG) << "No setup request received";
             continue;
         }
 
@@ -415,6 +414,7 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
     // Create and send response
     // Get available RAN functions and convert to RanFunctionDef list
     auto available_ran_function_ids = SmRegistry::instance().get_available_ran_functions();
+    E3_LOG_DEBUG(LOG_TAG) << "Available RAN function ids count: " << available_ran_function_ids.size();
     std::vector<RanFunctionDef> ran_function_list;
     for (auto id : available_ran_function_ids) {
         RanFunctionDef func;
@@ -428,12 +428,19 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
         }
         ran_function_list.push_back(func);
     }
+    E3_LOG_DEBUG(LOG_TAG) << "Constructed ran_function_list size: " << ran_function_list.size();
+    for (const auto &rf : ran_function_list) {
+        E3_LOG_DEBUG(LOG_TAG) << "  RAN function id=" << rf.ran_function_identifier
+                               << ", telemetry_count=" << rf.telemetry_identifier_list.size()
+                               << ", control_count=" << rf.control_identifier_list.size()
+                               << ", ran_function_data_len=" << rf.ran_function_data.size();
+    }
     
-    auto encode_result = encoder_->encode_setup_response(
+        auto encode_result = encoder_->encode_setup_response(
         generate_message_id(),
         request_message_id,
         response_code,
-        std::nullopt,  // e3ap_protocol_version
+        config_.e3ap_version,
         assigned_dapp_id,  // dapp_identifier
         config_.ran_identifier,  // ran_identifier
         ran_function_list

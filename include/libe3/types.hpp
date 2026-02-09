@@ -339,7 +339,10 @@ struct Pdu {
 struct E3Config {
     // RAN identification
     std::string ran_identifier;
-    
+
+    //  E3AP version
+    std::string e3ap_version{"1.0.0"};
+
     // Transport configuration
     E3LinkLayer link_layer{E3LinkLayer::ZMQ};
     E3TransportLayer transport_layer{E3TransportLayer::IPC};

@@ -221,7 +221,16 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                     OCTET_STRING_fromBuf(&ran_func->ranFunctionData,
                         reinterpret_cast<const char*>(func.ran_function_data.data()),
                         static_cast<int>(func.ran_function_data.size()));
-                    ASN_SEQUENCE_ADD(&asn1_pdu->msg.choice.setupResponse->ranFunctionList, ran_func);
+
+                    // Ensure ranFunctionList container is allocated (optional field)
+                    if (!asn1_pdu->msg.choice.setupResponse->ranFunctionList) {
+                        asn1_pdu->msg.choice.setupResponse->ranFunctionList =
+                            static_cast<decltype(asn1_pdu->msg.choice.setupResponse->ranFunctionList)>(
+                                calloc(1, sizeof(*asn1_pdu->msg.choice.setupResponse->ranFunctionList)));
+                    }
+
+                    // Append the ran function into the sequence's internal list
+                    ASN_SEQUENCE_ADD(&asn1_pdu->msg.choice.setupResponse->ranFunctionList->list, ran_func);
                 }
             }
             break;
