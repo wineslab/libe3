@@ -56,6 +56,7 @@ include(libe3Targets)
 # ============================================================================
 include(libe3Tests)
 include(libe3Examples)
+include(libe3Docs)
 
 # ============================================================================
 # Installation

@@ -36,6 +36,7 @@ JOBS=$(nproc)
 ARCH_NATIVE=0
 RUN_TESTS=0
 FATAL_ERRORS=0
+BUILD_DOCS=0
 
 # Terminal colors
 RED='\033[0;31m'
@@ -99,6 +100,7 @@ Features:
   --disable-tests         Disable unit tests
   --enable-examples       Build examples (default: ON)
   --disable-examples      Disable examples
+  --docs                  Build documentation (via CMake 'docs' target)
 
 Sanitizers:
 -----------
@@ -235,6 +237,7 @@ configure_cmake() {
         "-DLIBE3_ENABLE_ASN1=$([ $ENABLE_ASN1 -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_ENABLE_ASAN=$([ $ENABLE_ASAN -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_ENABLE_TSAN=$([ $ENABLE_TSAN -eq 1 ] && echo ON || echo OFF)"
+        "-DLIBE3_BUILD_DOCS=$([ $BUILD_DOCS -eq 1 ] && echo ON || echo OFF)"
     )
     
     # Generator
@@ -303,6 +306,17 @@ build_library() {
     echo_success "Build completed successfully!"
 }
 
+build_docs() {
+    local build_path="$SCRIPT_DIR/$BUILD_DIR"
+    cd "$build_path"
+
+    echo_info "Building documentation (target: docs)..."
+    # Attempt to build a CMake 'docs' target. Many projects expose docs via a target.
+    cmake --build . --target docs --parallel "$JOBS"
+
+    echo_success "Documentation build completed!"
+}
+
 run_tests() {
     local build_path="$SCRIPT_DIR/$BUILD_DIR"
     cd "$build_path"
@@ -337,6 +351,7 @@ print_summary() {
     echo "  AddressSan:     $([ $ENABLE_ASAN -eq 1 ] && echo 'enabled' || echo 'disabled')"
     echo "  ThreadSan:      $([ $ENABLE_TSAN -eq 1 ] && echo 'enabled' || echo 'disabled')"
     echo "  Fatal Errors:   $([ $FATAL_ERRORS -eq 1 ] && echo 'enabled' || echo 'disabled')"
+    echo "  Documentation:  $([ $BUILD_DOCS -eq 1 ] && echo 'build requested' || echo 'not built')"
     echo "======================================"
     echo ""
 }
@@ -446,6 +461,10 @@ main() {
                 ENABLE_MSAN=1
                 shift
                 ;;
+            --docs)
+                BUILD_DOCS=1
+                shift
+                ;;
             -I|--install-deps)
                 INSTALL_DEPS=1
                 shift
@@ -521,6 +540,11 @@ main() {
     # Run tests if requested
     if [ $RUN_TESTS -eq 1 ] && [ $BUILD_TESTS -eq 1 ]; then
         run_tests
+    fi
+    
+    # Build documentation if requested
+    if [ $BUILD_DOCS -eq 1 ]; then
+        build_docs
     fi
     
     # Install if requested
