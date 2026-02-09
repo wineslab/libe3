@@ -21,7 +21,6 @@ EncodeResult<EncodedMessage> E3Encoder::encode_setup_request(
 ) {
     Pdu pdu(PduType::SETUP_REQUEST);
     SetupRequest req;
-    req.id = message_id;
     req.e3ap_protocol_version = e3ap_protocol_version;
     req.dapp_name = dapp_name;
     req.dapp_version = dapp_version;
@@ -42,13 +41,13 @@ EncodeResult<EncodedMessage> E3Encoder::encode_setup_response(
 ) {
     Pdu pdu(PduType::SETUP_RESPONSE);
     SetupResponse resp;
-    resp.id = message_id;
     resp.request_id = request_id;
     resp.response_code = response_code;
     resp.e3ap_protocol_version = e3ap_protocol_version;
     resp.dapp_identifier = dapp_identifier;
     resp.ran_identifier = ran_identifier;
     resp.ran_function_list = ran_function_list;
+    pdu.message_id = message_id;
     pdu.choice = resp;
     return encode(pdu);
 }
@@ -63,12 +62,12 @@ EncodeResult<EncodedMessage> E3Encoder::encode_subscription_request(
 ) {
     Pdu pdu(PduType::SUBSCRIPTION_REQUEST);
     SubscriptionRequest req;
-    req.id = message_id;
     req.dapp_identifier = dapp_identifier;
     req.ran_function_identifier = ran_function_identifier;
     req.telemetry_identifier_list = telemetry_identifier_list;
     req.control_identifier_list = control_identifier_list;
     req.subscription_time = subscription_time;
+    pdu.message_id = message_id;
     pdu.choice = req;
     return encode(pdu);
 }
@@ -80,9 +79,9 @@ EncodeResult<EncodedMessage> E3Encoder::encode_subscription_delete(
 ) {
     Pdu pdu(PduType::SUBSCRIPTION_DELETE);
     SubscriptionDelete del;
-    del.id = message_id;
     del.dapp_identifier = dapp_identifier;
     del.subscription_id = subscription_id;
+    pdu.message_id = message_id;
     pdu.choice = del;
     return encode(pdu);
 }
@@ -96,11 +95,11 @@ EncodeResult<EncodedMessage> E3Encoder::encode_subscription_response(
 ) {
     Pdu pdu(PduType::SUBSCRIPTION_RESPONSE);
     SubscriptionResponse resp;
-    resp.id = message_id;
     resp.request_id = request_id;
     resp.dapp_identifier = dapp_identifier;
     resp.response_code = response_code;
     resp.subscription_id = subscription_id;
+    pdu.message_id = message_id;
     pdu.choice = resp;
     return encode(pdu);
 }
@@ -113,10 +112,10 @@ EncodeResult<EncodedMessage> E3Encoder::encode_indication_message(
 ) {
     Pdu pdu(PduType::INDICATION_MESSAGE);
     IndicationMessage msg;
-    msg.id = message_id;
     msg.dapp_identifier = dapp_identifier;
     msg.ran_function_identifier = ran_function_identifier;
     msg.protocol_data = protocol_data;
+    pdu.message_id = message_id;
     pdu.choice = msg;
     return encode(pdu);
 }
@@ -130,11 +129,11 @@ EncodeResult<EncodedMessage> E3Encoder::encode_dapp_control_action(
 ) {
     Pdu pdu(PduType::DAPP_CONTROL_ACTION);
     DAppControlAction action;
-    action.id = message_id;
     action.dapp_identifier = dapp_identifier;
     action.ran_function_identifier = ran_function_identifier;
     action.control_identifier = control_identifier;
     action.action_data = action_data;
+    pdu.message_id = message_id;
     pdu.choice = action;
     return encode(pdu);
 }
@@ -147,10 +146,10 @@ EncodeResult<EncodedMessage> E3Encoder::encode_dapp_report(
 ) {
     Pdu pdu(PduType::DAPP_REPORT);
     DAppReport report;
-    report.id = message_id;
     report.dapp_identifier = dapp_identifier;
     report.ran_function_identifier = ran_function_identifier;
     report.report_data = report_data;
+    pdu.message_id = message_id;
     pdu.choice = report;
     return encode(pdu);
 }
@@ -163,10 +162,10 @@ EncodeResult<EncodedMessage> E3Encoder::encode_xapp_control_action(
 ) {
     Pdu pdu(PduType::XAPP_CONTROL_ACTION);
     XAppControlAction action;
-    action.id = message_id;
     action.dapp_identifier = dapp_identifier;
     action.ran_function_identifier = ran_function_identifier;
     action.xapp_control_data = xapp_control_data;
+    pdu.message_id = message_id;
     pdu.choice = action;
     return encode(pdu);
 }
@@ -178,9 +177,9 @@ EncodeResult<EncodedMessage> E3Encoder::encode_message_ack(
 ) {
     Pdu pdu(PduType::MESSAGE_ACK);
     MessageAck ack;
-    ack.id = message_id;
     ack.request_id = request_id;
     ack.response_code = response_code;
+    pdu.message_id = message_id;
     pdu.choice = ack;
     return encode(pdu);
 }

@@ -167,7 +167,6 @@ struct RanFunctionDefinition {
  * @brief E3AP Setup Request structure
  */
 struct SetupRequest {
-    uint32_t id;                         ///< Message ID
     std::string e3ap_protocol_version;  ///< E3AP protocol version (e.g., "0.0.0")
     std::string dapp_name;               ///< Name of the dApp
     std::string dapp_version;            ///< Version of the dApp (e.g., "0.0.0")
@@ -188,7 +187,6 @@ struct RanFunctionDef {
  * @brief E3AP Setup Response structure
  */
 struct SetupResponse {
-    uint32_t id{0};                              ///< Message ID
     uint32_t request_id{0};                      ///< ID of the corresponding SetupRequest
     ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
     std::optional<std::string> e3ap_protocol_version;   ///< E3AP protocol version (optional)
@@ -201,7 +199,6 @@ struct SetupResponse {
  * @brief E3AP Subscription Request structure
  */
 struct SubscriptionRequest {
-    uint32_t id{0};                                  ///< Message ID
     uint32_t dapp_identifier{0};                     ///< dApp identifier
     uint32_t ran_function_identifier{0};             ///< RAN function to subscribe to
     std::vector<uint32_t> telemetry_identifier_list; ///< List of telemetry identifiers
@@ -213,7 +210,6 @@ struct SubscriptionRequest {
  * @brief E3AP Subscription Delete structure
  */
 struct SubscriptionDelete {
-    uint32_t id{0};                      ///< Message ID
     uint32_t dapp_identifier{0};         ///< dApp identifier
     uint32_t subscription_id{0};         ///< Subscription ID to delete
 };
@@ -222,7 +218,6 @@ struct SubscriptionDelete {
  * @brief E3AP Subscription Response structure
  */
 struct SubscriptionResponse {
-    uint32_t id{0};                              ///< Message ID
     uint32_t request_id{0};                      ///< ID of the corresponding SubscriptionRequest
     uint32_t dapp_identifier{0};                  ///< dApp identifier
     ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
@@ -233,7 +228,6 @@ struct SubscriptionResponse {
  * @brief E3AP Indication Message structure
  */
 struct IndicationMessage {
-    uint32_t id{0};                      ///< Message ID
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0}; ///< RAN function identifier
     std::vector<uint8_t> protocol_data;
@@ -243,7 +237,6 @@ struct IndicationMessage {
  * @brief E3AP dApp Control Action structure
  */
 struct DAppControlAction {
-    uint32_t id{0};                      ///< Message ID
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0};
     uint32_t control_identifier{0};      ///< Control identifier
@@ -254,7 +247,6 @@ struct DAppControlAction {
  * @brief E3AP Message Acknowledgment structure
  */
 struct MessageAck {
-    uint32_t id{0};                      ///< Message ID
     uint32_t request_id{0};              ///< ID of the request being acknowledged
     ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
 };
@@ -263,7 +255,6 @@ struct MessageAck {
  * @brief E3AP dApp Report structure
  */
 struct DAppReport {
-    uint32_t id{0};                      ///< Message ID
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0};
     std::vector<uint8_t> report_data;
@@ -273,7 +264,6 @@ struct DAppReport {
  * @brief E3AP xApp Control Action structure
  */
 struct XAppControlAction {
-    uint32_t id{0};                      ///< Message ID
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0};
     std::vector<uint8_t> xapp_control_data;
@@ -283,7 +273,6 @@ struct XAppControlAction {
  * @brief E3AP Release Message structure
  */
 struct ReleaseMessage {
-    uint32_t id{0};                      ///< Message ID
     uint32_t dapp_identifier{0};         ///< dApp identifier
 };
 

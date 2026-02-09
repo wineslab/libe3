@@ -150,6 +150,8 @@ ErrorCode E3Agent::send_indication(
     }
     
     Pdu pdu(PduType::INDICATION_MESSAGE);
+    uint32_t mid = impl_->interface->generate_message_id();
+    pdu.message_id = mid;
     IndicationMessage msg;
     msg.dapp_identifier = dapp_id;
     msg.ran_function_identifier = ran_function_id;

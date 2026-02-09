@@ -10,6 +10,7 @@
 #include "libe3/e3_interface.hpp"
 #include "libe3/logger.hpp"
 #include <chrono>
+#include <random>
 #include <signal.h>
 
 namespace libe3 {
@@ -20,13 +21,9 @@ constexpr auto SM_POLL_INTERVAL = std::chrono::milliseconds(10);
 }
 
 uint32_t E3Interface::generate_message_id() {
-    uint32_t id = message_id_counter_.fetch_add(1, std::memory_order_relaxed);
-    // Wrap around to stay within valid range (1-100)
-    if (id > 100) {
-        id = (id % 100) + 1;
-        message_id_counter_.store(id + 1, std::memory_order_relaxed);
-    }
-    return id;
+    thread_local std::mt19937 rng(std::random_device{}());
+    std::uniform_int_distribution<uint32_t> dist(1, 1000);
+    return dist(rng);
 }
 
 E3Interface::E3Interface(const E3Config& config)
@@ -226,7 +223,7 @@ void E3Interface::setup_loop() {
             continue;
         }
         
-        handle_setup_request(*request);
+        handle_setup_request(*request, pdu.message_id);
     }
     
     E3_LOG_INFO(LOG_TAG) << "Setup loop stopped";
@@ -263,7 +260,7 @@ void E3Interface::subscriber_loop() {
             case PduType::SUBSCRIPTION_REQUEST: {
                 auto* request = std::get_if<SubscriptionRequest>(&pdu.choice);
                 if (request) {
-                    handle_subscription_request(*request);
+                    handle_subscription_request(*request, pdu.message_id);
                 }
                 break;
             }
@@ -271,7 +268,7 @@ void E3Interface::subscriber_loop() {
             case PduType::SUBSCRIPTION_DELETE: {
                 auto* del = std::get_if<SubscriptionDelete>(&pdu.choice);
                 if (del) {
-                    handle_subscription_delete(*del);
+                    handle_subscription_delete(*del, pdu.message_id);
                 }
                 break;
             }
@@ -395,7 +392,7 @@ void E3Interface::sm_data_handler_loop() {
 // Message Handlers
 // =========================================================================
 
-void E3Interface::handle_setup_request(const SetupRequest& request) {
+void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t request_message_id) {
     E3_LOG_INFO(LOG_TAG) << "Handling setup request from dApp '" << request.dapp_name 
                          << "' (version=" << request.dapp_version 
                          << ", vendor=" << request.vendor 
@@ -432,7 +429,7 @@ void E3Interface::handle_setup_request(const SetupRequest& request) {
     
     auto encode_result = encoder_->encode_setup_response(
         generate_message_id(),
-        request.id,
+        request_message_id,
         response_code,
         std::nullopt,  // e3ap_protocol_version
         assigned_dapp_id,  // dapp_identifier
@@ -441,20 +438,20 @@ void E3Interface::handle_setup_request(const SetupRequest& request) {
     );
     
     if (!encode_result) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to encode setup response for request id " << request.id;
+        E3_LOG_ERROR(LOG_TAG) << "Failed to encode setup response for request id " << request_message_id;
         return;
     }
     
     ErrorCode send_result = connector_->send_response(encode_result->buffer);
     if (send_result != ErrorCode::SUCCESS) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to send setup response for request id " << request.id
+        E3_LOG_ERROR(LOG_TAG) << "Failed to send setup response for request id " << request_message_id
                               << "; error=" << error_code_to_string(send_result);
     } else {
-        E3_LOG_INFO(LOG_TAG) << "Sent setup response for request id " << request.id;
+        E3_LOG_INFO(LOG_TAG) << "Sent setup response for request id " << request_message_id;
     }
 }
 
-void E3Interface::handle_subscription_request(const SubscriptionRequest& request) {
+void E3Interface::handle_subscription_request(const SubscriptionRequest& request, uint32_t request_message_id) {
     E3_LOG_INFO(LOG_TAG) << "Handling subscription request from dApp " << request.dapp_identifier
                          << " for RAN function " << request.ran_function_identifier;
     
@@ -485,8 +482,8 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
     // Create and queue response
     Pdu response_pdu(PduType::SUBSCRIPTION_RESPONSE);
     SubscriptionResponse resp;
-    resp.id = generate_message_id();
-    resp.request_id = request.id;
+    response_pdu.message_id = generate_message_id();
+    resp.request_id = request_message_id;
     resp.dapp_identifier = request.dapp_identifier;
     resp.response_code = response_code;
     if (response_code == ResponseCode::POSITIVE) {
@@ -497,7 +494,7 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
     queue_outbound(std::move(response_pdu));
 }
 
-void E3Interface::handle_subscription_delete(const SubscriptionDelete& del) {
+void E3Interface::handle_subscription_delete(const SubscriptionDelete& del, uint32_t request_message_id) {
     E3_LOG_INFO(LOG_TAG) << "Handling subscription delete from dApp " << del.dapp_identifier
                          << " for subscription " << del.subscription_id;
     
@@ -519,8 +516,8 @@ void E3Interface::handle_subscription_delete(const SubscriptionDelete& del) {
     // Create and queue ack response
     Pdu response_pdu(PduType::MESSAGE_ACK);
     MessageAck ack;
-    ack.id = generate_message_id();
-    ack.request_id = del.id;
+    response_pdu.message_id = generate_message_id();
+    ack.request_id = request_message_id;
     ack.response_code = response_code;
     response_pdu.choice = ack;
     

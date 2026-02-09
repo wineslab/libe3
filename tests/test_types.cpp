@@ -42,13 +42,11 @@ TEST(Pdu_construction) {
 
 TEST(SetupRequest_fields) {
     SetupRequest req;
-    req.id = 1;
     req.e3ap_protocol_version = "1.0.0";
     req.dapp_name = "TestDApp";
     req.dapp_version = "1.0.0";
     req.vendor = "TestVendor";
     
-    ASSERT_EQ(req.id, 1u);
     ASSERT_STREQ(req.e3ap_protocol_version.c_str(), "1.0.0");
     ASSERT_STREQ(req.dapp_name.c_str(), "TestDApp");
     ASSERT_STREQ(req.dapp_version.c_str(), "1.0.0");
@@ -57,14 +55,12 @@ TEST(SetupRequest_fields) {
 
 TEST(SetupResponse_fields) {
     SetupResponse resp;
-    resp.id = 1;
     resp.request_id = 100;
     resp.response_code = ResponseCode::POSITIVE;
     resp.e3ap_protocol_version = "1.0.0";
     resp.dapp_identifier = 42;
     resp.ran_identifier = "test-ran";
     
-    ASSERT_EQ(resp.id, 1u);
     ASSERT_EQ(resp.request_id, 100u);
     ASSERT_TRUE(resp.response_code == ResponseCode::POSITIVE);
     ASSERT_TRUE(resp.e3ap_protocol_version.has_value());
@@ -74,14 +70,12 @@ TEST(SetupResponse_fields) {
 
 TEST(SubscriptionRequest_fields) {
     SubscriptionRequest req;
-    req.id = 1;
     req.dapp_identifier = 42;
     req.ran_function_identifier = 100;
     req.telemetry_identifier_list = {1, 2, 3};
     req.control_identifier_list = {10, 20};
     req.subscription_time = 3600;
     
-    ASSERT_EQ(req.id, 1u);
     ASSERT_EQ(req.dapp_identifier, 42u);
     ASSERT_EQ(req.ran_function_identifier, 100u);
     ASSERT_EQ(req.telemetry_identifier_list.size(), 3u);
@@ -91,11 +85,9 @@ TEST(SubscriptionRequest_fields) {
 
 TEST(SubscriptionDelete_fields) {
     SubscriptionDelete del;
-    del.id = 1;
     del.dapp_identifier = 42;
     del.subscription_id = 77;
     
-    ASSERT_EQ(del.id, 1u);
     ASSERT_EQ(del.dapp_identifier, 42u);
     ASSERT_EQ(del.subscription_id, 77u);
 }
@@ -139,7 +131,6 @@ TEST(Pdu_with_SetupRequest) {
 TEST(Pdu_with_SubscriptionResponse) {
     Pdu pdu(PduType::SUBSCRIPTION_RESPONSE);
     SubscriptionResponse resp;
-    resp.id = 1;
     resp.request_id = 77;
     resp.response_code = ResponseCode::POSITIVE;
     pdu.choice = resp;
@@ -153,7 +144,7 @@ TEST(E3Config_defaults) {
     E3Config config;
     config.ran_identifier = "test";
     
-    ASSERT_TRUE(config.link_layer == E3LinkLayer::POSIX);
+    ASSERT_TRUE(config.link_layer == E3LinkLayer::ZMQ);
     ASSERT_TRUE(config.transport_layer == E3TransportLayer::IPC);
     ASSERT_TRUE(config.encoding == EncodingFormat::ASN1);
 }
@@ -207,11 +198,9 @@ TEST(DAppReport_fields) {
 
 TEST(MessageAck_fields) {
     MessageAck ack;
-    ack.id = 100;
     ack.request_id = 12345;
     ack.response_code = ResponseCode::POSITIVE;
     
-    ASSERT_EQ(ack.id, 100u);
     ASSERT_EQ(ack.request_id, 12345u);
     ASSERT_TRUE(ack.response_code == ResponseCode::POSITIVE);
 }

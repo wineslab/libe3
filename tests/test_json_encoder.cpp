@@ -22,7 +22,6 @@ TEST(JsonEncoder_encode_setup_request) {
     
     Pdu pdu(PduType::SETUP_REQUEST);
     SetupRequest req;
-    req.id = 42;
     req.e3ap_protocol_version = "1.0.0";
     req.dapp_name = "TestDApp";
     req.dapp_version = "2.0.0";
@@ -45,7 +44,6 @@ TEST(JsonEncoder_encode_decode_setup_request) {
     
     Pdu original(PduType::SETUP_REQUEST);
     SetupRequest req;
-    req.id = 99;
     req.e3ap_protocol_version = "1.0.0";
     req.dapp_name = "MyDApp";
     req.dapp_version = "1.2.3";
@@ -61,7 +59,6 @@ TEST(JsonEncoder_encode_decode_setup_request) {
     ASSERT_TRUE(decoded->type == PduType::SETUP_REQUEST);
     
     auto& restored = std::get<SetupRequest>(decoded->choice);
-    ASSERT_EQ(restored.id, 99u);
     ASSERT_STREQ(restored.dapp_name.c_str(), "MyDApp");
     ASSERT_STREQ(restored.e3ap_protocol_version.c_str(), "1.0.0");
     ASSERT_STREQ(restored.vendor.c_str(), "MyVendor");
@@ -72,7 +69,6 @@ TEST(JsonEncoder_encode_setup_response) {
     
     Pdu pdu(PduType::SETUP_RESPONSE);
     SetupResponse resp;
-    resp.id = 1;
     resp.request_id = 100;
     resp.response_code = ResponseCode::POSITIVE;
     resp.dapp_identifier = 42;
@@ -90,7 +86,6 @@ TEST(JsonEncoder_encode_decode_subscription_request) {
     
     Pdu original(PduType::SUBSCRIPTION_REQUEST);
     SubscriptionRequest req;
-    req.id = 1;
     req.dapp_identifier = 42;
     req.ran_function_identifier = 100;
     req.telemetry_identifier_list = {1, 2, 3};
@@ -113,7 +108,6 @@ TEST(JsonEncoder_encode_decode_subscription_delete) {
     
     Pdu original(PduType::SUBSCRIPTION_DELETE);
     SubscriptionDelete del;
-    del.id = 1;
     del.dapp_identifier = 42;
     del.subscription_id = 77;
     original.choice = del;
@@ -135,7 +129,6 @@ TEST(JsonEncoder_encode_decode_subscription_response) {
     
     Pdu original(PduType::SUBSCRIPTION_RESPONSE);
     SubscriptionResponse resp;
-    resp.id = 1;
     resp.request_id = 55;
     resp.response_code = ResponseCode::POSITIVE;
     original.choice = resp;
@@ -223,7 +216,6 @@ TEST(JsonEncoder_encode_decode_message_ack) {
     
     Pdu original(PduType::MESSAGE_ACK);
     MessageAck ack;
-    ack.id = 100;
     ack.request_id = 54321;
     ack.response_code = ResponseCode::POSITIVE;
     original.choice = ack;
@@ -235,7 +227,6 @@ TEST(JsonEncoder_encode_decode_message_ack) {
     ASSERT_TRUE(decoded.has_value());
     
     auto& restored = std::get<MessageAck>(decoded->choice);
-    ASSERT_EQ(restored.id, 100u);
     ASSERT_EQ(restored.request_id, 54321u);
     ASSERT_TRUE(restored.response_code == ResponseCode::POSITIVE);
 }

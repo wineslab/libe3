@@ -191,17 +191,17 @@ private:
     /**
      * @brief Handle E3 Setup Request
      */
-    void handle_setup_request(const SetupRequest& request);
+    void handle_setup_request(const SetupRequest& request, uint32_t request_message_id);
 
     /**
      * @brief Handle E3 Subscription Request
      */
-    void handle_subscription_request(const SubscriptionRequest& request);
+    void handle_subscription_request(const SubscriptionRequest& request, uint32_t request_message_id);
 
     /**
      * @brief Handle E3 Subscription Delete
      */
-    void handle_subscription_delete(const SubscriptionDelete& del);
+    void handle_subscription_delete(const SubscriptionDelete& del, uint32_t request_message_id);
 
     /**
      * @brief Handle E3 Control Action
@@ -227,13 +227,11 @@ private:
      */
     void on_sm_lifecycle_change(uint32_t ran_function_id, bool should_start);
 
+public:
     /**
-     * @brief Generate unique message ID (1-100, wrapping)
+     * @brief Generate message ID (1-1000, randomized)
      */
     uint32_t generate_message_id();
-
-    // Message ID counter
-    std::atomic<uint32_t> message_id_counter_{1};
 };
 
 } // namespace libe3

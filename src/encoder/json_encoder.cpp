@@ -74,7 +74,6 @@ std::vector<uint8_t> JsonE3Encoder::hex_to_binary(const std::string& hex) {
 
 nlohmann::json JsonE3Encoder::encode_setup_request(const SetupRequest& req) const {
     nlohmann::json j;
-    j["id"] = req.id;
     j["e3ap_protocol_version"] = req.e3ap_protocol_version;
     j["dapp_name"] = req.dapp_name;
     j["dapp_version"] = req.dapp_version;
@@ -85,7 +84,6 @@ nlohmann::json JsonE3Encoder::encode_setup_request(const SetupRequest& req) cons
 
 nlohmann::json JsonE3Encoder::encode_setup_response(const SetupResponse& resp) const {
     nlohmann::json j;
-    j["id"] = resp.id;
     j["request_id"] = resp.request_id;
     j["response_code"] = (resp.response_code == ResponseCode::POSITIVE) ? "positive" : "negative";
     if (resp.e3ap_protocol_version.has_value()) {
@@ -112,7 +110,6 @@ nlohmann::json JsonE3Encoder::encode_setup_response(const SetupResponse& resp) c
 
 nlohmann::json JsonE3Encoder::encode_subscription_request(const SubscriptionRequest& req) const {
     nlohmann::json j;
-    j["id"] = req.id;
     j["dapp_identifier"] = req.dapp_identifier;
     j["ran_function_identifier"] = req.ran_function_identifier;
     j["telemetry_identifier_list"] = req.telemetry_identifier_list;
@@ -125,7 +122,6 @@ nlohmann::json JsonE3Encoder::encode_subscription_request(const SubscriptionRequ
 
 nlohmann::json JsonE3Encoder::encode_subscription_delete(const SubscriptionDelete& del) const {
     nlohmann::json j;
-    j["id"] = del.id;
     j["dapp_identifier"] = del.dapp_identifier;
     j["subscription_id"] = del.subscription_id;
     return j;
@@ -133,7 +129,6 @@ nlohmann::json JsonE3Encoder::encode_subscription_delete(const SubscriptionDelet
 
 nlohmann::json JsonE3Encoder::encode_subscription_response(const SubscriptionResponse& resp) const {
     nlohmann::json j;
-    j["id"] = resp.id;
     j["request_id"] = resp.request_id;
     j["dapp_identifier"] = resp.dapp_identifier;
     j["response_code"] = (resp.response_code == ResponseCode::POSITIVE) ? "positive" : "negative";
@@ -145,7 +140,6 @@ nlohmann::json JsonE3Encoder::encode_subscription_response(const SubscriptionRes
 
 nlohmann::json JsonE3Encoder::encode_indication_message(const IndicationMessage& msg) const {
     nlohmann::json j;
-    j["id"] = msg.id;
     j["dapp_identifier"] = msg.dapp_identifier;
     j["ran_function_identifier"] = msg.ran_function_identifier;
     j["protocol_data"] = binary_to_hex(msg.protocol_data);
@@ -154,7 +148,6 @@ nlohmann::json JsonE3Encoder::encode_indication_message(const IndicationMessage&
 
 nlohmann::json JsonE3Encoder::encode_dapp_control_action(const DAppControlAction& action) const {
     nlohmann::json j;
-    j["id"] = action.id;
     j["dapp_identifier"] = action.dapp_identifier;
     j["ran_function_identifier"] = action.ran_function_identifier;
     j["control_identifier"] = action.control_identifier;
@@ -164,7 +157,6 @@ nlohmann::json JsonE3Encoder::encode_dapp_control_action(const DAppControlAction
 
 nlohmann::json JsonE3Encoder::encode_dapp_report(const DAppReport& report) const {
     nlohmann::json j;
-    j["id"] = report.id;
     j["dapp_identifier"] = report.dapp_identifier;
     j["ran_function_identifier"] = report.ran_function_identifier;
     j["report_data"] = binary_to_hex(report.report_data);
@@ -173,7 +165,6 @@ nlohmann::json JsonE3Encoder::encode_dapp_report(const DAppReport& report) const
 
 nlohmann::json JsonE3Encoder::encode_xapp_control_action(const XAppControlAction& action) const {
     nlohmann::json j;
-    j["id"] = action.id;
     j["dapp_identifier"] = action.dapp_identifier;
     j["ran_function_identifier"] = action.ran_function_identifier;
     j["xapp_control_data"] = binary_to_hex(action.xapp_control_data);
@@ -182,7 +173,6 @@ nlohmann::json JsonE3Encoder::encode_xapp_control_action(const XAppControlAction
 
 nlohmann::json JsonE3Encoder::encode_message_ack(const MessageAck& ack) const {
     nlohmann::json j;
-    j["id"] = ack.id;
     j["request_id"] = ack.request_id;
     j["response_code"] = (ack.response_code == ResponseCode::POSITIVE) ? "positive" : "negative";
     return j;
@@ -194,7 +184,6 @@ nlohmann::json JsonE3Encoder::encode_message_ack(const MessageAck& ack) const {
 
 SetupRequest JsonE3Encoder::decode_setup_request(const nlohmann::json& j) const {
     SetupRequest req;
-    req.id = j.value("id", 0u);
     req.e3ap_protocol_version = j.value("e3ap_protocol_version", "");
     req.dapp_name = j.value("dapp_name", "");
     req.dapp_version = j.value("dapp_version", "");
@@ -205,7 +194,6 @@ SetupRequest JsonE3Encoder::decode_setup_request(const nlohmann::json& j) const 
 
 SetupResponse JsonE3Encoder::decode_setup_response(const nlohmann::json& j) const {
     SetupResponse resp;
-    resp.id = j.value("id", 0u);
     resp.request_id = j.value("request_id", 0u);
     
     std::string response_code_str = j.value("response_code", "negative");
@@ -233,7 +221,6 @@ SetupResponse JsonE3Encoder::decode_setup_response(const nlohmann::json& j) cons
 
 SubscriptionRequest JsonE3Encoder::decode_subscription_request(const nlohmann::json& j) const {
     SubscriptionRequest req;
-    req.id = j.value("id", 0u);
     req.dapp_identifier = j.value("dapp_identifier", 0u);
     req.ran_function_identifier = j.value("ran_function_identifier", 0u);
     req.telemetry_identifier_list = j.value("telemetry_identifier_list", std::vector<uint32_t>{});
@@ -246,7 +233,6 @@ SubscriptionRequest JsonE3Encoder::decode_subscription_request(const nlohmann::j
 
 SubscriptionDelete JsonE3Encoder::decode_subscription_delete(const nlohmann::json& j) const {
     SubscriptionDelete del;
-    del.id = j.value("id", 0u);
     del.dapp_identifier = j.value("dapp_identifier", 0u);
     del.subscription_id = j.value("subscription_id", 0u);
     return del;
@@ -254,7 +240,6 @@ SubscriptionDelete JsonE3Encoder::decode_subscription_delete(const nlohmann::jso
 
 SubscriptionResponse JsonE3Encoder::decode_subscription_response(const nlohmann::json& j) const {
     SubscriptionResponse resp;
-    resp.id = j.value("id", 0u);
     resp.request_id = j.value("request_id", 0u);
     resp.dapp_identifier = j.value("dapp_identifier", 0u);
     std::string response_code_str = j.value("response_code", "negative");
@@ -267,7 +252,6 @@ SubscriptionResponse JsonE3Encoder::decode_subscription_response(const nlohmann:
 
 IndicationMessage JsonE3Encoder::decode_indication_message(const nlohmann::json& j) const {
     IndicationMessage msg;
-    msg.id = j.value("id", 0u);
     msg.dapp_identifier = j.value("dapp_identifier", 0u);
     msg.ran_function_identifier = j.value("ran_function_identifier", 0u);
     msg.protocol_data = hex_to_binary(j.value("protocol_data", ""));
@@ -276,7 +260,6 @@ IndicationMessage JsonE3Encoder::decode_indication_message(const nlohmann::json&
 
 DAppControlAction JsonE3Encoder::decode_dapp_control_action(const nlohmann::json& j) const {
     DAppControlAction action;
-    action.id = j.value("id", 0u);
     action.dapp_identifier = j.value("dapp_identifier", 0u);
     action.ran_function_identifier = j.value("ran_function_identifier", 0u);
     action.control_identifier = j.value("control_identifier", 0u);
@@ -286,7 +269,6 @@ DAppControlAction JsonE3Encoder::decode_dapp_control_action(const nlohmann::json
 
 DAppReport JsonE3Encoder::decode_dapp_report(const nlohmann::json& j) const {
     DAppReport report;
-    report.id = j.value("id", 0u);
     report.dapp_identifier = j.value("dapp_identifier", 0u);
     report.ran_function_identifier = j.value("ran_function_identifier", 0u);
     report.report_data = hex_to_binary(j.value("report_data", ""));
@@ -295,7 +277,6 @@ DAppReport JsonE3Encoder::decode_dapp_report(const nlohmann::json& j) const {
 
 XAppControlAction JsonE3Encoder::decode_xapp_control_action(const nlohmann::json& j) const {
     XAppControlAction action;
-    action.id = j.value("id", 0u);
     action.dapp_identifier = j.value("dapp_identifier", 0u);
     action.ran_function_identifier = j.value("ran_function_identifier", 0u);
     action.xapp_control_data = hex_to_binary(j.value("xapp_control_data", ""));
@@ -304,7 +285,6 @@ XAppControlAction JsonE3Encoder::decode_xapp_control_action(const nlohmann::json
 
 MessageAck JsonE3Encoder::decode_message_ack(const nlohmann::json& j) const {
     MessageAck ack;
-    ack.id = j.value("id", 0u);
     ack.request_id = j.value("request_id", 0u);
     std::string response_code_str = j.value("response_code", "negative");
     ack.response_code = (response_code_str == "positive") ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
@@ -314,14 +294,12 @@ MessageAck JsonE3Encoder::decode_message_ack(const nlohmann::json& j) const {
 // ReleaseMessage encode/decode
 nlohmann::json JsonE3Encoder::encode_release_message(const ReleaseMessage& msg) const {
     nlohmann::json j;
-    j["id"] = msg.id;
     j["dapp_identifier"] = msg.dapp_identifier;
     return j;
 }
 
 ReleaseMessage JsonE3Encoder::decode_release_message(const nlohmann::json& j) const {
     ReleaseMessage msg;
-    msg.id = j.value("id", 0u);
     msg.dapp_identifier = j.value("dapp_identifier", 0u);
     return msg;
 }

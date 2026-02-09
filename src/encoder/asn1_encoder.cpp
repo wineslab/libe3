@@ -128,35 +128,36 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
         return nullptr;
     }
     
+    // Set top-level message ID (E3-PDU.id)
+    asn1_pdu->id = pdu.message_id;
+    
     switch (pdu.type) {
         case PduType::SETUP_REQUEST: {
             const auto* req = std::get_if<SetupRequest>(&pdu.choice);
             if (!req) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->present = E3_PDU_PR_setupRequest;
-            asn1_pdu->choice.setupRequest = static_cast<E3_SetupRequest_t*>(
+            asn1_pdu->msg.present = E3_PDU__msg_PR_setupRequest;
+            asn1_pdu->msg.choice.setupRequest = static_cast<E3_SetupRequest_t*>(
                 calloc(1, sizeof(E3_SetupRequest_t)));
-            if (!asn1_pdu->choice.setupRequest) { free(asn1_pdu); return nullptr; }
-            
-            asn1_pdu->choice.setupRequest->id = pdu.message_id;
+            if (!asn1_pdu->msg.choice.setupRequest) { free(asn1_pdu); return nullptr; }
             
             // Set e3apProtocolVersion string
-            OCTET_STRING_fromBuf(&asn1_pdu->choice.setupRequest->e3apProtocolVersion,
+            OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.setupRequest->e3apProtocolVersion,
                 req->e3ap_protocol_version.c_str(),
                 static_cast<int>(req->e3ap_protocol_version.size()));
             
             // Set dAppName string
-            OCTET_STRING_fromBuf(&asn1_pdu->choice.setupRequest->dAppName,
+            OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.setupRequest->dAppName,
                 req->dapp_name.c_str(),
                 static_cast<int>(req->dapp_name.size()));
             
             // Set dAppVersion string
-            OCTET_STRING_fromBuf(&asn1_pdu->choice.setupRequest->dAppVersion,
+            OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.setupRequest->dAppVersion,
                 req->dapp_version.c_str(),
                 static_cast<int>(req->dapp_version.size()));
             
             // Set vendor string
-            OCTET_STRING_fromBuf(&asn1_pdu->choice.setupRequest->vendor,
+            OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.setupRequest->vendor,
                 req->vendor.c_str(),
                 static_cast<int>(req->vendor.size()));
             break;
@@ -166,34 +167,33 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             const auto* resp = std::get_if<SetupResponse>(&pdu.choice);
             if (!resp) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->present = E3_PDU_PR_setupResponse;
-            asn1_pdu->choice.setupResponse = static_cast<E3_SetupResponse_t*>(
+            asn1_pdu->msg.present = E3_PDU__msg_PR_setupResponse;
+            asn1_pdu->msg.choice.setupResponse = static_cast<E3_SetupResponse_t*>(
                 calloc(1, sizeof(E3_SetupResponse_t)));
-            if (!asn1_pdu->choice.setupResponse) { free(asn1_pdu); return nullptr; }
+            if (!asn1_pdu->msg.choice.setupResponse) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.setupResponse->id = resp->id;
-            asn1_pdu->choice.setupResponse->requestId = resp->request_id;
-            asn1_pdu->choice.setupResponse->responseCode = 
+            asn1_pdu->msg.choice.setupResponse->requestId = resp->request_id;
+            asn1_pdu->msg.choice.setupResponse->responseCode = 
                 (resp->response_code == ResponseCode::POSITIVE) ? 0 : 1;
             
             // Set optional e3apProtocolVersion
             if (resp->e3ap_protocol_version.has_value()) {
-                asn1_pdu->choice.setupResponse->e3apProtocolVersion = 
+                asn1_pdu->msg.choice.setupResponse->e3apProtocolVersion = 
                     static_cast<OCTET_STRING_t*>(calloc(1, sizeof(OCTET_STRING_t)));
-                OCTET_STRING_fromBuf(asn1_pdu->choice.setupResponse->e3apProtocolVersion,
+                OCTET_STRING_fromBuf(asn1_pdu->msg.choice.setupResponse->e3apProtocolVersion,
                     resp->e3ap_protocol_version.value().c_str(),
                     static_cast<int>(resp->e3ap_protocol_version.value().size()));
             }
             
             // Set optional dAppIdentifier
             if (resp->dapp_identifier.has_value()) {
-                asn1_pdu->choice.setupResponse->dAppIdentifier = 
+                asn1_pdu->msg.choice.setupResponse->dAppIdentifier = 
                     static_cast<long*>(malloc(sizeof(long)));
-                *asn1_pdu->choice.setupResponse->dAppIdentifier = resp->dapp_identifier.value();
+                *asn1_pdu->msg.choice.setupResponse->dAppIdentifier = resp->dapp_identifier.value();
             }
             
             // Set mandatory ranIdentifier
-            OCTET_STRING_fromBuf(&asn1_pdu->choice.setupResponse->ranIdentifier,
+            OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.setupResponse->ranIdentifier,
                 resp->ran_identifier.c_str(),
                 static_cast<int>(resp->ran_identifier.size()));
             
@@ -221,7 +221,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                     OCTET_STRING_fromBuf(&ran_func->ranFunctionData,
                         reinterpret_cast<const char*>(func.ran_function_data.data()),
                         static_cast<int>(func.ran_function_data.size()));
-                    ASN_SEQUENCE_ADD(&asn1_pdu->choice.setupResponse->ranFunctionList, ran_func);
+                    ASN_SEQUENCE_ADD(&asn1_pdu->msg.choice.setupResponse->ranFunctionList, ran_func);
                 }
             }
             break;
@@ -231,34 +231,33 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             const auto* req = std::get_if<SubscriptionRequest>(&pdu.choice);
             if (!req) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->present = E3_PDU_PR_subscriptionRequest;
-            asn1_pdu->choice.subscriptionRequest = static_cast<E3_SubscriptionRequest_t*>(
+            asn1_pdu->msg.present = E3_PDU__msg_PR_subscriptionRequest;
+            asn1_pdu->msg.choice.subscriptionRequest = static_cast<E3_SubscriptionRequest_t*>(
                 calloc(1, sizeof(E3_SubscriptionRequest_t)));
-            if (!asn1_pdu->choice.subscriptionRequest) { free(asn1_pdu); return nullptr; }
+            if (!asn1_pdu->msg.choice.subscriptionRequest) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.subscriptionRequest->id = req->id;
-            asn1_pdu->choice.subscriptionRequest->dAppIdentifier = req->dapp_identifier;
-            asn1_pdu->choice.subscriptionRequest->ranFunctionIdentifier = req->ran_function_identifier;
+            asn1_pdu->msg.choice.subscriptionRequest->dAppIdentifier = req->dapp_identifier;
+            asn1_pdu->msg.choice.subscriptionRequest->ranFunctionIdentifier = req->ran_function_identifier;
             
             // Encode telemetryIdentifierList
             for (uint32_t tel_id : req->telemetry_identifier_list) {
                 long* id = static_cast<long*>(malloc(sizeof(long)));
                 *id = tel_id;
-                ASN_SEQUENCE_ADD(&asn1_pdu->choice.subscriptionRequest->telemetryIdentifierList, id);
+                ASN_SEQUENCE_ADD(&asn1_pdu->msg.choice.subscriptionRequest->telemetryIdentifierList, id);
             }
             
             // Encode controlIdentifierList
             for (uint32_t ctrl_id : req->control_identifier_list) {
                 long* id = static_cast<long*>(malloc(sizeof(long)));
                 *id = ctrl_id;
-                ASN_SEQUENCE_ADD(&asn1_pdu->choice.subscriptionRequest->controlIdentifierList, id);
+                ASN_SEQUENCE_ADD(&asn1_pdu->msg.choice.subscriptionRequest->controlIdentifierList, id);
             }
             
             // Set optional subscriptionTime
             if (req->subscription_time.has_value()) {
-                asn1_pdu->choice.subscriptionRequest->subscriptionTime = 
+                asn1_pdu->msg.choice.subscriptionRequest->subscriptionTime = 
                     static_cast<long*>(malloc(sizeof(long)));
-                *asn1_pdu->choice.subscriptionRequest->subscriptionTime = req->subscription_time.value();
+                *asn1_pdu->msg.choice.subscriptionRequest->subscriptionTime = req->subscription_time.value();
             }
             break;
         }
@@ -267,14 +266,13 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             const auto* del = std::get_if<SubscriptionDelete>(&pdu.choice);
             if (!del) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->present = E3_PDU_PR_subscriptionDelete;
-            asn1_pdu->choice.subscriptionDelete = static_cast<E3_SubscriptionDelete_t*>(
+            asn1_pdu->msg.present = E3_PDU__msg_PR_subscriptionDelete;
+            asn1_pdu->msg.choice.subscriptionDelete = static_cast<E3_SubscriptionDelete_t*>(
                 calloc(1, sizeof(E3_SubscriptionDelete_t)));
-            if (!asn1_pdu->choice.subscriptionDelete) { free(asn1_pdu); return nullptr; }
+            if (!asn1_pdu->msg.choice.subscriptionDelete) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.subscriptionDelete->id = del->id;
-            asn1_pdu->choice.subscriptionDelete->dAppIdentifier = del->dapp_identifier;
-            asn1_pdu->choice.subscriptionDelete->subscriptionId = del->subscription_id;
+            asn1_pdu->msg.choice.subscriptionDelete->dAppIdentifier = del->dapp_identifier;
+            asn1_pdu->msg.choice.subscriptionDelete->subscriptionId = del->subscription_id;
             break;
         }
         
@@ -282,22 +280,21 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             const auto* resp = std::get_if<SubscriptionResponse>(&pdu.choice);
             if (!resp) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->present = E3_PDU_PR_subscriptionResponse;
-            asn1_pdu->choice.subscriptionResponse = static_cast<E3_SubscriptionResponse_t*>(
+            asn1_pdu->msg.present = E3_PDU__msg_PR_subscriptionResponse;
+            asn1_pdu->msg.choice.subscriptionResponse = static_cast<E3_SubscriptionResponse_t*>(
                 calloc(1, sizeof(E3_SubscriptionResponse_t)));
-            if (!asn1_pdu->choice.subscriptionResponse) { free(asn1_pdu); return nullptr; }
+            if (!asn1_pdu->msg.choice.subscriptionResponse) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.subscriptionResponse->id = resp->id;
-            asn1_pdu->choice.subscriptionResponse->requestId = resp->request_id;
-            asn1_pdu->choice.subscriptionResponse->dAppIdentifier = resp->dapp_identifier;
-            asn1_pdu->choice.subscriptionResponse->responseCode = 
+            asn1_pdu->msg.choice.subscriptionResponse->requestId = resp->request_id;
+            asn1_pdu->msg.choice.subscriptionResponse->dAppIdentifier = resp->dapp_identifier;
+            asn1_pdu->msg.choice.subscriptionResponse->responseCode = 
                 (resp->response_code == ResponseCode::POSITIVE) ? 0 : 1;
             
             // Set optional subscriptionId
             if (resp->subscription_id.has_value()) {
-                asn1_pdu->choice.subscriptionResponse->subscriptionId = 
+                asn1_pdu->msg.choice.subscriptionResponse->subscriptionId = 
                     static_cast<long*>(malloc(sizeof(long)));
-                *asn1_pdu->choice.subscriptionResponse->subscriptionId = resp->subscription_id.value();
+                *asn1_pdu->msg.choice.subscriptionResponse->subscriptionId = resp->subscription_id.value();
             }
             break;
         }
@@ -306,17 +303,16 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             const auto* msg = std::get_if<IndicationMessage>(&pdu.choice);
             if (!msg) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->present = E3_PDU_PR_indicationMessage;
-            asn1_pdu->choice.indicationMessage = static_cast<E3_IndicationMessage_t*>(
+            asn1_pdu->msg.present = E3_PDU__msg_PR_indicationMessage;
+            asn1_pdu->msg.choice.indicationMessage = static_cast<E3_IndicationMessage_t*>(
                 calloc(1, sizeof(E3_IndicationMessage_t)));
-            if (!asn1_pdu->choice.indicationMessage) { free(asn1_pdu); return nullptr; }
+            if (!asn1_pdu->msg.choice.indicationMessage) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.indicationMessage->id = pdu.message_id;
-            asn1_pdu->choice.indicationMessage->dAppIdentifier = msg->dapp_identifier;
-            asn1_pdu->choice.indicationMessage->ranFunctionIdentifier = msg->ran_function_identifier;
+            asn1_pdu->msg.choice.indicationMessage->dAppIdentifier = msg->dapp_identifier;
+            asn1_pdu->msg.choice.indicationMessage->ranFunctionIdentifier = msg->ran_function_identifier;
             
             // Copy protocol data
-            OCTET_STRING_fromBuf(&asn1_pdu->choice.indicationMessage->protocolData,
+            OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.indicationMessage->protocolData,
                 reinterpret_cast<const char*>(msg->protocol_data.data()),
                 static_cast<int>(msg->protocol_data.size()));
             break;
@@ -326,17 +322,16 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             const auto* action = std::get_if<DAppControlAction>(&pdu.choice);
             if (!action) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->present = E3_PDU_PR_dAppControlAction;
-            asn1_pdu->choice.dAppControlAction = static_cast<E3_DAppControlAction_t*>(
+            asn1_pdu->msg.present = E3_PDU__msg_PR_dAppControlAction;
+            asn1_pdu->msg.choice.dAppControlAction = static_cast<E3_DAppControlAction_t*>(
                 calloc(1, sizeof(E3_DAppControlAction_t)));
-            if (!asn1_pdu->choice.dAppControlAction) { free(asn1_pdu); return nullptr; }
+            if (!asn1_pdu->msg.choice.dAppControlAction) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.dAppControlAction->id = pdu.message_id;
-            asn1_pdu->choice.dAppControlAction->dAppIdentifier = action->dapp_identifier;
-            asn1_pdu->choice.dAppControlAction->ranFunctionIdentifier = action->ran_function_identifier;
-            asn1_pdu->choice.dAppControlAction->controlIdentifier = action->control_identifier;
+            asn1_pdu->msg.choice.dAppControlAction->dAppIdentifier = action->dapp_identifier;
+            asn1_pdu->msg.choice.dAppControlAction->ranFunctionIdentifier = action->ran_function_identifier;
+            asn1_pdu->msg.choice.dAppControlAction->controlIdentifier = action->control_identifier;
             
-            OCTET_STRING_fromBuf(&asn1_pdu->choice.dAppControlAction->actionData,
+            OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.dAppControlAction->actionData,
                 reinterpret_cast<const char*>(action->action_data.data()),
                 static_cast<int>(action->action_data.size()));
             break;
@@ -346,16 +341,15 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             const auto* report = std::get_if<DAppReport>(&pdu.choice);
             if (!report) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->present = E3_PDU_PR_dAppReport;
-            asn1_pdu->choice.dAppReport = static_cast<E3_DAppReport_t*>(
+            asn1_pdu->msg.present = E3_PDU__msg_PR_dAppReport;
+            asn1_pdu->msg.choice.dAppReport = static_cast<E3_DAppReport_t*>(
                 calloc(1, sizeof(E3_DAppReport_t)));
-            if (!asn1_pdu->choice.dAppReport) { free(asn1_pdu); return nullptr; }
+            if (!asn1_pdu->msg.choice.dAppReport) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.dAppReport->id = pdu.message_id;
-            asn1_pdu->choice.dAppReport->dAppIdentifier = report->dapp_identifier;
-            asn1_pdu->choice.dAppReport->ranFunctionIdentifier = report->ran_function_identifier;
+            asn1_pdu->msg.choice.dAppReport->dAppIdentifier = report->dapp_identifier;
+            asn1_pdu->msg.choice.dAppReport->ranFunctionIdentifier = report->ran_function_identifier;
             
-            OCTET_STRING_fromBuf(&asn1_pdu->choice.dAppReport->reportData,
+            OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.dAppReport->reportData,
                 reinterpret_cast<const char*>(report->report_data.data()),
                 static_cast<int>(report->report_data.size()));
             break;
@@ -365,16 +359,15 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             const auto* action = std::get_if<XAppControlAction>(&pdu.choice);
             if (!action) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->present = E3_PDU_PR_xAppControlAction;
-            asn1_pdu->choice.xAppControlAction = static_cast<E3_XAppControlAction_t*>(
+            asn1_pdu->msg.present = E3_PDU__msg_PR_xAppControlAction;
+            asn1_pdu->msg.choice.xAppControlAction = static_cast<E3_XAppControlAction_t*>(
                 calloc(1, sizeof(E3_XAppControlAction_t)));
-            if (!asn1_pdu->choice.xAppControlAction) { free(asn1_pdu); return nullptr; }
+            if (!asn1_pdu->msg.choice.xAppControlAction) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.xAppControlAction->id = pdu.message_id;
-            asn1_pdu->choice.xAppControlAction->dAppIdentifier = action->dapp_identifier;
-            asn1_pdu->choice.xAppControlAction->ranFunctionIdentifier = action->ran_function_identifier;
+            asn1_pdu->msg.choice.xAppControlAction->dAppIdentifier = action->dapp_identifier;
+            asn1_pdu->msg.choice.xAppControlAction->ranFunctionIdentifier = action->ran_function_identifier;
             
-            OCTET_STRING_fromBuf(&asn1_pdu->choice.xAppControlAction->xAppControlData,
+            OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.xAppControlAction->xAppControlData,
                 reinterpret_cast<const char*>(action->xapp_control_data.data()),
                 static_cast<int>(action->xapp_control_data.size()));
             break;
@@ -384,14 +377,13 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             const auto* ack = std::get_if<MessageAck>(&pdu.choice);
             if (!ack) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->present = E3_PDU_PR_messageAck;
-            asn1_pdu->choice.messageAck = static_cast<E3_MessageAck_t*>(
+            asn1_pdu->msg.present = E3_PDU__msg_PR_messageAck;
+            asn1_pdu->msg.choice.messageAck = static_cast<E3_MessageAck_t*>(
                 calloc(1, sizeof(E3_MessageAck_t)));
-            if (!asn1_pdu->choice.messageAck) { free(asn1_pdu); return nullptr; }
+            if (!asn1_pdu->msg.choice.messageAck) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.messageAck->id = ack->id;
-            asn1_pdu->choice.messageAck->requestId = ack->request_id;
-            asn1_pdu->choice.messageAck->responseCode = 
+            asn1_pdu->msg.choice.messageAck->requestId = ack->request_id;
+            asn1_pdu->msg.choice.messageAck->responseCode = 
                 (ack->response_code == ResponseCode::POSITIVE) ? 0 : 1;
             break;
         }
@@ -400,13 +392,12 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             const auto* msg = std::get_if<ReleaseMessage>(&pdu.choice);
             if (!msg) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->present = E3_PDU_PR_releaseMessage;
-            asn1_pdu->choice.releaseMessage = static_cast<E3_ReleaseMessage_t*>(
+            asn1_pdu->msg.present = E3_PDU__msg_PR_releaseMessage;
+            asn1_pdu->msg.choice.releaseMessage = static_cast<E3_ReleaseMessage_t*>(
                 calloc(1, sizeof(E3_ReleaseMessage_t)));
-            if (!asn1_pdu->choice.releaseMessage) { free(asn1_pdu); return nullptr; }
+            if (!asn1_pdu->msg.choice.releaseMessage) { free(asn1_pdu); return nullptr; }
             
-            asn1_pdu->choice.releaseMessage->id = msg->id;
-            asn1_pdu->choice.releaseMessage->dAppIdentifier = msg->dapp_identifier;
+            asn1_pdu->msg.choice.releaseMessage->dAppIdentifier = msg->dapp_identifier;
             break;
         }
         
@@ -425,66 +416,65 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
 Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
     Pdu pdu;
     
-    switch (asn1_pdu->present) {
-        case E3_PDU_PR_setupRequest: {
+    // Read top-level message ID (E3-PDU.id)
+    pdu.message_id = static_cast<uint32_t>(asn1_pdu->id);
+    
+    switch (asn1_pdu->msg.present) {
+        case E3_PDU__msg_PR_setupRequest: {
             pdu.type = PduType::SETUP_REQUEST;
-            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.setupRequest->id);
             
             SetupRequest req;
-            req.id = static_cast<uint32_t>(asn1_pdu->choice.setupRequest->id);
             
             // Extract e3apProtocolVersion string
-            const OCTET_STRING_t* proto_ver = &asn1_pdu->choice.setupRequest->e3apProtocolVersion;
+            const OCTET_STRING_t* proto_ver = &asn1_pdu->msg.choice.setupRequest->e3apProtocolVersion;
             req.e3ap_protocol_version.assign(reinterpret_cast<const char*>(proto_ver->buf), proto_ver->size);
             
             // Extract dAppName string
-            const OCTET_STRING_t* dapp_name = &asn1_pdu->choice.setupRequest->dAppName;
+            const OCTET_STRING_t* dapp_name = &asn1_pdu->msg.choice.setupRequest->dAppName;
             req.dapp_name.assign(reinterpret_cast<const char*>(dapp_name->buf), dapp_name->size);
             
             // Extract dAppVersion string
-            const OCTET_STRING_t* dapp_ver = &asn1_pdu->choice.setupRequest->dAppVersion;
+            const OCTET_STRING_t* dapp_ver = &asn1_pdu->msg.choice.setupRequest->dAppVersion;
             req.dapp_version.assign(reinterpret_cast<const char*>(dapp_ver->buf), dapp_ver->size);
             
             // Extract vendor string
-            const OCTET_STRING_t* vendor = &asn1_pdu->choice.setupRequest->vendor;
+            const OCTET_STRING_t* vendor = &asn1_pdu->msg.choice.setupRequest->vendor;
             req.vendor.assign(reinterpret_cast<const char*>(vendor->buf), vendor->size);
             
             pdu.choice = req;
             break;
         }
         
-        case E3_PDU_PR_setupResponse: {
+        case E3_PDU__msg_PR_setupResponse: {
             pdu.type = PduType::SETUP_RESPONSE;
-            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.setupResponse->id);
             
             SetupResponse resp;
-            resp.id = static_cast<uint32_t>(asn1_pdu->choice.setupResponse->id);
-            resp.request_id = static_cast<uint32_t>(asn1_pdu->choice.setupResponse->requestId);
-            resp.response_code = (asn1_pdu->choice.setupResponse->responseCode == 0) 
+            resp.request_id = static_cast<uint32_t>(asn1_pdu->msg.choice.setupResponse->requestId);
+            resp.response_code = (asn1_pdu->msg.choice.setupResponse->responseCode == 0) 
                 ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
             
             // Extract optional e3apProtocolVersion
-            if (asn1_pdu->choice.setupResponse->e3apProtocolVersion) {
-                const OCTET_STRING_t* proto_ver = asn1_pdu->choice.setupResponse->e3apProtocolVersion;
+            if (asn1_pdu->msg.choice.setupResponse->e3apProtocolVersion) {
+                const OCTET_STRING_t* proto_ver = asn1_pdu->msg.choice.setupResponse->e3apProtocolVersion;
                 resp.e3ap_protocol_version = std::string(
                     reinterpret_cast<const char*>(proto_ver->buf), proto_ver->size);
             }
             
             // Extract optional dAppIdentifier
-            if (asn1_pdu->choice.setupResponse->dAppIdentifier) {
-                resp.dapp_identifier = *asn1_pdu->choice.setupResponse->dAppIdentifier;
+            if (asn1_pdu->msg.choice.setupResponse->dAppIdentifier) {
+                resp.dapp_identifier = *asn1_pdu->msg.choice.setupResponse->dAppIdentifier;
             }
             
             // Extract mandatory ranIdentifier
-            const OCTET_STRING_t* ran_id = &asn1_pdu->choice.setupResponse->ranIdentifier;
+            const OCTET_STRING_t* ran_id = &asn1_pdu->msg.choice.setupResponse->ranIdentifier;
             resp.ran_identifier.assign(reinterpret_cast<const char*>(ran_id->buf), ran_id->size);
             
             // Extract ranFunctionList
-            if (asn1_pdu->choice.setupResponse->ranFunctionList) {
-                int count = asn1_pdu->choice.setupResponse->ranFunctionList->list.count;
+            if (asn1_pdu->msg.choice.setupResponse->ranFunctionList) {
+                int count = asn1_pdu->msg.choice.setupResponse->ranFunctionList->list.count;
                 for (int i = 0; i < count; i++) {
                     E3_RanFunctionDefinition_t* asn_func = 
-                        asn1_pdu->choice.setupResponse->ranFunctionList->list.array[i];
+                        asn1_pdu->msg.choice.setupResponse->ranFunctionList->list.array[i];
                     RanFunctionDef func;
                     func.ran_function_identifier = static_cast<uint32_t>(asn_func->ranFunctionIdentifier);
                     
@@ -513,163 +503,147 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             break;
         }
         
-        case E3_PDU_PR_subscriptionRequest: {
+        case E3_PDU__msg_PR_subscriptionRequest: {
             pdu.type = PduType::SUBSCRIPTION_REQUEST;
-            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionRequest->id);
             
             SubscriptionRequest req;
-            req.id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionRequest->id);
-            req.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.subscriptionRequest->dAppIdentifier);
-            req.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->choice.subscriptionRequest->ranFunctionIdentifier);
+            req.dapp_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.subscriptionRequest->dAppIdentifier);
+            req.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.subscriptionRequest->ranFunctionIdentifier);
             
             // Decode telemetryIdentifierList
-            int tel_count = asn1_pdu->choice.subscriptionRequest->telemetryIdentifierList.list.count;
+            int tel_count = asn1_pdu->msg.choice.subscriptionRequest->telemetryIdentifierList.list.count;
             for (int i = 0; i < tel_count; i++) {
                 req.telemetry_identifier_list.push_back(
-                    static_cast<uint32_t>(*asn1_pdu->choice.subscriptionRequest->telemetryIdentifierList.list.array[i]));
+                    static_cast<uint32_t>(*asn1_pdu->msg.choice.subscriptionRequest->telemetryIdentifierList.list.array[i]));
             }
             
             // Decode controlIdentifierList
-            int ctrl_count = asn1_pdu->choice.subscriptionRequest->controlIdentifierList.list.count;
+            int ctrl_count = asn1_pdu->msg.choice.subscriptionRequest->controlIdentifierList.list.count;
             for (int i = 0; i < ctrl_count; i++) {
                 req.control_identifier_list.push_back(
-                    static_cast<uint32_t>(*asn1_pdu->choice.subscriptionRequest->controlIdentifierList.list.array[i]));
+                    static_cast<uint32_t>(*asn1_pdu->msg.choice.subscriptionRequest->controlIdentifierList.list.array[i]));
             }
             
             // Decode optional subscriptionTime
-            if (asn1_pdu->choice.subscriptionRequest->subscriptionTime) {
-                req.subscription_time = *asn1_pdu->choice.subscriptionRequest->subscriptionTime;
+            if (asn1_pdu->msg.choice.subscriptionRequest->subscriptionTime) {
+                req.subscription_time = *asn1_pdu->msg.choice.subscriptionRequest->subscriptionTime;
             }
             
             pdu.choice = req;
             break;
         }
         
-        case E3_PDU_PR_subscriptionDelete: {
+        case E3_PDU__msg_PR_subscriptionDelete: {
             pdu.type = PduType::SUBSCRIPTION_DELETE;
-            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionDelete->id);
             
             SubscriptionDelete del;
-            del.id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionDelete->id);
-            del.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.subscriptionDelete->dAppIdentifier);
-            del.subscription_id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionDelete->subscriptionId);
+            del.dapp_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.subscriptionDelete->dAppIdentifier);
+            del.subscription_id = static_cast<uint32_t>(asn1_pdu->msg.choice.subscriptionDelete->subscriptionId);
             
             pdu.choice = del;
             break;
         }
         
-        case E3_PDU_PR_subscriptionResponse: {
+        case E3_PDU__msg_PR_subscriptionResponse: {
             pdu.type = PduType::SUBSCRIPTION_RESPONSE;
-            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionResponse->id);
             
             SubscriptionResponse resp;
-            resp.id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionResponse->id);
-            resp.request_id = static_cast<uint32_t>(asn1_pdu->choice.subscriptionResponse->requestId);
-            resp.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.subscriptionResponse->dAppIdentifier);
-            resp.response_code = (asn1_pdu->choice.subscriptionResponse->responseCode == 0)
+            resp.request_id = static_cast<uint32_t>(asn1_pdu->msg.choice.subscriptionResponse->requestId);
+            resp.dapp_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.subscriptionResponse->dAppIdentifier);
+            resp.response_code = (asn1_pdu->msg.choice.subscriptionResponse->responseCode == 0)
                 ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
             
             // Decode optional subscriptionId
-            if (asn1_pdu->choice.subscriptionResponse->subscriptionId) {
-                resp.subscription_id = *asn1_pdu->choice.subscriptionResponse->subscriptionId;
+            if (asn1_pdu->msg.choice.subscriptionResponse->subscriptionId) {
+                resp.subscription_id = *asn1_pdu->msg.choice.subscriptionResponse->subscriptionId;
             }
             
             pdu.choice = resp;
             break;
         }
         
-        case E3_PDU_PR_indicationMessage: {
+        case E3_PDU__msg_PR_indicationMessage: {
             pdu.type = PduType::INDICATION_MESSAGE;
-            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.indicationMessage->id);
             
             IndicationMessage msg;
-            msg.id = static_cast<uint32_t>(asn1_pdu->choice.indicationMessage->id);
-            msg.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.indicationMessage->dAppIdentifier);
-            msg.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->choice.indicationMessage->ranFunctionIdentifier);
+            msg.dapp_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.indicationMessage->dAppIdentifier);
+            msg.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.indicationMessage->ranFunctionIdentifier);
             
             // Copy protocol data
-            const OCTET_STRING_t* data = &asn1_pdu->choice.indicationMessage->protocolData;
+            const OCTET_STRING_t* data = &asn1_pdu->msg.choice.indicationMessage->protocolData;
             msg.protocol_data.assign(data->buf, data->buf + data->size);
             
             pdu.choice = msg;
             break;
         }
         
-        case E3_PDU_PR_dAppControlAction: {
+        case E3_PDU__msg_PR_dAppControlAction: {
             pdu.type = PduType::DAPP_CONTROL_ACTION;
-            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.dAppControlAction->id);
             
             DAppControlAction action;
-            action.id = static_cast<uint32_t>(asn1_pdu->choice.dAppControlAction->id);
-            action.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.dAppControlAction->dAppIdentifier);
-            action.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->choice.dAppControlAction->ranFunctionIdentifier);
-            action.control_identifier = static_cast<uint32_t>(asn1_pdu->choice.dAppControlAction->controlIdentifier);
+            action.dapp_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppControlAction->dAppIdentifier);
+            action.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppControlAction->ranFunctionIdentifier);
+            action.control_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppControlAction->controlIdentifier);
             
-            const OCTET_STRING_t* data = &asn1_pdu->choice.dAppControlAction->actionData;
+            const OCTET_STRING_t* data = &asn1_pdu->msg.choice.dAppControlAction->actionData;
             action.action_data.assign(data->buf, data->buf + data->size);
             
             pdu.choice = action;
             break;
         }
         
-        case E3_PDU_PR_dAppReport: {
+        case E3_PDU__msg_PR_dAppReport: {
             pdu.type = PduType::DAPP_REPORT;
-            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.dAppReport->id);
             
             DAppReport report;
-            report.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.dAppReport->dAppIdentifier);
-            report.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->choice.dAppReport->ranFunctionIdentifier);
+            report.dapp_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppReport->dAppIdentifier);
+            report.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppReport->ranFunctionIdentifier);
             
-            const OCTET_STRING_t* data = &asn1_pdu->choice.dAppReport->reportData;
+            const OCTET_STRING_t* data = &asn1_pdu->msg.choice.dAppReport->reportData;
             report.report_data.assign(data->buf, data->buf + data->size);
             
             pdu.choice = report;
             break;
         }
         
-        case E3_PDU_PR_xAppControlAction: {
+        case E3_PDU__msg_PR_xAppControlAction: {
             pdu.type = PduType::XAPP_CONTROL_ACTION;
-            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.xAppControlAction->id);
             
             XAppControlAction action;
-            action.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.xAppControlAction->dAppIdentifier);
-            action.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->choice.xAppControlAction->ranFunctionIdentifier);
+            action.dapp_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.xAppControlAction->dAppIdentifier);
+            action.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.xAppControlAction->ranFunctionIdentifier);
             
-            const OCTET_STRING_t* data = &asn1_pdu->choice.xAppControlAction->xAppControlData;
+            const OCTET_STRING_t* data = &asn1_pdu->msg.choice.xAppControlAction->xAppControlData;
             action.xapp_control_data.assign(data->buf, data->buf + data->size);
             
             pdu.choice = action;
             break;
         }
         
-        case E3_PDU_PR_messageAck: {
+        case E3_PDU__msg_PR_messageAck: {
             pdu.type = PduType::MESSAGE_ACK;
-            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.messageAck->id);
             
             MessageAck ack;
-            ack.id = static_cast<uint32_t>(asn1_pdu->choice.messageAck->id);
-            ack.request_id = static_cast<uint32_t>(asn1_pdu->choice.messageAck->requestId);
-            ack.response_code = (asn1_pdu->choice.messageAck->responseCode == 0)
+            ack.request_id = static_cast<uint32_t>(asn1_pdu->msg.choice.messageAck->requestId);
+            ack.response_code = (asn1_pdu->msg.choice.messageAck->responseCode == 0)
                 ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
             
             pdu.choice = ack;
             break;
         }
         
-        case E3_PDU_PR_releaseMessage: {
+        case E3_PDU__msg_PR_releaseMessage: {
             pdu.type = PduType::RELEASE_MESSAGE;
-            pdu.message_id = static_cast<uint32_t>(asn1_pdu->choice.releaseMessage->id);
             
             ReleaseMessage msg;
-            msg.id = static_cast<uint32_t>(asn1_pdu->choice.releaseMessage->id);
-            msg.dapp_identifier = static_cast<uint32_t>(asn1_pdu->choice.releaseMessage->dAppIdentifier);
+            msg.dapp_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.releaseMessage->dAppIdentifier);
             
             pdu.choice = msg;
             break;
         }
         
         default:
-            E3_LOG_ERROR(LOG_TAG) << "Unknown ASN.1 PDU type: " << asn1_pdu->present;
+            E3_LOG_ERROR(LOG_TAG) << "Unknown ASN.1 PDU type: " << asn1_pdu->msg.present;
             break;
     }
     

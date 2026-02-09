@@ -1,7 +1,6 @@
 E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
 
     E3-SetupRequest ::= SEQUENCE {
-        id                   E3-MessageID,
         e3apProtocolVersion  E3-Version,
         dAppName             UTF8String (SIZE (1..64)),
         dAppVersion          E3-Version,
@@ -9,7 +8,6 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     }
 
     E3-SetupResponse ::= SEQUENCE {
-        id                   E3-MessageID,
         requestId            E3-MessageID,
         responseCode         E3-ResponseCode,
         e3apProtocolVersion  UTF8String (SIZE (1..16)) OPTIONAL,
@@ -19,7 +17,6 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     }
 
     E3-SubscriptionRequest ::= SEQUENCE {
-        id                      E3-MessageID,
         dAppIdentifier          E3-DAppID,
         ranFunctionIdentifier   INTEGER (0..100),
         telemetryIdentifierList SEQUENCE OF INTEGER (0..100),
@@ -28,13 +25,11 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     }
 
     E3-SubscriptionDelete ::= SEQUENCE {
-        id                    E3-MessageID,
         dAppIdentifier        E3-DAppID,
         subscriptionId        INTEGER (0..100)
     }
 
     E3-SubscriptionResponse ::= SEQUENCE {
-        id                   E3-MessageID,
         requestId            E3-MessageID,
         dAppIdentifier       E3-DAppID,
         responseCode         E3-ResponseCode,
@@ -49,14 +44,12 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     }
 
     E3-IndicationMessage ::= SEQUENCE {
-        id                      E3-MessageID,
         dAppIdentifier          INTEGER (0..100),
         ranFunctionIdentifier   INTEGER (0..100),
         protocolData            OCTET STRING (SIZE (1..32768))
     }
 
     E3-DAppControlAction ::= SEQUENCE {
-        id                      E3-MessageID,
         dAppIdentifier          E3-DAppID,
         ranFunctionIdentifier   INTEGER (0..100),
         controlIdentifier       INTEGER (0..100),
@@ -64,47 +57,46 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     }
 
     E3-DAppReport ::= SEQUENCE {
-        id                      E3-MessageID,
         dAppIdentifier          E3-DAppID,
         ranFunctionIdentifier   INTEGER (0..100),
         reportData              OCTET STRING (SIZE (1..32768))
     }
 
     E3-XAppControlAction ::= SEQUENCE {
-        id                      E3-MessageID,
         dAppIdentifier          E3-DAppID,
         ranFunctionIdentifier   INTEGER (0..100),
         xAppControlData         OCTET STRING (SIZE (1..32768))
     }
 
     E3-ReleaseMessage ::= SEQUENCE {
-        id                   E3-MessageID,
         dAppIdentifier       E3-DAppID
     }
 
     E3-MessageAck ::= SEQUENCE {
-        id                   E3-MessageID,
         requestId            E3-MessageID,
         responseCode         E3-ResponseCode
     }
 
     E3-DAppID ::= INTEGER (1..100)
-    E3-MessageID ::= INTEGER (1..100)
+    E3-MessageID ::= INTEGER (1..1000)
     E3-Version ::= UTF8String (SIZE (1..11))
     E3-ResponseCode ::= ENUMERATED { positive(0), negative(1) }
 
-    E3-PDU ::= CHOICE {
-        setupRequest          [0]  E3-SetupRequest,
-        setupResponse         [1]  E3-SetupResponse,
-        subscriptionRequest   [2]  E3-SubscriptionRequest,
-        subscriptionDelete    [3]  E3-SubscriptionDelete,
-        subscriptionResponse  [4]  E3-SubscriptionResponse,
-        indicationMessage     [5]  E3-IndicationMessage,
-        dAppControlAction     [6]  E3-DAppControlAction,
-        dAppReport            [7]  E3-DAppReport,
-        xAppControlAction     [8]  E3-XAppControlAction,
-        releaseMessage        [9]  E3-ReleaseMessage,
-        messageAck            [10] E3-MessageAck
+    E3-PDU ::= SEQUENCE {
+        id      E3-MessageID,
+        msg     CHOICE {
+            setupRequest          [0]  E3-SetupRequest,
+            setupResponse         [1]  E3-SetupResponse,
+            subscriptionRequest   [2]  E3-SubscriptionRequest,
+            subscriptionDelete    [3]  E3-SubscriptionDelete,
+            subscriptionResponse  [4]  E3-SubscriptionResponse,
+            indicationMessage     [5]  E3-IndicationMessage,
+            dAppControlAction     [6]  E3-DAppControlAction,
+            dAppReport            [7]  E3-DAppReport,
+            xAppControlAction     [8]  E3-XAppControlAction,
+            releaseMessage        [9]  E3-ReleaseMessage,
+            messageAck            [10] E3-MessageAck
+        }
     }
 
 END
