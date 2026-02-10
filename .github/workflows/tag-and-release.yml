@@ -76,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: libe3-deb
-          path: build/package.deb
+          path: build/libe3.deb
 
   github-release:
     name: Upload Debian package to GitHub Release

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# Helper to build libe3 and produce a .deb package under build/package.deb
+# Helper to build libe3 and produce a .deb package under build/libe3.deb
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
@@ -43,8 +43,8 @@ chmod 755 "$DEBIAN_DIR"
 
 echo "Building .deb package..."
 mkdir -p "$DEB_OUT_DIR"
-dpkg-deb --build "$PKG_ROOT" "$DEB_OUT_DIR/package.deb"
+dpkg-deb --build "$PKG_ROOT" "$DEB_OUT_DIR/libe3.deb"
 
-echo "Package created: $DEB_OUT_DIR/package.deb"
+echo "Package created: $DEB_OUT_DIR/libe3.deb"
 
 exit 0
