@@ -13,6 +13,7 @@ set(LIBE3_PUBLIC_HEADERS
     include/libe3/e3_interface.hpp
     include/libe3/e3_agent.hpp
     include/libe3/libe3.hpp
+    include/libe3/c_api.h
 )
 
 set(LIBE3_SOURCES
@@ -32,6 +33,7 @@ set(LIBE3_SOURCES
     # Connector
     src/connector/connector_factory.cpp
     src/connector/posix_connector.cpp
+    src/c_api.cpp
 )
 
 # Conditionally add ZMQ connector
