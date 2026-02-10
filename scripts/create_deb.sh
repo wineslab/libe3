@@ -19,7 +19,7 @@ chmod +x ./build_libe3 || true
 
 echo "Installing into staging area..."
 # Use cmake --install to populate the staging root
-cmake --install "$BUILD_DIR" --prefix /usr --destdir "$PKG_ROOT"
+DESTDIR="$PKG_ROOT" cmake --install "$BUILD_DIR" --prefix /usr
 
 echo "Creating DEBIAN control metadata..."
 DEBIAN_DIR="$PKG_ROOT/DEBIAN"
