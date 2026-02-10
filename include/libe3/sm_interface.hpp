@@ -81,7 +81,8 @@ public:
      * @brief Optional RAN-function-specific opaque data
      *
      * Returns a byte vector that will be included in the SetupResponse
-     * ranFunctionList->ranFunctionData OCTET STRING. Default is empty.
+     * as additional payload (ranFunctionList->ranFunctionData OCTET STRING for ASN).
+     * Default is empty since it is optional.
      */
     virtual std::vector<uint8_t> ran_function_data() const { return {}; }
 
