@@ -67,10 +67,11 @@ echo_error() {
 
 print_help() {
     cat << EOF
-libe3 Build Script
+libe3 - A Vendor-Neutral E3AP C++ Library, v0.0.1
+Copyright (c) 2026 Andrea Lacava <thecave003@gmail.com> and contributors.
 ==================
 
-This script builds the libe3 E3AP library with various configuration options.
+This script builds the libe3 E3AP library and its documentation.
 
 Usage: $(basename "$0") [OPTIONS]
 
@@ -150,6 +151,30 @@ Examples:
 EOF
 }
 
+# Install ASN.1 compiler from source (used on Debian where package may be outdated)
+install_asn1c_from_source() {
+    local asn1_install_log="$SCRIPT_DIR/build/log/asn1c_install_log.txt"
+    mkdir -p "$SCRIPT_DIR/build/log"
+    echo_info "\nInstalling ASN1 from source. Log: $asn1_install_log"
+    (
+        sudo $INSTALLER -y install bison flex autoconf automake libtool m4 || true
+        sudo rm -rf /tmp/asn1c || true
+        git clone https://github.com/mouse07410/asn1c /tmp/asn1c
+        cd /tmp/asn1c
+        git checkout 940dd5fa9f3917913fd487b13dfddfacd0ded06e || true
+        git log -n1 || true
+        autoreconf -iv || true
+        ./configure --prefix /opt/asn1c/ || true
+        make -j"$(nproc)" || true
+        sudo make install || true
+        cd - || true
+        sudo ldconfig || true
+        if [[ -v CI_ENV ]]; then
+            sudo rm -rf /tmp/asn1c || true
+        fi
+    ) > "$asn1_install_log" 2>&1 || true
+}
+
 check_command() {
     if ! command -v "$1" &> /dev/null; then
         return 1
@@ -171,8 +196,16 @@ install_dependencies() {
             libzmq3-dev \
             ninja-build \
             git \
-            asn1c \
+            autoconf \
+            automake \
+            libtool \
+            m4 \
+            bison \
+            flex \
             nlohmann-json3-dev
+        # Build and install asn1c from source (some distros ship old versions)
+        INSTALLER="apt-get"
+        install_asn1c_from_source
     elif check_command dnf; then
         echo_info "Detected Fedora/RHEL system"
         sudo dnf install -y \
