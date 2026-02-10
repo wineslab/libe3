@@ -31,7 +31,7 @@ Version: ${VERSION}
 Section: libs
 Priority: optional
 Architecture: amd64
-Maintainer: libe3 maintainers <noreply@example.com>
+Maintainer: Northeastern University <thecave003@gmail.com>
 Depends: libstdc++6
 Description: libe3 - Vendor-neutral E3AP C++ library
 EOF

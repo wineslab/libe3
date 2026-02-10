@@ -313,5 +313,8 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## Acknowledgments
 
-- Based on the E3AP implementation in OpenAirInterface
-- Inspired by O-RAN E2AP design patterns
+- Based on the original E3AP implementation in OpenAirInterface by Andrea Lacava - Northeastern University
+- The E3AP is a protocol inspired by O-RAN E2AP design patterns with due extensions for dApp-xApp management and synch
+- The code rationale and architecture is partially insipired by the e2sim and ns-O-RAN projects
+
+This work has been partially supported by OUSD(R&E) through Army Research Laboratory Cooperative Agreement Number W911NF-24-2-0065.
