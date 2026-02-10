@@ -55,7 +55,8 @@
 - pthreads
 - `asn1c` — ASN.1 APER encoder, required by `messages/`
 - `nlohmann-json3-dev` — Header-only JSON library; CMake expects the `nlohmann_json` target
-- (Optional) `libzmq3-dev` for ZMQ transport
+- `libzmq3-dev` for ZMQ transport
+ - `libsctp-dev` — SCTP development headers/libraries for POSIX/SCTP transport
 
 ### Install Dependencies
 
@@ -67,7 +68,7 @@ Install all required packages using the project's installer (recommended) or man
 
 # Manual (Debian/Ubuntu)
 sudo apt update
-sudo apt install -y build-essential cmake pkg-config libzmq3-dev ninja-build git asn1c nlohmann-json3-dev dpkg-dev debhelper fakeroot
+sudo apt install -y build-essential cmake pkg-config libzmq3-dev ninja-build git asn1c nlohmann-json3-dev libsctp-dev dpkg-dev debhelper fakeroot
 ```
 
 The packaging tools (`dpkg-dev`, `debhelper`, `fakeroot`) are only needed by `scripts/create_deb.sh`.

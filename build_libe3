@@ -202,7 +202,8 @@ install_dependencies() {
             m4 \
             bison \
             flex \
-            nlohmann-json3-dev
+            nlohmann-json3-dev \
+            libsctp-dev
         # Build and install asn1c from source (some distros ship old versions)
         INSTALLER="apt-get"
         install_asn1c_from_source
@@ -216,7 +217,8 @@ install_dependencies() {
             ninja-build \
             git \
             asn1c \
-            nlohmann-json-devel
+            nlohmann-json-devel \
+            lksctp-tools-devel
     elif check_command pacman; then
         echo_info "Detected Arch Linux system"
         sudo pacman -Sy --noconfirm \
@@ -227,7 +229,8 @@ install_dependencies() {
             ninja \
             git \
             asn1c \
-            nlohmann-json
+            nlohmann-json \
+            lksctp-tools
     elif check_command brew; then
         echo_info "Detected macOS with Homebrew"
         brew install cmake pkg-config zeromq ninja asn1c nlohmann-json
