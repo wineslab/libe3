@@ -52,7 +52,7 @@ jobs:
     name: Build Debian package
     runs-on: ubuntu-latest
     needs: create-tag
-    if: ${{ needs.create-tag.outputs.tag_created == 'true' && github.repository == 'wineslab/spear-lib3' }}
+    if: ${{ needs.create-tag.outputs.tag_created == 'true' && github.repository == 'wineslab/spear-libe3' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -83,7 +83,7 @@ jobs:
       - build-deb
       - create-tag
     runs-on: ubuntu-latest
-    if: ${{ needs.create-tag.outputs.tag_created == 'true' && github.repository == 'wineslab/spear-lib3' }}
+    if: ${{ needs.create-tag.outputs.tag_created == 'true' && github.repository == 'wineslab/spear-libe3' }}
     permissions:
       contents: write
     steps:
