@@ -48,8 +48,8 @@ jobs:
             echo "tag_created=false" >> $GITHUB_OUTPUT
           fi
 
-  build-deb:
-    name: Build Debian package
+  build-deb-amd64:
+    name: Build Debian package (amd64)
     runs-on: ubuntu-latest
     needs: create-tag
     if: ${{ needs.create-tag.outputs.tag_created == 'true' && github.repository == 'wineslab/spear-libe3' }}
@@ -68,30 +68,67 @@ jobs:
         run: |
           chmod +x ./scripts/create_deb.sh || true
 
-      - name: Run packaging script
+      - name: Run packaging script for amd64
         run: |
-          ./scripts/create_deb.sh
+          ./scripts/create_deb.sh amd64
 
-      - name: Upload .deb artifact
+      - name: Upload amd64 .deb artifact
         uses: actions/upload-artifact@v4
         with:
-          name: libe3-deb
-          path: build/libe3.deb
+          name: libe3-deb-amd64
+          path: build/libe3_${{ needs.create-tag.outputs.version }}_amd64.deb
+
+  build-deb-arm64:
+    name: Build Debian package (arm64)
+    runs-on: ubuntu-24.04-arm
+    needs: create-tag
+    if: ${{ needs.create-tag.outputs.tag_created == 'true' && github.repository == 'wineslab/spear-libe3' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install build dependencies via build_libe3
+        run: |
+          sudo apt-get update
+          chmod +x ./build_libe3 || true
+          ./build_libe3 -I
+
+      - name: Make packaging script executable
+        run: |
+          chmod +x ./scripts/create_deb.sh || true
+
+      - name: Run packaging script for arm64
+        run: |
+          ./scripts/create_deb.sh arm64
+
+      - name: Upload arm64 .deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libe3-deb-arm64
+          path: build/libe3_${{ needs.create-tag.outputs.version }}_arm64.deb
 
   github-release:
     name: Upload Debian package to GitHub Release
     needs:
-      - build-deb
+      - build-deb-amd64
+      - build-deb-arm64
       - create-tag
     runs-on: ubuntu-latest
     if: ${{ needs.create-tag.outputs.tag_created == 'true' && github.repository == 'wineslab/spear-libe3' }}
     permissions:
       contents: write
     steps:
-      - name: Download deb artifact
+      - name: Download amd64 deb artifact
         uses: actions/download-artifact@v4
         with:
-          name: libe3-deb
+          name: libe3-deb-amd64
+          path: dist/
+
+      - name: Download arm64 deb artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: libe3-deb-arm64
           path: dist/
 
       - name: Create GitHub Release and upload .deb
