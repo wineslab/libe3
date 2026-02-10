@@ -170,7 +170,9 @@ install_dependencies() {
             pkg-config \
             libzmq3-dev \
             ninja-build \
-            git
+            git \
+            asn1c \
+            nlohmann-json3-dev
     elif check_command dnf; then
         echo_info "Detected Fedora/RHEL system"
         sudo dnf install -y \
@@ -179,7 +181,9 @@ install_dependencies() {
             pkg-config \
             zeromq-devel \
             ninja-build \
-            git
+            git \
+            asn1c \
+            nlohmann-json-devel
     elif check_command pacman; then
         echo_info "Detected Arch Linux system"
         sudo pacman -Sy --noconfirm \
@@ -188,10 +192,12 @@ install_dependencies() {
             pkg-config \
             zeromq \
             ninja \
-            git
+            git \
+            asn1c \
+            nlohmann-json
     elif check_command brew; then
         echo_info "Detected macOS with Homebrew"
-        brew install cmake pkg-config zeromq ninja
+        brew install cmake pkg-config zeromq ninja asn1c nlohmann-json
     else
         echo_error "Unsupported package manager. Please install dependencies manually:"
         echo "  - cmake (>= 3.16)"

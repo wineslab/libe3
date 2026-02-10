@@ -50,10 +50,27 @@
 
 ### Prerequisites
 
-- C++17 compatible compiler (GCC 7+, Clang 5+, MSVC 2017+)
+- C++17 compiler (GCC 7+, Clang 5+, MSVC 2017+)
 - CMake 3.16+
 - pthreads
-- (Optional) ZeroMQ for ZMQ transport
+- `asn1c` — ASN.1 APER encoder, required by `messages/`
+- `nlohmann-json3-dev` — Header-only JSON library; CMake expects the `nlohmann_json` target
+- (Optional) `libzmq3-dev` for ZMQ transport
+
+### Install Dependencies
+
+Install all required packages using the project's installer (recommended) or manually:
+
+```bash
+# Recommended
+./build_libe3 -I
+
+# Manual (Debian/Ubuntu)
+sudo apt update
+sudo apt install -y build-essential cmake pkg-config libzmq3-dev ninja-build git asn1c nlohmann-json3-dev dpkg-dev debhelper fakeroot
+```
+
+The packaging tools (`dpkg-dev`, `debhelper`, `fakeroot`) are only needed by `scripts/create_deb.sh`.
 
 ### Building
 
