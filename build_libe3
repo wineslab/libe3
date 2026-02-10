@@ -563,6 +563,11 @@ main() {
     # Install dependencies if requested
     if [ $INSTALL_DEPS -eq 1 ]; then
         install_dependencies
+        # When invoked with -I/--install-deps we only install dependencies and exit.
+        # This prevents the script from proceeding to configure/build twice when
+        # CI pipelines call it for dependency setup before running the actual build.
+        echo_info "Dependencies installed. Please try to build libe3."
+        exit 0
     fi
     
     # Clean if requested
