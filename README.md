@@ -71,6 +71,9 @@ cd libe3
 # Clean build with Ninja
 ./build_libe3 -c --ninja
 
+# Documentation 
+./build_libe3 --docs
+
 # Install dependencies first (Ubuntu/Fedora/Arch/macOS)
 ./build_libe3 -I
 
@@ -122,22 +125,21 @@ int main() {
     config.link_layer = libe3::E3LinkLayer::POSIX;
     config.transport_layer = libe3::E3TransportLayer::IPC;
     config.encoding = libe3::EncodingFormat::JSON;
-    
-    // Create and configure agent
+
+    // Create the agent
     libe3::E3Agent agent(std::move(config));
-    
-    // Set up event callbacks
-    agent.set_control_callback([](uint32_t dapp_id, uint32_t ran_func,
-                                  const std::vector<uint8_t>& data) {
-        std::cout << "Control action from dApp " << dapp_id << "\n";
-    });
-    
-    // Initialize and start
-    agent.init();
-    agent.start();
-    
+
+    // Initialize and start (start() will call init() if needed)
+    if (agent.init() != libe3::ErrorCode::SUCCESS) {
+        // handle initialization error
+    }
+
+    if (agent.start() != libe3::ErrorCode::SUCCESS) {
+        // handle start error
+    }
+
     // ... run your application ...
-    
+
     agent.stop();
     return 0;
 }
@@ -145,65 +147,51 @@ int main() {
 
 ### Custom Service Model
 
+Service Models implement the `libe3::ServiceModel` interface. Control action
+handlers are registered from the SM implementation via `register_control_callback`
+and the `E3Agent` routes incoming control actions to the appropriate SM.
+
 ```cpp
 #include <libe3/libe3.hpp>
 
 class MyKpmServiceModel : public libe3::ServiceModel {
 public:
-    uint32_t id() const override { return 100; }
     std::string name() const override { return "KPM"; }
-    std::string version() const override { return "2.0.0"; }
-    
-    std::vector<uint32_t> ran_function_ids() const override {
-        return {100};
-    }
-    
-    libe3::ErrorCode start() override {
-        // Start collecting KPM data
-        return libe3::ErrorCode::SUCCESS;
-    }
-    
-    libe3::ErrorCode stop() override {
-        return libe3::ErrorCode::SUCCESS;
-    }
-    
-    bool is_running() const override { return running_; }
-    
-    std::optional<std::vector<uint8_t>> poll_indication_data() override {
-        // Return collected KPM data
-        return std::nullopt;
-    }
-    
-    libe3::ErrorCode handle_control_action(const std::vector<uint8_t>& data) override {
-        // Handle control actions
-        return libe3::ErrorCode::SUCCESS;
-    }
-    
-    void set_indication_callback(IndicationCallback cb) override {
-        callback_ = std::move(cb);
+    uint32_t version() const override { return 2; }
+    uint32_t ran_function_id() const override { return 100; }
+
+    std::vector<uint32_t> telemetry_ids() const override { return {1}; }
+    std::vector<uint32_t> control_ids() const override { return {1}; }
+
+    ErrorCode init() override {
+        register_control_callback(1, [](const std::vector<uint8_t>& data) {
+            // decode and apply control action
+            return ErrorCode::SUCCESS;
+        });
+        return ErrorCode::SUCCESS;
     }
 
+    void destroy() override { stop(); }
+    ErrorCode start() override { running_ = true; return ErrorCode::SUCCESS; }
+    void stop() override { running_ = false; }
+    bool is_running() const override { return running_; }
+    std::vector<uint8_t> ran_function_data() const override { return {}; }
+
 private:
-    bool running_ = false;
-    IndicationCallback callback_;
+    std::atomic<bool> running_{false};
 };
 
 // Register with agent
 agent.register_sm(std::make_unique<MyKpmServiceModel>());
 ```
 
-### Simulation Mode
+### Notes on Simulation / Local Testing
 
-For testing without real RAN infrastructure:
+The library exposes IPC endpoints by default (see `E3Config` defaults) so
+local testing with dApps on the same host is supported using the IPC transport.
+There is no dedicated `simulation_mode` field in `E3Config`; instead adjust
+endpoints and transport selection to run in isolated/local environments.
 
-```cpp
-libe3::E3Config config;
-config.ran_identifier = "simulated-ran";
-config.simulation_mode = true;  // Enable simulation
-
-libe3::E3Agent agent(std::move(config));
-// Agent works without actual network connectivity
-```
 
 ## API Reference
 
@@ -217,28 +205,39 @@ The main facade class for RAN vendors.
 | `start()` | Start processing threads |
 | `stop()` | Stop the agent |
 | `state()` | Get current state |
+| `is_running()` | Check if agent is running |
 | `register_sm(sm)` | Register a Service Model |
-| `set_control_callback(cb)` | Set control action handler |
-| `set_indication_callback(cb)` | Set indication handler |
-| `send_indication(dapp_id, ran_function_id, data)` | Send indication to specific dApp |
-| `get_registered_dapps()` | Get list of registered dApps |
+| `get_available_ran_functions()` | Get available RAN function IDs from registered SMs |
+| `send_indication(dapp_id, ran_function_id, data)` | Send an indication to a specific dApp |
+| `get_registered_dapps()` | Get list of registered dApp IDs |
+| `get_dapp_subscriptions(dapp_id)` | Get subscriptions for a dApp |
+| `get_ran_function_subscribers(ran_function_id)` | Get subscribers for a RAN function |
+| `config()` | Access current `E3Config` |
 | `dapp_count()` | Number of registered dApps |
 | `subscription_count()` | Number of active subscriptions |
 
 ### E3Config
 
-Configuration structure for the agent.
+The `E3Config` structure contains agent configuration and defaults suitable
+for local development (IPC) or production deployments.
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `ran_identifier` | string | Unique RAN identifier |
-| `link_layer` | E3LinkLayer | ZMQ, POSIX |
+| `e3ap_version` | string | E3AP protocol version string |
+| `link_layer` | E3LinkLayer | ZMQ or POSIX |
 | `transport_layer` | E3TransportLayer | SCTP, TCP, IPC |
-| `encoding` | EncodingFormat | JSON, ASN1 |
-| `simulation_mode` | bool | Enable simulation mode |
-| `setup_endpoint` | string | Setup connection endpoint |
-| `subscriber_endpoint` | string | Subscriber endpoint |
-| `publisher_endpoint` | string | Publisher endpoint |
+| `setup_endpoint` | string | Setup connection endpoint (default: ipc:///tmp/dapps/setup) |
+| `subscriber_endpoint` | string | Subscriber endpoint (default: ipc:///tmp/dapps/dapp_socket) |
+| `publisher_endpoint` | string | Publisher endpoint (default: ipc:///tmp/dapps/e3_socket) |
+| `encoding` | EncodingFormat | ASN1 or JSON |
+| `connect_timeout_ms` | uint32_t | Connect timeout (ms) |
+| `recv_timeout_ms` | uint32_t | Receive timeout (ms) |
+| `send_timeout_ms` | uint32_t | Send timeout (ms) |
+| `receive_buffer_size` | size_t | Receive buffer size (bytes) |
+| `send_buffer_size` | size_t | Send buffer size (bytes) |
+| `io_threads` | size_t | Number of I/O threads |
+| `log_level` | int | Logging level (0=none .. 5=trace) |
 
 ### ServiceModel
 
@@ -246,16 +245,17 @@ Interface for implementing custom service models.
 
 | Method | Description |
 |--------|-------------|
-| `id()` | Unique SM identifier |
 | `name()` | SM name (e.g., "KPM") |
-| `version()` | SM version string |
-| `ran_function_ids()` | List of RAN function IDs |
-| `start()` | Start the SM |
-| `stop()` | Stop the SM |
-| `is_running()` | Check if running |
-| `poll_indication_data()` | Poll for indication data |
-| `handle_control_action(data)` | Handle control action |
-| `set_indication_callback(cb)` | Set indication callback |
+| `version()` | SM version number |
+| `ran_function_id()` | RAN function ID served by this SM |
+| `telemetry_ids()` | Telemetry identifiers provided by the SM |
+| `control_ids()` | Control identifiers accepted by the SM |
+| `ran_function_data()` | Optional opaque bytes included in SetupResponse |
+| `init()` | Initialize the SM (register callbacks) |
+| `destroy()` | Destroy the SM and release resources |
+| `start()` | Start SM processing (on first subscription) |
+| `stop()` | Stop SM processing (on last unsubscription) |
+| `is_running()` | Check if SM is currently running |
 
 ## Directory Structure
 
@@ -302,10 +302,6 @@ const char* ver = libe3::version();  // e.g., "0.0.1"
 int major, minor, patch;
 libe3::version(major, minor, patch);  // e.g., 0, 0, 1
 ```
-
-## Integration with spear-dApp
-
-libe3 is designed to integrate with the SPEAR dApp framework. See the [spear-dApp documentation](../spear-dApp/README.md) for details on building dApps that communicate with libe3-based RAN functions.
 
 ## Contributing
 
