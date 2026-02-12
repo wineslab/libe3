@@ -347,6 +347,11 @@ struct E3Config {
     E3LinkLayer link_layer{E3LinkLayer::ZMQ};
     E3TransportLayer transport_layer{E3TransportLayer::IPC};
     
+    // Ports
+    const uint16_t setup_port;
+    const uint16_t subscriber_port;
+    const uint16_t publisher_port;
+
     // Endpoints
     std::string setup_endpoint{"ipc:///tmp/dapps/setup"};
     std::string subscriber_endpoint{"ipc:///tmp/dapps/dapp_socket"};
