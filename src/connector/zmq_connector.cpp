@@ -28,14 +28,26 @@ ZmqE3Connector::ZmqE3Connector(
     const std::string& setup_endpoint,
     const std::string& inbound_endpoint,
     const std::string& outbound_endpoint,
+    uint16_t setup_port,
+    uint16_t inbound_port,
+    uint16_t outbound_port,
     size_t io_threads
 )
     : transport_layer_(transport_layer)
     , io_threads_(io_threads)
+    , setup_port_(setup_port)
+    , inbound_port_(inbound_port)
+    , outbound_port_(outbound_port)
 {
-    setup_endpoint_ = setup_endpoint;
-    inbound_endpoint_ = inbound_endpoint;
-    outbound_endpoint_ = outbound_endpoint;
+    if (transport_layer == E3TransportLayer::TCP) {
+        setup_endpoint_ = "tcp://*:" + std::to_string(setup_port);
+        inbound_endpoint_ = "tcp://*:" + std::to_string(inbound_port);
+        outbound_endpoint_ = "tcp://*:" + std::to_string(outbound_port);
+    } else {
+        setup_endpoint_ = setup_endpoint;
+        inbound_endpoint_ = inbound_endpoint;
+        outbound_endpoint_ = outbound_endpoint;
+    }
     
     E3_LOG_INFO(LOG_TAG) << "Creating ZMQ connector";
     E3_LOG_DEBUG(LOG_TAG) << "  Setup endpoint: " << setup_endpoint_;

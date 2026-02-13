@@ -163,6 +163,9 @@ std::unique_ptr<E3Connector> create_connector(
     const std::string& setup_endpoint,
     const std::string& inbound_endpoint,
     const std::string& outbound_endpoint,
+    uint16_t setup_port,
+    uint16_t inbound_port,
+    uint16_t outbound_port,
     size_t io_threads = 2
 );
 

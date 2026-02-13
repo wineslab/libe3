@@ -41,19 +41,23 @@ class E3Interface;
  * config.link_layer = libe3::E3LinkLayer::ZMQ;
  * config.transport_layer = libe3::E3TransportLayer::IPC;
  * config.encoding = libe3::EncodingFormat::JSON;
- *
+ * // Set custom ports if needed
+ * config.setup_port = 9990;
+ * config.subscriber_port = 9999;
+ * config.publisher_port = 9991;
+
  * libe3::E3Agent agent(config);
- *
+
  * // Register Service Models
  * agent.register_sm(std::make_unique<MySpectrumSM>());
- *
+
  * // Start the agent
  * if (agent.start() != libe3::ErrorCode::SUCCESS) {
  *     // Handle error
  * }
- *
+
  * // ... agent runs, handling dApp connections and messages ...
- *
+
  * // Shutdown
  * agent.stop();
  * ```

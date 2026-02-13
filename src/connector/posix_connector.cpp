@@ -26,9 +26,6 @@ namespace libe3 {
 namespace {
 constexpr const char* LOG_TAG = "PosixConn";
 constexpr const char* IPC_BASE_DIR = "/tmp/dapps";
-constexpr uint16_t DEFAULT_SETUP_PORT = 9990;
-constexpr uint16_t DEFAULT_INBOUND_PORT = 9999;
-constexpr uint16_t DEFAULT_OUTBOUND_PORT = 9991;
 constexpr int POLL_TIMEOUT_MS = 500;  // Timeout for graceful shutdown
 
 /**
@@ -67,22 +64,30 @@ PosixE3Connector::PosixE3Connector(
     E3TransportLayer transport_layer,
     const std::string& setup_endpoint,
     const std::string& inbound_endpoint,
-    const std::string& outbound_endpoint
+    const std::string& outbound_endpoint,
+    uint16_t setup_port,
+    uint16_t inbound_port,
+    uint16_t outbound_port
 )
     : transport_layer_(transport_layer)
     , setup_connection_socket_(UNUSED_SOCKET)
     , inbound_connection_socket_(UNUSED_SOCKET)
     , outbound_connection_socket_(UNUSED_SOCKET)
+    , setup_port_(setup_port)
+    , inbound_port_(inbound_port)
+    , outbound_port_(outbound_port)
 {
-    // Strip any ZMQ-style URI prefix (e.g. "ipc://") — POSIX needs bare paths
     setup_endpoint_ = strip_uri_prefix(setup_endpoint);
     inbound_endpoint_ = strip_uri_prefix(inbound_endpoint);
     outbound_endpoint_ = strip_uri_prefix(outbound_endpoint);
-    
+
     E3_LOG_INFO(LOG_TAG) << "Creating POSIX connector";
     E3_LOG_DEBUG(LOG_TAG) << "  Setup endpoint: " << setup_endpoint_;
     E3_LOG_DEBUG(LOG_TAG) << "  Inbound endpoint: " << inbound_endpoint_;
     E3_LOG_DEBUG(LOG_TAG) << "  Outbound endpoint: " << outbound_endpoint_;
+    E3_LOG_DEBUG(LOG_TAG) << "  Setup port: " << setup_port_;
+    E3_LOG_DEBUG(LOG_TAG) << "  Inbound port: " << inbound_port_;
+    E3_LOG_DEBUG(LOG_TAG) << "  Outbound port: " << outbound_port_;
 }
 
 PosixE3Connector::~PosixE3Connector() {
@@ -109,7 +114,7 @@ ErrorCode PosixE3Connector::setup_initial_connection() {
         sock = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
-        addr.sin_port = htons(DEFAULT_SETUP_PORT);
+        addr.sin_port = htons(setup_port_);
         addr.sin_addr.s_addr = INADDR_ANY;
         ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
     }
@@ -117,7 +122,7 @@ ErrorCode PosixE3Connector::setup_initial_connection() {
         sock = socket(AF_INET, SOCK_STREAM, 0);
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
-        addr.sin_port = htons(DEFAULT_SETUP_PORT);
+        addr.sin_port = htons(setup_port_);
         addr.sin_addr.s_addr = INADDR_ANY;
         ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
     }
@@ -230,7 +235,7 @@ ErrorCode PosixE3Connector::setup_inbound_connection() {
         sock = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
-        addr.sin_port = htons(DEFAULT_INBOUND_PORT);
+        addr.sin_port = htons(inbound_port_);
         addr.sin_addr.s_addr = INADDR_ANY;
         ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
     }
@@ -238,7 +243,7 @@ ErrorCode PosixE3Connector::setup_inbound_connection() {
         sock = socket(AF_INET, SOCK_STREAM, 0);
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
-        addr.sin_port = htons(DEFAULT_INBOUND_PORT);
+        addr.sin_port = htons(inbound_port_);
         addr.sin_addr.s_addr = INADDR_ANY;
         ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
     }
@@ -362,7 +367,7 @@ ErrorCode PosixE3Connector::setup_outbound_connection() {
         sock = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
-        addr.sin_port = htons(DEFAULT_OUTBOUND_PORT);
+        addr.sin_port = htons(outbound_port_);
         addr.sin_addr.s_addr = INADDR_ANY;
         ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
     }
@@ -370,7 +375,7 @@ ErrorCode PosixE3Connector::setup_outbound_connection() {
         sock = socket(AF_INET, SOCK_STREAM, 0);
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
-        addr.sin_port = htons(DEFAULT_OUTBOUND_PORT);
+        addr.sin_port = htons(outbound_port_);
         addr.sin_addr.s_addr = INADDR_ANY;
         ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
     }

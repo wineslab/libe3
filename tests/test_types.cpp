@@ -147,6 +147,9 @@ TEST(E3Config_defaults) {
     ASSERT_TRUE(config.link_layer == E3LinkLayer::ZMQ);
     ASSERT_TRUE(config.transport_layer == E3TransportLayer::IPC);
     ASSERT_TRUE(config.encoding == EncodingFormat::ASN1);
+    ASSERT_EQ(config.setup_port, 9990u);
+    ASSERT_EQ(config.subscriber_port, 9999u);
+    ASSERT_EQ(config.publisher_port, 9991u);
 }
 
 TEST(E3Config_zmq) {
@@ -154,12 +157,18 @@ TEST(E3Config_zmq) {
     config.ran_identifier = "zmq-ran";
     config.link_layer = E3LinkLayer::ZMQ;
     config.transport_layer = E3TransportLayer::TCP;
+    config.setup_port = 5555;
+    config.subscriber_port = 5556;
+    config.publisher_port = 5557;
     config.setup_endpoint = "tcp://localhost:5555";
     config.subscriber_endpoint = "tcp://localhost:5556";
     config.publisher_endpoint = "tcp://localhost:5557";
     
     ASSERT_TRUE(config.link_layer == E3LinkLayer::ZMQ);
     ASSERT_TRUE(config.transport_layer == E3TransportLayer::TCP);
+    ASSERT_EQ(config.setup_port, 5555u);
+    ASSERT_EQ(config.subscriber_port, 5556u);
+    ASSERT_EQ(config.publisher_port, 5557u);
     ASSERT_STREQ(config.setup_endpoint.c_str(), "tcp://localhost:5555");
 }
 

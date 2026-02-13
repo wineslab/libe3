@@ -25,7 +25,10 @@ public:
         E3TransportLayer transport_layer,
         const std::string& setup_endpoint,
         const std::string& inbound_endpoint,
-        const std::string& outbound_endpoint
+        const std::string& outbound_endpoint,
+        uint16_t setup_port,
+        uint16_t inbound_port,
+        uint16_t outbound_port
     );
     
     ~PosixE3Connector() override;
@@ -61,6 +64,10 @@ private:
     int inbound_connection_socket_{-1};
     int outbound_socket_{-1};
     int outbound_connection_socket_{-1};
+
+    uint16_t setup_port_;
+    uint16_t inbound_port_;
+    uint16_t outbound_port_;
     
     bool connected_{false};
     std::atomic<bool> shutdown_requested_{false};

@@ -74,6 +74,9 @@ ErrorCode E3Interface::init() {
         config_.setup_endpoint,
         config_.subscriber_endpoint,
         config_.publisher_endpoint,
+        config_.setup_port,
+        config_.subscriber_port,
+        config_.publisher_port,
         config_.io_threads
     );
     

@@ -92,6 +92,31 @@ e3_service_model_handle_t* e3_service_model_create_from_c(
 void e3_service_model_destroy(e3_service_model_handle_t* sm);
 
 /**
+ * @brief Configuration for creating an E3Agent from C.
+ *
+ * All string pointers are copied by the library; the caller may free them
+ * after the call. Use NULL for optional strings to keep library defaults.
+ *
+ * Enum values: link_layer: 0=ZMQ, 1=POSIX. transport_layer: 0=SCTP, 1=TCP, 2=IPC.
+ * encoding: 0=ASN1, 1=JSON. Use -1 for link_layer, transport_layer, encoding, log_level
+ * to keep defaults. Use 0 for setup_port, subscriber_port, publisher_port to keep defaults.
+ */
+typedef struct {
+    const char* ran_identifier;
+    int link_layer;       /* 0=ZMQ, 1=POSIX, -1=default */
+    int transport_layer;  /* 0=SCTP, 1=TCP, 2=IPC, -1=default */
+    uint16_t setup_port;
+    uint16_t subscriber_port;
+    uint16_t publisher_port;
+    const char* setup_endpoint;
+    const char* subscriber_endpoint;
+    const char* publisher_endpoint;
+    int encoding;         /* 0=ASN1, 1=JSON, -1=default */
+    size_t io_threads;    /* 0=default */
+    int log_level;        /* -1=default */
+} e3_config_t;
+
+/**
  * @brief Create/destroy an `E3Agent` handle
  */
 /**
@@ -103,6 +128,18 @@ void e3_service_model_destroy(e3_service_model_handle_t* sm);
  * @return e3_agent_handle_t* on success, NULL on allocation error
  */
 e3_agent_handle_t* e3_agent_create_default();
+
+/**
+ * @brief Create a new `E3Agent` with the given configuration.
+ *
+ * If \p config is NULL, behaves like \ref e3_agent_create_default.
+ * String fields in \p config are copied; the caller may free them after the call.
+ * Use 0 or NULL for fields to keep library defaults (e.g. setup_port 0 → 9990).
+ *
+ * @param config Configuration (ports, endpoints, link/transport layer, etc.)
+ * @return e3_agent_handle_t* on success, NULL on allocation error
+ */
+e3_agent_handle_t* e3_agent_create_with_config(const e3_config_t* config);
 
 /**
  * @brief Destroy an `E3Agent` handle.

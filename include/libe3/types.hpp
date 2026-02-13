@@ -348,9 +348,9 @@ struct E3Config {
     E3TransportLayer transport_layer{E3TransportLayer::IPC};
     
     // Ports
-    const uint16_t setup_port;
-    const uint16_t subscriber_port;
-    const uint16_t publisher_port;
+    uint16_t setup_port{9990};
+    uint16_t subscriber_port{9999};
+    uint16_t publisher_port{9991};
 
     // Endpoints
     std::string setup_endpoint{"ipc:///tmp/dapps/setup"};

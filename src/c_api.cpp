@@ -99,9 +99,31 @@ void e3_service_model_destroy(e3_service_model_handle_t* sm) {
 }
 
 e3_agent_handle_t* e3_agent_create_default() {
+    return e3_agent_create_with_config(nullptr);
+}
+
+e3_agent_handle_t* e3_agent_create_with_config(const e3_config_t* config) {
     try {
+        E3Config cfg;
+        if (config) {
+            if (config->ran_identifier) cfg.ran_identifier = config->ran_identifier;
+            if (config->link_layer >= 0 && config->link_layer <= 1)
+                cfg.link_layer = static_cast<E3LinkLayer>(config->link_layer);
+            if (config->transport_layer >= 0 && config->transport_layer <= 2)
+                cfg.transport_layer = static_cast<E3TransportLayer>(config->transport_layer);
+            if (config->setup_port != 0) cfg.setup_port = config->setup_port;
+            if (config->subscriber_port != 0) cfg.subscriber_port = config->subscriber_port;
+            if (config->publisher_port != 0) cfg.publisher_port = config->publisher_port;
+            if (config->setup_endpoint) cfg.setup_endpoint = config->setup_endpoint;
+            if (config->subscriber_endpoint) cfg.subscriber_endpoint = config->subscriber_endpoint;
+            if (config->publisher_endpoint) cfg.publisher_endpoint = config->publisher_endpoint;
+            if (config->encoding >= 0 && config->encoding <= 1)
+                cfg.encoding = static_cast<EncodingFormat>(config->encoding);
+            if (config->io_threads != 0) cfg.io_threads = config->io_threads;
+            if (config->log_level >= 0) cfg.log_level = config->log_level;
+        }
         e3_agent_handle_t* h = new e3_agent_handle_s();
-        h->agent = std::make_unique<E3Agent>(E3Config{});
+        h->agent = std::make_unique<E3Agent>(std::move(cfg));
         return h;
     } catch (...) {
         return nullptr;

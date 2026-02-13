@@ -26,6 +26,9 @@ public:
         const std::string& setup_endpoint,
         const std::string& inbound_endpoint,
         const std::string& outbound_endpoint,
+        uint16_t setup_port,
+        uint16_t inbound_port,
+        uint16_t outbound_port,
         size_t io_threads
     );
     
@@ -56,6 +59,9 @@ public:
 private:
     E3TransportLayer transport_layer_;
     size_t io_threads_;
+    uint16_t setup_port_;
+    uint16_t inbound_port_;
+    uint16_t outbound_port_;
     
     void* context_{nullptr};
     void* setup_socket_{nullptr};
