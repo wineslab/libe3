@@ -278,7 +278,7 @@ void E3Interface::subscriber_loop() {
             case PduType::DAPP_CONTROL_ACTION: {
                 auto* action = std::get_if<DAppControlAction>(&pdu.choice);
                 if (action) {
-                    handle_control_action(*action);
+                    handle_control_action(*action, pdu.message_id);
                 }
                 break;
             }
@@ -544,13 +544,13 @@ void E3Interface::handle_subscription_delete(const SubscriptionDelete& del, uint
     queue_outbound(std::move(response_pdu));
 }
 
-void E3Interface::handle_control_action(const DAppControlAction& action) {
+void E3Interface::handle_control_action(const DAppControlAction& action, uint32_t request_message_id) {
     E3_LOG_INFO(LOG_TAG) << "Handling control action from dApp " << action.dapp_identifier
                          << " for RAN function " << action.ran_function_identifier
                          << " control " << action.control_identifier
                          << " (" << action.action_data.size() << " bytes)";
     
-    // Find SM for this RAN function
+    ResponseCode ack_code = ResponseCode::NEGATIVE;
     ServiceModel* sm = SmRegistry::instance().get_by_ran_function(action.ran_function_identifier);
     
     if (sm && sm->is_running()) {
@@ -561,6 +561,7 @@ void E3Interface::handle_control_action(const DAppControlAction& action) {
         
         if (result == ErrorCode::SUCCESS) {
             E3_LOG_INFO(LOG_TAG) << "Control action processed by SM";
+            ack_code = ResponseCode::POSITIVE;
         } else {
             E3_LOG_ERROR(LOG_TAG) << "SM failed to process control action: "
                                   << error_code_to_string(result);
@@ -569,6 +570,14 @@ void E3Interface::handle_control_action(const DAppControlAction& action) {
         E3_LOG_ERROR(LOG_TAG) << "No running SM found for RAN function " 
                               << action.ran_function_identifier;
     }
+    
+    Pdu response_pdu(PduType::MESSAGE_ACK);
+    response_pdu.message_id = generate_message_id();
+    MessageAck ack;
+    ack.request_id = request_message_id;
+    ack.response_code = ack_code;
+    response_pdu.choice = ack;
+    queue_outbound(std::move(response_pdu));
 }
 
 void E3Interface::handle_dapp_report(const DAppReport& report) {

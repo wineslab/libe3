@@ -245,6 +245,56 @@ e3_error_t e3_agent_send_indication(
     size_t data_len
 );
 
+/**
+ * @brief Send a dApp report to a specific dApp (RAN → dApp).
+ *
+ * @param agent Agent handle
+ * @param dapp_id Target dApp identifier
+ * @param ran_function_id RAN function identifier
+ * @param report_data Pointer to E3SM-encoded report payload (may be NULL if data_len is 0)
+ * @param report_data_len Length of payload in bytes
+ * @return e3_error_t ErrorCode value (0 == success)
+ */
+e3_error_t e3_agent_send_dapp_report(
+    e3_agent_handle_t* agent,
+    uint32_t dapp_id,
+    uint32_t ran_function_id,
+    const uint8_t* report_data,
+    size_t report_data_len
+);
+
+/**
+ * @brief Send an xApp control action to a specific dApp (e.g. from E2/SM).
+ *
+ * @param agent Agent handle
+ * @param dapp_id Target dApp identifier
+ * @param ran_function_id RAN function identifier
+ * @param control_data Pointer to E3SM-encoded control payload (may be NULL if data_len is 0)
+ * @param control_data_len Length of payload in bytes
+ * @return e3_error_t ErrorCode value (0 == success)
+ */
+e3_error_t e3_agent_send_xapp_control(
+    e3_agent_handle_t* agent,
+    uint32_t dapp_id,
+    uint32_t ran_function_id,
+    const uint8_t* control_data,
+    size_t control_data_len
+);
+
+/**
+ * @brief Send a message acknowledgment (e.g. ack a control/request from dApp).
+ *
+ * @param agent Agent handle
+ * @param request_id ID of the request being acknowledged
+ * @param response_code 0 = positive (success), 1 = negative (failure)
+ * @return e3_error_t ErrorCode value (0 == success)
+ */
+e3_error_t e3_agent_send_message_ack(
+    e3_agent_handle_t* agent,
+    uint32_t request_id,
+    int response_code
+);
+
 /* Simple stats */
 /**
  * @brief Number of registered dApps known to the agent.

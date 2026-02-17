@@ -205,8 +205,9 @@ private:
 
     /**
      * @brief Handle E3 Control Action
+     * @param request_message_id Message ID from the incoming PDU (used for MessageAck)
      */
-    void handle_control_action(const DAppControlAction& action);
+    void handle_control_action(const DAppControlAction& action, uint32_t request_message_id);
 
     /**
      * @brief Handle dApp Report

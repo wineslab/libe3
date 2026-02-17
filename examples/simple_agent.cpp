@@ -196,6 +196,19 @@ int main(int argc, char* argv[]) {
                   << libe3::error_code_to_string(sm_result) << "\n";
         return 1;
     }
+
+    // Handle dApp reports (e.g. Simple-DAppReport from simple_dapp.py)
+    agent.set_dapp_report_handler([](const libe3::DAppReport& report) {
+        libe3_examples::SimpleDAppReport decoded;
+        if (libe3_examples::decode_simple_dapp_report(report.report_data, decoded)) {
+            std::cout << "[SIMPLE] dApp report from dApp " << report.dapp_identifier
+                      << " (RAN function " << report.ran_function_identifier
+                      << "): bin1=" << decoded.bin1 << "\n";
+        } else {
+            std::cout << "[SIMPLE] dApp report from dApp " << report.dapp_identifier
+                      << " (" << report.report_data.size() << " bytes, decode failed)\n";
+        }
+    });
     
     // Start the agent
     auto start_result = agent.start();

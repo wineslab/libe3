@@ -23,6 +23,9 @@ namespace libe3 {
 // Forward declaration - implementation hidden from users
 class E3Interface;
 
+/** Callback for incoming dApp reports (dApp → RAN). Set before start() to handle reports. */
+using DAppReportHandler = std::function<void(const DAppReport&)>;
+
 /**
  * @brief E3Agent - Main façade for RAN vendor integration
  *
@@ -153,6 +156,12 @@ public:
      */
     std::vector<uint32_t> get_available_ran_functions() const;
 
+    /**
+     * @brief Set callback for incoming dApp reports (dApp → RAN).
+     * Call before start(). When a dApp sends a DApp report, this callback is invoked.
+     */
+    void set_dapp_report_handler(DAppReportHandler handler);
+
     // =========================================================================
     // Manual Operations
     // =========================================================================
@@ -170,6 +179,43 @@ public:
         uint32_t ran_function_id,
         const std::vector<uint8_t>& data
     );
+
+    /**
+     * @brief Send a dApp report to a specific dApp (RAN → dApp).
+     *
+     * @param dapp_id Target dApp identifier
+     * @param ran_function_id RAN function identifier
+     * @param report_data E3SM-encoded report payload
+     * @return ErrorCode::SUCCESS on success
+     */
+    ErrorCode send_dapp_report(
+        uint32_t dapp_id,
+        uint32_t ran_function_id,
+        const std::vector<uint8_t>& report_data
+    );
+
+    /**
+     * @brief Send an xApp control action to a specific dApp (e.g. from E2/SM).
+     *
+     * @param dapp_id Target dApp identifier
+     * @param ran_function_id RAN function identifier
+     * @param control_data E3SM-encoded control payload
+     * @return ErrorCode::SUCCESS on success
+     */
+    ErrorCode send_xapp_control(
+        uint32_t dapp_id,
+        uint32_t ran_function_id,
+        const std::vector<uint8_t>& control_data
+    );
+
+    /**
+     * @brief Send a message acknowledgment (e.g. ack a control/request from dApp).
+     *
+     * @param request_id ID of the request being acknowledged
+     * @param response_code ResponseCode::POSITIVE (0) or NEGATIVE (1)
+     * @return ErrorCode::SUCCESS on success
+     */
+    ErrorCode send_message_ack(uint32_t request_id, ResponseCode response_code);
 
     /**
      * @brief Get list of registered dApp IDs

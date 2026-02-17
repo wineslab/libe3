@@ -12,6 +12,7 @@ extern "C" {
 #include "Simple-Indication.h"
 #include "Simple-Control.h"
 #include "Simple-RanFunctionData.h"
+#include "Simple-DAppReport.h"
 #include "aper_encoder.h"
 #include "aper_decoder.h"
 
@@ -111,6 +112,15 @@ bool encode_ran_function_data(const std::string name, std::vector<uint8_t>& out)
     out.assign(buffer, buffer + bytes);
 
     if (srd.name.buf) free(srd.name.buf);
+    return true;
+}
+
+bool decode_simple_dapp_report(const std::vector<uint8_t>& in, SimpleDAppReport& out) {
+    Simple_DAppReport_t* rep = nullptr;
+    asn_dec_rval_t dr = aper_decode(NULL, &asn_DEF_Simple_DAppReport, (void**)&rep, in.data(), in.size(), 0, 0);
+    if (dr.code != RC_OK || !rep) return false;
+    out.bin1 = rep->bin1;
+    ASN_STRUCT_FREE(asn_DEF_Simple_DAppReport, rep);
     return true;
 }
 

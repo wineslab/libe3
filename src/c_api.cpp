@@ -223,6 +223,42 @@ e3_error_t e3_agent_register_sm(e3_agent_handle_t* agent, e3_service_model_handl
         return static_cast<int>(agent->agent->send_indication(dapp_id, ran_function_id, buf));
     }
 
+    e3_error_t e3_agent_send_dapp_report(
+        e3_agent_handle_t* agent,
+        uint32_t dapp_id,
+        uint32_t ran_function_id,
+        const uint8_t* report_data,
+        size_t report_data_len
+    ) {
+        if (!agent || !agent->agent) return static_cast<int>(ErrorCode::INVALID_PARAM);
+        std::vector<uint8_t> buf;
+        if (report_data && report_data_len) buf.assign(report_data, report_data + report_data_len);
+        return static_cast<int>(agent->agent->send_dapp_report(dapp_id, ran_function_id, buf));
+    }
+
+    e3_error_t e3_agent_send_xapp_control(
+        e3_agent_handle_t* agent,
+        uint32_t dapp_id,
+        uint32_t ran_function_id,
+        const uint8_t* control_data,
+        size_t control_data_len
+    ) {
+        if (!agent || !agent->agent) return static_cast<int>(ErrorCode::INVALID_PARAM);
+        std::vector<uint8_t> buf;
+        if (control_data && control_data_len) buf.assign(control_data, control_data + control_data_len);
+        return static_cast<int>(agent->agent->send_xapp_control(dapp_id, ran_function_id, buf));
+    }
+
+    e3_error_t e3_agent_send_message_ack(
+        e3_agent_handle_t* agent,
+        uint32_t request_id,
+        int response_code
+    ) {
+        if (!agent || !agent->agent) return static_cast<int>(ErrorCode::INVALID_PARAM);
+        ResponseCode rc = (response_code == 0) ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
+        return static_cast<int>(agent->agent->send_message_ack(request_id, rc));
+    }
+
     size_t e3_agent_dapp_count(e3_agent_handle_t* agent) {
         if (!agent || !agent->agent) return 0;
         return agent->agent->dapp_count();

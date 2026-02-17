@@ -16,6 +16,10 @@ struct SimpleIndication {
     std::optional<uint32_t> timestamp;
 };
 
+struct SimpleDAppReport {
+    int bin1;
+};
+
 // Encode Simple-Indication into PER/UPER bytes
 bool encode_simple_indication(const SimpleIndication& in, std::vector<uint8_t>& out);
 
@@ -30,5 +34,8 @@ bool decode_simple_control(const std::vector<uint8_t>& in, int& samplingThreshol
 
 // Encode Simple-RanFunctionData into APER bytes
 bool encode_ran_function_data(const std::string name, std::vector<uint8_t>& out);
+
+// Decode Simple-DAppReport from APER bytes (dApp → RAN report)
+bool decode_simple_dapp_report(const std::vector<uint8_t>& in, SimpleDAppReport& out);
 
 } // namespace libe3_examples

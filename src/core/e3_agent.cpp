@@ -22,6 +22,7 @@ constexpr const char* LOG_TAG = "E3Agent";
 struct E3Agent::Impl {
     E3Config config;
     std::unique_ptr<E3Interface> interface;
+    DAppReportHandler dapp_report_handler;
     
     explicit Impl(E3Config cfg) : config(std::move(cfg)) {}
 };
@@ -60,6 +61,10 @@ ErrorCode E3Agent::init() {
         E3_LOG_ERROR(LOG_TAG) << "Failed to initialize interface: " 
                               << error_code_to_string(result);
         return result;
+    }
+    
+    if (impl_->dapp_report_handler) {
+        impl_->interface->set_dapp_report_handler(impl_->dapp_report_handler);
     }
     
     E3_LOG_INFO(LOG_TAG) << "E3Agent initialized successfully";
@@ -136,6 +141,13 @@ std::vector<uint32_t> E3Agent::get_available_ran_functions() const {
     return impl_->interface->get_available_ran_functions();
 }
 
+void E3Agent::set_dapp_report_handler(DAppReportHandler handler) {
+    impl_->dapp_report_handler = std::move(handler);
+    if (impl_->interface && impl_->dapp_report_handler) {
+        impl_->interface->set_dapp_report_handler(impl_->dapp_report_handler);
+    }
+}
+
 // =========================================================================
 // Manual Operations
 // =========================================================================
@@ -158,6 +170,55 @@ ErrorCode E3Agent::send_indication(
     msg.protocol_data = data;
     pdu.choice = msg;
     
+    return impl_->interface->queue_outbound(std::move(pdu));
+}
+
+ErrorCode E3Agent::send_dapp_report(
+    uint32_t dapp_id,
+    uint32_t ran_function_id,
+    const std::vector<uint8_t>& report_data
+) {
+    if (!impl_->interface || !impl_->interface->is_running()) {
+        return ErrorCode::NOT_INITIALIZED;
+    }
+    Pdu pdu(PduType::DAPP_REPORT);
+    pdu.message_id = impl_->interface->generate_message_id();
+    DAppReport report;
+    report.dapp_identifier = dapp_id;
+    report.ran_function_identifier = ran_function_id;
+    report.report_data = report_data;
+    pdu.choice = report;
+    return impl_->interface->queue_outbound(std::move(pdu));
+}
+
+ErrorCode E3Agent::send_xapp_control(
+    uint32_t dapp_id,
+    uint32_t ran_function_id,
+    const std::vector<uint8_t>& control_data
+) {
+    if (!impl_->interface || !impl_->interface->is_running()) {
+        return ErrorCode::NOT_INITIALIZED;
+    }
+    Pdu pdu(PduType::XAPP_CONTROL_ACTION);
+    pdu.message_id = impl_->interface->generate_message_id();
+    XAppControlAction action;
+    action.dapp_identifier = dapp_id;
+    action.ran_function_identifier = ran_function_id;
+    action.xapp_control_data = control_data;
+    pdu.choice = action;
+    return impl_->interface->queue_outbound(std::move(pdu));
+}
+
+ErrorCode E3Agent::send_message_ack(uint32_t request_id, ResponseCode response_code) {
+    if (!impl_->interface || !impl_->interface->is_running()) {
+        return ErrorCode::NOT_INITIALIZED;
+    }
+    Pdu pdu(PduType::MESSAGE_ACK);
+    pdu.message_id = impl_->interface->generate_message_id();
+    MessageAck ack;
+    ack.request_id = request_id;
+    ack.response_code = response_code;
+    pdu.choice = ack;
     return impl_->interface->queue_outbound(std::move(pdu));
 }
 
