@@ -11,6 +11,7 @@ extern "C" {
 
 #include "Simple-Indication.h"
 #include "Simple-Control.h"
+#include "Simple-ConfigControl.h"
 #include "Simple-RanFunctionData.h"
 #include "Simple-DAppReport.h"
 #include "aper_encoder.h"
@@ -121,6 +122,30 @@ bool decode_simple_dapp_report(const std::vector<uint8_t>& in, SimpleDAppReport&
     if (dr.code != RC_OK || !rep) return false;
     out.bin1 = rep->bin1;
     ASN_STRUCT_FREE(asn_DEF_Simple_DAppReport, rep);
+    return true;
+}
+
+bool encode_simple_config_control(const SimpleConfigControl& in, std::vector<uint8_t>& out) {
+    Simple_ConfigControl_t scc;
+    memset(&scc, 0, sizeof(scc));
+    scc.enable = in.enable ? 1 : 0;
+
+    uint8_t buffer[32];
+    asn_enc_rval_t ret = aper_encode_to_buffer(&asn_DEF_Simple_ConfigControl, NULL, &scc, buffer, sizeof(buffer));
+    if (ret.encoded == -1) {
+        return false;
+    }
+    size_t bytes = (ret.encoded + 7) / 8;
+    out.assign(buffer, buffer + bytes);
+    return true;
+}
+
+bool decode_simple_config_control(const std::vector<uint8_t>& in, SimpleConfigControl& out) {
+    Simple_ConfigControl_t* scc = nullptr;
+    asn_dec_rval_t dr = aper_decode(NULL, &asn_DEF_Simple_ConfigControl, (void**)&scc, in.data(), in.size(), 0, 0);
+    if (dr.code != RC_OK || !scc) return false;
+    out.enable = scc->enable ? true : false;
+    ASN_STRUCT_FREE(asn_DEF_Simple_ConfigControl, scc);
     return true;
 }
 

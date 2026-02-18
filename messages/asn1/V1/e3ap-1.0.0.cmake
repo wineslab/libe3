@@ -30,6 +30,12 @@ set(e3ap_source
     BIT_STRING_rfill.c
     BIT_STRING_uper.c
     BIT_STRING_xer.c
+    BOOLEAN_aper.c
+    BOOLEAN.c
+    BOOLEAN_print.c
+    BOOLEAN_rfill.c
+    BOOLEAN_uper.c
+    BOOLEAN_xer.c
     constraints.c
     constr_CHOICE_aper.c
     constr_CHOICE.c
@@ -145,6 +151,7 @@ set(e3ap_headers
     ber_tlv_length.h
     ber_tlv_tag.h
     BIT_STRING.h
+    BOOLEAN.h
     constraints.h
     constr_CHOICE.h
     constr_SEQUENCE.h

@@ -195,7 +195,7 @@ public:
     );
 
     /**
-     * @brief Send an xApp control action to a specific dApp (e.g. from E2/SM).
+     * @brief Send an xApp control action to a specific dApp coming from the E2SM-DAPP.
      *
      * @param dapp_id Target dApp identifier
      * @param ran_function_id RAN function identifier

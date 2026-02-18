@@ -20,6 +20,10 @@ struct SimpleDAppReport {
     int bin1;
 };
 
+struct SimpleConfigControl {
+    bool enable;
+};
+
 // Encode Simple-Indication into PER/UPER bytes
 bool encode_simple_indication(const SimpleIndication& in, std::vector<uint8_t>& out);
 
@@ -37,5 +41,11 @@ bool encode_ran_function_data(const std::string name, std::vector<uint8_t>& out)
 
 // Decode Simple-DAppReport from APER bytes (dApp → RAN report)
 bool decode_simple_dapp_report(const std::vector<uint8_t>& in, SimpleDAppReport& out);
+
+// Encode Simple-ConfigControl into APER bytes
+bool encode_simple_config_control(const SimpleConfigControl& in, std::vector<uint8_t>& out);
+
+// Decode Simple-ConfigControl from APER bytes
+bool decode_simple_config_control(const std::vector<uint8_t>& in, SimpleConfigControl& out);
 
 } // namespace libe3_examples

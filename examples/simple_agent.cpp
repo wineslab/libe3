@@ -257,6 +257,28 @@ int main(int argc, char* argv[]) {
                                   << dapp_id << ": "
                                   << libe3::error_code_to_string(rc) << "\n";
                     }
+
+                    // Simulate xApp control action delivery every 3rd indication
+                    if (seq % 3 == 0) {
+                        libe3_examples::SimpleConfigControl config_ctrl;
+                        config_ctrl.enable = (seq / 3) % 2 == 0; // alternate enable/disable
+                        std::vector<uint8_t> ctrl_encoded;
+                        if (libe3_examples::encode_simple_config_control(config_ctrl, ctrl_encoded)) {
+                            auto rc_ctrl = agent.send_xapp_control(
+                                dapp_id, SimpleServiceModel::RAN_FUNCTION_ID, ctrl_encoded);
+                            if (rc_ctrl == libe3::ErrorCode::SUCCESS) {
+                                std::cout << "  -> Sent xApp control (enable=" << config_ctrl.enable
+                                          << ") to dApp " << dapp_id
+                                          << " (" << ctrl_encoded.size() << " bytes)\n";
+                            } else {
+                                std::cerr << "  -> Failed to send xApp control to dApp "
+                                          << dapp_id << ": "
+                                          << libe3::error_code_to_string(rc_ctrl) << "\n";
+                            }
+                        } else {
+                            std::cerr << "Failed to encode Simple-ConfigControl\n";
+                        }
+                    }
                 }
             }
             ++seq;

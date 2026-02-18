@@ -476,7 +476,7 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
                          << " for RAN function " << request.ran_function_identifier;
     
     ResponseCode response_code = ResponseCode::NEGATIVE;
-    uint32_t subscription_id = 0;
+    uint32_t subscription_id = 1;
     
     // Check if dApp is registered
     if (!subscription_manager_->is_dapp_registered(request.dapp_identifier)) {
