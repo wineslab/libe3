@@ -18,7 +18,7 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
 
     E3-SubscriptionRequest ::= SEQUENCE {
         dAppIdentifier          E3-DAppID,
-        ranFunctionIdentifier   INTEGER (0..100),
+        ranFunctionIdentifier   INTEGER (1..100),
         telemetryIdentifierList SEQUENCE OF INTEGER (0..100),
         controlIdentifierList   SEQUENCE OF INTEGER (0..100),
         subscriptionTime        INTEGER (0..3600) OPTIONAL,
@@ -40,34 +40,34 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     }
 
     E3-RanFunctionDefinition ::= SEQUENCE {
-        ranFunctionIdentifier   INTEGER (0..100),
+        ranFunctionIdentifier   INTEGER (1..100),
         telemetryIdentifierList SEQUENCE OF INTEGER (0..100),
         controlIdentifierList   SEQUENCE OF INTEGER (0..100),
         ranFunctionData         OCTET STRING (SIZE (1..32768))
     }
 
     E3-IndicationMessage ::= SEQUENCE {
-        dAppIdentifier          INTEGER (0..100),
-        ranFunctionIdentifier   INTEGER (0..100),
+        dAppIdentifier          E3-DAppID,
+        ranFunctionIdentifier   INTEGER (1..100),
         protocolData            OCTET STRING (SIZE (1..32768))
     }
 
     E3-DAppControlAction ::= SEQUENCE {
         dAppIdentifier          E3-DAppID,
-        ranFunctionIdentifier   INTEGER (0..100),
-        controlIdentifier       INTEGER (0..100),
+        ranFunctionIdentifier   INTEGER (1..100),
+        controlIdentifier       INTEGER (1..100),
         actionData              OCTET STRING (SIZE (1..32768))
     }
 
     E3-DAppReport ::= SEQUENCE {
         dAppIdentifier          E3-DAppID,
-        ranFunctionIdentifier   INTEGER (0..100),
+        ranFunctionIdentifier   INTEGER (1..100),
         reportData              OCTET STRING (SIZE (1..32768))
     }
 
     E3-XAppControlAction ::= SEQUENCE {
         dAppIdentifier          E3-DAppID,
-        ranFunctionIdentifier   INTEGER (0..100),
+        ranFunctionIdentifier   INTEGER (1..100),
         xAppControlData         OCTET STRING (SIZE (1..32768))
     }
 
