@@ -5,6 +5,19 @@
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
+# pkg-config (.pc) file
+set(LIBE3_PC_LIB_NAME "libe3")
+
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/libe3.pc.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/libe3.pc"
+    @ONLY
+)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libe3.pc"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+)
+
 # Install libraries
 install(TARGETS libe3 libe3_shared asn1_e3ap libe3_warnings libe3_sanitizers
     EXPORT libe3Targets
