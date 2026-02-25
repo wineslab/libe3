@@ -21,6 +21,8 @@
 #include <chrono>
 #include <memory>
 
+#include "libe3/error_codes.h"
+
 namespace libe3 {
 
 /**
@@ -98,31 +100,25 @@ enum class AgentState : uint8_t {
 
 /**
  * @brief Error codes returned by libe3 operations
+ * Use shared error-code list (see libe3/error_codes.h)
  */
 enum class ErrorCode : int {
-    SUCCESS = 0,
-    INVALID_PARAM = -1,
-    NOT_INITIALIZED = -2,
-    ALREADY_INITIALIZED = -3,
-    NOT_CONNECTED = -4,
-    CONNECTION_FAILED = -5,
-    TIMEOUT = -6,
-    ENCODE_FAILED = -7,
-    DECODE_FAILED = -8,
-    SM_NOT_FOUND = -9,
-    SM_ALREADY_REGISTERED = -10,
-    BUFFER_TOO_SMALL = -11,
-    INTERNAL_ERROR = -12,
-    SUBSCRIPTION_EXISTS = -13,
-    SUBSCRIPTION_NOT_FOUND = -14,
-    DAPP_NOT_REGISTERED = -15,
-    TRANSPORT_ERROR = -16,
-    STATE_ERROR = -17,
-    SM_START_FAILED = -18,
-    NOT_FOUND = -19,
-    CANCELLED = -20,
-    GENERIC_ERROR = -100
+#define X(name, val) name = val,
+    LIBE3_ERROR_CODE_LIST
+#undef X
 };
+
+/**
+ * @brief Convert ErrorCode to string name (C++ wrapper)
+ */
+inline const char* ErrorCodeToString(ErrorCode code) {
+    switch (static_cast<int>(code)) {
+#define X(name, val) case val: return #name;
+        LIBE3_ERROR_CODE_LIST
+#undef X
+        default: return "UNKNOWN_ERROR_CODE";
+    }
+}
 
 // Maximum sizes for E3AP data fields (aligned with original C implementation)
 constexpr size_t MAX_PROTOCOL_DATA_SIZE = 32768;

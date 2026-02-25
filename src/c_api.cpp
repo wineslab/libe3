@@ -3,6 +3,7 @@
 #include "libe3/e3_agent.hpp"
 #include "libe3/sm_interface.hpp"
 #include "libe3/types.hpp"
+#include "libe3/error_codes.h"
 
 #include <string>
 #include <vector>
@@ -25,13 +26,13 @@ struct e3_service_model_handle_s : public ServiceModel {
     std::vector<uint8_t> ran_function_data_s; // store ran_function_data
 
     // callbacks
-    e3_sm_init_cb init_cb = nullptr;
-    e3_sm_destroy_cb destroy_cb = nullptr;
-    e3_sm_start_cb start_cb = nullptr;
-    e3_sm_stop_cb stop_cb = nullptr;
-    e3_sm_is_running_cb is_running_cb = nullptr;
-    e3_sm_process_control_cb process_control_cb = nullptr;
-    void* user_data = nullptr;
+    e3_sm_init_cb sm_init = nullptr;
+    e3_sm_destroy_cb sm_destroy = nullptr;
+    e3_sm_start_cb sm_start = nullptr;
+    e3_sm_stop_cb sm_stop = nullptr;
+    e3_sm_is_running_cb sm_is_running = nullptr;
+    e3_sm_process_control_cb sm_process_control = nullptr;
+    void* sm_context = nullptr;
 
     // mark if ownership was transferred to an agent
     bool transferred_to_agent = false;
@@ -50,13 +51,13 @@ struct e3_service_model_handle_s : public ServiceModel {
         if (desc.ran_function_data && desc.ran_function_data_len) {
             ran_function_data_s.assign(desc.ran_function_data, desc.ran_function_data + desc.ran_function_data_len);
         }
-        init_cb = desc.init_cb;
-        destroy_cb = desc.destroy_cb;
-        start_cb = desc.start_cb;
-        stop_cb = desc.stop_cb;
-        is_running_cb = desc.is_running_cb;
-        process_control_cb = desc.process_control_cb;
-        user_data = desc.user_data;
+        sm_init = desc.sm_init;
+        sm_destroy = desc.sm_destroy;
+        sm_start = desc.sm_start;
+        sm_stop = desc.sm_stop;
+        sm_is_running = desc.sm_is_running;
+        sm_process_control = desc.sm_process_control;
+        sm_context = desc.sm_context;
     }
 
     // ServiceModel virtuals
@@ -67,21 +68,21 @@ struct e3_service_model_handle_s : public ServiceModel {
     std::vector<uint32_t> control_ids() const override { return control_ids_s; }
     std::vector<uint8_t> ran_function_data() const override { return ran_function_data_s; }
     ErrorCode init() override {
-        if (init_cb) return static_cast<ErrorCode>(init_cb(user_data));
+        if (sm_init) return static_cast<ErrorCode>(sm_init(sm_context));
         return ErrorCode::SUCCESS;
     }
     void destroy() override {
-        if (destroy_cb) destroy_cb(user_data);
+        if (sm_destroy) sm_destroy(sm_context);
     }
     ErrorCode start() override {
-        if (start_cb) return static_cast<ErrorCode>(start_cb(user_data));
+        if (sm_start) return static_cast<ErrorCode>(sm_start(sm_context));
         return ErrorCode::SUCCESS;
     }
     void stop() override {
-        if (stop_cb) stop_cb(user_data);
+        if (sm_stop) sm_stop(sm_context);
     }
     bool is_running() const override {
-        if (is_running_cb) return is_running_cb(user_data) != 0;
+        if (sm_is_running) return sm_is_running(sm_context) != 0;
         return false;
     }
 };
@@ -275,4 +276,12 @@ e3_error_t e3_agent_register_sm(e3_agent_handle_t* agent, e3_service_model_handl
         return agent->agent->subscription_count();
     }
 
+const char* e3_error_to_string(e3_error_t code) {
+    switch (code) {
+#define X(name, val) case val: return #name;
+        LIBE3_ERROR_CODE_LIST
+#undef X
+        default: return "UNKNOWN_ERROR_CODE";
+    }
+}
 } // extern "C"

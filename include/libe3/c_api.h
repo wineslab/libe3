@@ -12,45 +12,21 @@
 extern "C" {
 #endif
 
+#include "libe3/error_codes.h"
+
 /* Opaque handles */
 typedef struct e3_agent_handle_s e3_agent_handle_t;
 typedef struct e3_service_model_handle_s e3_service_model_handle_t;
 
-/**
- * @brief Error code returned by C API functions (maps to \ref libe3::ErrorCode)
- *
- * Value 0 corresponds to \ref libe3::ErrorCode::SUCCESS.
- *
- * Possible values (see \ref libe3::ErrorCode):
- *   - 0: SUCCESS
- *   - 1: INVALID_PARAM
- *   - 2: STATE_ERROR
- *   - 3: INTERNAL_ERROR
- *   - 4: NOT_IMPLEMENTED
- *   - 5: TIMEOUT
- *   - 6: UNSUPPORTED
- *   - 7: RESOURCE_ERROR
- *   - 8: ENCODING_ERROR
- *   - 9: TRANSPORT_ERROR
- *   - 10: AGENT_ERROR
- *   - 11: DAPP_ERROR
- *   - 12: SM_ERROR
- *   - 13: SUBSCRIPTION_ERROR
- *   - 14: CONTROL_ERROR
- *   - 15: TELEMETRY_ERROR
- *   - 16: REPORT_ERROR
- *   - 17: UNKNOWN_ERROR
- */
-typedef int e3_error_t;
 
 /* Callback prototypes for a C-backed ServiceModel */
-typedef e3_error_t (*e3_sm_init_cb)(void* user_data);
-typedef void      (*e3_sm_destroy_cb)(void* user_data);
-typedef e3_error_t (*e3_sm_start_cb)(void* user_data);
-typedef void      (*e3_sm_stop_cb)(void* user_data);
-typedef int       (*e3_sm_is_running_cb)(void* user_data); /* returns 0/1 */
+typedef e3_error_t (*e3_sm_init_cb)(void* sm_context);
+typedef void      (*e3_sm_destroy_cb)(void* sm_context);
+typedef e3_error_t (*e3_sm_start_cb)(void* sm_context);
+typedef void      (*e3_sm_stop_cb)(void* sm_context);
+typedef int       (*e3_sm_is_running_cb)(void* sm_context); /* returns 0/1 */
 typedef e3_error_t (*e3_sm_process_control_cb)(
-    void* user_data,
+    void* sm_context,
     uint32_t control_id,
     const uint8_t* data,
     size_t data_len
@@ -80,14 +56,14 @@ typedef struct {
     size_t ran_function_data_len;     // Length of ran_function_data in bytes (0 if none)
 
     /* Callbacks */
-    e3_sm_init_cb init_cb;                   // Called on SM registration
-    e3_sm_destroy_cb destroy_cb;             // Called on SM destruction
-    e3_sm_start_cb start_cb;                 // Called when SM should start
-    e3_sm_stop_cb stop_cb;                   // Called when SM should stop
-    e3_sm_is_running_cb is_running_cb;       // Called to query running state
-    e3_sm_process_control_cb process_control_cb; // Called to process control actions
+    e3_sm_init_cb sm_init;                   // Called on SM registration
+    e3_sm_destroy_cb sm_destroy;             // Called on SM destruction
+    e3_sm_start_cb sm_start;                 // Called when SM should start
+    e3_sm_stop_cb sm_stop;                   // Called when SM should stop
+    e3_sm_is_running_cb sm_is_running;       // Called to query running state
+    e3_sm_process_control_cb sm_process_control; // Called to process control actions
 
-    void* user_data;                 // Opaque pointer passed to all callbacks
+    void* sm_context;                 // Opaque pointer passed to all callbacks
 } e3_c_service_model_desc_t;
 
 /* Create/destroy a C-backed ServiceModel */
