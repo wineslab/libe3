@@ -22,6 +22,7 @@ struct e3_service_model_handle_s : public ServiceModel {
     uint32_t ran_function_id_s;
     std::vector<uint32_t> telemetry_ids_s;
     std::vector<uint32_t> control_ids_s;
+    std::vector<uint8_t> ran_function_data_s; // store ran_function_data
 
     // callbacks
     e3_sm_init_cb init_cb = nullptr;
@@ -45,6 +46,10 @@ struct e3_service_model_handle_s : public ServiceModel {
         if (desc.control_ids && desc.control_ids_len) {
             control_ids_s.assign(desc.control_ids, desc.control_ids + desc.control_ids_len);
         }
+        // Copy ran_function_data if provided
+        if (desc.ran_function_data && desc.ran_function_data_len) {
+            ran_function_data_s.assign(desc.ran_function_data, desc.ran_function_data + desc.ran_function_data_len);
+        }
         init_cb = desc.init_cb;
         destroy_cb = desc.destroy_cb;
         start_cb = desc.start_cb;
@@ -60,6 +65,7 @@ struct e3_service_model_handle_s : public ServiceModel {
     uint32_t ran_function_id() const override { return ran_function_id_s; }
     std::vector<uint32_t> telemetry_ids() const override { return telemetry_ids_s; }
     std::vector<uint32_t> control_ids() const override { return control_ids_s; }
+    std::vector<uint8_t> ran_function_data() const override { return ran_function_data_s; }
     ErrorCode init() override {
         if (init_cb) return static_cast<ErrorCode>(init_cb(user_data));
         return ErrorCode::SUCCESS;

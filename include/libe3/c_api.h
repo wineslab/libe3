@@ -17,9 +17,29 @@ typedef struct e3_agent_handle_s e3_agent_handle_t;
 typedef struct e3_service_model_handle_s e3_service_model_handle_t;
 
 /**
- * @brief Error code returned by C API functions (maps to libe3::ErrorCode)
+ * @brief Error code returned by C API functions (maps to \ref libe3::ErrorCode)
  *
- * Value 0 corresponds to `ErrorCode::SUCCESS`.
+ * Value 0 corresponds to \ref libe3::ErrorCode::SUCCESS.
+ *
+ * Possible values (see \ref libe3::ErrorCode):
+ *   - 0: SUCCESS
+ *   - 1: INVALID_PARAM
+ *   - 2: STATE_ERROR
+ *   - 3: INTERNAL_ERROR
+ *   - 4: NOT_IMPLEMENTED
+ *   - 5: TIMEOUT
+ *   - 6: UNSUPPORTED
+ *   - 7: RESOURCE_ERROR
+ *   - 8: ENCODING_ERROR
+ *   - 9: TRANSPORT_ERROR
+ *   - 10: AGENT_ERROR
+ *   - 11: DAPP_ERROR
+ *   - 12: SM_ERROR
+ *   - 13: SUBSCRIPTION_ERROR
+ *   - 14: CONTROL_ERROR
+ *   - 15: TELEMETRY_ERROR
+ *   - 16: REPORT_ERROR
+ *   - 17: UNKNOWN_ERROR
  */
 typedef int e3_error_t;
 
@@ -45,26 +65,29 @@ typedef e3_error_t (*e3_sm_process_control_cb)(
  * - Callbacks are invoked by the C++ adapter and receive `user_data`.
  */
 typedef struct {
-    const char* name;
-    uint32_t version;
-    uint32_t ran_function_id;
+    const char* name;                // Service Model name (null-terminated string)
+    uint32_t version;                // Service Model version
+    uint32_t ran_function_id;        // RAN function ID for this SM
 
-    const uint32_t* telemetry_ids;
-    size_t telemetry_ids_len;
+    const uint32_t* telemetry_ids;   // Array of supported telemetry IDs (copied by library)
+    size_t telemetry_ids_len;        // Number of telemetry IDs
 
-    const uint32_t* control_ids;
-    size_t control_ids_len;
+    const uint32_t* control_ids;     // Array of supported control IDs (copied by library)
+    size_t control_ids_len;          // Number of control IDs
+
+    /* Optional opaque RAN function data (E3SM-encoded, sent in setup response) */
+    const uint8_t* ran_function_data; // Pointer to opaque RAN function data (may be NULL)
+    size_t ran_function_data_len;     // Length of ran_function_data in bytes (0 if none)
 
     /* Callbacks */
-    e3_sm_init_cb init_cb;
-    e3_sm_destroy_cb destroy_cb;
-    e3_sm_start_cb start_cb;
-    e3_sm_stop_cb stop_cb;
-    e3_sm_is_running_cb is_running_cb;
-    e3_sm_process_control_cb process_control_cb;
+    e3_sm_init_cb init_cb;                   // Called on SM registration
+    e3_sm_destroy_cb destroy_cb;             // Called on SM destruction
+    e3_sm_start_cb start_cb;                 // Called when SM should start
+    e3_sm_stop_cb stop_cb;                   // Called when SM should stop
+    e3_sm_is_running_cb is_running_cb;       // Called to query running state
+    e3_sm_process_control_cb process_control_cb; // Called to process control actions
 
-    /* User opaque pointer forwarded to callbacks */
-    void* user_data;
+    void* user_data;                 // Opaque pointer passed to all callbacks
 } e3_c_service_model_desc_t;
 
 /* Create/destroy a C-backed ServiceModel */
@@ -153,15 +176,15 @@ void e3_agent_destroy(e3_agent_handle_t* agent);
 /**
  * @brief Initialize the agent.
  *
- * Prepares internal resources; must be called before `e3_agent_start`.
- * Returns an `ErrorCode` cast to `e3_error_t` (0 == success).
+ * Prepares internal resources; must be called before \ref e3_agent_start.
+ * Returns a \ref e3_error_t (see \ref libe3::ErrorCode; 0 == SUCCESS).
  */
 e3_error_t e3_agent_init(e3_agent_handle_t* agent);
 
 /**
  * @brief Start the agent processing threads and accept dApp connections.
  *
- * Returns an `ErrorCode` cast to `e3_error_t` (0 == success).
+ * Returns a \ref e3_error_t (see \ref libe3::ErrorCode; 0 == SUCCESS).
  */
 e3_error_t e3_agent_start(e3_agent_handle_t* agent);
 
@@ -169,6 +192,7 @@ e3_error_t e3_agent_start(e3_agent_handle_t* agent);
  * @brief Stop the agent and release runtime resources.
  *
  * Safe to call even if the agent is not running.
+ * Returns nothing; errors are ignored.
  */
 void e3_agent_stop(e3_agent_handle_t* agent);
 
@@ -235,7 +259,7 @@ void e3_agent_free_uint32_array(uint32_t* arr);
  * @param ran_function_id RAN function identifier
  * @param data Pointer to E3SM-encoded payload (may be NULL)
  * @param data_len Length of payload in bytes
- * @return e3_error_t ErrorCode value (0 == success)
+ * @return \ref e3_error_t (see \ref libe3::ErrorCode; 0 == SUCCESS)
  */
 e3_error_t e3_agent_send_indication(
     e3_agent_handle_t* agent,
@@ -253,7 +277,7 @@ e3_error_t e3_agent_send_indication(
  * @param ran_function_id RAN function identifier
  * @param report_data Pointer to E3SM-encoded report payload (may be NULL if data_len is 0)
  * @param report_data_len Length of payload in bytes
- * @return e3_error_t ErrorCode value (0 == success)
+ * @return \ref e3_error_t (see \ref libe3::ErrorCode; 0 == SUCCESS)
  */
 e3_error_t e3_agent_send_dapp_report(
     e3_agent_handle_t* agent,
@@ -271,7 +295,7 @@ e3_error_t e3_agent_send_dapp_report(
  * @param ran_function_id RAN function identifier
  * @param control_data Pointer to E3SM-encoded control payload (may be NULL if data_len is 0)
  * @param control_data_len Length of payload in bytes
- * @return e3_error_t ErrorCode value (0 == success)
+ * @return \ref e3_error_t (see \ref libe3::ErrorCode; 0 == SUCCESS)
  */
 e3_error_t e3_agent_send_xapp_control(
     e3_agent_handle_t* agent,
@@ -287,7 +311,7 @@ e3_error_t e3_agent_send_xapp_control(
  * @param agent Agent handle
  * @param request_id ID of the request being acknowledged
  * @param response_code 0 = positive (success), 1 = negative (failure)
- * @return e3_error_t ErrorCode value (0 == success)
+ * @return \ref e3_error_t (see \ref libe3::ErrorCode; 0 == SUCCESS)
  */
 e3_error_t e3_agent_send_message_ack(
     e3_agent_handle_t* agent,
