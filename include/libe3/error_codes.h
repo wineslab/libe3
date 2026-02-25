@@ -31,12 +31,17 @@ extern "C" {
     X(STATE_ERROR, -17) \
     X(SM_START_FAILED, -18) \
     X(NOT_FOUND, -19) \
-    X(CANCELLED, -20) \
+    X(SM_ERROR_INVALID_PARAM, -20) \
+    X(SM_ERROR_NOT_FOUND, -21) \
+    X(SM_ERROR_ALREADY_EXISTS, -22) \
+    X(SM_ERROR_THREAD_FAILED, -23) \
+    X(SM_ERROR_MEMORY, -24) \
+    X(CANCELLED, -25) \
     X(GENERIC_ERROR, -100)
 
 /* C-friendly prefixed enum values to avoid global-name collisions */
 enum e3_error_code_e {
-#define X(name, val) E3_ERROR_##name = val,
+#define X(name, val) E3_##name = val,
     LIBE3_ERROR_CODE_LIST
 #undef X
 };

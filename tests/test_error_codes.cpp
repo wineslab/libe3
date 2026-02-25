@@ -13,9 +13,9 @@ using namespace libe3;
 
 TEST(C_API_error_to_string) {
     /* C API returns uppercase symbol names as declared by the X-macro */
-    ASSERT_STREQ(e3_error_to_string(E3_ERROR_SUCCESS), "SUCCESS");
-    ASSERT_STREQ(e3_error_to_string(E3_ERROR_TIMEOUT), "TIMEOUT");
-    ASSERT_STREQ(e3_error_to_string(E3_ERROR_NOT_FOUND), "NOT_FOUND");
+    ASSERT_STREQ(e3_error_to_string(E3_SUCCESS), "SUCCESS");
+    ASSERT_STREQ(e3_error_to_string(E3_TIMEOUT), "TIMEOUT");
+    ASSERT_STREQ(e3_error_to_string(E3_NOT_FOUND), "NOT_FOUND");
 }
 
 TEST(CXX_ErrorCodeToString_wrapper) {

@@ -14,6 +14,7 @@ set(LIBE3_PUBLIC_HEADERS
     include/libe3/e3_agent.hpp
     include/libe3/libe3.hpp
     include/libe3/c_api.h
+    include/libe3/error_codes.h
 )
 
 set(LIBE3_SOURCES
