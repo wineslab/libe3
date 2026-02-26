@@ -173,24 +173,6 @@ ErrorCode E3Agent::send_indication(
     return impl_->interface->queue_outbound(std::move(pdu));
 }
 
-ErrorCode E3Agent::send_dapp_report(
-    uint32_t dapp_id,
-    uint32_t ran_function_id,
-    const std::vector<uint8_t>& report_data
-) {
-    if (!impl_->interface || !impl_->interface->is_running()) {
-        return ErrorCode::NOT_INITIALIZED;
-    }
-    Pdu pdu(PduType::DAPP_REPORT);
-    pdu.message_id = impl_->interface->generate_message_id();
-    DAppReport report;
-    report.dapp_identifier = dapp_id;
-    report.ran_function_identifier = ran_function_id;
-    report.report_data = report_data;
-    pdu.choice = report;
-    return impl_->interface->queue_outbound(std::move(pdu));
-}
-
 ErrorCode E3Agent::send_xapp_control(
     uint32_t dapp_id,
     uint32_t ran_function_id,

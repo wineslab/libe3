@@ -21,6 +21,7 @@ CMAKE_OPTIONS=""
 CLEAN=0
 CLEAN_ALL=0
 INSTALL=0
+UNINSTALL=0
 INSTALL_PREFIX=""
 INSTALL_DEPS=0
 BUILD_TESTS=1
@@ -37,6 +38,8 @@ ARCH_NATIVE=0
 RUN_TESTS=0
 FATAL_ERRORS=0
 BUILD_DOCS=0
+CREATE_DEB=0
+DEB_ARCH=""
 
 # Terminal colors
 RED='\033[0;31m'
@@ -115,11 +118,17 @@ Installation:
 -------------
   -I, --install-deps      Install required dependencies (requires sudo)
   --install               Install library after building
+  --uninstall             Uninstall library using install manifest
   --prefix DIR            Installation prefix (default: /usr/local)
 
 Testing:
 --------
   -t, --test              Run tests after building
+
+Packaging:
+----------
+  --deb                   Create .deb package(s) after build
+  --deb-arch ARCH         Package arch: amd64, arm64, or all (default: host)
 
 Other:
 ------
@@ -141,6 +150,15 @@ Examples:
 
   # Install dependencies and build
   ./$(basename "$0") -I
+
+  # Uninstall files installed from this build directory
+  ./$(basename "$0") --uninstall
+
+  # Build and create Debian package for host architecture
+  ./$(basename "$0") --deb
+
+  # Build and create Debian packages for amd64 and arm64
+  ./$(basename "$0") --deb --deb-arch all
 
   # Build with sanitizers for debugging
   ./$(basename "$0") -g --sanitize
@@ -379,6 +397,88 @@ install_library() {
     echo_success "Installation completed!"
 }
 
+uninstall_library() {
+    local build_path="$SCRIPT_DIR/$BUILD_DIR"
+    local manifest_path="$build_path/install_manifest.txt"
+    local cache_path="$build_path/CMakeCache.txt"
+    local cache_prefix=""
+    local -a uninstall_prefixes=()
+    local prefix
+
+    # Include explicit --prefix when provided.
+    if [ -n "$INSTALL_PREFIX" ]; then
+        uninstall_prefixes+=("$INSTALL_PREFIX")
+    fi
+
+    # Include prefix from CMake cache when available.
+    if [ -f "$cache_path" ]; then
+        cache_prefix="$(sed -n 's/^CMAKE_INSTALL_PREFIX:PATH=//p' "$cache_path" | head -n1)"
+        if [ -n "$cache_prefix" ]; then
+            uninstall_prefixes+=("$cache_prefix")
+        fi
+    fi
+
+    # /usr/local is the default for CMake install.
+    uninstall_prefixes+=("/usr/local")
+
+    if [ -f "$manifest_path" ]; then
+        echo_info "Uninstalling files listed in manifest: $manifest_path"
+        sudo sh -c 'while IFS= read -r path; do rm -f "$path"; done' < "$manifest_path"
+    else
+        echo_warning "Install manifest not found at $manifest_path, using prefix cleanup only."
+    fi
+
+    # Clean known libe3 install paths from candidate prefixes.
+    for prefix in "${uninstall_prefixes[@]}"; do
+        # Skip unsafe empty/root prefixes.
+        if [ -z "$prefix" ] || [ "$prefix" = "/" ]; then
+            continue
+        fi
+        echo_info "Removing libe3 install paths under prefix: $prefix"
+        sudo rm -rf \
+            "$prefix/include/libe3" \
+            "$prefix/lib/liblibe3.a" \
+            "$prefix/lib/liblibe3.so" \
+            "$prefix/lib/liblibe3.so.0" \
+            "$prefix/lib/liblibe3.so.0.0.1" \
+            "$prefix/lib/libasn1_e3ap.a" \
+            "$prefix/lib/pkgconfig/libe3.pc" \
+            "$prefix/lib/cmake/libe3" \
+            "$prefix/lib64/liblibe3.a" \
+            "$prefix/lib64/liblibe3.so" \
+            "$prefix/lib64/liblibe3.so.0" \
+            "$prefix/lib64/liblibe3.so.0.0.1" \
+            "$prefix/lib64/libasn1_e3ap.a" \
+            "$prefix/lib64/pkgconfig/libe3.pc" \
+            "$prefix/lib64/cmake/libe3"
+    done
+
+    echo_success "Uninstallation completed. Re-run with --verbose and check the prefix if files remain."
+}
+
+create_deb_packages() {
+    local deb_script="$SCRIPT_DIR/scripts/create_deb.sh"
+    local build_path="$SCRIPT_DIR/$BUILD_DIR"
+
+    if [ ! -f "$deb_script" ]; then
+        echo_error "Packaging script not found: $deb_script"
+        exit 1
+    fi
+
+    if [ ! -x "$deb_script" ]; then
+        chmod +x "$deb_script"
+    fi
+
+    echo_info "Creating Debian package(s)..."
+    if [ -n "$DEB_ARCH" ]; then
+        "$deb_script" --use-existing-build --build-dir "$build_path" "$DEB_ARCH"
+    else
+        "$deb_script" --use-existing-build --build-dir "$build_path"
+    fi
+
+    echo_success "Debian package creation completed!"
+}
+
 print_summary() {
     echo ""
     echo "======================================"
@@ -515,8 +615,25 @@ main() {
                 INSTALL=1
                 shift
                 ;;
+            --uninstall)
+                UNINSTALL=1
+                shift
+                ;;
             --prefix)
                 INSTALL_PREFIX="$2"
+                shift 2
+                ;;
+            --deb)
+                CREATE_DEB=1
+                shift
+                ;;
+            --deb-arch)
+                if [ -z "${2:-}" ]; then
+                    echo_error "--deb-arch requires a value"
+                    exit 1
+                fi
+                CREATE_DEB=1
+                DEB_ARCH="$2"
                 shift 2
                 ;;
             -t|--test)
@@ -552,6 +669,28 @@ main() {
     if [ $ENABLE_MSAN -eq 1 ] && [ $ENABLE_ASAN -eq 1 ]; then
         echo_error "MemorySanitizer and AddressSanitizer cannot be used together"
         exit 1
+    fi
+
+    if [ $INSTALL -eq 1 ] && [ $UNINSTALL -eq 1 ]; then
+        echo_error "--install and --uninstall cannot be used together"
+        exit 1
+    fi
+
+    if [ $UNINSTALL -eq 1 ]; then
+        uninstall_library
+        exit 0
+    fi
+
+    if [ -n "$DEB_ARCH" ]; then
+        case "$DEB_ARCH" in
+            amd64|arm64|all|x86_64|x64|aarch64)
+                ;;
+            *)
+                echo_error "Invalid value for --deb-arch: $DEB_ARCH"
+                echo "Valid values: amd64, arm64, all"
+                exit 1
+                ;;
+        esac
     fi
     
     # Check for required tools
@@ -597,6 +736,11 @@ main() {
     # Install if requested
     if [ $INSTALL -eq 1 ]; then
         install_library
+    fi
+
+    # Create .deb package(s) if requested
+    if [ $CREATE_DEB -eq 1 ]; then
+        create_deb_packages
     fi
     
     echo_success "libe3 build completed successfully!"

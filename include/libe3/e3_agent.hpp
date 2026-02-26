@@ -181,20 +181,6 @@ public:
     );
 
     /**
-     * @brief Send a dApp report to a specific dApp (RAN → dApp).
-     *
-     * @param dapp_id Target dApp identifier
-     * @param ran_function_id RAN function identifier
-     * @param report_data E3SM-encoded report payload
-     * @return ErrorCode::SUCCESS on success
-     */
-    ErrorCode send_dapp_report(
-        uint32_t dapp_id,
-        uint32_t ran_function_id,
-        const std::vector<uint8_t>& report_data
-    );
-
-    /**
      * @brief Send an xApp control action to a specific dApp coming from the E2SM-DAPP.
      *
      * @param dapp_id Target dApp identifier

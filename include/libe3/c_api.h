@@ -32,6 +32,14 @@ typedef e3_error_t (*e3_sm_process_control_cb)(
     size_t data_len
 );
 
+/* Callback for incoming dApp reports (dApp -> RAN). */
+typedef void (*e3_dapp_report_cb)(
+    uint32_t dapp_id,
+    uint32_t ran_function_id,
+    const uint8_t* report_data,
+    size_t report_data_len
+);
+
 /**
  * @brief Descriptor describing a ServiceModel implemented in C.
  *
@@ -188,6 +196,20 @@ int e3_agent_get_state(e3_agent_handle_t* agent);
  */
 int e3_agent_is_running(e3_agent_handle_t* agent);
 
+/**
+ * @brief Set callback for incoming dApp reports (dApp -> RAN).
+ *
+ * Pass NULL as \p handler to clear the callback.
+ *
+ * @param agent Agent handle
+ * @param handler Callback invoked for each incoming dApp report
+ * @return \ref e3_error_t (see \ref libe3::ErrorCode; 0 == SUCCESS)
+ */
+e3_error_t e3_agent_set_dapp_report_handler(
+    e3_agent_handle_t* agent,
+    e3_dapp_report_cb handler
+);
+
 /* Helpers to return arrays allocated by the library. Caller must free with
  * `e3_agent_free_uint32_array` when finished.
  */
@@ -243,24 +265,6 @@ e3_error_t e3_agent_send_indication(
     uint32_t ran_function_id,
     const uint8_t* data,
     size_t data_len
-);
-
-/**
- * @brief Send a dApp report to a specific dApp (RAN → dApp).
- *
- * @param agent Agent handle
- * @param dapp_id Target dApp identifier
- * @param ran_function_id RAN function identifier
- * @param report_data Pointer to E3SM-encoded report payload (may be NULL if data_len is 0)
- * @param report_data_len Length of payload in bytes
- * @return \ref e3_error_t (see \ref libe3::ErrorCode; 0 == SUCCESS)
- */
-e3_error_t e3_agent_send_dapp_report(
-    e3_agent_handle_t* agent,
-    uint32_t dapp_id,
-    uint32_t ran_function_id,
-    const uint8_t* report_data,
-    size_t report_data_len
 );
 
 /**

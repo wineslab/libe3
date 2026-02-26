@@ -333,7 +333,7 @@ void E3Interface::publisher_loop() {
     
     while (!should_stop_.load()) {
         // Pop from queue (blocking)
-        auto pdu_opt = response_queue_->pop(std::chrono::milliseconds(100));
+        auto pdu_opt = response_queue_->pop(std::chrono::milliseconds(10));
         
         if (!pdu_opt) {
             continue;

@@ -180,6 +180,33 @@ e3_error_t e3_agent_register_sm(e3_agent_handle_t* agent, e3_service_model_handl
         return agent->agent->is_running() ? 1 : 0;
     }
 
+e3_error_t e3_agent_set_dapp_report_handler(
+    e3_agent_handle_t* agent,
+    e3_dapp_report_cb handler
+) {
+    if (!agent || !agent->agent) return static_cast<int>(ErrorCode::INVALID_PARAM);
+
+        if (!handler) {
+            agent->agent->set_dapp_report_handler(DAppReportHandler{});
+            return static_cast<int>(ErrorCode::SUCCESS);
+        }
+
+        agent->agent->set_dapp_report_handler(
+            [handler](const DAppReport& report) {
+                const uint8_t* report_data =
+                    report.report_data.empty() ? nullptr : report.report_data.data();
+                handler(
+                    report.dapp_identifier,
+                    report.ran_function_identifier,
+                    report_data,
+                    report.report_data.size()
+                );
+            }
+        );
+
+        return static_cast<int>(ErrorCode::SUCCESS);
+    }
+
     static uint32_t* copy_vector_u32_to_c(const std::vector<uint32_t>& v, size_t* out_len) {
         if (out_len) *out_len = v.size();
         if (v.empty()) return nullptr;
@@ -228,19 +255,6 @@ e3_error_t e3_agent_register_sm(e3_agent_handle_t* agent, e3_service_model_handl
         std::vector<uint8_t> buf;
         if (data && data_len) buf.assign(data, data + data_len);
         return static_cast<int>(agent->agent->send_indication(dapp_id, ran_function_id, buf));
-    }
-
-    e3_error_t e3_agent_send_dapp_report(
-        e3_agent_handle_t* agent,
-        uint32_t dapp_id,
-        uint32_t ran_function_id,
-        const uint8_t* report_data,
-        size_t report_data_len
-    ) {
-        if (!agent || !agent->agent) return static_cast<int>(ErrorCode::INVALID_PARAM);
-        std::vector<uint8_t> buf;
-        if (report_data && report_data_len) buf.assign(report_data, report_data + report_data_len);
-        return static_cast<int>(agent->agent->send_dapp_report(dapp_id, ran_function_id, buf));
     }
 
     e3_error_t e3_agent_send_xapp_control(
