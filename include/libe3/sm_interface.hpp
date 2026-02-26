@@ -19,22 +19,11 @@
 #include <string>
 #include <atomic>
 #include <mutex>
-#include <unordered_map>
 
 namespace libe3 {
 
 // Forward declarations
 class ServiceModel;
-
-/**
- * @brief Callback type for handling a specific control action within an SM
- *
- * @param action_data The control action data (E3SM-encoded)
- * @return ErrorCode::SUCCESS on success, error code on failure
- */
-using ControlActionCallback = std::function<ErrorCode(
-    const std::vector<uint8_t>& action_data
-)>;
 
 /**
  * @brief Abstract Service Model interface
@@ -124,47 +113,95 @@ public:
     /**
      * @brief Process a control action from a dApp
      *
-     * Dispatches to the registered control callback for the given control ID.
-     *
-     * @param control_id The control action ID
-     * @param action_data E3SM-encoded control action data
-     * @return ErrorCode::SUCCESS on success, ErrorCode::NOT_FOUND if no callback registered
+     * Called by the E3 interface when a DAppControlAction is received for this
+     * service model. Implementations can emit outbound PDUs (e.g. MessageAck,
+     * IndicationMessage) via emit_outbound().
      */
-    ErrorCode process_control_action(
-        uint32_t control_id,
-        const std::vector<uint8_t>& action_data
-    ) {
-        auto it = control_callbacks_.find(control_id);
-        if (it != control_callbacks_.end()) {
-            return it->second(action_data);
-        }
-        return ErrorCode::NOT_FOUND;
-    }
+    virtual ErrorCode handle_control_action(
+        uint32_t request_message_id,
+        const DAppControlAction& action
+    ) = 0;
 
 protected:
     ServiceModel() = default;
 
     /**
-     * @brief Register a control action callback for a specific control ID
+     * @brief Build a MessageAck PDU for a control/request message.
      *
-     * @param control_id The control ID to register the callback for
-     * @param callback The callback function to handle this control action
+     * This helper only builds the PDU. Implementations can decide whether to
+     * emit it with emit_outbound() or suppress it when protocol semantics allow.
      */
-    void register_control_callback(uint32_t control_id, ControlActionCallback callback) {
-        control_callbacks_[control_id] = std::move(callback);
+    static Pdu make_message_ack_pdu(
+        uint32_t request_message_id,
+        ResponseCode response_code
+    ) {
+        Pdu pdu(PduType::MESSAGE_ACK);
+        MessageAck ack;
+        ack.request_id = request_message_id;
+        ack.response_code = response_code;
+        pdu.choice = ack;
+        return pdu;
     }
 
     /**
-     * @brief Unregister a control action callback
+     * @brief Build an IndicationMessage PDU.
      *
-     * @param control_id The control ID to unregister
+     * This helper only builds the PDU. Implementations can emit it with
+     * emit_outbound() when appropriate.
      */
-    void unregister_control_callback(uint32_t control_id) {
-        control_callbacks_.erase(control_id);
+    static Pdu make_indication_pdu(
+        uint32_t dapp_id,
+        uint32_t ran_function_id,
+        std::vector<uint8_t> protocol_data
+    ) {
+        Pdu pdu(PduType::INDICATION_MESSAGE);
+        IndicationMessage msg;
+        msg.dapp_identifier = dapp_id;
+        msg.ran_function_identifier = ran_function_id;
+        msg.protocol_data = std::move(protocol_data);
+        pdu.choice = std::move(msg);
+        return pdu;
+    }
+
+    /**
+     * @brief Emit an outbound PDU produced by the SM.
+     */
+    ErrorCode emit_outbound(Pdu&& pdu) {
+        if (!outbound_emitter_) {
+            return ErrorCode::NOT_INITIALIZED;
+        }
+        return outbound_emitter_(std::move(pdu));
+    }
+
+    /**
+     * @brief Get currently subscribed dApps for this SM's RAN function.
+     */
+    std::vector<uint32_t> get_subscribers() const {
+        if (!subscribers_provider_) {
+            return {};
+        }
+        return subscribers_provider_();
+    }
+
+    /**
+     * @brief Set the outbound PDU emitter callback (used by E3Interface).
+     */
+    void set_outbound_emitter(std::function<ErrorCode(Pdu&&)> emitter) {
+        outbound_emitter_ = std::move(emitter);
+    }
+
+    /**
+     * @brief Set subscriber provider callback (used by E3Interface).
+     */
+    void set_subscribers_provider(std::function<std::vector<uint32_t>()> provider) {
+        subscribers_provider_ = std::move(provider);
     }
 
 private:
-    std::unordered_map<uint32_t, ControlActionCallback> control_callbacks_;
+    std::function<ErrorCode(Pdu&&)> outbound_emitter_;
+    std::function<std::vector<uint32_t>()> subscribers_provider_;
+
+    friend class E3Interface;
 };
 
 /**

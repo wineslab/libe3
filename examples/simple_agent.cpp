@@ -14,6 +14,7 @@
 #include <atomic>
 #include <thread>
 #include <cstring>
+#include <ctime>
 #include <getopt.h>
 // Simple SM wrappers
 #include "sm_simple/e3sm_simple_wrapper.hpp"
@@ -43,25 +44,18 @@ public:
         return {1};
     }
 
-    libe3::ErrorCode init() override {
-        register_control_callback(1, [](const std::vector<uint8_t>& data) {
-            int sampling = 0;
-            if (libe3_examples::decode_simple_control(data, sampling)) {
-                std::cout << "[SIMPLE] Control action 1: samplingThreshold=" << sampling << "\n";
-            } else {
-                std::cout << "[SIMPLE] Control action 1: failed to decode (" << data.size() << " bytes)\n";
-            }
-            return libe3::ErrorCode::SUCCESS;
-        });
-        return libe3::ErrorCode::SUCCESS;
-    }
+    libe3::ErrorCode init() override { return libe3::ErrorCode::SUCCESS; }
 
     void destroy() override {
         stop();
     }
 
     libe3::ErrorCode start() override {
+        if (running_) {
+            return libe3::ErrorCode::SUCCESS;
+        }
         running_ = true;
+        worker_ = std::thread(&SimpleServiceModel::worker_loop, this);
         return libe3::ErrorCode::SUCCESS;
     }
 
@@ -75,13 +69,81 @@ public:
     }
 
     void stop() override {
+        if (!running_) {
+            return;
+        }
         running_ = false;
+        if (worker_.joinable()) {
+            worker_.join();
+        }
     }
 
     bool is_running() const override { return running_; }
 
+    libe3::ErrorCode handle_control_action(
+        uint32_t request_message_id,
+        const libe3::DAppControlAction& action
+    ) override {
+        int sampling = 0;
+        bool decode_ok = libe3_examples::decode_simple_control(action.action_data, sampling);
+        if (decode_ok) {
+            std::cout << "[SIMPLE] Control action " << action.control_identifier
+                      << ": samplingThreshold=" << sampling << "\n";
+        } else {
+            std::cout << "[SIMPLE] Control action " << action.control_identifier
+                      << ": failed to decode (" << action.action_data.size() << " bytes)\n";
+        }
+
+        libe3::Pdu ack_pdu = make_message_ack_pdu(
+            request_message_id,
+            decode_ok ? libe3::ResponseCode::POSITIVE : libe3::ResponseCode::NEGATIVE
+        );
+        return emit_outbound(std::move(ack_pdu));
+    }
+
 private:
     std::atomic<bool> running_{false};
+    std::thread worker_;
+    uint32_t seq_{0};
+
+    void worker_loop() {
+        while (running_) {
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            if (!running_) {
+                break;
+            }
+
+            auto subscribers = get_subscribers();
+            if (subscribers.empty()) {
+                continue;
+            }
+
+            libe3_examples::SimpleIndication si;
+            si.data1 = seq_;
+            si.timestamp = static_cast<uint32_t>(std::time(nullptr));
+
+            std::vector<uint8_t> encoded;
+            if (!libe3_examples::encode_simple_indication(si, encoded)) {
+                std::cerr << "Failed to encode Simple-Indication\n";
+                continue;
+            }
+
+            for (uint32_t dapp_id : subscribers) {
+                libe3::Pdu pdu = make_indication_pdu(dapp_id, RAN_FUNCTION_ID, encoded);
+                auto rc = emit_outbound(std::move(pdu));
+                if (rc == libe3::ErrorCode::SUCCESS) {
+                    std::cout << "  -> Sent indication #" << seq_
+                              << " to dApp " << dapp_id
+                              << " (" << encoded.size() << " bytes)\n";
+                } else {
+                    std::cerr << "  -> Failed to send indication to dApp "
+                              << dapp_id << ": "
+                              << libe3::error_code_to_string(rc) << "\n";
+                }
+            }
+            ++seq_;
+        }
+    }
 };
 
 void print_usage(const char* program_name) {
@@ -197,8 +259,9 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Handle dApp reports (e.g. Simple-DAppReport from simple_dapp.py)
+    // Handle dApp reports for the RAN
     agent.set_dapp_report_handler([](const libe3::DAppReport& report) {
+        // In the RAN report is sent to the xApp through E2, here we just decode it as en example
         libe3_examples::SimpleDAppReport decoded;
         if (libe3_examples::decode_simple_dapp_report(report.report_data, decoded)) {
             std::cout << "[SIMPLE] dApp report from dApp " << report.dapp_identifier
@@ -222,67 +285,13 @@ int main(int argc, char* argv[]) {
     std::cout << "State: " << libe3::agent_state_to_string(agent.state()) << "\n";
     std::cout << "Press Ctrl+C to stop...\n\n";
     
-    // Main loop — periodically send mock indication data to subscribers
-    uint32_t seq = 0;
+    // Main loop — keep process alive and print statistics
     while (g_running) {
         std::this_thread::sleep_for(std::chrono::seconds(2));
         
         // Print statistics periodically
         std::cout << "  dApps: " << agent.dapp_count()
                   << ", Subscriptions: " << agent.subscription_count() << "\n";
-        
-        // Deliver mock indication data to every dApp subscribed to the simple SM
-        auto subscribers = agent.get_ran_function_subscribers(
-            SimpleServiceModel::RAN_FUNCTION_ID);
-        
-        if (!subscribers.empty()) {
-            // Build a structured Simple-Indication and encode it
-            libe3_examples::SimpleIndication si;
-            si.data1 = seq;
-            si.timestamp = static_cast<uint32_t>(time(NULL));
-
-            std::vector<uint8_t> encoded;
-            if (!libe3_examples::encode_simple_indication(si, encoded)) {
-                std::cerr << "Failed to encode Simple-Indication\n";
-            } else {
-                for (uint32_t dapp_id : subscribers) {
-                    auto rc = agent.send_indication(
-                        dapp_id, SimpleServiceModel::RAN_FUNCTION_ID, encoded);
-                    if (rc == libe3::ErrorCode::SUCCESS) {
-                        std::cout << "  -> Sent indication #" << seq
-                                  << " to dApp " << dapp_id
-                                  << " (" << encoded.size() << " bytes)\n";
-                    } else {
-                        std::cerr << "  -> Failed to send indication to dApp "
-                                  << dapp_id << ": "
-                                  << libe3::error_code_to_string(rc) << "\n";
-                    }
-
-                    // Simulate xApp control action delivery every 3rd indication
-                    if (seq % 3 == 0) {
-                        libe3_examples::SimpleConfigControl config_ctrl;
-                        config_ctrl.enable = (seq / 3) % 2 == 0; // alternate enable/disable
-                        std::vector<uint8_t> ctrl_encoded;
-                        if (libe3_examples::encode_simple_config_control(config_ctrl, ctrl_encoded)) {
-                            auto rc_ctrl = agent.send_xapp_control(
-                                dapp_id, SimpleServiceModel::RAN_FUNCTION_ID, ctrl_encoded);
-                            if (rc_ctrl == libe3::ErrorCode::SUCCESS) {
-                                std::cout << "  -> Sent xApp control (enable=" << config_ctrl.enable
-                                          << ") to dApp " << dapp_id
-                                          << " (" << ctrl_encoded.size() << " bytes)\n";
-                            } else {
-                                std::cerr << "  -> Failed to send xApp control to dApp "
-                                          << dapp_id << ": "
-                                          << libe3::error_code_to_string(rc_ctrl) << "\n";
-                            }
-                        } else {
-                            std::cerr << "Failed to encode Simple-ConfigControl\n";
-                        }
-                    }
-                }
-            }
-            ++seq;
-        }
     }
     
     std::cout << "\nStopping agent...\n";

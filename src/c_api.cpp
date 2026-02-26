@@ -85,6 +85,29 @@ struct e3_service_model_handle_s : public ServiceModel {
         if (sm_is_running) return sm_is_running(sm_context) != 0;
         return false;
     }
+
+    ErrorCode handle_control_action(
+        uint32_t request_message_id,
+        const DAppControlAction& action
+    ) override {
+        if (!sm_process_control) {
+            return ErrorCode::NOT_FOUND;
+        }
+        return static_cast<ErrorCode>(sm_process_control(
+            this,
+            sm_context,
+            request_message_id,
+            action.dapp_identifier,
+            action.ran_function_identifier,
+            action.control_identifier,
+            action.action_data.empty() ? nullptr : action.action_data.data(),
+            action.action_data.size()
+        ));
+    }
+
+    ErrorCode emit_pdu(Pdu&& pdu) {
+        return emit_outbound(std::move(pdu));
+    }
 };
 
 extern "C" {
@@ -103,6 +126,43 @@ void e3_service_model_destroy(e3_service_model_handle_t* sm) {
     // If ownership was transferred to an agent, we must not delete here.
     if (sm->transferred_to_agent) return;
     delete sm;
+}
+
+e3_error_t e3_service_model_emit_indication(
+    e3_service_model_handle_t* sm,
+    uint32_t dapp_id,
+    uint32_t ran_function_id,
+    const uint8_t* data,
+    size_t data_len
+) {
+    if (!sm) return static_cast<int>(ErrorCode::INVALID_PARAM);
+
+    Pdu pdu(PduType::INDICATION_MESSAGE);
+    IndicationMessage msg;
+    msg.dapp_identifier = dapp_id;
+    msg.ran_function_identifier = ran_function_id;
+    if (data && data_len) {
+        msg.protocol_data.assign(data, data + data_len);
+    }
+    pdu.choice = std::move(msg);
+
+    return static_cast<int>(sm->emit_pdu(std::move(pdu)));
+}
+
+e3_error_t e3_service_model_emit_message_ack(
+    e3_service_model_handle_t* sm,
+    uint32_t request_id,
+    int response_code
+) {
+    if (!sm) return static_cast<int>(ErrorCode::INVALID_PARAM);
+
+    Pdu pdu(PduType::MESSAGE_ACK);
+    MessageAck ack;
+    ack.request_id = request_id;
+    ack.response_code = (response_code == 0) ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
+    pdu.choice = ack;
+
+    return static_cast<int>(sm->emit_pdu(std::move(pdu)));
 }
 
 e3_agent_handle_t* e3_agent_create_default() {

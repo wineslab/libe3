@@ -56,11 +56,6 @@ public:
     ErrorCode push(Pdu pdu);
 
     /**
-     * @brief Push a PDU to the queue (move semantics)
-     */
-    ErrorCode push(Pdu&& pdu);
-
-    /**
      * @brief Pop a PDU from the queue (blocking)
      *
      * Blocks until a PDU is available.

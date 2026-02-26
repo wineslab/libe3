@@ -26,7 +26,11 @@ typedef e3_error_t (*e3_sm_start_cb)(void* sm_context);
 typedef void      (*e3_sm_stop_cb)(void* sm_context);
 typedef int       (*e3_sm_is_running_cb)(void* sm_context); /* returns 0/1 */
 typedef e3_error_t (*e3_sm_process_control_cb)(
+    e3_service_model_handle_t* sm_handle,
     void* sm_context,
+    uint32_t request_message_id,
+    uint32_t dapp_id,
+    uint32_t ran_function_id,
     uint32_t control_id,
     const uint8_t* data,
     size_t data_len
@@ -97,6 +101,29 @@ e3_service_model_handle_t* e3_service_model_create_from_c(
  * this function is a no-op and the agent takes responsibility for cleanup.
  */
 void e3_service_model_destroy(e3_service_model_handle_t* sm);
+
+/**
+ * @brief Emit an indication message from a ServiceModel to the outbound queue.
+ *
+ * This is intended for C-backed ServiceModels. The message is forwarded by
+ * the internal publisher path.
+ */
+e3_error_t e3_service_model_emit_indication(
+    e3_service_model_handle_t* sm,
+    uint32_t dapp_id,
+    uint32_t ran_function_id,
+    const uint8_t* data,
+    size_t data_len
+);
+
+/**
+ * @brief Emit a message acknowledgment from a ServiceModel.
+ */
+e3_error_t e3_service_model_emit_message_ack(
+    e3_service_model_handle_t* sm,
+    uint32_t request_id,
+    int response_code
+);
 
 /**
  * @brief Configuration for creating an E3Agent from C.

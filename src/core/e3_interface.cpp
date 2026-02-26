@@ -115,7 +115,6 @@ ErrorCode E3Interface::start() {
     // Start threads
     subscriber_thread_ = std::make_unique<std::thread>(&E3Interface::subscriber_loop, this);
     publisher_thread_ = std::make_unique<std::thread>(&E3Interface::publisher_loop, this);
-    sm_data_thread_ = std::make_unique<std::thread>(&E3Interface::sm_data_handler_loop, this);
     setup_thread_ = std::make_unique<std::thread>(&E3Interface::setup_loop, this);
     
     state_.store(AgentState::RUNNING);
@@ -174,7 +173,7 @@ ErrorCode E3Interface::queue_outbound(Pdu pdu) {
     if (!response_queue_) {
         return ErrorCode::NOT_INITIALIZED;
     }
-    return response_queue_->push(pdu);
+    return response_queue_->push(std::move(pdu));
 }
 
 std::vector<uint32_t> E3Interface::get_available_ran_functions() const {
@@ -182,6 +181,22 @@ std::vector<uint32_t> E3Interface::get_available_ran_functions() const {
 }
 
 ErrorCode E3Interface::register_sm(std::unique_ptr<ServiceModel> sm) {
+    if (!sm) {
+        return ErrorCode::INVALID_PARAM;
+    }
+    const uint32_t ran_function_id = sm->ran_function_id();
+    sm->set_subscribers_provider([this, ran_function_id]() {
+        if (!subscription_manager_) {
+            return std::vector<uint32_t>{};
+        }
+        return subscription_manager_->get_subscribed_dapps(ran_function_id);
+    });
+    sm->set_outbound_emitter([this](Pdu&& pdu) {
+        if (pdu.message_id == 0) {
+            pdu.message_id = generate_message_id();
+        }
+        return queue_outbound(std::move(pdu));
+    });
     return SmRegistry::instance().register_sm(std::move(sm));
 }
 
@@ -549,35 +564,22 @@ void E3Interface::handle_control_action(const DAppControlAction& action, uint32_
                          << " for RAN function " << action.ran_function_identifier
                          << " control " << action.control_identifier
                          << " (" << action.action_data.size() << " bytes)";
-    
-    ResponseCode ack_code = ResponseCode::NEGATIVE;
+
     ServiceModel* sm = SmRegistry::instance().get_by_ran_function(action.ran_function_identifier);
-    
+
     if (sm && sm->is_running()) {
-        ErrorCode result = sm->process_control_action(
-            action.control_identifier,
-            action.action_data
-        );
-        
-        if (result == ErrorCode::SUCCESS) {
-            E3_LOG_INFO(LOG_TAG) << "Control action processed by SM";
-            ack_code = ResponseCode::POSITIVE;
-        } else {
+        ErrorCode result = sm->handle_control_action(request_message_id, action);
+        if (result != ErrorCode::SUCCESS) {
             E3_LOG_ERROR(LOG_TAG) << "SM failed to process control action: "
                                   << error_code_to_string(result);
+            return;
         }
+        E3_LOG_INFO(LOG_TAG) << "Control action processed by SM";
     } else {
         E3_LOG_ERROR(LOG_TAG) << "No running SM found for RAN function " 
                               << action.ran_function_identifier;
-    }
-    
-    Pdu response_pdu(PduType::MESSAGE_ACK);
-    response_pdu.message_id = generate_message_id();
-    MessageAck ack;
-    ack.request_id = request_message_id;
-    ack.response_code = ack_code;
-    response_pdu.choice = ack;
-    queue_outbound(std::move(response_pdu));
+        return;
+    }    
 }
 
 void E3Interface::handle_dapp_report(const DAppReport& report) {

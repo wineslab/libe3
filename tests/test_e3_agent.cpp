@@ -37,16 +37,7 @@ public:
         return {10, 20};  // Example control IDs
     }
     
-    ErrorCode init() override {
-        // Register control callbacks
-        register_control_callback(10, [](const std::vector<uint8_t>&) {
-            return ErrorCode::SUCCESS;
-        });
-        register_control_callback(20, [](const std::vector<uint8_t>&) {
-            return ErrorCode::SUCCESS;
-        });
-        return ErrorCode::SUCCESS;
-    }
+    ErrorCode init() override { return ErrorCode::SUCCESS; }
     
     void destroy() override {
         running_ = false;
@@ -62,6 +53,13 @@ public:
     }
     
     bool is_running() const override { return running_; }
+
+    ErrorCode handle_control_action(
+        uint32_t /*request_message_id*/,
+        const DAppControlAction& /*action*/
+    ) override {
+        return ErrorCode::SUCCESS;
+    }
 
 private:
     uint32_t id_;
