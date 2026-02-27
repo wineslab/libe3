@@ -113,9 +113,9 @@ ErrorCode E3Interface::start() {
     state_.store(AgentState::CONNECTED);
     
     // Start threads
+    setup_thread_ = std::make_unique<std::thread>(&E3Interface::setup_loop, this);
     subscriber_thread_ = std::make_unique<std::thread>(&E3Interface::subscriber_loop, this);
     publisher_thread_ = std::make_unique<std::thread>(&E3Interface::publisher_loop, this);
-    setup_thread_ = std::make_unique<std::thread>(&E3Interface::setup_loop, this);
     
     state_.store(AgentState::RUNNING);
     E3_LOG_INFO(LOG_TAG) << "E3Interface started successfully";
