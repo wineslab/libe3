@@ -19,8 +19,8 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     E3-SubscriptionRequest ::= SEQUENCE {
         dAppIdentifier          E3-DAppID,
         ranFunctionIdentifier   INTEGER (1..100),
-        telemetryIdentifierList SEQUENCE OF INTEGER (0..100),
-        controlIdentifierList   SEQUENCE OF INTEGER (0..100),
+        telemetryIdentifierList SEQUENCE (SIZE (0..100)) OF INTEGER (1..100),
+        controlIdentifierList   SEQUENCE (SIZE (0..100)) OF INTEGER (1..100),
         subscriptionTime        INTEGER (0..3600) OPTIONAL,
         periodicity             INTEGER (0..1000) OPTIONAL
     }
@@ -35,14 +35,14 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         dAppIdentifier       E3-DAppID,
         responseCode         E3-ResponseCode,
         subscriptionId       INTEGER (1..100) OPTIONAL,
-        telemetryIdentifierList SEQUENCE OF INTEGER (0..100) OPTIONAL,
-        controlIdentifierList   SEQUENCE OF INTEGER (0..100) OPTIONAL
+        telemetryIdentifierList SEQUENCE (SIZE (0..100)) OF INTEGER (1..100) OPTIONAL,
+        controlIdentifierList   SEQUENCE (SIZE (0..100)) OF INTEGER (1..100) OPTIONAL
     }
 
     E3-RanFunctionDefinition ::= SEQUENCE {
         ranFunctionIdentifier   INTEGER (1..100),
-        telemetryIdentifierList SEQUENCE OF INTEGER (0..100),
-        controlIdentifierList   SEQUENCE OF INTEGER (0..100),
+        telemetryIdentifierList SEQUENCE (SIZE (0..100)) OF INTEGER (1..100),
+        controlIdentifierList   SEQUENCE (SIZE (0..100)) OF INTEGER (1..100),
         ranFunctionData         OCTET STRING (SIZE (1..32768))
     }
 
