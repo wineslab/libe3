@@ -21,13 +21,27 @@ target_include_directories(libe3
 target_link_libraries(libe3
     PUBLIC
         Threads::Threads
-        nlohmann_json::nlohmann_json
         tl::expected
-        asn1_e3ap
+        
     PRIVATE
         libe3_warnings
         libe3_sanitizers
 )
+
+# Conditionally link JSON and ASN.1 libraries and expose compile-time flags
+if(LIBE3_ENABLE_JSON)
+    target_link_libraries(libe3 PUBLIC nlohmann_json::nlohmann_json)
+    target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_JSON=1)
+else()
+    target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_JSON=0)
+endif()
+
+if(LIBE3_ENABLE_ASN1)
+    target_link_libraries(libe3 PUBLIC asn1_e3ap)
+    target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_ASN1=1)
+else()
+    target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_ASN1=0)
+endif()
 
 if(LIBE3_ENABLE_ZMQ)
     target_compile_definitions(libe3 PUBLIC LIBE3_HAS_ZMQ=1)
@@ -61,13 +75,26 @@ target_include_directories(libe3_shared
 target_link_libraries(libe3_shared
     PUBLIC
         Threads::Threads
-        nlohmann_json::nlohmann_json
         tl::expected
-        asn1_e3ap
     PRIVATE
         libe3_warnings
         libe3_sanitizers
 )
+
+# Conditionally link JSON and ASN.1 libraries and expose compile-time flags
+if(LIBE3_ENABLE_JSON)
+    target_link_libraries(libe3_shared PUBLIC nlohmann_json::nlohmann_json)
+    target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_JSON=1)
+else()
+    target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_JSON=0)
+endif()
+
+if(LIBE3_ENABLE_ASN1)
+    target_link_libraries(libe3_shared PUBLIC asn1_e3ap)
+    target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_ASN1=1)
+else()
+    target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_ASN1=0)
+endif()
 
 if(LIBE3_ENABLE_ZMQ)
     target_compile_definitions(libe3_shared PUBLIC LIBE3_HAS_ZMQ=1)

@@ -27,9 +27,7 @@ set(LIBE3_SOURCES
     
     # Encoder
     src/encoder/e3_encoder.cpp
-    src/encoder/json_encoder.cpp
     src/encoder/encoder_factory.cpp
-    src/encoder/asn1_encoder.cpp
     
     # Connector
     src/connector/connector_factory.cpp
@@ -40,4 +38,13 @@ set(LIBE3_SOURCES
 # Conditionally add ZMQ connector
 if(LIBE3_ENABLE_ZMQ)
     list(APPEND LIBE3_SOURCES src/connector/zmq_connector.cpp)
+endif()
+
+# Conditionally include encoder implementations
+if(LIBE3_ENABLE_ASN1)
+    list(APPEND LIBE3_SOURCES src/encoder/asn1_encoder.cpp)
+endif()
+
+if(LIBE3_ENABLE_JSON)
+    list(APPEND LIBE3_SOURCES src/encoder/json_encoder.cpp)
 endif()

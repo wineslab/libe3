@@ -22,6 +22,11 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
     # If the filename already starts with 'test_', strip it to avoid 'test_test_...' targets
     string(REGEX REPLACE "^test_" "" simple_name ${test_name})
     set(target_name "test_${simple_name}")
+    # Skip tests that require optional components when those components are disabled
+    if(NOT LIBE3_ENABLE_JSON AND simple_name STREQUAL "json_encoder")
+        message(STATUS "Skipping test_json_encoder: JSON support disabled")
+        continue()
+    endif()
 
     add_executable(${target_name} "${CMAKE_CURRENT_SOURCE_DIR}/${test_src}")
     target_link_libraries(${target_name}

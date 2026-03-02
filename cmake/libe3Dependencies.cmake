@@ -10,19 +10,21 @@
 find_package(Threads REQUIRED)
 
 # Required: nlohmann/json for JSON encoding
-find_package(nlohmann_json 3.11 QUIET)
-if(NOT nlohmann_json_FOUND)
-    include(FetchContent)
-    FetchContent_Declare(
-        nlohmann_json
-        GIT_REPOSITORY https://github.com/nlohmann/json.git
-        GIT_TAG v3.11.3
-        GIT_SHALLOW TRUE
-    )
-    FetchContent_MakeAvailable(nlohmann_json)
-    message(STATUS "nlohmann/json: Fetched from GitHub")
-else()
-    message(STATUS "nlohmann/json: Found installed version")
+if(LIBE3_ENABLE_JSON)
+    find_package(nlohmann_json 3.11 QUIET)
+    if(NOT nlohmann_json_FOUND)
+        include(FetchContent)
+        FetchContent_Declare(
+            nlohmann_json
+            GIT_REPOSITORY https://github.com/nlohmann/json.git
+            GIT_TAG v3.11.3
+            GIT_SHALLOW TRUE
+        )
+        FetchContent_MakeAvailable(nlohmann_json)
+        message(STATUS "nlohmann/json: Fetched from GitHub")
+    else()
+        message(STATUS "nlohmann/json: Found installed version")
+    endif()
 endif()
 
 # Required: tl::expected for C++17 std::expected-like functionality

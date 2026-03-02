@@ -28,6 +28,7 @@ BUILD_TESTS=1
 BUILD_EXAMPLES=1
 ENABLE_ZMQ=1
 ENABLE_ASN1=1
+ENABLE_JSON=0
 ENABLE_ASAN=0
 ENABLE_TSAN=0
 ENABLE_UBSAN=0
@@ -295,6 +296,7 @@ configure_cmake() {
         "-DLIBE3_BUILD_EXAMPLES=$([ $BUILD_EXAMPLES -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_ENABLE_ZMQ=$([ $ENABLE_ZMQ -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_ENABLE_ASN1=$([ $ENABLE_ASN1 -eq 1 ] && echo ON || echo OFF)"
+        "-DLIBE3_ENABLE_JSON=$([ $ENABLE_JSON -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_ENABLE_ASAN=$([ $ENABLE_ASAN -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_ENABLE_TSAN=$([ $ENABLE_TSAN -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_BUILD_DOCS=$([ $BUILD_DOCS -eq 1 ] && echo ON || echo OFF)"

@@ -19,7 +19,13 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libe3.pc"
 )
 
 # Install libraries
-install(TARGETS libe3 libe3_shared asn1_e3ap libe3_warnings libe3_sanitizers
+set(LIBE3_INSTALL_TARGETS libe3 libe3_shared libe3_warnings libe3_sanitizers)
+
+if(LIBE3_ENABLE_ASN1)
+    list(APPEND LIBE3_INSTALL_TARGETS asn1_e3ap)
+endif()
+
+install(TARGETS ${LIBE3_INSTALL_TARGETS}
     EXPORT libe3Targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -39,10 +45,12 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/libe3/version.hpp
 )
 
 # Install ASN.1 generated headers
-install(DIRECTORY ${ASN1_GENERATED_DIR}/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libe3/asn1
-    FILES_MATCHING PATTERN "*.h"
-)
+if(LIBE3_ENABLE_ASN1)
+    install(DIRECTORY ${ASN1_GENERATED_DIR}/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libe3/asn1
+        FILES_MATCHING PATTERN "*.h"
+    )
+endif()
 
 # Export targets
 install(EXPORT libe3Targets
