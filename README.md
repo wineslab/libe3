@@ -116,6 +116,7 @@ make -j$(nproc)
 | `LIBE3_BUILD_EXAMPLES` | ON | Build examples |
 | `LIBE3_ENABLE_ZMQ` | ON | Enable ZeroMQ transport |
 | `LIBE3_ENABLE_ASN1` | ON | Enable ASN.1 encoding |
+| `LIBE3_ENABLE_JSON` | OFF | Enable JSON encoding (mutually exclusive with ASN.1) |
 | `LIBE3_ENABLE_ASAN` | OFF | Enable AddressSanitizer |
 | `LIBE3_ENABLE_TSAN` | OFF | Enable ThreadSanitizer |
 

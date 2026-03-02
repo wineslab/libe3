@@ -146,7 +146,14 @@ TEST(E3Config_defaults) {
     
     ASSERT_TRUE(config.link_layer == E3LinkLayer::ZMQ);
     ASSERT_TRUE(config.transport_layer == E3TransportLayer::IPC);
+    // Encoding default follows build-time selection
+#if defined(LIBE3_ENABLE_JSON)
+    ASSERT_TRUE(config.encoding == EncodingFormat::JSON);
+#elif defined(LIBE3_ENABLE_ASN1)
     ASSERT_TRUE(config.encoding == EncodingFormat::ASN1);
+#else
+    ASSERT_TRUE(config.encoding == EncodingFormat::ASN1);
+#endif
     ASSERT_EQ(config.setup_port, 9990u);
     ASSERT_EQ(config.subscriber_port, 9999u);
     ASSERT_EQ(config.publisher_port, 9991u);

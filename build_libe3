@@ -350,30 +350,6 @@ configure_cmake() {
     $cmake_cmd "${cmake_args[@]}" "$SCRIPT_DIR"
 }
 
-    validate_default() {
-        ENABLE_ASN1=1
-        ENABLE_JSON=0
-        BUILD_DIR="build-validate-default"
-        clean_build
-        configure_cmake
-        build_library
-        if [ $RUN_TESTS -eq 1 ]; then
-            run_tests
-        fi
-    }
-
-    validate_json() {
-        ENABLE_ASN1=0
-        ENABLE_JSON=1
-        BUILD_DIR="build-validate-json"
-        clean_build
-        configure_cmake
-        build_library
-        if [ $RUN_TESTS -eq 1 ]; then
-            run_tests
-        fi
-    }
-
 build_library() {
     local build_path="$SCRIPT_DIR/$BUILD_DIR"
     cd "$build_path"
