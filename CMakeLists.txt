@@ -41,9 +41,20 @@ include(libe3Dependencies)
 include(libe3Version)
 
 # ============================================================================
+# Mutual exclusion between ASN.1 and JSON encoders
+# ============================================================================
+if(LIBE3_ENABLE_ASN1 AND LIBE3_ENABLE_JSON)
+    message(FATAL_ERROR "Both LIBE3_ENABLE_ASN1 and LIBE3_ENABLE_JSON are enabled. Please enable only one encoding: ASN.1 or JSON.")
+endif()
+
+# ============================================================================
 # ASN.1 Messages Library
 # ============================================================================
-add_subdirectory(messages)
+if(LIBE3_ENABLE_ASN1)
+    add_subdirectory(messages)
+else()
+    message(STATUS "ASN.1 encoding support disabled by configuration")
+endif()
 
 # ============================================================================
 # Library

@@ -11,6 +11,11 @@ if(@LIBE3_ENABLE_ZMQ@)
     endif()
 endif()
 
+# If libe3 was built with JSON support, make downstream consumers find nlohmann/json
+if(@LIBE3_ENABLE_JSON@)
+    find_dependency(nlohmann_json 3.11 REQUIRED)
+endif()
+
 include("${CMAKE_CURRENT_LIST_DIR}/libe3Targets.cmake")
 
 check_required_components(libe3)
