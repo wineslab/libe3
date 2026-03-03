@@ -355,9 +355,9 @@ struct E3Config {
     std::string publisher_endpoint{"ipc:///tmp/dapps/e3_socket"};
     
     // Encoding format
-#if LIBE3_ENABLE_ASN1
+#if defined(LIBE3_ENABLE_ASN1)
     EncodingFormat encoding{EncodingFormat::ASN1};
-#elif LIBE3_ENABLE_JSON
+#elif defined(LIBE3_ENABLE_JSON)
     EncodingFormat encoding{EncodingFormat::JSON};
 #else // Fallback
     EncodingFormat encoding{EncodingFormat::ASN1};

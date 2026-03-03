@@ -31,16 +31,12 @@ target_link_libraries(libe3
 # Conditionally link JSON and ASN.1 libraries and expose compile-time flags
 if(LIBE3_ENABLE_JSON)
     target_link_libraries(libe3 PUBLIC nlohmann_json::nlohmann_json)
-    target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_JSON=1)
-else()
-    target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_JSON=0)
+    target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_JSON)
 endif()
 
 if(LIBE3_ENABLE_ASN1)
     target_link_libraries(libe3 PUBLIC asn1_e3ap)
-    target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_ASN1=1)
-else()
-    target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_ASN1=0)
+    target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_ASN1)
 endif()
 
 if(LIBE3_ENABLE_ZMQ)
@@ -84,16 +80,12 @@ target_link_libraries(libe3_shared
 # Conditionally link JSON and ASN.1 libraries and expose compile-time flags
 if(LIBE3_ENABLE_JSON)
     target_link_libraries(libe3_shared PUBLIC nlohmann_json::nlohmann_json)
-    target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_JSON=1)
-else()
-    target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_JSON=0)
+    target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_JSON)
 endif()
 
 if(LIBE3_ENABLE_ASN1)
     target_link_libraries(libe3_shared PUBLIC asn1_e3ap)
-    target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_ASN1=1)
-else()
-    target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_ASN1=0)
+    target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_ASN1)
 endif()
 
 if(LIBE3_ENABLE_ZMQ)

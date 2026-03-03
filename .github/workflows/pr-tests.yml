@@ -1,0 +1,35 @@
+name: Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Build and Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        build_type: [Debug, Release]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          chmod +x ./build_libe3 || true
+          ./build_libe3 -I || true
+
+      - name: Build and test with build_libe3 (${ { matrix.build_type } })
+        shell: bash
+        run: |
+          chmod +x ./build_libe3 || true
+          if [ "${{ matrix.build_type }}" = "Debug" ]; then
+            BUILD_FLAG="-g"
+          else
+            BUILD_FLAG="-r"
+          fi
+          ./build_libe3 -c -d build -j $(nproc) $BUILD_FLAG -t
