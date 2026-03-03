@@ -3,7 +3,7 @@ name: Tag and Publish libe3 package
 on:
   push:
     branches:
-      - first-it
+      - main
 
 jobs:
   create-tag:
