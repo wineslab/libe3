@@ -2,7 +2,6 @@
  * @file zmq_connector.cpp
  * @brief ZeroMQ connector implementation
  *
- * Ported from the original C implementation's zeromq_* functions in e3_connector.c
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -21,21 +20,34 @@ namespace libe3 {
 namespace {
 constexpr const char* LOG_TAG = "ZmqConn";
 constexpr const char* IPC_BASE_DIR = "/tmp/dapps";
+constexpr int RECV_TIMEOUT_MS = 500;  // Timeout for graceful shutdown
 }
 
 ZmqE3Connector::ZmqE3Connector(
-    TransportType transport,
+    E3TransportLayer transport_layer,
     const std::string& setup_endpoint,
     const std::string& inbound_endpoint,
     const std::string& outbound_endpoint,
+    uint16_t setup_port,
+    uint16_t inbound_port,
+    uint16_t outbound_port,
     size_t io_threads
 )
-    : transport_type_(transport)
+    : transport_layer_(transport_layer)
     , io_threads_(io_threads)
+    , setup_port_(setup_port)
+    , inbound_port_(inbound_port)
+    , outbound_port_(outbound_port)
 {
-    setup_endpoint_ = setup_endpoint;
-    inbound_endpoint_ = inbound_endpoint;
-    outbound_endpoint_ = outbound_endpoint;
+    if (transport_layer == E3TransportLayer::TCP) {
+        setup_endpoint_ = "tcp://*:" + std::to_string(setup_port);
+        inbound_endpoint_ = "tcp://*:" + std::to_string(inbound_port);
+        outbound_endpoint_ = "tcp://*:" + std::to_string(outbound_port);
+    } else {
+        setup_endpoint_ = setup_endpoint;
+        inbound_endpoint_ = inbound_endpoint;
+        outbound_endpoint_ = outbound_endpoint;
+    }
     
     E3_LOG_INFO(LOG_TAG) << "Creating ZMQ connector";
     E3_LOG_DEBUG(LOG_TAG) << "  Setup endpoint: " << setup_endpoint_;
@@ -64,7 +76,7 @@ ErrorCode ZmqE3Connector::setup_initial_connection() {
     }
     
     // Create IPC directory if using IPC transport
-    if (transport_type_ == TransportType::ZMQ_IPC) {
+    if (transport_layer_ == E3TransportLayer::IPC) {
         struct stat st{};
         if (stat(IPC_BASE_DIR, &st) == -1) {
             if (mkdir(IPC_BASE_DIR, 0777) == -1) {
@@ -95,6 +107,10 @@ ErrorCode ZmqE3Connector::setup_initial_connection() {
         return ErrorCode::CONNECTION_FAILED;
     }
     
+    // Set receive timeout to allow graceful shutdown
+    int recv_timeout = RECV_TIMEOUT_MS;
+    zmq_setsockopt(setup_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+    
     int ret = zmq_bind(setup_socket_, setup_endpoint_.c_str());
     if (ret != 0) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to bind setup socket: " << zmq_strerror(errno);
@@ -102,7 +118,7 @@ ErrorCode ZmqE3Connector::setup_initial_connection() {
     }
     
     // Set IPC permissions if needed
-    if (transport_type_ == TransportType::ZMQ_IPC) {
+    if (transport_layer_ == E3TransportLayer::IPC) {
         setup_ipc_permissions(setup_endpoint_);
     }
     
@@ -120,11 +136,16 @@ int ZmqE3Connector::recv_setup_request(std::vector<uint8_t>& buffer) {
     buffer.resize(DEFAULT_BUFFER_SIZE);
     int ret = zmq_recv(setup_socket_, buffer.data(), buffer.size(), 0);
     if (ret < 0) {
+        if (errno == EAGAIN) {
+            // Timeout - return 0 to indicate no data (allows shutdown check)
+            return 0;
+        }
         E3_LOG_ERROR(LOG_TAG) << "Failed to receive setup request: " << zmq_strerror(errno);
+        reset_setup_socket();
         return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
     }
     
-    buffer.resize(ret);
+    buffer.resize(static_cast<size_t>(ret));
     E3_LOG_DEBUG(LOG_TAG) << "Received setup request: " << ret << " bytes";
     return ret;
 }
@@ -137,6 +158,7 @@ ErrorCode ZmqE3Connector::send_response(const std::vector<uint8_t>& data) {
     int ret = zmq_send(setup_socket_, data.data(), data.size(), 0);
     if (ret < 0) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to send response: " << zmq_strerror(errno);
+        reset_setup_socket();
         return ErrorCode::TRANSPORT_ERROR;
     }
     
@@ -162,13 +184,17 @@ ErrorCode ZmqE3Connector::setup_inbound_connection() {
     int conflate = 1;
     zmq_setsockopt(inbound_socket_, ZMQ_CONFLATE, &conflate, sizeof(conflate));
     
+    // Set receive timeout to allow graceful shutdown
+    int recv_timeout = RECV_TIMEOUT_MS;
+    zmq_setsockopt(inbound_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+    
     int ret = zmq_bind(inbound_socket_, inbound_endpoint_.c_str());
     if (ret != 0) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to bind inbound socket: " << zmq_strerror(errno);
         return ErrorCode::CONNECTION_FAILED;
     }
     
-    if (transport_type_ == TransportType::ZMQ_IPC) {
+    if (transport_layer_ == E3TransportLayer::IPC) {
         setup_ipc_permissions(inbound_endpoint_);
     }
     
@@ -184,11 +210,15 @@ int ZmqE3Connector::receive(std::vector<uint8_t>& buffer) {
     buffer.resize(DEFAULT_BUFFER_SIZE);
     int ret = zmq_recv(inbound_socket_, buffer.data(), buffer.size(), 0);
     if (ret < 0) {
+        if (errno == EAGAIN) {
+            // Timeout - return 0 to indicate no data (allows shutdown check)
+            return 0;
+        }
         E3_LOG_ERROR(LOG_TAG) << "Failed to receive: " << zmq_strerror(errno);
         return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
     }
     
-    buffer.resize(ret);
+    buffer.resize(static_cast<size_t>(ret));
     E3_LOG_TRACE(LOG_TAG) << "Received: " << ret << " bytes";
     return ret;
 }
@@ -210,7 +240,7 @@ ErrorCode ZmqE3Connector::setup_outbound_connection() {
         return ErrorCode::CONNECTION_FAILED;
     }
     
-    if (transport_type_ == TransportType::ZMQ_IPC) {
+    if (transport_layer_ == E3TransportLayer::IPC) {
         setup_ipc_permissions(outbound_endpoint_);
     }
     
@@ -257,7 +287,7 @@ void ZmqE3Connector::dispose() {
     }
     
     // Clean up IPC files if using IPC transport
-    if (transport_type_ == TransportType::ZMQ_IPC) {
+    if (transport_layer_ == E3TransportLayer::IPC) {
         // Extract file paths from IPC endpoints (ipc:///path)
         auto extract_path = [](const std::string& endpoint) -> std::string {
             const std::string prefix = "ipc://";
@@ -284,6 +314,13 @@ void ZmqE3Connector::dispose() {
     E3_LOG_INFO(LOG_TAG) << "ZMQ connector disposed";
 }
 
+void ZmqE3Connector::shutdown() {
+    // ZMQ uses ZMQ_RCVTIMEO for timeout-based shutdown.
+    // The receive loops will wake up periodically and check should_stop_.
+    // No additional action needed here.
+    E3_LOG_DEBUG(LOG_TAG) << "ZMQ connector shutdown requested";
+}
+
 void ZmqE3Connector::setup_ipc_permissions(const std::string& endpoint) {
     // Extract file path from IPC endpoint (ipc:///path)
     const std::string prefix = "ipc://";
@@ -298,6 +335,44 @@ void ZmqE3Connector::setup_ipc_permissions(const std::string& endpoint) {
     } else {
         E3_LOG_DEBUG(LOG_TAG) << "Set permissions on " << path;
     }
+}
+
+bool ZmqE3Connector::reset_setup_socket() {
+    E3_LOG_WARN(LOG_TAG) << "Resetting setup socket after error";
+
+    if (setup_socket_) {
+        zmq_close(setup_socket_);
+        setup_socket_ = nullptr;
+    }
+
+    if (!context_) {
+        E3_LOG_ERROR(LOG_TAG) << "Cannot reset setup socket without context";
+        return false;
+    }
+
+    setup_socket_ = zmq_socket(context_, ZMQ_REP);
+    if (!setup_socket_) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to recreate setup socket: " << zmq_strerror(errno);
+        return false;
+    }
+
+    int recv_timeout = RECV_TIMEOUT_MS;
+    zmq_setsockopt(setup_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+
+    int ret = zmq_bind(setup_socket_, setup_endpoint_.c_str());
+    if (ret != 0) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to rebind setup socket: " << zmq_strerror(errno);
+        zmq_close(setup_socket_);
+        setup_socket_ = nullptr;
+        return false;
+    }
+
+    if (transport_layer_ == E3TransportLayer::IPC) {
+        setup_ipc_permissions(setup_endpoint_);
+    }
+
+    E3_LOG_INFO(LOG_TAG) << "Setup socket reset and bound to " << setup_endpoint_;
+    return true;
 }
 
 } // namespace libe3

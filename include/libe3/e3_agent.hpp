@@ -23,32 +23,8 @@ namespace libe3 {
 // Forward declaration - implementation hidden from users
 class E3Interface;
 
-/**
- * @brief Callback type for receiving indication data
- *
- * @param dapp_id The dApp ID the indication is for
- * @param ran_function_id The RAN function providing the data
- * @param data E3SM-encoded indication data
- */
-using IndicationCallback = std::function<void(
-    uint32_t dapp_id,
-    uint32_t ran_function_id,
-    const std::vector<uint8_t>& data
-)>;
-
-/**
- * @brief Callback type for receiving control actions
- *
- * @param dapp_id The dApp ID sending the control
- * @param ran_function_id The target RAN function
- * @param data E3SM-encoded control data
- * @return ErrorCode::SUCCESS to acknowledge, error code to reject
- */
-using ControlCallback = std::function<ErrorCode(
-    uint32_t dapp_id,
-    uint32_t ran_function_id,
-    const std::vector<uint8_t>& data
-)>;
+/** Callback for incoming dApp reports (dApp → RAN). Set before start() to handle reports. */
+using DAppReportHandler = std::function<void(const DAppReport&)>;
 
 /**
  * @brief E3Agent - Main façade for RAN vendor integration
@@ -58,34 +34,33 @@ using ControlCallback = std::function<ErrorCode(
  *
  * - Simple lifecycle management (init, start, stop, destroy)
  * - Service Model registration
- * - Event callbacks for control actions and indications
+ * - Automatic routing of control actions to the correct Service Model
  * - Thread-safe operation
  *
  * **Usage Example:**
  * ```cpp
  * // Create agent with configuration
  * libe3::E3Config config;
- * config.transport = libe3::TransportType::ZMQ_IPC;
+ * config.link_layer = libe3::E3LinkLayer::ZMQ;
+ * config.transport_layer = libe3::E3TransportLayer::IPC;
  * config.encoding = libe3::EncodingFormat::JSON;
- *
+ * // Set custom ports if needed
+ * config.setup_port = 9990;
+ * config.subscriber_port = 9999;
+ * config.publisher_port = 9991;
+
  * libe3::E3Agent agent(config);
- *
+
  * // Register Service Models
  * agent.register_sm(std::make_unique<MySpectrumSM>());
- *
- * // Set callbacks
- * agent.set_control_callback([](uint32_t dapp, uint32_t rf, auto& data) {
- *     // Handle control action
- *     return libe3::ErrorCode::SUCCESS;
- * });
- *
+
  * // Start the agent
  * if (agent.start() != libe3::ErrorCode::SUCCESS) {
  *     // Handle error
  * }
- *
+
  * // ... agent runs, handling dApp connections and messages ...
- *
+
  * // Shutdown
  * agent.stop();
  * ```
@@ -127,7 +102,7 @@ public:
      * @return ErrorCode::SUCCESS on success
      * @return ErrorCode::ALREADY_INITIALIZED if already initialized
      */
-    [[nodiscard]] ErrorCode init();
+    ErrorCode init();
 
     /**
      * @brief Start the agent
@@ -137,7 +112,7 @@ public:
      *
      * @return ErrorCode::SUCCESS on success
      */
-    [[nodiscard]] ErrorCode start();
+    ErrorCode start();
 
     /**
      * @brief Stop the agent
@@ -150,12 +125,12 @@ public:
     /**
      * @brief Get current agent state
      */
-    [[nodiscard]] AgentState state() const noexcept;
+    AgentState state() const noexcept;
 
     /**
      * @brief Check if agent is running
      */
-    [[nodiscard]] bool is_running() const noexcept;
+    bool is_running() const noexcept;
 
     // =========================================================================
     // Service Model Registration
@@ -172,59 +147,66 @@ public:
      * @return ErrorCode::SM_ALREADY_REGISTERED if RAN function already has SM
      * @return ErrorCode::STATE_ERROR if agent is already running
      */
-    [[nodiscard]] ErrorCode register_sm(std::unique_ptr<ServiceModel> sm);
+    ErrorCode register_sm(std::unique_ptr<ServiceModel> sm);
 
     /**
      * @brief Get available RAN function IDs
      *
      * Returns the RAN function IDs from all registered Service Models.
      */
-    [[nodiscard]] std::vector<uint32_t> get_available_ran_functions() const;
-
-    // =========================================================================
-    // Callbacks
-    // =========================================================================
+    std::vector<uint32_t> get_available_ran_functions() const;
 
     /**
-     * @brief Set callback for control actions from dApps
-     *
-     * This callback is invoked when a dApp sends a control action.
-     * The callback runs in the subscriber thread context.
-     *
-     * @param callback Control action callback
+     * @brief Set callback for incoming dApp reports (dApp → RAN).
+     * Call before start(). When a dApp sends a DApp report, this callback is invoked.
      */
-    void set_control_callback(ControlCallback callback);
-
-    /**
-     * @brief Set callback for indication data ready events
-     *
-     * This callback is invoked when indication data is ready to be
-     * sent to subscribed dApps. Use this for custom indication routing.
-     *
-     * @param callback Indication callback
-     */
-    void set_indication_callback(IndicationCallback callback);
+    void set_dapp_report_handler(DAppReportHandler handler);
 
     // =========================================================================
-    // Manual Operations (for advanced use cases)
+    // Manual Operations
     // =========================================================================
 
     /**
      * @brief Send an indication message to a specific dApp
      *
      * @param dapp_id Target dApp identifier
+     * @param ran_function_id RAN function identifier
      * @param data E3SM-encoded indication data
      * @return ErrorCode::SUCCESS on success
      */
-    [[nodiscard]] ErrorCode send_indication(
+    ErrorCode send_indication(
         uint32_t dapp_id,
+        uint32_t ran_function_id,
         const std::vector<uint8_t>& data
     );
 
     /**
+     * @brief Send an xApp control action to a specific dApp coming from the E2SM-DAPP.
+     *
+     * @param dapp_id Target dApp identifier
+     * @param ran_function_id RAN function identifier
+     * @param control_data E3SM-encoded control payload
+     * @return ErrorCode::SUCCESS on success
+     */
+    ErrorCode send_xapp_control(
+        uint32_t dapp_id,
+        uint32_t ran_function_id,
+        const std::vector<uint8_t>& control_data
+    );
+
+    /**
+     * @brief Send a message acknowledgment (e.g. ack a control/request from dApp).
+     *
+     * @param request_id ID of the request being acknowledged
+     * @param response_code ResponseCode::POSITIVE (0) or NEGATIVE (1)
+     * @return ErrorCode::SUCCESS on success
+     */
+    ErrorCode send_message_ack(uint32_t request_id, ResponseCode response_code);
+
+    /**
      * @brief Get list of registered dApp IDs
      */
-    [[nodiscard]] std::vector<uint32_t> get_registered_dapps() const;
+    std::vector<uint32_t> get_registered_dapps() const;
 
     /**
      * @brief Get subscriptions for a dApp
@@ -232,7 +214,7 @@ public:
      * @param dapp_id dApp identifier
      * @return List of RAN function IDs the dApp is subscribed to
      */
-    [[nodiscard]] std::vector<uint32_t> get_dapp_subscriptions(uint32_t dapp_id) const;
+    std::vector<uint32_t> get_dapp_subscriptions(uint32_t dapp_id) const;
 
     /**
      * @brief Get subscribers for a RAN function
@@ -240,7 +222,7 @@ public:
      * @param ran_function_id RAN function identifier
      * @return List of dApp IDs subscribed to this RAN function
      */
-    [[nodiscard]] std::vector<uint32_t> get_ran_function_subscribers(
+    std::vector<uint32_t> get_ran_function_subscribers(
         uint32_t ran_function_id
     ) const;
 
@@ -251,15 +233,7 @@ public:
     /**
      * @brief Get current configuration
      */
-    [[nodiscard]] const E3Config& config() const noexcept;
-
-    /**
-     * @brief Check if running in simulation mode
-     *
-     * In simulation mode, the agent operates without a real transport
-     * connection, useful for unit testing.
-     */
-    [[nodiscard]] bool is_simulation_mode() const noexcept;
+    const E3Config& config() const noexcept;
 
     // =========================================================================
     // Statistics
@@ -268,12 +242,12 @@ public:
     /**
      * @brief Get number of registered dApps
      */
-    [[nodiscard]] size_t dapp_count() const;
+    size_t dapp_count() const;
 
     /**
      * @brief Get total number of active subscriptions
      */
-    [[nodiscard]] size_t subscription_count() const;
+    size_t subscription_count() const;
 
 private:
     struct Impl;

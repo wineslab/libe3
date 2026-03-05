@@ -75,7 +75,7 @@ public:
     /**
      * @brief Get current log level
      */
-    [[nodiscard]] LogLevel level() const noexcept {
+    LogLevel level() const noexcept {
         return level_;
     }
 
@@ -99,9 +99,32 @@ public:
     }
 
     /**
+     * @brief Set log file path (append mode)
+     *
+     * If set, logs are written to this file instead of stderr
+     * when no callback is configured.
+     */
+    void set_log_file(const std::string& path) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (file_) {
+            std::fclose(file_);
+            file_ = nullptr;
+        }
+
+        if (!path.empty()) {
+            file_ = std::fopen(path.c_str(), "a");
+            if (file_) {
+                std::setvbuf(file_, nullptr, _IOLBF, 0);
+            } else {
+                std::fprintf(stderr, "[Logger] Failed to open log file %s\n", path.c_str());
+            }
+        }
+    }
+
+    /**
      * @brief Check if a level should be logged
      */
-    [[nodiscard]] bool should_log(LogLevel level) const noexcept {
+    bool should_log(LogLevel level) const noexcept {
         return static_cast<int>(level) <= static_cast<int>(level_);
     }
 
@@ -118,6 +141,7 @@ public:
         if (callback_) {
             callback_(level, component, message);
         } else {
+            FILE* out = file_ ? file_ : stderr;
             // Default: write to stderr with timestamp
             auto now = std::chrono::system_clock::now();
             auto time_t = std::chrono::system_clock::to_time_t(now);
@@ -127,9 +151,10 @@ public:
             char time_buf[32];
             std::strftime(time_buf, sizeof(time_buf), "%Y-%m-%d %H:%M:%S", std::localtime(&time_t));
             
-            fprintf(stderr, "[%s.%03d] [%s] [%s] %s\n",
+            std::fprintf(out, "[%s.%03d] [%s] [%s] %s\n",
                     time_buf, static_cast<int>(ms.count()),
                     level_to_string(level), component.c_str(), message.c_str());
+            std::fflush(out);
         }
     }
 
@@ -139,7 +164,7 @@ private:
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
 
-    [[nodiscard]] static const char* level_to_string(LogLevel level) noexcept {
+    static const char* level_to_string(LogLevel level) noexcept {
         switch (level) {
             case LogLevel::ERROR: return "ERROR";
             case LogLevel::WARN:  return "WARN ";
@@ -152,6 +177,7 @@ private:
 
     LogLevel level_{LogLevel::INFO};
     LogCallback callback_;
+    FILE* file_{nullptr};
     std::mutex mutex_;
 };
 

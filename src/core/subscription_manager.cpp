@@ -14,7 +14,8 @@ namespace libe3 {
 
 namespace {
 constexpr const char* LOG_TAG = "SubMgr";
-constexpr uint32_t MAX_DAPP_ID = 100;
+constexpr uint32_t MAX_DAPP_ID = 100; 
+constexpr uint32_t MIN_DAPP_ID = 1;
 }
 
 SubscriptionManager::SubscriptionManager() {
@@ -26,6 +27,8 @@ SubscriptionManager::~SubscriptionManager() {
     registered_dapps_.clear();
     dapp_subscriptions_.clear();
     ran_function_subscribers_.clear();
+    subscription_ids_.clear();
+    subscription_id_reverse_.clear();
     E3_LOG_DEBUG(LOG_TAG) << "Subscription manager destroyed";
 }
 
@@ -38,29 +41,44 @@ void SubscriptionManager::set_sm_lifecycle_callback(SmLifecycleCallback callback
 // dApp Registration Management
 // =========================================================================
 
-ErrorCode SubscriptionManager::register_dapp(uint32_t dapp_id) {
-    if (dapp_id > MAX_DAPP_ID) {
-        E3_LOG_ERROR(LOG_TAG) << "Invalid dApp ID " << dapp_id << " (must be 0-100)";
-        return ErrorCode::INVALID_PARAM;
-    }
-
+std::pair<ErrorCode, uint32_t> SubscriptionManager::register_dapp() {
     std::unique_lock lock(mutex_);
 
-    if (registered_dapps_.count(dapp_id) > 0) {
-        E3_LOG_WARN(LOG_TAG) << "dApp " << dapp_id << " is already registered";
-        return ErrorCode::SUBSCRIPTION_EXISTS;
+    // Find the next available dApp ID
+    uint32_t assigned_id = next_dapp_id_;
+    uint32_t attempts = 0;
+    
+    // Search for an available ID (handle wrap-around and gaps from unregistered dApps)
+    while (registered_dapps_.count(assigned_id) > 0 && attempts <= MAX_DAPP_ID) {
+        assigned_id++;
+        if (assigned_id > MAX_DAPP_ID) {
+            assigned_id = MIN_DAPP_ID;
+        }
+        attempts++;
+    }
+    
+    if (attempts > MAX_DAPP_ID) {
+        E3_LOG_ERROR(LOG_TAG) << "No available dApp IDs (range " << MIN_DAPP_ID
+                              << ".." << MAX_DAPP_ID << ")";
+        return {ErrorCode::INTERNAL_ERROR, 0};
     }
 
     DAppEntry entry;
-    entry.dapp_identifier = dapp_id;
+    entry.dapp_identifier = assigned_id;
     entry.registered_time = std::chrono::steady_clock::now();
-    registered_dapps_[dapp_id] = entry;
+    registered_dapps_[assigned_id] = entry;
 
     // Initialize empty subscription set for this dApp
-    dapp_subscriptions_[dapp_id] = {};
+    dapp_subscriptions_[assigned_id] = {};
+    
+    // Update next_dapp_id_ for the next registration
+    next_dapp_id_ = assigned_id + 1;
+    if (next_dapp_id_ > MAX_DAPP_ID) {
+        next_dapp_id_ = MIN_DAPP_ID;
+    }
 
-    E3_LOG_INFO(LOG_TAG) << "dApp " << dapp_id << " registered successfully";
-    return ErrorCode::SUCCESS;
+    E3_LOG_INFO(LOG_TAG) << "dApp registered successfully with ID " << assigned_id;
+    return {ErrorCode::SUCCESS, assigned_id};
 }
 
 ErrorCode SubscriptionManager::unregister_dapp(uint32_t dapp_id) {
@@ -89,6 +107,14 @@ ErrorCode SubscriptionManager::unregister_dapp(uint32_t dapp_id) {
             bool still_has_subscribers = !subscribers.empty();
             if (had_subscribers && !still_has_subscribers) {
                 affected_ran_functions.emplace_back(ran_func, false); // should_start = false
+            }
+            
+            // Remove subscription ID mapping
+            uint64_t sub_key = make_sub_key(dapp_id, ran_func);
+            auto sub_id_it = subscription_id_reverse_.find(sub_key);
+            if (sub_id_it != subscription_id_reverse_.end()) {
+                subscription_ids_.erase(sub_id_it->second);
+                subscription_id_reverse_.erase(sub_id_it);
             }
         }
         dapp_subscriptions_.erase(sub_it);
@@ -129,32 +155,46 @@ std::vector<uint32_t> SubscriptionManager::get_registered_dapps() const {
 // Subscription Management
 // =========================================================================
 
-ErrorCode SubscriptionManager::add_subscription(uint32_t dapp_id, uint32_t ran_function_id) {
+std::pair<ErrorCode, uint32_t> SubscriptionManager::add_subscription(uint32_t dapp_id, uint32_t ran_function_id) {
     std::unique_lock lock(mutex_);
 
     // Check if dApp is registered
     if (registered_dapps_.count(dapp_id) == 0) {
         E3_LOG_ERROR(LOG_TAG) << "dApp " << dapp_id << " not registered, cannot add subscription";
-        return ErrorCode::DAPP_NOT_REGISTERED;
+        return {ErrorCode::DAPP_NOT_REGISTERED, 0};
     }
 
     // Check if subscription already exists
     auto& dapp_subs = dapp_subscriptions_[dapp_id];
     if (dapp_subs.count(ran_function_id) > 0) {
+        // Return existing subscription ID
+        uint64_t sub_key = make_sub_key(dapp_id, ran_function_id);
+        uint32_t existing_sub_id = subscription_id_reverse_[sub_key];
         E3_LOG_WARN(LOG_TAG) << "dApp " << dapp_id << " already subscribed to RAN function " 
-                             << ran_function_id;
-        return ErrorCode::SUBSCRIPTION_EXISTS;
+                             << ran_function_id << " (subscription_id=" << existing_sub_id << ")";
+        return {ErrorCode::SUBSCRIPTION_EXISTS, existing_sub_id};
     }
 
     // Check if this is the first subscriber for this RAN function
     bool had_subscribers = !ran_function_subscribers_[ran_function_id].empty();
 
+    // Assign subscription ID
+    uint32_t subscription_id = next_subscription_id_++;
+    if (next_subscription_id_ > 100) {
+        next_subscription_id_ = 1; // Wrap around per spec (0-100 range)
+    }
+    
     // Add subscription
     dapp_subs.insert(ran_function_id);
     ran_function_subscribers_[ran_function_id].insert(dapp_id);
+    
+    // Add subscription ID mappings
+    subscription_ids_[subscription_id] = {dapp_id, ran_function_id};
+    subscription_id_reverse_[make_sub_key(dapp_id, ran_function_id)] = subscription_id;
 
     E3_LOG_INFO(LOG_TAG) << "Subscription added: dApp " << dapp_id 
-                         << " -> RAN function " << ran_function_id;
+                         << " -> RAN function " << ran_function_id
+                         << " (subscription_id=" << subscription_id << ")";
 
     // Notify about SM lifecycle change if this is the first subscriber
     lock.unlock();
@@ -162,7 +202,7 @@ ErrorCode SubscriptionManager::add_subscription(uint32_t dapp_id, uint32_t ran_f
         check_sm_lifecycle(ran_function_id, false); // had_subscribers = false
     }
 
-    return ErrorCode::SUCCESS;
+    return {ErrorCode::SUCCESS, subscription_id};
 }
 
 ErrorCode SubscriptionManager::remove_subscription(uint32_t dapp_id, uint32_t ran_function_id) {
@@ -185,6 +225,14 @@ ErrorCode SubscriptionManager::remove_subscription(uint32_t dapp_id, uint32_t ra
     bool had_subscribers = !subscribers.empty();
     subscribers.erase(dapp_id);
     bool still_has_subscribers = !subscribers.empty();
+    
+    // Remove subscription ID mappings
+    uint64_t sub_key = make_sub_key(dapp_id, ran_function_id);
+    auto sub_id_it = subscription_id_reverse_.find(sub_key);
+    if (sub_id_it != subscription_id_reverse_.end()) {
+        subscription_ids_.erase(sub_id_it->second);
+        subscription_id_reverse_.erase(sub_id_it);
+    }
 
     E3_LOG_INFO(LOG_TAG) << "Subscription removed: dApp " << dapp_id 
                          << " -> RAN function " << ran_function_id;
@@ -195,6 +243,54 @@ ErrorCode SubscriptionManager::remove_subscription(uint32_t dapp_id, uint32_t ra
         check_sm_lifecycle(ran_function_id, true); // had_subscribers = true
     }
 
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode SubscriptionManager::remove_subscription_by_id(uint32_t dapp_id, uint32_t subscription_id) {
+    std::unique_lock lock(mutex_);
+    
+    // Find the subscription by ID
+    auto sub_it = subscription_ids_.find(subscription_id);
+    if (sub_it == subscription_ids_.end()) {
+        E3_LOG_WARN(LOG_TAG) << "Subscription ID " << subscription_id << " not found";
+        return ErrorCode::SUBSCRIPTION_NOT_FOUND;
+    }
+    
+    auto [sub_dapp_id, ran_function_id] = sub_it->second;
+    
+    // Verify the dApp ID matches
+    if (sub_dapp_id != dapp_id) {
+        E3_LOG_WARN(LOG_TAG) << "Subscription ID " << subscription_id 
+                             << " does not belong to dApp " << dapp_id;
+        return ErrorCode::SUBSCRIPTION_NOT_FOUND;
+    }
+    
+    // Remove from dApp subscriptions
+    auto dapp_it = dapp_subscriptions_.find(dapp_id);
+    if (dapp_it != dapp_subscriptions_.end()) {
+        dapp_it->second.erase(ran_function_id);
+    }
+    
+    // Remove from reverse index
+    auto& subscribers = ran_function_subscribers_[ran_function_id];
+    bool had_subscribers = !subscribers.empty();
+    subscribers.erase(dapp_id);
+    bool still_has_subscribers = !subscribers.empty();
+    
+    // Remove subscription ID mappings
+    uint64_t sub_key = make_sub_key(dapp_id, ran_function_id);
+    subscription_id_reverse_.erase(sub_key);
+    subscription_ids_.erase(sub_it);
+    
+    E3_LOG_INFO(LOG_TAG) << "Subscription " << subscription_id << " removed: dApp " << dapp_id 
+                         << " -> RAN function " << ran_function_id;
+    
+    // Notify about SM lifecycle change if this was the last subscriber
+    lock.unlock();
+    if (had_subscribers && !still_has_subscribers) {
+        check_sm_lifecycle(ran_function_id, true); // had_subscribers = true
+    }
+    
     return ErrorCode::SUCCESS;
 }
 

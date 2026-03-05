@@ -1,0 +1,12 @@
+# Doxyfile.in - minimal Doxygen configuration for libe3
+PROJECT_NAME           = "@PROJECT_NAME@"
+OUTPUT_DIRECTORY       = "@DOXYGEN_OUTPUT_DIR@"
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+RECURSIVE              = YES
+INPUT                  = @DOXYGEN_INPUT_DIRS@
+EXCLUDE                =
+QUIET                  = NO
+WARNINGS               = YES
+GENERATE_TREEVIEW      = YES
+

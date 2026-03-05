@@ -18,46 +18,12 @@
 #include <vector>
 #include <string>
 #include <atomic>
+#include <mutex>
 
 namespace libe3 {
 
 // Forward declarations
 class ServiceModel;
-
-/**
- * @brief SM indication data for passing data from SM to publisher
- */
-struct SmIndicationData {
-    uint32_t ran_function_id{0};
-    std::vector<uint8_t> encoded_data;
-    uint64_t timestamp{0};
-    bool ready{false};
-};
-
-/**
- * @brief Callback type for processing control actions from dApps
- *
- * @param ran_function_id The RAN function this action is for
- * @param action_data The control action data (E3SM-encoded)
- * @return ErrorCode::SUCCESS on success, error code on failure
- */
-using ControlActionHandler = std::function<ErrorCode(
-    uint32_t ran_function_id,
-    const std::vector<uint8_t>& action_data
-)>;
-
-/**
- * @brief Callback type for receiving indication data from SM
- *
- * @param ran_function_id The RAN function providing data
- * @param encoded_data E3SM-encoded indication data
- * @param timestamp Timestamp of the data
- */
-using IndicationDataCallback = std::function<void(
-    uint32_t ran_function_id,
-    std::vector<uint8_t> encoded_data,
-    uint64_t timestamp
-)>;
 
 /**
  * @brief Abstract Service Model interface
@@ -78,25 +44,36 @@ public:
     /**
      * @brief Get SM name
      */
-    [[nodiscard]] virtual std::string name() const = 0;
+    virtual std::string name() const = 0;
 
     /**
      * @brief Get SM version
      */
-    [[nodiscard]] virtual uint32_t version() const = 0;
+    virtual uint32_t version() const = 0;
 
     /**
-     * @brief Get RAN function IDs handled by this SM
+     * @brief Get RAN function ID for this SM
      */
-    [[nodiscard]] virtual std::vector<uint32_t> ran_function_ids() const = 0;
+    virtual uint32_t ran_function_id() const = 0;
 
     /**
-     * @brief Check if SM handles a specific RAN function
+     * @brief Get telemetry IDs supported by this SM
      */
-    [[nodiscard]] bool handles_ran_function(uint32_t ran_function_id) const {
-        auto ids = ran_function_ids();
-        return std::find(ids.begin(), ids.end(), ran_function_id) != ids.end();
-    }
+    virtual std::vector<uint32_t> telemetry_ids() const = 0;
+
+    /**
+     * @brief Get control IDs supported by this SM
+     */
+    virtual std::vector<uint32_t> control_ids() const = 0;
+
+    /**
+     * @brief Optional RAN-function-specific opaque data
+     *
+     * Returns a byte vector that will be included in the SetupResponse
+     * as additional payload (ranFunctionList->ranFunctionData OCTET STRING for ASN).
+     * Default is empty since it is optional.
+     */
+    virtual std::vector<uint8_t> ran_function_data() const { return {}; }
 
     /**
      * @brief Initialize the SM
@@ -104,7 +81,7 @@ public:
      * Called when the SM is first registered.
      * @return ErrorCode::SUCCESS on success
      */
-    [[nodiscard]] virtual ErrorCode init() = 0;
+    virtual ErrorCode init() = 0;
 
     /**
      * @brief Destroy the SM and release resources
@@ -119,7 +96,7 @@ public:
      * Called when the first dApp subscribes to this SM's RAN function.
      * @return ErrorCode::SUCCESS on success
      */
-    [[nodiscard]] virtual ErrorCode start() = 0;
+    virtual ErrorCode start() = 0;
 
     /**
      * @brief Stop the SM processing
@@ -131,48 +108,100 @@ public:
     /**
      * @brief Check if SM is currently running
      */
-    [[nodiscard]] virtual bool is_running() const = 0;
+    virtual bool is_running() const = 0;
 
     /**
      * @brief Process a control action from a dApp
      *
-     * @param ran_function_id The RAN function this action is for
-     * @param action_data E3SM-encoded control action data
-     * @return ErrorCode::SUCCESS on success
+     * Called by the E3 interface when a DAppControlAction is received for this
+     * service model. Implementations can emit outbound PDUs (e.g. MessageAck,
+     * IndicationMessage) via emit_outbound().
      */
-    [[nodiscard]] virtual ErrorCode process_control_action(
-        uint32_t ran_function_id,
-        const std::vector<uint8_t>& action_data
+    virtual ErrorCode handle_control_action(
+        uint32_t request_message_id,
+        const DAppControlAction& action
     ) = 0;
-
-    /**
-     * @brief Set callback for delivering indication data
-     *
-     * The SM implementation should call this callback when it has
-     * indication data ready to be sent to subscribers.
-     */
-    void set_indication_callback(IndicationDataCallback callback) {
-        indication_callback_ = std::move(callback);
-    }
 
 protected:
     ServiceModel() = default;
 
     /**
-     * @brief Deliver indication data to the E3 agent
+     * @brief Build a MessageAck PDU for a control/request message.
      *
-     * Call this from your SM implementation when indication data is ready.
+     * This helper only builds the PDU. Implementations can decide whether to
+     * emit it with emit_outbound() or suppress it when protocol semantics allow.
      */
-    void deliver_indication(uint32_t ran_function_id,
-                           std::vector<uint8_t> encoded_data,
-                           uint64_t timestamp = 0) {
-        if (indication_callback_) {
-            indication_callback_(ran_function_id, std::move(encoded_data), timestamp);
+    static Pdu make_message_ack_pdu(
+        uint32_t request_message_id,
+        ResponseCode response_code
+    ) {
+        Pdu pdu(PduType::MESSAGE_ACK);
+        MessageAck ack;
+        ack.request_id = request_message_id;
+        ack.response_code = response_code;
+        pdu.choice = ack;
+        return pdu;
+    }
+
+    /**
+     * @brief Build an IndicationMessage PDU.
+     *
+     * This helper only builds the PDU. Implementations can emit it with
+     * emit_outbound() when appropriate.
+     */
+    static Pdu make_indication_pdu(
+        uint32_t dapp_id,
+        uint32_t ran_function_id,
+        std::vector<uint8_t> protocol_data
+    ) {
+        Pdu pdu(PduType::INDICATION_MESSAGE);
+        IndicationMessage msg;
+        msg.dapp_identifier = dapp_id;
+        msg.ran_function_identifier = ran_function_id;
+        msg.protocol_data = std::move(protocol_data);
+        pdu.choice = std::move(msg);
+        return pdu;
+    }
+
+    /**
+     * @brief Emit an outbound PDU produced by the SM.
+     */
+    ErrorCode emit_outbound(Pdu&& pdu) {
+        if (!outbound_emitter_) {
+            return ErrorCode::NOT_INITIALIZED;
         }
+        return outbound_emitter_(std::move(pdu));
+    }
+
+    /**
+     * @brief Get currently subscribed dApps for this SM's RAN function.
+     */
+    std::vector<uint32_t> get_subscribers() const {
+        if (!subscribers_provider_) {
+            return {};
+        }
+        return subscribers_provider_();
+    }
+
+    /**
+     * @brief Set the outbound PDU emitter callback (used by E3Interface).
+     */
+    void set_outbound_emitter(std::function<ErrorCode(Pdu&&)> emitter) {
+        outbound_emitter_ = std::move(emitter);
+    }
+
+    /**
+     * @brief Set subscriber provider callback (used by E3Interface).
+     */
+    void set_subscribers_provider(std::function<std::vector<uint32_t>()> provider) {
+        subscribers_provider_ = std::move(provider);
     }
 
 private:
-    IndicationDataCallback indication_callback_;
+    std::function<ErrorCode(Pdu&&)> outbound_emitter_;
+    std::function<std::vector<uint32_t>()> subscribers_provider_;
+
+    friend class E3Interface;
 };
 
 /**
@@ -200,19 +229,19 @@ public:
      * @return ErrorCode::SUCCESS on success
      * @return ErrorCode::SM_ALREADY_REGISTERED if SM for this RAN function exists
      */
-    [[nodiscard]] ErrorCode register_sm(std::unique_ptr<ServiceModel> sm);
+    ErrorCode register_sm(std::unique_ptr<ServiceModel> sm);
 
     /**
      * @brief Register a Service Model factory
      *
      * Use this to defer SM creation until needed.
      */
-    [[nodiscard]] ErrorCode register_sm_factory(uint32_t ran_function_id, SmFactory factory);
+    ErrorCode register_sm_factory(uint32_t ran_function_id, SmFactory factory);
 
     /**
      * @brief Unregister a Service Model by RAN function ID
      */
-    [[nodiscard]] ErrorCode unregister_sm(uint32_t ran_function_id);
+    ErrorCode unregister_sm(uint32_t ran_function_id);
 
     /**
      * @brief Get SM by RAN function ID
@@ -220,27 +249,27 @@ public:
      * @param ran_function_id RAN function ID to look up
      * @return Pointer to SM, nullptr if not found
      */
-    [[nodiscard]] ServiceModel* get_by_ran_function(uint32_t ran_function_id);
+    ServiceModel* get_by_ran_function(uint32_t ran_function_id);
 
     /**
      * @brief Get all available RAN function IDs
      */
-    [[nodiscard]] std::vector<uint32_t> get_available_ran_functions() const;
+    std::vector<uint32_t> get_available_ran_functions() const;
 
     /**
      * @brief Start SM for a RAN function
      */
-    [[nodiscard]] ErrorCode start_sm(uint32_t ran_function_id);
+    ErrorCode start_sm(uint32_t ran_function_id);
 
     /**
      * @brief Stop SM for a RAN function
      */
-    [[nodiscard]] ErrorCode stop_sm(uint32_t ran_function_id);
+    ErrorCode stop_sm(uint32_t ran_function_id);
 
     /**
      * @brief Check if SM is running
      */
-    [[nodiscard]] bool is_sm_running(uint32_t ran_function_id) const;
+    bool is_sm_running(uint32_t ran_function_id) const;
 
     /**
      * @brief Clear all registered SMs

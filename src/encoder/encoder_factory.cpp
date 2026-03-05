@@ -6,21 +6,26 @@
  */
 
 #include "libe3/e3_encoder.hpp"
+#if LIBE3_ENABLE_ASN1
+#include "asn1_encoder.hpp"
+#endif
+#if LIBE3_ENABLE_JSON
 #include "json_encoder.hpp"
+#endif
 #include "libe3/logger.hpp"
 
 namespace libe3 {
 
 std::unique_ptr<E3Encoder> create_encoder(EncodingFormat format) {
     switch (format) {
+#if LIBE3_ENABLE_ASN1
+        case EncodingFormat::ASN1:
+            return std::make_unique<Asn1E3Encoder>();
+#endif
+#if LIBE3_ENABLE_JSON
         case EncodingFormat::JSON:
             return std::make_unique<JsonE3Encoder>();
-        
-        case EncodingFormat::ASN1:
-            // ASN.1 encoder would be implemented here
-            // For now, fall back to JSON
-            E3_LOG_WARN("Encoder") << "ASN.1 encoder not yet implemented, using JSON";
-            return std::make_unique<JsonE3Encoder>();
+#endif
         
         default:
             return nullptr;

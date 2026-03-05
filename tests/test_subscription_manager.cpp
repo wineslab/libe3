@@ -22,89 +22,99 @@ TEST(SubscriptionManager_initial_state) {
 TEST(SubscriptionManager_register_dapp) {
     SubscriptionManager mgr;
     
-    auto result = mgr.register_dapp(100);
-    ASSERT_EQ(result, ErrorCode::SUCCESS);
+    auto [result, dapp_id] = mgr.register_dapp();
+    ASSERT_TRUE(result == ErrorCode::SUCCESS);
     ASSERT_EQ(mgr.dapp_count(), 1u);
-    ASSERT_TRUE(mgr.is_dapp_registered(100));
-    ASSERT_FALSE(mgr.is_dapp_registered(200));
+    ASSERT_TRUE(mgr.is_dapp_registered(dapp_id));
 }
 
-TEST(SubscriptionManager_register_duplicate) {
+TEST(SubscriptionManager_register_multiple_dapps_assigns_unique_ids) {
     SubscriptionManager mgr;
     
-    mgr.register_dapp(100);
-    auto result = mgr.register_dapp(100);
-    ASSERT_EQ(result, ErrorCode::SUBSCRIPTION_EXISTS);
-    ASSERT_EQ(mgr.dapp_count(), 1u);
+    auto [result1, id1] = mgr.register_dapp();
+    auto [result2, id2] = mgr.register_dapp();
+    auto [result3, id3] = mgr.register_dapp();
+    
+    ASSERT_TRUE(result1 == ErrorCode::SUCCESS);
+    ASSERT_TRUE(result2 == ErrorCode::SUCCESS);
+    ASSERT_TRUE(result3 == ErrorCode::SUCCESS);
+    ASSERT_EQ(mgr.dapp_count(), 3u);
+    
+    // All IDs should be unique
+    ASSERT_NE(id1, id2);
+    ASSERT_NE(id2, id3);
+    ASSERT_NE(id1, id3);
 }
 
 TEST(SubscriptionManager_unregister_dapp) {
     SubscriptionManager mgr;
     
-    mgr.register_dapp(100);
-    auto result = mgr.unregister_dapp(100);
-    ASSERT_EQ(result, ErrorCode::SUCCESS);
+    auto [reg_result, dapp_id] = mgr.register_dapp();
+    ASSERT_TRUE(reg_result == ErrorCode::SUCCESS);
+    
+    auto result = mgr.unregister_dapp(dapp_id);
+    ASSERT_TRUE(result == ErrorCode::SUCCESS);
     ASSERT_EQ(mgr.dapp_count(), 0u);
-    ASSERT_FALSE(mgr.is_dapp_registered(100));
+    ASSERT_FALSE(mgr.is_dapp_registered(dapp_id));
 }
 
 TEST(SubscriptionManager_unregister_nonexistent) {
     SubscriptionManager mgr;
     auto result = mgr.unregister_dapp(999);
-    ASSERT_EQ(result, ErrorCode::NOT_FOUND);
+    ASSERT_TRUE(result == ErrorCode::DAPP_NOT_REGISTERED);
 }
 
 TEST(SubscriptionManager_add_subscription) {
     SubscriptionManager mgr;
     
-    mgr.register_dapp(100);
-    auto result = mgr.add_subscription(100, 200);
-    ASSERT_EQ(result, ErrorCode::SUCCESS);
+    auto [reg_result, dapp_id] = mgr.register_dapp();
+    auto [result, sub_id] = mgr.add_subscription(dapp_id, 200);
+    ASSERT_TRUE(result == ErrorCode::SUCCESS);
     ASSERT_EQ(mgr.subscription_count(), 1u);
-    ASSERT_TRUE(mgr.is_subscribed(100, 200));
+    ASSERT_TRUE(mgr.is_subscribed(dapp_id, 200));
 }
 
 TEST(SubscriptionManager_add_subscription_unregistered_dapp) {
     SubscriptionManager mgr;
-    auto result = mgr.add_subscription(100, 200);
-    ASSERT_EQ(result, ErrorCode::NOT_FOUND);
+    auto [result, sub_id] = mgr.add_subscription(100, 200);
+    ASSERT_TRUE(result == ErrorCode::DAPP_NOT_REGISTERED);
 }
 
 TEST(SubscriptionManager_add_subscription_duplicate) {
     SubscriptionManager mgr;
-    mgr.register_dapp(100);
-    mgr.add_subscription(100, 200);
-    auto result = mgr.add_subscription(100, 200);
-    ASSERT_EQ(result, ErrorCode::SUBSCRIPTION_EXISTS);
+    auto [reg_result, dapp_id] = mgr.register_dapp();
+    mgr.add_subscription(dapp_id, 200);
+    auto [result, sub_id] = mgr.add_subscription(dapp_id, 200);
+    ASSERT_TRUE(result == ErrorCode::SUBSCRIPTION_EXISTS);
 }
 
 TEST(SubscriptionManager_remove_subscription) {
     SubscriptionManager mgr;
-    mgr.register_dapp(100);
-    mgr.add_subscription(100, 200);
+    auto [reg_result, dapp_id] = mgr.register_dapp();
+    mgr.add_subscription(dapp_id, 200);
     
-    auto result = mgr.remove_subscription(100, 200);
-    ASSERT_EQ(result, ErrorCode::SUCCESS);
-    ASSERT_FALSE(mgr.is_subscribed(100, 200));
+    auto result = mgr.remove_subscription(dapp_id, 200);
+    ASSERT_TRUE(result == ErrorCode::SUCCESS);
+    ASSERT_FALSE(mgr.is_subscribed(dapp_id, 200));
     ASSERT_EQ(mgr.subscription_count(), 0u);
 }
 
 TEST(SubscriptionManager_remove_subscription_not_found) {
     SubscriptionManager mgr;
-    mgr.register_dapp(100);
-    auto result = mgr.remove_subscription(100, 999);
-    ASSERT_EQ(result, ErrorCode::NOT_FOUND);
+    auto [reg_result, dapp_id] = mgr.register_dapp();
+    auto result = mgr.remove_subscription(dapp_id, 999);
+    ASSERT_TRUE(result == ErrorCode::SUBSCRIPTION_NOT_FOUND);
 }
 
 TEST(SubscriptionManager_get_subscribed_dapps) {
     SubscriptionManager mgr;
-    mgr.register_dapp(100);
-    mgr.register_dapp(101);
-    mgr.register_dapp(102);
+    auto [res1, dapp1] = mgr.register_dapp();
+    auto [res2, dapp2] = mgr.register_dapp();
+    auto [res3, dapp3] = mgr.register_dapp();
     
-    mgr.add_subscription(100, 500);
-    mgr.add_subscription(101, 500);
-    mgr.add_subscription(102, 600);
+    mgr.add_subscription(dapp1, 500);
+    mgr.add_subscription(dapp2, 500);
+    mgr.add_subscription(dapp3, 600);
     
     auto subscribers = mgr.get_subscribed_dapps(500);
     ASSERT_EQ(subscribers.size(), 2u);
@@ -118,36 +128,39 @@ TEST(SubscriptionManager_get_subscribed_dapps) {
 
 TEST(SubscriptionManager_get_dapp_subscriptions) {
     SubscriptionManager mgr;
-    mgr.register_dapp(100);
-    mgr.add_subscription(100, 200);
-    mgr.add_subscription(100, 300);
-    mgr.add_subscription(100, 400);
+    auto [reg_result, dapp_id] = mgr.register_dapp();
+    mgr.add_subscription(dapp_id, 200);
+    mgr.add_subscription(dapp_id, 300);
+    mgr.add_subscription(dapp_id, 400);
     
-    auto subs = mgr.get_dapp_subscriptions(100);
+    auto subs = mgr.get_dapp_subscriptions(dapp_id);
     ASSERT_EQ(subs.size(), 3u);
 }
 
 TEST(SubscriptionManager_unregister_clears_subscriptions) {
     SubscriptionManager mgr;
-    mgr.register_dapp(100);
-    mgr.add_subscription(100, 200);
-    mgr.add_subscription(100, 300);
+    auto [reg_result, dapp_id] = mgr.register_dapp();
+    mgr.add_subscription(dapp_id, 200);
+    mgr.add_subscription(dapp_id, 300);
     
-    mgr.unregister_dapp(100);
+    mgr.unregister_dapp(dapp_id);
     ASSERT_EQ(mgr.subscription_count(), 0u);
     
     // Re-register and verify subscriptions are gone
-    mgr.register_dapp(100);
-    ASSERT_TRUE(mgr.get_dapp_subscriptions(100).empty());
+    auto [reg_result2, new_dapp_id] = mgr.register_dapp();
+    ASSERT_TRUE(mgr.get_dapp_subscriptions(new_dapp_id).empty());
 }
 
 TEST(SubscriptionManager_multiple_dapps) {
     SubscriptionManager mgr;
+    std::vector<uint32_t> dapp_ids;
     
     for (uint32_t i = 0; i < 10; ++i) {
-        mgr.register_dapp(i);
-        mgr.add_subscription(i, 100);
-        mgr.add_subscription(i, 200);
+        auto [result, id] = mgr.register_dapp();
+        ASSERT_TRUE(result == ErrorCode::SUCCESS);
+        dapp_ids.push_back(id);
+        mgr.add_subscription(id, 100);
+        mgr.add_subscription(id, 200);
     }
     
     ASSERT_EQ(mgr.dapp_count(), 10u);
@@ -160,10 +173,10 @@ TEST(SubscriptionManager_has_subscribers) {
     
     ASSERT_FALSE(mgr.has_subscribers(100));
     
-    mgr.register_dapp(1);
+    auto [reg_result, dapp_id] = mgr.register_dapp();
     ASSERT_FALSE(mgr.has_subscribers(100));
     
-    mgr.add_subscription(1, 100);
+    mgr.add_subscription(dapp_id, 100);
     ASSERT_TRUE(mgr.has_subscribers(100));
 }
 
@@ -187,24 +200,24 @@ TEST(SubscriptionManager_sm_lifecycle_callback) {
         }
     );
     
-    mgr.register_dapp(1);
+    auto [reg1, dapp1] = mgr.register_dapp();
     
     // First subscription should trigger start
-    mgr.add_subscription(1, 100);
+    mgr.add_subscription(dapp1, 100);
     ASSERT_EQ(start_count.load(), 1);
     ASSERT_EQ(last_started_sm, 100u);
     
     // Second subscription to same SM should not trigger start
-    mgr.register_dapp(2);
-    mgr.add_subscription(2, 100);
+    auto [reg2, dapp2] = mgr.register_dapp();
+    mgr.add_subscription(dapp2, 100);
     ASSERT_EQ(start_count.load(), 1);
     
     // Remove one subscription - SM still has subscribers
-    mgr.remove_subscription(1, 100);
+    mgr.remove_subscription(dapp1, 100);
     ASSERT_EQ(stop_count.load(), 0);
     
     // Remove last subscription - should trigger stop
-    mgr.remove_subscription(2, 100);
+    mgr.remove_subscription(dapp2, 100);
     ASSERT_EQ(stop_count.load(), 1);
     ASSERT_EQ(last_stopped_sm, 100u);
 }
@@ -214,9 +227,11 @@ TEST(SubscriptionManager_thread_safety) {
     std::atomic<int> success_count{0};
     std::atomic<int> error_count{0};
     
-    // Pre-register some dApps
+    // Pre-register some dApps and collect their IDs
+    std::vector<uint32_t> dapp_ids;
     for (uint32_t i = 0; i < 10; ++i) {
-        mgr.register_dapp(i);
+        auto [result, id] = mgr.register_dapp();
+        dapp_ids.push_back(id);
     }
     
     // Concurrent operations
@@ -224,11 +239,11 @@ TEST(SubscriptionManager_thread_safety) {
     for (int t = 0; t < 4; ++t) {
         threads.emplace_back([&, t]() {
             for (int i = 0; i < 100; ++i) {
-                uint32_t dapp_id = static_cast<uint32_t>(t);
+                uint32_t dapp_id = dapp_ids[static_cast<size_t>(t)];
                 uint32_t sm_id = static_cast<uint32_t>(i % 5);
                 
-                auto add_result = mgr.add_subscription(dapp_id, sm_id);
-                if (add_result == ErrorCode::SUCCESS || add_result == ErrorCode::ALREADY_EXISTS) {
+                auto [add_err, sub_id] = mgr.add_subscription(dapp_id, sm_id);
+                if (add_err == ErrorCode::SUCCESS || add_err == ErrorCode::SUBSCRIPTION_EXISTS) {
                     ++success_count;
                 } else {
                     ++error_count;
@@ -252,10 +267,10 @@ TEST(SubscriptionManager_thread_safety) {
 
 TEST(SubscriptionManager_clear) {
     SubscriptionManager mgr;
-    mgr.register_dapp(1);
-    mgr.register_dapp(2);
-    mgr.add_subscription(1, 100);
-    mgr.add_subscription(2, 200);
+    auto [res1, id1] = mgr.register_dapp();
+    auto [res2, id2] = mgr.register_dapp();
+    mgr.add_subscription(id1, 100);
+    mgr.add_subscription(id2, 200);
     
     mgr.clear();
     

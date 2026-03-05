@@ -10,11 +10,8 @@
 #ifndef LIBE3_LIBE3_HPP
 #define LIBE3_LIBE3_HPP
 
-// Version information
-#define LIBE3_VERSION_MAJOR 0
-#define LIBE3_VERSION_MINOR 1
-#define LIBE3_VERSION_PATCH 0
-#define LIBE3_VERSION_STRING "0.1.0"
+// Version information (generated from VERSION file)
+#include <libe3/version.hpp>
 
 // Core types
 #include "types.hpp"
@@ -27,19 +24,6 @@
 
 // Service Model interface for custom SMs
 #include "sm_interface.hpp"
-
-// Optional: Direct access to encoder/connector interfaces
-// (usually not needed by library users)
-#include "e3_encoder.hpp"
-#include "e3_connector.hpp"
-
-// Optional: Subscription manager access
-// (usually accessed through E3Agent)
-#include "subscription_manager.hpp"
-
-// Optional: Response queue
-// (usually accessed through E3Agent)
-#include "response_queue.hpp"
 
 namespace libe3 {
 

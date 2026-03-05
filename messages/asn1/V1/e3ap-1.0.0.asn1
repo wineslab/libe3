@@ -1,0 +1,105 @@
+E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
+
+    E3-SetupRequest ::= SEQUENCE {
+        e3apProtocolVersion  E3-Version,
+        dAppName             UTF8String (SIZE (1..64)),
+        dAppVersion          E3-Version,
+        vendor               UTF8String (SIZE (1..64))
+    }
+
+    E3-SetupResponse ::= SEQUENCE {
+        requestId            E3-MessageID,
+        responseCode         E3-ResponseCode,
+        ranIdentifier        UTF8String (SIZE (1..64)),
+        e3apProtocolVersion  E3-Version OPTIONAL,
+        dAppIdentifier       E3-DAppID OPTIONAL,
+        ranFunctionList      SEQUENCE OF E3-RanFunctionDefinition OPTIONAL
+    }
+
+    E3-SubscriptionRequest ::= SEQUENCE {
+        dAppIdentifier          E3-DAppID,
+        ranFunctionIdentifier   INTEGER (1..100),
+        telemetryIdentifierList SEQUENCE (SIZE (0..100)) OF INTEGER (1..100),
+        controlIdentifierList   SEQUENCE (SIZE (0..100)) OF INTEGER (1..100),
+        subscriptionTime        INTEGER (0..3600) OPTIONAL,
+        periodicity             INTEGER (0..1000) OPTIONAL
+    }
+
+    E3-SubscriptionDelete ::= SEQUENCE {
+        dAppIdentifier        E3-DAppID,
+        subscriptionId        INTEGER (1..100)
+    }
+
+    E3-SubscriptionResponse ::= SEQUENCE {
+        requestId            E3-MessageID,
+        dAppIdentifier       E3-DAppID,
+        responseCode         E3-ResponseCode,
+        subscriptionId       INTEGER (1..100) OPTIONAL,
+        telemetryIdentifierList SEQUENCE (SIZE (0..100)) OF INTEGER (1..100) OPTIONAL,
+        controlIdentifierList   SEQUENCE (SIZE (0..100)) OF INTEGER (1..100) OPTIONAL
+    }
+
+    E3-RanFunctionDefinition ::= SEQUENCE {
+        ranFunctionIdentifier   INTEGER (1..100),
+        telemetryIdentifierList SEQUENCE (SIZE (0..100)) OF INTEGER (1..100),
+        controlIdentifierList   SEQUENCE (SIZE (0..100)) OF INTEGER (1..100),
+        ranFunctionData         OCTET STRING (SIZE (1..32768))
+    }
+
+    E3-IndicationMessage ::= SEQUENCE {
+        dAppIdentifier          E3-DAppID,
+        ranFunctionIdentifier   INTEGER (1..100),
+        protocolData            OCTET STRING (SIZE (1..32768))
+    }
+
+    E3-DAppControlAction ::= SEQUENCE {
+        dAppIdentifier          E3-DAppID,
+        ranFunctionIdentifier   INTEGER (1..100),
+        controlIdentifier       INTEGER (1..100),
+        actionData              OCTET STRING (SIZE (1..32768))
+    }
+
+    E3-DAppReport ::= SEQUENCE {
+        dAppIdentifier          E3-DAppID,
+        ranFunctionIdentifier   INTEGER (1..100),
+        reportData              OCTET STRING (SIZE (1..32768))
+    }
+
+    E3-XAppControlAction ::= SEQUENCE {
+        dAppIdentifier          E3-DAppID,
+        ranFunctionIdentifier   INTEGER (1..100),
+        xAppControlData         OCTET STRING (SIZE (1..32768))
+    }
+
+    E3-ReleaseMessage ::= SEQUENCE {
+        dAppIdentifier       E3-DAppID
+    }
+
+    E3-MessageAck ::= SEQUENCE {
+        requestId            E3-MessageID,
+        responseCode         E3-ResponseCode
+    }
+
+    E3-DAppID ::= INTEGER (1..100)
+    E3-MessageID ::= INTEGER (1..1000)
+    E3-Version ::= UTF8String (SIZE (1..11))
+    E3-ResponseCode ::= ENUMERATED { positive(0), negative(1) }
+
+    E3-PDU ::= SEQUENCE {
+        id      E3-MessageID,
+        msg     CHOICE {
+            setupRequest          [0]  E3-SetupRequest,
+            setupResponse         [1]  E3-SetupResponse,
+            subscriptionRequest   [2]  E3-SubscriptionRequest,
+            subscriptionDelete    [3]  E3-SubscriptionDelete,
+            subscriptionResponse  [4]  E3-SubscriptionResponse,
+            indicationMessage     [5]  E3-IndicationMessage,
+            dAppControlAction     [6]  E3-DAppControlAction,
+            dAppReport            [7]  E3-DAppReport,
+            xAppControlAction     [8]  E3-XAppControlAction,
+            releaseMessage        [9]  E3-ReleaseMessage,
+            messageAck            [10] E3-MessageAck
+        }
+    }
+
+END

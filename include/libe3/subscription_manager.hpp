@@ -14,6 +14,7 @@
 #include "types.hpp"
 #include <mutex>
 #include <shared_mutex>
+#include <utility>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
@@ -75,12 +76,14 @@ public:
     /**
      * @brief Register a dApp from E3 Setup Request
      *
-     * @param dapp_id dApp identifier (0-100 per spec)
-     * @return ErrorCode::SUCCESS on success
-     * @return ErrorCode::INVALID_PARAM if dapp_id > 100
-     * @return ErrorCode::SUBSCRIPTION_EXISTS if already registered
+     * The SubscriptionManager assigns a unique dApp ID automatically.
+     *
+     * @return std::pair containing:
+     *         - ErrorCode::SUCCESS on success, or error code on failure
+     *         - The assigned dApp ID (valid only if ErrorCode::SUCCESS)
+     * @return ErrorCode::INTERNAL_ERROR if no IDs available (max 101 dApps)
      */
-    [[nodiscard]] ErrorCode register_dapp(uint32_t dapp_id);
+    std::pair<ErrorCode, uint32_t> register_dapp();
 
     /**
      * @brief Unregister a dApp and clean up all its subscriptions
@@ -89,7 +92,7 @@ public:
      * @return ErrorCode::SUCCESS on success
      * @return ErrorCode::DAPP_NOT_REGISTERED if dApp not found
      */
-    [[nodiscard]] ErrorCode unregister_dapp(uint32_t dapp_id);
+    ErrorCode unregister_dapp(uint32_t dapp_id);
 
     /**
      * @brief Check if a dApp is registered
@@ -97,12 +100,12 @@ public:
      * @param dapp_id dApp identifier
      * @return true if registered
      */
-    [[nodiscard]] bool is_dapp_registered(uint32_t dapp_id) const;
+    bool is_dapp_registered(uint32_t dapp_id) const;
 
     /**
      * @brief Get list of registered dApp IDs
      */
-    [[nodiscard]] std::vector<uint32_t> get_registered_dapps() const;
+    std::vector<uint32_t> get_registered_dapps() const;
 
     // =========================================================================
     // Subscription Management (E3 Subscription flow)
@@ -113,11 +116,13 @@ public:
      *
      * @param dapp_id dApp identifier
      * @param ran_function_id RAN function identifier (0-255)
-     * @return ErrorCode::SUCCESS on success
+     * @return std::pair containing:
+     *         - ErrorCode::SUCCESS on success, or error code on failure
+     *         - The assigned subscription ID (valid only if ErrorCode::SUCCESS)
      * @return ErrorCode::DAPP_NOT_REGISTERED if dApp not registered
      * @return ErrorCode::SUBSCRIPTION_EXISTS if already subscribed
      */
-    [[nodiscard]] ErrorCode add_subscription(uint32_t dapp_id, uint32_t ran_function_id);
+    std::pair<ErrorCode, uint32_t> add_subscription(uint32_t dapp_id, uint32_t ran_function_id);
 
     /**
      * @brief Remove a subscription between dApp and RAN function
@@ -127,27 +132,37 @@ public:
      * @return ErrorCode::SUCCESS on success
      * @return ErrorCode::SUBSCRIPTION_NOT_FOUND if subscription doesn't exist
      */
-    [[nodiscard]] ErrorCode remove_subscription(uint32_t dapp_id, uint32_t ran_function_id);
+    ErrorCode remove_subscription(uint32_t dapp_id, uint32_t ran_function_id);
+
+    /**
+     * @brief Remove a subscription by its ID
+     *
+     * @param dapp_id dApp identifier
+     * @param subscription_id Subscription ID
+     * @return ErrorCode::SUCCESS on success
+     * @return ErrorCode::SUBSCRIPTION_NOT_FOUND if subscription doesn't exist
+     */
+    ErrorCode remove_subscription_by_id(uint32_t dapp_id, uint32_t subscription_id);
 
     /**
      * @brief Check if dApp is subscribed to a RAN function
      */
-    [[nodiscard]] bool is_subscribed(uint32_t dapp_id, uint32_t ran_function_id) const;
+    bool is_subscribed(uint32_t dapp_id, uint32_t ran_function_id) const;
 
     /**
      * @brief Get all RAN functions a dApp is subscribed to
      */
-    [[nodiscard]] std::vector<uint32_t> get_dapp_subscriptions(uint32_t dapp_id) const;
+    std::vector<uint32_t> get_dapp_subscriptions(uint32_t dapp_id) const;
 
     /**
      * @brief Get all dApps subscribed to a RAN function
      */
-    [[nodiscard]] std::vector<uint32_t> get_subscribed_dapps(uint32_t ran_function_id) const;
+    std::vector<uint32_t> get_subscribed_dapps(uint32_t ran_function_id) const;
 
     /**
      * @brief Get count of subscribers for a RAN function
      */
-    [[nodiscard]] size_t get_subscriber_count(uint32_t ran_function_id) const;
+    size_t get_subscriber_count(uint32_t ran_function_id) const;
 
     // =========================================================================
     // RAN Function Management
@@ -156,12 +171,12 @@ public:
     /**
      * @brief Get all RAN functions that have at least one subscriber
      */
-    [[nodiscard]] std::vector<uint32_t> get_active_ran_functions() const;
+    std::vector<uint32_t> get_active_ran_functions() const;
 
     /**
      * @brief Check if any dApp is subscribed to a RAN function
      */
-    [[nodiscard]] bool has_subscribers(uint32_t ran_function_id) const;
+    bool has_subscribers(uint32_t ran_function_id) const;
 
     // =========================================================================
     // Statistics
@@ -170,12 +185,12 @@ public:
     /**
      * @brief Get total number of registered dApps
      */
-    [[nodiscard]] size_t dapp_count() const;
+    size_t dapp_count() const;
 
     /**
      * @brief Get total number of active subscriptions
      */
-    [[nodiscard]] size_t subscription_count() const;
+    size_t subscription_count() const;
 
     /**
      * @brief Clear all registrations and subscriptions
@@ -195,8 +210,25 @@ private:
     // RAN function ID -> set of subscribed dApp IDs (reverse index for fast lookup)
     std::unordered_map<uint32_t, std::unordered_set<uint32_t>> ran_function_subscribers_;
     
+    // Subscription ID -> (dApp ID, RAN function ID) mapping
+    std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> subscription_ids_;
+    
+    // (dApp ID, RAN function ID) -> Subscription ID reverse mapping
+    std::unordered_map<uint64_t, uint32_t> subscription_id_reverse_;
+    
     // Callback for SM lifecycle events
     SmLifecycleCallback sm_lifecycle_callback_;
+    
+    // Next dApp ID to assign (1-100 per spec)
+    uint32_t next_dapp_id_{1};
+    
+    // Next subscription ID to assign
+    uint32_t next_subscription_id_{1};
+    
+    // Helper to create composite key for subscription
+    static uint64_t make_sub_key(uint32_t dapp_id, uint32_t ran_func_id) {
+        return (static_cast<uint64_t>(dapp_id) << 32) | ran_func_id;
+    }
 
     /**
      * @brief Check if SM should be started/stopped and invoke callback

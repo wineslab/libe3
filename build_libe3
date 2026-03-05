@@ -1,0 +1,761 @@
+#!/bin/bash
+#
+# libe3 - Vendor-Neutral E3AP C++ Library
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Build script for libe3 library
+# Inspired by OpenAirInterface's build_oai script
+
+set -e
+
+# ============================================================================
+# Configuration
+# ============================================================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BUILD_DIR="build"
+CMAKE_BUILD_TYPE="Release"
+CMAKE_GENERATOR=""
+CMAKE_OPTIONS=""
+CLEAN=0
+CLEAN_ALL=0
+INSTALL=0
+UNINSTALL=0
+INSTALL_PREFIX=""
+INSTALL_DEPS=0
+BUILD_TESTS=1
+BUILD_EXAMPLES=1
+ENABLE_ZMQ=1
+ENABLE_ASN1=1
+ENABLE_JSON=0
+ENABLE_ASAN=0
+ENABLE_TSAN=0
+ENABLE_UBSAN=0
+ENABLE_MSAN=0
+VERBOSE=0
+JOBS=$(nproc)
+ARCH_NATIVE=0
+RUN_TESTS=0
+FATAL_ERRORS=0
+BUILD_DOCS=0
+CREATE_DEB=0
+DEB_ARCH=""
+
+# Terminal colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# ============================================================================
+# Helper Functions
+# ============================================================================
+
+echo_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+echo_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+echo_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+echo_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+print_help() {
+    cat << EOF
+libe3 - A Vendor-Neutral E3AP C++ Library, v0.0.1
+Copyright (c) 2026 Andrea Lacava <thecave003@gmail.com> and contributors.
+==================
+
+This script builds the libe3 E3AP library and its documentation.
+
+Usage: $(basename "$0") [OPTIONS]
+
+Build Options:
+--------------
+  -c, --clean             Clean build directory before building
+  -C, --clean-all         Remove all build artifacts and start fresh
+  -d, --build-dir DIR     Set build directory (default: build)
+  -j, --jobs N            Number of parallel jobs (default: $(nproc))
+  -v, --verbose           Enable verbose build output
+  --ninja                 Use Ninja build system instead of Make
+
+Build Types:
+------------
+  -g, --debug             Build with debug symbols (Debug)
+  -r, --release           Build optimized release (Release, default)
+  --relwithdebinfo        Build optimized with debug info (RelWithDebInfo)
+  --minsizerel            Build for minimum size (MinSizeRel)
+
+Features:
+---------
+  --enable-zmq            Enable ZeroMQ transport (default: ON)
+  --disable-zmq           Disable ZeroMQ transport
+  --enable-asn1           Enable ASN.1 encoding support (default: ON)
+  --disable-asn1          Disable ASN.1 encoding
+  --enable-tests          Build unit tests (default: ON)
+  --disable-tests         Disable unit tests
+  --enable-examples       Build examples (default: ON)
+  --disable-examples      Disable examples
+  --docs                  Build documentation (via CMake 'docs' target)
+
+Sanitizers:
+-----------
+  --sanitize              Enable address and undefined sanitizers
+  --sanitize-address      Enable AddressSanitizer
+  --sanitize-thread       Enable ThreadSanitizer
+  --sanitize-undefined    Enable UndefinedBehaviorSanitizer
+  --sanitize-memory       Enable MemorySanitizer (requires clang)
+
+Installation:
+-------------
+  -I, --install-deps      Install required dependencies (requires sudo)
+  --install               Install library after building
+  --uninstall             Uninstall library using install manifest
+  --prefix DIR            Installation prefix (default: /usr/local)
+
+Testing:
+--------
+  -t, --test              Run tests after building
+
+Packaging:
+----------
+  --deb                   Create .deb package(s) after build
+  --deb-arch ARCH         Package arch: amd64, arm64, or all (default: host)
+
+Other:
+------
+  --arch-native           Enable -march=native compiler flag
+  --fatal-errors          Stop compilation on first error (-Wfatal-errors)
+  --cmake-opt "OPTS"      Pass additional options to CMake
+  -h, --help              Show this help message
+
+Examples:
+---------
+  # Basic release build
+  ./$(basename "$0")
+
+  # Debug build with tests
+  ./$(basename "$0") -g -t
+
+  # Clean release build with ZMQ disabled
+  ./$(basename "$0") -c --disable-zmq
+
+  # Install dependencies and build
+  ./$(basename "$0") -I
+
+  # Uninstall files installed from this build directory
+  ./$(basename "$0") --uninstall
+
+  # Build and create Debian package for host architecture
+  ./$(basename "$0") --deb
+
+  # Build and create Debian packages for amd64 and arm64
+  ./$(basename "$0") --deb --deb-arch all
+
+  # Build with sanitizers for debugging
+  ./$(basename "$0") -g --sanitize
+
+  # Build with Ninja and verbose output
+  ./$(basename "$0") --ninja -v
+
+EOF
+}
+
+# Install ASN.1 compiler from source (used on Debian where package may be outdated)
+install_asn1c_from_source() {
+    local asn1_install_log="$SCRIPT_DIR/build/log/asn1c_install_log.txt"
+    mkdir -p "$SCRIPT_DIR/build/log"
+    echo_info "\nInstalling ASN1 from source. Log: $asn1_install_log"
+    (
+        sudo $INSTALLER -y install bison flex autoconf automake libtool m4 || true
+        sudo rm -rf /tmp/asn1c || true
+        git clone https://github.com/mouse07410/asn1c /tmp/asn1c
+        cd /tmp/asn1c
+        git checkout 940dd5fa9f3917913fd487b13dfddfacd0ded06e || true
+        git log -n1 || true
+        autoreconf -iv || true
+        ./configure --prefix /opt/asn1c/ || true
+        make -j"$(nproc)" || true
+        sudo make install || true
+        cd - || true
+        sudo ldconfig || true
+        if [[ -v CI_ENV ]]; then
+            sudo rm -rf /tmp/asn1c || true
+        fi
+    ) > "$asn1_install_log" 2>&1 || true
+}
+
+check_command() {
+    if ! command -v "$1" &> /dev/null; then
+        return 1
+    fi
+    return 0
+}
+
+install_dependencies() {
+    echo_info "Installing dependencies..."
+    
+    # Detect package manager
+    if check_command apt-get; then
+        echo_info "Detected Debian/Ubuntu system"
+        sudo apt-get update
+        sudo apt-get install -y \
+            build-essential \
+            cmake \
+            pkg-config \
+            libzmq3-dev \
+            ninja-build \
+            git \
+            autoconf \
+            automake \
+            libtool \
+            m4 \
+            bison \
+            flex \
+            nlohmann-json3-dev \
+            libsctp-dev
+        # Build and install asn1c from source (some distros ship old versions)
+        INSTALLER="apt-get"
+        install_asn1c_from_source
+    elif check_command dnf; then
+        echo_info "Detected Fedora/RHEL system"
+        sudo dnf install -y \
+            gcc-c++ \
+            cmake \
+            pkg-config \
+            zeromq-devel \
+            ninja-build \
+            git \
+            asn1c \
+            nlohmann-json-devel \
+            lksctp-tools-devel
+    elif check_command pacman; then
+        echo_info "Detected Arch Linux system"
+        sudo pacman -Sy --noconfirm \
+            base-devel \
+            cmake \
+            pkg-config \
+            zeromq \
+            ninja \
+            git \
+            asn1c \
+            nlohmann-json \
+            lksctp-tools
+    elif check_command brew; then
+        echo_info "Detected macOS with Homebrew"
+        brew install cmake pkg-config zeromq ninja asn1c nlohmann-json
+    else
+        echo_error "Unsupported package manager. Please install dependencies manually:"
+        echo "  - cmake (>= 3.16)"
+        echo "  - C++17 compiler (gcc >= 7, clang >= 5)"
+        echo "  - pkg-config"
+        echo "  - libzmq (optional, for ZMQ transport)"
+        echo "  - ninja (optional, for faster builds)"
+        exit 1
+    fi
+    
+    echo_success "Dependencies installed successfully"
+}
+
+clean_build() {
+    if [ -d "$SCRIPT_DIR/$BUILD_DIR" ]; then
+        echo_info "Cleaning build directory: $BUILD_DIR"
+        rm -rf "$SCRIPT_DIR/$BUILD_DIR"
+    fi
+}
+
+clean_all() {
+    echo_info "Cleaning all build artifacts..."
+    rm -rf "$SCRIPT_DIR/build"*
+    rm -rf "$SCRIPT_DIR/cmake-build-"*
+    rm -rf "$SCRIPT_DIR/CMakeCache.txt"
+    rm -rf "$SCRIPT_DIR/CMakeFiles"
+    echo_success "All build artifacts cleaned"
+}
+
+configure_cmake() {
+    local cmake_cmd="cmake"
+    local build_path="$SCRIPT_DIR/$BUILD_DIR"
+    
+    mkdir -p "$build_path"
+    cd "$build_path"
+    
+    # Build CMake command
+    local cmake_args=(
+        "-DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE"
+        "-DLIBE3_BUILD_TESTS=$([ $BUILD_TESTS -eq 1 ] && echo ON || echo OFF)"
+        "-DLIBE3_BUILD_EXAMPLES=$([ $BUILD_EXAMPLES -eq 1 ] && echo ON || echo OFF)"
+        "-DLIBE3_ENABLE_ZMQ=$([ $ENABLE_ZMQ -eq 1 ] && echo ON || echo OFF)"
+        "-DLIBE3_ENABLE_ASN1=$([ $ENABLE_ASN1 -eq 1 ] && echo ON || echo OFF)"
+        "-DLIBE3_ENABLE_JSON=$([ $ENABLE_JSON -eq 1 ] && echo ON || echo OFF)"
+        "-DLIBE3_ENABLE_ASAN=$([ $ENABLE_ASAN -eq 1 ] && echo ON || echo OFF)"
+        "-DLIBE3_ENABLE_TSAN=$([ $ENABLE_TSAN -eq 1 ] && echo ON || echo OFF)"
+        "-DLIBE3_BUILD_DOCS=$([ $BUILD_DOCS -eq 1 ] && echo ON || echo OFF)"
+    )
+    
+    # Generator
+    if [ -n "$CMAKE_GENERATOR" ]; then
+        cmake_args+=("-G" "$CMAKE_GENERATOR")
+    fi
+    
+    # Arch native
+    if [ $ARCH_NATIVE -eq 1 ]; then
+        cmake_args+=("-DCMAKE_CXX_FLAGS=-march=native")
+    fi
+    
+    # Fatal errors - stop on first error
+    if [ $FATAL_ERRORS -eq 1 ]; then
+        cmake_args+=("-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS:+$CMAKE_CXX_FLAGS }-Wfatal-errors")
+        cmake_args+=("-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS:+$CMAKE_C_FLAGS }-Wfatal-errors")
+    fi
+    
+    # Install prefix
+    if [ -n "$INSTALL_PREFIX" ]; then
+        cmake_args+=("-DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX")
+    fi
+    
+    # Additional sanitizers (need to add to CMake)
+    if [ $ENABLE_UBSAN -eq 1 ]; then
+        cmake_args+=("-DCMAKE_CXX_FLAGS=-fsanitize=undefined -fno-omit-frame-pointer")
+        cmake_args+=("-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=undefined")
+    fi
+    
+    if [ $ENABLE_MSAN -eq 1 ]; then
+        cmake_args+=("-DCMAKE_CXX_FLAGS=-fsanitize=memory -fno-omit-frame-pointer")
+        cmake_args+=("-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=memory")
+    fi
+    
+    # Additional CMake options
+    if [ -n "$CMAKE_OPTIONS" ]; then
+        cmake_args+=($CMAKE_OPTIONS)
+    fi
+    
+    echo_info "Configuring CMake..."
+    echo_info "Build type: $CMAKE_BUILD_TYPE"
+    echo_info "Build directory: $build_path"
+    
+    if [ $VERBOSE -eq 1 ]; then
+        echo_info "CMake arguments: ${cmake_args[*]}"
+    fi
+    
+    $cmake_cmd "${cmake_args[@]}" "$SCRIPT_DIR"
+}
+
+build_library() {
+    local build_path="$SCRIPT_DIR/$BUILD_DIR"
+    cd "$build_path"
+    
+    local build_cmd="cmake --build ."
+    local build_args=("--parallel" "$JOBS")
+    
+    if [ $VERBOSE -eq 1 ]; then
+        build_args+=("--verbose")
+    fi
+    
+    echo_info "Building libe3 with $JOBS parallel jobs..."
+    
+    $build_cmd "${build_args[@]}"
+    
+    echo_success "Build completed successfully!"
+}
+
+build_docs() {
+    local build_path="$SCRIPT_DIR/$BUILD_DIR"
+    cd "$build_path"
+
+    echo_info "Building documentation (target: docs)..."
+    # Attempt to build a CMake 'docs' target. Many projects expose docs via a target.
+    cmake --build . --target docs --parallel "$JOBS"
+
+    echo_success "Documentation build completed!"
+}
+
+run_tests() {
+    local build_path="$SCRIPT_DIR/$BUILD_DIR"
+    cd "$build_path"
+    
+    echo_info "Running tests..."
+    ctest --output-on-failure --parallel "$JOBS"
+    
+    echo_success "All tests passed!"
+}
+
+install_library() {
+    local build_path="$SCRIPT_DIR/$BUILD_DIR"
+    cd "$build_path"
+    
+    echo_info "Installing libe3..."
+    sudo cmake --install .
+    
+    echo_success "Installation completed!"
+}
+
+uninstall_library() {
+    local build_path="$SCRIPT_DIR/$BUILD_DIR"
+    local manifest_path="$build_path/install_manifest.txt"
+    local cache_path="$build_path/CMakeCache.txt"
+    local cache_prefix=""
+    local -a uninstall_prefixes=()
+    local prefix
+
+    # Include explicit --prefix when provided.
+    if [ -n "$INSTALL_PREFIX" ]; then
+        uninstall_prefixes+=("$INSTALL_PREFIX")
+    fi
+
+    # Include prefix from CMake cache when available.
+    if [ -f "$cache_path" ]; then
+        cache_prefix="$(sed -n 's/^CMAKE_INSTALL_PREFIX:PATH=//p' "$cache_path" | head -n1)"
+        if [ -n "$cache_prefix" ]; then
+            uninstall_prefixes+=("$cache_prefix")
+        fi
+    fi
+
+    # /usr/local is the default for CMake install.
+    uninstall_prefixes+=("/usr/local")
+
+    if [ -f "$manifest_path" ]; then
+        echo_info "Uninstalling files listed in manifest: $manifest_path"
+        sudo sh -c 'while IFS= read -r path; do rm -f "$path"; done' < "$manifest_path"
+    else
+        echo_warning "Install manifest not found at $manifest_path, using prefix cleanup only."
+    fi
+
+    # Clean known libe3 install paths from candidate prefixes.
+    for prefix in "${uninstall_prefixes[@]}"; do
+        # Skip unsafe empty/root prefixes.
+        if [ -z "$prefix" ] || [ "$prefix" = "/" ]; then
+            continue
+        fi
+        echo_info "Removing libe3 install paths under prefix: $prefix"
+        sudo rm -rf \
+            "$prefix/include/libe3" \
+            "$prefix/lib/liblibe3.a" \
+            "$prefix/lib/liblibe3.so" \
+            "$prefix/lib/liblibe3.so.0" \
+            "$prefix/lib/liblibe3.so.0.0.1" \
+            "$prefix/lib/libasn1_e3ap.a" \
+            "$prefix/lib/pkgconfig/libe3.pc" \
+            "$prefix/lib/cmake/libe3" \
+            "$prefix/lib64/liblibe3.a" \
+            "$prefix/lib64/liblibe3.so" \
+            "$prefix/lib64/liblibe3.so.0" \
+            "$prefix/lib64/liblibe3.so.0.0.1" \
+            "$prefix/lib64/libasn1_e3ap.a" \
+            "$prefix/lib64/pkgconfig/libe3.pc" \
+            "$prefix/lib64/cmake/libe3"
+    done
+
+    echo_success "Uninstallation completed. Re-run with --verbose and check the prefix if files remain."
+}
+
+create_deb_packages() {
+    local deb_script="$SCRIPT_DIR/scripts/create_deb.sh"
+    local build_path="$SCRIPT_DIR/$BUILD_DIR"
+
+    if [ ! -f "$deb_script" ]; then
+        echo_error "Packaging script not found: $deb_script"
+        exit 1
+    fi
+
+    if [ ! -x "$deb_script" ]; then
+        chmod +x "$deb_script"
+    fi
+
+    echo_info "Creating Debian package(s)..."
+    if [ -n "$DEB_ARCH" ]; then
+        "$deb_script" --use-existing-build --build-dir "$build_path" "$DEB_ARCH"
+    else
+        "$deb_script" --use-existing-build --build-dir "$build_path"
+    fi
+
+    echo_success "Debian package creation completed!"
+}
+
+print_summary() {
+    echo ""
+    echo "======================================"
+    echo "       libe3 Build Summary"
+    echo "======================================"
+    echo "  Build Type:     $CMAKE_BUILD_TYPE"
+    echo "  Build Dir:      $BUILD_DIR"
+    echo "  Tests:          $([ $BUILD_TESTS -eq 1 ] && echo 'enabled' || echo 'disabled')"
+    echo "  Examples:       $([ $BUILD_EXAMPLES -eq 1 ] && echo 'enabled' || echo 'disabled')"
+    echo "  ZMQ Support:    $([ $ENABLE_ZMQ -eq 1 ] && echo 'enabled' || echo 'disabled')"
+    echo "  ASN.1 Encoding: $([ $ENABLE_ASN1 -eq 1 ] && echo 'enabled' || echo 'disabled')"
+    echo "  AddressSan:     $([ $ENABLE_ASAN -eq 1 ] && echo 'enabled' || echo 'disabled')"
+    echo "  ThreadSan:      $([ $ENABLE_TSAN -eq 1 ] && echo 'enabled' || echo 'disabled')"
+    echo "  Fatal Errors:   $([ $FATAL_ERRORS -eq 1 ] && echo 'enabled' || echo 'disabled')"
+    echo "  Documentation:  $([ $BUILD_DOCS -eq 1 ] && echo 'build requested' || echo 'not built')"
+    echo "======================================"
+    echo ""
+}
+
+# ============================================================================
+# Main
+# ============================================================================
+
+main() {
+    # Parse arguments
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -h|--help)
+                print_help
+                exit 0
+                ;;
+            -c|--clean)
+                CLEAN=1
+                shift
+                ;;
+            -C|--clean-all)
+                CLEAN_ALL=1
+                shift
+                ;;
+            -d|--build-dir)
+                BUILD_DIR="$2"
+                shift 2
+                ;;
+            -j|--jobs)
+                JOBS="$2"
+                shift 2
+                ;;
+            -v|--verbose)
+                VERBOSE=1
+                shift
+                ;;
+            --ninja)
+                CMAKE_GENERATOR="Ninja"
+                shift
+                ;;
+            -g|--debug)
+                CMAKE_BUILD_TYPE="Debug"
+                shift
+                ;;
+            -r|--release)
+                CMAKE_BUILD_TYPE="Release"
+                shift
+                ;;
+            --relwithdebinfo)
+                CMAKE_BUILD_TYPE="RelWithDebInfo"
+                shift
+                ;;
+            --minsizerel)
+                CMAKE_BUILD_TYPE="MinSizeRel"
+                shift
+                ;;
+            --enable-zmq)
+                ENABLE_ZMQ=1
+                shift
+                ;;
+            --disable-zmq)
+                ENABLE_ZMQ=0
+                shift
+                ;;
+            --enable-asn1)
+                ENABLE_ASN1=1
+                shift
+                ;;
+            --disable-asn1)
+                ENABLE_ASN1=0
+                shift
+                ;;
+            --enable-tests)
+                BUILD_TESTS=1
+                shift
+                ;;
+            --disable-tests)
+                BUILD_TESTS=0
+                shift
+                ;;
+            --enable-examples)
+                BUILD_EXAMPLES=1
+                shift
+                ;;
+            --disable-examples)
+                BUILD_EXAMPLES=0
+                shift
+                ;;
+            --sanitize)
+                ENABLE_ASAN=1
+                ENABLE_UBSAN=1
+                shift
+                ;;
+            --sanitize-address)
+                ENABLE_ASAN=1
+                shift
+                ;;
+            --sanitize-thread)
+                ENABLE_TSAN=1
+                shift
+                ;;
+            --sanitize-undefined)
+                ENABLE_UBSAN=1
+                shift
+                ;;
+            --sanitize-memory)
+                ENABLE_MSAN=1
+                shift
+                ;;
+            --docs)
+                BUILD_DOCS=1
+                shift
+                ;;
+            -I|--install-deps)
+                INSTALL_DEPS=1
+                shift
+                ;;
+            --install)
+                INSTALL=1
+                shift
+                ;;
+            --uninstall)
+                UNINSTALL=1
+                shift
+                ;;
+            --prefix)
+                INSTALL_PREFIX="$2"
+                shift 2
+                ;;
+            --deb)
+                CREATE_DEB=1
+                shift
+                ;;
+            --deb-arch)
+                if [ -z "${2:-}" ]; then
+                    echo_error "--deb-arch requires a value"
+                    exit 1
+                fi
+                CREATE_DEB=1
+                DEB_ARCH="$2"
+                shift 2
+                ;;
+            -t|--test)
+                RUN_TESTS=1
+                shift
+                ;;
+            --arch-native)
+                ARCH_NATIVE=1
+                shift
+                ;;
+            --fatal-errors)
+                FATAL_ERRORS=1
+                shift
+                ;;
+            --cmake-opt)
+                CMAKE_OPTIONS="$CMAKE_OPTIONS $2"
+                shift 2
+                ;;
+            *)
+                echo_error "Unknown option: $1"
+                echo "Use --help for usage information"
+                exit 1
+                ;;
+        esac
+    done
+    
+    # Validate sanitizer combinations
+    if [ $ENABLE_ASAN -eq 1 ] && [ $ENABLE_TSAN -eq 1 ]; then
+        echo_error "AddressSanitizer and ThreadSanitizer cannot be used together"
+        exit 1
+    fi
+    
+    if [ $ENABLE_MSAN -eq 1 ] && [ $ENABLE_ASAN -eq 1 ]; then
+        echo_error "MemorySanitizer and AddressSanitizer cannot be used together"
+        exit 1
+    fi
+
+    if [ $INSTALL -eq 1 ] && [ $UNINSTALL -eq 1 ]; then
+        echo_error "--install and --uninstall cannot be used together"
+        exit 1
+    fi
+
+    if [ $UNINSTALL -eq 1 ]; then
+        uninstall_library
+        exit 0
+    fi
+
+    if [ -n "$DEB_ARCH" ]; then
+        case "$DEB_ARCH" in
+            amd64|arm64|all|x86_64|x64|aarch64)
+                ;;
+            *)
+                echo_error "Invalid value for --deb-arch: $DEB_ARCH"
+                echo "Valid values: amd64, arm64, all"
+                exit 1
+                ;;
+        esac
+    fi
+    
+    # Check for required tools
+    if ! check_command cmake; then
+        echo_error "CMake is required but not found. Install with: --install-deps"
+        exit 1
+    fi
+    
+    # Install dependencies if requested
+    if [ $INSTALL_DEPS -eq 1 ]; then
+        install_dependencies
+        # When invoked with -I/--install-deps we only install dependencies and exit.
+        # This prevents the script from proceeding to configure/build twice when
+        # CI pipelines call it for dependency setup before running the actual build.
+        echo_info "Dependencies installed. Please try to build libe3."
+        exit 0
+    fi
+    
+    # Clean if requested
+    if [ $CLEAN_ALL -eq 1 ]; then
+        clean_all
+    elif [ $CLEAN -eq 1 ]; then
+        clean_build
+    fi
+    
+    # Print build summary
+    print_summary
+    
+    # Configure and build
+    configure_cmake
+    build_library
+    
+    # Run tests if requested
+    if [ $RUN_TESTS -eq 1 ] && [ $BUILD_TESTS -eq 1 ]; then
+        run_tests
+    fi
+    
+    # Build documentation if requested
+    if [ $BUILD_DOCS -eq 1 ]; then
+        build_docs
+    fi
+    
+    # Install if requested
+    if [ $INSTALL -eq 1 ]; then
+        install_library
+    fi
+
+    # Create .deb package(s) if requested
+    if [ $CREATE_DEB -eq 1 ]; then
+        create_deb_packages
+    fi
+    
+    echo_success "libe3 build completed successfully!"
+    echo ""
+    echo "Build artifacts are in: $SCRIPT_DIR/$BUILD_DIR"
+    
+    if [ $BUILD_TESTS -eq 1 ]; then
+        echo "Run tests with: cd $BUILD_DIR && ctest"
+    fi
+    
+    if [ $BUILD_EXAMPLES -eq 1 ]; then
+        echo "Examples are in: $BUILD_DIR/examples/"
+    fi
+}
+
+main "$@"

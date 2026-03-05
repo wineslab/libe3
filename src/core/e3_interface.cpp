@@ -10,6 +10,7 @@
 #include "libe3/e3_interface.hpp"
 #include "libe3/logger.hpp"
 #include <chrono>
+#include <random>
 #include <signal.h>
 
 namespace libe3 {
@@ -19,9 +20,16 @@ constexpr const char* LOG_TAG = "E3Iface";
 constexpr auto SM_POLL_INTERVAL = std::chrono::milliseconds(10);
 }
 
+uint32_t E3Interface::generate_message_id() {
+    thread_local std::mt19937 rng(std::random_device{}());
+    std::uniform_int_distribution<uint32_t> dist(1, 1000);
+    return dist(rng);
+}
+
 E3Interface::E3Interface(const E3Config& config)
     : config_(config)
 {
+    Logger::instance().set_log_file("/tmp/e3_agent.log");
     Logger::instance().set_level(config.log_level);
     E3_LOG_INFO(LOG_TAG) << "E3Interface created";
 }
@@ -59,22 +67,22 @@ ErrorCode E3Interface::init() {
     // Create response queue
     response_queue_ = std::make_unique<ResponseQueue>();
     
-    // Create connector (unless in simulation mode)
-    if (!config_.simulation_mode) {
-        connector_ = create_connector(
-            config_.transport,
-            config_.setup_endpoint,
-            config_.inbound_endpoint,
-            config_.outbound_endpoint,
-            config_.io_threads
-        );
-        
-        if (!connector_) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to create connector";
-            return ErrorCode::INTERNAL_ERROR;
-        }
-    } else {
-        E3_LOG_INFO(LOG_TAG) << "Running in SIMULATION MODE";
+    // Create connector
+    connector_ = create_connector(
+        config_.link_layer,
+        config_.transport_layer,
+        config_.setup_endpoint,
+        config_.subscriber_endpoint,
+        config_.publisher_endpoint,
+        config_.setup_port,
+        config_.subscriber_port,
+        config_.publisher_port,
+        config_.io_threads
+    );
+    
+    if (!connector_) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to create connector";
+        return ErrorCode::INTERNAL_ERROR;
     }
     
     state_.store(AgentState::INITIALIZED);
@@ -94,23 +102,20 @@ ErrorCode E3Interface::start() {
     E3_LOG_INFO(LOG_TAG) << "Starting E3Interface";
     should_stop_.store(false);
     
-    if (!config_.simulation_mode) {
-        // Set up initial connection
-        ErrorCode conn_result = connector_->setup_initial_connection();
-        if (conn_result != ErrorCode::SUCCESS) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to setup initial connection";
-            state_.store(AgentState::ERROR);
-            return conn_result;
-        }
+    // Set up initial connection
+    ErrorCode conn_result = connector_->setup_initial_connection();
+    if (conn_result != ErrorCode::SUCCESS) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to setup initial connection";
+        state_.store(AgentState::ERROR);
+        return conn_result;
     }
     
     state_.store(AgentState::CONNECTED);
     
     // Start threads
+    setup_thread_ = std::make_unique<std::thread>(&E3Interface::setup_loop, this);
     subscriber_thread_ = std::make_unique<std::thread>(&E3Interface::subscriber_loop, this);
     publisher_thread_ = std::make_unique<std::thread>(&E3Interface::publisher_loop, this);
-    sm_data_thread_ = std::make_unique<std::thread>(&E3Interface::sm_data_handler_loop, this);
-    setup_thread_ = std::make_unique<std::thread>(&E3Interface::setup_loop, this);
     
     state_.store(AgentState::RUNNING);
     E3_LOG_INFO(LOG_TAG) << "E3Interface started successfully";
@@ -131,6 +136,11 @@ void E3Interface::stop() {
     // Wake up response queue
     if (response_queue_) {
         response_queue_->shutdown();
+    }
+    
+    // Interrupt blocking socket operations
+    if (connector_) {
+        connector_->shutdown();
     }
     
     // Join threads
@@ -171,6 +181,22 @@ std::vector<uint32_t> E3Interface::get_available_ran_functions() const {
 }
 
 ErrorCode E3Interface::register_sm(std::unique_ptr<ServiceModel> sm) {
+    if (!sm) {
+        return ErrorCode::INVALID_PARAM;
+    }
+    const uint32_t ran_function_id = sm->ran_function_id();
+    sm->set_subscribers_provider([this, ran_function_id]() {
+        if (!subscription_manager_) {
+            return std::vector<uint32_t>{};
+        }
+        return subscription_manager_->get_subscribed_dapps(ran_function_id);
+    });
+    sm->set_outbound_emitter([this](Pdu&& pdu) {
+        if (pdu.message_id == 0) {
+            pdu.message_id = generate_message_id();
+        }
+        return queue_outbound(std::move(pdu));
+    });
     return SmRegistry::instance().register_sm(std::move(sm));
 }
 
@@ -184,25 +210,20 @@ void E3Interface::setup_loop() {
     auto available_ran_functions = SmRegistry::instance().get_available_ran_functions();
     
     while (!should_stop_.load()) {
-        if (config_.simulation_mode) {
-            // In simulation mode, just sleep
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            continue;
-        }
-        
         std::vector<uint8_t> buffer;
         int ret = connector_->recv_setup_request(buffer);
         
         if (ret <= 0) {
             if (should_stop_.load()) break;
-            E3_LOG_DEBUG(LOG_TAG) << "No setup request received";
             continue;
         }
+
+        E3_LOG_INFO(LOG_TAG) << "Setup request received: " << ret << " bytes";
         
         // Decode the setup request
-        auto decode_result = encoder_->decode(buffer.data(), ret);
+        auto decode_result = encoder_->decode(buffer.data(), static_cast<size_t>(ret));
         if (!decode_result) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to decode setup request";
+            E3_LOG_ERROR(LOG_TAG) << "Failed to decode setup request; ret=" << ret;
             continue;
         }
         
@@ -219,7 +240,7 @@ void E3Interface::setup_loop() {
             continue;
         }
         
-        handle_setup_request(*request);
+        handle_setup_request(*request, pdu.message_id);
     }
     
     E3_LOG_INFO(LOG_TAG) << "Setup loop stopped";
@@ -228,22 +249,15 @@ void E3Interface::setup_loop() {
 void E3Interface::subscriber_loop() {
     E3_LOG_INFO(LOG_TAG) << "Subscriber loop started";
     
-    if (!config_.simulation_mode) {
-        ErrorCode result = connector_->setup_inbound_connection();
-        if (result != ErrorCode::SUCCESS) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to setup inbound connection";
-            return;
-        }
+    ErrorCode result = connector_->setup_inbound_connection();
+    if (result != ErrorCode::SUCCESS) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to setup inbound connection";
+        return;
     }
     
     std::vector<uint8_t> buffer;
     
     while (!should_stop_.load()) {
-        if (config_.simulation_mode) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            continue;
-        }
-        
         int ret = connector_->receive(buffer);
         
         if (ret <= 0) {
@@ -251,7 +265,7 @@ void E3Interface::subscriber_loop() {
             continue;
         }
         
-        auto decode_result = encoder_->decode(buffer.data(), ret);
+        auto decode_result = encoder_->decode(buffer.data(), static_cast<size_t>(ret));
         if (!decode_result) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to decode PDU in subscriber";
             continue;
@@ -263,15 +277,23 @@ void E3Interface::subscriber_loop() {
             case PduType::SUBSCRIPTION_REQUEST: {
                 auto* request = std::get_if<SubscriptionRequest>(&pdu.choice);
                 if (request) {
-                    handle_subscription_request(*request);
+                    handle_subscription_request(*request, pdu.message_id);
                 }
                 break;
             }
             
-            case PduType::CONTROL_ACTION: {
-                auto* action = std::get_if<ControlAction>(&pdu.choice);
+            case PduType::SUBSCRIPTION_DELETE: {
+                auto* del = std::get_if<SubscriptionDelete>(&pdu.choice);
+                if (del) {
+                    handle_subscription_delete(*del, pdu.message_id);
+                }
+                break;
+            }
+            
+            case PduType::DAPP_CONTROL_ACTION: {
+                auto* action = std::get_if<DAppControlAction>(&pdu.choice);
                 if (action) {
-                    handle_control_action(*action);
+                    handle_control_action(*action, pdu.message_id);
                 }
                 break;
             }
@@ -284,6 +306,14 @@ void E3Interface::subscriber_loop() {
                 break;
             }
             
+            case PduType::RELEASE_MESSAGE: {
+                auto* release = std::get_if<ReleaseMessage>(&pdu.choice);
+                if (release) {
+                    handle_release_message(*release);
+                }
+                break;
+            }
+
             default:
                 E3_LOG_WARN(LOG_TAG) << "Received unexpected PDU type: " 
                                      << pdu_type_to_string(pdu.type);
@@ -300,35 +330,27 @@ void E3Interface::publisher_loop() {
     // Ignore SIGPIPE to handle closed connections gracefully
     signal(SIGPIPE, SIG_IGN);
     
-    if (!config_.simulation_mode) {
-        // Retry outbound connection setup
-        ErrorCode result;
-        do {
-            std::this_thread::sleep_for(std::chrono::seconds(3));
-            if (should_stop_.load()) return;
-            
-            E3_LOG_INFO(LOG_TAG) << "Trying to setup outbound connection";
-            result = connector_->setup_outbound_connection();
-        } while (result != ErrorCode::SUCCESS && !should_stop_.load());
+    // Retry outbound connection setup
+    ErrorCode result;
+    do {
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+        if (should_stop_.load()) return;
         
-        if (result != ErrorCode::SUCCESS) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to setup outbound connection";
-            return;
-        }
-        E3_LOG_INFO(LOG_TAG) << "Outbound connection established";
+        E3_LOG_INFO(LOG_TAG) << "Trying to setup outbound connection";
+        result = connector_->setup_outbound_connection();
+    } while (result != ErrorCode::SUCCESS && !should_stop_.load());
+    
+    if (result != ErrorCode::SUCCESS) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to setup outbound connection";
+        return;
     }
+    E3_LOG_INFO(LOG_TAG) << "Outbound connection established";
     
     while (!should_stop_.load()) {
         // Pop from queue (blocking)
-        auto pdu_opt = response_queue_->pop(std::chrono::milliseconds(100));
+        auto pdu_opt = response_queue_->pop(std::chrono::milliseconds(10));
         
         if (!pdu_opt) {
-            continue;
-        }
-        
-        if (config_.simulation_mode) {
-            E3_LOG_DEBUG(LOG_TAG) << "Simulation: would send " 
-                                  << pdu_type_to_string(pdu_opt->type);
             continue;
         }
         
@@ -395,163 +417,169 @@ void E3Interface::sm_data_handler_loop() {
 // Message Handlers
 // =========================================================================
 
-void E3Interface::handle_setup_request(const SetupRequest& request) {
-    E3_LOG_INFO(LOG_TAG) << "Handling setup request from dApp " << request.dapp_identifier
-                         << " (action=" << action_type_to_string(request.type) << ")";
+void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t request_message_id) {
+    E3_LOG_INFO(LOG_TAG) << "Handling setup request from dApp '" << request.dapp_name 
+                         << "' (version=" << request.dapp_version 
+                         << ", vendor=" << request.vendor 
+                         << ", e3ap_version=" << request.e3ap_protocol_version << ")";
     
     ResponseCode response_code = ResponseCode::NEGATIVE;
+    uint32_t assigned_dapp_id = 0;
     
-    switch (request.type) {
-        case ActionType::INSERT: {
-            ErrorCode result = subscription_manager_->register_dapp(request.dapp_identifier);
-            
-            if (result == ErrorCode::SUCCESS) {
-                response_code = ResponseCode::POSITIVE;
-                E3_LOG_INFO(LOG_TAG) << "dApp " << request.dapp_identifier << " registered";
-            } else if (result == ErrorCode::SUBSCRIPTION_EXISTS) {
-                // Already registered - still send positive response
-                response_code = ResponseCode::POSITIVE;
-                E3_LOG_WARN(LOG_TAG) << "dApp " << request.dapp_identifier << " already registered";
-            } else {
-                E3_LOG_ERROR(LOG_TAG) << "Failed to register dApp " << request.dapp_identifier;
-            }
-            break;
-        }
-        
-        case ActionType::DELETE: {
-            ErrorCode result = subscription_manager_->unregister_dapp(request.dapp_identifier);
-            
-            if (result == ErrorCode::SUCCESS) {
-                response_code = ResponseCode::POSITIVE;
-                E3_LOG_INFO(LOG_TAG) << "dApp " << request.dapp_identifier << " unregistered";
-            } else {
-                E3_LOG_ERROR(LOG_TAG) << "Failed to unregister dApp " << request.dapp_identifier;
-            }
-            break;
-        }
-        
-        default:
-            E3_LOG_WARN(LOG_TAG) << "Unsupported action type in setup request";
-            break;
+    // Register the dApp
+    auto [result, dapp_id] = subscription_manager_->register_dapp();
+    assigned_dapp_id = dapp_id;
+    
+    if (result == ErrorCode::SUCCESS) {
+        response_code = ResponseCode::POSITIVE;
+        E3_LOG_INFO(LOG_TAG) << "dApp '" << request.dapp_name << "' registered with assigned ID " << assigned_dapp_id;
+    } else {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to register dApp '" << request.dapp_name << "': " << error_code_to_string(result);
     }
     
     // Create and send response
-    auto available_ran_functions = SmRegistry::instance().get_available_ran_functions();
+    // Get available RAN functions and convert to RanFunctionDef list
+    auto available_ran_function_ids = SmRegistry::instance().get_available_ran_functions();
+    E3_LOG_DEBUG(LOG_TAG) << "Available RAN function ids count: " << available_ran_function_ids.size();
+    std::vector<RanFunctionDef> ran_function_list;
+    for (auto id : available_ran_function_ids) {
+        RanFunctionDef func;
+        func.ran_function_identifier = id;
+        ServiceModel* sm = SmRegistry::instance().get_by_ran_function(id);
+        if (sm) {
+            func.telemetry_identifier_list = sm->telemetry_ids();
+            func.control_identifier_list = sm->control_ids();
+            // Include optional RAN-function-specific opaque data provided by the SM
+            func.ran_function_data = sm->ran_function_data();
+        }
+        ran_function_list.push_back(func);
+    }
+    E3_LOG_DEBUG(LOG_TAG) << "Constructed ran_function_list size: " << ran_function_list.size();
+    for (const auto &rf : ran_function_list) {
+        E3_LOG_DEBUG(LOG_TAG) << "  RAN function id=" << rf.ran_function_identifier
+                               << ", telemetry_count=" << rf.telemetry_identifier_list.size()
+                               << ", control_count=" << rf.control_identifier_list.size()
+                               << ", ran_function_data_len=" << rf.ran_function_data.size();
+    }
     
-    auto encode_result = encoder_->encode_setup_response(
-        request.id,
+        auto encode_result = encoder_->encode_setup_response(
+        generate_message_id(),
+        request_message_id,
         response_code,
-        available_ran_functions
+        config_.e3ap_version,
+        assigned_dapp_id,  // dapp_identifier
+        config_.ran_identifier,  // ran_identifier
+        ran_function_list
     );
     
     if (!encode_result) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to encode setup response";
+        E3_LOG_ERROR(LOG_TAG) << "Failed to encode setup response for request id " << request_message_id;
         return;
     }
     
-    if (!config_.simulation_mode) {
-        ErrorCode send_result = connector_->send_response(encode_result->buffer);
-        if (send_result != ErrorCode::SUCCESS) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to send setup response";
-        } else {
-            E3_LOG_INFO(LOG_TAG) << "Sent setup response";
-        }
+    ErrorCode send_result = connector_->send_response(encode_result->buffer);
+    if (send_result != ErrorCode::SUCCESS) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to send setup response for request id " << request_message_id
+                              << "; error=" << error_code_to_string(send_result);
+    } else {
+        E3_LOG_INFO(LOG_TAG) << "Sent setup response for request id " << request_message_id;
     }
 }
 
-void E3Interface::handle_subscription_request(const SubscriptionRequest& request) {
+void E3Interface::handle_subscription_request(const SubscriptionRequest& request, uint32_t request_message_id) {
     E3_LOG_INFO(LOG_TAG) << "Handling subscription request from dApp " << request.dapp_identifier
-                         << " for RAN function " << request.ran_function_identifier
-                         << " (action=" << action_type_to_string(request.type) << ")";
+                         << " for RAN function " << request.ran_function_identifier;
     
     ResponseCode response_code = ResponseCode::NEGATIVE;
+    uint32_t subscription_id = 1;
     
-    switch (request.type) {
-        case ActionType::INSERT: {
-            // Check if dApp is registered
-            if (!subscription_manager_->is_dapp_registered(request.dapp_identifier)) {
-                E3_LOG_ERROR(LOG_TAG) << "dApp " << request.dapp_identifier << " not registered";
-                break;
-            }
-            
-            ErrorCode result = subscription_manager_->add_subscription(
-                request.dapp_identifier,
-                request.ran_function_identifier
-            );
-            
-            if (result == ErrorCode::SUCCESS || result == ErrorCode::SUBSCRIPTION_EXISTS) {
-                response_code = ResponseCode::POSITIVE;
-                E3_LOG_INFO(LOG_TAG) << "Subscription added: dApp " << request.dapp_identifier
-                                     << " -> RAN function " << request.ran_function_identifier;
-            } else {
-                E3_LOG_ERROR(LOG_TAG) << "Failed to add subscription: " 
-                                      << error_code_to_string(result);
-            }
-            break;
-        }
+    // Check if dApp is registered
+    if (!subscription_manager_->is_dapp_registered(request.dapp_identifier)) {
+        E3_LOG_ERROR(LOG_TAG) << "dApp " << request.dapp_identifier << " not registered";
+    } else {
+        auto [result, sub_id] = subscription_manager_->add_subscription(
+            request.dapp_identifier,
+            request.ran_function_identifier
+        );
+        subscription_id = sub_id;
         
-        case ActionType::DELETE: {
-            ErrorCode result = subscription_manager_->remove_subscription(
-                request.dapp_identifier,
-                request.ran_function_identifier
-            );
-            
-            if (result == ErrorCode::SUCCESS) {
-                response_code = ResponseCode::POSITIVE;
-                E3_LOG_INFO(LOG_TAG) << "Subscription removed: dApp " << request.dapp_identifier
-                                     << " -> RAN function " << request.ran_function_identifier;
-            } else {
-                E3_LOG_ERROR(LOG_TAG) << "Failed to remove subscription: "
-                                      << error_code_to_string(result);
-            }
-            break;
+        if (result == ErrorCode::SUCCESS || result == ErrorCode::SUBSCRIPTION_EXISTS) {
+            response_code = ResponseCode::POSITIVE;
+            E3_LOG_INFO(LOG_TAG) << "Subscription added: dApp " << request.dapp_identifier
+                                 << " -> RAN function " << request.ran_function_identifier
+                                 << " (subscription_id=" << subscription_id << ")";
+        } else {
+            E3_LOG_ERROR(LOG_TAG) << "Failed to add subscription: " 
+                                  << error_code_to_string(result);
         }
-        
-        default:
-            E3_LOG_WARN(LOG_TAG) << "Unsupported action type in subscription request";
-            break;
     }
     
     // Create and queue response
     Pdu response_pdu(PduType::SUBSCRIPTION_RESPONSE);
     SubscriptionResponse resp;
-    resp.id = 0; // Will be set by encoder
-    resp.request_id = request.id;
+    response_pdu.message_id = generate_message_id();
+    resp.request_id = request_message_id;
+    resp.dapp_identifier = request.dapp_identifier;
     resp.response_code = response_code;
+    if (response_code == ResponseCode::POSITIVE) {
+        resp.subscription_id = subscription_id;
+    }
     response_pdu.choice = resp;
     
     queue_outbound(std::move(response_pdu));
 }
 
-void E3Interface::handle_control_action(const ControlAction& action) {
+void E3Interface::handle_subscription_delete(const SubscriptionDelete& del, uint32_t request_message_id) {
+    E3_LOG_INFO(LOG_TAG) << "Handling subscription delete from dApp " << del.dapp_identifier
+                         << " for subscription " << del.subscription_id;
+    
+    ResponseCode response_code = ResponseCode::NEGATIVE;
+    
+    ErrorCode result = subscription_manager_->remove_subscription_by_id(
+        del.dapp_identifier,
+        del.subscription_id
+    );
+    
+    if (result == ErrorCode::SUCCESS) {
+        response_code = ResponseCode::POSITIVE;
+        E3_LOG_INFO(LOG_TAG) << "Subscription " << del.subscription_id << " removed for dApp " << del.dapp_identifier;
+    } else {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to remove subscription: "
+                              << error_code_to_string(result);
+    }
+    
+    // Create and queue ack response
+    Pdu response_pdu(PduType::MESSAGE_ACK);
+    MessageAck ack;
+    response_pdu.message_id = generate_message_id();
+    ack.request_id = request_message_id;
+    ack.response_code = response_code;
+    response_pdu.choice = ack;
+    
+    queue_outbound(std::move(response_pdu));
+}
+
+void E3Interface::handle_control_action(const DAppControlAction& action, uint32_t request_message_id) {
     E3_LOG_INFO(LOG_TAG) << "Handling control action from dApp " << action.dapp_identifier
                          << " for RAN function " << action.ran_function_identifier
+                         << " control " << action.control_identifier
                          << " (" << action.action_data.size() << " bytes)";
-    
-    // Find SM for this RAN function
+
     ServiceModel* sm = SmRegistry::instance().get_by_ran_function(action.ran_function_identifier);
-    
+
     if (sm && sm->is_running()) {
-        ErrorCode result = sm->process_control_action(
-            action.ran_function_identifier,
-            action.action_data
-        );
-        
-        if (result == ErrorCode::SUCCESS) {
-            E3_LOG_INFO(LOG_TAG) << "Control action processed by SM";
-        } else {
+        ErrorCode result = sm->handle_control_action(request_message_id, action);
+        if (result != ErrorCode::SUCCESS) {
             E3_LOG_ERROR(LOG_TAG) << "SM failed to process control action: "
                                   << error_code_to_string(result);
+            return;
         }
+        E3_LOG_INFO(LOG_TAG) << "Control action processed by SM";
     } else {
         E3_LOG_ERROR(LOG_TAG) << "No running SM found for RAN function " 
                               << action.ran_function_identifier;
-    }
-    
-    // Also invoke user callback if set
-    if (control_action_handler_) {
-        control_action_handler_(action);
-    }
+        return;
+    }    
 }
 
 void E3Interface::handle_dapp_report(const DAppReport& report) {
@@ -562,6 +590,12 @@ void E3Interface::handle_dapp_report(const DAppReport& report) {
     if (dapp_report_handler_) {
         dapp_report_handler_(report);
     }
+}
+
+void E3Interface::handle_release_message(const ReleaseMessage& release) {
+    E3_LOG_INFO(LOG_TAG) << "Handling release message from dApp " << release.dapp_identifier;
+
+    handle_dapp_disconnection(release.dapp_identifier);
 }
 
 void E3Interface::handle_dapp_disconnection(uint32_t dapp_id) {

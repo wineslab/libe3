@@ -39,6 +39,7 @@ CTestTestfile.cmake
 _deps/
 *.cmake
 !cmake/*.cmake
+!messages/**/*.cmake
 
 # IDE and editor files
 .idea/

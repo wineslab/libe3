@@ -53,12 +53,7 @@ public:
      * @return ErrorCode::SUCCESS on success
      * @return ErrorCode::BUFFER_TOO_SMALL if queue is full
      */
-    [[nodiscard]] ErrorCode push(Pdu pdu);
-
-    /**
-     * @brief Push a PDU to the queue (move semantics)
-     */
-    [[nodiscard]] ErrorCode push(Pdu&& pdu);
+    ErrorCode push(Pdu pdu);
 
     /**
      * @brief Pop a PDU from the queue (blocking)
@@ -67,7 +62,7 @@ public:
      *
      * @return The popped PDU
      */
-    [[nodiscard]] Pdu pop();
+    Pdu pop();
 
     /**
      * @brief Pop a PDU from the queue with timeout
@@ -75,29 +70,29 @@ public:
      * @param timeout Maximum time to wait
      * @return The PDU if available, std::nullopt on timeout
      */
-    [[nodiscard]] std::optional<Pdu> pop(std::chrono::milliseconds timeout);
+    std::optional<Pdu> pop(std::chrono::milliseconds timeout);
 
     /**
      * @brief Try to pop without blocking
      *
      * @return The PDU if available, std::nullopt if queue is empty
      */
-    [[nodiscard]] std::optional<Pdu> try_pop();
+    std::optional<Pdu> try_pop();
 
     /**
      * @brief Check if queue is empty
      */
-    [[nodiscard]] bool empty() const;
+    bool empty() const;
 
     /**
      * @brief Get current queue size
      */
-    [[nodiscard]] size_t size() const;
+    size_t size() const;
 
     /**
      * @brief Get maximum queue capacity
      */
-    [[nodiscard]] size_t capacity() const noexcept { return max_size_; }
+    size_t capacity() const noexcept { return max_size_; }
 
     /**
      * @brief Clear all items from the queue
@@ -112,7 +107,7 @@ public:
     /**
      * @brief Check if queue is shut down
      */
-    [[nodiscard]] bool is_shutdown() const;
+    bool is_shutdown() const;
 
 private:
     std::queue<Pdu> queue_;

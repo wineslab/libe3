@@ -8,6 +8,7 @@
 #include "libe3/e3_agent.hpp"
 #include "libe3/e3_interface.hpp"
 #include "libe3/logger.hpp"
+#include "libe3/version.hpp"
 
 namespace libe3 {
 
@@ -21,8 +22,7 @@ constexpr const char* LOG_TAG = "E3Agent";
 struct E3Agent::Impl {
     E3Config config;
     std::unique_ptr<E3Interface> interface;
-    ControlCallback control_callback;
-    IndicationCallback indication_callback;
+    DAppReportHandler dapp_report_handler;
     
     explicit Impl(E3Config cfg) : config(std::move(cfg)) {}
 };
@@ -63,19 +63,8 @@ ErrorCode E3Agent::init() {
         return result;
     }
     
-    // Set up control action handler
-    if (impl_->control_callback) {
-        impl_->interface->set_control_action_handler(
-            [this](const ControlAction& action) {
-                if (impl_->control_callback) {
-                    impl_->control_callback(
-                        action.dapp_identifier,
-                        action.ran_function_identifier,
-                        action.action_data
-                    );
-                }
-            }
-        );
+    if (impl_->dapp_report_handler) {
+        impl_->interface->set_dapp_report_handler(impl_->dapp_report_handler);
     }
     
     E3_LOG_INFO(LOG_TAG) << "E3Agent initialized successfully";
@@ -105,7 +94,7 @@ ErrorCode E3Agent::start() {
 }
 
 void E3Agent::stop() {
-    if (!impl_->interface) {
+    if (!impl_ || !impl_->interface) {
         return;
     }
     
@@ -115,14 +104,14 @@ void E3Agent::stop() {
 }
 
 AgentState E3Agent::state() const noexcept {
-    if (!impl_->interface) {
+    if (!impl_ || !impl_->interface) {
         return AgentState::UNINITIALIZED;
     }
     return impl_->interface->state();
 }
 
 bool E3Agent::is_running() const noexcept {
-    return impl_->interface && impl_->interface->is_running();
+    return impl_ && impl_->interface && impl_->interface->is_running();
 }
 
 // =========================================================================
@@ -142,35 +131,6 @@ ErrorCode E3Agent::register_sm(std::unique_ptr<ServiceModel> sm) {
         }
     }
     
-    // Set up indication callback on the SM
-    if (impl_->indication_callback) {
-        auto ran_funcs = sm->ran_function_ids();
-        sm->set_indication_callback(
-            [this](uint32_t ran_func, std::vector<uint8_t> data, uint64_t timestamp) {
-                // Get subscribers for this RAN function
-                auto subscribers = impl_->interface->subscription_manager()
-                    .get_subscribed_dapps(ran_func);
-                
-                // Deliver to each subscriber
-                for (uint32_t dapp_id : subscribers) {
-                    // Queue indication message
-                    Pdu pdu(PduType::INDICATION_MESSAGE);
-                    IndicationMessage msg;
-                    msg.dapp_identifier = dapp_id;
-                    msg.protocol_data = data;
-                    pdu.choice = msg;
-                    
-                    impl_->interface->queue_outbound(std::move(pdu));
-                    
-                    // Also invoke user callback
-                    if (impl_->indication_callback) {
-                        impl_->indication_callback(dapp_id, ran_func, data);
-                    }
-                }
-            }
-        );
-    }
-    
     return impl_->interface->register_sm(std::move(sm));
 }
 
@@ -181,47 +141,66 @@ std::vector<uint32_t> E3Agent::get_available_ran_functions() const {
     return impl_->interface->get_available_ran_functions();
 }
 
-// =========================================================================
-// Callbacks
-// =========================================================================
-
-void E3Agent::set_control_callback(ControlCallback callback) {
-    impl_->control_callback = std::move(callback);
-    
-    if (impl_->interface) {
-        impl_->interface->set_control_action_handler(
-            [this](const ControlAction& action) {
-                if (impl_->control_callback) {
-                    impl_->control_callback(
-                        action.dapp_identifier,
-                        action.ran_function_identifier,
-                        action.action_data
-                    );
-                }
-            }
-        );
+void E3Agent::set_dapp_report_handler(DAppReportHandler handler) {
+    impl_->dapp_report_handler = std::move(handler);
+    if (impl_->interface && impl_->dapp_report_handler) {
+        impl_->interface->set_dapp_report_handler(impl_->dapp_report_handler);
     }
-}
-
-void E3Agent::set_indication_callback(IndicationCallback callback) {
-    impl_->indication_callback = std::move(callback);
 }
 
 // =========================================================================
 // Manual Operations
 // =========================================================================
 
-ErrorCode E3Agent::send_indication(uint32_t dapp_id, const std::vector<uint8_t>& data) {
+ErrorCode E3Agent::send_indication(
+    uint32_t dapp_id,
+    uint32_t ran_function_id,
+    const std::vector<uint8_t>& data
+) {
     if (!impl_->interface || !impl_->interface->is_running()) {
         return ErrorCode::NOT_INITIALIZED;
     }
     
     Pdu pdu(PduType::INDICATION_MESSAGE);
+    uint32_t mid = impl_->interface->generate_message_id();
+    pdu.message_id = mid;
     IndicationMessage msg;
     msg.dapp_identifier = dapp_id;
+    msg.ran_function_identifier = ran_function_id;
     msg.protocol_data = data;
     pdu.choice = msg;
     
+    return impl_->interface->queue_outbound(std::move(pdu));
+}
+
+ErrorCode E3Agent::send_xapp_control(
+    uint32_t dapp_id,
+    uint32_t ran_function_id,
+    const std::vector<uint8_t>& control_data
+) {
+    if (!impl_->interface || !impl_->interface->is_running()) {
+        return ErrorCode::NOT_INITIALIZED;
+    }
+    Pdu pdu(PduType::XAPP_CONTROL_ACTION);
+    pdu.message_id = impl_->interface->generate_message_id();
+    XAppControlAction action;
+    action.dapp_identifier = dapp_id;
+    action.ran_function_identifier = ran_function_id;
+    action.xapp_control_data = control_data;
+    pdu.choice = action;
+    return impl_->interface->queue_outbound(std::move(pdu));
+}
+
+ErrorCode E3Agent::send_message_ack(uint32_t request_id, ResponseCode response_code) {
+    if (!impl_->interface || !impl_->interface->is_running()) {
+        return ErrorCode::NOT_INITIALIZED;
+    }
+    Pdu pdu(PduType::MESSAGE_ACK);
+    pdu.message_id = impl_->interface->generate_message_id();
+    MessageAck ack;
+    ack.request_id = request_id;
+    ack.response_code = response_code;
+    pdu.choice = ack;
     return impl_->interface->queue_outbound(std::move(pdu));
 }
 
@@ -252,10 +231,6 @@ std::vector<uint32_t> E3Agent::get_ran_function_subscribers(uint32_t ran_functio
 
 const E3Config& E3Agent::config() const noexcept {
     return impl_->config;
-}
-
-bool E3Agent::is_simulation_mode() const noexcept {
-    return impl_->config.simulation_mode;
 }
 
 // =========================================================================

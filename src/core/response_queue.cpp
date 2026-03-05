@@ -47,10 +47,6 @@ ErrorCode ResponseQueue::push(Pdu pdu) {
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode ResponseQueue::push(Pdu&& pdu) {
-    return push(pdu);
-}
-
 Pdu ResponseQueue::pop() {
     std::unique_lock lock(mutex_);
     

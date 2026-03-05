@@ -21,6 +21,8 @@
 #include <chrono>
 #include <memory>
 
+#include "libe3/error_codes.h"
+
 namespace libe3 {
 
 /**
@@ -32,16 +34,20 @@ enum class EncodingFormat : uint8_t {
 };
 
 /**
- * @brief Transport protocol types
+ * @brief Link layer types (matches Python E3LinkLayer)
  */
-enum class TransportType : uint8_t {
-    POSIX = 0,       ///< POSIX sockets (generic, uses TCP by default)
-    POSIX_TCP = 1,   ///< POSIX TCP sockets
-    POSIX_SCTP = 2,  ///< POSIX SCTP sockets (O-RAN standard)
-    POSIX_IPC = 3,   ///< POSIX Unix Domain Sockets
-    ZMQ = 10,        ///< ZeroMQ (generic, uses IPC by default)
-    ZMQ_TCP = 11,    ///< ZeroMQ over TCP
-    ZMQ_IPC = 12     ///< ZeroMQ over IPC
+enum class E3LinkLayer : uint8_t {
+    ZMQ = 0,     ///< ZeroMQ-based transport
+    POSIX = 1    ///< POSIX socket-based transport
+};
+
+/**
+ * @brief Transport layer types (matches Python E3TransportLayer)
+ */
+enum class E3TransportLayer : uint8_t {
+    SCTP = 0,    ///< SCTP (O-RAN standard)
+    TCP = 1,     ///< TCP
+    IPC = 2      ///< Unix Domain Sockets / IPC
 };
 
 /**
@@ -68,12 +74,14 @@ enum class PduType : uint8_t {
     SETUP_REQUEST = 0,
     SETUP_RESPONSE = 1,
     SUBSCRIPTION_REQUEST = 2,
-    SUBSCRIPTION_RESPONSE = 3,
-    INDICATION_MESSAGE = 4,
-    CONTROL_ACTION = 5,
-    DAPP_REPORT = 6,
-    XAPP_CONTROL_ACTION = 7,
-    MESSAGE_ACK = 8
+    SUBSCRIPTION_DELETE = 3,
+    SUBSCRIPTION_RESPONSE = 4,
+    INDICATION_MESSAGE = 5,
+    DAPP_CONTROL_ACTION = 6,
+    DAPP_REPORT = 7,
+    XAPP_CONTROL_ACTION = 8,
+    RELEASE_MESSAGE = 9,
+    MESSAGE_ACK = 10
 };
 
 /**
@@ -92,30 +100,25 @@ enum class AgentState : uint8_t {
 
 /**
  * @brief Error codes returned by libe3 operations
+ * Use shared error-code list (see libe3/error_codes.h)
  */
 enum class ErrorCode : int {
-    SUCCESS = 0,
-    INVALID_PARAM = -1,
-    NOT_INITIALIZED = -2,
-    ALREADY_INITIALIZED = -3,
-    NOT_CONNECTED = -4,
-    CONNECTION_FAILED = -5,
-    TIMEOUT = -6,
-    ENCODE_FAILED = -7,
-    DECODE_FAILED = -8,
-    SM_NOT_FOUND = -9,
-    SM_ALREADY_REGISTERED = -10,
-    BUFFER_TOO_SMALL = -11,
-    INTERNAL_ERROR = -12,
-    SUBSCRIPTION_EXISTS = -13,
-    SUBSCRIPTION_NOT_FOUND = -14,
-    DAPP_NOT_REGISTERED = -15,
-    TRANSPORT_ERROR = -16,
-    STATE_ERROR = -17,
-    SM_START_FAILED = -18,
-    NOT_FOUND = -19,
-    GENERIC_ERROR = -100
+#define X(name, val) name = val,
+    LIBE3_ERROR_CODE_LIST
+#undef X
 };
+
+/**
+ * @brief Convert ErrorCode to string name (C++ wrapper)
+ */
+inline const char* ErrorCodeToString(ErrorCode code) {
+    switch (static_cast<int>(code)) {
+#define X(name, val) case val: return #name;
+        LIBE3_ERROR_CODE_LIST
+#undef X
+        default: return "UNKNOWN_ERROR_CODE";
+    }
+}
 
 // Maximum sizes for E3AP data fields (aligned with original C implementation)
 constexpr size_t MAX_PROTOCOL_DATA_SIZE = 32768;
@@ -127,14 +130,6 @@ constexpr size_t DEFAULT_BUFFER_SIZE = 60000;
 
 // Protocol version
 constexpr uint32_t LIBE3_PROTOCOL_VERSION = 1;
-
-/**
- * @brief E3AP Setup result
- */
-enum class SetupResult : uint8_t {
-    SUCCESS = 0,
-    FAILURE = 1
-};
 
 /**
  * @brief Encoded message wrapper
@@ -149,10 +144,10 @@ struct EncodedMessage {
     EncodedMessage(std::vector<uint8_t> buf, EncodingFormat fmt)
         : buffer(std::move(buf)), format(fmt) {}
     
-    [[nodiscard]] size_t size() const noexcept { return buffer.size(); }
-    [[nodiscard]] bool empty() const noexcept { return buffer.empty(); }
-    [[nodiscard]] const uint8_t* data() const noexcept { return buffer.data(); }
-    [[nodiscard]] uint8_t* data() noexcept { return buffer.data(); }
+    size_t size() const noexcept { return buffer.size(); }
+    bool empty() const noexcept { return buffer.empty(); }
+    const uint8_t* data() const noexcept { return buffer.data(); }
+    uint8_t* data() noexcept { return buffer.data(); }
 };
 
 /**
@@ -168,37 +163,62 @@ struct RanFunctionDefinition {
  * @brief E3AP Setup Request structure
  */
 struct SetupRequest {
-    std::string ran_identifier;
-    uint32_t protocol_version{LIBE3_PROTOCOL_VERSION};
-    std::vector<RanFunctionDefinition> ran_functions;
+    std::string e3ap_protocol_version;  ///< E3AP protocol version (e.g., "0.0.0")
+    std::string dapp_name;               ///< Name of the dApp
+    std::string dapp_version;            ///< Version of the dApp (e.g., "0.0.0")
+    std::string vendor;                  ///< Vendor name (max 30 chars)
+};
+
+/**
+ * @brief RAN Function Definition for Setup Response
+ */
+struct RanFunctionDef {
+    uint32_t ran_function_identifier{0};
+    std::vector<uint32_t> telemetry_identifier_list;  ///< List of telemetry identifiers
+    std::vector<uint32_t> control_identifier_list;    ///< List of control identifiers
+    std::vector<uint8_t> ran_function_data;
 };
 
 /**
  * @brief E3AP Setup Response structure
  */
 struct SetupResponse {
-    SetupResult result{SetupResult::FAILURE};
-    std::vector<uint32_t> accepted_ran_functions;
-    std::vector<uint32_t> rejected_ran_functions;
-    std::string message;
+    uint32_t request_id{0};                      ///< ID of the corresponding SetupRequest
+    ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
+    std::optional<std::string> e3ap_protocol_version;   ///< E3AP protocol version (optional)
+    std::optional<uint32_t> dapp_identifier;            ///< Assigned dApp identifier (optional)
+    std::string ran_identifier;                         ///< RAN identifier (mandatory)
+    std::vector<RanFunctionDef> ran_function_list;      ///< List of available RAN functions (optional)
 };
 
 /**
  * @brief E3AP Subscription Request structure
  */
 struct SubscriptionRequest {
-    uint32_t dapp_identifier{0};
-    std::vector<uint32_t> ran_functions_to_subscribe;
-    std::vector<uint32_t> ran_functions_to_unsubscribe;
+    uint32_t dapp_identifier{0};                     ///< dApp identifier
+    uint32_t ran_function_identifier{0};             ///< RAN function to subscribe to
+    std::vector<uint32_t> telemetry_identifier_list; ///< List of telemetry identifiers
+    std::vector<uint32_t> control_identifier_list;   ///< List of control identifiers
+    std::optional<uint32_t> subscription_time;       ///< How long to keep the subscription (0-3600 sec)
+    std::optional<uint32_t> periodicity;             ///< Periodicity of data delivery (0-10000 microseconds)
+};
+
+/**
+ * @brief E3AP Subscription Delete structure
+ */
+struct SubscriptionDelete {
+    uint32_t dapp_identifier{0};         ///< dApp identifier
+    uint32_t subscription_id{0};         ///< Subscription ID to delete
 };
 
 /**
  * @brief E3AP Subscription Response structure
  */
 struct SubscriptionResponse {
-    uint32_t dapp_identifier{0};
-    std::vector<uint32_t> accepted_ran_functions;
-    std::vector<uint32_t> rejected_ran_functions;
+    uint32_t request_id{0};                      ///< ID of the corresponding SubscriptionRequest
+    uint32_t dapp_identifier{0};                  ///< dApp identifier
+    ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
+    std::optional<uint32_t> subscription_id;     ///< Subscription ID (optional)
 };
 
 /**
@@ -206,15 +226,17 @@ struct SubscriptionResponse {
  */
 struct IndicationMessage {
     uint32_t dapp_identifier{0};
+    uint32_t ran_function_identifier{0}; ///< RAN function identifier
     std::vector<uint8_t> protocol_data;
 };
 
 /**
- * @brief E3AP Control Action structure
+ * @brief E3AP dApp Control Action structure
  */
-struct ControlAction {
+struct DAppControlAction {
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0};
+    uint32_t control_identifier{0};      ///< Control identifier
     std::vector<uint8_t> action_data;
 };
 
@@ -222,9 +244,8 @@ struct ControlAction {
  * @brief E3AP Message Acknowledgment structure
  */
 struct MessageAck {
-    uint32_t original_message_id{0};
-    ErrorCode result{ErrorCode::SUCCESS};
-    std::string message;
+    uint32_t request_id{0};              ///< ID of the request being acknowledged
+    ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
 };
 
 /**
@@ -246,17 +267,26 @@ struct XAppControlAction {
 };
 
 /**
+ * @brief E3AP Release Message structure
+ */
+struct ReleaseMessage {
+    uint32_t dapp_identifier{0};         ///< dApp identifier
+};
+
+/**
  * @brief Generic E3AP PDU using std::variant for type-safe union
  */
 using PduChoice = std::variant<
     SetupRequest,
     SetupResponse,
     SubscriptionRequest,
+    SubscriptionDelete,
     SubscriptionResponse,
     IndicationMessage,
-    ControlAction,
+    DAppControlAction,
     DAppReport,
     XAppControlAction,
+    ReleaseMessage,
     MessageAck
 >;
 
@@ -290,12 +320,12 @@ struct Pdu {
      * @brief Get PDU data with type checking
      */
     template<typename T>
-    [[nodiscard]] T* get_if() noexcept {
+    T* get_if() noexcept {
         return std::get_if<T>(&choice);
     }
 
     template<typename T>
-    [[nodiscard]] const T* get_if() const noexcept {
+    const T* get_if() const noexcept {
         return std::get_if<T>(&choice);
     }
 };
@@ -306,15 +336,32 @@ struct Pdu {
 struct E3Config {
     // RAN identification
     std::string ran_identifier;
-    
+
+    //  E3AP version
+    std::string e3ap_version{"1.0.0"};
+
     // Transport configuration
-    TransportType transport{TransportType::POSIX};
+    E3LinkLayer link_layer{E3LinkLayer::ZMQ};
+    E3TransportLayer transport_layer{E3TransportLayer::IPC};
+    
+    // Ports
+    uint16_t setup_port{9990};
+    uint16_t subscriber_port{9999};
+    uint16_t publisher_port{9991};
+
+    // Endpoints
     std::string setup_endpoint{"ipc:///tmp/dapps/setup"};
     std::string subscriber_endpoint{"ipc:///tmp/dapps/dapp_socket"};
     std::string publisher_endpoint{"ipc:///tmp/dapps/e3_socket"};
     
     // Encoding format
+#if defined(LIBE3_ENABLE_ASN1)
+    EncodingFormat encoding{EncodingFormat::ASN1};
+#elif defined(LIBE3_ENABLE_JSON)
     EncodingFormat encoding{EncodingFormat::JSON};
+#else // Fallback
+    EncodingFormat encoding{EncodingFormat::ASN1};
+#endif
     
     // Timeouts (milliseconds)
     uint32_t connect_timeout_ms{5000};
@@ -324,9 +371,6 @@ struct E3Config {
     // Buffer sizes
     size_t receive_buffer_size{DEFAULT_BUFFER_SIZE};
     size_t send_buffer_size{DEFAULT_BUFFER_SIZE};
-    
-    // Simulation mode (for testing without real RAN)
-    bool simulation_mode{false};
     
     // Threading
     size_t io_threads{2};
@@ -362,25 +406,27 @@ struct SubscriptionEntry {
 /**
  * @brief Convert PduType to string representation
  */
-[[nodiscard]] inline const char* pdu_type_to_string(PduType type) noexcept {
+inline const char* pdu_type_to_string(PduType type) noexcept {
     switch (type) {
         case PduType::SETUP_REQUEST: return "SetupRequest";
         case PduType::SETUP_RESPONSE: return "SetupResponse";
         case PduType::SUBSCRIPTION_REQUEST: return "SubscriptionRequest";
+        case PduType::SUBSCRIPTION_DELETE: return "SubscriptionDelete";
         case PduType::SUBSCRIPTION_RESPONSE: return "SubscriptionResponse";
         case PduType::INDICATION_MESSAGE: return "IndicationMessage";
-        case PduType::CONTROL_ACTION: return "ControlAction";
+        case PduType::DAPP_CONTROL_ACTION: return "DAppControlAction";
         case PduType::DAPP_REPORT: return "DAppReport";
         case PduType::XAPP_CONTROL_ACTION: return "XAppControlAction";
+        case PduType::RELEASE_MESSAGE: return "ReleaseMessage";
         case PduType::MESSAGE_ACK: return "MessageAck";
-        default: return "Unknown";
+        default: return "unknown";
     }
 }
 
 /**
  * @brief Convert ActionType to string representation
  */
-[[nodiscard]] inline const char* action_type_to_string(ActionType type) noexcept {
+inline const char* action_type_to_string(ActionType type) noexcept {
     switch (type) {
         case ActionType::INSERT: return "insert";
         case ActionType::UPDATE: return "update";
@@ -392,7 +438,7 @@ struct SubscriptionEntry {
 /**
  * @brief Convert ResponseCode to string representation
  */
-[[nodiscard]] inline const char* response_code_to_string(ResponseCode code) noexcept {
+inline const char* response_code_to_string(ResponseCode code) noexcept {
     switch (code) {
         case ResponseCode::POSITIVE: return "positive";
         case ResponseCode::NEGATIVE: return "negative";
@@ -403,7 +449,7 @@ struct SubscriptionEntry {
 /**
  * @brief Convert ErrorCode to string representation
  */
-[[nodiscard]] inline const char* error_code_to_string(ErrorCode code) noexcept {
+inline const char* error_code_to_string(ErrorCode code) noexcept {
     switch (code) {
         case ErrorCode::SUCCESS: return "Success";
         case ErrorCode::INVALID_PARAM: return "Invalid parameter";
@@ -425,6 +471,7 @@ struct SubscriptionEntry {
         case ErrorCode::STATE_ERROR: return "State error";
         case ErrorCode::SM_START_FAILED: return "Service Model start failed";
         case ErrorCode::NOT_FOUND: return "Not found";
+        case ErrorCode::CANCELLED: return "Operation cancelled";
         default: return "Unknown error";
     }
 }
@@ -432,7 +479,7 @@ struct SubscriptionEntry {
 /**
  * @brief Convert AgentState to string representation
  */
-[[nodiscard]] inline const char* agent_state_to_string(AgentState state) noexcept {
+inline const char* agent_state_to_string(AgentState state) noexcept {
     switch (state) {
         case AgentState::UNINITIALIZED: return "Uninitialized";
         case AgentState::INITIALIZED: return "Initialized";
@@ -443,6 +490,29 @@ struct SubscriptionEntry {
         case AgentState::STOPPED: return "Stopped";
         case AgentState::ERROR: return "Error";
         default: return "Unknown";
+    }
+}
+
+/**
+ * @brief Convert E3LinkLayer to string representation
+ */
+inline const char* link_layer_to_string(E3LinkLayer layer) noexcept {
+    switch (layer) {
+        case E3LinkLayer::ZMQ: return "zmq";
+        case E3LinkLayer::POSIX: return "posix";
+        default: return "unknown";
+    }
+}
+
+/**
+ * @brief Convert E3TransportLayer to string representation
+ */
+inline const char* transport_layer_to_string(E3TransportLayer layer) noexcept {
+    switch (layer) {
+        case E3TransportLayer::SCTP: return "sctp";
+        case E3TransportLayer::TCP: return "tcp";
+        case E3TransportLayer::IPC: return "ipc";
+        default: return "unknown";
     }
 }
 

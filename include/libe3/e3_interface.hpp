@@ -33,7 +33,6 @@ class E3Agent;
  */
 using SetupRequestHandler = std::function<ResponseCode(const SetupRequest&, SetupResponse&)>;
 using SubscriptionRequestHandler = std::function<ResponseCode(const SubscriptionRequest&)>;
-using ControlActionHandler = std::function<void(const ControlAction&)>;
 using DAppReportHandler = std::function<void(const DAppReport&)>;
 
 /**
@@ -72,7 +71,7 @@ public:
      * Creates connector, encoder, and initializes internal state.
      * @return ErrorCode::SUCCESS on success
      */
-    [[nodiscard]] ErrorCode init();
+    ErrorCode init();
 
     /**
      * @brief Start the interface processing loops
@@ -80,7 +79,7 @@ public:
      * Spawns the subscriber, publisher, and SM data handler threads.
      * @return ErrorCode::SUCCESS on success
      */
-    [[nodiscard]] ErrorCode start();
+    ErrorCode start();
 
     /**
      * @brief Stop the interface
@@ -92,61 +91,50 @@ public:
     /**
      * @brief Get current state
      */
-    [[nodiscard]] AgentState state() const noexcept { return state_.load(); }
+    AgentState state() const noexcept { return state_.load(); }
 
     /**
      * @brief Check if interface is running
      */
-    [[nodiscard]] bool is_running() const noexcept { 
+    bool is_running() const noexcept { 
         return state_.load() == AgentState::RUNNING; 
     }
 
     /**
      * @brief Get the subscription manager
      */
-    [[nodiscard]] SubscriptionManager& subscription_manager() noexcept { 
+    SubscriptionManager& subscription_manager() noexcept { 
         return *subscription_manager_; 
     }
 
     /**
      * @brief Get the response queue for outbound messages
      */
-    [[nodiscard]] ResponseQueue& response_queue() noexcept { 
+    ResponseQueue& response_queue() noexcept { 
         return *response_queue_; 
     }
 
     /**
      * @brief Queue a PDU for outbound transmission
      */
-    [[nodiscard]] ErrorCode queue_outbound(Pdu pdu);
+    ErrorCode queue_outbound(Pdu pdu);
 
     /**
      * @brief Get available RAN functions
      */
-    [[nodiscard]] std::vector<uint32_t> get_available_ran_functions() const;
+    std::vector<uint32_t> get_available_ran_functions() const;
 
     /**
      * @brief Register a Service Model
      */
-    [[nodiscard]] ErrorCode register_sm(std::unique_ptr<ServiceModel> sm);
+    ErrorCode register_sm(std::unique_ptr<ServiceModel> sm);
 
     // =========================================================================
     // Event Handlers - Set by E3Agent
     // =========================================================================
 
-    void set_control_action_handler(ControlActionHandler handler) {
-        control_action_handler_ = std::move(handler);
-    }
-
     void set_dapp_report_handler(DAppReportHandler handler) {
         dapp_report_handler_ = std::move(handler);
-    }
-
-    /**
-     * @brief Check if running in simulation mode
-     */
-    [[nodiscard]] bool is_simulation_mode() const noexcept { 
-        return config_.simulation_mode; 
     }
 
 private:
@@ -170,7 +158,6 @@ private:
     std::unique_ptr<std::thread> sm_data_thread_;
 
     // Event handlers
-    ControlActionHandler control_action_handler_;
     DAppReportHandler dapp_report_handler_;
 
     // =========================================================================
@@ -204,22 +191,33 @@ private:
     /**
      * @brief Handle E3 Setup Request
      */
-    void handle_setup_request(const SetupRequest& request);
+    void handle_setup_request(const SetupRequest& request, uint32_t request_message_id);
 
     /**
      * @brief Handle E3 Subscription Request
      */
-    void handle_subscription_request(const SubscriptionRequest& request);
+    void handle_subscription_request(const SubscriptionRequest& request, uint32_t request_message_id);
+
+    /**
+     * @brief Handle E3 Subscription Delete
+     */
+    void handle_subscription_delete(const SubscriptionDelete& del, uint32_t request_message_id);
 
     /**
      * @brief Handle E3 Control Action
+     * @param request_message_id Message ID from the incoming PDU (used for MessageAck)
      */
-    void handle_control_action(const ControlAction& action);
+    void handle_control_action(const DAppControlAction& action, uint32_t request_message_id);
 
     /**
      * @brief Handle dApp Report
      */
     void handle_dapp_report(const DAppReport& report);
+
+    /**
+     * @brief Handle dApp Report
+     */
+    void handle_release_message(const ReleaseMessage &release);
 
     /**
      * @brief Handle dApp disconnection
@@ -234,6 +232,12 @@ private:
      * @brief Callback for SM lifecycle changes
      */
     void on_sm_lifecycle_change(uint32_t ran_function_id, bool should_start);
+
+public:
+    /**
+     * @brief Generate message ID (1-1000, randomized)
+     */
+    uint32_t generate_message_id();
 };
 
 } // namespace libe3
