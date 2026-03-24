@@ -62,6 +62,8 @@ private:
     // Helper methods for type conversions
     PduType string_to_pdu_type(const std::string& s) const;
     ErrorCode string_to_error_code(const std::string& s) const;
+
+    bool nested_mode_ = false;
 };
 
 } // namespace libe3

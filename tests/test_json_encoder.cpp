@@ -34,7 +34,7 @@ TEST(JsonEncoder_encode_setup_request) {
     
     // Verify JSON contains expected fields
     std::string json(encoded->buffer.begin(), encoded->buffer.end());
-    ASSERT_TRUE(json.find("SetupRequest") != std::string::npos);
+    ASSERT_TRUE(json.find("setupRequest") != std::string::npos);
     ASSERT_TRUE(json.find("TestDApp") != std::string::npos);
     ASSERT_TRUE(json.find("TestVendor") != std::string::npos);
 }
@@ -78,7 +78,7 @@ TEST(JsonEncoder_encode_setup_response) {
     ASSERT_TRUE(encoded.has_value());
     
     std::string json(encoded->buffer.begin(), encoded->buffer.end());
-    ASSERT_TRUE(json.find("SetupResponse") != std::string::npos);
+    ASSERT_TRUE(json.find("setupResponse") != std::string::npos);
 }
 
 TEST(JsonEncoder_encode_decode_subscription_request) {
