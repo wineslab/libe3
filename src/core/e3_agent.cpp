@@ -23,6 +23,7 @@ struct E3Agent::Impl {
     E3Config config;
     std::unique_ptr<E3Interface> interface;
     DAppReportHandler dapp_report_handler;
+    DAppStatusChangedHandler dapp_status_changed_handler;
     
     explicit Impl(E3Config cfg) : config(std::move(cfg)) {}
 };
@@ -65,6 +66,10 @@ ErrorCode E3Agent::init() {
     
     if (impl_->dapp_report_handler) {
         impl_->interface->set_dapp_report_handler(impl_->dapp_report_handler);
+    }
+
+    if (impl_->dapp_status_changed_handler) {
+        impl_->interface->set_dapp_status_changed_handler(impl_->dapp_status_changed_handler);
     }
     
     E3_LOG_INFO(LOG_TAG) << "E3Agent initialized successfully";
@@ -145,6 +150,13 @@ void E3Agent::set_dapp_report_handler(DAppReportHandler handler) {
     impl_->dapp_report_handler = std::move(handler);
     if (impl_->interface && impl_->dapp_report_handler) {
         impl_->interface->set_dapp_report_handler(impl_->dapp_report_handler);
+    }
+}
+
+void E3Agent::set_dapp_status_changed_handler(DAppStatusChangedHandler handler) {
+    impl_->dapp_status_changed_handler = std::move(handler);
+    if (impl_->interface && impl_->dapp_status_changed_handler) {
+        impl_->interface->set_dapp_status_changed_handler(impl_->dapp_status_changed_handler);
     }
 }
 

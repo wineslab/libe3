@@ -44,6 +44,24 @@ typedef void (*e3_dapp_report_cb)(
     size_t report_data_len
 );
 
+/** Callback when dApp status changes (connect, disconnect, subscribe, unsubscribe). */
+typedef void (*e3_dapp_status_changed_cb)(void);
+
+/**
+ * @brief Set callback for dApp status changes.
+ *
+ * Called when a dApp connects, disconnects, subscribes, or unsubscribes.
+ * Pass NULL as \p handler to clear the callback.
+ *
+ * @param agent Agent handle
+ * @param handler Callback invoked on each dApp status change
+ * @return \ref e3_error_t (see \ref libe3::ErrorCode; 0 == SUCCESS)
+ */
+e3_error_t e3_agent_set_dapp_status_changed_handler(
+    e3_agent_handle_t* agent,
+    e3_dapp_status_changed_cb handler
+);
+
 /**
  * @brief Descriptor describing a ServiceModel implemented in C.
  *
