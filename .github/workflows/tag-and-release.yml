@@ -135,6 +135,24 @@ jobs:
           chmod +x ./build_libe3 || true
           ./build_libe3 -r --docs
 
+      - name: Report documentation coverage
+        run: |
+          # Count documented vs undocumented symbols from Doxygen warnings
+          total=$(grep -c "is not documented" build/docs/doxygen_warnings.txt 2>/dev/null || echo 0)
+          echo "## Documentation Coverage" >> $GITHUB_STEP_SUMMARY
+          if [ "$total" -eq 0 ]; then
+            echo "✅ No undocumented public symbols detected." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **${total} undocumented symbol(s)** found. See details below." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "<details><summary>Undocumented symbols</summary>" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            grep "is not documented" build/docs/doxygen_warnings.txt >> $GITHUB_STEP_SUMMARY || true
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "</details>" >> $GITHUB_STEP_SUMMARY
+          fi
+
       - name: Package HTML documentation
         run: |
           version=${{ needs.create-tag.outputs.version }}
@@ -214,6 +232,15 @@ jobs:
           unzip "/tmp/docs-artifact/libe3-docs-${version}.zip" -d /tmp/docs-html/
 
       - name: Publish to gh-pages branch
+        # Process overview:
+        # 1. Configure git identity (needed to author the commit).
+        # 2. Fetch and switch to the `gh-pages` branch, creating it as an orphan
+        #    (history-free) if it does not yet exist.
+        # 3. Wipe all existing content from the branch so stale files from a
+        #    previous release do not linger.
+        # 4. Copy the freshly-extracted Doxygen HTML tree into the branch root.
+        # 5. Commit and push.  GitHub Pages will then automatically serve the
+        #    content from this branch at https://<org>.github.io/<repo>/.
         run: |
           version=${{ needs.create-tag.outputs.version }}
           git config user.name "github-actions[bot]"

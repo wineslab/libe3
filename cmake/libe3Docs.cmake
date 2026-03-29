@@ -20,6 +20,7 @@ if(LIBE3_BUILD_DOCS)
         set(DOXYGEN_INPUT_DIRS
             "${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/src")
         set(DOXYGEN_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+        set(DOXYGEN_WARN_LOGFILE "${CMAKE_CURRENT_BINARY_DIR}/docs/doxygen_warnings.txt")
 
         # Dot / Graphviz support
         if(DOXYGEN_DOT_FOUND)
