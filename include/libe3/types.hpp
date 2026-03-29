@@ -154,9 +154,9 @@ struct EncodedMessage {
  * @brief RAN Function definition (SM identification)
  */
 struct RanFunctionDefinition {
-    uint32_t ran_function_id{0};
-    std::string sm_name;
-    std::string sm_version;
+    uint32_t ran_function_id{0};  ///< Unique identifier for this RAN function
+    std::string sm_name;           ///< Human-readable Service Model name
+    std::string sm_version;        ///< Service Model version string (e.g. "1.0.0")
 };
 
 /**
@@ -335,48 +335,47 @@ struct Pdu {
  */
 struct E3Config {
     // RAN identification
-    std::string ran_identifier;
+    std::string ran_identifier;  ///< Unique identifier for this RAN function (e.g. "DU-1")
 
-    //  E3AP version
-    std::string e3ap_version{"1.0.0"};
+    std::string e3ap_version{"1.0.0"};  ///< E3AP protocol version advertised during setup
 
     // Transport configuration
-    E3LinkLayer link_layer{E3LinkLayer::ZMQ};
-    E3TransportLayer transport_layer{E3TransportLayer::IPC};
+    E3LinkLayer link_layer{E3LinkLayer::ZMQ};             ///< Link-layer transport (ZMQ or POSIX)
+    E3TransportLayer transport_layer{E3TransportLayer::IPC}; ///< Transport-layer protocol (SCTP, TCP, IPC)
     
     // Ports
-    uint16_t setup_port{9990};
-    uint16_t subscriber_port{9999};
-    uint16_t publisher_port{9991};
+    uint16_t setup_port{9990};       ///< Port used for E3AP setup channel
+    uint16_t subscriber_port{9999};  ///< Port used for inbound control/subscription channel
+    uint16_t publisher_port{9991};   ///< Port used for outbound indication/publication channel
 
     // Endpoints
-    std::string setup_endpoint{"ipc:///tmp/dapps/setup"};
-    std::string subscriber_endpoint{"ipc:///tmp/dapps/dapp_socket"};
-    std::string publisher_endpoint{"ipc:///tmp/dapps/e3_socket"};
+    std::string setup_endpoint{"ipc:///tmp/dapps/setup"};            ///< Endpoint URI for setup channel
+    std::string subscriber_endpoint{"ipc:///tmp/dapps/dapp_socket"}; ///< Endpoint URI for inbound channel
+    std::string publisher_endpoint{"ipc:///tmp/dapps/e3_socket"};    ///< Endpoint URI for outbound channel
     
     // Encoding format
 #if defined(LIBE3_ENABLE_ASN1)
-    EncodingFormat encoding{EncodingFormat::ASN1};
+    EncodingFormat encoding{EncodingFormat::ASN1}; ///< PDU encoding format (ASN.1 PER or JSON)
 #elif defined(LIBE3_ENABLE_JSON)
-    EncodingFormat encoding{EncodingFormat::JSON};
+    EncodingFormat encoding{EncodingFormat::JSON};  ///< PDU encoding format (ASN.1 PER or JSON)
 #else // Fallback
-    EncodingFormat encoding{EncodingFormat::ASN1};
+    EncodingFormat encoding{EncodingFormat::ASN1};  ///< PDU encoding format (ASN.1 PER or JSON)
 #endif
     
     // Timeouts (milliseconds)
-    uint32_t connect_timeout_ms{5000};
-    uint32_t recv_timeout_ms{1000};
-    uint32_t send_timeout_ms{1000};
+    uint32_t connect_timeout_ms{5000}; ///< Connection establishment timeout in milliseconds
+    uint32_t recv_timeout_ms{1000};    ///< Receive operation timeout in milliseconds
+    uint32_t send_timeout_ms{1000};    ///< Send operation timeout in milliseconds
     
     // Buffer sizes
-    size_t receive_buffer_size{DEFAULT_BUFFER_SIZE};
-    size_t send_buffer_size{DEFAULT_BUFFER_SIZE};
+    size_t receive_buffer_size{DEFAULT_BUFFER_SIZE}; ///< Size of the receive buffer in bytes
+    size_t send_buffer_size{DEFAULT_BUFFER_SIZE};    ///< Size of the send buffer in bytes
     
     // Threading
-    size_t io_threads{2};
+    size_t io_threads{2};  ///< Number of I/O threads (used by ZMQ context)
     
     // Logging level (0=none, 1=error, 2=warn, 3=info, 4=debug, 5=trace)
-    int log_level{3};
+    int log_level{3};  ///< Logging verbosity: 0=none, 1=error, 2=warn, 3=info, 4=debug, 5=trace
 };
 
 /**
@@ -388,17 +387,17 @@ using Timestamp = std::chrono::time_point<std::chrono::steady_clock>;
  * @brief dApp registration entry
  */
 struct DAppEntry {
-    uint32_t dapp_identifier{0};
-    Timestamp registered_time;
+    uint32_t dapp_identifier{0};  ///< Assigned dApp identifier (1–100)
+    Timestamp registered_time;     ///< Monotonic timestamp of when the dApp registered
 };
 
 /**
  * @brief Subscription entry representing dApp-RAN function association
  */
 struct SubscriptionEntry {
-    uint32_t dapp_identifier{0};
-    uint32_t ran_function_id{0};
-    Timestamp created_time;
+    uint32_t dapp_identifier{0};  ///< Identifier of the subscribed dApp
+    uint32_t ran_function_id{0};  ///< RAN function the dApp is subscribed to
+    Timestamp created_time;        ///< Monotonic timestamp of when the subscription was created
 };
 
 // Utility functions for type conversions

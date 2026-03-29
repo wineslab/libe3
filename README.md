@@ -3,6 +3,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://isocpp.org/)
 [![Version](https://img.shields.io/badge/version-0.0.1-green.svg)](VERSION)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://wineslab.github.io/dApp-libe3/)
 
 **libe3** is a standalone, vendor-neutral C++ library for implementing the E3AP (E3 Application Protocol) in RAN functions such as DU, CU-CP, and CU-UP. It provides a clean object-oriented API for RAN vendors while hiding transport, encoding, and protocol complexity.
 
@@ -325,6 +326,25 @@ libe3::version(major, minor, patch);  // e.g., 0, 0, 1
 ## Contributing
 
 Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Documentation
+
+The full API reference is automatically generated with [Doxygen](https://www.doxygen.nl/) and published to GitHub Pages on every release.
+
+🔗 **[https://wineslab.github.io/dApp-libe3/](https://wineslab.github.io/dApp-libe3/)**
+
+To build the documentation locally:
+
+```bash
+# Install Doxygen and Graphviz (Ubuntu)
+sudo apt-get install doxygen graphviz
+
+# Build docs (output will be in build/docs/html/)
+./build_libe3 --docs
+
+# Open in browser
+xdg-open build/docs/html/index.html
+```
 
 ## License
 

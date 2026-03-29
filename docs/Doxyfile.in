@@ -1,12 +1,61 @@
-# Doxyfile.in - minimal Doxygen configuration for libe3
+# Doxyfile.in - Doxygen configuration for libe3
 PROJECT_NAME           = "@PROJECT_NAME@"
+PROJECT_NUMBER         = "@PROJECT_VERSION@"
+PROJECT_BRIEF          = "C++ library for E3AP RAN vendor integration"
 OUTPUT_DIRECTORY       = "@DOXYGEN_OUTPUT_DIR@"
+
+# Input
+INPUT                  = @DOXYGEN_INPUT_DIRS@
+RECURSIVE              = YES
+USE_MDFILE_AS_MAINPAGE = @DOXYGEN_README@
+
+# Extraction
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+
+# Output formats
 GENERATE_HTML          = YES
 GENERATE_LATEX         = NO
-RECURSIVE              = YES
-INPUT                  = @DOXYGEN_INPUT_DIRS@
-EXCLUDE                =
+
+# HTML settings
+HTML_OUTPUT            = html
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+FULL_SIDEBAR           = NO
+
+# Graphs (requires Graphviz/dot)
+HAVE_DOT               = @DOXYGEN_HAVE_DOT@
+DOT_PATH               = @DOXYGEN_DOT_PATH@
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES
+CLASS_DIAGRAMS         = YES
+COLLABORATION_GRAPH    = YES
+INCLUDE_GRAPH          = YES
+INCLUDED_BY_GRAPH      = YES
+MAX_DOT_GRAPH_DEPTH    = 3
+
+# Preprocessing
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = NO
+PREDEFINED             = LIBE3_ENABLE_ASN1 LIBE3_ENABLE_ZMQ
+
+# Warnings
 QUIET                  = NO
 WARNINGS               = YES
-GENERATE_TREEVIEW      = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+WARN_LOGFILE           = @DOXYGEN_WARN_LOGFILE@
+
+# Source browsing
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+STRIP_CODE_COMMENTS    = NO
+
+# Miscellaneous
+SORT_MEMBER_DOCS       = YES
+SHOW_USED_FILES        = YES
+SHOW_FILES             = YES
+SHOW_NAMESPACES        = YES
 
