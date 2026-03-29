@@ -36,6 +36,10 @@ inline const char* version() noexcept {
 
 /**
  * @brief Get library version as integers
+ *
+ * @param[out] major Major version number
+ * @param[out] minor Minor version number
+ * @param[out] patch Patch version number
  */
 inline void version(int& major, int& minor, int& patch) noexcept {
     major = LIBE3_VERSION_MAJOR;
