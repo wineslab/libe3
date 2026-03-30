@@ -17,6 +17,16 @@ namespace libe3 {
  * @brief JSON encoder for E3AP PDUs
  *
  * Provides JSON encoding/decoding for development and debugging.
+ *
+ * JSON wire format uses camelCase keys (e.g. "dAppName", "ranFunctionIdentifier")
+ * and camelCase PDU type strings (e.g. "setupRequest", "indicationMessage").
+ * PascalCase PDU types are rejected by the decoder.
+ *
+ * The decoder supports two envelope formats:
+ * - **Flat**: payload fields sit alongside "type", "id", and "timestamp" at root level.
+ * - **Nested**: payload fields are wrapped in a "data" object at root level.
+ *
+ * The encoder mirrors the format of the last decoded message via @ref nested_mode_.
  */
 class JsonE3Encoder : public E3Encoder {
 public:
@@ -60,9 +70,11 @@ private:
     static std::vector<uint8_t> hex_to_binary(const std::string& hex);
 
     // Helper methods for type conversions
-    PduType string_to_pdu_type(const std::string& s) const;
+    std::optional<PduType> string_to_pdu_type(const std::string& s) const;
     ErrorCode string_to_error_code(const std::string& s) const;
 
+    /// Tracks whether the last decoded message used nested format ("data" wrapper).
+    /// The encoder mirrors this so responses match the request envelope structure.
     bool nested_mode_ = false;
 };
 

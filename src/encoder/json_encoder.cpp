@@ -16,21 +16,10 @@ namespace {
 
 constexpr const char* LOG_TAG = "JsonEnc";
 
-const char* pdu_type_to_json_string(PduType type) noexcept {
-    switch (type) {
-        case PduType::SETUP_REQUEST:          return "setupRequest";
-        case PduType::SETUP_RESPONSE:         return "setupResponse";
-        case PduType::SUBSCRIPTION_REQUEST:   return "subscriptionRequest";
-        case PduType::SUBSCRIPTION_DELETE:    return "subscriptionDelete";
-        case PduType::SUBSCRIPTION_RESPONSE:  return "subscriptionResponse";
-        case PduType::INDICATION_MESSAGE:     return "indicationMessage";
-        case PduType::DAPP_CONTROL_ACTION:    return "dAppControlAction";
-        case PduType::DAPP_REPORT:            return "dAppReport";
-        case PduType::XAPP_CONTROL_ACTION:    return "xAppControlAction";
-        case PduType::RELEASE_MESSAGE:        return "releaseMessage";
-        case PduType::MESSAGE_ACK:            return "messageAck";
-        default:                              return "unknown";
-    }
+std::string to_camel_case(const char* pascal) {
+    std::string s(pascal);
+    if (!s.empty()) s[0] = static_cast<char>(std::tolower(static_cast<unsigned char>(s[0])));
+    return s;
 }
 
 } // anonymous namespace
@@ -40,7 +29,7 @@ const char* pdu_type_to_json_string(PduType type) noexcept {
 // Helper methods for type conversions
 // ============================================================================
 
-PduType JsonE3Encoder::string_to_pdu_type(const std::string& s) const {
+std::optional<PduType> JsonE3Encoder::string_to_pdu_type(const std::string& s) const {
     if (s == "setupRequest")          return PduType::SETUP_REQUEST;
     if (s == "setupResponse")         return PduType::SETUP_RESPONSE;
     if (s == "subscriptionRequest")   return PduType::SUBSCRIPTION_REQUEST;
@@ -52,7 +41,7 @@ PduType JsonE3Encoder::string_to_pdu_type(const std::string& s) const {
     if (s == "xAppControlAction")     return PduType::XAPP_CONTROL_ACTION;
     if (s == "releaseMessage")        return PduType::RELEASE_MESSAGE;
     if (s == "messageAck")            return PduType::MESSAGE_ACK;
-    return PduType::SETUP_REQUEST; // Default
+    return std::nullopt;
 }
 
 ErrorCode JsonE3Encoder::string_to_error_code(const std::string& s) const {
@@ -328,7 +317,7 @@ ReleaseMessage JsonE3Encoder::decode_release_message(const nlohmann::json& j) co
 EncodeResult<EncodedMessage> JsonE3Encoder::encode(const Pdu& pdu) {
     try {
         nlohmann::json root;
-        root["type"] = pdu_type_to_json_string(pdu.type);
+        root["type"] = to_camel_case(pdu_type_to_string(pdu.type));
         root["id"] = pdu.message_id;
         root["timestamp"] = pdu.timestamp;
         
@@ -412,10 +401,14 @@ EncodeResult<Pdu> JsonE3Encoder::decode(const uint8_t* data, size_t size) {
         
         Pdu pdu;
         
-        // Accept both nested envelope (pdu_type/message_id/data) and flat format (type/id)
-        std::string pdu_type_str = root.value("pdu_type", root.value("type", ""));
-        pdu.type = string_to_pdu_type(pdu_type_str);
-        pdu.message_id = root.value("message_id", root.value("id", 0u));
+        std::string pdu_type_str = root.value("type", "");
+        auto pdu_type = string_to_pdu_type(pdu_type_str);
+        if (!pdu_type) {
+            E3_LOG_ERROR(LOG_TAG) << "Unrecognized PDU type: " << pdu_type_str;
+            return tl::unexpected(ErrorCode::DECODE_FAILED);
+        }
+        pdu.type = *pdu_type;
+        pdu.message_id = root.value("id", 0u);
         pdu.timestamp = root.value("timestamp", 0ull);
         
         // Use nested "data" object if present, otherwise treat root as the data object (flat format)
