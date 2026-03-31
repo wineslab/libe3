@@ -373,7 +373,32 @@ struct E3Config {
     
     // Threading
     size_t io_threads{2};  ///< Number of I/O threads (used by ZMQ context)
-    
+
+    /**
+     * @brief CPU core to pin the subscriber and publisher I/O threads to.
+     *
+     * When set to a non-negative value the subscriber_loop and publisher_loop
+     * threads will be pinned to this logical CPU core via
+     * pthread_setaffinity_np (Linux only; ignored on other platforms).
+     * This eliminates cache-migration overhead and reduces scheduling jitter
+     * in sub-millisecond control loops.
+     *
+     * -1 (default) disables core pinning.
+     */
+    int io_thread_affinity{-1};
+
+    /**
+     * @brief Nice value applied to the subscriber and publisher I/O threads.
+     *
+     * Range -20 (highest priority) to 19 (lowest priority), 0 = system
+     * default.  A negative value reduces OS scheduling latency at the cost of
+     * slightly less CPU time for other processes.  Requires appropriate
+     * privileges for negative values (CAP_SYS_NICE on Linux).
+     *
+     * Applied via setpriority(PRIO_PROCESS, tid, value) on Linux.
+     */
+    int io_thread_niceness{0};
+
     // Logging level (0=none, 1=error, 2=warn, 3=info, 4=debug, 5=trace)
     int log_level{3};  ///< Logging verbosity: 0=none, 1=error, 2=warn, 3=info, 4=debug, 5=trace
 };

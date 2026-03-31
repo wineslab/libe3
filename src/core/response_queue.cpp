@@ -1,24 +1,30 @@
 /**
  * @file response_queue.cpp
- * @brief Thread-safe queue implementation
+ * @brief Lock-free bounded queue for E3AP outbound PDUs
  *
- * Ported from the original C implementation e3_response_queue.c
+ * Replaces the original mutex + condition-variable implementation with the
+ * MPMC lock-free ring buffer from mpmc_queue.hpp.  Blocking pop() variants
+ * use a three-phase adaptive spin-wait to minimise latency while avoiding
+ * a busy-loop when the queue is idle for longer periods.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 #include "libe3/response_queue.hpp"
 #include "libe3/logger.hpp"
+#include <thread>
 
 namespace libe3 {
 
 namespace {
 constexpr const char* LOG_TAG = "Queue";
-}
+} // anonymous namespace
 
-ResponseQueue::ResponseQueue(size_t max_size)
-    : max_size_(max_size) {
-    E3_LOG_DEBUG(LOG_TAG) << "Response queue created with capacity " << max_size;
+ResponseQueue::ResponseQueue(size_t capacity)
+    : ring_(capacity)
+{
+    E3_LOG_DEBUG(LOG_TAG) << "Lock-free response queue created, capacity="
+                          << ring_.capacity();
 }
 
 ResponseQueue::~ResponseQueue() {
@@ -27,107 +33,101 @@ ResponseQueue::~ResponseQueue() {
 }
 
 ErrorCode ResponseQueue::push(Pdu pdu) {
-    std::unique_lock lock(mutex_);
-    
-    if (shutdown_) {
+    if (shutdown_.load(std::memory_order_relaxed)) {
         return ErrorCode::NOT_INITIALIZED;
     }
-    
-    if (queue_.size() >= max_size_) {
+
+    if (!ring_.try_push(std::move(pdu))) {
         E3_LOG_WARN(LOG_TAG) << "Queue full, dropping message";
         return ErrorCode::BUFFER_TOO_SMALL;
     }
-    
-    queue_.push(std::move(pdu));
-    E3_LOG_TRACE(LOG_TAG) << "Pushed PDU, queue size: " << queue_.size();
-    
-    lock.unlock();
-    not_empty_.notify_one();
-    
+
+    E3_LOG_TRACE(LOG_TAG) << "Pushed PDU";
     return ErrorCode::SUCCESS;
 }
 
 Pdu ResponseQueue::pop() {
-    std::unique_lock lock(mutex_);
-    
-    not_empty_.wait(lock, [this] { 
-        return !queue_.empty() || shutdown_; 
-    });
-    
-    if (shutdown_ && queue_.empty()) {
-        // Return empty PDU on shutdown
-        return Pdu{};
+    Pdu pdu;
+
+    // Phase 1: CPU-pause spin (nanosecond latency when producer is fast)
+    for (size_t i = 0; i < SPIN_COUNT; ++i) {
+        if (ring_.try_pop(pdu)) return pdu;
+        if (shutdown_.load(std::memory_order_relaxed)) return Pdu{};
+        cpu_relax();
     }
-    
-    Pdu pdu = std::move(queue_.front());
-    queue_.pop();
-    
-    E3_LOG_TRACE(LOG_TAG) << "Popped PDU, queue size: " << queue_.size();
-    return pdu;
+
+    // Phase 2: Cooperative yield (microsecond range)
+    for (size_t i = 0; i < YIELD_COUNT; ++i) {
+        if (ring_.try_pop(pdu)) return pdu;
+        if (shutdown_.load(std::memory_order_relaxed)) return Pdu{};
+        std::this_thread::yield();
+    }
+
+    // Phase 3: Short sleep until data arrives or shutdown is signalled
+    while (true) {
+        if (ring_.try_pop(pdu)) return pdu;
+        if (shutdown_.load(std::memory_order_relaxed)) return Pdu{};
+        std::this_thread::sleep_for(SLEEP_DURATION);
+    }
 }
 
 std::optional<Pdu> ResponseQueue::pop(std::chrono::milliseconds timeout) {
-    std::unique_lock lock(mutex_);
-    
-    if (!not_empty_.wait_for(lock, timeout, [this] { 
-        return !queue_.empty() || shutdown_; 
-    })) {
-        return std::nullopt; // Timeout
+    Pdu pdu;
+    auto deadline = std::chrono::steady_clock::now() + timeout;
+
+    // Phase 1: CPU-pause spin
+    for (size_t i = 0; i < SPIN_COUNT; ++i) {
+        if (ring_.try_pop(pdu)) return pdu;
+        if (shutdown_.load(std::memory_order_relaxed)) return std::nullopt;
+        cpu_relax();
     }
-    
-    if (shutdown_ && queue_.empty()) {
-        return std::nullopt;
+
+    // Phase 2: Cooperative yield
+    for (size_t i = 0; i < YIELD_COUNT; ++i) {
+        if (ring_.try_pop(pdu)) return pdu;
+        if (shutdown_.load(std::memory_order_relaxed)) return std::nullopt;
+        std::this_thread::yield();
     }
-    
-    Pdu pdu = std::move(queue_.front());
-    queue_.pop();
-    
-    E3_LOG_TRACE(LOG_TAG) << "Popped PDU (with timeout), queue size: " << queue_.size();
-    return pdu;
+
+    // Phase 3: Timed sleep
+    while (std::chrono::steady_clock::now() < deadline) {
+        if (ring_.try_pop(pdu)) return pdu;
+        if (shutdown_.load(std::memory_order_relaxed)) return std::nullopt;
+        std::this_thread::sleep_for(SLEEP_DURATION);
+    }
+
+    // One last attempt after deadline
+    if (ring_.try_pop(pdu)) return pdu;
+    return std::nullopt;
 }
 
 std::optional<Pdu> ResponseQueue::try_pop() {
-    std::unique_lock lock(mutex_);
-    
-    if (queue_.empty()) {
-        return std::nullopt;
-    }
-    
-    Pdu pdu = std::move(queue_.front());
-    queue_.pop();
-    
-    return pdu;
+    Pdu pdu;
+    if (ring_.try_pop(pdu)) return pdu;
+    return std::nullopt;
 }
 
 bool ResponseQueue::empty() const {
-    std::unique_lock lock(mutex_);
-    return queue_.empty();
+    return ring_.empty_approx();
 }
 
 size_t ResponseQueue::size() const {
-    std::unique_lock lock(mutex_);
-    return queue_.size();
+    return ring_.size_approx();
 }
 
 void ResponseQueue::clear() {
-    std::unique_lock lock(mutex_);
-    std::queue<Pdu> empty;
-    std::swap(queue_, empty);
+    Pdu pdu;
+    while (ring_.try_pop(pdu)) {}
     E3_LOG_DEBUG(LOG_TAG) << "Queue cleared";
 }
 
 void ResponseQueue::shutdown() {
-    {
-        std::unique_lock lock(mutex_);
-        shutdown_ = true;
-    }
-    not_empty_.notify_all();
-    E3_LOG_DEBUG(LOG_TAG) << "Queue shutdown signaled";
+    shutdown_.store(true, std::memory_order_relaxed);
+    E3_LOG_DEBUG(LOG_TAG) << "Queue shutdown signalled";
 }
 
 bool ResponseQueue::is_shutdown() const {
-    std::unique_lock lock(mutex_);
-    return shutdown_;
+    return shutdown_.load(std::memory_order_relaxed);
 }
 
 } // namespace libe3
