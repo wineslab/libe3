@@ -202,6 +202,71 @@ TEST(E3Agent_move_semantics) {
     ASSERT_EQ(funcs.size(), 1u);
 }
 
+TEST(E3Agent_set_dapp_status_changed_handler_before_init) {
+    E3Config config;
+    config.ran_identifier = "status-cb-test";
+
+    E3Agent agent(std::move(config));
+
+    bool called = false;
+    agent.set_dapp_status_changed_handler([&called]() {
+        called = true;
+    });
+
+    // Handler is stored but cannot fire until the agent is running and a
+    // dApp actually connects/subscribes. Verify that setting it before init
+    // does not crash and the agent initialises normally.
+    auto result = agent.init();
+    ASSERT_EQ(error_to_int(result), error_to_int(ErrorCode::SUCCESS));
+}
+
+TEST(E3Agent_set_dapp_status_changed_handler_after_init) {
+    E3Config config;
+    config.ran_identifier = "status-cb-after-init";
+
+    E3Agent agent(std::move(config));
+    agent.init();
+
+    bool called = false;
+    agent.set_dapp_status_changed_handler([&called]() {
+        called = true;
+    });
+
+    // Handler is forwarded to the already-created E3Interface.
+    // No crash, and agent state remains valid.
+    ASSERT_NE(state_to_int(agent.state()), state_to_int(AgentState::UNINITIALIZED));
+}
+
+TEST(E3Agent_set_dapp_status_changed_handler_nullptr_clears) {
+    E3Config config;
+    config.ran_identifier = "status-cb-clear";
+
+    E3Agent agent(std::move(config));
+
+    // Set a handler then clear it with an empty function.
+    agent.set_dapp_status_changed_handler([]() {});
+    agent.set_dapp_status_changed_handler(DAppStatusChangedHandler{});
+
+    auto result = agent.init();
+    ASSERT_EQ(error_to_int(result), error_to_int(ErrorCode::SUCCESS));
+}
+
+TEST(E3Agent_set_dapp_status_changed_handler_replace) {
+    E3Config config;
+    config.ran_identifier = "status-cb-replace";
+
+    E3Agent agent(std::move(config));
+
+    int counter = 0;
+    agent.set_dapp_status_changed_handler([&counter]() { counter = 1; });
+    agent.set_dapp_status_changed_handler([&counter]() { counter = 2; });
+
+    // The second handler should replace the first. Verify no crash and
+    // the agent still initialises correctly.
+    auto result = agent.init();
+    ASSERT_EQ(error_to_int(result), error_to_int(ErrorCode::SUCCESS));
+}
+
 TEST(E3Agent_destructor_stops) {
     bool was_running = false;
     {

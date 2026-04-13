@@ -228,7 +228,11 @@ The main facade class for RAN vendors.
 | `is_running()` | Check if agent is running |
 | `register_sm(sm)` | Register a Service Model |
 | `get_available_ran_functions()` | Get available RAN function IDs from registered SMs |
+| `set_dapp_report_handler(handler)` | Set callback for incoming dApp reports (dApp → RAN) |
+| `set_dapp_status_changed_handler(handler)` | Set callback for dApp status changes (connect, disconnect, subscribe, unsubscribe) |
 | `send_indication(dapp_id, ran_function_id, data)` | Send an indication to a specific dApp |
+| `send_xapp_control(dapp_id, ran_function_id, data)` | Forward an xApp control action to a specific dApp |
+| `send_message_ack(request_id, response_code)` | Send a message acknowledgment (positive or negative) to a dApp |
 | `get_registered_dapps()` | Get list of registered dApp IDs |
 | `get_dapp_subscriptions(dapp_id)` | Get subscriptions for a dApp |
 | `get_ran_function_subscribers(ran_function_id)` | Get subscribers for a RAN function |
