@@ -1,9 +1,16 @@
 /**
  * @file response_queue.hpp
- * @brief Thread-safe queue for E3AP response messages
+ * @brief Lock-free bounded queue for E3AP outbound PDUs
  *
- * Provides a thread-safe, blocking queue for queuing outbound E3AP PDUs.
- * Ported from the original C implementation's e3_response_queue.
+ * Replaces the original mutex + condition-variable implementation with a
+ * lock-free MPMC ring buffer (see mpmc_queue.hpp) to eliminate mutex
+ * contention on the hot publish path and to reduce latency jitter in
+ * sub-millisecond control loops.
+ *
+ * Producer/consumer pattern in libe3:
+ *  - Producers: subscriber_loop thread, sm_data_handler_loop thread, and
+ *               any caller of E3Interface::queue_outbound() (MPSC / MPMC).
+ *  - Consumer:  publisher_loop thread (single consumer).
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -12,31 +19,34 @@
 #define LIBE3_RESPONSE_QUEUE_HPP
 
 #include "types.hpp"
-#include <queue>
-#include <mutex>
-#include <condition_variable>
+#include "mpmc_queue.hpp"
+#include <atomic>
 #include <optional>
 #include <chrono>
 
 namespace libe3 {
 
 /**
- * @brief Thread-safe queue for E3AP PDUs
+ * @brief Lock-free bounded queue for E3AP PDUs.
  *
- * This class provides a bounded, thread-safe queue for communication
- * between threads in the E3 agent. It supports blocking pop with
- * optional timeout.
+ * Provides the same API as the previous mutex-based implementation but uses
+ * an MPMC lock-free ring buffer internally.  Blocking pop variants use an
+ * adaptive spin-wait strategy:
+ *  1. Spin with CPU pause hints  (lowest latency, nanoseconds)
+ *  2. Thread yield               (cooperative, microseconds)
+ *  3. Short sleep (50 µs)        (idle wait, avoids busy-loop when quiet)
  */
 class ResponseQueue {
 public:
     /**
-     * @brief Construct a new Response Queue
-     * @param max_size Maximum queue capacity (default: 100)
+     * @brief Construct a ResponseQueue.
+     * @param capacity Minimum ring buffer capacity (rounded up to next power
+     *                 of two, default 128).
      */
-    explicit ResponseQueue(size_t max_size = 100);
+    explicit ResponseQueue(size_t capacity = 128);
 
     /**
-     * @brief Destructor
+     * @brief Destructor – signals shutdown so any blocked pop() returns.
      */
     ~ResponseQueue();
 
@@ -47,74 +57,61 @@ public:
     ResponseQueue& operator=(ResponseQueue&&) = delete;
 
     /**
-     * @brief Push a PDU to the queue
-     *
-     * @param pdu PDU to push
-     * @return ErrorCode::SUCCESS on success
-     * @return ErrorCode::BUFFER_TOO_SMALL if queue is full
+     * @brief Enqueue a PDU (non-blocking, lock-free).
+     * @return ErrorCode::SUCCESS on success.
+     * @return ErrorCode::BUFFER_TOO_SMALL if the ring buffer is full.
+     * @return ErrorCode::NOT_INITIALIZED if shutdown() has been called.
      */
     ErrorCode push(Pdu pdu);
 
     /**
-     * @brief Pop a PDU from the queue (blocking)
+     * @brief Dequeue a PDU, blocking indefinitely until one is available.
      *
-     * Blocks until a PDU is available.
-     *
-     * @return The popped PDU
+     * Returns an empty Pdu{} if shutdown() is called while waiting.
      */
     Pdu pop();
 
     /**
-     * @brief Pop a PDU from the queue with timeout
-     *
-     * @param timeout Maximum time to wait
-     * @return The PDU if available, std::nullopt on timeout
+     * @brief Dequeue a PDU with a maximum wait duration.
+     * @return The PDU on success; std::nullopt on timeout or shutdown.
      */
     std::optional<Pdu> pop(std::chrono::milliseconds timeout);
 
     /**
-     * @brief Try to pop without blocking
-     *
-     * @return The PDU if available, std::nullopt if queue is empty
+     * @brief Try to dequeue without blocking.
+     * @return The PDU if one was available; std::nullopt otherwise.
      */
     std::optional<Pdu> try_pop();
 
-    /**
-     * @brief Check if queue is empty
-     */
+    /** @brief Return true if the queue appears empty (approximate). */
     bool empty() const;
 
-    /**
-     * @brief Get current queue size
-     */
+    /** @brief Return the approximate number of items in the queue. */
     size_t size() const;
 
-    /**
-     * @brief Get maximum queue capacity
-     */
-    size_t capacity() const noexcept { return max_size_; }
+    /** @brief Return the ring buffer capacity (always a power of two). */
+    size_t capacity() const noexcept { return ring_.capacity(); }
 
-    /**
-     * @brief Clear all items from the queue
-     */
+    /** @brief Discard all items currently in the queue. */
     void clear();
 
     /**
-     * @brief Wake up all waiting threads (for shutdown)
+     * @brief Signal shutdown so that all blocked pop() calls return promptly.
      */
     void shutdown();
 
-    /**
-     * @brief Check if queue is shut down
-     */
+    /** @brief Return true if shutdown() has been called. */
     bool is_shutdown() const;
 
 private:
-    std::queue<Pdu> queue_;
-    mutable std::mutex mutex_;
-    std::condition_variable not_empty_;
-    size_t max_size_;
-    bool shutdown_{false};
+    MpmcQueue<Pdu> ring_;
+    std::atomic<bool> shutdown_{false};
+
+    // Adaptive spin-wait tuning constants
+    static constexpr size_t SPIN_COUNT  = 40;   ///< CPU-pause iterations
+    static constexpr size_t YIELD_COUNT = 100;  ///< thread-yield iterations
+    /// Sleep duration between attempts in the slow path (µs)
+    static constexpr auto SLEEP_DURATION = std::chrono::microseconds(50);
 };
 
 } // namespace libe3

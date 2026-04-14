@@ -13,12 +13,53 @@
 #include <random>
 #include <signal.h>
 
+#ifdef __linux__
+#include <pthread.h>
+#include <sched.h>
+#include <sys/resource.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#endif
+
 namespace libe3 {
 
 namespace {
 constexpr const char* LOG_TAG = "E3Iface";
 constexpr auto SM_POLL_INTERVAL = std::chrono::milliseconds(10);
+
+/**
+ * @brief Apply CPU-affinity and niceness to the calling thread.
+ *
+ * Invoked at the very start of each I/O thread so that the settings take
+ * effect before any real work begins.
+ *
+ * @param affinity  Logical CPU core to pin to, or -1 to skip pinning.
+ * @param niceness  Nice value in [-20, 19], or 0 to skip.
+ */
+void apply_thread_config(int affinity, int niceness) noexcept {
+#ifdef __linux__
+    if (affinity >= 0) {
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        CPU_SET(static_cast<size_t>(affinity), &cpuset);
+        // Non-fatal if this fails (e.g. core index out of range).
+        (void)pthread_setaffinity_np(pthread_self(),
+                                     sizeof(cpu_set_t), &cpuset);
+    }
+    if (niceness != 0) {
+        // Use the kernel TID so only this thread's scheduling priority changes.
+        // syscall(SYS_gettid) returns the kernel thread ID as a long; cast it
+        // to pid_t first, then to the id_t expected by setpriority(PRIO_PROCESS).
+        auto tid = static_cast<id_t>(static_cast<pid_t>(syscall(SYS_gettid)));
+        // Non-fatal: negative values require CAP_SYS_NICE.
+        (void)setpriority(PRIO_PROCESS, tid, niceness);
+    }
+#else
+    (void)affinity;
+    (void)niceness;
+#endif
 }
+} // anonymous namespace
 
 uint32_t E3Interface::generate_message_id() {
     thread_local std::mt19937 rng(std::random_device{}());
@@ -253,8 +294,9 @@ void E3Interface::setup_loop() {
 }
 
 void E3Interface::subscriber_loop() {
+    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness);
     E3_LOG_INFO(LOG_TAG) << "Subscriber loop started";
-    
+
     ErrorCode result = connector_->setup_inbound_connection();
     if (result != ErrorCode::SUCCESS) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to setup inbound connection";
@@ -331,8 +373,9 @@ void E3Interface::subscriber_loop() {
 }
 
 void E3Interface::publisher_loop() {
+    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness);
     E3_LOG_INFO(LOG_TAG) << "Publisher loop started";
-    
+
     // Ignore SIGPIPE to handle closed connections gracefully
     signal(SIGPIPE, SIG_IGN);
     

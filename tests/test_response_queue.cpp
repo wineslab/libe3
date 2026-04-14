@@ -75,16 +75,18 @@ TEST(ResponseQueue_fifo_order) {
 }
 
 TEST(ResponseQueue_capacity_limit) {
-    ResponseQueue queue(3);
-    
-    for (int i = 0; i < 3; ++i) {
+    // The ring buffer rounds capacity up to the next power of two; use 4
+    // (already a power of two) so the logical capacity is well-defined.
+    ResponseQueue queue(4);
+
+    for (int i = 0; i < 4; ++i) {
         Pdu pdu(PduType::INDICATION_MESSAGE);
         auto result = queue.push(pdu);
         ASSERT_TRUE(result == ErrorCode::SUCCESS);
     }
-    
-    ASSERT_EQ(queue.size(), 3u);
-    
+
+    ASSERT_EQ(queue.size(), 4u);
+
     // This should fail (queue full)
     Pdu extra(PduType::INDICATION_MESSAGE);
     auto pushed = queue.push(extra);
@@ -169,8 +171,11 @@ TEST(ResponseQueue_clear) {
 }
 
 TEST(ResponseQueue_capacity) {
+    // capacity() returns the actual ring-buffer size, which is the next
+    // power of two >= the requested capacity.  64 is the next power of two
+    // greater than or equal to 42.
     ResponseQueue queue(42);
-    ASSERT_EQ(queue.capacity(), 42u);
+    ASSERT_EQ(queue.capacity(), 64u);
 }
 
 TEST(ResponseQueue_blocking_pop) {
