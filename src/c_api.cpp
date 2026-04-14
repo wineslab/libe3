@@ -358,4 +358,23 @@ const char* e3_error_to_string(e3_error_t code) {
         default: return "UNKNOWN_ERROR_CODE";
     }
 }
+
+e3_error_t e3_agent_set_dapp_status_changed_handler(
+    e3_agent_handle_t* agent,
+    e3_dapp_status_changed_cb handler
+) {
+    if (!agent || !agent->agent) return static_cast<int>(ErrorCode::INVALID_PARAM);
+
+    if (!handler) {
+        agent->agent->set_dapp_status_changed_handler(DAppStatusChangedHandler{});
+        return static_cast<int>(ErrorCode::SUCCESS);
+    }
+
+    agent->agent->set_dapp_status_changed_handler(
+        [handler]() { handler(); }
+    );
+
+    return static_cast<int>(ErrorCode::SUCCESS);
+}
+
 } // extern "C"

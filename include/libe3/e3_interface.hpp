@@ -34,6 +34,7 @@ class E3Agent;
 using SetupRequestHandler = std::function<ResponseCode(const SetupRequest&, SetupResponse&)>;
 using SubscriptionRequestHandler = std::function<ResponseCode(const SubscriptionRequest&)>;
 using DAppReportHandler = std::function<void(const DAppReport&)>;
+using DAppStatusChangedHandler = std::function<void()>;
 
 /**
  * @brief E3Interface - Internal protocol coordination
@@ -137,6 +138,12 @@ public:
         dapp_report_handler_ = std::move(handler);
     }
 
+    void set_dapp_status_changed_handler(DAppStatusChangedHandler handler) {
+        dapp_status_changed_handler_ = std::move(handler);
+    }
+
+    void notify_dapp_status_changed();
+
 private:
     // Configuration
     E3Config config_;
@@ -159,6 +166,8 @@ private:
 
     // Event handlers
     DAppReportHandler dapp_report_handler_;
+
+    DAppStatusChangedHandler dapp_status_changed_handler_;
 
     // =========================================================================
     // Thread Entry Points

@@ -259,6 +259,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // Handle dApp status changes (connect, subscribe, unsubscribe, disconnect)
+    agent.set_dapp_status_changed_handler([&agent]() {
+        std::cout << "[STATUS] dApp status changed — "
+                  << "dApps: " << agent.dapp_count()
+                  << ", subscriptions: " << agent.subscription_count() << "\n";
+    });
+
     // Handle dApp reports for the RAN
     agent.set_dapp_report_handler([](const libe3::DAppReport& report) {
         // In the RAN report is sent to the xApp through E2, here we just decode it as en example

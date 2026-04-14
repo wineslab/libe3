@@ -26,6 +26,9 @@ class E3Interface;
 /** Callback for incoming dApp reports (dApp → RAN). Set before start() to handle reports. */
 using DAppReportHandler = std::function<void(const DAppReport&)>;
 
+/** Callback when dApp status changes (connect, disconnect, subscribe, unsubscribe). */
+using DAppStatusChangedHandler = std::function<void()>;
+
 /**
  * @brief E3Agent - Main façade for RAN vendor integration
  *
@@ -161,6 +164,13 @@ public:
      * Call before start(). When a dApp sends a DApp report, this callback is invoked.
      */
     void set_dapp_report_handler(DAppReportHandler handler);
+
+    /**
+     * @brief Set callback for dApp status changes.
+     * Called when a dApp connects, disconnects, subscribes, or unsubscribes.
+     * Call before start().
+     */
+    void set_dapp_status_changed_handler(DAppStatusChangedHandler handler);
 
     // =========================================================================
     // Manual Operations

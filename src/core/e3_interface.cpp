@@ -200,6 +200,12 @@ ErrorCode E3Interface::register_sm(std::unique_ptr<ServiceModel> sm) {
     return SmRegistry::instance().register_sm(std::move(sm));
 }
 
+void E3Interface::notify_dapp_status_changed() {
+    if (dapp_status_changed_handler_) {
+        dapp_status_changed_handler_();
+    }
+}
+
 // =========================================================================
 // Thread Entry Points
 // =========================================================================
@@ -433,6 +439,7 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
     if (result == ErrorCode::SUCCESS) {
         response_code = ResponseCode::POSITIVE;
         E3_LOG_INFO(LOG_TAG) << "dApp '" << request.dapp_name << "' registered with assigned ID " << assigned_dapp_id;
+        notify_dapp_status_changed();
     } else {
         E3_LOG_ERROR(LOG_TAG) << "Failed to register dApp '" << request.dapp_name << "': " << error_code_to_string(result);
     }
@@ -508,6 +515,9 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
             E3_LOG_INFO(LOG_TAG) << "Subscription added: dApp " << request.dapp_identifier
                                  << " -> RAN function " << request.ran_function_identifier
                                  << " (subscription_id=" << subscription_id << ")";
+            if (result == ErrorCode::SUCCESS) {
+                notify_dapp_status_changed();
+            }
         } else {
             E3_LOG_ERROR(LOG_TAG) << "Failed to add subscription: " 
                                   << error_code_to_string(result);
@@ -543,6 +553,7 @@ void E3Interface::handle_subscription_delete(const SubscriptionDelete& del, uint
     if (result == ErrorCode::SUCCESS) {
         response_code = ResponseCode::POSITIVE;
         E3_LOG_INFO(LOG_TAG) << "Subscription " << del.subscription_id << " removed for dApp " << del.dapp_identifier;
+        notify_dapp_status_changed();
     } else {
         E3_LOG_ERROR(LOG_TAG) << "Failed to remove subscription: "
                               << error_code_to_string(result);
@@ -610,6 +621,7 @@ void E3Interface::handle_dapp_disconnection(uint32_t dapp_id) {
     if (result == ErrorCode::SUCCESS) {
         E3_LOG_INFO(LOG_TAG) << "dApp " << dapp_id << " unregistered, " 
                              << subscriptions.size() << " subscriptions removed";
+        notify_dapp_status_changed();
     } else {
         E3_LOG_ERROR(LOG_TAG) << "Failed to unregister dApp " << dapp_id << ": "
                               << error_code_to_string(result);
