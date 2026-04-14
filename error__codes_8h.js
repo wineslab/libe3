@@ -1,0 +1,36 @@
+var error__codes_8h =
+[
+    [ "LIBE3_ERROR_CODE_LIST", "group__error__codes.html#ga36076106bfe5aefabf75dbd1d52175fd", null ],
+    [ "X", "error__codes_8h.html#a874ed6a0d72190fc26699b18a6e0432c", null ],
+    [ "e3_error_t", "error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9", null ],
+    [ "e3_error_code_e", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8", [
+      [ "E3_SUCCESS", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8af824146bac59547151593059b891da98", null ],
+      [ "E3_INVALID_PARAM", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8ae7e2cb456b9f2ab568b681d883d793ba", null ],
+      [ "E3_NOT_INITIALIZED", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8aeae2e99d5dd794031766de4b4930eb8b", null ],
+      [ "E3_ALREADY_INITIALIZED", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a032484d5c3f798c50beb6b8202a1fa47", null ],
+      [ "E3_NOT_CONNECTED", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a5157c36bb7d35415f85073e00b2d64c0", null ],
+      [ "E3_CONNECTION_FAILED", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a359923385e11184d89112526efcf5535", null ],
+      [ "E3_TIMEOUT", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a04994a724db331393908b59ab6ea377b", null ],
+      [ "E3_ENCODE_FAILED", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a18f777be8d60634e7bfe0eee45876092", null ],
+      [ "E3_DECODE_FAILED", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8ac53cff2a3a3d59d3948383e112d16be1", null ],
+      [ "E3_SM_NOT_FOUND", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a9d1748b393d11c3045a29fc4681a9afe", null ],
+      [ "E3_SM_ALREADY_REGISTERED", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a7eb44a40220c3645fd20677f4c377dc2", null ],
+      [ "E3_BUFFER_TOO_SMALL", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8ab42478110670e61012aedd5712fa1e1f", null ],
+      [ "E3_INTERNAL_ERROR", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8ae7b7678692bd74b3e45d0437c78d91fb", null ],
+      [ "E3_SUBSCRIPTION_EXISTS", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8adc5018bd08084a1897e186d042823ca6", null ],
+      [ "E3_SUBSCRIPTION_NOT_FOUND", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8afcc4601bd3566559580e570a57ab3fec", null ],
+      [ "E3_DAPP_NOT_REGISTERED", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a99057dc19593f277389b7633e2f826ee", null ],
+      [ "E3_TRANSPORT_ERROR", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a9afeda0cd7ee0a9a6de0ea175d943b7e", null ],
+      [ "E3_STATE_ERROR", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8acd1fbc9bc4e6436f38e5173ca2d2eb40", null ],
+      [ "E3_SM_START_FAILED", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a8b041fb13f6c33b47fb3aef491fba6c8", null ],
+      [ "E3_NOT_FOUND", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a312252c24d6e03104d66955117e15890", null ],
+      [ "E3_SM_ERROR_INVALID_PARAM", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a702ce747bfe21ab15b24a2647ce8065a", null ],
+      [ "E3_SM_ERROR_NOT_FOUND", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a29d0431bd6bc1857fbc85c1818356a37", null ],
+      [ "E3_SM_ERROR_ALREADY_EXISTS", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8abf6920398b2b6963cfaeb915b942309c", null ],
+      [ "E3_SM_ERROR_THREAD_FAILED", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a8deb30a143b77d6880510744f411bf91", null ],
+      [ "E3_SM_ERROR_MEMORY", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8ab8f1129351fbb6fe4b47255e43d3088d", null ],
+      [ "E3_CANCELLED", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8adb9ab2483e67e2897a77fbc700d2dd52", null ],
+      [ "E3_GENERIC_ERROR", "error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8ad987a8e102f7c89fa0f56524304059f3", null ]
+    ] ],
+    [ "e3_error_to_string", "error__codes_8h.html#a3f30e282e3e14ec6ba778ca4266f51fd", null ]
+];
