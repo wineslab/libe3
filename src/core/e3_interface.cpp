@@ -107,6 +107,9 @@ ErrorCode E3Interface::init() {
     
     // Create response queue
     response_queue_ = std::make_unique<ResponseQueue>();
+
+    // Create dApp-report queue
+    report_queue_ = std::make_unique<MpmcQueue<DAppReport>>(1024);
     
     // Create connector
     connector_ = create_connector(
@@ -157,7 +160,8 @@ ErrorCode E3Interface::start() {
     setup_thread_ = std::make_unique<std::thread>(&E3Interface::setup_loop, this);
     subscriber_thread_ = std::make_unique<std::thread>(&E3Interface::subscriber_loop, this);
     publisher_thread_ = std::make_unique<std::thread>(&E3Interface::publisher_loop, this);
-    
+    report_worker_thread_ = std::make_unique<std::thread>(&E3Interface::report_worker_loop, this);
+
     state_.store(AgentState::RUNNING);
     E3_LOG_INFO(LOG_TAG) << "E3Interface started successfully";
     
@@ -196,6 +200,9 @@ void E3Interface::stop() {
     }
     if (sm_data_thread_ && sm_data_thread_->joinable()) {
         sm_data_thread_->join();
+    }
+    if (report_worker_thread_ && report_worker_thread_->joinable()) {
+        report_worker_thread_->join();
     }
     
     // Clean up SM registry
@@ -349,7 +356,9 @@ void E3Interface::subscriber_loop() {
             case PduType::DAPP_REPORT: {
                 auto* report = std::get_if<DAppReport>(&pdu.choice);
                 if (report) {
-                    handle_dapp_report(*report);
+                    if (report_queue_ && !report_queue_->try_push(std::move(*report))) {
+                        E3_LOG_ERROR(LOG_TAG) << "Report queue full — dropping dApp report ";
+                    }
                 }
                 break;
             }
@@ -419,6 +428,29 @@ void E3Interface::publisher_loop() {
     }
     
     E3_LOG_INFO(LOG_TAG) << "Publisher loop stopped";
+}
+
+void E3Interface::report_worker_loop() {
+    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness);
+    E3_LOG_INFO(LOG_TAG) << "Report worker loop started";
+
+    DAppReport report;
+    while (!should_stop_.load()) {
+        if (report_queue_ && report_queue_->try_pop(report)) {
+            handle_dapp_report(report);
+            continue;
+        }
+
+        std::this_thread::sleep_for(std::chrono::microseconds(100));
+    }
+
+    if (report_queue_) {
+        while (report_queue_->try_pop(report)) {
+            handle_dapp_report(report);
+        }
+    }
+
+    E3_LOG_INFO(LOG_TAG) << "Report worker loop stopped";
 }
 
 void E3Interface::sm_data_handler_loop() {

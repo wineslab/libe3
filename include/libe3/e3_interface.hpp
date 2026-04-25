@@ -17,6 +17,7 @@
 #include "e3_encoder.hpp"
 #include "subscription_manager.hpp"
 #include "response_queue.hpp"
+#include "mpmc_queue.hpp"
 #include "sm_interface.hpp"
 #include <memory>
 #include <thread>
@@ -158,11 +159,14 @@ private:
     std::unique_ptr<SubscriptionManager> subscription_manager_;
     std::unique_ptr<ResponseQueue> response_queue_;
 
+    std::unique_ptr<MpmcQueue<DAppReport>> report_queue_;
+
     // Threads
     std::unique_ptr<std::thread> setup_thread_;
     std::unique_ptr<std::thread> subscriber_thread_;
     std::unique_ptr<std::thread> publisher_thread_;
     std::unique_ptr<std::thread> sm_data_thread_;
+    std::unique_ptr<std::thread> report_worker_thread_;
 
     // Event handlers
     DAppReportHandler dapp_report_handler_;
@@ -192,6 +196,13 @@ private:
      * @brief SM data handler - polls SMs and queues indication messages
      */
     void sm_data_handler_loop();
+
+    /**
+     * @brief Report worker thread - drains report_queue_ and invokes
+     *        handle_dapp_report() off the subscriber thread so ZMQ reads
+     *        are never blocked by downstream (OAI / iApp) work.
+     */
+    void report_worker_loop();
 
     // =========================================================================
     // Message Handlers

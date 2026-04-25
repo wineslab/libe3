@@ -179,11 +179,7 @@ ErrorCode ZmqE3Connector::setup_inbound_connection() {
     
     // Subscribe to all messages
     zmq_setsockopt(inbound_socket_, ZMQ_SUBSCRIBE, "", 0);
-    
-    // Keep only the latest message (conflate)
-    int conflate = 1;
-    zmq_setsockopt(inbound_socket_, ZMQ_CONFLATE, &conflate, sizeof(conflate));
-    
+
     // Set receive timeout to allow graceful shutdown
     int recv_timeout = RECV_TIMEOUT_MS;
     zmq_setsockopt(inbound_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
