@@ -36,5 +36,10 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
             libe3_warnings
             libe3_sanitizers
     )
+
+    if(LIBE3_ENABLE_ZMQ AND TARGET PkgConfig::ZMQ)
+        target_link_libraries(${target_name} PRIVATE PkgConfig::ZMQ)
+    endif()
+    
     add_test(NAME ${target_name} COMMAND ${target_name})
 endforeach()

@@ -64,17 +64,18 @@ EncodeResult<EncodedMessage> Asn1E3Encoder::encode(const Pdu& pdu) {
         ASN_STRUCT_FREE(asn_DEF_E3_PDU, asn1_pdu);
         return tl::unexpected(ErrorCode::ENCODE_FAILED);
     }
-
+    
+    // Resize buffer to actual encoded size
     const size_t encoded_bytes = (static_cast<size_t>(enc_rval.encoded) + 7) / 8;
     buffer.resize(encoded_bytes);
-
+    
     ASN_STRUCT_FREE(asn_DEF_E3_PDU, asn1_pdu);
-
+    
     EncodedMessage msg;
     msg.buffer = std::move(buffer);
     msg.format = EncodingFormat::ASN1;
-
-    E3_LOG_DEBUG(LOG_TAG) << "Encoded PDU: " << encoded_bytes << " bytes (" << enc_rval.encoded << " bits)";
+    
+    E3_LOG_DEBUG(LOG_TAG) << "Encoded PDU: " << enc_rval.encoded << " bytes";
     return msg;
 }
 
