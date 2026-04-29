@@ -1,6 +1,6 @@
 /**
  * @file bench_mpmc_queue.cpp
- * @brief Stress test and latency/throughput benchmark for MpmcQueue and ResponseQueue
+ * @brief Stress test and latency/throughput benchmark for MpmcQueue and LockFreeQueue
  *
  * Measures end-to-end push-to-pop latency at different queue capacities,
  * throughput under SPSC/MPSC/MPMC producer-consumer configurations, and
@@ -14,7 +14,7 @@
  */
 
 #include "libe3/mpmc_queue.hpp"
-#include "libe3/response_queue.hpp"
+#include "libe3/lockfree_queue.hpp"
 
 #include <algorithm>
 #include <atomic>
@@ -117,7 +117,7 @@ static MpmcLatResult mpmc_spsc_latency(size_t queue_cap, int n_items) {
 }
 
 // ---------------------------------------------------------------------------
-// Section 2 – ResponseQueue end-to-end latency (SPSC)
+// Section 2 – LockFreeQueue end-to-end latency (SPSC)
 // ---------------------------------------------------------------------------
 
 struct RQLatResult {
@@ -128,13 +128,13 @@ struct RQLatResult {
 };
 
 /**
- * Like the MpmcQueue latency test but uses the full ResponseQueue API.
+ * Like the MpmcQueue latency test but uses the full LockFreeQueue API.
  * The push timestamp (nanoseconds) is stored in Pdu::timestamp, which the
  * Pdu constructor sets to milliseconds; we intentionally override it with
  * nanoseconds for this measurement.
  */
 static RQLatResult rq_spsc_latency(size_t queue_cap, int n_items) {
-    ResponseQueue rq(queue_cap);
+    LockFreeQueue<Pdu> rq(queue_cap);
     std::vector<int64_t> latencies(static_cast<size_t>(n_items));
 
     // Warm-up
@@ -334,13 +334,13 @@ int main() {
     }
     std::cout << "\n";
 
-    // ---- 2. ResponseQueue SPSC latency -------------------------------------
+    // ---- 2. LockFreeQueue SPSC latency -------------------------------------
     std::vector<RQLatResult> rlat;
     rlat.reserve(caps.size());
     for (size_t c : caps)
         rlat.push_back(rq_spsc_latency(c, LAT_ITEMS));
 
-    std::cout << "## ResponseQueue End-to-End Latency (SPSC, "
+    std::cout << "## LockFreeQueue End-to-End Latency (SPSC, "
               << LAT_ITEMS << " items per queue size)\n\n";
     std::cout << "| Queue Capacity | P50 (ns) | P95 (ns) | P99 (ns) |\n";
     std::cout << "|---------------:|---------:|---------:|---------:|\n";

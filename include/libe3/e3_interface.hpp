@@ -16,7 +16,7 @@
 #include "e3_connector.hpp"
 #include "e3_encoder.hpp"
 #include "subscription_manager.hpp"
-#include "response_queue.hpp"
+#include "lockfree_queue.hpp"
 #include "sm_interface.hpp"
 #include "dapp_subscription_state.hpp"
 #include <memory>
@@ -123,8 +123,8 @@ public:
     /**
      * @brief Get the response queue for outbound messages
      */
-    ResponseQueue& response_queue() noexcept { 
-        return *response_queue_; 
+    LockFreeQueue<Pdu>& response_queue() noexcept {
+        return *response_queue_;
     }
 
     /**
@@ -212,7 +212,11 @@ private:
     std::unique_ptr<SubscriptionManager> subscription_manager_;
     // dApp-only state (nullptr when role==RAN).
     std::unique_ptr<DAppSubscriptionState> dapp_state_;
-    std::unique_ptr<ResponseQueue> response_queue_;
+    std::unique_ptr<LockFreeQueue<Pdu>> response_queue_;
+
+    // dApp-report queue: subscriber/inbound thread hands reports off to the
+    // report worker thread so downstream (OAI / iApp) work never blocks reads.
+    std::unique_ptr<LockFreeQueue<DAppReport>> report_queue_;
 
     // Threads. setup_thread_ runs the setup loop (RAN: serves; dApp: drives once).
     // inbound_thread_ / outbound_thread_ replace the old subscriber_thread_ /
@@ -222,6 +226,7 @@ private:
     std::unique_ptr<std::thread> inbound_thread_;
     std::unique_ptr<std::thread> outbound_thread_;
     std::unique_ptr<std::thread> sm_data_thread_;
+    std::unique_ptr<std::thread> report_worker_thread_;
 
     // RAN-side handlers
     DAppReportHandler dapp_report_handler_;
@@ -282,6 +287,13 @@ private:
      *        Only runs on RAN role.
      */
     void sm_data_handler_loop();
+
+    /**
+     * @brief Report worker thread - drains report_queue_ and invokes
+     *        handle_dapp_report() off the subscriber thread so ZMQ reads
+     *        are never blocked by downstream (OAI / iApp) work.
+     */
+    void report_worker_loop();
 
     // =========================================================================
     // Message Handlers
