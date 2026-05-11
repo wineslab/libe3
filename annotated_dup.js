@@ -16,6 +16,7 @@ var annotated_dup =
       [ "Logger", "classlibe3_1_1Logger.html", "classlibe3_1_1Logger" ],
       [ "LogStream", "classlibe3_1_1LogStream.html", "classlibe3_1_1LogStream" ],
       [ "MessageAck", "structlibe3_1_1MessageAck.html", "structlibe3_1_1MessageAck" ],
+      [ "MpmcQueue", "classlibe3_1_1MpmcQueue.html", "classlibe3_1_1MpmcQueue" ],
       [ "Pdu", "structlibe3_1_1Pdu.html", "structlibe3_1_1Pdu" ],
       [ "PosixE3Connector", "classlibe3_1_1PosixE3Connector.html", "classlibe3_1_1PosixE3Connector" ],
       [ "RanFunctionDef", "structlibe3_1_1RanFunctionDef.html", "structlibe3_1_1RanFunctionDef" ],

@@ -7,9 +7,10 @@ var searchData=
   ['_7ee3interface_4',['~E3Interface',['../classlibe3_1_1E3Interface.html#a60a12121b85cfed268d37ae7cf72486b',1,'libe3::E3Interface']]],
   ['_7ejsone3encoder_5',['~JsonE3Encoder',['../classlibe3_1_1JsonE3Encoder.html#a318a7d77c33a9624e7512db1aacebdc3',1,'libe3::JsonE3Encoder']]],
   ['_7elogstream_6',['~LogStream',['../classlibe3_1_1LogStream.html#a2a4a53729988364f1694d1097015dc74',1,'libe3::LogStream']]],
-  ['_7eposixe3connector_7',['~PosixE3Connector',['../classlibe3_1_1PosixE3Connector.html#a09050e9c1adc050d26d7d345e0ca130d',1,'libe3::PosixE3Connector']]],
-  ['_7eresponsequeue_8',['~ResponseQueue',['../classlibe3_1_1ResponseQueue.html#a764db6c0201bd9a8400dc676238eed4b',1,'libe3::ResponseQueue']]],
-  ['_7eservicemodel_9',['~ServiceModel',['../classlibe3_1_1ServiceModel.html#a4e7def12f11c843da1581d69cb5d6b9b',1,'libe3::ServiceModel']]],
-  ['_7esubscriptionmanager_10',['~SubscriptionManager',['../classlibe3_1_1SubscriptionManager.html#a8a2372bc4da0b3ddac68c26634d214d7',1,'libe3::SubscriptionManager']]],
-  ['_7ezmqe3connector_11',['~ZmqE3Connector',['../classlibe3_1_1ZmqE3Connector.html#aaa68eb185549c7b2094b8cdecb813ed7',1,'libe3::ZmqE3Connector']]]
+  ['_7empmcqueue_7',['~MpmcQueue',['../classlibe3_1_1MpmcQueue.html#a7985bb0c1eb33e8dca373439a64f3444',1,'libe3::MpmcQueue']]],
+  ['_7eposixe3connector_8',['~PosixE3Connector',['../classlibe3_1_1PosixE3Connector.html#a09050e9c1adc050d26d7d345e0ca130d',1,'libe3::PosixE3Connector']]],
+  ['_7eresponsequeue_9',['~ResponseQueue',['../classlibe3_1_1ResponseQueue.html#a764db6c0201bd9a8400dc676238eed4b',1,'libe3::ResponseQueue']]],
+  ['_7eservicemodel_10',['~ServiceModel',['../classlibe3_1_1ServiceModel.html#a4e7def12f11c843da1581d69cb5d6b9b',1,'libe3::ServiceModel']]],
+  ['_7esubscriptionmanager_11',['~SubscriptionManager',['../classlibe3_1_1SubscriptionManager.html#a8a2372bc4da0b3ddac68c26634d214d7',1,'libe3::SubscriptionManager']]],
+  ['_7ezmqe3connector_12',['~ZmqE3Connector',['../classlibe3_1_1ZmqE3Connector.html#aaa68eb185549c7b2094b8cdecb813ed7',1,'libe3::ZmqE3Connector']]]
 ];

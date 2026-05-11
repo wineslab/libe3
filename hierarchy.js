@@ -23,6 +23,8 @@ var hierarchy =
     [ "libe3::Logger", "classlibe3_1_1Logger.html", null ],
     [ "libe3::LogStream", "classlibe3_1_1LogStream.html", null ],
     [ "libe3::MessageAck", "structlibe3_1_1MessageAck.html", null ],
+    [ "libe3::MpmcQueue< T >", "classlibe3_1_1MpmcQueue.html", null ],
+    [ "libe3::MpmcQueue< libe3::Pdu >", "classlibe3_1_1MpmcQueue.html", null ],
     [ "libe3::Pdu", "structlibe3_1_1Pdu.html", null ],
     [ "libe3::RanFunctionDef", "structlibe3_1_1RanFunctionDef.html", null ],
     [ "libe3::RanFunctionDefinition", "structlibe3_1_1RanFunctionDefinition.html", null ],

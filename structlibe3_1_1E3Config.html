@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -155,6 +155,12 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:ae51015b0eff46f7c09c89e995d62b1de" id="r_ae51015b0eff46f7c09c89e995d62b1de"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1E3Config.html#ae51015b0eff46f7c09c89e995d62b1de">io_threads</a> {2}</td></tr>
 <tr class="memdesc:ae51015b0eff46f7c09c89e995d62b1de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of I/O threads (used by ZMQ context)  <br /></td></tr>
 <tr class="separator:ae51015b0eff46f7c09c89e995d62b1de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5826028457743a7e11c4a164dcfad4ca" id="r_a5826028457743a7e11c4a164dcfad4ca"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1E3Config.html#a5826028457743a7e11c4a164dcfad4ca">io_thread_affinity</a> {-1}</td></tr>
+<tr class="memdesc:a5826028457743a7e11c4a164dcfad4ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">CPU core to pin the subscriber and publisher I/O threads to.  <br /></td></tr>
+<tr class="separator:a5826028457743a7e11c4a164dcfad4ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60d374891a5936af392e5180d4dd884d" id="r_a60d374891a5936af392e5180d4dd884d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1E3Config.html#a60d374891a5936af392e5180d4dd884d">io_thread_niceness</a> {0}</td></tr>
+<tr class="memdesc:a60d374891a5936af392e5180d4dd884d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nice value applied to the subscriber and publisher I/O threads.  <br /></td></tr>
+<tr class="separator:a60d374891a5936af392e5180d4dd884d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a38f5a15184eb32679fcdaeba7f1dfaa9" id="r_a38f5a15184eb32679fcdaeba7f1dfaa9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1E3Config.html#a38f5a15184eb32679fcdaeba7f1dfaa9">log_level</a> {3}</td></tr>
 <tr class="memdesc:a38f5a15184eb32679fcdaeba7f1dfaa9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Logging verbosity: 0=none, 1=error, 2=warn, 3=info, 4=debug, 5=trace.  <br /></td></tr>
 <tr class="separator:a38f5a15184eb32679fcdaeba7f1dfaa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -218,6 +224,46 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a5826028457743a7e11c4a164dcfad4ca" name="a5826028457743a7e11c4a164dcfad4ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5826028457743a7e11c4a164dcfad4ca">&#9670;&#160;</a></span>io_thread_affinity</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int libe3::E3Config::io_thread_affinity {-1}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>CPU core to pin the subscriber and publisher I/O threads to. </p>
+<p>When set to a non-negative value the subscriber_loop and publisher_loop threads will be pinned to this logical CPU core via pthread_setaffinity_np (Linux only; ignored on other platforms). This eliminates cache-migration overhead and reduces scheduling jitter in sub-millisecond control loops.</p>
+<p>-1 (default) disables core pinning. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00388">388</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a60d374891a5936af392e5180d4dd884d" name="a60d374891a5936af392e5180d4dd884d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60d374891a5936af392e5180d4dd884d">&#9670;&#160;</a></span>io_thread_niceness</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int libe3::E3Config::io_thread_niceness {0}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Nice value applied to the subscriber and publisher I/O threads. </p>
+<p>Range -20 (highest priority) to 19 (lowest priority), 0 = system default. A negative value reduces OS scheduling latency at the cost of slightly less CPU time for other processes. Requires appropriate privileges for negative values (CAP_SYS_NICE on Linux).</p>
+<p>Applied via setpriority(PRIO_PROCESS, tid, value) on Linux. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00400">400</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
 <a id="ae51015b0eff46f7c09c89e995d62b1de" name="ae51015b0eff46f7c09c89e995d62b1de"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae51015b0eff46f7c09c89e995d62b1de">&#9670;&#160;</a></span>io_threads</h2>
 
@@ -268,7 +314,7 @@ Public Attributes</h2></td></tr>
 
 <p>Logging verbosity: 0=none, 1=error, 2=warn, 3=info, 4=debug, 5=trace. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00378">378</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00403">403</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

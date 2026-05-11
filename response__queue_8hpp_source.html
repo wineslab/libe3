@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -100,143 +100,142 @@ $(document).ready(function(){initNavTree('response__queue_8hpp_source.html','');
 <div class="contents">
 <a href="response__queue_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/**</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * @file response_queue.hpp</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * @brief Thread-safe queue for E3AP response messages</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * @brief Lock-free bounded queue for E3AP outbound PDUs</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * Provides a thread-safe, blocking queue for queuing outbound E3AP PDUs.</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * Ported from the original C implementation&#39;s e3_response_queue.</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * SPDX-License-Identifier: Apache-2.0</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#ifndef LIBE3_RESPONSE_QUEUE_HPP</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#define LIBE3_RESPONSE_QUEUE_HPP</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="types_8hpp.html">types.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;queue&gt;</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;mutex&gt;</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;condition_variable&gt;</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;chrono&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * Replaces the original mutex + condition-variable implementation with a</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * lock-free MPMC ring buffer (see mpmc_queue.hpp) to eliminate mutex</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * contention on the hot publish path and to reduce latency jitter in</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * sub-millisecond control loops.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * Producer/consumer pattern in libe3:</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *  - Producers: subscriber_loop thread, sm_data_handler_loop thread, and</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> *               any caller of E3Interface::queue_outbound() (MPSC / MPMC).</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> *  - Consumer:  publisher_loop thread (single consumer).</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * SPDX-License-Identifier: Apache-2.0</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#ifndef LIBE3_RESPONSE_QUEUE_HPP</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#define LIBE3_RESPONSE_QUEUE_HPP</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacelibe3.html">libe3</a> {</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"></span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">/**</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * @brief Thread-safe queue for E3AP PDUs</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> * This class provides a bounded, thread-safe queue for communication</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment"> * between threads in the E3 agent. It supports blocking pop with</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment"> * optional timeout.</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment"> */</span></div>
-<div class="foldopen" id="foldopen00030" data-start="{" data-end="};">
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="classlibe3_1_1ResponseQueue.html">   30</a></span><span class="keyword">class </span><a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a> {</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">public</span>:<span class="comment"></span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment">     * @brief Construct a new Response Queue</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment">     * @param max_size Maximum queue capacity (default: 100)</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keyword">explicit</span> <a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a>(<span class="keywordtype">size_t</span> max_size = 100);</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment"></span> </div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment">     * @brief Destructor</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#a764db6c0201bd9a8400dc676238eed4b">~ResponseQueue</a>();</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="comment">// Non-copyable, non-movable</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="classlibe3_1_1ResponseQueue.html#a160ada2fc0224ad9b5367e50d4cdd2be">   44</a></span>    <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#a160ada2fc0224ad9b5367e50d4cdd2be">ResponseQueue</a>(<span class="keyword">const</span> <a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a>&amp;) = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="classlibe3_1_1ResponseQueue.html#ab3df452339cd22621b37f6e23d09d41f">   45</a></span>    <a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a>&amp; <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#ab3df452339cd22621b37f6e23d09d41f">operator=</a>(<span class="keyword">const</span> <a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a>&amp;) = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classlibe3_1_1ResponseQueue.html#accaac87f22c58da6f8f1afcb3ecc74f3">   46</a></span>    <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#accaac87f22c58da6f8f1afcb3ecc74f3">ResponseQueue</a>(<a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a>&amp;&amp;) = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="classlibe3_1_1ResponseQueue.html#a19a36be00aad3ad08912f4d963c422cb">   47</a></span>    <a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a>&amp; <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#a19a36be00aad3ad08912f4d963c422cb">operator=</a>(<a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a>&amp;&amp;) = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment"></span> </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment">     * @brief Push a PDU to the queue</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment">     *</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="comment">     * @param pdu PDU to push</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment">     * @return ErrorCode::SUCCESS on success</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="comment">     * @return ErrorCode::BUFFER_TOO_SMALL if queue is full</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <a class="code hl_enumeration" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#a7e841aaa8d120a40cef0eace2e6638a4">push</a>(<a class="code hl_struct" href="structlibe3_1_1Pdu.html">Pdu</a> pdu);</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="comment"></span> </div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">     * @brief Pop a PDU from the queue (blocking)</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="comment">     *</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="comment">     * Blocks until a PDU is available.</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="comment">     *</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="comment">     * @return The popped PDU</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;<a class="code" href="types_8hpp.html">types.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;<a class="code" href="mpmc__queue_8hpp.html">mpmc_queue.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;atomic&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;chrono&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacelibe3.html">libe3</a> {</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment"></span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">/**</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment"> * @brief Lock-free bounded queue for E3AP PDUs.</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment"> * Provides the same API as the previous mutex-based implementation but uses</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment"> * an MPMC lock-free ring buffer internally.  Blocking pop variants use an</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment"> * adaptive spin-wait strategy:</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="comment"> *  1. Spin with CPU pause hints  (lowest latency, nanoseconds)</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment"> *  2. Thread yield               (cooperative, microseconds)</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment"> *  3. Short sleep (50 µs)        (idle wait, avoids busy-loop when quiet)</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment"> */</span></div>
+<div class="foldopen" id="foldopen00039" data-start="{" data-end="};">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="classlibe3_1_1ResponseQueue.html">   39</a></span><span class="keyword">class </span><a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a> {</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="keyword">public</span>:<span class="comment"></span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">     * @brief Construct a ResponseQueue.</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">     * @param capacity Minimum ring buffer capacity (rounded up to next power</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">     *                 of two, default 128).</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keyword">explicit</span> <a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a>(<span class="keywordtype">size_t</span> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#aa8f336cb8ae8c4468d3e66456e39f2e4">capacity</a> = 128);</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment"></span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment">     * @brief Destructor – signals shutdown so any blocked pop() returns.</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#a764db6c0201bd9a8400dc676238eed4b">~ResponseQueue</a>();</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="comment">// Non-copyable, non-movable</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="classlibe3_1_1ResponseQueue.html#a160ada2fc0224ad9b5367e50d4cdd2be">   54</a></span>    <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#a160ada2fc0224ad9b5367e50d4cdd2be">ResponseQueue</a>(<span class="keyword">const</span> <a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="classlibe3_1_1ResponseQueue.html#ab3df452339cd22621b37f6e23d09d41f">   55</a></span>    <a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a>&amp; <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#ab3df452339cd22621b37f6e23d09d41f">operator=</a>(<span class="keyword">const</span> <a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="classlibe3_1_1ResponseQueue.html#accaac87f22c58da6f8f1afcb3ecc74f3">   56</a></span>    <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#accaac87f22c58da6f8f1afcb3ecc74f3">ResponseQueue</a>(<a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a>&amp;&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="classlibe3_1_1ResponseQueue.html#a19a36be00aad3ad08912f4d963c422cb">   57</a></span>    <a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a>&amp; <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#a19a36be00aad3ad08912f4d963c422cb">operator=</a>(<a class="code hl_class" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a>&amp;&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment"></span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="comment">     * @brief Enqueue a PDU (non-blocking, lock-free).</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="comment">     * @return ErrorCode::SUCCESS on success.</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="comment">     * @return ErrorCode::BUFFER_TOO_SMALL if the ring buffer is full.</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="comment">     * @return ErrorCode::NOT_INITIALIZED if shutdown() has been called.</span></div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <a class="code hl_struct" href="structlibe3_1_1Pdu.html">Pdu</a> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#ac7eca0dae8b4f7e699fc284bded148c2">pop</a>();</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <a class="code hl_enumeration" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#a7e841aaa8d120a40cef0eace2e6638a4">push</a>(<a class="code hl_struct" href="structlibe3_1_1Pdu.html">Pdu</a> pdu);</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="comment"></span> </div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="comment">     * @brief Pop a PDU from the queue with timeout</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="comment">     * @brief Dequeue a PDU, blocking indefinitely until one is available.</span></div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="comment">     *</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="comment">     * @param timeout Maximum time to wait</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="comment">     * @return The PDU if available, std::nullopt on timeout</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    std::optional&lt;Pdu&gt; <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#ac7eca0dae8b4f7e699fc284bded148c2">pop</a>(std::chrono::milliseconds timeout);</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="comment"></span> </div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="comment">     * @brief Try to pop without blocking</span></div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="comment">     *</span></div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="comment">     * @return The PDU if available, std::nullopt if queue is empty</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    std::optional&lt;Pdu&gt; <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#aa320a43472803080de845350b4d521c3">try_pop</a>();</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="comment"></span> </div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="comment">     * @brief Check if queue is empty</span></div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#a0db8a4ca4108d67df18a13e83abed794">empty</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="comment"></span> </div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="comment">     * @brief Get current queue size</span></div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="comment">     * Returns an empty Pdu{} if shutdown() is called while waiting.</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <a class="code hl_struct" href="structlibe3_1_1Pdu.html">Pdu</a> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#ac7eca0dae8b4f7e699fc284bded148c2">pop</a>();</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="comment"></span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="comment">     * @brief Dequeue a PDU with a maximum wait duration.</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="comment">     * @return The PDU on success; std::nullopt on timeout or shutdown.</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    std::optional&lt;Pdu&gt; <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#ac7eca0dae8b4f7e699fc284bded148c2">pop</a>(std::chrono::milliseconds timeout);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="comment"></span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="comment">     * @brief Try to dequeue without blocking.</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="comment">     * @return The PDU if one was available; std::nullopt otherwise.</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    std::optional&lt;Pdu&gt; <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#aa320a43472803080de845350b4d521c3">try_pop</a>();</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="comment"></span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="comment">    /** @brief Return true if the queue appears empty (approximate). */</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#a0db8a4ca4108d67df18a13e83abed794">empty</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="comment"></span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="comment">    /** @brief Return the approximate number of items in the queue. */</span></div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="keywordtype">size_t</span> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#a9e4d75314c3d37184dbfddf00075a84c">size</a>() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="comment"></span> </div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="comment">     * @brief Get maximum queue capacity</span></div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="classlibe3_1_1ResponseQueue.html#aa8f336cb8ae8c4468d3e66456e39f2e4">   95</a></span>    <span class="keywordtype">size_t</span> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#aa8f336cb8ae8c4468d3e66456e39f2e4">capacity</a>() const noexcept { <span class="keywordflow">return</span> max_size_; }</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="comment"></span> </div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="comment">     * @brief Clear all items from the queue</span></div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#aeb8eeca7f12e980ed80da590738e547d">clear</a>();</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="comment"></span> </div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="comment">     * @brief Wake up all waiting threads (for shutdown)</span></div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#a7ef3fbddcd72227b651f90b9b111eddc">shutdown</a>();</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="comment"></span> </div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="comment">     * @brief Check if queue is shut down</span></div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#a10248ba2b5cb19eba70c0b8d75a01e9f">is_shutdown</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    std::queue&lt;Pdu&gt; queue_;</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="keyword">mutable</span> std::mutex mutex_;</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    std::condition_variable not_empty_;</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <span class="keywordtype">size_t</span> max_size_;</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="keywordtype">bool</span> shutdown_{<span class="keyword">false</span>};</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>};</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="comment">    /** @brief Return the ring buffer capacity (always a power of two). */</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="classlibe3_1_1ResponseQueue.html#aa8f336cb8ae8c4468d3e66456e39f2e4">   93</a></span>    <span class="keywordtype">size_t</span> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#aa8f336cb8ae8c4468d3e66456e39f2e4">capacity</a>() const noexcept { <span class="keywordflow">return</span> ring_.capacity(); }</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="comment"></span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="comment">    /** @brief Discard all items currently in the queue. */</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#aeb8eeca7f12e980ed80da590738e547d">clear</a>();</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="comment"></span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="comment">     * @brief Signal shutdown so that all blocked pop() calls return promptly.</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#a7ef3fbddcd72227b651f90b9b111eddc">shutdown</a>();</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="comment"></span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="comment">    /** @brief Return true if shutdown() has been called. */</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classlibe3_1_1ResponseQueue.html#a10248ba2b5cb19eba70c0b8d75a01e9f">is_shutdown</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <a class="code hl_class" href="classlibe3_1_1MpmcQueue.html">MpmcQueue&lt;Pdu&gt;</a> ring_;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    std::atomic&lt;bool&gt; shutdown_{<span class="keyword">false</span>};</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="comment">// Adaptive spin-wait tuning constants</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">size_t</span> SPIN_COUNT  = 40;   <span class="comment">///&lt; CPU-pause iterations</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">size_t</span> YIELD_COUNT = 100;  <span class="comment">///&lt; thread-yield iterations</span><span class="comment"></span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="comment">    /// Sleep duration between attempts in the slow path (µs)</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="comment"></span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">auto</span> SLEEP_DURATION = std::chrono::microseconds(50);</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>};</div>
 </div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>} <span class="comment">// namespace libe3</span></div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><span class="preprocessor">#endif </span><span class="comment">// LIBE3_RESPONSE_QUEUE_HPP</span></div>
-<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html">libe3::ResponseQueue</a></div><div class="ttdoc">Thread-safe queue for E3AP PDUs.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8hpp_source.html#l00030">response_queue.hpp:30</a></div></div>
-<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_a0db8a4ca4108d67df18a13e83abed794"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#a0db8a4ca4108d67df18a13e83abed794">libe3::ResponseQueue::empty</a></div><div class="ttdeci">bool empty() const</div><div class="ttdoc">Check if queue is empty.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00102">response_queue.cpp:102</a></div></div>
-<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_a10248ba2b5cb19eba70c0b8d75a01e9f"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#a10248ba2b5cb19eba70c0b8d75a01e9f">libe3::ResponseQueue::is_shutdown</a></div><div class="ttdeci">bool is_shutdown() const</div><div class="ttdoc">Check if queue is shut down.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00128">response_queue.cpp:128</a></div></div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>} <span class="comment">// namespace libe3</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="preprocessor">#endif </span><span class="comment">// LIBE3_RESPONSE_QUEUE_HPP</span></div>
+<div class="ttc" id="aclasslibe3_1_1MpmcQueue_html"><div class="ttname"><a href="classlibe3_1_1MpmcQueue.html">libe3::MpmcQueue</a></div><div class="ttdoc">Lock-free bounded MPMC ring buffer.</div><div class="ttdef"><b>Definition</b> <a href="mpmc__queue_8hpp_source.html#l00047">mpmc_queue.hpp:47</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html">libe3::ResponseQueue</a></div><div class="ttdoc">Lock-free bounded queue for E3AP PDUs.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8hpp_source.html#l00039">response_queue.hpp:39</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_a0db8a4ca4108d67df18a13e83abed794"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#a0db8a4ca4108d67df18a13e83abed794">libe3::ResponseQueue::empty</a></div><div class="ttdeci">bool empty() const</div><div class="ttdoc">Return true if the queue appears empty (approximate).</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00110">response_queue.cpp:110</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_a10248ba2b5cb19eba70c0b8d75a01e9f"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#a10248ba2b5cb19eba70c0b8d75a01e9f">libe3::ResponseQueue::is_shutdown</a></div><div class="ttdeci">bool is_shutdown() const</div><div class="ttdoc">Return true if shutdown() has been called.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00129">response_queue.cpp:129</a></div></div>
 <div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_a160ada2fc0224ad9b5367e50d4cdd2be"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#a160ada2fc0224ad9b5367e50d4cdd2be">libe3::ResponseQueue::ResponseQueue</a></div><div class="ttdeci">ResponseQueue(const ResponseQueue &amp;)=delete</div></div>
 <div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_a19a36be00aad3ad08912f4d963c422cb"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#a19a36be00aad3ad08912f4d963c422cb">libe3::ResponseQueue::operator=</a></div><div class="ttdeci">ResponseQueue &amp; operator=(ResponseQueue &amp;&amp;)=delete</div></div>
-<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_a764db6c0201bd9a8400dc676238eed4b"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#a764db6c0201bd9a8400dc676238eed4b">libe3::ResponseQueue::~ResponseQueue</a></div><div class="ttdeci">~ResponseQueue()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00024">response_queue.cpp:24</a></div></div>
-<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_a7e841aaa8d120a40cef0eace2e6638a4"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#a7e841aaa8d120a40cef0eace2e6638a4">libe3::ResponseQueue::push</a></div><div class="ttdeci">ErrorCode push(Pdu pdu)</div><div class="ttdoc">Push a PDU to the queue.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00029">response_queue.cpp:29</a></div></div>
-<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_a7ef3fbddcd72227b651f90b9b111eddc"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#a7ef3fbddcd72227b651f90b9b111eddc">libe3::ResponseQueue::shutdown</a></div><div class="ttdeci">void shutdown()</div><div class="ttdoc">Wake up all waiting threads (for shutdown)</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00119">response_queue.cpp:119</a></div></div>
-<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_a9e4d75314c3d37184dbfddf00075a84c"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#a9e4d75314c3d37184dbfddf00075a84c">libe3::ResponseQueue::size</a></div><div class="ttdeci">size_t size() const</div><div class="ttdoc">Get current queue size.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00107">response_queue.cpp:107</a></div></div>
-<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_aa320a43472803080de845350b4d521c3"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#aa320a43472803080de845350b4d521c3">libe3::ResponseQueue::try_pop</a></div><div class="ttdeci">std::optional&lt; Pdu &gt; try_pop()</div><div class="ttdoc">Try to pop without blocking.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00089">response_queue.cpp:89</a></div></div>
-<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_aa8f336cb8ae8c4468d3e66456e39f2e4"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#aa8f336cb8ae8c4468d3e66456e39f2e4">libe3::ResponseQueue::capacity</a></div><div class="ttdeci">size_t capacity() const noexcept</div><div class="ttdoc">Get maximum queue capacity.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8hpp_source.html#l00095">response_queue.hpp:95</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_a764db6c0201bd9a8400dc676238eed4b"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#a764db6c0201bd9a8400dc676238eed4b">libe3::ResponseQueue::~ResponseQueue</a></div><div class="ttdeci">~ResponseQueue()</div><div class="ttdoc">Destructor – signals shutdown so any blocked pop() returns.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00030">response_queue.cpp:30</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_a7e841aaa8d120a40cef0eace2e6638a4"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#a7e841aaa8d120a40cef0eace2e6638a4">libe3::ResponseQueue::push</a></div><div class="ttdeci">ErrorCode push(Pdu pdu)</div><div class="ttdoc">Enqueue a PDU (non-blocking, lock-free).</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00035">response_queue.cpp:35</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_a7ef3fbddcd72227b651f90b9b111eddc"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#a7ef3fbddcd72227b651f90b9b111eddc">libe3::ResponseQueue::shutdown</a></div><div class="ttdeci">void shutdown()</div><div class="ttdoc">Signal shutdown so that all blocked pop() calls return promptly.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00124">response_queue.cpp:124</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_a9e4d75314c3d37184dbfddf00075a84c"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#a9e4d75314c3d37184dbfddf00075a84c">libe3::ResponseQueue::size</a></div><div class="ttdeci">size_t size() const</div><div class="ttdoc">Return the approximate number of items in the queue.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00114">response_queue.cpp:114</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_aa320a43472803080de845350b4d521c3"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#aa320a43472803080de845350b4d521c3">libe3::ResponseQueue::try_pop</a></div><div class="ttdeci">std::optional&lt; Pdu &gt; try_pop()</div><div class="ttdoc">Try to dequeue without blocking.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00104">response_queue.cpp:104</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_aa8f336cb8ae8c4468d3e66456e39f2e4"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#aa8f336cb8ae8c4468d3e66456e39f2e4">libe3::ResponseQueue::capacity</a></div><div class="ttdeci">size_t capacity() const noexcept</div><div class="ttdoc">Return the ring buffer capacity (always a power of two).</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8hpp_source.html#l00093">response_queue.hpp:93</a></div></div>
 <div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_ab3df452339cd22621b37f6e23d09d41f"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#ab3df452339cd22621b37f6e23d09d41f">libe3::ResponseQueue::operator=</a></div><div class="ttdeci">ResponseQueue &amp; operator=(const ResponseQueue &amp;)=delete</div></div>
-<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_ac7eca0dae8b4f7e699fc284bded148c2"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#ac7eca0dae8b4f7e699fc284bded148c2">libe3::ResponseQueue::pop</a></div><div class="ttdeci">Pdu pop()</div><div class="ttdoc">Pop a PDU from the queue (blocking)</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00050">response_queue.cpp:50</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_ac7eca0dae8b4f7e699fc284bded148c2"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#ac7eca0dae8b4f7e699fc284bded148c2">libe3::ResponseQueue::pop</a></div><div class="ttdeci">Pdu pop()</div><div class="ttdoc">Dequeue a PDU, blocking indefinitely until one is available.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00049">response_queue.cpp:49</a></div></div>
 <div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_accaac87f22c58da6f8f1afcb3ecc74f3"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#accaac87f22c58da6f8f1afcb3ecc74f3">libe3::ResponseQueue::ResponseQueue</a></div><div class="ttdeci">ResponseQueue(ResponseQueue &amp;&amp;)=delete</div></div>
-<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_aeb8eeca7f12e980ed80da590738e547d"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#aeb8eeca7f12e980ed80da590738e547d">libe3::ResponseQueue::clear</a></div><div class="ttdeci">void clear()</div><div class="ttdoc">Clear all items from the queue.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00112">response_queue.cpp:112</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1ResponseQueue_html_aeb8eeca7f12e980ed80da590738e547d"><div class="ttname"><a href="classlibe3_1_1ResponseQueue.html#aeb8eeca7f12e980ed80da590738e547d">libe3::ResponseQueue::clear</a></div><div class="ttdeci">void clear()</div><div class="ttdoc">Discard all items currently in the queue.</div><div class="ttdef"><b>Definition</b> <a href="response__queue_8cpp_source.html#l00118">response_queue.cpp:118</a></div></div>
+<div class="ttc" id="ampmc__queue_8hpp_html"><div class="ttname"><a href="mpmc__queue_8hpp.html">mpmc_queue.hpp</a></div><div class="ttdoc">Lock-free bounded Multi-Producer Multi-Consumer (MPMC) ring buffer.</div></div>
 <div class="ttc" id="anamespacelibe3_html"><div class="ttname"><a href="namespacelibe3.html">libe3</a></div><div class="ttdef"><b>Definition</b> <a href="libe3_8hpp_source.html#l00028">libe3.hpp:28</a></div></div>
 <div class="ttc" id="anamespacelibe3_html_a0f455c3a80f115f8aa8ad664850d6bb3"><div class="ttname"><a href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">libe3::ErrorCode</a></div><div class="ttdeci">ErrorCode</div><div class="ttdoc">Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00105">types.hpp:105</a></div></div>
 <div class="ttc" id="astructlibe3_1_1Pdu_html"><div class="ttname"><a href="structlibe3_1_1Pdu.html">libe3::Pdu</a></div><div class="ttdoc">Generic E3AP PDU structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00296">types.hpp:296</a></div></div>

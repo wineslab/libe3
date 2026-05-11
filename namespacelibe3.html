@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -147,6 +147,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1MessageAck.html">MessageAck</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">E3AP Message Acknowledgment structure.  <a href="structlibe3_1_1MessageAck.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1MpmcQueue.html">MpmcQueue</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lock-free bounded MPMC ring buffer.  <a href="classlibe3_1_1MpmcQueue.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1Pdu.html">Pdu</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic E3AP PDU structure.  <a href="structlibe3_1_1Pdu.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -163,7 +166,7 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">E3AP Release Message structure.  <a href="structlibe3_1_1ReleaseMessage.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Thread-safe queue for E3AP PDUs.  <a href="classlibe3_1_1ResponseQueue.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lock-free bounded queue for E3AP PDUs.  <a href="classlibe3_1_1ResponseQueue.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1ServiceModel.html">ServiceModel</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract Service Model interface.  <a href="classlibe3_1_1ServiceModel.html#details">More...</a><br /></td></tr>
@@ -323,6 +326,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a3fd9e4c182481cd094c35bab83ede638" id="r_a3fd9e4c182481cd094c35bab83ede638"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classlibe3_1_1E3Encoder.html">E3Encoder</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a3fd9e4c182481cd094c35bab83ede638">create_encoder</a> (<a class="el" href="namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444">EncodingFormat</a> format)</td></tr>
 <tr class="memdesc:a3fd9e4c182481cd094c35bab83ede638"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory function to create appropriate encoder.  <br /></td></tr>
 <tr class="separator:a3fd9e4c182481cd094c35bab83ede638"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a979479d8033aec7c1268d3a5af3223c7" id="r_a979479d8033aec7c1268d3a5af3223c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a979479d8033aec7c1268d3a5af3223c7">cpu_relax</a> () noexcept</td></tr>
+<tr class="memdesc:a979479d8033aec7c1268d3a5af3223c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emit a CPU-level pause/yield hint inside spin-wait loops.  <br /></td></tr>
+<tr class="separator:a979479d8033aec7c1268d3a5af3223c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e67547ed0251e57fee673a53a8e935f" id="r_a1e67547ed0251e57fee673a53a8e935f"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a1e67547ed0251e57fee673a53a8e935f">ErrorCodeToString</a> (<a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> code)</td></tr>
 <tr class="memdesc:a1e67547ed0251e57fee673a53a8e935f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert ErrorCode to string name (C++ wrapper)  <br /></td></tr>
 <tr class="separator:a1e67547ed0251e57fee673a53a8e935f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -350,6 +356,9 @@ Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
+<tr class="memitem:ab6da70ca1096634b6803d9f25120b0e3" id="r_ab6da70ca1096634b6803d9f25120b0e3"><td class="memItemLeft" align="right" valign="top">static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#ab6da70ca1096634b6803d9f25120b0e3">CACHE_LINE_SIZE</a> = 64</td></tr>
+<tr class="memdesc:ab6da70ca1096634b6803d9f25120b0e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assumed cache-line size (bytes) used for alignment padding.  <br /></td></tr>
+<tr class="separator:ab6da70ca1096634b6803d9f25120b0e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a581a3bc9ba0fad9e97f52c00fdce32b9" id="r_a581a3bc9ba0fad9e97f52c00fdce32b9"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a581a3bc9ba0fad9e97f52c00fdce32b9">MAX_PROTOCOL_DATA_SIZE</a> = 32768</td></tr>
 <tr class="separator:a581a3bc9ba0fad9e97f52c00fdce32b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca224e72d9af7089c4d9c1a150a705db" id="r_aca224e72d9af7089c4d9c1a150a705db"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#aca224e72d9af7089c4d9c1a150a705db">MAX_ACTION_DATA_SIZE</a> = 32768</td></tr>
@@ -556,7 +565,7 @@ template&lt;typename T &gt; </div>
 
 <p>Timestamp type using steady_clock for monotonic time. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00384">384</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00409">409</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -899,7 +908,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert ActionType to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00428">428</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00453">453</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -929,7 +938,37 @@ template&lt;typename T &gt; </div>
 
 <p>Convert AgentState to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00481">481</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00506">506</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a979479d8033aec7c1268d3a5af3223c7" name="a979479d8033aec7c1268d3a5af3223c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a979479d8033aec7c1268d3a5af3223c7">&#9670;&#160;</a></span>cpu_relax()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void libe3::cpu_relax </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Emit a CPU-level pause/yield hint inside spin-wait loops. </p>
+<p>Reduces power consumption and inter-core bus traffic while spinning. On architectures without a dedicated pause instruction this is a no-op. </p>
+
+<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00201">201</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
 
 </div>
 </div>
@@ -1076,7 +1115,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert ErrorCode to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00451">451</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00476">476</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1136,7 +1175,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert E3LinkLayer to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00498">498</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00523">523</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1166,7 +1205,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert PduType to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00408">408</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00433">433</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1196,7 +1235,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert ResponseCode to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00440">440</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00465">465</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1226,7 +1265,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert E3TransportLayer to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00509">509</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00534">534</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1316,6 +1355,32 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
+<a id="ab6da70ca1096634b6803d9f25120b0e3" name="ab6da70ca1096634b6803d9f25120b0e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6da70ca1096634b6803d9f25120b0e3">&#9670;&#160;</a></span>CACHE_LINE_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr size_t libe3::CACHE_LINE_SIZE = 64</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Assumed cache-line size (bytes) used for alignment padding. </p>
+
+<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00029">29</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
+
+</div>
+</div>
 <a id="a809598c8d63a2bdce0d447411324a2b5" name="a809598c8d63a2bdce0d447411324a2b5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a809598c8d63a2bdce0d447411324a2b5">&#9670;&#160;</a></span>DEFAULT_BUFFER_SIZE</h2>
 

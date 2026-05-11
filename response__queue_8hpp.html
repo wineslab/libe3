@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -97,12 +97,11 @@ $(document).ready(function(){initNavTree('response__queue_8hpp.html',''); initRe
 </div><!--header-->
 <div class="contents">
 
-<p>Thread-safe queue for E3AP response messages.  
+<p>Lock-free bounded queue for E3AP outbound PDUs.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="types_8hpp_source.html">types.hpp</a>&quot;</code><br />
-<code>#include &lt;queue&gt;</code><br />
-<code>#include &lt;mutex&gt;</code><br />
-<code>#include &lt;condition_variable&gt;</code><br />
+<code>#include &quot;<a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>&quot;</code><br />
+<code>#include &lt;atomic&gt;</code><br />
 <code>#include &lt;optional&gt;</code><br />
 <code>#include &lt;chrono&gt;</code><br />
 </div>
@@ -111,7 +110,7 @@ $(document).ready(function(){initNavTree('response__queue_8hpp.html',''); initRe
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1ResponseQueue.html">libe3::ResponseQueue</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Thread-safe queue for E3AP PDUs.  <a href="classlibe3_1_1ResponseQueue.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lock-free bounded queue for E3AP PDUs.  <a href="classlibe3_1_1ResponseQueue.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -120,8 +119,12 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Thread-safe queue for E3AP response messages. </p>
-<p>Provides a thread-safe, blocking queue for queuing outbound E3AP PDUs. Ported from the original C implementation's e3_response_queue.</p>
+<div class="textblock"><p>Lock-free bounded queue for E3AP outbound PDUs. </p>
+<p>Replaces the original mutex + condition-variable implementation with a lock-free MPMC ring buffer (see <a class="el" href="mpmc__queue_8hpp.html" title="Lock-free bounded Multi-Producer Multi-Consumer (MPMC) ring buffer.">mpmc_queue.hpp</a>) to eliminate mutex contention on the hot publish path and to reduce latency jitter in sub-millisecond control loops.</p>
+<p>Producer/consumer pattern in <a class="el" href="namespacelibe3.html">libe3</a>:</p><ul>
+<li>Producers: subscriber_loop thread, sm_data_handler_loop thread, and any caller of E3Interface::queue_outbound() (MPSC / MPMC).</li>
+<li>Consumer: publisher_loop thread (single consumer).</li>
+</ul>
 <p>SPDX-License-Identifier: Apache-2.0 </p>
 
 <p class="definition">Definition in file <a class="el" href="response__queue_8hpp_source.html">response_queue.hpp</a>.</p>
