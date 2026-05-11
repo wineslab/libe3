@@ -1,0 +1,32 @@
+name: Question / Support
+description: Ask a usage question or request guidance. For confirmed bugs use the bug report template instead.
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please confirm this is a usage question, not a bug. Check `README.md`, the Doxygen docs at https://wineslab.github.io/dApp-libe3/, and `examples/` first.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried?
+      description: Commands run, docs consulted, links followed.
+    validations:
+      required: true
+
+  - type: input
+    id: context
+    attributes:
+      label: Relevant context
+      description: Build flags, encoding (ASN.1/JSON), OS, downstream consumer — whatever applies.
+    validations:
+      required: false

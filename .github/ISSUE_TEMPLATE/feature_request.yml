@@ -1,0 +1,70 @@
+name: Feature request
+description: Propose a new capability or behavior change for libe3.
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before opening, please discuss substantial changes with the maintainers (issue, email, or any other channel) — see `CONTRIBUTING.md`.
+
+        libe3 is one of three paired repositories (with `dapps` and `dApp-openairinterface5g`). **We do not accept patches that break or reduce compatibility with the twin repositories.** If your feature touches the public API, ABI, or the E3 wire protocol, please describe the corresponding changes needed in the twin repos.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / use case
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Sketch the API, behavior, configuration option, or new module. Code snippets / header sketches welcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+
+  - type: textarea
+    id: twin_repo
+    attributes:
+      label: Twin-repo impact
+      description: Does this require coordinated changes in `dapps` and/or `dApp-openairinterface5g`? If yes, describe them. If no, write "None".
+    validations:
+      required: true
+
+  - type: dropdown
+    id: abi
+    attributes:
+      label: ABI / API impact
+      options:
+        - "No change to public headers"
+        - "Additive (new public symbols, no removals)"
+        - "Breaking (removes or changes existing public symbols)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: willing
+    attributes:
+      label: Are you willing to implement this?
+      options:
+        - "Yes, I'll open a PR (in the internal repo)"
+        - "Yes, with maintainer guidance"
+        - "No — proposal only"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+    validations:
+      required: false

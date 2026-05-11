@@ -1,0 +1,157 @@
+name: Bug report
+description: Report a defect in libe3. Use this when something does not behave as documented.
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill in every required field — bug reports without reproduction info or environment details cannot be triaged and will be closed.
+
+        Before submitting, please confirm you have searched the existing issues on the public mirror (`wineslab/dApp-libe3`) and, if you have access, on the internal repository for duplicates.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I have searched existing issues and confirmed this is not a duplicate.
+          required: true
+        - label: I have verified the bug against the latest commit on `main`.
+          required: true
+        - label: I have read `CONTRIBUTING.md`.
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of the bug.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Numbered list of exact steps. Include the full command lines you ran (`./build_libe3 …`, `ctest …`, etc.).
+      value: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include error messages, sanitizer output, and stack traces exactly as they appeared.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: build_type
+    attributes:
+      label: Build type
+      options:
+        - "Release (-r)"
+        - "Debug (-g)"
+        - "RelWithDebInfo (--relwithdebinfo)"
+        - "MinSizeRel (--minsizerel)"
+    validations:
+      required: true
+
+  - type: input
+    id: build_command
+    attributes:
+      label: Exact build command
+      description: The full `./build_libe3 …` invocation (or `cmake …` / `make …` if you went raw).
+      placeholder: "./build_libe3 -c -d build -j $(nproc) -r -t"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: features
+    attributes:
+      label: CMake feature flags (mark non-defaults)
+      description: Defaults are LIBE3_ENABLE_ZMQ=ON, LIBE3_ENABLE_ASN1=ON, LIBE3_ENABLE_JSON=OFF, LIBE3_BUILD_TESTS=ON, LIBE3_BUILD_EXAMPLES=ON.
+      options:
+        - label: LIBE3_ENABLE_ZMQ disabled
+        - label: LIBE3_ENABLE_ASN1 disabled
+        - label: LIBE3_ENABLE_JSON enabled (mutually exclusive with ASN1)
+        - label: LIBE3_BUILD_TESTS disabled
+        - label: LIBE3_BUILD_EXAMPLES disabled
+        - label: LIBE3_ENABLE_ASAN enabled
+        - label: LIBE3_ENABLE_TSAN enabled
+
+  - type: dropdown
+    id: consumer
+    attributes:
+      label: How is libe3 being used?
+      options:
+        - "Standalone — examples/simple_agent or similar"
+        - "Linked from dApp-openairinterface5g (gNB)"
+        - "Used by dapps tests"
+        - "Other downstream consumer"
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: libe3 version
+      description: Contents of the `VERSION` file at the commit you tested, or git commit SHA.
+      placeholder: "0.0.1 (commit abcdef)"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system + architecture
+      placeholder: "Ubuntu 22.04 x86_64 / Ubuntu 24.04 arm64 / Fedora 40 x86_64"
+    validations:
+      required: true
+
+  - type: input
+    id: compiler
+    attributes:
+      label: Compiler and version
+      description: Output of `gcc --version` or `clang --version`.
+      placeholder: "gcc 13.2.0 / clang 17.0.6"
+    validations:
+      required: true
+
+  - type: textarea
+    id: ctest
+    attributes:
+      label: Test output (if relevant)
+      description: Output of `cd build && ctest --output-on-failure` for the failing test(s).
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / sanitizer output
+      description: Full stderr, ASan/TSan/UBSan reports, GDB backtrace if applicable. Use a code fence.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional context
+      description: Hypotheses, recent related changes, related issues.
+    validations:
+      required: false

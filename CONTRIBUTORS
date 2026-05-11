@@ -1,0 +1,19 @@
+# Author
+
+- Andrea Lacava <thecave003@gmail.com>
+  - Initial library scaffolding and CMake build system
+  - E3 Agent and E3 Interface core implementation
+  - JSON encoding/decoding support (nlohmann/json)
+  - ASN.1 encoding path and Spectrum SM example
+  - GitHub Actions: PR test matrix (Debug/Release), tag-and-release with .deb packaging,
+    Doxygen GitHub Pages deployment, internal-to-public mirroring
+  - Doxygen documentation setup
+
+
+# Contributors
+
+Listed in chronological order of first contribution.
+We are grateful for every contribution, big or small, that helped shape this project.
+
+- Filippo Olimpieri <126257005+Ninjabippo1205@users.noreply.github.com>
+  - Callback mechanism for dApp status reporting to the E2 Agent

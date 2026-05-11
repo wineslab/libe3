@@ -1,0 +1,27 @@
+name: Documentation issue
+description: Report missing, wrong, or unclear documentation (README, Doxygen comments, examples).
+title: "[Docs]: "
+labels: ["documentation"]
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Documentation location
+      description: File path, README section, or Doxygen URL.
+      placeholder: "README.md § Quick Start, or include/libe3/E3Agent.hpp Doxygen comment, or https://wineslab.github.io/dApp-libe3/..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong or missing?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested correction
+    validations:
+      required: false
