@@ -66,7 +66,8 @@ EncodeResult<EncodedMessage> Asn1E3Encoder::encode(const Pdu& pdu) {
     }
     
     // Resize buffer to actual encoded size
-    buffer.resize(static_cast<size_t>(enc_rval.encoded));
+    const size_t encoded_bytes = (static_cast<size_t>(enc_rval.encoded) + 7) / 8;
+    buffer.resize(encoded_bytes);
     
     ASN_STRUCT_FREE(asn_DEF_E3_PDU, asn1_pdu);
     
