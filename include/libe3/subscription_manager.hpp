@@ -13,6 +13,7 @@
 
 #include "types.hpp"
 #include <mutex>
+#include <optional>
 #include <shared_mutex>
 #include <utility>
 #include <vector>
@@ -178,9 +179,14 @@ public:
     /**
      * @brief Get subscription details for a specific dApp + RAN function pair
      *
-     * @return nullptr if no such subscription exists
+     * Returns a copy of the SubscriptionDetails under the manager's read lock,
+     * not a pointer into internal storage. This prevents a use-after-free when
+     * another thread calls unregister_dapp / remove_subscription between the
+     * caller getting a pointer and dereferencing it.
+     *
+     * @return std::nullopt if no such subscription exists
      */
-    const SubscriptionDetails* get_subscription_details(uint32_t dapp_id, uint32_t ran_function_id) const;
+    std::optional<SubscriptionDetails> get_subscription_details(uint32_t dapp_id, uint32_t ran_function_id) const;
 
     /**
      * @brief Get count of subscribers for a RAN function

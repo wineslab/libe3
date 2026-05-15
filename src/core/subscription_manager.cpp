@@ -342,15 +342,17 @@ std::vector<uint32_t> SubscriptionManager::get_subscribed_dapps(uint32_t ran_fun
     return std::vector<uint32_t>(it->second.begin(), it->second.end());
 }
 
-const SubscriptionDetails* SubscriptionManager::get_subscription_details(
+std::optional<SubscriptionDetails> SubscriptionManager::get_subscription_details(
         uint32_t dapp_id, uint32_t ran_function_id) const {
     std::shared_lock lock(mutex_);
 
     auto it = subscription_details_.find(make_sub_key(dapp_id, ran_function_id));
     if (it == subscription_details_.end()) {
-        return nullptr;
+        return std::nullopt;
     }
-    return &it->second;
+    // Return by value (copy under the lock) so the caller never derefs storage
+    // that another thread can destroy via unregister_dapp / remove_subscription.
+    return it->second;
 }
 
 size_t SubscriptionManager::get_subscriber_count(uint32_t ran_function_id) const {

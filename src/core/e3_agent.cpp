@@ -241,18 +241,18 @@ uint32_t E3Agent::get_subscription_periodicity(uint32_t dapp_id, uint32_t ran_fu
     if (!impl_->interface) {
         return 0;
     }
-    const auto* details = impl_->interface->subscription_manager()
-                              .get_subscription_details(dapp_id, ran_function_id);
-    return details ? details->periodicity_us : 0;
+    auto details = impl_->interface->subscription_manager()
+                       .get_subscription_details(dapp_id, ran_function_id);
+    return details.has_value() ? details->periodicity_us : 0;
 }
 
 std::vector<uint32_t> E3Agent::get_subscription_telemetry_ids(uint32_t dapp_id, uint32_t ran_function_id) const {
     if (!impl_->interface) {
         return {};
     }
-    const auto* details = impl_->interface->subscription_manager()
-                              .get_subscription_details(dapp_id, ran_function_id);
-    return details ? details->telemetry_ids : std::vector<uint32_t>{};
+    auto details = impl_->interface->subscription_manager()
+                       .get_subscription_details(dapp_id, ran_function_id);
+    return details.has_value() ? std::move(details->telemetry_ids) : std::vector<uint32_t>{};
 }
 
 // =========================================================================
