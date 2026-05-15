@@ -146,11 +146,14 @@ TEST(E3Config_defaults) {
     
     ASSERT_TRUE(config.link_layer == E3LinkLayer::ZMQ);
     ASSERT_TRUE(config.transport_layer == E3TransportLayer::IPC);
-    // Encoding default follows build-time selection
-#if defined(LIBE3_ENABLE_JSON)
-    ASSERT_TRUE(config.encoding == EncodingFormat::JSON);
-#elif defined(LIBE3_ENABLE_ASN1)
+    // Encoding default follows build-time selection. When both encoders
+    // are compiled in, ASN.1 takes precedence (matches types.hpp:357-363).
+    // With both ON, the per-port ZmqConnector still serves JSON peers — this
+    // field only sets the legacy "single-encoder default" preference.
+#if defined(LIBE3_ENABLE_ASN1)
     ASSERT_TRUE(config.encoding == EncodingFormat::ASN1);
+#elif defined(LIBE3_ENABLE_JSON)
+    ASSERT_TRUE(config.encoding == EncodingFormat::JSON);
 #else
     ASSERT_TRUE(config.encoding == EncodingFormat::ASN1);
 #endif
