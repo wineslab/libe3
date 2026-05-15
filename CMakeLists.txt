@@ -41,10 +41,13 @@ include(libe3Dependencies)
 include(libe3Version)
 
 # ============================================================================
-# Mutual exclusion between ASN.1 and JSON encoders
+# Encoder selection (runtime, not build-time)
 # ============================================================================
-if(LIBE3_ENABLE_ASN1 AND LIBE3_ENABLE_JSON)
-    message(FATAL_ERROR "Both LIBE3_ENABLE_ASN1 and LIBE3_ENABLE_JSON are enabled. Please enable only one encoding: ASN.1 or JSON.")
+# Both ASN.1 and JSON encoders can be enabled together. When both are on,
+# the encoder is selected per peer at runtime — one ZMQ port triplet per
+# encoding (see ZmqConnector). At least one must be enabled.
+if(NOT LIBE3_ENABLE_ASN1 AND NOT LIBE3_ENABLE_JSON)
+    message(FATAL_ERROR "At least one of LIBE3_ENABLE_ASN1 or LIBE3_ENABLE_JSON must be enabled.")
 endif()
 
 # ============================================================================
