@@ -136,12 +136,23 @@ public:
      */
     const std::string& outbound_endpoint() const noexcept { return outbound_endpoint_; }
 
+    /**
+     * @brief Get encoding format this connector is dedicated to
+     *
+     * When dual-encoding is enabled, libe3 instantiates one connector per
+     * supported EncodingFormat (one ZMQ port triplet each). Peers connect
+     * to whichever triplet matches their wire codec; the encoding for each
+     * inbound message is identified by which connector received it.
+     */
+    EncodingFormat encoding() const noexcept { return encoding_; }
+
 protected:
     E3Connector() = default;
-    
+
     std::string setup_endpoint_;
     std::string inbound_endpoint_;
     std::string outbound_endpoint_;
+    EncodingFormat encoding_{EncodingFormat::ASN1};
 };
 
 /**
@@ -166,7 +177,8 @@ std::unique_ptr<E3Connector> create_connector(
     uint16_t setup_port,
     uint16_t inbound_port,
     uint16_t outbound_port,
-    size_t io_threads = 2
+    size_t io_threads = 2,
+    EncodingFormat encoding = EncodingFormat::ASN1
 );
 
 } // namespace libe3

@@ -31,7 +31,8 @@ ZmqE3Connector::ZmqE3Connector(
     uint16_t setup_port,
     uint16_t inbound_port,
     uint16_t outbound_port,
-    size_t io_threads
+    size_t io_threads,
+    EncodingFormat encoding
 )
     : transport_layer_(transport_layer)
     , io_threads_(io_threads)
@@ -39,6 +40,7 @@ ZmqE3Connector::ZmqE3Connector(
     , inbound_port_(inbound_port)
     , outbound_port_(outbound_port)
 {
+    encoding_ = encoding;
     if (transport_layer == E3TransportLayer::TCP) {
         setup_endpoint_ = "tcp://*:" + std::to_string(setup_port);
         inbound_endpoint_ = "tcp://*:" + std::to_string(inbound_port);

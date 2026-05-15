@@ -108,7 +108,10 @@ ErrorCode E3Interface::init() {
     // Create response queue
     response_queue_ = std::make_unique<ResponseQueue>();
     
-    // Create connector
+    // Create connector tagged with the active encoding format.
+    // When both ASN.1 and JSON are compiled in (build flag), each operator
+    // deployment picks one for now; full per-port-triplet dual routing is
+    // a post-M5 workstream that will instantiate one connector per encoding.
     connector_ = create_connector(
         config_.link_layer,
         config_.transport_layer,
@@ -118,7 +121,8 @@ ErrorCode E3Interface::init() {
         config_.setup_port,
         config_.subscriber_port,
         config_.publisher_port,
-        config_.io_threads
+        config_.io_threads,
+        config_.encoding
     );
     
     if (!connector_) {

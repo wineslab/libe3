@@ -29,7 +29,8 @@ public:
         uint16_t setup_port,
         uint16_t inbound_port,
         uint16_t outbound_port,
-        size_t io_threads
+        size_t io_threads,
+        EncodingFormat encoding = EncodingFormat::ASN1
     );
     
     ~ZmqE3Connector() override;

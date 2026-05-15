@@ -67,7 +67,8 @@ PosixE3Connector::PosixE3Connector(
     const std::string& outbound_endpoint,
     uint16_t setup_port,
     uint16_t inbound_port,
-    uint16_t outbound_port
+    uint16_t outbound_port,
+    EncodingFormat encoding
 )
     : transport_layer_(transport_layer)
     , setup_connection_socket_(UNUSED_SOCKET)
@@ -77,6 +78,7 @@ PosixE3Connector::PosixE3Connector(
     , inbound_port_(inbound_port)
     , outbound_port_(outbound_port)
 {
+    encoding_ = encoding;
     setup_endpoint_ = strip_uri_prefix(setup_endpoint);
     inbound_endpoint_ = strip_uri_prefix(inbound_endpoint);
     outbound_endpoint_ = strip_uri_prefix(outbound_endpoint);
