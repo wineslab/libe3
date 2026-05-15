@@ -34,7 +34,7 @@ TEST(JsonEncoder_encode_setup_request) {
     
     // Verify JSON contains expected fields
     std::string json(encoded->buffer.begin(), encoded->buffer.end());
-    ASSERT_TRUE(json.find("SetupRequest") != std::string::npos);
+    ASSERT_TRUE(json.find("setupRequest") != std::string::npos);
     ASSERT_TRUE(json.find("TestDApp") != std::string::npos);
     ASSERT_TRUE(json.find("TestVendor") != std::string::npos);
 }
@@ -78,7 +78,7 @@ TEST(JsonEncoder_encode_setup_response) {
     ASSERT_TRUE(encoded.has_value());
     
     std::string json(encoded->buffer.begin(), encoded->buffer.end());
-    ASSERT_TRUE(json.find("SetupResponse") != std::string::npos);
+    ASSERT_TRUE(json.find("setupResponse") != std::string::npos);
 }
 
 TEST(JsonEncoder_encode_decode_subscription_request) {
@@ -278,6 +278,83 @@ TEST(JsonEncoder_roundtrip_large_data) {
     for (size_t i = 0; i < restored.protocol_data.size(); ++i) {
         ASSERT_EQ(restored.protocol_data[i], static_cast<uint8_t>(i & 0xFF));
     }
+}
+
+TEST(JsonEncoder_decode_nested_format) {
+    auto encoder = create_encoder();
+
+    std::string nested_json = R"({
+        "type": "setupRequest",
+        "id": 99,
+        "timestamp": 0,
+        "data": {
+            "e3apProtocolVersion": "2.0.0",
+            "dAppName": "NestedDApp",
+            "dAppVersion": "3.0.0",
+            "vendor": "NestedVendor"
+        }
+    })";
+
+    std::vector<uint8_t> buf(nested_json.begin(), nested_json.end());
+    auto result = encoder->decode(buf.data(), buf.size());
+    ASSERT_TRUE(result.has_value());
+    ASSERT_TRUE(result->type == PduType::SETUP_REQUEST);
+    ASSERT_EQ(result->message_id, 99u);
+
+    auto& req = std::get<SetupRequest>(result->choice);
+    ASSERT_STREQ(req.dapp_name.c_str(), "NestedDApp");
+    ASSERT_STREQ(req.e3ap_protocol_version.c_str(), "2.0.0");
+    ASSERT_STREQ(req.vendor.c_str(), "NestedVendor");
+}
+
+TEST(JsonEncoder_encode_mirrors_nested_format) {
+    auto encoder = create_encoder();
+
+    std::string nested_json = R"({
+        "type": "setupRequest",
+        "id": 50,
+        "timestamp": 0,
+        "data": {
+            "e3apProtocolVersion": "1.0.0",
+            "dAppName": "MirrorTest",
+            "dAppVersion": "1.0.0",
+            "vendor": "TestVendor"
+        }
+    })";
+
+    std::vector<uint8_t> buf(nested_json.begin(), nested_json.end());
+    auto decoded = encoder->decode(buf.data(), buf.size());
+    ASSERT_TRUE(decoded.has_value());
+
+    Pdu response(PduType::SETUP_RESPONSE);
+    SetupResponse resp;
+    resp.request_id = 50;
+    resp.response_code = ResponseCode::POSITIVE;
+    resp.dapp_identifier = 1;
+    response.choice = resp;
+
+    auto encoded = encoder->encode(response);
+    ASSERT_TRUE(encoded.has_value());
+
+    std::string json_out(encoded->buffer.begin(), encoded->buffer.end());
+    ASSERT_TRUE(json_out.find("\"data\"") != std::string::npos);
+}
+
+TEST(JsonEncoder_reject_pascal_case_pdu_type) {
+    auto encoder = create_encoder();
+
+    std::string pascal_json = R"({
+        "type": "SetupRequest",
+        "id": 1,
+        "timestamp": 0,
+        "dAppName": "Test",
+        "dAppVersion": "1.0",
+        "vendor": "V"
+    })";
+
+    std::vector<uint8_t> buf(pascal_json.begin(), pascal_json.end());
+    auto result = encoder->decode(buf.data(), buf.size());
+    ASSERT_FALSE(result.has_value());
 }
 
 int main() {
