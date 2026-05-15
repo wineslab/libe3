@@ -189,6 +189,7 @@ struct SetupResponse {
     std::optional<uint32_t> dapp_identifier;            ///< Assigned dApp identifier (optional)
     std::string ran_identifier;                         ///< RAN identifier (mandatory)
     std::vector<RanFunctionDef> ran_function_list;      ///< List of available RAN functions (optional)
+    std::optional<std::string> message;                 ///< Diagnostic message (typically on negative response)
 };
 
 /**
@@ -213,20 +214,37 @@ struct SubscriptionDelete {
 
 /**
  * @brief E3AP Subscription Response structure
+ *
+ * Echoes the fields cuBB's E3 Agent emits (e3_agent.cpp:1036-1040): the
+ * granted telemetry/control IDs, the agent-committed periodicity (may
+ * cap what the dApp requested), and a diagnostic message on negatives.
+ * Aerial reads telemetryGrantedList and periodicity to confirm/update
+ * its subscription state (e3_manager.cpp:884-890).
  */
 struct SubscriptionResponse {
-    uint32_t request_id{0};                      ///< ID of the corresponding SubscriptionRequest
-    uint32_t dapp_identifier{0};                  ///< dApp identifier
-    ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
-    std::optional<uint32_t> subscription_id;     ///< Subscription ID (optional)
+    uint32_t request_id{0};                              ///< ID of the corresponding SubscriptionRequest
+    uint32_t dapp_identifier{0};                         ///< dApp identifier
+    ResponseCode response_code{ResponseCode::NEGATIVE};  ///< Response code (positive/negative)
+    std::optional<uint32_t> subscription_id;             ///< Subscription ID (optional)
+    std::optional<uint32_t> ran_function_identifier;     ///< RAN function the subscription targets
+    std::vector<uint32_t> telemetry_granted_list;        ///< Telemetry IDs the agent committed to
+    std::vector<uint32_t> control_granted_list;          ///< Control IDs the agent committed to
+    std::optional<uint32_t> periodicity_us;              ///< Agent-committed periodicity (microseconds)
+    std::optional<std::string> message;                  ///< Diagnostic message (typically on negative)
 };
 
 /**
  * @brief E3AP Indication Message structure
+ *
+ * `subscription_id` lets receivers correlate indications back to the
+ * subscription they originated from; cuBB sets it on every outbound
+ * indication (data_lake/e3_agent.cpp:254). Optional for backward compat
+ * with producers that don't populate it.
  */
 struct IndicationMessage {
     uint32_t dapp_identifier{0};
-    uint32_t ran_function_identifier{0}; ///< RAN function identifier
+    uint32_t ran_function_identifier{0};        ///< RAN function identifier
+    std::optional<uint32_t> subscription_id;    ///< Subscription this indication belongs to
     std::vector<uint8_t> protocol_data;
 };
 

@@ -22,6 +22,71 @@ std::string to_camel_case(const char* pascal) {
     return s;
 }
 
+// ----------------------------------------------------------------------------
+// Structured-JSON payload helpers
+//
+// Aerial dApps and cuBB embed binary-payload fields (protocolData, actionData,
+// reportData, xAppControlData, ranFunctionData) as inline JSON objects/arrays
+// on the wire, NOT as hex strings. Service Models on either side serialise
+// their SM-specific payload to UTF-8 JSON bytes; the encoder embeds the parsed
+// object inline, and the decoder dumps it back to UTF-8 JSON bytes for the SM
+// to parse.
+//
+// Fallback: if a payload isn't valid JSON (e.g. legacy ASN.1-bridged SM, or
+// raw bytes during a migration), we wrap it in a {"__hex__": "..."} sentinel
+// so the bytes survive a roundtrip without crashing the encode. The same
+// sentinel pattern is recognised on decode.
+// ----------------------------------------------------------------------------
+
+inline std::string bytes_to_hex_string(const std::vector<uint8_t>& bytes) {
+    static const char* d = "0123456789abcdef";
+    std::string out;
+    out.reserve(bytes.size() * 2);
+    for (uint8_t b : bytes) {
+        out.push_back(d[(b >> 4) & 0xF]);
+        out.push_back(d[b & 0xF]);
+    }
+    return out;
+}
+
+inline std::vector<uint8_t> hex_string_to_bytes(const std::string& hex) {
+    std::vector<uint8_t> out;
+    out.reserve(hex.size() / 2);
+    for (size_t i = 0; i + 1 < hex.size(); i += 2) {
+        out.push_back(static_cast<uint8_t>(std::stoi(hex.substr(i, 2), nullptr, 16)));
+    }
+    return out;
+}
+
+nlohmann::json bytes_to_json_payload(const std::vector<uint8_t>& bytes) {
+    if (bytes.empty()) {
+        return nlohmann::json::object();
+    }
+    try {
+        auto parsed = nlohmann::json::parse(bytes.begin(), bytes.end());
+        // Only structured (object/array) payloads are accepted as inline JSON;
+        // scalar literals that happen to parse (e.g. "42", "true") would lose
+        // precision on re-dump, so we route them through the hex sentinel.
+        if (parsed.is_object() || parsed.is_array()) {
+            return parsed;
+        }
+    } catch (const nlohmann::json::parse_error&) {
+        // Fall through to hex sentinel.
+    }
+    return nlohmann::json{{"__hex__", bytes_to_hex_string(bytes)}};
+}
+
+std::vector<uint8_t> json_payload_to_bytes(const nlohmann::json& j) {
+    // Reverse of bytes_to_json_payload: recognise the hex sentinel and return
+    // the original bytes; otherwise dump the JSON object/array to compact
+    // UTF-8 text for the consumer SM to parse.
+    if (j.is_object() && j.contains("__hex__") && j["__hex__"].is_string()) {
+        return hex_string_to_bytes(j["__hex__"].get_ref<const std::string&>());
+    }
+    std::string dumped = j.dump();
+    return std::vector<uint8_t>(dumped.begin(), dumped.end());
+}
+
 } // anonymous namespace
 
 
@@ -106,10 +171,15 @@ nlohmann::json JsonE3Encoder::encode_setup_response(const SetupResponse& resp) c
             func_obj["ranFunctionIdentifier"] = func.ran_function_identifier;
             func_obj["telemetryIdentifierList"] = func.telemetry_identifier_list;
             func_obj["controlIdentifierList"] = func.control_identifier_list;
-            func_obj["ranFunctionData"] = binary_to_hex(func.ran_function_data);
+            // cuBB emits ranFunctionData as a structured array of stream
+            // descriptors (e3_agent.cpp:938-944), not as a hex blob.
+            func_obj["ranFunctionData"] = bytes_to_json_payload(func.ran_function_data);
             ran_funcs.push_back(func_obj);
         }
         j["ranFunctionList"] = ran_funcs;
+    }
+    if (resp.message.has_value()) {
+        j["message"] = resp.message.value();
     }
     return j;
 }
@@ -144,6 +214,21 @@ nlohmann::json JsonE3Encoder::encode_subscription_response(const SubscriptionRes
     if (resp.subscription_id.has_value()) {
         j["subscriptionId"] = resp.subscription_id.value();
     }
+    if (resp.ran_function_identifier.has_value()) {
+        j["ranFunctionIdentifier"] = resp.ran_function_identifier.value();
+    }
+    if (!resp.telemetry_granted_list.empty()) {
+        j["telemetryGrantedList"] = resp.telemetry_granted_list;
+    }
+    if (!resp.control_granted_list.empty()) {
+        j["controlGrantedList"] = resp.control_granted_list;
+    }
+    if (resp.periodicity_us.has_value()) {
+        j["periodicity"] = resp.periodicity_us.value();
+    }
+    if (resp.message.has_value()) {
+        j["message"] = resp.message.value();
+    }
     return j;
 }
 
@@ -151,7 +236,12 @@ nlohmann::json JsonE3Encoder::encode_indication_message(const IndicationMessage&
     nlohmann::json j;
     j["dAppIdentifier"] = msg.dapp_identifier;
     j["ranFunctionIdentifier"] = msg.ran_function_identifier;
-    j["protocolData"] = nlohmann::json::parse(msg.protocol_data);
+    if (msg.subscription_id.has_value()) {
+        j["subscriptionId"] = msg.subscription_id.value();
+    }
+    // protocolData on the wire is inline structured JSON (cuBB e3_agent.cpp:269+).
+    // The hex sentinel falls back gracefully if an SM hasn't migrated yet.
+    j["protocolData"] = bytes_to_json_payload(msg.protocol_data);
     return j;
 }
 
@@ -160,7 +250,9 @@ nlohmann::json JsonE3Encoder::encode_dapp_control_action(const DAppControlAction
     j["dAppIdentifier"] = action.dapp_identifier;
     j["ranFunctionIdentifier"] = action.ran_function_identifier;
     j["controlIdentifier"] = action.control_identifier;
-    j["actionData"] = binary_to_hex(action.action_data);
+    // Aerial sends actionData as a structured JSON object via SendDAppControl
+    // (subcarrier_power_app.cpp:340-344). Match that on the wire.
+    j["actionData"] = bytes_to_json_payload(action.action_data);
     return j;
 }
 
@@ -168,7 +260,7 @@ nlohmann::json JsonE3Encoder::encode_dapp_report(const DAppReport& report) const
     nlohmann::json j;
     j["dAppIdentifier"] = report.dapp_identifier;
     j["ranFunctionIdentifier"] = report.ran_function_identifier;
-    j["reportData"] = binary_to_hex(report.report_data);
+    j["reportData"] = bytes_to_json_payload(report.report_data);
     return j;
 }
 
@@ -176,7 +268,7 @@ nlohmann::json JsonE3Encoder::encode_xapp_control_action(const XAppControlAction
     nlohmann::json j;
     j["dAppIdentifier"] = action.dapp_identifier;
     j["ranFunctionIdentifier"] = action.ran_function_identifier;
-    j["xAppControlData"] = binary_to_hex(action.xapp_control_data);
+    j["xAppControlData"] = bytes_to_json_payload(action.xapp_control_data);
     return j;
 }
 
@@ -221,9 +313,14 @@ SetupResponse JsonE3Encoder::decode_setup_response(const nlohmann::json& j) cons
             func.ran_function_identifier = func_obj.value("ranFunctionIdentifier", 0u);
             func.telemetry_identifier_list = func_obj.value("telemetryIdentifierList", std::vector<uint32_t>{});
             func.control_identifier_list = func_obj.value("controlIdentifierList", std::vector<uint32_t>{});
-            func.ran_function_data = hex_to_binary(func_obj.value("ranFunctionData", ""));
+            if (func_obj.contains("ranFunctionData")) {
+                func.ran_function_data = json_payload_to_bytes(func_obj["ranFunctionData"]);
+            }
             resp.ran_function_list.push_back(func);
         }
+    }
+    if (j.contains("message") && j["message"].is_string()) {
+        resp.message = j["message"].get<std::string>();
     }
     return resp;
 }
@@ -259,6 +356,21 @@ SubscriptionResponse JsonE3Encoder::decode_subscription_response(const nlohmann:
     if (j.contains("subscriptionId")) {
         resp.subscription_id = j["subscriptionId"].get<uint32_t>();
     }
+    if (j.contains("ranFunctionIdentifier")) {
+        resp.ran_function_identifier = j["ranFunctionIdentifier"].get<uint32_t>();
+    }
+    if (j.contains("telemetryGrantedList") && j["telemetryGrantedList"].is_array()) {
+        resp.telemetry_granted_list = j["telemetryGrantedList"].get<std::vector<uint32_t>>();
+    }
+    if (j.contains("controlGrantedList") && j["controlGrantedList"].is_array()) {
+        resp.control_granted_list = j["controlGrantedList"].get<std::vector<uint32_t>>();
+    }
+    if (j.contains("periodicity")) {
+        resp.periodicity_us = j["periodicity"].get<uint32_t>();
+    }
+    if (j.contains("message") && j["message"].is_string()) {
+        resp.message = j["message"].get<std::string>();
+    }
     return resp;
 }
 
@@ -266,8 +378,12 @@ IndicationMessage JsonE3Encoder::decode_indication_message(const nlohmann::json&
     IndicationMessage msg;
     msg.dapp_identifier = j.value("dAppIdentifier", 0u);
     msg.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
-    std::string dumped = j["protocolData"].dump();
-    msg.protocol_data.assign(dumped.begin(), dumped.end());
+    if (j.contains("subscriptionId")) {
+        msg.subscription_id = j["subscriptionId"].get<uint32_t>();
+    }
+    if (j.contains("protocolData")) {
+        msg.protocol_data = json_payload_to_bytes(j["protocolData"]);
+    }
     return msg;
 }
 
@@ -276,7 +392,9 @@ DAppControlAction JsonE3Encoder::decode_dapp_control_action(const nlohmann::json
     action.dapp_identifier = j.value("dAppIdentifier", 0u);
     action.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
     action.control_identifier = j.value("controlIdentifier", 0u);
-    action.action_data = hex_to_binary(j.value("actionData", ""));
+    if (j.contains("actionData")) {
+        action.action_data = json_payload_to_bytes(j["actionData"]);
+    }
     return action;
 }
 
@@ -284,7 +402,9 @@ DAppReport JsonE3Encoder::decode_dapp_report(const nlohmann::json& j) const {
     DAppReport report;
     report.dapp_identifier = j.value("dAppIdentifier", 0u);
     report.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
-    report.report_data = hex_to_binary(j.value("reportData", ""));
+    if (j.contains("reportData")) {
+        report.report_data = json_payload_to_bytes(j["reportData"]);
+    }
     return report;
 }
 
@@ -292,7 +412,9 @@ XAppControlAction JsonE3Encoder::decode_xapp_control_action(const nlohmann::json
     XAppControlAction action;
     action.dapp_identifier = j.value("dAppIdentifier", 0u);
     action.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
-    action.xapp_control_data = hex_to_binary(j.value("xAppControlData", ""));
+    if (j.contains("xAppControlData")) {
+        action.xapp_control_data = json_payload_to_bytes(j["xAppControlData"]);
+    }
     return action;
 }
 
