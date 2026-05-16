@@ -123,6 +123,9 @@ nlohmann::json JsonE3Encoder::encode_subscription_request(const SubscriptionRequ
     if (req.subscription_time.has_value()) {
         j["subscriptionTime"] = req.subscription_time.value();
     }
+    if (req.periodicity.has_value()) {
+        j["periodicity"] = req.periodicity.value();
+    }
     return j;
 }
 
@@ -148,7 +151,7 @@ nlohmann::json JsonE3Encoder::encode_indication_message(const IndicationMessage&
     nlohmann::json j;
     j["dAppIdentifier"] = msg.dapp_identifier;
     j["ranFunctionIdentifier"] = msg.ran_function_identifier;
-    j["protocolData"] = binary_to_hex(msg.protocol_data);
+    j["protocolData"] = nlohmann::json::parse(msg.protocol_data);
     return j;
 }
 
@@ -234,6 +237,9 @@ SubscriptionRequest JsonE3Encoder::decode_subscription_request(const nlohmann::j
     if (j.contains("subscriptionTime")) {
         req.subscription_time = j["subscriptionTime"].get<uint32_t>();
     }
+    if (j.contains("periodicity")) {
+        req.periodicity = j["periodicity"].get<uint32_t>();
+    }
     return req;
 }
 
@@ -260,7 +266,8 @@ IndicationMessage JsonE3Encoder::decode_indication_message(const nlohmann::json&
     IndicationMessage msg;
     msg.dapp_identifier = j.value("dAppIdentifier", 0u);
     msg.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
-    msg.protocol_data = hex_to_binary(j.value("protocolData", ""));
+    std::string dumped = j["protocolData"].dump();
+    msg.protocol_data.assign(dumped.begin(), dumped.end());
     return msg;
 }
 

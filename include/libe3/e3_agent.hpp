@@ -306,6 +306,24 @@ public:
         uint32_t ran_function_id
     ) const;
 
+    /**
+     * @brief Get the reporting periodicity a dApp requested for a RAN function
+     *
+     * @return periodicity in microseconds, 0 if not set or subscription not found
+     */
+    uint32_t get_subscription_periodicity(
+        uint32_t dapp_id, uint32_t ran_function_id
+    ) const;
+
+    /**
+     * @brief Get the telemetry IDs a dApp requested for a RAN function
+     *
+     * @return vector of telemetry IDs (empty if none requested or subscription not found)
+     */
+    std::vector<uint32_t> get_subscription_telemetry_ids(
+        uint32_t dapp_id, uint32_t ran_function_id
+    ) const;
+
     // =========================================================================
     // Configuration
     // =========================================================================

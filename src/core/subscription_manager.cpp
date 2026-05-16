@@ -109,13 +109,14 @@ ErrorCode SubscriptionManager::unregister_dapp(uint32_t dapp_id) {
                 affected_ran_functions.emplace_back(ran_func, false); // should_start = false
             }
             
-            // Remove subscription ID mapping
+            // Remove subscription ID mapping and details
             uint64_t sub_key = make_sub_key(dapp_id, ran_func);
             auto sub_id_it = subscription_id_reverse_.find(sub_key);
             if (sub_id_it != subscription_id_reverse_.end()) {
                 subscription_ids_.erase(sub_id_it->second);
                 subscription_id_reverse_.erase(sub_id_it);
             }
+            subscription_details_.erase(sub_key);
         }
         dapp_subscriptions_.erase(sub_it);
     }
@@ -155,7 +156,11 @@ std::vector<uint32_t> SubscriptionManager::get_registered_dapps() const {
 // Subscription Management
 // =========================================================================
 
-std::pair<ErrorCode, uint32_t> SubscriptionManager::add_subscription(uint32_t dapp_id, uint32_t ran_function_id) {
+std::pair<ErrorCode, uint32_t> SubscriptionManager::add_subscription(
+        uint32_t dapp_id,
+        uint32_t ran_function_id,
+        const std::vector<uint32_t>& telemetry_ids,
+        uint32_t periodicity_us) {
     std::unique_lock lock(mutex_);
 
     // Check if dApp is registered
@@ -190,11 +195,22 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::add_subscription(uint32_t da
     
     // Add subscription ID mappings
     subscription_ids_[subscription_id] = {dapp_id, ran_function_id};
-    subscription_id_reverse_[make_sub_key(dapp_id, ran_function_id)] = subscription_id;
+    uint64_t sub_key = make_sub_key(dapp_id, ran_function_id);
+    subscription_id_reverse_[sub_key] = subscription_id;
+
+    // Store per-subscription metadata
+    SubscriptionDetails details;
+    details.dapp_id = dapp_id;
+    details.ran_function_id = ran_function_id;
+    details.telemetry_ids = telemetry_ids;
+    details.periodicity_us = periodicity_us;
+    subscription_details_[sub_key] = std::move(details);
 
     E3_LOG_INFO(LOG_TAG) << "Subscription added: dApp " << dapp_id 
                          << " -> RAN function " << ran_function_id
-                         << " (subscription_id=" << subscription_id << ")";
+                         << " (subscription_id=" << subscription_id
+                         << ", periodicity_us=" << periodicity_us
+                         << ", telemetry_ids=" << telemetry_ids.size() << ")";
 
     // Notify about SM lifecycle change if this is the first subscriber
     lock.unlock();
@@ -226,13 +242,14 @@ ErrorCode SubscriptionManager::remove_subscription(uint32_t dapp_id, uint32_t ra
     subscribers.erase(dapp_id);
     bool still_has_subscribers = !subscribers.empty();
     
-    // Remove subscription ID mappings
+    // Remove subscription ID mappings and details
     uint64_t sub_key = make_sub_key(dapp_id, ran_function_id);
     auto sub_id_it = subscription_id_reverse_.find(sub_key);
     if (sub_id_it != subscription_id_reverse_.end()) {
         subscription_ids_.erase(sub_id_it->second);
         subscription_id_reverse_.erase(sub_id_it);
     }
+    subscription_details_.erase(sub_key);
 
     E3_LOG_INFO(LOG_TAG) << "Subscription removed: dApp " << dapp_id 
                          << " -> RAN function " << ran_function_id;
@@ -277,10 +294,11 @@ ErrorCode SubscriptionManager::remove_subscription_by_id(uint32_t dapp_id, uint3
     subscribers.erase(dapp_id);
     bool still_has_subscribers = !subscribers.empty();
     
-    // Remove subscription ID mappings
+    // Remove subscription ID mappings and details
     uint64_t sub_key = make_sub_key(dapp_id, ran_function_id);
     subscription_id_reverse_.erase(sub_key);
     subscription_ids_.erase(sub_it);
+    subscription_details_.erase(sub_key);
     
     E3_LOG_INFO(LOG_TAG) << "Subscription " << subscription_id << " removed: dApp " << dapp_id 
                          << " -> RAN function " << ran_function_id;
@@ -322,6 +340,17 @@ std::vector<uint32_t> SubscriptionManager::get_subscribed_dapps(uint32_t ran_fun
         return {};
     }
     return std::vector<uint32_t>(it->second.begin(), it->second.end());
+}
+
+const SubscriptionDetails* SubscriptionManager::get_subscription_details(
+        uint32_t dapp_id, uint32_t ran_function_id) const {
+    std::shared_lock lock(mutex_);
+
+    auto it = subscription_details_.find(make_sub_key(dapp_id, ran_function_id));
+    if (it == subscription_details_.end()) {
+        return nullptr;
+    }
+    return &it->second;
 }
 
 size_t SubscriptionManager::get_subscriber_count(uint32_t ran_function_id) const {
@@ -381,6 +410,9 @@ void SubscriptionManager::clear() {
     registered_dapps_.clear();
     dapp_subscriptions_.clear();
     ran_function_subscribers_.clear();
+    subscription_ids_.clear();
+    subscription_id_reverse_.clear();
+    subscription_details_.clear();
     E3_LOG_INFO(LOG_TAG) << "All registrations and subscriptions cleared";
 }
 

@@ -11,7 +11,7 @@ find_package(Threads REQUIRED)
 
 # Required: nlohmann/json for JSON encoding
 if(LIBE3_ENABLE_JSON)
-    find_package(nlohmann_json 3.11 QUIET)
+    find_package(nlohmann_json 3.10 QUIET)
     if(NOT nlohmann_json_FOUND)
         include(FetchContent)
         FetchContent_Declare(
