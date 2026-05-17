@@ -366,11 +366,7 @@ EncodeResult<EncodedMessage> JsonE3Encoder::encode(const Pdu& pdu) {
             else if constexpr (std::is_same_v<T, MessageAck>) {
                 fields = encode_message_ack(arg);
             }
-            if (nested_mode_) {
-                root["data"] = fields;
-            } else {
-                root.update(fields);
-            }
+            root.update(fields);
         }, pdu.choice);
         
         std::string json_str = root.dump();
@@ -418,44 +414,45 @@ EncodeResult<Pdu> JsonE3Encoder::decode(const uint8_t* data, size_t size) {
         pdu.message_id = root.value("id", 0u);
         pdu.timestamp = root.value("timestamp", 0ull);
         
-        // Use nested "data" object if present, otherwise treat root as the data object (flat format)
-        nested_mode_ = root.contains("data");
-        const nlohmann::json& j = nested_mode_ ? root["data"] : root;
+        if (root.contains("data")) {
+            E3_LOG_ERROR(LOG_TAG) << "Nested \"data\" wrapper is not supported; use flat format";
+            return tl::unexpected(ErrorCode::DECODE_FAILED);
+        }
         
         // Decode based on PDU type
         switch (pdu.type) {
             case PduType::SETUP_REQUEST:
-                pdu.choice = decode_setup_request(j);
+                pdu.choice = decode_setup_request(root);
                 break;
             case PduType::SETUP_RESPONSE:
-                pdu.choice = decode_setup_response(j);
+                pdu.choice = decode_setup_response(root);
                 break;
             case PduType::SUBSCRIPTION_REQUEST:
-                pdu.choice = decode_subscription_request(j);
+                pdu.choice = decode_subscription_request(root);
                 break;
             case PduType::SUBSCRIPTION_DELETE:
-                pdu.choice = decode_subscription_delete(j);
+                pdu.choice = decode_subscription_delete(root);
                 break;
             case PduType::SUBSCRIPTION_RESPONSE:
-                pdu.choice = decode_subscription_response(j);
+                pdu.choice = decode_subscription_response(root);
                 break;
             case PduType::INDICATION_MESSAGE:
-                pdu.choice = decode_indication_message(j);
+                pdu.choice = decode_indication_message(root);
                 break;
             case PduType::DAPP_CONTROL_ACTION:
-                pdu.choice = decode_dapp_control_action(j);
+                pdu.choice = decode_dapp_control_action(root);
                 break;
             case PduType::DAPP_REPORT:
-                pdu.choice = decode_dapp_report(j);
+                pdu.choice = decode_dapp_report(root);
                 break;
             case PduType::XAPP_CONTROL_ACTION:
-                pdu.choice = decode_xapp_control_action(j);
+                pdu.choice = decode_xapp_control_action(root);
                 break;
             case PduType::RELEASE_MESSAGE:
-                pdu.choice = decode_release_message(j);
+                pdu.choice = decode_release_message(root);
                 break;
             case PduType::MESSAGE_ACK:
-                pdu.choice = decode_message_ack(j);
+                pdu.choice = decode_message_ack(root);
                 break;
             default:
                 E3_LOG_ERROR(LOG_TAG) << "Unknown PDU type: " << pdu_type_str;
