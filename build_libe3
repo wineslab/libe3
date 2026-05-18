@@ -28,7 +28,7 @@ BUILD_TESTS=1
 BUILD_EXAMPLES=1
 ENABLE_ZMQ=1
 ENABLE_ASN1=1
-ENABLE_JSON=0
+ENABLE_JSON=1
 ENABLE_ASAN=0
 ENABLE_TSAN=0
 ENABLE_UBSAN=0
@@ -101,6 +101,8 @@ Features:
   --disable-zmq           Disable ZeroMQ transport
   --enable-asn1           Enable ASN.1 encoding support (default: ON)
   --disable-asn1          Disable ASN.1 encoding
+  --enable-json           Enable JSON encoding support (default: ON)
+  --disable-json          Disable JSON encoding
   --enable-tests          Build unit tests (default: ON)
   --disable-tests         Disable unit tests
   --enable-examples       Build examples (default: ON)
@@ -492,6 +494,7 @@ print_summary() {
     echo "  Examples:       $([ $BUILD_EXAMPLES -eq 1 ] && echo 'enabled' || echo 'disabled')"
     echo "  ZMQ Support:    $([ $ENABLE_ZMQ -eq 1 ] && echo 'enabled' || echo 'disabled')"
     echo "  ASN.1 Encoding: $([ $ENABLE_ASN1 -eq 1 ] && echo 'enabled' || echo 'disabled')"
+    echo "  JSON Encoding:  $([ $ENABLE_JSON -eq 1 ] && echo 'enabled' || echo 'disabled')"
     echo "  AddressSan:     $([ $ENABLE_ASAN -eq 1 ] && echo 'enabled' || echo 'disabled')"
     echo "  ThreadSan:      $([ $ENABLE_TSAN -eq 1 ] && echo 'enabled' || echo 'disabled')"
     echo "  Fatal Errors:   $([ $FATAL_ERRORS -eq 1 ] && echo 'enabled' || echo 'disabled')"
@@ -566,6 +569,14 @@ main() {
                 ;;
             --disable-asn1)
                 ENABLE_ASN1=0
+                shift
+                ;;
+            --enable-json)
+                ENABLE_JSON=1
+                shift
+                ;;
+            --disable-json)
+                ENABLE_JSON=0
                 shift
                 ;;
             --enable-tests)
