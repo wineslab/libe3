@@ -219,9 +219,23 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                         ASN_SEQUENCE_ADD(&ran_func->controlIdentifierList, id);
                     }
                     
-                    OCTET_STRING_fromBuf(&ran_func->ranFunctionData,
-                        reinterpret_cast<const char*>(func.ran_function_data.data()),
-                        static_cast<int>(func.ran_function_data.size()));
+                    // E3-RanFunctionDefinition.ranFunctionData is constrained to
+                    // OCTET STRING (SIZE (1..32768)). SMs that don't populate
+                    // their own metadata (oai_kpm_sm, sensing_sm, e3_kpm_sm)
+                    // leave ran_function_data empty — encoding the empty buffer
+                    // violates the SIZE>=1 constraint and aborts the whole
+                    // setupResponse. Substitute a 1-byte zero placeholder so the
+                    // SM still appears in the list; dApps that don't expect
+                    // payload on a given RF can just ignore the byte.
+                    if (func.ran_function_data.empty()) {
+                        static const uint8_t k_empty_rfd[] = {0x00};
+                        OCTET_STRING_fromBuf(&ran_func->ranFunctionData,
+                            reinterpret_cast<const char*>(k_empty_rfd), 1);
+                    } else {
+                        OCTET_STRING_fromBuf(&ran_func->ranFunctionData,
+                            reinterpret_cast<const char*>(func.ran_function_data.data()),
+                            static_cast<int>(func.ran_function_data.size()));
+                    }
 
                     // Ensure ranFunctionList container is allocated (optional field)
                     if (!asn1_pdu->msg.choice.setupResponse->ranFunctionList) {
