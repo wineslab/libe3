@@ -188,6 +188,23 @@ e3_agent_handle_t* e3_agent_create_with_config(const e3_config_t* config) {
                 cfg.encoding = static_cast<EncodingFormat>(config->encoding);
             if (config->io_threads != 0) cfg.io_threads = config->io_threads;
             if (config->log_level >= 0) cfg.log_level = config->log_level;
+
+            if (config->enable_dual_encoding) {
+                cfg.enable_dual_encoding = true;
+                if (config->secondary_encoding >= 0 && config->secondary_encoding <= 1) {
+                    cfg.secondary_encoding = static_cast<EncodingFormat>(
+                        config->secondary_encoding);
+                } else {
+                    // -1 (or any out-of-range): auto-flip from primary so the
+                    // operator doesn't have to think about it.
+                    cfg.secondary_encoding = (cfg.encoding == EncodingFormat::ASN1)
+                                                ? EncodingFormat::JSON
+                                                : EncodingFormat::ASN1;
+                }
+                cfg.secondary_setup_port      = config->secondary_setup_port;
+                cfg.secondary_subscriber_port = config->secondary_subscriber_port;
+                cfg.secondary_publisher_port  = config->secondary_publisher_port;
+            }
         }
         e3_agent_handle_t* h = new e3_agent_handle_s();
         h->agent = std::make_unique<E3Agent>(std::move(cfg));

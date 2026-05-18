@@ -166,6 +166,18 @@ typedef struct {
     int encoding;         /* 0=ASN1, 1=JSON, -1=default */
     size_t io_threads;    /* 0=default */
     int log_level;        /* -1=default */
+
+    /* Dual-encoding: when enable_dual_encoding=1 libe3 binds a second
+     * port triplet using secondary_encoding. dApps connecting to the
+     * primary triplet speak `encoding`; dApps on the secondary triplet
+     * speak `secondary_encoding`. SubscriptionManager / SmRegistry are
+     * shared; outbound PDUs are routed back through the dApp's channel.
+     * Leave 0/-1 for single-encoding mode. */
+    int enable_dual_encoding;            /* 0=off (default), 1=on */
+    int secondary_encoding;              /* 0=ASN1, 1=JSON, -1=auto-flip primary */
+    uint16_t secondary_setup_port;       /* 0 invalid when enable_dual_encoding=1 */
+    uint16_t secondary_subscriber_port;
+    uint16_t secondary_publisher_port;
 } e3_config_t;
 
 /**

@@ -89,12 +89,24 @@ public:
      *
      * The SubscriptionManager assigns a unique dApp ID automatically.
      *
+     * @param channel_index The libe3 channel the setup arrived on (0=primary,
+     *        1=secondary). Used by E3Interface::queue_outbound to route
+     *        outbound PDUs back through the connector/encoder this dApp
+     *        speaks. Default 0 preserves single-channel callers.
      * @return std::pair containing:
      *         - ErrorCode::SUCCESS on success, or error code on failure
      *         - The assigned dApp ID (valid only if ErrorCode::SUCCESS)
      * @return ErrorCode::INTERNAL_ERROR if no IDs available (max 101 dApps)
      */
-    std::pair<ErrorCode, uint32_t> register_dapp();
+    std::pair<ErrorCode, uint32_t> register_dapp(size_t channel_index = 0);
+
+    /**
+     * @brief Look up the channel a dApp is bound to
+     *
+     * @return The channel index recorded at register_dapp(), or std::nullopt
+     *         if the dApp is not registered.
+     */
+    std::optional<size_t> get_dapp_channel(uint32_t dapp_id) const;
 
     /**
      * @brief Unregister a dApp and clean up all its subscriptions

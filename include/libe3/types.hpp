@@ -371,14 +371,30 @@ struct E3Config {
     std::string subscriber_endpoint{"ipc:///tmp/dapps/dapp_socket"}; ///< Endpoint URI for inbound channel
     std::string publisher_endpoint{"ipc:///tmp/dapps/e3_socket"};    ///< Endpoint URI for outbound channel
     
-    // Encoding format
+    // Encoding format. When `enable_dual_encoding` is true and both encoders
+    // are compiled in, libe3 binds a SECOND triplet of REP/PUB/SUB sockets
+    // on the secondary_* ports below and serves both encodings simultaneously.
+    // dApps are routed by which port they connected to; outbound messages
+    // are dispatched per-dApp via an internal dapp_id→encoding map.
 #if defined(LIBE3_ENABLE_ASN1)
-    EncodingFormat encoding{EncodingFormat::ASN1}; ///< PDU encoding format (ASN.1 PER or JSON)
+    EncodingFormat encoding{EncodingFormat::ASN1}; ///< Primary PDU encoding format
 #elif defined(LIBE3_ENABLE_JSON)
-    EncodingFormat encoding{EncodingFormat::JSON};  ///< PDU encoding format (ASN.1 PER or JSON)
+    EncodingFormat encoding{EncodingFormat::JSON}; ///< Primary PDU encoding format
 #else // Fallback
-    EncodingFormat encoding{EncodingFormat::ASN1};  ///< PDU encoding format (ASN.1 PER or JSON)
+    EncodingFormat encoding{EncodingFormat::ASN1};
 #endif
+
+    // -- Dual-encoding (one libe3 process serving BOTH ASN.1 and JSON) --
+    // When true, libe3 binds a second port triplet using `secondary_encoding`.
+    // dApps connecting to the primary triplet speak `encoding`; dApps on the
+    // secondary triplet speak `secondary_encoding`. SubscriptionManager and
+    // SmRegistry are shared, so a single SM emits indications encoded for
+    // each subscriber's own channel automatically.
+    bool enable_dual_encoding{false};
+    EncodingFormat secondary_encoding{EncodingFormat::JSON}; ///< Encoding of the secondary channel
+    uint16_t secondary_setup_port{0};      ///< REP for the secondary channel
+    uint16_t secondary_subscriber_port{0}; ///< SUB for the secondary channel
+    uint16_t secondary_publisher_port{0};  ///< PUB for the secondary channel
     
     // Timeouts (milliseconds)
     uint32_t connect_timeout_ms{5000}; ///< Connection establishment timeout in milliseconds
@@ -432,6 +448,7 @@ using Timestamp = std::chrono::time_point<std::chrono::steady_clock>;
 struct DAppEntry {
     uint32_t dapp_identifier{0};  ///< Assigned dApp identifier (1–100)
     Timestamp registered_time;     ///< Monotonic timestamp of when the dApp registered
+    size_t channel_index{0};       ///< Channel the dApp registered through (0=primary, 1=secondary)
 };
 
 /**

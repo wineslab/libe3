@@ -41,13 +41,13 @@ void SubscriptionManager::set_sm_lifecycle_callback(SmLifecycleCallback callback
 // dApp Registration Management
 // =========================================================================
 
-std::pair<ErrorCode, uint32_t> SubscriptionManager::register_dapp() {
+std::pair<ErrorCode, uint32_t> SubscriptionManager::register_dapp(size_t channel_index) {
     std::unique_lock lock(mutex_);
 
     // Find the next available dApp ID
     uint32_t assigned_id = next_dapp_id_;
     uint32_t attempts = 0;
-    
+
     // Search for an available ID (handle wrap-around and gaps from unregistered dApps)
     while (registered_dapps_.count(assigned_id) > 0 && attempts <= MAX_DAPP_ID) {
         assigned_id++;
@@ -56,7 +56,7 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::register_dapp() {
         }
         attempts++;
     }
-    
+
     if (attempts > MAX_DAPP_ID) {
         E3_LOG_ERROR(LOG_TAG) << "No available dApp IDs (range " << MIN_DAPP_ID
                               << ".." << MAX_DAPP_ID << ")";
@@ -66,19 +66,30 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::register_dapp() {
     DAppEntry entry;
     entry.dapp_identifier = assigned_id;
     entry.registered_time = std::chrono::steady_clock::now();
+    entry.channel_index = channel_index;
     registered_dapps_[assigned_id] = entry;
 
     // Initialize empty subscription set for this dApp
     dapp_subscriptions_[assigned_id] = {};
-    
+
     // Update next_dapp_id_ for the next registration
     next_dapp_id_ = assigned_id + 1;
     if (next_dapp_id_ > MAX_DAPP_ID) {
         next_dapp_id_ = MIN_DAPP_ID;
     }
 
-    E3_LOG_INFO(LOG_TAG) << "dApp registered successfully with ID " << assigned_id;
+    E3_LOG_INFO(LOG_TAG) << "dApp registered successfully with ID " << assigned_id
+                         << " on channel " << channel_index;
     return {ErrorCode::SUCCESS, assigned_id};
+}
+
+std::optional<size_t> SubscriptionManager::get_dapp_channel(uint32_t dapp_id) const {
+    std::shared_lock lock(mutex_);
+    auto it = registered_dapps_.find(dapp_id);
+    if (it == registered_dapps_.end()) {
+        return std::nullopt;
+    }
+    return it->second.channel_index;
 }
 
 ErrorCode SubscriptionManager::unregister_dapp(uint32_t dapp_id) {

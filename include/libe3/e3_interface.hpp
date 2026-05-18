@@ -6,6 +6,12 @@
  * the E3Agent facade and the protocol handling components. It is
  * NOT exposed to library users directly.
  *
+ * Supports either a single channel (one encoder + one ZMQ triplet) or
+ * dual channels (e.g. ASN.1 on one port set, JSON on another) when
+ * `E3Config::enable_dual_encoding` is true. SubscriptionManager and
+ * SmRegistry are shared across channels; outbound PDUs are routed
+ * back through the channel the target dApp registered on.
+ *
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -22,6 +28,7 @@
 #include <thread>
 #include <atomic>
 #include <functional>
+#include <vector>
 
 namespace libe3 {
 
@@ -35,6 +42,26 @@ using SetupRequestHandler = std::function<ResponseCode(const SetupRequest&, Setu
 using SubscriptionRequestHandler = std::function<ResponseCode(const SubscriptionRequest&)>;
 using DAppReportHandler = std::function<void(const DAppReport&)>;
 using DAppStatusChangedHandler = std::function<void()>;
+
+/**
+ * @brief Per-encoding I/O channel.
+ *
+ * Bundles the encoder, connector, outbound queue, and three I/O threads
+ * for one wire-format/port-triplet combination. E3Interface holds 1 or 2
+ * of these depending on `E3Config::enable_dual_encoding`.
+ */
+struct Channel {
+    EncodingFormat encoding{EncodingFormat::ASN1};
+    uint16_t setup_port{0};
+    uint16_t subscriber_port{0};
+    uint16_t publisher_port{0};
+    std::unique_ptr<E3Encoder> encoder;
+    std::unique_ptr<E3Connector> connector;
+    std::unique_ptr<ResponseQueue> response_queue;
+    std::unique_ptr<std::thread> setup_thread;
+    std::unique_ptr<std::thread> subscriber_thread;
+    std::unique_ptr<std::thread> publisher_thread;
+};
 
 /**
  * @brief E3Interface - Internal protocol coordination
@@ -97,26 +124,23 @@ public:
     /**
      * @brief Check if interface is running
      */
-    bool is_running() const noexcept { 
-        return state_.load() == AgentState::RUNNING; 
+    bool is_running() const noexcept {
+        return state_.load() == AgentState::RUNNING;
     }
 
     /**
      * @brief Get the subscription manager
      */
-    SubscriptionManager& subscription_manager() noexcept { 
-        return *subscription_manager_; 
-    }
-
-    /**
-     * @brief Get the response queue for outbound messages
-     */
-    ResponseQueue& response_queue() noexcept { 
-        return *response_queue_; 
+    SubscriptionManager& subscription_manager() noexcept {
+        return *subscription_manager_;
     }
 
     /**
      * @brief Queue a PDU for outbound transmission
+     *
+     * Routes the PDU to the response queue of the channel that the target
+     * dApp is bound to (recorded by SubscriptionManager at register_dapp).
+     * Falls back to channel 0 if the target cannot be determined.
      */
     ErrorCode queue_outbound(Pdu pdu);
 
@@ -152,95 +176,72 @@ private:
     std::atomic<AgentState> state_{AgentState::UNINITIALIZED};
     std::atomic<bool> should_stop_{false};
 
-    // Core components
-    std::unique_ptr<E3Connector> connector_;
-    std::unique_ptr<E3Encoder> encoder_;
+    // Core components shared across channels
     std::unique_ptr<SubscriptionManager> subscription_manager_;
-    std::unique_ptr<ResponseQueue> response_queue_;
 
-    // Threads
-    std::unique_ptr<std::thread> setup_thread_;
-    std::unique_ptr<std::thread> subscriber_thread_;
-    std::unique_ptr<std::thread> publisher_thread_;
-    std::unique_ptr<std::thread> sm_data_thread_;
+    // I/O channels (1 or 2 entries)
+    std::vector<std::unique_ptr<Channel>> channels_;
 
     // Event handlers
     DAppReportHandler dapp_report_handler_;
-
     DAppStatusChangedHandler dapp_status_changed_handler_;
 
     // =========================================================================
-    // Thread Entry Points
+    // Thread Entry Points (one set per channel)
     // =========================================================================
 
-    /**
-     * @brief Main setup loop - handles E3 Setup requests
-     */
-    void setup_loop();
-
-    /**
-     * @brief Subscriber thread - receives control actions from dApps
-     */
-    void subscriber_loop();
-
-    /**
-     * @brief Publisher thread - sends indication messages to dApps
-     */
-    void publisher_loop();
-
-    /**
-     * @brief SM data handler - polls SMs and queues indication messages
-     */
-    void sm_data_handler_loop();
+    void setup_loop(size_t channel_idx);
+    void subscriber_loop(size_t channel_idx);
+    void publisher_loop(size_t channel_idx);
 
     // =========================================================================
     // Message Handlers
+    //
+    // Subscription/control/report/release are channel-agnostic at the handler
+    // level: they touch the shared SubscriptionManager / SM registry. The
+    // channel that received the inbound PDU is threaded through to handle
+    // outbound routing (setup response, subscription response) so the dApp
+    // gets a reply on the same encoding it spoke.
     // =========================================================================
 
-    /**
-     * @brief Handle E3 Setup Request
-     */
-    void handle_setup_request(const SetupRequest& request, uint32_t request_message_id);
+    void handle_setup_request(const SetupRequest& request,
+                              uint32_t request_message_id,
+                              size_t channel_idx);
 
-    /**
-     * @brief Handle E3 Subscription Request
-     */
-    void handle_subscription_request(const SubscriptionRequest& request, uint32_t request_message_id);
+    void handle_subscription_request(const SubscriptionRequest& request,
+                                     uint32_t request_message_id);
 
-    /**
-     * @brief Handle E3 Subscription Delete
-     */
-    void handle_subscription_delete(const SubscriptionDelete& del, uint32_t request_message_id);
+    void handle_subscription_delete(const SubscriptionDelete& del,
+                                    uint32_t request_message_id);
 
-    /**
-     * @brief Handle E3 Control Action
-     * @param request_message_id Message ID from the incoming PDU (used for MessageAck)
-     */
-    void handle_control_action(const DAppControlAction& action, uint32_t request_message_id);
+    void handle_control_action(const DAppControlAction& action,
+                               uint32_t request_message_id);
 
-    /**
-     * @brief Handle dApp Report
-     */
     void handle_dapp_report(const DAppReport& report);
 
-    /**
-     * @brief Handle dApp Report
-     */
-    void handle_release_message(const ReleaseMessage &release);
+    void handle_release_message(const ReleaseMessage& release);
 
-    /**
-     * @brief Handle dApp disconnection
-     */
     void handle_dapp_disconnection(uint32_t dapp_id);
 
     // =========================================================================
     // SM Lifecycle Management
     // =========================================================================
 
-    /**
-     * @brief Callback for SM lifecycle changes
-     */
     void on_sm_lifecycle_change(uint32_t ran_function_id, bool should_start);
+
+    // =========================================================================
+    // Outbound routing helpers
+    // =========================================================================
+
+    /**
+     * @brief Resolve the channel a PDU should be sent through.
+     *
+     * Inspects the PDU's `choice` variant for `dapp_identifier` and looks
+     * the dApp up in SubscriptionManager. For MessageAck (no dApp tag) the
+     * thread-local "current inbound channel" set by subscriber_loop is
+     * used. Returns 0 if no hint is available.
+     */
+    size_t resolve_outbound_channel(const Pdu& pdu) const noexcept;
 
 public:
     /**
