@@ -286,8 +286,8 @@ TEST(SubscriptionManager_subscription_details_stored) {
     auto [result, sub_id] = mgr.add_subscription(dapp_id, 200, tids, 5000);
     ASSERT_TRUE(result == ErrorCode::SUCCESS);
 
-    const auto* details = mgr.get_subscription_details(dapp_id, 200);
-    ASSERT_TRUE(details != nullptr);
+    const auto details = mgr.get_subscription_details(dapp_id, 200);
+    ASSERT_TRUE(details.has_value());
     ASSERT_EQ(details->dapp_id, dapp_id);
     ASSERT_EQ(details->ran_function_id, 200u);
     ASSERT_EQ(details->periodicity_us, 5000u);
@@ -304,8 +304,8 @@ TEST(SubscriptionManager_subscription_details_defaults) {
     auto [result, sub_id] = mgr.add_subscription(dapp_id, 200);
     ASSERT_TRUE(result == ErrorCode::SUCCESS);
 
-    const auto* details = mgr.get_subscription_details(dapp_id, 200);
-    ASSERT_TRUE(details != nullptr);
+    const auto details = mgr.get_subscription_details(dapp_id, 200);
+    ASSERT_TRUE(details.has_value());
     ASSERT_EQ(details->periodicity_us, 0u);
     ASSERT_TRUE(details->telemetry_ids.empty());
 }
@@ -318,8 +318,8 @@ TEST(SubscriptionManager_subscription_details_removed_on_delete) {
     mgr.add_subscription(dapp_id, 200, tids, 1000);
     mgr.remove_subscription(dapp_id, 200);
 
-    const auto* details = mgr.get_subscription_details(dapp_id, 200);
-    ASSERT_TRUE(details == nullptr);
+    const auto details = mgr.get_subscription_details(dapp_id, 200);
+    ASSERT_TRUE(!details.has_value());
 }
 
 TEST(SubscriptionManager_subscription_details_removed_on_unregister) {
@@ -330,8 +330,8 @@ TEST(SubscriptionManager_subscription_details_removed_on_unregister) {
     mgr.add_subscription(dapp_id, 300, tids, 2000);
     mgr.unregister_dapp(dapp_id);
 
-    const auto* details = mgr.get_subscription_details(dapp_id, 300);
-    ASSERT_TRUE(details == nullptr);
+    const auto details = mgr.get_subscription_details(dapp_id, 300);
+    ASSERT_TRUE(!details.has_value());
 }
 
 int main() {
