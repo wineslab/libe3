@@ -7,6 +7,7 @@
 
 #include "json_encoder.hpp"
 #include "libe3/logger.hpp"
+#include <cctype>
 #include <iomanip>
 #include <sstream>
 
@@ -23,19 +24,28 @@ std::string to_camel_case(const char* pascal) {
 }
 
 // ----------------------------------------------------------------------------
-// Structured-JSON payload helpers
+// Structured-JSON payload helpers — liberal-receive, conservative-emit.
 //
-// Aerial dApps and cuBB embed binary-payload fields (protocolData, actionData,
-// reportData, xAppControlData, ranFunctionData) as inline JSON objects/arrays
-// on the wire, NOT as hex strings. Service Models on either side serialise
-// their SM-specific payload to UTF-8 JSON bytes; the encoder embeds the parsed
-// object inline, and the decoder dumps it back to UTF-8 JSON bytes for the SM
-// to parse.
+// libe3 is the only library that both encodes AND decodes every PDU type, so
+// it acts as the authoritative reference for the wire format. To stay
+// compatible with every peer in the wild we follow Postel's law:
 //
-// Fallback: if a payload isn't valid JSON (e.g. legacy ASN.1-bridged SM, or
-// raw bytes during a migration), we wrap it in a {"__hex__": "..."} sentinel
-// so the bytes survive a roundtrip without crashing the encode. The same
-// sentinel pattern is recognised on decode.
+//   ON EMIT (bytes_to_json_payload): pick ONE canonical form per case.
+//     - bytes that parse as a JSON object or array -> embed inline (cuBB's
+//       convention, e3_agent.cpp:256+).
+//     - everything else -> wrap in {"__hex__": "<hex>"} sentinel.
+//
+//   ON DECODE (json_payload_to_bytes): accept FOUR shapes:
+//     1. inline JSON object / array  (cuBB, libe3 self-roundtrip, spear-dApp)
+//     2. {"__hex__": "<hex>"} sentinel  (libe3's opaque-bytes form)
+//     3. plain hex string             (NVIDIA aerial, commit 19f9bd3:
+//                                       SendDAppControl hex-encodes a JSON
+//                                       payload and assigns it as a string)
+//     4. plain UTF-8 string           (final fallback so an opaque text
+//                                       payload still survives roundtrip)
+//
+// New peers should converge on shapes (1) or (2). Shapes (3)/(4) exist
+// strictly for inbound compatibility; libe3 never emits them.
 // ----------------------------------------------------------------------------
 
 inline std::string bytes_to_hex_string(const std::vector<uint8_t>& bytes) {
@@ -76,13 +86,34 @@ nlohmann::json bytes_to_json_payload(const std::vector<uint8_t>& bytes) {
     return nlohmann::json{{"__hex__", bytes_to_hex_string(bytes)}};
 }
 
+// True iff `s` is a non-empty even-length sequence of ASCII hex digits.
+// Used to detect aerial-style plain hex-string payloads (shape 3 above).
+inline bool is_pure_hex_string(const std::string& s) {
+    if (s.empty() || (s.size() % 2) != 0) return false;
+    for (char c : s) {
+        if (!std::isxdigit(static_cast<unsigned char>(c))) return false;
+    }
+    return true;
+}
+
 std::vector<uint8_t> json_payload_to_bytes(const nlohmann::json& j) {
-    // Reverse of bytes_to_json_payload: recognise the hex sentinel and return
-    // the original bytes; otherwise dump the JSON object/array to compact
-    // UTF-8 text for the consumer SM to parse.
+    // Shape 2: explicit hex-sentinel object.
     if (j.is_object() && j.contains("__hex__") && j["__hex__"].is_string()) {
         return hex_string_to_bytes(j["__hex__"].get_ref<const std::string&>());
     }
+    // Shapes 3 & 4: bare string payload. Aerial's SendDAppControl
+    // (spear-aerial-sample-apps@19f9bd3, e3_manager.cpp:1022+) hex-encodes
+    // the inner JSON config and ships it as a JSON string. Detect that and
+    // hex-decode; otherwise treat the string as opaque UTF-8 bytes.
+    if (j.is_string()) {
+        const std::string& s = j.get_ref<const std::string&>();
+        if (is_pure_hex_string(s)) {
+            return hex_string_to_bytes(s);
+        }
+        return std::vector<uint8_t>(s.begin(), s.end());
+    }
+    // Shape 1: inline JSON object/array — round-trip the structured payload
+    // back to compact UTF-8 text for the consumer SM to parse.
     std::string dumped = j.dump();
     return std::vector<uint8_t>(dumped.begin(), dumped.end());
 }

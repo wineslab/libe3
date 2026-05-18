@@ -321,6 +321,118 @@ TEST(JsonEncoder_reject_pascal_case_pdu_type) {
     ASSERT_FALSE(result.has_value());
 }
 
+// ---------------------------------------------------------------------------
+// actionData payload-shape acceptance matrix
+//
+// libe3 must tolerate every binary-payload shape a peer might emit (Postel's
+// law on the receive side). These tests pin the four accepted shapes:
+//   1. inline JSON object   (cuBB / libe3-self / spear-dApp)
+//   2. {"__hex__": "..."}   (libe3's opaque-bytes sentinel)
+//   3. plain hex string     (NVIDIA aerial, spear-aerial-sample-apps@19f9bd3)
+//   4. plain UTF-8 string   (final-fallback so any text payload survives)
+// ---------------------------------------------------------------------------
+
+namespace {
+std::vector<uint8_t> decode_action_data(const std::string& wire) {
+    auto encoder = create_encoder();
+    std::vector<uint8_t> buf(wire.begin(), wire.end());
+    auto decoded = encoder->decode(buf.data(), buf.size());
+    if (!decoded.has_value()) return {};
+    return std::get<DAppControlAction>(decoded->choice).action_data;
+}
+}  // namespace
+
+TEST(JsonEncoder_actionData_inline_object) {
+    // Shape 1 — inline JSON object. The SM-facing bytes are the compact
+    // re-dump of that object.
+    std::string wire = R"({
+        "type": "dAppControlAction",
+        "id": 1, "timestamp": 0,
+        "dAppIdentifier": 7,
+        "ranFunctionIdentifier": 4,
+        "controlIdentifier": 1,
+        "actionData": {"enabled": false, "ul_bw": 40}
+    })";
+    auto bytes = decode_action_data(wire);
+    ASSERT_FALSE(bytes.empty());
+    auto reparsed = nlohmann::json::parse(bytes);
+    ASSERT_TRUE(reparsed.is_object());
+    ASSERT_EQ(reparsed["ul_bw"].get<int>(), 40);
+    ASSERT_EQ(reparsed["enabled"].get<bool>(), false);
+}
+
+TEST(JsonEncoder_actionData_hex_sentinel) {
+    // Shape 2 — explicit {"__hex__": "<hex>"} wrapper. Bytes are the literal
+    // hex-decoded blob.
+    std::string wire = R"({
+        "type": "dAppControlAction",
+        "id": 2, "timestamp": 0,
+        "dAppIdentifier": 7,
+        "ranFunctionIdentifier": 4,
+        "controlIdentifier": 1,
+        "actionData": {"__hex__": "deadbeef"}
+    })";
+    auto bytes = decode_action_data(wire);
+    ASSERT_EQ(bytes.size(), 4u);
+    ASSERT_EQ(bytes[0], 0xDEu);
+    ASSERT_EQ(bytes[1], 0xADu);
+    ASSERT_EQ(bytes[2], 0xBEu);
+    ASSERT_EQ(bytes[3], 0xEFu);
+}
+
+TEST(JsonEncoder_actionData_plain_hex_string) {
+    // Shape 3 — NVIDIA aerial convention (spear-aerial-sample-apps@19f9bd3,
+    // e3_manager.cpp:1022+). actionData is a bare JSON string whose chars
+    // are pairwise hex digits of the inner JSON payload. Decoder must
+    // hex-decode rather than treat the string as opaque UTF-8.
+    // "7b22656e61626c6564223a747275657d" == `{"enabled":true}`.
+    std::string wire = R"({
+        "type": "dAppControlAction",
+        "id": 3, "timestamp": 0,
+        "dAppIdentifier": 7,
+        "ranFunctionIdentifier": 4,
+        "controlIdentifier": 1,
+        "actionData": "7b22656e61626c6564223a747275657d"
+    })";
+    auto bytes = decode_action_data(wire);
+    ASSERT_FALSE(bytes.empty());
+    auto reparsed = nlohmann::json::parse(bytes);
+    ASSERT_TRUE(reparsed.is_object());
+    ASSERT_EQ(reparsed["enabled"].get<bool>(), true);
+}
+
+TEST(JsonEncoder_actionData_plain_utf8_string) {
+    // Shape 4 — bare string that is NOT pure hex. Decoder must NOT attempt
+    // hex-decode; the SM receives the literal UTF-8 bytes of the string.
+    std::string wire = R"({
+        "type": "dAppControlAction",
+        "id": 4, "timestamp": 0,
+        "dAppIdentifier": 7,
+        "ranFunctionIdentifier": 4,
+        "controlIdentifier": 1,
+        "actionData": "hello world"
+    })";
+    auto bytes = decode_action_data(wire);
+    std::string recovered(bytes.begin(), bytes.end());
+    ASSERT_EQ(recovered, std::string("hello world"));
+}
+
+// Edge: hex-looking string of odd length must NOT be hex-decoded (length
+// invariant violated) — fall through to plain UTF-8 shape.
+TEST(JsonEncoder_actionData_odd_length_hex_is_utf8) {
+    std::string wire = R"({
+        "type": "dAppControlAction",
+        "id": 5, "timestamp": 0,
+        "dAppIdentifier": 7,
+        "ranFunctionIdentifier": 4,
+        "controlIdentifier": 1,
+        "actionData": "abc"
+    })";
+    auto bytes = decode_action_data(wire);
+    std::string recovered(bytes.begin(), bytes.end());
+    ASSERT_EQ(recovered, std::string("abc"));
+}
+
 int main() {
     return RUN_ALL_TESTS();
 }
