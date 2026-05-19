@@ -346,6 +346,17 @@ std::vector<uint32_t> E3Interface::get_available_ran_functions() const {
     return SmRegistry::instance().get_available_ran_functions();
 }
 
+std::optional<EncodingFormat> E3Interface::get_dapp_encoding(uint32_t dapp_id) const {
+    if (!subscription_manager_) {
+        return std::nullopt;
+    }
+    auto ch_idx = subscription_manager_->get_dapp_channel(dapp_id);
+    if (!ch_idx || *ch_idx >= channels_.size() || !channels_[*ch_idx]) {
+        return std::nullopt;
+    }
+    return channels_[*ch_idx]->encoding;
+}
+
 ErrorCode E3Interface::register_sm(std::unique_ptr<ServiceModel> sm) {
     if (!sm) {
         return ErrorCode::INVALID_PARAM;

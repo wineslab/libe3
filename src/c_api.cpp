@@ -317,6 +317,17 @@ e3_error_t e3_agent_set_dapp_report_handler(
         return copy_vector_u32_to_c(v, out_len);
     }
 
+    e3_dapp_encoding_t e3_agent_get_dapp_encoding(e3_agent_handle_t* agent, uint32_t dapp_id) {
+        if (!agent || !agent->agent) return E3_DAPP_ENCODING_UNKNOWN;
+        auto enc = agent->agent->get_dapp_encoding(dapp_id);
+        if (!enc) return E3_DAPP_ENCODING_UNKNOWN;
+        switch (*enc) {
+            case EncodingFormat::ASN1: return E3_DAPP_ENCODING_ASN1;
+            case EncodingFormat::JSON: return E3_DAPP_ENCODING_JSON;
+        }
+        return E3_DAPP_ENCODING_UNKNOWN;
+    }
+
     uint32_t e3_agent_get_subscription_periodicity(
         e3_agent_handle_t* agent,
         uint32_t dapp_id,

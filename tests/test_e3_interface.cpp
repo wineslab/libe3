@@ -211,6 +211,91 @@ TEST(DAppStatusChanged_no_spurious_calls) {
     ASSERT_EQ(count, 0);
 }
 
+// ============================================================================
+// get_dapp_encoding(): SMs use this to pick the encoder matching the
+// dApp's channel. Tested without ZMQ — SubscriptionManager::register_dapp
+// records the channel index, and E3Interface combines that with the
+// channel list to surface the encoding.
+// ============================================================================
+
+TEST(DappEncoding_single_channel_asn1_returns_asn1) {
+    E3Config cfg = make_test_config();
+    cfg.encoding = EncodingFormat::ASN1;
+    E3Interface iface(cfg);
+    ASSERT_EQ(error_to_int(iface.init()), error_to_int(ErrorCode::SUCCESS));
+
+    auto [res, id] = iface.subscription_manager().register_dapp(/*channel_index=*/0);
+    ASSERT_EQ(error_to_int(res), error_to_int(ErrorCode::SUCCESS));
+
+    auto enc = iface.get_dapp_encoding(id);
+    ASSERT_TRUE(enc.has_value());
+    ASSERT_EQ(static_cast<int>(*enc), static_cast<int>(EncodingFormat::ASN1));
+}
+
+TEST(DappEncoding_single_channel_json_returns_json) {
+    E3Config cfg = make_test_config();
+    cfg.encoding = EncodingFormat::JSON;
+    E3Interface iface(cfg);
+    ASSERT_EQ(error_to_int(iface.init()), error_to_int(ErrorCode::SUCCESS));
+
+    auto [res, id] = iface.subscription_manager().register_dapp(/*channel_index=*/0);
+    ASSERT_EQ(error_to_int(res), error_to_int(ErrorCode::SUCCESS));
+
+    auto enc = iface.get_dapp_encoding(id);
+    ASSERT_TRUE(enc.has_value());
+    ASSERT_EQ(static_cast<int>(*enc), static_cast<int>(EncodingFormat::JSON));
+}
+
+TEST(DappEncoding_dual_channel_returns_per_dapp_encoding) {
+    E3Config cfg = make_test_config();
+    cfg.encoding              = EncodingFormat::ASN1;        // primary
+    cfg.enable_dual_encoding  = true;
+    cfg.secondary_encoding    = EncodingFormat::JSON;        // secondary
+    // Distinct ports so init() doesn't reject a collision.
+    cfg.setup_port            = 19990;
+    cfg.subscriber_port       = 19999;
+    cfg.publisher_port        = 19991;
+    cfg.secondary_setup_port  = 15555;
+    cfg.secondary_subscriber_port = 15557;
+    cfg.secondary_publisher_port  = 15556;
+
+    E3Interface iface(cfg);
+    ASSERT_EQ(error_to_int(iface.init()), error_to_int(ErrorCode::SUCCESS));
+
+    auto [res1, id_a] = iface.subscription_manager().register_dapp(/*channel_index=*/0);
+    auto [res2, id_b] = iface.subscription_manager().register_dapp(/*channel_index=*/1);
+    ASSERT_EQ(error_to_int(res1), error_to_int(ErrorCode::SUCCESS));
+    ASSERT_EQ(error_to_int(res2), error_to_int(ErrorCode::SUCCESS));
+
+    auto enc_a = iface.get_dapp_encoding(id_a);
+    auto enc_b = iface.get_dapp_encoding(id_b);
+    ASSERT_TRUE(enc_a.has_value());
+    ASSERT_TRUE(enc_b.has_value());
+    ASSERT_EQ(static_cast<int>(*enc_a), static_cast<int>(EncodingFormat::ASN1));
+    ASSERT_EQ(static_cast<int>(*enc_b), static_cast<int>(EncodingFormat::JSON));
+}
+
+TEST(DappEncoding_unregistered_dapp_returns_nullopt) {
+    E3Interface iface(make_test_config());
+    ASSERT_EQ(error_to_int(iface.init()), error_to_int(ErrorCode::SUCCESS));
+
+    auto enc = iface.get_dapp_encoding(/*never-registered*/ 42);
+    ASSERT_FALSE(enc.has_value());
+}
+
+TEST(DappEncoding_returns_nullopt_after_unregister) {
+    E3Interface iface(make_test_config());
+    ASSERT_EQ(error_to_int(iface.init()), error_to_int(ErrorCode::SUCCESS));
+
+    auto [res, id] = iface.subscription_manager().register_dapp();
+    ASSERT_EQ(error_to_int(res), error_to_int(ErrorCode::SUCCESS));
+    ASSERT_TRUE(iface.get_dapp_encoding(id).has_value());
+
+    ASSERT_EQ(error_to_int(iface.subscription_manager().unregister_dapp(id)),
+              error_to_int(ErrorCode::SUCCESS));
+    ASSERT_FALSE(iface.get_dapp_encoding(id).has_value());
+}
+
 int main() {
     return RUN_ALL_TESTS();
 }

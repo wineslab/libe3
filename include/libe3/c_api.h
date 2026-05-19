@@ -302,6 +302,34 @@ uint32_t* e3_agent_get_dapp_subscriptions(e3_agent_handle_t* agent, uint32_t dap
 uint32_t* e3_agent_get_ran_function_subscribers(e3_agent_handle_t* agent, uint32_t ran_function_id, size_t* out_len);
 
 /**
+ * @brief Wire encoding a dApp speaks, as recorded at register_dapp() time.
+ *
+ * Used by Service Models that want to emit indication payloads in the
+ * dApp's native format (e.g. ASN.1 to dApps on the ASN.1 channel, JSON to
+ * dApps on the JSON channel). The SM is responsible for actually doing the
+ * dual encoding; libe3 only reports which encoding the channel uses so
+ * the SM can pick the matching encoder.
+ *
+ * Values mirror E3Config::encoding (0=ASN1, 1=JSON). -1 is returned when
+ * the dApp is not registered or the agent handle is null.
+ */
+typedef enum {
+    E3_DAPP_ENCODING_UNKNOWN = -1,
+    E3_DAPP_ENCODING_ASN1    = 0,
+    E3_DAPP_ENCODING_JSON    = 1
+} e3_dapp_encoding_t;
+
+/**
+ * @brief Look up the wire encoding for a given dApp.
+ *
+ * @param agent   Agent handle (non-null).
+ * @param dapp_id dApp identifier returned earlier by register_dapp.
+ * @return The encoding the dApp's channel uses, or E3_DAPP_ENCODING_UNKNOWN
+ *         if the dApp is not registered.
+ */
+e3_dapp_encoding_t e3_agent_get_dapp_encoding(e3_agent_handle_t* agent, uint32_t dapp_id);
+
+/**
  * @brief Get the reporting periodicity a dApp requested for a RAN function.
  *
  * @return periodicity in microseconds, 0 if not set or subscription not found

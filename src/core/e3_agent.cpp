@@ -237,6 +237,13 @@ std::vector<uint32_t> E3Agent::get_ran_function_subscribers(uint32_t ran_functio
     return impl_->interface->subscription_manager().get_subscribed_dapps(ran_function_id);
 }
 
+std::optional<EncodingFormat> E3Agent::get_dapp_encoding(uint32_t dapp_id) const {
+    if (!impl_->interface) {
+        return std::nullopt;
+    }
+    return impl_->interface->get_dapp_encoding(dapp_id);
+}
+
 uint32_t E3Agent::get_subscription_periodicity(uint32_t dapp_id, uint32_t ran_function_id) const {
     if (!impl_->interface) {
         return 0;

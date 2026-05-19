@@ -25,6 +25,7 @@
 #include "response_queue.hpp"
 #include "sm_interface.hpp"
 #include <memory>
+#include <optional>
 #include <thread>
 #include <atomic>
 #include <functional>
@@ -148,6 +149,18 @@ public:
      * @brief Get available RAN functions
      */
     std::vector<uint32_t> get_available_ran_functions() const;
+
+    /**
+     * @brief Encoding used by the channel a given dApp is bound to.
+     *
+     * Combines SubscriptionManager::get_dapp_channel() (channel index by
+     * dApp ID) with channels_[idx].encoding. Returns std::nullopt if the
+     * dApp is not registered or the recorded channel index is stale.
+     *
+     * Service Models call this through the C API to pick which encoder
+     * to use when emitting indication payloads.
+     */
+    std::optional<EncodingFormat> get_dapp_encoding(uint32_t dapp_id) const;
 
     /**
      * @brief Register a Service Model

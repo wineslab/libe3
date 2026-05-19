@@ -16,6 +16,7 @@
 #include "sm_interface.hpp"
 #include <memory>
 #include <functional>
+#include <optional>
 #include <vector>
 
 namespace libe3 {
@@ -235,6 +236,14 @@ public:
     std::vector<uint32_t> get_ran_function_subscribers(
         uint32_t ran_function_id
     ) const;
+
+    /**
+     * @brief Encoding used by the channel a given dApp is bound to.
+     *
+     * @return Encoding format (ASN1 or JSON), or std::nullopt if the dApp
+     *         is not registered.
+     */
+    std::optional<EncodingFormat> get_dapp_encoding(uint32_t dapp_id) const;
 
     /**
      * @brief Get the reporting periodicity a dApp requested for a RAN function
