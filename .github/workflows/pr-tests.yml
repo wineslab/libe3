@@ -34,6 +34,32 @@ jobs:
           fi
           ./build_libe3 -c -d build -j $(nproc) $BUILD_FLAG -t
 
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          chmod +x ./build_libe3 || true
+          ./build_libe3 -I || true
+
+      - name: Configure with integration tests
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLIBE3_BUILD_INTEGRATION_TESTS=ON
+
+      - name: Build
+        run: cmake --build build -j $(nproc)
+
+      - name: Run integration tests
+        run: cd build && ctest -L integration --output-on-failure
+
   benchmark:
     name: MPMC Queue Benchmark
     runs-on: ubuntu-latest

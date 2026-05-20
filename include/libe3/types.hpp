@@ -42,6 +42,21 @@ enum class E3LinkLayer : uint8_t {
 };
 
 /**
+ * @brief Role this E3 endpoint plays in the protocol.
+ *
+ * RAN is the existing behaviour: the agent binds the setup/inbound/outbound
+ * sockets and answers dApp requests. DAPP is the symmetric client side: the
+ * agent connects to those endpoints and drives setup/subscribe/release.
+ *
+ * Default is RAN so that any caller compiled against earlier libe3 headers
+ * keeps today's behaviour.
+ */
+enum class E3Role : uint8_t {
+    RAN = 0,     ///< RAN function (binds sockets; today's only behaviour)
+    DAPP = 1     ///< dApp (connects to a RAN agent)
+};
+
+/**
  * @brief Transport layer types (matches Python E3TransportLayer)
  */
 enum class E3TransportLayer : uint8_t {
@@ -334,8 +349,16 @@ struct Pdu {
  * @brief Configuration for E3Agent
  */
 struct E3Config {
-    // RAN identification
+    // Role: RAN (today's default — binds sockets) or DAPP (connects).
+    E3Role role{E3Role::RAN};
+
+    // RAN identification (used when role==RAN to advertise this RAN's id)
     std::string ran_identifier;  ///< Unique identifier for this RAN function (e.g. "DU-1")
+
+    // dApp identification (used when role==DAPP to send in SetupRequest)
+    std::string dapp_name{"libe3-dapp"};   ///< dApp name advertised in SetupRequest
+    std::string dapp_version{"0.0.0"};      ///< dApp version advertised in SetupRequest
+    std::string vendor;                     ///< Vendor name for SetupRequest (optional)
 
     std::string e3ap_version{"1.0.0"};  ///< E3AP protocol version advertised during setup
 
@@ -514,6 +537,17 @@ inline const char* agent_state_to_string(AgentState state) noexcept {
         case AgentState::STOPPED: return "Stopped";
         case AgentState::ERROR: return "Error";
         default: return "Unknown";
+    }
+}
+
+/**
+ * @brief Convert E3Role to string representation
+ */
+inline const char* role_to_string(E3Role role) noexcept {
+    switch (role) {
+        case E3Role::RAN: return "ran";
+        case E3Role::DAPP: return "dapp";
+        default: return "unknown";
     }
 }
 
