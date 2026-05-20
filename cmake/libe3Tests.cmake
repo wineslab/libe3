@@ -38,3 +38,33 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
     )
     add_test(NAME ${target_name} COMMAND ${target_name})
 endforeach()
+
+# Integration tests in tests/integration/ are opt-in via
+# LIBE3_BUILD_INTEGRATION_TESTS=ON. They require ASN.1 encoding and the
+# example_simple_agent/example_simple_dapp executables for cross-process
+# scenarios. Each test gets the "integration" CTest label so callers can
+# `ctest -L integration` (or skip them with `ctest -LE integration`).
+if(LIBE3_BUILD_INTEGRATION_TESTS AND LIBE3_ENABLE_ASN1)
+    file(GLOB LIBE3_INTEGRATION_TEST_SOURCES
+        RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+        "tests/integration/*.cpp")
+    foreach(test_src IN LISTS LIBE3_INTEGRATION_TEST_SOURCES)
+        get_filename_component(test_name ${test_src} NAME_WE)
+        string(REGEX REPLACE "^test_" "" simple_name ${test_name})
+        set(target_name "test_${simple_name}")
+        add_executable(${target_name} "${CMAKE_CURRENT_SOURCE_DIR}/${test_src}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/examples/sm_simple/e3sm_simple_wrapper.cpp")
+        target_link_libraries(${target_name}
+            PRIVATE
+                libe3::libe3
+                libe3_test_framework
+                libe3_warnings
+                libe3_sanitizers
+                asn1_e3ap
+        )
+        target_include_directories(${target_name} PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/examples)
+        add_test(NAME ${target_name} COMMAND ${target_name})
+        set_tests_properties(${target_name} PROPERTIES LABELS "integration")
+    endforeach()
+endif()

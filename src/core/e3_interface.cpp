@@ -70,9 +70,18 @@ uint32_t E3Interface::generate_message_id() {
 E3Interface::E3Interface(const E3Config& config)
     : config_(config)
 {
-    Logger::instance().set_log_file("/tmp/e3_agent.log");
+    // Suppress shared log-file writes when logging is disabled. This lets
+    // multiple E3Interface instances (e.g. a RAN-role and a dApp-role one in
+    // the same process — integration tests, the latency benchmark, or
+    // production multi-peer dApps) coexist without racing on the same file.
+    if (config.log_level > 0) {
+        const char* log_path = (config.role == E3Role::DAPP)
+            ? "/tmp/e3_dapp.log"
+            : "/tmp/e3_agent.log";
+        Logger::instance().set_log_file(log_path);
+    }
     Logger::instance().set_level(config.log_level);
-    E3_LOG_INFO(LOG_TAG) << "E3Interface created";
+    E3_LOG_INFO(LOG_TAG) << "E3Interface created (role=" << role_to_string(config.role) << ")";
 }
 
 E3Interface::~E3Interface() {
@@ -95,19 +104,21 @@ ErrorCode E3Interface::init() {
         return ErrorCode::INTERNAL_ERROR;
     }
     
-    // Create subscription manager
-    subscription_manager_ = std::make_unique<SubscriptionManager>();
-    
-    // Set up SM lifecycle callback
-    subscription_manager_->set_sm_lifecycle_callback(
-        [this](uint32_t ran_function_id, bool should_start) {
-            on_sm_lifecycle_change(ran_function_id, should_start);
-        }
-    );
-    
+    // Allocate role-specific state. Exactly one is non-null.
+    if (config_.role == E3Role::RAN) {
+        subscription_manager_ = std::make_unique<SubscriptionManager>();
+        subscription_manager_->set_sm_lifecycle_callback(
+            [this](uint32_t ran_function_id, bool should_start) {
+                on_sm_lifecycle_change(ran_function_id, should_start);
+            }
+        );
+    } else {
+        dapp_state_ = std::make_unique<DAppSubscriptionState>();
+    }
+
     // Create response queue
     response_queue_ = std::make_unique<ResponseQueue>();
-    
+
     // Create connector
     connector_ = create_connector(
         config_.link_layer,
@@ -118,7 +129,8 @@ ErrorCode E3Interface::init() {
         config_.setup_port,
         config_.subscriber_port,
         config_.publisher_port,
-        config_.io_threads
+        config_.io_threads,
+        config_.role
     );
     
     if (!connector_) {
@@ -140,27 +152,37 @@ ErrorCode E3Interface::start() {
         return ErrorCode::STATE_ERROR;
     }
     
-    E3_LOG_INFO(LOG_TAG) << "Starting E3Interface";
+    E3_LOG_INFO(LOG_TAG) << "Starting E3Interface (role=" << role_to_string(config_.role) << ")";
     should_stop_.store(false);
-    
-    // Set up initial connection
-    ErrorCode conn_result = connector_->setup_initial_connection();
+
+    // Set up the setup channel. RAN binds; dApp connects.
+    ErrorCode conn_result = (config_.role == E3Role::RAN)
+        ? connector_->setup_initial_connection()
+        : connector_->setup_initial_connection_client();
     if (conn_result != ErrorCode::SUCCESS) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to setup initial connection";
+        E3_LOG_ERROR(LOG_TAG) << "Failed to setup initial connection: "
+                              << error_code_to_string(conn_result);
         state_.store(AgentState::ERROR);
         return conn_result;
     }
-    
+
     state_.store(AgentState::CONNECTED);
-    
-    // Start threads
-    setup_thread_ = std::make_unique<std::thread>(&E3Interface::setup_loop, this);
-    subscriber_thread_ = std::make_unique<std::thread>(&E3Interface::subscriber_loop, this);
-    publisher_thread_ = std::make_unique<std::thread>(&E3Interface::publisher_loop, this);
-    
+
+    // Start threads. RAN runs setup+inbound+outbound+sm_data; dApp runs
+    // setup+inbound+outbound (no sm_data — dApps don't host SMs).
+    if (config_.role == E3Role::RAN) {
+        setup_thread_ = std::make_unique<std::thread>(&E3Interface::setup_loop_ran, this);
+        inbound_thread_ = std::make_unique<std::thread>(&E3Interface::inbound_loop_ran, this);
+        outbound_thread_ = std::make_unique<std::thread>(&E3Interface::outbound_loop_ran, this);
+    } else {
+        setup_thread_ = std::make_unique<std::thread>(&E3Interface::setup_loop_dapp, this);
+        inbound_thread_ = std::make_unique<std::thread>(&E3Interface::inbound_loop_dapp, this);
+        outbound_thread_ = std::make_unique<std::thread>(&E3Interface::outbound_loop_dapp, this);
+    }
+
     state_.store(AgentState::RUNNING);
     E3_LOG_INFO(LOG_TAG) << "E3Interface started successfully";
-    
+
     return ErrorCode::SUCCESS;
 }
 
@@ -188,18 +210,31 @@ void E3Interface::stop() {
     if (setup_thread_ && setup_thread_->joinable()) {
         setup_thread_->join();
     }
-    if (subscriber_thread_ && subscriber_thread_->joinable()) {
-        subscriber_thread_->join();
+    if (inbound_thread_ && inbound_thread_->joinable()) {
+        inbound_thread_->join();
     }
-    if (publisher_thread_ && publisher_thread_->joinable()) {
-        publisher_thread_->join();
+    if (outbound_thread_ && outbound_thread_->joinable()) {
+        outbound_thread_->join();
     }
     if (sm_data_thread_ && sm_data_thread_->joinable()) {
         sm_data_thread_->join();
     }
+
+    // Wake up anyone blocked in wait_for_setup so they don't hang.
+    {
+        std::lock_guard<std::mutex> lk(setup_complete_mu_);
+        setup_complete_ = true;
+    }
+    setup_complete_cv_.notify_all();
     
-    // Clean up SM registry
-    SmRegistry::instance().clear();
+    // Clean up SM registry — only the RAN role owns SMs. Doing this
+    // unconditionally would wipe a sibling RAN-role E3Interface's registered
+    // SMs in a two-roles-in-one-process scenario (integration tests, the
+    // latency benchmark, multi-peer dApps colocated with a RAN). The dApp
+    // role never registers an SM, so there's nothing to clear.
+    if (config_.role == E3Role::RAN) {
+        SmRegistry::instance().clear();
+    }
     
     // Dispose connector
     if (connector_) {
@@ -251,8 +286,8 @@ void E3Interface::notify_dapp_status_changed() {
 // Thread Entry Points
 // =========================================================================
 
-void E3Interface::setup_loop() {
-    E3_LOG_INFO(LOG_TAG) << "Setup loop started";
+void E3Interface::setup_loop_ran() {
+    E3_LOG_INFO(LOG_TAG) << "Setup loop (RAN) started";
     
     auto available_ran_functions = SmRegistry::instance().get_available_ran_functions();
     
@@ -290,12 +325,12 @@ void E3Interface::setup_loop() {
         handle_setup_request(*request, pdu.message_id);
     }
     
-    E3_LOG_INFO(LOG_TAG) << "Setup loop stopped";
+    E3_LOG_INFO(LOG_TAG) << "Setup loop (RAN) stopped";
 }
 
-void E3Interface::subscriber_loop() {
+void E3Interface::inbound_loop_ran() {
     apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness);
-    E3_LOG_INFO(LOG_TAG) << "Subscriber loop started";
+    E3_LOG_INFO(LOG_TAG) << "Inbound loop (RAN) started";
 
     ErrorCode result = connector_->setup_inbound_connection();
     if (result != ErrorCode::SUCCESS) {
@@ -369,26 +404,29 @@ void E3Interface::subscriber_loop() {
         }
     }
     
-    E3_LOG_INFO(LOG_TAG) << "Subscriber loop stopped";
+    E3_LOG_INFO(LOG_TAG) << "Inbound loop (RAN) stopped";
 }
 
-void E3Interface::publisher_loop() {
+void E3Interface::outbound_loop_ran() {
     apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness);
-    E3_LOG_INFO(LOG_TAG) << "Publisher loop started";
+    E3_LOG_INFO(LOG_TAG) << "Outbound loop (RAN) started";
 
     // Ignore SIGPIPE to handle closed connections gracefully
     signal(SIGPIPE, SIG_IGN);
-    
-    // Retry outbound connection setup
-    ErrorCode result;
-    do {
-        std::this_thread::sleep_for(std::chrono::seconds(3));
+
+    // Set up the outbound (PUB) socket. Try immediately; retry with backoff
+    // only on failure. Putting an unconditional sleep before the first
+    // attempt introduces a multi-second startup latency that breaks
+    // integration tests and any colocated RAN/dApp pair.
+    ErrorCode result = connector_->setup_outbound_connection();
+    while (result != ErrorCode::SUCCESS && !should_stop_.load()) {
+        E3_LOG_WARN(LOG_TAG) << "Outbound connection setup failed ("
+                             << error_code_to_string(result) << "), retrying in 1s";
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         if (should_stop_.load()) return;
-        
-        E3_LOG_INFO(LOG_TAG) << "Trying to setup outbound connection";
         result = connector_->setup_outbound_connection();
-    } while (result != ErrorCode::SUCCESS && !should_stop_.load());
-    
+    }
+
     if (result != ErrorCode::SUCCESS) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to setup outbound connection";
         return;
@@ -418,7 +456,7 @@ void E3Interface::publisher_loop() {
         }
     }
     
-    E3_LOG_INFO(LOG_TAG) << "Publisher loop stopped";
+    E3_LOG_INFO(LOG_TAG) << "Outbound loop (RAN) stopped";
 }
 
 void E3Interface::sm_data_handler_loop() {
@@ -674,6 +712,379 @@ void E3Interface::handle_dapp_disconnection(uint32_t dapp_id) {
 // =========================================================================
 // SM Lifecycle Management
 // =========================================================================
+
+// ===========================================================================
+// dApp-role thread bodies
+// ===========================================================================
+
+void E3Interface::setup_loop_dapp() {
+    E3_LOG_INFO(LOG_TAG) << "Setup loop (dApp) started";
+
+    // Encode the SetupRequest from config_'s dApp identification fields.
+    auto enc = encoder_->encode_setup_request(
+        generate_message_id(),
+        config_.e3ap_version,
+        config_.dapp_name,
+        config_.dapp_version,
+        config_.vendor
+    );
+    if (!enc) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to encode SetupRequest";
+        std::lock_guard<std::mutex> lk(setup_complete_mu_);
+        setup_complete_ = true;
+        setup_succeeded_ = false;
+        setup_complete_cv_.notify_all();
+        return;
+    }
+
+    // Lazy-pirate REQ: send, wait for reply with timeout, retry on no reply.
+    constexpr int MAX_RETRIES = 5;
+    int retries = 0;
+    bool got_response = false;
+    while (!should_stop_.load() && retries < MAX_RETRIES) {
+        ErrorCode rc = connector_->send_setup_request_client(enc->buffer);
+        if (rc != ErrorCode::SUCCESS) {
+            E3_LOG_ERROR(LOG_TAG) << "send_setup_request_client failed: "
+                                  << error_code_to_string(rc);
+            ++retries;
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            continue;
+        }
+
+        // Try a few times to receive (connector recv has its own short timeout).
+        for (int attempt = 0; attempt < 4 && !should_stop_.load(); ++attempt) {
+            std::vector<uint8_t> resp_buf;
+            int n = connector_->recv_setup_response_client(resp_buf);
+            if (n > 0) {
+                auto decoded = encoder_->decode(resp_buf.data(), static_cast<size_t>(n));
+                if (!decoded) {
+                    E3_LOG_ERROR(LOG_TAG) << "Failed to decode SetupResponse";
+                    break;
+                }
+                if (decoded->type != PduType::SETUP_RESPONSE) {
+                    E3_LOG_ERROR(LOG_TAG) << "Unexpected PDU on setup channel: "
+                                          << pdu_type_to_string(decoded->type);
+                    break;
+                }
+                auto* resp = std::get_if<SetupResponse>(&decoded->choice);
+                if (resp) {
+                    handle_setup_response(*resp);
+                    got_response = true;
+                }
+                break;
+            }
+            if (n < 0) {
+                E3_LOG_ERROR(LOG_TAG) << "recv_setup_response_client error";
+                break;
+            }
+        }
+        if (got_response) break;
+        ++retries;
+    }
+
+    {
+        std::lock_guard<std::mutex> lk(setup_complete_mu_);
+        setup_complete_ = true;
+        setup_succeeded_ = got_response;
+    }
+    setup_complete_cv_.notify_all();
+
+    E3_LOG_INFO(LOG_TAG) << "Setup loop (dApp) finished, success="
+                         << (got_response ? "yes" : "no");
+}
+
+void E3Interface::inbound_loop_dapp() {
+    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness);
+    E3_LOG_INFO(LOG_TAG) << "Inbound loop (dApp) started";
+
+    ErrorCode result = connector_->setup_inbound_connection_client();
+    if (result != ErrorCode::SUCCESS) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to setup inbound (dApp) connection: "
+                              << error_code_to_string(result);
+        return;
+    }
+
+    std::vector<uint8_t> buffer;
+    while (!should_stop_.load()) {
+        int ret = connector_->receive(buffer);
+        if (ret <= 0) {
+            if (should_stop_.load()) break;
+            continue;
+        }
+        auto decoded = encoder_->decode(buffer.data(), static_cast<size_t>(ret));
+        if (!decoded) {
+            E3_LOG_ERROR(LOG_TAG) << "Failed to decode PDU in dApp inbound";
+            continue;
+        }
+        Pdu& pdu = *decoded;
+        switch (pdu.type) {
+            case PduType::SUBSCRIPTION_RESPONSE: {
+                auto* r = std::get_if<SubscriptionResponse>(&pdu.choice);
+                if (r) handle_subscription_response(*r);
+                break;
+            }
+            case PduType::INDICATION_MESSAGE: {
+                auto* m = std::get_if<IndicationMessage>(&pdu.choice);
+                if (m) handle_indication(*m);
+                break;
+            }
+            case PduType::XAPP_CONTROL_ACTION: {
+                auto* a = std::get_if<XAppControlAction>(&pdu.choice);
+                if (a) handle_xapp_control_action(*a);
+                break;
+            }
+            case PduType::MESSAGE_ACK: {
+                auto* a = std::get_if<MessageAck>(&pdu.choice);
+                if (a) handle_message_ack(*a);
+                break;
+            }
+            default:
+                E3_LOG_WARN(LOG_TAG) << "dApp received unexpected PDU type: "
+                                     << pdu_type_to_string(pdu.type);
+                break;
+        }
+    }
+
+    E3_LOG_INFO(LOG_TAG) << "Inbound loop (dApp) stopped";
+}
+
+void E3Interface::outbound_loop_dapp() {
+    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness);
+    E3_LOG_INFO(LOG_TAG) << "Outbound loop (dApp) started";
+
+    signal(SIGPIPE, SIG_IGN);
+
+    ErrorCode result = connector_->setup_outbound_connection_client();
+    if (result != ErrorCode::SUCCESS) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to setup outbound (dApp) connection: "
+                              << error_code_to_string(result);
+        return;
+    }
+
+    while (!should_stop_.load()) {
+        auto pdu_opt = response_queue_->pop(std::chrono::milliseconds(10));
+        if (!pdu_opt) continue;
+
+        auto enc = encoder_->encode(*pdu_opt);
+        if (!enc) {
+            E3_LOG_ERROR(LOG_TAG) << "Failed to encode dApp outbound PDU";
+            continue;
+        }
+        ErrorCode rc = connector_->send(enc->buffer);
+        if (rc != ErrorCode::SUCCESS) {
+            E3_LOG_ERROR(LOG_TAG) << "Failed to send dApp outbound PDU";
+        } else {
+            E3_LOG_DEBUG(LOG_TAG) << "Sent dApp outbound PDU: "
+                                  << pdu_type_to_string(pdu_opt->type);
+        }
+    }
+
+    E3_LOG_INFO(LOG_TAG) << "Outbound loop (dApp) stopped";
+}
+
+// ===========================================================================
+// dApp-role message handlers
+// ===========================================================================
+
+void E3Interface::handle_setup_response(const SetupResponse& resp) {
+    E3_LOG_INFO(LOG_TAG) << "Handling SetupResponse rc="
+                         << response_code_to_string(resp.response_code);
+    if (dapp_state_ && resp.response_code == ResponseCode::POSITIVE) {
+        uint32_t dapp_id = resp.dapp_identifier.value_or(0);
+        dapp_state_->record_setup_response(dapp_id, resp.ran_function_list);
+    }
+    if (setup_response_handler_) {
+        setup_response_handler_(resp);
+    }
+}
+
+void E3Interface::handle_subscription_response(const SubscriptionResponse& resp) {
+    if (dapp_state_) {
+        std::lock_guard<std::mutex> lk(dapp_state_->mu);
+        if (!dapp_state_->assigned_dapp_id.has_value() ||
+            *dapp_state_->assigned_dapp_id != resp.dapp_identifier) {
+            return;  // not for us
+        }
+    }
+    E3_LOG_INFO(LOG_TAG) << "Handling SubscriptionResponse for request "
+                         << resp.request_id << " rc="
+                         << response_code_to_string(resp.response_code);
+    if (dapp_state_ && resp.response_code == ResponseCode::POSITIVE
+        && resp.subscription_id.has_value()) {
+        // We need the RAN function id; find it via the request_id mapping.
+        // Since we don't separately track requested rf_id at this layer yet,
+        // the SubscriptionResponse currently doesn't echo it. The dApp-facing
+        // layer (E3Agent::subscribe) is responsible for resolving rf_id and
+        // calling record_subscription if needed via handlers.
+        // For now we just record the sub_id without an rf_id mapping if
+        // we can't determine it; the user's handler can supplement.
+    }
+    if (subscription_response_handler_) {
+        subscription_response_handler_(resp);
+    }
+}
+
+void E3Interface::handle_indication(const IndicationMessage& msg) {
+    // ZMQ PUB broadcasts to every connected SUB, so a dApp instance will
+    // receive indications addressed to other dApps connected to the same RAN.
+    // Filter: an indication is only for us if its dApp identifier matches
+    // the one the RAN assigned us during setup.
+    if (dapp_state_) {
+        std::lock_guard<std::mutex> lk(dapp_state_->mu);
+        if (!dapp_state_->assigned_dapp_id.has_value() ||
+            *dapp_state_->assigned_dapp_id != msg.dapp_identifier) {
+            return;  // not for us
+        }
+    }
+    if (indication_handler_) {
+        indication_handler_(msg);
+    }
+}
+
+void E3Interface::handle_xapp_control_action(const XAppControlAction& action) {
+    if (dapp_state_) {
+        std::lock_guard<std::mutex> lk(dapp_state_->mu);
+        if (!dapp_state_->assigned_dapp_id.has_value() ||
+            *dapp_state_->assigned_dapp_id != action.dapp_identifier) {
+            return;
+        }
+    }
+    if (xapp_control_handler_) {
+        xapp_control_handler_(action);
+    }
+}
+
+void E3Interface::handle_message_ack(const MessageAck& ack) {
+    if (message_ack_handler_) {
+        message_ack_handler_(ack);
+    }
+}
+
+// ===========================================================================
+// dApp-role accessors and outbound helpers
+// ===========================================================================
+
+std::optional<uint32_t> E3Interface::dapp_id() const noexcept {
+    if (!dapp_state_) return std::nullopt;
+    std::lock_guard<std::mutex> lk(dapp_state_->mu);
+    return dapp_state_->assigned_dapp_id;
+}
+
+std::vector<uint32_t> E3Interface::active_subscription_ids() const {
+    if (!dapp_state_) return {};
+    return dapp_state_->active_subscriptions();
+}
+
+std::vector<uint32_t> E3Interface::subscribed_ran_functions() const {
+    if (!dapp_state_) return {};
+    return dapp_state_->subscribed_ran_functions();
+}
+
+std::vector<RanFunctionDef> E3Interface::remote_ran_functions() const {
+    if (!dapp_state_) return {};
+    std::lock_guard<std::mutex> lk(dapp_state_->mu);
+    return dapp_state_->remote_ran_functions;
+}
+
+ErrorCode E3Interface::queue_subscription_request(
+    uint32_t ran_function_id,
+    std::vector<uint32_t> telemetry_ids,
+    std::vector<uint32_t> control_ids,
+    std::optional<uint32_t> sub_time,
+    std::optional<uint32_t> periodicity
+) {
+    if (!dapp_state_) return ErrorCode::STATE_ERROR;
+    auto id = dapp_id();
+    if (!id) return ErrorCode::NOT_INITIALIZED;
+
+    Pdu pdu(PduType::SUBSCRIPTION_REQUEST);
+    SubscriptionRequest req;
+    req.dapp_identifier = *id;
+    req.ran_function_identifier = ran_function_id;
+    req.telemetry_identifier_list = std::move(telemetry_ids);
+    req.control_identifier_list = std::move(control_ids);
+    req.subscription_time = sub_time;
+    req.periodicity = periodicity;
+    pdu.choice = std::move(req);
+    pdu.message_id = generate_message_id();
+    return queue_outbound(std::move(pdu));
+}
+
+ErrorCode E3Interface::queue_subscription_delete(uint32_t ran_function_id) {
+    if (!dapp_state_) return ErrorCode::STATE_ERROR;
+    auto id = dapp_id();
+    if (!id) return ErrorCode::NOT_INITIALIZED;
+    auto sub_id = dapp_state_->subscription_id_for(ran_function_id);
+    if (!sub_id) return ErrorCode::SUBSCRIPTION_NOT_FOUND;
+
+    Pdu pdu(PduType::SUBSCRIPTION_DELETE);
+    SubscriptionDelete del;
+    del.dapp_identifier = *id;
+    del.subscription_id = *sub_id;
+    pdu.choice = del;
+    pdu.message_id = generate_message_id();
+    return queue_outbound(std::move(pdu));
+}
+
+ErrorCode E3Interface::queue_dapp_control_action(
+    uint32_t ran_function_id,
+    uint32_t control_id,
+    std::vector<uint8_t> action_data
+) {
+    if (!dapp_state_) return ErrorCode::STATE_ERROR;
+    auto id = dapp_id();
+    if (!id) return ErrorCode::NOT_INITIALIZED;
+
+    Pdu pdu(PduType::DAPP_CONTROL_ACTION);
+    DAppControlAction a;
+    a.dapp_identifier = *id;
+    a.ran_function_identifier = ran_function_id;
+    a.control_identifier = control_id;
+    a.action_data = std::move(action_data);
+    pdu.choice = std::move(a);
+    pdu.message_id = generate_message_id();
+    return queue_outbound(std::move(pdu));
+}
+
+ErrorCode E3Interface::queue_dapp_report(
+    uint32_t ran_function_id,
+    std::vector<uint8_t> report_data
+) {
+    if (!dapp_state_) return ErrorCode::STATE_ERROR;
+    auto id = dapp_id();
+    if (!id) return ErrorCode::NOT_INITIALIZED;
+
+    Pdu pdu(PduType::DAPP_REPORT);
+    DAppReport r;
+    r.dapp_identifier = *id;
+    r.ran_function_identifier = ran_function_id;
+    r.report_data = std::move(report_data);
+    pdu.choice = std::move(r);
+    pdu.message_id = generate_message_id();
+    return queue_outbound(std::move(pdu));
+}
+
+ErrorCode E3Interface::queue_release_message() {
+    if (!dapp_state_) return ErrorCode::STATE_ERROR;
+    auto id = dapp_id();
+    if (!id) return ErrorCode::NOT_INITIALIZED;
+
+    Pdu pdu(PduType::RELEASE_MESSAGE);
+    ReleaseMessage rel;
+    rel.dapp_identifier = *id;
+    pdu.choice = rel;
+    pdu.message_id = generate_message_id();
+    return queue_outbound(std::move(pdu));
+}
+
+ErrorCode E3Interface::wait_for_setup(std::chrono::milliseconds timeout) {
+    if (config_.role != E3Role::DAPP) return ErrorCode::INVALID_PARAM;
+    std::unique_lock<std::mutex> lk(setup_complete_mu_);
+    if (!setup_complete_cv_.wait_for(lk, timeout, [this]() { return setup_complete_; })) {
+        return ErrorCode::TIMEOUT;
+    }
+    return setup_succeeded_ ? ErrorCode::SUCCESS : ErrorCode::CONNECTION_FAILED;
+}
 
 void E3Interface::on_sm_lifecycle_change(uint32_t ran_function_id, bool should_start) {
     if (should_start) {

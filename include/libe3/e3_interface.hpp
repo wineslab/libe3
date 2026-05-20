@@ -18,10 +18,15 @@
 #include "subscription_manager.hpp"
 #include "response_queue.hpp"
 #include "sm_interface.hpp"
+#include "dapp_subscription_state.hpp"
 #include <memory>
 #include <thread>
 #include <atomic>
 #include <functional>
+#include <optional>
+#include <mutex>
+#include <condition_variable>
+#include <chrono>
 
 namespace libe3 {
 
@@ -35,6 +40,13 @@ using SetupRequestHandler = std::function<ResponseCode(const SetupRequest&, Setu
 using SubscriptionRequestHandler = std::function<ResponseCode(const SubscriptionRequest&)>;
 using DAppReportHandler = std::function<void(const DAppReport&)>;
 using DAppStatusChangedHandler = std::function<void()>;
+
+// dApp-side handlers (RAN -> dApp PDU dispatch)
+using SetupResponseHandler = std::function<void(const SetupResponse&)>;
+using SubscriptionResponseHandler = std::function<void(const SubscriptionResponse&)>;
+using IndicationHandler = std::function<void(const IndicationMessage&)>;
+using XAppControlHandler = std::function<void(const XAppControlAction&)>;
+using MessageAckHandler = std::function<void(const MessageAck&)>;
 
 /**
  * @brief E3Interface - Internal protocol coordination
@@ -142,6 +154,47 @@ public:
         dapp_status_changed_handler_ = std::move(handler);
     }
 
+    // dApp-side handlers (set before start() when role==DAPP)
+    void set_setup_response_handler(SetupResponseHandler handler) {
+        setup_response_handler_ = std::move(handler);
+    }
+    void set_subscription_response_handler(SubscriptionResponseHandler handler) {
+        subscription_response_handler_ = std::move(handler);
+    }
+    void set_indication_handler(IndicationHandler handler) {
+        indication_handler_ = std::move(handler);
+    }
+    void set_xapp_control_handler(XAppControlHandler handler) {
+        xapp_control_handler_ = std::move(handler);
+    }
+    void set_message_ack_handler(MessageAckHandler handler) {
+        message_ack_handler_ = std::move(handler);
+    }
+
+    // dApp-side accessors
+    std::optional<uint32_t> dapp_id() const noexcept;
+    std::vector<uint32_t> active_subscription_ids() const;
+    std::vector<uint32_t> subscribed_ran_functions() const;
+    std::vector<RanFunctionDef> remote_ran_functions() const;
+
+    // dApp-side outbound helpers (queue PDUs that the outbound loop will encode + send)
+    ErrorCode queue_subscription_request(uint32_t ran_function_id,
+                                         std::vector<uint32_t> telemetry_ids,
+                                         std::vector<uint32_t> control_ids,
+                                         std::optional<uint32_t> sub_time = std::nullopt,
+                                         std::optional<uint32_t> periodicity = std::nullopt);
+    ErrorCode queue_subscription_delete(uint32_t ran_function_id);
+    ErrorCode queue_dapp_control_action(uint32_t ran_function_id,
+                                        uint32_t control_id,
+                                        std::vector<uint8_t> action_data);
+    ErrorCode queue_dapp_report(uint32_t ran_function_id,
+                                std::vector<uint8_t> report_data);
+    ErrorCode queue_release_message();
+
+    // Block until the setup handshake completes (or times out / fails).
+    // Only meaningful on dApp role.
+    ErrorCode wait_for_setup(std::chrono::milliseconds timeout);
+
     void notify_dapp_status_changed();
 
 private:
@@ -155,41 +208,78 @@ private:
     // Core components
     std::unique_ptr<E3Connector> connector_;
     std::unique_ptr<E3Encoder> encoder_;
+    // RAN-only state (nullptr when role==DAPP).
     std::unique_ptr<SubscriptionManager> subscription_manager_;
+    // dApp-only state (nullptr when role==RAN).
+    std::unique_ptr<DAppSubscriptionState> dapp_state_;
     std::unique_ptr<ResponseQueue> response_queue_;
 
-    // Threads
+    // Threads. setup_thread_ runs the setup loop (RAN: serves; dApp: drives once).
+    // inbound_thread_ / outbound_thread_ replace the old subscriber_thread_ /
+    // publisher_thread_ names since on the dApp side what flows in is not a
+    // subscription. sm_data_thread_ only runs on RAN role.
     std::unique_ptr<std::thread> setup_thread_;
-    std::unique_ptr<std::thread> subscriber_thread_;
-    std::unique_ptr<std::thread> publisher_thread_;
+    std::unique_ptr<std::thread> inbound_thread_;
+    std::unique_ptr<std::thread> outbound_thread_;
     std::unique_ptr<std::thread> sm_data_thread_;
 
-    // Event handlers
+    // RAN-side handlers
     DAppReportHandler dapp_report_handler_;
-
     DAppStatusChangedHandler dapp_status_changed_handler_;
+
+    // dApp-side handlers
+    SetupResponseHandler setup_response_handler_;
+    SubscriptionResponseHandler subscription_response_handler_;
+    IndicationHandler indication_handler_;
+    XAppControlHandler xapp_control_handler_;
+    MessageAckHandler message_ack_handler_;
+
+    // dApp-side setup-complete signal (notified by setup_loop_dapp)
+    mutable std::mutex setup_complete_mu_;
+    std::condition_variable setup_complete_cv_;
+    bool setup_complete_{false};
+    bool setup_succeeded_{false};
 
     // =========================================================================
     // Thread Entry Points
     // =========================================================================
 
     /**
-     * @brief Main setup loop - handles E3 Setup requests
+     * @brief RAN-role main setup loop - handles E3 Setup requests
      */
-    void setup_loop();
+    void setup_loop_ran();
 
     /**
-     * @brief Subscriber thread - receives control actions from dApps
+     * @brief dApp-role setup loop - send SetupRequest, recv SetupResponse, idle.
      */
-    void subscriber_loop();
+    void setup_loop_dapp();
 
     /**
-     * @brief Publisher thread - sends indication messages to dApps
+     * @brief RAN-role inbound loop - receives subscribe/control/report/release.
      */
-    void publisher_loop();
+    void inbound_loop_ran();
 
     /**
-     * @brief SM data handler - polls SMs and queues indication messages
+     * @brief dApp-role inbound loop - receives subscribe-response/indication/
+     *        xapp-control/message-ack.
+     */
+    void inbound_loop_dapp();
+
+    /**
+     * @brief RAN-role outbound loop - sends indications, subscription
+     *        responses and acks back to dApps.
+     */
+    void outbound_loop_ran();
+
+    /**
+     * @brief dApp-role outbound loop - sends subscribe/delete/control/
+     *        report/release back to the RAN.
+     */
+    void outbound_loop_dapp();
+
+    /**
+     * @brief SM data handler - polls SMs and queues indication messages.
+     *        Only runs on RAN role.
      */
     void sm_data_handler_loop();
 
@@ -197,41 +287,21 @@ private:
     // Message Handlers
     // =========================================================================
 
-    /**
-     * @brief Handle E3 Setup Request
-     */
+    // RAN-role handlers
     void handle_setup_request(const SetupRequest& request, uint32_t request_message_id);
-
-    /**
-     * @brief Handle E3 Subscription Request
-     */
     void handle_subscription_request(const SubscriptionRequest& request, uint32_t request_message_id);
-
-    /**
-     * @brief Handle E3 Subscription Delete
-     */
     void handle_subscription_delete(const SubscriptionDelete& del, uint32_t request_message_id);
-
-    /**
-     * @brief Handle E3 Control Action
-     * @param request_message_id Message ID from the incoming PDU (used for MessageAck)
-     */
     void handle_control_action(const DAppControlAction& action, uint32_t request_message_id);
-
-    /**
-     * @brief Handle dApp Report
-     */
     void handle_dapp_report(const DAppReport& report);
-
-    /**
-     * @brief Handle dApp Report
-     */
     void handle_release_message(const ReleaseMessage &release);
-
-    /**
-     * @brief Handle dApp disconnection
-     */
     void handle_dapp_disconnection(uint32_t dapp_id);
+
+    // dApp-role handlers
+    void handle_setup_response(const SetupResponse& response);
+    void handle_subscription_response(const SubscriptionResponse& response);
+    void handle_indication(const IndicationMessage& msg);
+    void handle_xapp_control_action(const XAppControlAction& action);
+    void handle_message_ack(const MessageAck& ack);
 
     // =========================================================================
     // SM Lifecycle Management
