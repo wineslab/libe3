@@ -1,0 +1,85 @@
+name: Full-loop Latency Benchmark
+
+# Runs the full-loop control-loop latency benchmark (tests/integration/
+# bench_full_loop_latency.cpp) on every PR and posts the per-phase
+# markdown table as a PR comment, mirroring the MPMC queue benchmark
+# workflow.
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: full-loop-bench-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bench:
+    name: Full-loop latency
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          chmod +x ./build_libe3
+          ./build_libe3 -I
+
+      - name: Build Release with integration tests
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLIBE3_BUILD_INTEGRATION_TESTS=ON
+          cmake --build build --target test_bench_full_loop_latency -j $(nproc)
+
+      - name: Run benchmark
+        run: |
+          # Filter out logger noise — bench prints its markdown to stdout.
+          ./build/test_bench_full_loop_latency 2>/dev/null \
+            | grep -v "^\[20" > bench_results.md
+          cat bench_results.md
+
+      - name: Post results as PR comment
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const results = fs.readFileSync('bench_results.md', 'utf8');
+            const marker = '<!-- full-loop-latency-results -->';
+            const sha = context.payload.pull_request.head.sha.substring(0, 7);
+            const body = [
+              marker,
+              `## ⏱️ Full-loop Latency Benchmark (commit \`${sha}\`)`,
+              '',
+              results,
+              `> _Benchmarked on \`ubuntu-latest\`, Release build, ZMQ + IPC, ASN.1 APER._`,
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }

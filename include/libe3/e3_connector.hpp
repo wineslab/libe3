@@ -93,6 +93,53 @@ public:
      */
     virtual ErrorCode send(const std::vector<uint8_t>& data) = 0;
 
+    // =========================================================================
+    // Client-side (dApp role) operations
+    //
+    // Mirrors of the server-side methods above but with bind/listen replaced
+    // by connect. Default implementations return INVALID_PARAM so connectors
+    // that have not been taught the dApp role surface a clear error instead
+    // of silently misbehaving. ZmqE3Connector and PosixE3Connector override
+    // these.
+    // =========================================================================
+
+    /**
+     * @brief Connect the setup channel (dApp role: REQ connect).
+     */
+    virtual ErrorCode setup_initial_connection_client() {
+        return ErrorCode::INVALID_PARAM;
+    }
+
+    /**
+     * @brief Send a SetupRequest on the setup channel (dApp role).
+     */
+    virtual ErrorCode send_setup_request_client(const std::vector<uint8_t>& /*data*/) {
+        return ErrorCode::INVALID_PARAM;
+    }
+
+    /**
+     * @brief Receive a SetupResponse on the setup channel (dApp role).
+     */
+    virtual int recv_setup_response_client(std::vector<uint8_t>& /*buffer*/) {
+        return static_cast<int>(ErrorCode::INVALID_PARAM);
+    }
+
+    /**
+     * @brief Connect the inbound channel (dApp role: SUB connect to the
+     * RAN's publisher endpoint).
+     */
+    virtual ErrorCode setup_inbound_connection_client() {
+        return ErrorCode::INVALID_PARAM;
+    }
+
+    /**
+     * @brief Connect the outbound channel (dApp role: PUB connect to the
+     * RAN's subscriber endpoint).
+     */
+    virtual ErrorCode setup_outbound_connection_client() {
+        return ErrorCode::INVALID_PARAM;
+    }
+
     /**
      * @brief Clean up and release all resources
      */
@@ -122,6 +169,17 @@ public:
     virtual bool is_connected() const noexcept = 0;
 
     /**
+     * @brief Set role (RAN or DAPP). Affects bind vs connect direction and
+     * cleanup behaviour. Must be set before any setup_* call. Default RAN.
+     */
+    void set_role(E3Role role) noexcept { role_ = role; }
+
+    /**
+     * @brief Get current role.
+     */
+    E3Role role() const noexcept { return role_; }
+
+    /**
      * @brief Get setup endpoint
      */
     const std::string& setup_endpoint() const noexcept { return setup_endpoint_; }
@@ -138,10 +196,11 @@ public:
 
 protected:
     E3Connector() = default;
-    
+
     std::string setup_endpoint_;
     std::string inbound_endpoint_;
     std::string outbound_endpoint_;
+    E3Role role_{E3Role::RAN};
 };
 
 /**
@@ -166,7 +225,8 @@ std::unique_ptr<E3Connector> create_connector(
     uint16_t setup_port,
     uint16_t inbound_port,
     uint16_t outbound_port,
-    size_t io_threads = 2
+    size_t io_threads = 2,
+    E3Role role = E3Role::RAN
 );
 
 } // namespace libe3

@@ -17,6 +17,8 @@
 #include <memory>
 #include <functional>
 #include <vector>
+#include <optional>
+#include <chrono>
 
 namespace libe3 {
 
@@ -28,6 +30,13 @@ using DAppReportHandler = std::function<void(const DAppReport&)>;
 
 /** Callback when dApp status changes (connect, disconnect, subscribe, unsubscribe). */
 using DAppStatusChangedHandler = std::function<void()>;
+
+// dApp-side handlers (used when role==DAPP).
+using SetupResponseHandler = std::function<void(const SetupResponse&)>;
+using SubscriptionResponseHandler = std::function<void(const SubscriptionResponse&)>;
+using IndicationHandler = std::function<void(const IndicationMessage&)>;
+using XAppControlHandler = std::function<void(const XAppControlAction&)>;
+using MessageAckHandler = std::function<void(const MessageAck&)>;
 
 /**
  * @brief E3Agent - Main façade for RAN vendor integration
@@ -212,6 +221,67 @@ public:
      * @return ErrorCode::SUCCESS on success
      */
     ErrorCode send_message_ack(uint32_t request_id, ResponseCode response_code);
+
+    // =========================================================================
+    // dApp-role API (used when E3Config.role == E3Role::DAPP)
+    //
+    // Calling these on a RAN-role agent returns STATE_ERROR. Setters can be
+    // called before start(); they're stored and forwarded to the interface
+    // once init() runs.
+    // =========================================================================
+
+    /** Set callback for incoming SetupResponse (RAN → dApp). */
+    void set_setup_response_handler(SetupResponseHandler handler);
+    /** Set callback for incoming SubscriptionResponse (RAN → dApp). */
+    void set_subscription_response_handler(SubscriptionResponseHandler handler);
+    /** Set callback for incoming IndicationMessage (RAN → dApp). */
+    void set_indication_handler(IndicationHandler handler);
+    /** Set callback for incoming XAppControlAction (xApp → dApp via RAN). */
+    void set_xapp_control_handler(XAppControlHandler handler);
+    /** Set callback for incoming MessageAck (RAN → dApp). */
+    void set_message_ack_handler(MessageAckHandler handler);
+
+    /**
+     * @brief dApp identifier assigned by the RAN in SetupResponse.
+     * @return nullopt until setup completes (or on RAN-role agents).
+     */
+    std::optional<uint32_t> dapp_id() const noexcept;
+
+    /** RAN functions this dApp is currently subscribed to. */
+    std::vector<uint32_t> subscribed_ran_functions() const;
+
+    /** Subscription IDs this dApp currently holds. */
+    std::vector<uint32_t> active_subscription_ids() const;
+
+    /**
+     * @brief Block until the dApp setup handshake completes.
+     * @return SUCCESS on positive SetupResponse, CONNECTION_FAILED on negative,
+     *         TIMEOUT if the wait elapses, INVALID_PARAM on RAN-role.
+     */
+    ErrorCode wait_for_setup(std::chrono::milliseconds timeout);
+
+    /**
+     * @brief Subscribe to a RAN function. Must be called after a positive setup.
+     */
+    ErrorCode subscribe(uint32_t ran_function_id,
+                        std::vector<uint32_t> telemetry_ids,
+                        std::vector<uint32_t> control_ids,
+                        std::optional<uint32_t> sub_time = std::nullopt,
+                        std::optional<uint32_t> periodicity = std::nullopt);
+
+    /** Send a SubscriptionDelete for a previously subscribed RAN function. */
+    ErrorCode unsubscribe(uint32_t ran_function_id);
+
+    /** Send a dApp control action to the RAN. */
+    ErrorCode send_control(uint32_t ran_function_id,
+                           uint32_t control_id,
+                           std::vector<uint8_t> action_data);
+
+    /** Send a dApp report to the RAN. */
+    ErrorCode send_report(uint32_t ran_function_id, std::vector<uint8_t> report_data);
+
+    /** Send a ReleaseMessage. The dApp stays running until stop() is called. */
+    ErrorCode release();
 
     /**
      * @brief Get list of registered dApp IDs

@@ -41,6 +41,14 @@ public:
     int receive(std::vector<uint8_t>& buffer) override;
     ErrorCode setup_outbound_connection() override;
     ErrorCode send(const std::vector<uint8_t>& data) override;
+
+    // Client-side (dApp role) operations
+    ErrorCode setup_initial_connection_client() override;
+    ErrorCode send_setup_request_client(const std::vector<uint8_t>& data) override;
+    int recv_setup_response_client(std::vector<uint8_t>& buffer) override;
+    ErrorCode setup_inbound_connection_client() override;
+    ErrorCode setup_outbound_connection_client() override;
+
     void dispose() override;
     void shutdown() override;
     

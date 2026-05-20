@@ -39,6 +39,10 @@ ZmqE3Connector::ZmqE3Connector(
     , inbound_port_(inbound_port)
     , outbound_port_(outbound_port)
 {
+    // For TCP, derive the endpoint strings from the port numbers. The
+    // bind/connect-direction adjustment is handled at the call sites below
+    // (RAN binds tcp://*:N; dApp connects to tcp://127.0.0.1:N). For IPC
+    // both sides use the same ipc:// string.
     if (transport_layer == E3TransportLayer::TCP) {
         setup_endpoint_ = "tcp://*:" + std::to_string(setup_port);
         inbound_endpoint_ = "tcp://*:" + std::to_string(inbound_port);
@@ -263,6 +267,138 @@ ErrorCode ZmqE3Connector::send(const std::vector<uint8_t>& data) {
     return ErrorCode::SUCCESS;
 }
 
+namespace {
+// Convert a bind-style endpoint ("tcp://*:9990") to a connect-style one
+// ("tcp://127.0.0.1:9990"). IPC endpoints are returned unchanged.
+std::string to_connect_endpoint(const std::string& bind_ep) {
+    const std::string prefix = "tcp://*:";
+    if (bind_ep.compare(0, prefix.size(), prefix) == 0) {
+        return "tcp://127.0.0.1:" + bind_ep.substr(prefix.size());
+    }
+    return bind_ep;
+}
+}  // anonymous namespace
+
+// ===========================================================================
+// Client-side (dApp role) implementations
+//
+// The dApp ROLE inverts the bind/connect direction on all three channels:
+//   - setup_endpoint    : REQ connect (RAN binds REP)
+//   - publisher_endpoint: SUB connect (RAN binds PUB) — this is our INBOUND
+//   - subscriber_endpoint: PUB connect (RAN binds SUB) — this is our OUTBOUND
+// Socket TYPES on the inbound/outbound pair are unchanged; only the
+// bind/connect direction flips and the role of the two endpoints swaps.
+// ===========================================================================
+
+ErrorCode ZmqE3Connector::setup_initial_connection_client() {
+    // Create ZMQ context (same as RAN-side init)
+    context_ = zmq_ctx_new();
+    if (!context_) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to create ZMQ context";
+        return ErrorCode::CONNECTION_FAILED;
+    }
+    if (zmq_ctx_set(context_, ZMQ_IO_THREADS, static_cast<int>(io_threads_)) != 0) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to set ZMQ I/O threads: " << zmq_strerror(errno);
+        zmq_ctx_destroy(context_);
+        context_ = nullptr;
+        return ErrorCode::CONNECTION_FAILED;
+    }
+
+    // REQ socket — the dApp INITIATES setup
+    setup_socket_ = zmq_socket(context_, ZMQ_REQ);
+    if (!setup_socket_) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to create REQ setup socket: " << zmq_strerror(errno);
+        return ErrorCode::CONNECTION_FAILED;
+    }
+
+    int recv_timeout = RECV_TIMEOUT_MS;
+    zmq_setsockopt(setup_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+    int linger = 0;  // Don't block on close if RAN never replied
+    zmq_setsockopt(setup_socket_, ZMQ_LINGER, &linger, sizeof(linger));
+
+    const std::string setup_cep = to_connect_endpoint(setup_endpoint_);
+    int ret = zmq_connect(setup_socket_, setup_cep.c_str());
+    if (ret != 0) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to connect setup socket: " << zmq_strerror(errno);
+        return ErrorCode::CONNECTION_FAILED;
+    }
+    E3_LOG_INFO(LOG_TAG) << "Setup REQ socket connected to " << setup_cep;
+    connected_ = true;
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode ZmqE3Connector::send_setup_request_client(const std::vector<uint8_t>& data) {
+    if (!setup_socket_) return ErrorCode::NOT_CONNECTED;
+    int ret = zmq_send(setup_socket_, data.data(), data.size(), 0);
+    if (ret < 0) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to send setup request: " << zmq_strerror(errno);
+        return ErrorCode::TRANSPORT_ERROR;
+    }
+    E3_LOG_DEBUG(LOG_TAG) << "Sent SetupRequest: " << data.size() << " bytes";
+    return ErrorCode::SUCCESS;
+}
+
+int ZmqE3Connector::recv_setup_response_client(std::vector<uint8_t>& buffer) {
+    if (!setup_socket_) return static_cast<int>(ErrorCode::NOT_CONNECTED);
+    buffer.resize(DEFAULT_BUFFER_SIZE);
+    int ret = zmq_recv(setup_socket_, buffer.data(), buffer.size(), 0);
+    if (ret < 0) {
+        if (errno == EAGAIN) return 0;
+        E3_LOG_ERROR(LOG_TAG) << "Failed to receive setup response: " << zmq_strerror(errno);
+        return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
+    }
+    buffer.resize(static_cast<size_t>(ret));
+    E3_LOG_DEBUG(LOG_TAG) << "Received SetupResponse: " << ret << " bytes";
+    return ret;
+}
+
+ErrorCode ZmqE3Connector::setup_inbound_connection_client() {
+    if (!context_) return ErrorCode::NOT_INITIALIZED;
+
+    // dApp INBOUND = RAN's publisher_endpoint (where RAN PUB-binds)
+    inbound_socket_ = zmq_socket(context_, ZMQ_SUB);
+    if (!inbound_socket_) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to create inbound SUB socket: " << zmq_strerror(errno);
+        return ErrorCode::CONNECTION_FAILED;
+    }
+    zmq_setsockopt(inbound_socket_, ZMQ_SUBSCRIBE, "", 0);
+    int conflate = 1;
+    zmq_setsockopt(inbound_socket_, ZMQ_CONFLATE, &conflate, sizeof(conflate));
+    int recv_timeout = RECV_TIMEOUT_MS;
+    zmq_setsockopt(inbound_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+
+    const std::string inbound_cep = to_connect_endpoint(outbound_endpoint_);
+    int ret = zmq_connect(inbound_socket_, inbound_cep.c_str());
+    if (ret != 0) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to connect inbound SUB to "
+                              << inbound_cep << ": " << zmq_strerror(errno);
+        return ErrorCode::CONNECTION_FAILED;
+    }
+    E3_LOG_INFO(LOG_TAG) << "Inbound SUB socket connected to " << inbound_cep;
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode ZmqE3Connector::setup_outbound_connection_client() {
+    if (!context_) return ErrorCode::NOT_INITIALIZED;
+
+    // dApp OUTBOUND = RAN's subscriber_endpoint (where RAN SUB-binds)
+    outbound_socket_ = zmq_socket(context_, ZMQ_PUB);
+    if (!outbound_socket_) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to create outbound PUB socket: " << zmq_strerror(errno);
+        return ErrorCode::CONNECTION_FAILED;
+    }
+
+    const std::string outbound_cep = to_connect_endpoint(inbound_endpoint_);
+    int ret = zmq_connect(outbound_socket_, outbound_cep.c_str());
+    if (ret != 0) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to connect outbound PUB to "
+                              << outbound_cep << ": " << zmq_strerror(errno);
+        return ErrorCode::CONNECTION_FAILED;
+    }
+    E3_LOG_INFO(LOG_TAG) << "Outbound PUB socket connected to " << outbound_cep;
+    return ErrorCode::SUCCESS;
+}
+
 void ZmqE3Connector::dispose() {
     E3_LOG_DEBUG(LOG_TAG) << "Disposing ZMQ connector";
     
@@ -286,8 +422,10 @@ void ZmqE3Connector::dispose() {
         context_ = nullptr;
     }
     
-    // Clean up IPC files if using IPC transport
-    if (transport_layer_ == E3TransportLayer::IPC) {
+    // Clean up IPC files if using IPC transport AND we own them (RAN side
+    // binds, which creates the socket files; dApp side connects, so it has
+    // nothing to unlink).
+    if (transport_layer_ == E3TransportLayer::IPC && role_ == E3Role::RAN) {
         // Extract file paths from IPC endpoints (ipc:///path)
         auto extract_path = [](const std::string& endpoint) -> std::string {
             const std::string prefix = "ipc://";
@@ -296,17 +434,17 @@ void ZmqE3Connector::dispose() {
             }
             return "";
         };
-        
+
         std::string path;
         path = extract_path(setup_endpoint_);
         if (!path.empty()) unlink(path.c_str());
-        
+
         path = extract_path(inbound_endpoint_);
         if (!path.empty()) unlink(path.c_str());
-        
+
         path = extract_path(outbound_endpoint_);
         if (!path.empty()) unlink(path.c_str());
-        
+
         rmdir(IPC_BASE_DIR);
     }
     
