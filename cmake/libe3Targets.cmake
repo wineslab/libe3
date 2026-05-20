@@ -22,10 +22,17 @@ target_link_libraries(libe3
     PUBLIC
         Threads::Threads
         tl::expected
-        
+        # libe3_sanitizers carries -fsanitize=thread / address etc. and
+        # MUST propagate to consumers — libe3's inline + template code
+        # gets compiled into the consumer's TUs (e.g. nlohmann/json,
+        # tl::expected, std containers), which leaves __tsan_* symbol
+        # references in the consumer object files. Without PUBLIC the
+        # consumer link line lacks -fsanitize=thread and fails with
+        # `undefined reference to __tsan_*`. PRIVATE would only flag
+        # libe3's own .cpp files.
+        libe3_sanitizers
     PRIVATE
         libe3_warnings
-        libe3_sanitizers
 )
 
 # Conditionally link JSON and ASN.1 libraries and expose compile-time flags
@@ -72,9 +79,11 @@ target_link_libraries(libe3_shared
     PUBLIC
         Threads::Threads
         tl::expected
+        # See the libe3 (static) target above — sanitizer flags must
+        # propagate so consumer link lines pick up -fsanitize=thread etc.
+        libe3_sanitizers
     PRIVATE
         libe3_warnings
-        libe3_sanitizers
 )
 
 # Conditionally link JSON and ASN.1 libraries and expose compile-time flags
