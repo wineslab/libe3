@@ -345,12 +345,31 @@ std::vector<uint32_t> SubscriptionManager::get_dapp_subscriptions(uint32_t dapp_
 
 std::vector<uint32_t> SubscriptionManager::get_subscribed_dapps(uint32_t ran_function_id) const {
     std::shared_lock lock(mutex_);
-    
+
     auto it = ran_function_subscribers_.find(ran_function_id);
     if (it == ran_function_subscribers_.end()) {
         return {};
     }
     return std::vector<uint32_t>(it->second.begin(), it->second.end());
+}
+
+std::vector<std::pair<uint32_t, size_t>>
+SubscriptionManager::get_subscribers_with_channel(uint32_t ran_function_id) const {
+    std::shared_lock lock(mutex_);
+
+    std::vector<std::pair<uint32_t, size_t>> out;
+    auto subs_it = ran_function_subscribers_.find(ran_function_id);
+    if (subs_it == ran_function_subscribers_.end()) {
+        return out;
+    }
+    out.reserve(subs_it->second.size());
+    for (uint32_t dapp_id : subs_it->second) {
+        auto reg_it = registered_dapps_.find(dapp_id);
+        if (reg_it != registered_dapps_.end()) {
+            out.emplace_back(dapp_id, reg_it->second.channel_index);
+        }
+    }
+    return out;
 }
 
 std::optional<SubscriptionDetails> SubscriptionManager::get_subscription_details(

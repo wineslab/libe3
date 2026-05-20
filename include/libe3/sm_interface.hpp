@@ -19,6 +19,7 @@
 #include <string>
 #include <atomic>
 #include <mutex>
+#include <shared_mutex>
 
 namespace libe3 {
 
@@ -282,7 +283,12 @@ private:
     SmRegistry(const SmRegistry&) = delete;
     SmRegistry& operator=(const SmRegistry&) = delete;
 
-    mutable std::mutex mutex_;
+    /* Was std::mutex — every get_by_ran_function / get_available_ran_functions
+     * (both pure reads from the setup_loop and from SM worker hot paths)
+     * took the exclusive lock and serialised against each other.
+     * shared_mutex lets the read paths run concurrently with each other
+     * while keeping register_sm / start_sm / etc. exclusive. */
+    mutable std::shared_mutex mutex_;
     std::unordered_map<uint32_t, std::unique_ptr<ServiceModel>> sms_;
     std::unordered_map<uint32_t, SmFactory> factories_;
 };

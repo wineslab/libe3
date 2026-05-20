@@ -162,6 +162,24 @@ public:
      */
     std::optional<EncodingFormat> get_dapp_encoding(uint32_t dapp_id) const;
 
+    struct SubscriberEncoding {
+        uint32_t       dapp_id;
+        EncodingFormat encoding;
+    };
+
+    /**
+     * @brief All dApps subscribed to a RAN function paired with the
+     *        encoding their channel speaks, under a single shared-lock
+     *        acquire on the SubscriptionManager.
+     *
+     * Service Models call this once per emit-batch instead of pairing
+     * get_ran_function_subscribers() with per-dApp get_dapp_encoding()
+     * — same data, one third the lock acquires, and the contention with
+     * setup-time register_dapp (writer) drops accordingly.
+     */
+    std::vector<SubscriberEncoding>
+    get_subscribers_with_encoding(uint32_t ran_function_id) const;
+
     /**
      * @brief Register a Service Model
      */

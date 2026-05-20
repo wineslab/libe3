@@ -245,6 +245,21 @@ public:
      */
     std::optional<EncodingFormat> get_dapp_encoding(uint32_t dapp_id) const;
 
+    struct SubscriberEncoding {
+        uint32_t       dapp_id;
+        EncodingFormat encoding;
+    };
+
+    /**
+     * @brief Combined subscribers + encoding lookup for a RAN function.
+     *
+     * Used by Service Models that emit indications in different wire
+     * formats per channel — collapses what was three lock-acquires per
+     * dApp per emit into one. See E3Interface::get_subscribers_with_encoding.
+     */
+    std::vector<SubscriberEncoding>
+    get_subscribers_with_encoding(uint32_t ran_function_id) const;
+
     /**
      * @brief Get the reporting periodicity a dApp requested for a RAN function
      *

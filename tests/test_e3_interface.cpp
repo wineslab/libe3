@@ -296,6 +296,81 @@ TEST(DappEncoding_returns_nullopt_after_unregister) {
     ASSERT_FALSE(iface.get_dapp_encoding(id).has_value());
 }
 
+// ============================================================================
+// get_subscribers_with_encoding(): combined query exercised by hot-path SM
+// workers. Same data as the get_subscribed_dapps + per-dApp get_dapp_encoding
+// pair, computed under a single shared lock.
+// ============================================================================
+
+TEST(SubscribersWithEncoding_empty_when_no_subscribers) {
+    E3Interface iface(make_test_config());
+    ASSERT_EQ(error_to_int(iface.init()), error_to_int(ErrorCode::SUCCESS));
+    iface.register_sm(std::make_unique<IntegTestSM>());
+
+    auto v = iface.get_subscribers_with_encoding(100);
+    ASSERT_EQ(static_cast<int>(v.size()), 0);
+}
+
+TEST(SubscribersWithEncoding_single_dual_channel_split) {
+    E3Config cfg = make_test_config();
+    cfg.encoding              = EncodingFormat::ASN1;
+    cfg.enable_dual_encoding  = true;
+    cfg.secondary_encoding    = EncodingFormat::JSON;
+    cfg.setup_port            = 19990;
+    cfg.subscriber_port       = 19999;
+    cfg.publisher_port        = 19991;
+    cfg.secondary_setup_port  = 15555;
+    cfg.secondary_subscriber_port = 15557;
+    cfg.secondary_publisher_port  = 15556;
+
+    E3Interface iface(cfg);
+    ASSERT_EQ(error_to_int(iface.init()), error_to_int(ErrorCode::SUCCESS));
+    iface.register_sm(std::make_unique<IntegTestSM>());
+
+    auto [res_a, id_a] = iface.subscription_manager().register_dapp(0);
+    auto [res_b, id_b] = iface.subscription_manager().register_dapp(1);
+    ASSERT_EQ(error_to_int(res_a), error_to_int(ErrorCode::SUCCESS));
+    ASSERT_EQ(error_to_int(res_b), error_to_int(ErrorCode::SUCCESS));
+
+    auto [sub_a, _sa] = iface.subscription_manager().add_subscription(id_a, 100);
+    auto [sub_b, _sb] = iface.subscription_manager().add_subscription(id_b, 100);
+    ASSERT_EQ(error_to_int(sub_a), error_to_int(ErrorCode::SUCCESS));
+    ASSERT_EQ(error_to_int(sub_b), error_to_int(ErrorCode::SUCCESS));
+
+    auto v = iface.get_subscribers_with_encoding(100);
+    ASSERT_EQ(static_cast<int>(v.size()), 2);
+
+    /* Find each by dapp_id (vector order isn't guaranteed). */
+    bool seen_a = false, seen_b = false;
+    for (const auto& e : v) {
+        if (e.dapp_id == id_a) {
+            ASSERT_EQ(static_cast<int>(e.encoding), static_cast<int>(EncodingFormat::ASN1));
+            seen_a = true;
+        } else if (e.dapp_id == id_b) {
+            ASSERT_EQ(static_cast<int>(e.encoding), static_cast<int>(EncodingFormat::JSON));
+            seen_b = true;
+        }
+    }
+    ASSERT_TRUE(seen_a);
+    ASSERT_TRUE(seen_b);
+}
+
+TEST(SubscribersWithEncoding_excludes_unregistered) {
+    E3Interface iface(make_test_config());
+    ASSERT_EQ(error_to_int(iface.init()), error_to_int(ErrorCode::SUCCESS));
+    iface.register_sm(std::make_unique<IntegTestSM>());
+
+    auto [res, id] = iface.subscription_manager().register_dapp();
+    auto [s_res, _sid] = iface.subscription_manager().add_subscription(id, 100);
+    ASSERT_EQ(error_to_int(res),   error_to_int(ErrorCode::SUCCESS));
+    ASSERT_EQ(error_to_int(s_res), error_to_int(ErrorCode::SUCCESS));
+    ASSERT_EQ(static_cast<int>(iface.get_subscribers_with_encoding(100).size()), 1);
+
+    ASSERT_EQ(error_to_int(iface.subscription_manager().unregister_dapp(id)),
+              error_to_int(ErrorCode::SUCCESS));
+    ASSERT_EQ(static_cast<int>(iface.get_subscribers_with_encoding(100).size()), 0);
+}
+
 int main() {
     return RUN_ALL_TESTS();
 }

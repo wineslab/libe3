@@ -15,6 +15,7 @@
 #include <mutex>
 #include <optional>
 #include <shared_mutex>
+#include "wp_rwlock.hpp"
 #include <utility>
 #include <vector>
 #include <unordered_map>
@@ -189,6 +190,23 @@ public:
     std::vector<uint32_t> get_subscribed_dapps(uint32_t ran_function_id) const;
 
     /**
+     * @brief Get all dApps subscribed to a RAN function paired with their
+     *        bound channel index, under a single shared-lock acquire.
+     *
+     * Service Models that emit indications in different encodings per
+     * channel would otherwise call get_subscribed_dapps() followed by
+     * get_dapp_channel() once per subscriber — three lock-acquires per
+     * emission per dApp. This call collapses that to one, halving the
+     * reader pressure on the manager's mutex during steady-state
+     * emission.
+     *
+     * @return Pairs of (dapp_id, channel_index). dApps that have been
+     *         unregistered between subscribing and this call are skipped.
+     */
+    std::vector<std::pair<uint32_t, size_t>>
+    get_subscribers_with_channel(uint32_t ran_function_id) const;
+
+    /**
      * @brief Get subscription details for a specific dApp + RAN function pair
      *
      * Returns a copy of the SubscriptionDetails under the manager's read lock,
@@ -239,8 +257,13 @@ public:
     void clear();
 
 private:
-    // Using shared_mutex for read-heavy workloads
-    mutable std::shared_mutex mutex_;
+    // Writer-preferring rwlock — read-heavy workload (SM workers querying
+    // subscribers / encoding on every emission) plus latency-sensitive
+    // writers (register_dapp from setup_loop). Default reader-preference
+    // would let high-frequency readers starve a queued writer; here a
+    // queued writer blocks new readers and runs as soon as in-flight
+    // readers release. See wp_rwlock.hpp.
+    mutable WriterPreferringRwLock mutex_;
     
     // dApp ID -> registration entry
     std::unordered_map<uint32_t, DAppEntry> registered_dapps_;

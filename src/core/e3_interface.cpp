@@ -357,6 +357,22 @@ std::optional<EncodingFormat> E3Interface::get_dapp_encoding(uint32_t dapp_id) c
     return channels_[*ch_idx]->encoding;
 }
 
+std::vector<E3Interface::SubscriberEncoding>
+E3Interface::get_subscribers_with_encoding(uint32_t ran_function_id) const {
+    if (!subscription_manager_) {
+        return {};
+    }
+    auto pairs = subscription_manager_->get_subscribers_with_channel(ran_function_id);
+    std::vector<SubscriberEncoding> out;
+    out.reserve(pairs.size());
+    for (const auto& [dapp_id, ch_idx] : pairs) {
+        if (ch_idx < channels_.size() && channels_[ch_idx]) {
+            out.push_back({dapp_id, channels_[ch_idx]->encoding});
+        }
+    }
+    return out;
+}
+
 ErrorCode E3Interface::register_sm(std::unique_ptr<ServiceModel> sm) {
     if (!sm) {
         return ErrorCode::INVALID_PARAM;

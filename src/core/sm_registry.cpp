@@ -8,6 +8,7 @@
 #include "libe3/sm_interface.hpp"
 #include "libe3/logger.hpp"
 #include <algorithm>
+#include <shared_mutex>
 
 namespace libe3 {
 
@@ -25,7 +26,7 @@ ErrorCode SmRegistry::register_sm(std::unique_ptr<ServiceModel> sm) {
         return ErrorCode::INVALID_PARAM;
     }
 
-    std::lock_guard lock(mutex_);
+    std::unique_lock lock(mutex_);
 
     uint32_t ran_func = sm->ran_function_id();
     
@@ -55,7 +56,7 @@ ErrorCode SmRegistry::register_sm_factory(uint32_t ran_function_id, SmFactory fa
         return ErrorCode::INVALID_PARAM;
     }
 
-    std::lock_guard lock(mutex_);
+    std::unique_lock lock(mutex_);
 
     if (sms_.count(ran_function_id) > 0 || factories_.count(ran_function_id) > 0) {
         E3_LOG_ERROR(LOG_TAG) << "SM or factory already registered for RAN function " 
@@ -70,7 +71,7 @@ ErrorCode SmRegistry::register_sm_factory(uint32_t ran_function_id, SmFactory fa
 }
 
 ErrorCode SmRegistry::unregister_sm(uint32_t ran_function_id) {
-    std::lock_guard lock(mutex_);
+    std::unique_lock lock(mutex_);
 
     auto it = sms_.find(ran_function_id);
     if (it != sms_.end()) {
@@ -93,35 +94,47 @@ ErrorCode SmRegistry::unregister_sm(uint32_t ran_function_id) {
 }
 
 ServiceModel* SmRegistry::get_by_ran_function(uint32_t ran_function_id) {
-    std::lock_guard lock(mutex_);
+    /* Fast path: pure lookup under a shared lock. The cold path (factory
+     * materialisation) needs to mutate the registry, so it re-acquires
+     * exclusively. */
+    {
+        std::shared_lock rlock(mutex_);
+        auto it = sms_.find(ran_function_id);
+        if (it != sms_.end()) {
+            return it->second.get();
+        }
+        if (factories_.find(ran_function_id) == factories_.end()) {
+            return nullptr;
+        }
+    }
 
-    // Direct lookup
+    std::unique_lock wlock(mutex_);
+    /* Re-check under the exclusive lock — another thread may have
+     * materialised the same factory or unregistered it while we were
+     * upgrading the lock. */
     auto it = sms_.find(ran_function_id);
     if (it != sms_.end()) {
         return it->second.get();
     }
-
-    // Check if there's a factory for this RAN function
     auto factory_it = factories_.find(ran_function_id);
-    if (factory_it != factories_.end()) {
-        // Create SM from factory
-        auto sm = factory_it->second();
-        if (sm) {
-            ErrorCode init_result = sm->init();
-            if (init_result == ErrorCode::SUCCESS) {
-                ServiceModel* ptr = sm.get();
-                sms_[ran_function_id] = std::move(sm);
-                factories_.erase(factory_it);
-                return ptr;
-            }
+    if (factory_it == factories_.end()) {
+        return nullptr;
+    }
+    auto sm = factory_it->second();
+    if (sm) {
+        ErrorCode init_result = sm->init();
+        if (init_result == ErrorCode::SUCCESS) {
+            ServiceModel* ptr = sm.get();
+            sms_[ran_function_id] = std::move(sm);
+            factories_.erase(factory_it);
+            return ptr;
         }
     }
-
     return nullptr;
 }
 
 std::vector<uint32_t> SmRegistry::get_available_ran_functions() const {
-    std::lock_guard lock(mutex_);
+    std::shared_lock lock(mutex_);
 
     std::vector<uint32_t> result;
     result.reserve(sms_.size() + factories_.size());
@@ -139,7 +152,7 @@ std::vector<uint32_t> SmRegistry::get_available_ran_functions() const {
 }
 
 ErrorCode SmRegistry::start_sm(uint32_t ran_function_id) {
-    std::lock_guard lock(mutex_);
+    std::unique_lock lock(mutex_);
 
     auto it = sms_.find(ran_function_id);
     if (it == sms_.end()) {
@@ -166,7 +179,7 @@ ErrorCode SmRegistry::start_sm(uint32_t ran_function_id) {
 }
 
 ErrorCode SmRegistry::stop_sm(uint32_t ran_function_id) {
-    std::lock_guard lock(mutex_);
+    std::unique_lock lock(mutex_);
 
     auto it = sms_.find(ran_function_id);
     if (it == sms_.end()) {
@@ -185,7 +198,7 @@ ErrorCode SmRegistry::stop_sm(uint32_t ran_function_id) {
 }
 
 bool SmRegistry::is_sm_running(uint32_t ran_function_id) const {
-    std::lock_guard lock(mutex_);
+    std::shared_lock lock(mutex_);
 
     auto it = sms_.find(ran_function_id);
     if (it != sms_.end()) {
@@ -196,7 +209,7 @@ bool SmRegistry::is_sm_running(uint32_t ran_function_id) const {
 }
 
 void SmRegistry::clear() {
-    std::lock_guard lock(mutex_);
+    std::unique_lock lock(mutex_);
 
     for (auto& [id, sm] : sms_) {
         if (sm->is_running()) {

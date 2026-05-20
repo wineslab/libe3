@@ -330,6 +330,46 @@ typedef enum {
 e3_dapp_encoding_t e3_agent_get_dapp_encoding(e3_agent_handle_t* agent, uint32_t dapp_id);
 
 /**
+ * @brief One subscriber paired with the encoding its channel speaks.
+ *
+ * Returned by e3_agent_get_ran_function_subscribers_with_encoding so the
+ * SM doesn't have to follow up each dApp ID with a per-dApp encoding
+ * lookup.
+ */
+typedef struct {
+    uint32_t           dapp_id;
+    e3_dapp_encoding_t encoding;
+} e3_subscriber_encoding_t;
+
+/**
+ * @brief Combined subscribers + encoding query for a RAN function.
+ *
+ * Equivalent to calling e3_agent_get_ran_function_subscribers followed by
+ * e3_agent_get_dapp_encoding on each result — but done in a single
+ * shared-lock acquire on the agent's SubscriptionManager. SMs emitting
+ * indications at high cadence should prefer this call: it cuts the
+ * reader pressure on the manager's rwlock from O(num_dapps) per emit to
+ * O(1), which in turn shortens the latency setup-time writers
+ * (register_dapp) experience under load.
+ *
+ * Ownership: the returned array is malloc'd by libe3. Free with
+ * e3_agent_free_subscriber_encoding_array(). Returns NULL with
+ * *out_len = 0 on error or empty subscriber set.
+ */
+e3_subscriber_encoding_t* e3_agent_get_ran_function_subscribers_with_encoding(
+    e3_agent_handle_t* agent,
+    uint32_t ran_function_id,
+    size_t* out_len);
+
+/**
+ * @brief Free an array returned by
+ *        e3_agent_get_ran_function_subscribers_with_encoding.
+ *
+ * Safe to call with NULL.
+ */
+void e3_agent_free_subscriber_encoding_array(e3_subscriber_encoding_t* arr);
+
+/**
  * @brief Get the reporting periodicity a dApp requested for a RAN function.
  *
  * @return periodicity in microseconds, 0 if not set or subscription not found

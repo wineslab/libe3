@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <cstdlib>
 #include <cstring>
 
 using namespace libe3;
@@ -326,6 +327,41 @@ e3_error_t e3_agent_set_dapp_report_handler(
             case EncodingFormat::JSON: return E3_DAPP_ENCODING_JSON;
         }
         return E3_DAPP_ENCODING_UNKNOWN;
+    }
+
+    static e3_dapp_encoding_t encoding_to_c(EncodingFormat e) {
+        switch (e) {
+            case EncodingFormat::ASN1: return E3_DAPP_ENCODING_ASN1;
+            case EncodingFormat::JSON: return E3_DAPP_ENCODING_JSON;
+        }
+        return E3_DAPP_ENCODING_UNKNOWN;
+    }
+
+    e3_subscriber_encoding_t* e3_agent_get_ran_function_subscribers_with_encoding(
+        e3_agent_handle_t* agent,
+        uint32_t ran_function_id,
+        size_t* out_len
+    ) {
+        if (out_len) *out_len = 0;
+        if (!agent || !agent->agent) return nullptr;
+
+        auto v = agent->agent->get_subscribers_with_encoding(ran_function_id);
+        if (v.empty()) return nullptr;
+
+        auto* arr = static_cast<e3_subscriber_encoding_t*>(
+            std::malloc(v.size() * sizeof(e3_subscriber_encoding_t)));
+        if (!arr) return nullptr;
+
+        for (size_t i = 0; i < v.size(); ++i) {
+            arr[i].dapp_id  = v[i].dapp_id;
+            arr[i].encoding = encoding_to_c(v[i].encoding);
+        }
+        if (out_len) *out_len = v.size();
+        return arr;
+    }
+
+    void e3_agent_free_subscriber_encoding_array(e3_subscriber_encoding_t* arr) {
+        std::free(arr);
     }
 
     uint32_t e3_agent_get_subscription_periodicity(

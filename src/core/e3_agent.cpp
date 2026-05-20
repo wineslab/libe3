@@ -244,6 +244,20 @@ std::optional<EncodingFormat> E3Agent::get_dapp_encoding(uint32_t dapp_id) const
     return impl_->interface->get_dapp_encoding(dapp_id);
 }
 
+std::vector<E3Agent::SubscriberEncoding>
+E3Agent::get_subscribers_with_encoding(uint32_t ran_function_id) const {
+    if (!impl_->interface) {
+        return {};
+    }
+    auto v = impl_->interface->get_subscribers_with_encoding(ran_function_id);
+    std::vector<SubscriberEncoding> out;
+    out.reserve(v.size());
+    for (const auto& e : v) {
+        out.push_back({e.dapp_id, e.encoding});
+    }
+    return out;
+}
+
 uint32_t E3Agent::get_subscription_periodicity(uint32_t dapp_id, uint32_t ran_function_id) const {
     if (!impl_->interface) {
         return 0;
