@@ -407,6 +407,13 @@ void E3Interface::setup_loop(size_t channel_idx) {
     Channel& ch = *channels_[channel_idx];
     E3_LOG_INFO(LOG_TAG) << "Setup loop started on channel " << channel_idx;
 
+    /* Per-channel counter (thread-local since each setup_loop owns one
+     * thread) for malformed setup requests. Used to rate-limit the
+     * "wrong encoding on this port?" warning so a chatty misconfigured
+     * peer doesn't flood the log. First failure logs; subsequent ones
+     * log every 1024 to stay under the operator's radar. */
+    thread_local uint64_t bad_request_count = 0;
+
     while (!should_stop_.load()) {
         std::vector<uint8_t> buffer;
         int ret = ch.connector->recv_setup_request(buffer);
@@ -421,42 +428,53 @@ void E3Interface::setup_loop(size_t channel_idx) {
 
         /* ZMQ REP has a strict state machine: every recv MUST be followed
          * by a send, or the socket wedges. If a malformed setup request
-         * arrives (e.g. a JSON-encoded payload on the ASN.1 channel because
-         * a misconfigured dApp is pointing at the wrong port), we still
-         * have to send *something* back — otherwise the next recv on this
-         * REP socket fails with EFSM ("Operation cannot be accomplished in
-         * current state") and the channel is dead until the gNB restarts.
+         * arrives (typically a peer sending the wrong wire format — e.g.
+         * a JSON-encoded payload landing on an ASN.1 channel because a
+         * dApp's config points at the wrong port), we still have to send
+         * *something* back. Otherwise the next recv fails with EFSM
+         * ("Operation cannot be accomplished in current state") and the
+         * channel is dead until restart.
          *
-         * Send an empty reply on any pre-handle error path so a single
-         * bad packet doesn't permanently kill the channel. The peer will
-         * see a 0-byte reply and either retry or fail-fast on its side. */
-        auto send_empty_unwedge = [&]() {
+         * Strategy: send a zero-byte reply on any pre-handle error path
+         * (decode failure, wrong PDU type, choice variant mismatch). The
+         * peer sees a 0-byte response and fails fast on its side — which
+         * is the right outcome since whatever it sent was wrong. The
+         * channel stays alive for well-formed requests from other peers. */
+        auto discard_and_unwedge = [&](const char* reason) {
+            ++bad_request_count;
+            /* Log first occurrence and then every 1024 — enough to flag
+             * the misconfiguration without filling /var/log. */
+            if (bad_request_count == 1 || (bad_request_count % 1024) == 0) {
+                E3_LOG_WARN(LOG_TAG)
+                    << "Channel " << channel_idx
+                    << ": discarding malformed setup request (" << reason
+                    << ", " << ret << " bytes, count=" << bad_request_count
+                    << "). This usually means a peer is sending the wrong "
+                       "wire encoding to this port — check the connecting "
+                       "dApp's e3_config endpoints match this channel's "
+                       "encoding ("
+                    << (ch.encoding == EncodingFormat::ASN1 ? "ASN.1" : "JSON")
+                    << ").";
+            }
             const std::vector<uint8_t> empty;
             (void)ch.connector->send_response(empty);
         };
 
         auto decode_result = ch.encoder->decode(buffer.data(), static_cast<size_t>(ret));
         if (!decode_result) {
-            E3_LOG_ERROR(LOG_TAG) << "Channel " << channel_idx
-                                  << ": failed to decode setup request (ret=" << ret << ")";
-            send_empty_unwedge();
+            discard_and_unwedge("decode failed");
             continue;
         }
 
         Pdu& pdu = *decode_result;
         if (pdu.type != PduType::SETUP_REQUEST) {
-            E3_LOG_ERROR(LOG_TAG) << "Channel " << channel_idx
-                                  << ": unexpected PDU type in setup: "
-                                  << pdu_type_to_string(pdu.type);
-            send_empty_unwedge();
+            discard_and_unwedge("wrong PDU type");
             continue;
         }
 
         auto* request = std::get_if<SetupRequest>(&pdu.choice);
         if (!request) {
-            E3_LOG_ERROR(LOG_TAG) << "Channel " << channel_idx
-                                  << ": failed to get SetupRequest from PDU";
-            send_empty_unwedge();
+            discard_and_unwedge("PDU variant not SetupRequest");
             continue;
         }
 
