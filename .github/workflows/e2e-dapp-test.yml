@@ -26,8 +26,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # PR-1 ships ZMQ only; PR-2 will expand the matrix to POSIX too.
-        link: [zmq]
+        # POSIX/SCTP is intentionally excluded — ubuntu-latest runners lack
+        # the sctp kernel module. The code path is built; we just don't
+        # exercise it in CI.
+        link: [zmq, posix]
         transport: [ipc, tcp]
 
     steps:
