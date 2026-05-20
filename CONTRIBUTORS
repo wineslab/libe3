@@ -17,3 +17,11 @@ We are grateful for every contribution, big or small, that helped shape this pro
 
 - Filippo Olimpieri <126257005+Ninjabippo1205@users.noreply.github.com>
   - Callback mechanism for dApp status reporting to the E2 Agent
+
+- Andrea Lacava <a.lacava@northeastern.edu>
+  - dApp role support (issue #15): E3Role enum, role-aware E3Interface
+    with split RAN/dApp loops, ZMQ and POSIX client connectors,
+    DAppSubscriptionState, multi-peer dispatch (one process can hold N
+    E3Agent instances connecting to N RANs), examples/simple_dapp.cpp,
+    full-loop latency benchmark with per-phase PR-comment workflow,
+    e2e-dapp-test.yml CI matrix, and the SWIG Python binding seam.
