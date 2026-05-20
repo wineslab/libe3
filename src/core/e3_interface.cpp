@@ -419,10 +419,27 @@ void E3Interface::setup_loop(size_t channel_idx) {
         E3_LOG_INFO(LOG_TAG) << "Channel " << channel_idx
                              << ": setup request received (" << ret << " bytes)";
 
+        /* ZMQ REP has a strict state machine: every recv MUST be followed
+         * by a send, or the socket wedges. If a malformed setup request
+         * arrives (e.g. a JSON-encoded payload on the ASN.1 channel because
+         * a misconfigured dApp is pointing at the wrong port), we still
+         * have to send *something* back — otherwise the next recv on this
+         * REP socket fails with EFSM ("Operation cannot be accomplished in
+         * current state") and the channel is dead until the gNB restarts.
+         *
+         * Send an empty reply on any pre-handle error path so a single
+         * bad packet doesn't permanently kill the channel. The peer will
+         * see a 0-byte reply and either retry or fail-fast on its side. */
+        auto send_empty_unwedge = [&]() {
+            const std::vector<uint8_t> empty;
+            (void)ch.connector->send_response(empty);
+        };
+
         auto decode_result = ch.encoder->decode(buffer.data(), static_cast<size_t>(ret));
         if (!decode_result) {
             E3_LOG_ERROR(LOG_TAG) << "Channel " << channel_idx
                                   << ": failed to decode setup request (ret=" << ret << ")";
+            send_empty_unwedge();
             continue;
         }
 
@@ -431,6 +448,7 @@ void E3Interface::setup_loop(size_t channel_idx) {
             E3_LOG_ERROR(LOG_TAG) << "Channel " << channel_idx
                                   << ": unexpected PDU type in setup: "
                                   << pdu_type_to_string(pdu.type);
+            send_empty_unwedge();
             continue;
         }
 
@@ -438,6 +456,7 @@ void E3Interface::setup_loop(size_t channel_idx) {
         if (!request) {
             E3_LOG_ERROR(LOG_TAG) << "Channel " << channel_idx
                                   << ": failed to get SetupRequest from PDU";
+            send_empty_unwedge();
             continue;
         }
 
