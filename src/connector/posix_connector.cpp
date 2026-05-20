@@ -20,6 +20,8 @@
 #include <cstring>
 #include <cerrno>
 #include <poll.h>
+#include <thread>
+#include <chrono>
 
 namespace libe3 {
 
@@ -317,7 +319,7 @@ int PosixE3Connector::receive(std::vector<uint8_t>& buffer) {
     if (inbound_connection_socket_ < 0) {
         return static_cast<int>(ErrorCode::NOT_CONNECTED);
     }
-    
+
     // Wait for data with timeout
     int poll_ret = wait_for_socket(inbound_connection_socket_, POLL_TIMEOUT_MS);
     if (poll_ret == 0) {
@@ -331,7 +333,15 @@ int PosixE3Connector::receive(std::vector<uint8_t>& buffer) {
         E3_LOG_ERROR(LOG_TAG) << "Poll failed on receive: " << strerror(errno);
         return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
     }
-    
+
+    // On the dApp role our peer (RAN) uses send() = send_in_chunks() which
+    // emits a 4-byte length-prefix frame, so we decode it accordingly. On
+    // the RAN role we preserve the existing raw recv behaviour for
+    // compatibility with the Python spear-dApp's framing convention.
+    if (role_ == E3Role::DAPP) {
+        return recv_with_size(inbound_connection_socket_, buffer);
+    }
+
     buffer.resize(DEFAULT_BUFFER_SIZE);
     ssize_t ret = recv(inbound_connection_socket_, buffer.data(), buffer.size(), 0);
     if (ret < 0) {
@@ -341,7 +351,7 @@ int PosixE3Connector::receive(std::vector<uint8_t>& buffer) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to receive: " << strerror(errno);
         return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
     }
-    
+
     buffer.resize(static_cast<size_t>(ret));
     E3_LOG_TRACE(LOG_TAG) << "Received: " << ret << " bytes";
     return static_cast<int>(ret);
@@ -423,13 +433,160 @@ ErrorCode PosixE3Connector::send(const std::vector<uint8_t>& data) {
     if (outbound_connection_socket_ < 0) {
         return ErrorCode::NOT_CONNECTED;
     }
-    
+
+    // dApp role sends to RAN's receive() which uses raw recv. Use a raw
+    // send to match. RAN role keeps the existing framed send so it stays
+    // wire-compatible with the Python spear-dApp's recv_in_chunks().
+    if (role_ == E3Role::DAPP) {
+        ssize_t sent = ::send(outbound_connection_socket_, data.data(), data.size(), 0);
+        if (sent < 0 || static_cast<size_t>(sent) != data.size()) {
+            E3_LOG_ERROR(LOG_TAG) << "Failed to send dApp outbound: " << strerror(errno);
+            return ErrorCode::TRANSPORT_ERROR;
+        }
+        E3_LOG_TRACE(LOG_TAG) << "Sent (dApp raw): " << data.size() << " bytes";
+        return ErrorCode::SUCCESS;
+    }
+
     int ret = send_in_chunks(outbound_connection_socket_, data.data(), data.size());
     if (ret < 0) {
         return ErrorCode::TRANSPORT_ERROR;
     }
-    
+
     E3_LOG_TRACE(LOG_TAG) << "Sent: " << data.size() << " bytes";
+    return ErrorCode::SUCCESS;
+}
+
+// ===========================================================================
+// Client-side (dApp role) implementations
+//
+// Mirrors of the server-side methods but with connect() in place of
+// bind()/listen()/accept(). For IPC the dApp connects to setup_endpoint_
+// (same as RAN binds). For TCP the dApp connects to 127.0.0.1:port. For
+// SCTP the same TCP-style address is used; ubuntu-latest runners lack
+// the sctp kernel module so SCTP client creation may fail at socket()
+// time — callers should treat that as "transport not supported".
+// ===========================================================================
+
+namespace {
+// Connect a fresh socket to (addr, port_or_path) for the given transport.
+// Returns the fd on success or -1 on error.
+int posix_connect_for(E3TransportLayer transport,
+                      const std::string& endpoint,
+                      uint16_t port) {
+    if (transport == E3TransportLayer::IPC) {
+        int sock = socket(AF_UNIX, SOCK_STREAM, 0);
+        if (sock < 0) return -1;
+        struct sockaddr_un addr{};
+        addr.sun_family = AF_UNIX;
+        strncpy(addr.sun_path, endpoint.c_str(), sizeof(addr.sun_path) - 1);
+        if (connect(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) < 0) {
+            close(sock);
+            return -1;
+        }
+        return sock;
+    }
+    int sock;
+    if (transport == E3TransportLayer::SCTP) {
+        sock = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+    } else {
+        sock = socket(AF_INET, SOCK_STREAM, 0);
+    }
+    if (sock < 0) return -1;
+    struct sockaddr_in addr{};
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);  // 127.0.0.1
+    if (connect(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) < 0) {
+        close(sock);
+        return -1;
+    }
+    return sock;
+}
+}  // anonymous namespace
+
+ErrorCode PosixE3Connector::setup_initial_connection_client() {
+    // Retry with a short backoff so we don't race the RAN's bind on startup.
+    int sock = -1;
+    for (int retry = 0; retry < 10 && sock < 0; ++retry) {
+        sock = posix_connect_for(transport_layer_, setup_endpoint_, setup_port_);
+        if (sock < 0) {
+            if (shutdown_requested_.load()) return ErrorCode::CANCELLED;
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        }
+    }
+    if (sock < 0) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to connect setup socket: " << strerror(errno);
+        return ErrorCode::CONNECTION_FAILED;
+    }
+    setup_connection_socket_ = sock;
+    connected_ = true;
+    E3_LOG_INFO(LOG_TAG) << "Setup socket connected (client) to "
+                         << setup_endpoint_ << " port=" << setup_port_;
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode PosixE3Connector::send_setup_request_client(const std::vector<uint8_t>& data) {
+    if (setup_connection_socket_ < 0) return ErrorCode::NOT_CONNECTED;
+    // The RAN's recv_setup_request reads via raw recv() (no length prefix),
+    // so the dApp must send the SetupRequest the same way. The setup
+    // channel doesn't carry chunked messages so a single send() is fine.
+    ssize_t sent = ::send(setup_connection_socket_, data.data(), data.size(), 0);
+    if (sent < 0 || static_cast<size_t>(sent) != data.size()) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to send setup request: " << strerror(errno);
+        return ErrorCode::TRANSPORT_ERROR;
+    }
+    E3_LOG_DEBUG(LOG_TAG) << "Sent SetupRequest: " << data.size() << " bytes";
+    return ErrorCode::SUCCESS;
+}
+
+int PosixE3Connector::recv_setup_response_client(std::vector<uint8_t>& buffer) {
+    if (setup_connection_socket_ < 0) return static_cast<int>(ErrorCode::NOT_CONNECTED);
+
+    // Wait for data with timeout to allow cooperative shutdown.
+    int poll_ret = wait_for_socket(setup_connection_socket_, POLL_TIMEOUT_MS);
+    if (poll_ret == 0) return 0;
+    if (poll_ret < 0) return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
+
+    return recv_with_size(setup_connection_socket_, buffer);
+}
+
+ErrorCode PosixE3Connector::setup_inbound_connection_client() {
+    // dApp inbound = RAN's outbound endpoint (publisher).
+    int sock = -1;
+    for (int retry = 0; retry < 10 && sock < 0; ++retry) {
+        sock = posix_connect_for(transport_layer_, outbound_endpoint_, outbound_port_);
+        if (sock < 0) {
+            if (shutdown_requested_.load()) return ErrorCode::CANCELLED;
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        }
+    }
+    if (sock < 0) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to connect inbound socket: " << strerror(errno);
+        return ErrorCode::CONNECTION_FAILED;
+    }
+    inbound_connection_socket_ = sock;
+    E3_LOG_INFO(LOG_TAG) << "Inbound socket connected (client) to "
+                         << outbound_endpoint_ << " port=" << outbound_port_;
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode PosixE3Connector::setup_outbound_connection_client() {
+    // dApp outbound = RAN's inbound endpoint (subscriber).
+    int sock = -1;
+    for (int retry = 0; retry < 10 && sock < 0; ++retry) {
+        sock = posix_connect_for(transport_layer_, inbound_endpoint_, inbound_port_);
+        if (sock < 0) {
+            if (shutdown_requested_.load()) return ErrorCode::CANCELLED;
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        }
+    }
+    if (sock < 0) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to connect outbound socket: " << strerror(errno);
+        return ErrorCode::CONNECTION_FAILED;
+    }
+    outbound_connection_socket_ = sock;
+    E3_LOG_INFO(LOG_TAG) << "Outbound socket connected (client) to "
+                         << inbound_endpoint_ << " port=" << inbound_port_;
     return ErrorCode::SUCCESS;
 }
 
@@ -473,8 +630,9 @@ void PosixE3Connector::dispose() {
         close(setup_socket_);
     }
     
-    // Clean up IPC files
-    if (transport_layer_ == E3TransportLayer::IPC) {
+    // Clean up IPC socket files only if we created them (RAN side binds).
+    // The dApp side connects, so it has nothing to unlink.
+    if (transport_layer_ == E3TransportLayer::IPC && role_ == E3Role::RAN) {
         unlink(setup_endpoint_.c_str());
         unlink(inbound_endpoint_.c_str());
         unlink(outbound_endpoint_.c_str());
