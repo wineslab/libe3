@@ -30,6 +30,12 @@ class SimpleServiceModel : public libe3::ServiceModel {
 public:
     static constexpr uint32_t RAN_FUNCTION_ID = 1;
 
+    // period_us: microseconds between indication emissions. Sub-millisecond
+    // values stress the conflate/queueing balance; the per-send log is silenced
+    // below 1 ms so stdout I/O does not dominate the measurement.
+    explicit SimpleServiceModel(uint64_t period_us = 2'000'000)
+        : period_us_(period_us), quiet_(period_us < 1000) {}
+
     std::string name() const override { return "SIMPLE"; }
     uint32_t version() const override { return 1; }
 
@@ -77,6 +83,7 @@ public:
         if (worker_.joinable()) {
             worker_.join();
         }
+        std::cout << "[SIMPLE] total indication cycles emitted: " << seq_ << "\n";
     }
 
     bool is_running() const override { return running_; }
@@ -106,10 +113,14 @@ private:
     std::atomic<bool> running_{false};
     std::thread worker_;
     uint32_t seq_{0};
+    uint64_t period_us_{2'000'000};
+    bool quiet_{false};
 
     void worker_loop() {
         while (running_) {
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            if (period_us_ > 0) {
+                std::this_thread::sleep_for(std::chrono::microseconds(period_us_));
+            }
             if (!running_) {
                 break;
             }
@@ -120,7 +131,7 @@ private:
             }
 
             libe3_examples::SimpleIndication si;
-            si.data1 = seq_;
+            si.data1 = seq_;  // monotonic; data1 range was widened in the SM grammar
             // Wall-clock send time in milliseconds, masked into the 31-bit
             // ASN.1 range. The dApp uses this to measure per-indication age
             // (transport + queueing delay) in the E2E tests — this lives only
@@ -139,9 +150,11 @@ private:
                 libe3::Pdu pdu = make_indication_pdu(dapp_id, RAN_FUNCTION_ID, encoded);
                 auto rc = emit_outbound(std::move(pdu));
                 if (rc == libe3::ErrorCode::SUCCESS) {
-                    std::cout << "  -> Sent indication #" << seq_
-                              << " to dApp " << dapp_id
-                              << " (" << encoded.size() << " bytes)\n";
+                    if (!quiet_) {
+                        std::cout << "  -> Sent indication #" << seq_
+                                  << " to dApp " << dapp_id
+                                  << " (" << encoded.size() << " bytes)\n";
+                    }
                 } else {
                     std::cerr << "  -> Failed to send indication to dApp "
                               << dapp_id << ": "
@@ -165,6 +178,9 @@ void print_usage(const char* program_name) {
               << "      --port-offset <K>    TCP port offset added to the default ports\n"
               << "                           (setup 9990+K, subscriber 9999+K, publisher 9991+K).\n"
               << "                           Lets multiple RANs coexist on one host over TCP.\n"
+              << "      --period-us <N>      Emit one indication every N microseconds\n"
+              << "                           (default: 2000000 = 2 s). e.g. 11494 ~= 87 ind/s\n"
+              << "                           (one per slot); sub-ms values stress queueing.\n"
               << "  -h, --help               Show this help message\n";
 }
 
@@ -198,8 +214,9 @@ int main(int argc, char* argv[]) {
     std::string ran_id = "example-ran-001";
     std::string socket_dir;   // empty => library default (/tmp/dapps)
     int port_offset = 0;      // TCP: added to the default ports
+    uint64_t period_us = 2'000'000;  // indication emission period (default 2s)
 
-    // Command-line options. --port-offset is long-only (val 1000).
+    // Command-line options. --port-offset (1000) and --period-us (1001) are long-only.
     static struct option long_options[] = {
         {"link",        required_argument, nullptr, 'l'},
         {"transport",   required_argument, nullptr, 't'},
@@ -207,6 +224,7 @@ int main(int argc, char* argv[]) {
         {"ran_id",      required_argument, nullptr, 'r'},
         {"socket-dir",  required_argument, nullptr, 'd'},
         {"port-offset", required_argument, nullptr, 1000},
+        {"period-us",   required_argument, nullptr, 1001},
         {"help",        no_argument,       nullptr, 'h'},
         {nullptr,       0,                 nullptr,  0 }
     };
@@ -231,6 +249,9 @@ int main(int argc, char* argv[]) {
                 break;
             case 1000:
                 port_offset = std::atoi(optarg);
+                break;
+            case 1001:
+                period_us = std::strtoull(optarg, nullptr, 10);  // --period-us
                 break;
             case 'h':
                 print_usage(argv[0]);
@@ -276,7 +297,8 @@ int main(int argc, char* argv[]) {
               << "  Transport layer: " << libe3::transport_layer_to_string(transport_layer) << "\n"
               << "  Encoding: " << (encoding == libe3::EncodingFormat::JSON ? "json" : "asn1") << "\n"
               << "  Socket dir: " << (socket_dir.empty() ? "/tmp/dapps (default)" : socket_dir) << "\n"
-              << "  Port offset: " << port_offset << "\n\n";
+              << "  Port offset: " << port_offset << "\n"
+              << "  Period: " << period_us << " us\n\n";
     
     // Create the agent
     libe3::E3Agent agent(std::move(config));
@@ -290,8 +312,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Register the simple service model
-    auto sm_result = agent.register_sm(std::make_unique<SimpleServiceModel>());
+    // Register the simple service model (with the configured emission period)
+    auto sm_result = agent.register_sm(std::make_unique<SimpleServiceModel>(period_us));
     if (sm_result != libe3::ErrorCode::SUCCESS) {
         std::cerr << "Failed to register Simple SM: "
                   << libe3::error_code_to_string(sm_result) << "\n";
