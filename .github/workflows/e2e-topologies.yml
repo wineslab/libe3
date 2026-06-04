@@ -16,12 +16,8 @@ name: E2E Topologies (multi-dApp / multi-RAN)
 
 on:
   pull_request:
-    # Also runs on the stacked issue-15 chain branches so each stacked PR
-    # (e.g. base issue-15/pr1-zmq-dapp-role) exercises the topologies on review,
-    # not only once the chain reaches main.
     branches:
       - main
-      - "issue-15/**"
   workflow_dispatch:
 
 concurrency:
