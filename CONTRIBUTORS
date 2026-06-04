@@ -8,6 +8,10 @@
   - GitHub Actions: PR test matrix (Debug/Release), tag-and-release with .deb packaging,
     Doxygen GitHub Pages deployment, internal-to-public mirroring
   - Doxygen documentation setup
+  - dApp role support (#15): E3Role + role-aware E3Interface, ZMQ/POSIX
+    client connectors, DAppSubscriptionState, multi-peer dispatch,
+    simple_dapp example, full-loop latency benchmark + CI workflows,
+    SWIG Python binding seam
 
 
 # Contributors
