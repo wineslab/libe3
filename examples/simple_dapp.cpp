@@ -55,6 +55,9 @@ static void print_usage(const char* program_name) {
               << "                           Repeatable: one per RAN (default: /tmp/dapps).\n"
               << "      --port-offset <K>    TCP port offset of a RAN to connect to.\n"
               << "                           Repeatable: one per RAN (default: 0).\n"
+              << "  -q, --quiet              Suppress per-indication lines (keep the summary).\n"
+              << "                           Use at high (sub-ms) rates so stdout I/O does not\n"
+              << "                           dominate the queueing-time measurement.\n"
               << "  -h, --help               Show this help message\n";
 }
 
@@ -73,6 +76,14 @@ struct Peer {
     // inbound thread, read after stop()). age = recv_ms - send_ms.
     uint64_t age_sum_ms{0};
     uint32_t age_max_ms{0};
+    uint32_t age_max_seq{0};   // which indication carried the max age
+    // coarse age histogram (ms): <=1, 2..5, 6..10, >10
+    uint64_t age_le1{0}, age_2_5{0}, age_6_10{0}, age_gt10{0};
+    // Data-drop accounting from the monotonic sequence number (data1). With
+    // conflate removed we expect ~0 gaps; expected = max-min+1.
+    bool seq_seen{false};
+    uint32_t min_seq{0};
+    uint32_t max_seq{0};
 };
 
 static std::string peer_label(const std::string& dir, int offset) {
@@ -111,6 +122,7 @@ int main(int argc, char* argv[]) {
     libe3::E3TransportLayer transport_layer = libe3::E3TransportLayer::IPC;
     libe3::EncodingFormat encoding = libe3::EncodingFormat::ASN1;
     bool control_enabled = false;
+    bool quiet = false;
     int timed_seconds = 0;
     std::vector<std::string> socket_dirs;   // repeated --socket-dir (IPC peers)
     std::vector<int> port_offsets;          // repeated --port-offset (TCP peers)
@@ -124,12 +136,13 @@ int main(int argc, char* argv[]) {
         {"timed",       required_argument, nullptr, 'T'},
         {"socket-dir",  required_argument, nullptr, 'd'},
         {"port-offset", required_argument, nullptr, 1000},
+        {"quiet",       no_argument,       nullptr, 'q'},
         {"help",        no_argument,       nullptr, 'h'},
         {nullptr,       0,                 nullptr,  0 }
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "l:t:e:cT:d:h", long_options, nullptr)) != -1) {
+    while ((opt = getopt_long(argc, argv, "l:t:e:cT:d:qh", long_options, nullptr)) != -1) {
         switch (opt) {
             case 'l': link_layer = parse_link_layer(optarg); break;
             case 't': transport_layer = parse_transport_layer(optarg); break;
@@ -138,6 +151,7 @@ int main(int argc, char* argv[]) {
             case 'T': timed_seconds = std::atoi(optarg); break;
             case 'd': socket_dirs.emplace_back(optarg); break;
             case 1000: port_offsets.push_back(std::atoi(optarg)); break;
+            case 'q': quiet = true; break;
             case 'h': print_usage(argv[0]); return 0;
             default:  print_usage(argv[0]); return 1;
         }
@@ -210,7 +224,7 @@ int main(int argc, char* argv[]) {
 
         p->agent = std::make_unique<libe3::E3Agent>(std::move(config));
 
-        p->agent->set_indication_handler([p, control_enabled](const libe3::IndicationMessage& msg) {
+        p->agent->set_indication_handler([p, control_enabled, quiet](const libe3::IndicationMessage& msg) {
             libe3_examples::SimpleIndication si;
             if (!libe3_examples::decode_simple_indication(msg.protocol_data, si)) {
                 std::cerr << "[SIMPLE] peer=" << p->label << " failed to decode indication ("
@@ -219,6 +233,16 @@ int main(int argc, char* argv[]) {
             }
             ++p->count;
             const uint32_t seq = si.data1;
+
+            // Track the sequence range so the summary can report dropped
+            // indications (gaps) — the data-loss half of the conflate study.
+            if (!p->seq_seen) {
+                p->seq_seen = true;
+                p->min_seq = p->max_seq = seq;
+            } else {
+                if (seq < p->min_seq) p->min_seq = seq;
+                if (seq > p->max_seq) p->max_seq = seq;
+            }
 
             // Indication age = recv time - agent send time (ms), masked into
             // the 31-bit range the agent stamped. Captures transport + inbound
@@ -231,18 +255,25 @@ int main(int argc, char* argv[]) {
                 const uint32_t now = static_cast<uint32_t>(now_ms & 0x7FFFFFFF);
                 const uint32_t age = (now - *si.timestamp) & 0x7FFFFFFF;  // modular wrap
                 p->age_sum_ms += age;
-                if (age > p->age_max_ms) p->age_max_ms = age;
+                if (age > p->age_max_ms) { p->age_max_ms = age; p->age_max_seq = seq; }
+                if (age <= 1) ++p->age_le1;
+                else if (age <= 5) ++p->age_2_5;
+                else if (age <= 10) ++p->age_6_10;
+                else ++p->age_gt10;
                 age_str = std::to_string(age) + "ms";
             }
 
             // Provenance-tagged: ran= and sub= identify the source RAN.
-            std::cout << "[SIMPLE] peer=" << p->label
-                      << " ran=" << (p->ran_id.empty() ? "?" : p->ran_id)
-                      << " sub=" << (p->sub_id ? std::to_string(*p->sub_id) : "?")
-                      << " dapp=" << msg.dapp_identifier
-                      << " Indication #" << seq
-                      << " age=" << age_str
-                      << " (RAN function " << msg.ran_function_identifier << ")\n";
+            // Suppressed under --quiet so stdout I/O can't bottleneck high rates.
+            if (!quiet) {
+                std::cout << "[SIMPLE] peer=" << p->label
+                          << " ran=" << (p->ran_id.empty() ? "?" : p->ran_id)
+                          << " sub=" << (p->sub_id ? std::to_string(*p->sub_id) : "?")
+                          << " dapp=" << msg.dapp_identifier
+                          << " Indication #" << seq
+                          << " age=" << age_str
+                          << " (RAN function " << msg.ran_function_identifier << ")\n";
+            }
 
             // Every 5th indication, optionally echo back a Simple-Control.
             if (control_enabled && seq % 5 == 0) {
@@ -251,8 +282,10 @@ int main(int argc, char* argv[]) {
                 if (libe3_examples::encode_simple_control(sampling, encoded)) {
                     auto rc = p->agent->send_control(/*ran_function_id=*/1, /*control_id=*/1, encoded);
                     if (rc == libe3::ErrorCode::SUCCESS) {
-                        std::cout << "  -> [" << p->label << "] Sent Simple-Control samplingThreshold="
-                                  << sampling << "\n";
+                        if (!quiet) {
+                            std::cout << "  -> [" << p->label << "] Sent Simple-Control samplingThreshold="
+                                      << sampling << "\n";
+                        }
                     } else {
                         std::cerr << "  -> [" << p->label << "] Failed to send Simple-Control: "
                                   << libe3::error_code_to_string(rc) << "\n";
@@ -351,11 +384,20 @@ int main(int argc, char* argv[]) {
         const uint32_t n = pp->count.load();
         total += n;
         const double avg = n ? static_cast<double>(pp->age_sum_ms) / n : 0.0;
+        // Drop accounting from the sequence range: expected = max-min+1.
+        const uint64_t expected = pp->seq_seen ? (static_cast<uint64_t>(pp->max_seq) - pp->min_seq + 1) : 0;
+        const uint64_t dropped = (expected > n) ? (expected - n) : 0;
+        const double drop_pct = expected ? (100.0 * dropped / expected) : 0.0;
         std::cout << "  peer=" << pp->label
                   << " ran=" << (pp->ran_id.empty() ? "?" : pp->ran_id)
                   << " sub=" << (pp->sub_id ? std::to_string(*pp->sub_id) : "?")
                   << " indications=" << n
-                  << " age_ms(avg=" << avg << " max=" << pp->age_max_ms << ")";
+                  << " seq=[" << (pp->seq_seen ? pp->min_seq : 0) << ".." << (pp->seq_seen ? pp->max_seq : 0) << "]"
+                  << " dropped=" << dropped << " (" << drop_pct << "%)"
+                  << " age_ms(avg=" << avg << " max=" << pp->age_max_ms
+                  << " @seq=" << pp->age_max_seq << ")"
+                  << " hist[<=1:" << pp->age_le1 << " 2-5:" << pp->age_2_5
+                  << " 6-10:" << pp->age_6_10 << " >10:" << pp->age_gt10 << "]";
         if (pp->age_max_ms > 1) {
             std::cout << "  [note: indication queueing >1ms]";
         }

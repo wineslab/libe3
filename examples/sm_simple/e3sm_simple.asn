@@ -19,7 +19,7 @@ Simple-RanFunctionData  ::= SEQUENCE {
 
 -- Simple Indication (random data from RAN)
 Simple-Indication ::= SEQUENCE {
-    data1                   INTEGER (0..32768),              -- Random data
+    data1                   INTEGER (0..2147483647),         -- Random data / monotonic sequence counter (examples)
     timestamp               INTEGER (0..2147483647) OPTIONAL -- Unix timestamp when samples were captured
 }
 
