@@ -7,6 +7,6 @@ var searchData=
   ['control_5fids_4',['control_ids',['../classlibe3_1_1ServiceModel.html#ad8da981e910f19aa2730c7a40cc74158',1,'libe3::ServiceModel::control_ids()'],['../structe3__service__model__handle__s.html#aa700bce11840cd6628437da0cd8d835d',1,'e3_service_model_handle_s::control_ids()']]],
   ['copy_5fvector_5fu32_5fto_5fc_5',['copy_vector_u32_to_c',['../c__api_8cpp.html#af59fba4576569e2106460af906ba9d31',1,'c_api.cpp']]],
   ['cpu_5frelax_6',['cpu_relax',['../namespacelibe3.html#a979479d8033aec7c1268d3a5af3223c7',1,'libe3']]],
-  ['create_5fconnector_7',['create_connector',['../namespacelibe3.html#a5ada47bc605351d31fe904d874c45eac',1,'libe3']]],
+  ['create_5fconnector_7',['create_connector',['../namespacelibe3.html#aa9ff798ade0521070e6332830f7d35bd',1,'libe3']]],
   ['create_5fencoder_8',['create_encoder',['../namespacelibe3.html#a3fd9e4c182481cd094c35bab83ede638',1,'libe3']]]
 ];

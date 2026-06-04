@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.4</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -113,7 +113,7 @@ $(document).ready(function(){initNavTree('connector__factory_8cpp_source.html','
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacelibe3.html">libe3</a> {</div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
 <div class="foldopen" id="foldopen00015" data-start="{" data-end="}">
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="namespacelibe3.html#a5ada47bc605351d31fe904d874c45eac">   15</a></span>std::unique_ptr&lt;E3Connector&gt; <a class="code hl_function" href="namespacelibe3.html#a5ada47bc605351d31fe904d874c45eac">create_connector</a>(</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="namespacelibe3.html#aa9ff798ade0521070e6332830f7d35bd">   15</a></span>std::unique_ptr&lt;E3Connector&gt; <a class="code hl_function" href="namespacelibe3.html#aa9ff798ade0521070e6332830f7d35bd">create_connector</a>(</div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <a class="code hl_enumeration" href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0e">E3LinkLayer</a> link_layer,</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <a class="code hl_enumeration" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40">E3TransportLayer</a> transport_layer,</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    <span class="keyword">const</span> std::string&amp; setup_endpoint,</div>
@@ -122,39 +122,46 @@ $(document).ready(function(){initNavTree('connector__factory_8cpp_source.html','
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    uint16_t setup_port,</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    uint16_t inbound_port,</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    uint16_t outbound_port,</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keywordtype">size_t</span> io_threads</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>) {</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keywordflow">switch</span> (link_layer) {</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea38cf8f016825407fb4e79e319d87bd5e">E3LinkLayer::ZMQ</a>:</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>            <span class="keywordflow">return</span> std::make_unique&lt;ZmqE3Connector&gt;(</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>                transport_layer, setup_endpoint, inbound_endpoint, outbound_endpoint,</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>                setup_port, inbound_port, outbound_port, io_threads</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>            );</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea0028405011724c5677faba466637b1e5">E3LinkLayer::POSIX</a>:</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>            <span class="keywordflow">return</span> std::make_unique&lt;PosixE3Connector&gt;(</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>                transport_layer, setup_endpoint, inbound_endpoint, outbound_endpoint,</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>                setup_port, inbound_port, outbound_port</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>            );</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <span class="keywordflow">default</span>:</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>            <a class="code hl_define" href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a>(<span class="stringliteral">&quot;ConnFactory&quot;</span>) &lt;&lt; <span class="stringliteral">&quot;Unsupported link layer: &quot;</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>                                        &lt;&lt; <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(link_layer);</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>            <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    }</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>}</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keywordtype">size_t</span> io_threads,</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <a class="code hl_enumeration" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a> role</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>) {</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    std::unique_ptr&lt;E3Connector&gt; conn;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keywordflow">switch</span> (link_layer) {</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea38cf8f016825407fb4e79e319d87bd5e">E3LinkLayer::ZMQ</a>:</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>            conn = std::make_unique&lt;ZmqE3Connector&gt;(</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>                transport_layer, setup_endpoint, inbound_endpoint, outbound_endpoint,</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>                setup_port, inbound_port, outbound_port, io_threads</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>            );</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>            <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea0028405011724c5677faba466637b1e5">E3LinkLayer::POSIX</a>:</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>            conn = std::make_unique&lt;PosixE3Connector&gt;(</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>                transport_layer, setup_endpoint, inbound_endpoint, outbound_endpoint,</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>                setup_port, inbound_port, outbound_port</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>            );</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>            <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        <span class="keywordflow">default</span>:</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>            <a class="code hl_define" href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a>(<span class="stringliteral">&quot;ConnFactory&quot;</span>) &lt;&lt; <span class="stringliteral">&quot;Unsupported link layer: &quot;</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>                                        &lt;&lt; <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(link_layer);</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>            <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    }</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordflow">if</span> (conn) conn-&gt;set_role(role);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordflow">return</span> conn;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>}</div>
 </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>} <span class="comment">// namespace libe3</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>} <span class="comment">// namespace libe3</span></div>
 <div class="ttc" id="ae3__connector_8hpp_html"><div class="ttname"><a href="e3__connector_8hpp.html">e3_connector.hpp</a></div><div class="ttdoc">Abstract E3 Connector interface for transport layer.</div></div>
 <div class="ttc" id="alogger_8hpp_html"><div class="ttname"><a href="logger_8hpp.html">logger.hpp</a></div><div class="ttdoc">Logging facility for libe3.</div></div>
 <div class="ttc" id="alogger_8hpp_html_a95e326d05fe1b245f98aa703ee67a10c"><div class="ttname"><a href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a></div><div class="ttdeci">#define E3_LOG_ERROR(component)</div><div class="ttdef"><b>Definition</b> <a href="logger_8hpp_source.html#l00217">logger.hpp:217</a></div></div>
 <div class="ttc" id="anamespacelibe3_html"><div class="ttname"><a href="namespacelibe3.html">libe3</a></div><div class="ttdef"><b>Definition</b> <a href="libe3_8hpp_source.html#l00028">libe3.hpp:28</a></div></div>
-<div class="ttc" id="anamespacelibe3_html_a24bf966c6225dc47ac47d7a8a1986c40"><div class="ttname"><a href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40">libe3::E3TransportLayer</a></div><div class="ttdeci">E3TransportLayer</div><div class="ttdoc">Transport layer types (matches Python E3TransportLayer)</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00047">types.hpp:47</a></div></div>
-<div class="ttc" id="anamespacelibe3_html_a5ada47bc605351d31fe904d874c45eac"><div class="ttname"><a href="namespacelibe3.html#a5ada47bc605351d31fe904d874c45eac">libe3::create_connector</a></div><div class="ttdeci">std::unique_ptr&lt; E3Connector &gt; create_connector(E3LinkLayer link_layer, E3TransportLayer transport_layer, const std::string &amp;setup_endpoint, const std::string &amp;inbound_endpoint, const std::string &amp;outbound_endpoint, uint16_t setup_port, uint16_t inbound_port, uint16_t outbound_port, size_t io_threads=2)</div><div class="ttdoc">Factory function to create appropriate connector.</div><div class="ttdef"><b>Definition</b> <a href="connector__factory_8cpp_source.html#l00015">connector_factory.cpp:15</a></div></div>
+<div class="ttc" id="anamespacelibe3_html_a24bf966c6225dc47ac47d7a8a1986c40"><div class="ttname"><a href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40">libe3::E3TransportLayer</a></div><div class="ttdeci">E3TransportLayer</div><div class="ttdoc">Transport layer types (matches Python E3TransportLayer)</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00062">types.hpp:62</a></div></div>
+<div class="ttc" id="anamespacelibe3_html_a42d84c47e47cdcae78a4214ab412b2ec"><div class="ttname"><a href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">libe3::E3Role</a></div><div class="ttdeci">E3Role</div><div class="ttdoc">Role this E3 endpoint plays in the protocol.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00054">types.hpp:54</a></div></div>
 <div class="ttc" id="anamespacelibe3_html_a6cf81048dab516aa29417bb0dc741d0e"><div class="ttname"><a href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0e">libe3::E3LinkLayer</a></div><div class="ttdeci">E3LinkLayer</div><div class="ttdoc">Link layer types (matches Python E3LinkLayer)</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00039">types.hpp:39</a></div></div>
 <div class="ttc" id="anamespacelibe3_html_a6cf81048dab516aa29417bb0dc741d0ea0028405011724c5677faba466637b1e5"><div class="ttname"><a href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea0028405011724c5677faba466637b1e5">libe3::E3LinkLayer::POSIX</a></div><div class="ttdeci">@ POSIX</div><div class="ttdoc">POSIX socket-based transport.</div></div>
 <div class="ttc" id="anamespacelibe3_html_a6cf81048dab516aa29417bb0dc741d0ea38cf8f016825407fb4e79e319d87bd5e"><div class="ttname"><a href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea38cf8f016825407fb4e79e319d87bd5e">libe3::E3LinkLayer::ZMQ</a></div><div class="ttdeci">@ ZMQ</div><div class="ttdoc">ZeroMQ-based transport.</div></div>
+<div class="ttc" id="anamespacelibe3_html_aa9ff798ade0521070e6332830f7d35bd"><div class="ttname"><a href="namespacelibe3.html#aa9ff798ade0521070e6332830f7d35bd">libe3::create_connector</a></div><div class="ttdeci">std::unique_ptr&lt; E3Connector &gt; create_connector(E3LinkLayer link_layer, E3TransportLayer transport_layer, const std::string &amp;setup_endpoint, const std::string &amp;inbound_endpoint, const std::string &amp;outbound_endpoint, uint16_t setup_port, uint16_t inbound_port, uint16_t outbound_port, size_t io_threads=2, E3Role role=E3Role::RAN)</div><div class="ttdoc">Factory function to create appropriate connector.</div><div class="ttdef"><b>Definition</b> <a href="connector__factory_8cpp_source.html#l00015">connector_factory.cpp:15</a></div></div>
 <div class="ttc" id="aposix__connector_8hpp_html"><div class="ttname"><a href="posix__connector_8hpp.html">posix_connector.hpp</a></div><div class="ttdoc">POSIX socket-based E3 Connector.</div></div>
 <div class="ttc" id="azmq__connector_8hpp_html"><div class="ttname"><a href="zmq__connector_8hpp.html">zmq_connector.hpp</a></div><div class="ttdoc">ZeroMQ-based E3 Connector.</div></div>
 </div><!-- fragment --></div><!-- contents -->

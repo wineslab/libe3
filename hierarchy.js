@@ -3,6 +3,7 @@ var hierarchy =
     [ "libe3::DAppControlAction", "structlibe3_1_1DAppControlAction.html", null ],
     [ "libe3::DAppEntry", "structlibe3_1_1DAppEntry.html", null ],
     [ "libe3::DAppReport", "structlibe3_1_1DAppReport.html", null ],
+    [ "libe3::DAppSubscriptionState", "classlibe3_1_1DAppSubscriptionState.html", null ],
     [ "e3_agent_handle_s", "structe3__agent__handle__s.html", null ],
     [ "e3_c_service_model_desc_t", "structe3__c__service__model__desc__t.html", null ],
     [ "e3_config_t", "structe3__config__t.html", null ],

@@ -41,6 +41,10 @@ var types_8hpp =
       [ "ZMQ", "types_8hpp.html#a6cf81048dab516aa29417bb0dc741d0ea38cf8f016825407fb4e79e319d87bd5e", null ],
       [ "POSIX", "types_8hpp.html#a6cf81048dab516aa29417bb0dc741d0ea0028405011724c5677faba466637b1e5", null ]
     ] ],
+    [ "E3Role", "types_8hpp.html#a42d84c47e47cdcae78a4214ab412b2ec", [
+      [ "RAN", "types_8hpp.html#a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c", null ],
+      [ "DAPP", "types_8hpp.html#a42d84c47e47cdcae78a4214ab412b2ecaf6d65812e5d7fae71a473c63c22b9d4a", null ]
+    ] ],
     [ "E3TransportLayer", "types_8hpp.html#a24bf966c6225dc47ac47d7a8a1986c40", [
       [ "SCTP", "types_8hpp.html#a24bf966c6225dc47ac47d7a8a1986c40a74096394e1dbe6f5b2ac4d54d4e88c97", null ],
       [ "TCP", "types_8hpp.html#a24bf966c6225dc47ac47d7a8a1986c40ab136ef5f6a01d816991fe3cf7a6ac763", null ],
@@ -78,6 +82,7 @@ var types_8hpp =
     [ "link_layer_to_string", "types_8hpp.html#aa315ed8a2ba72534a600f7d9305b5ff8", null ],
     [ "pdu_type_to_string", "types_8hpp.html#a635f33e375e8c160ecd82d0759742300", null ],
     [ "response_code_to_string", "types_8hpp.html#a91f7245a15a8f381b892d146355c0429", null ],
+    [ "role_to_string", "types_8hpp.html#a7f2cb4f48ecbef9a7aeb214aaf885202", null ],
     [ "transport_layer_to_string", "types_8hpp.html#a952757655773611abf6832b06ce0914d", null ],
     [ "DEFAULT_BUFFER_SIZE", "types_8hpp.html#a809598c8d63a2bdce0d447411324a2b5", null ],
     [ "LIBE3_PROTOCOL_VERSION", "types_8hpp.html#ac69f2e5f639ef2bdb04445cf7ac2b408", null ],

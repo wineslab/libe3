@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.4</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -113,6 +113,8 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1DAppReport.html">DAppReport</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">E3AP dApp Report structure.  <a href="structlibe3_1_1DAppReport.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1DAppSubscriptionState.html">DAppSubscriptionState</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html">E3Agent</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classlibe3_1_1E3Agent.html" title="E3Agent - Main façade for RAN vendor integration.">E3Agent</a> - Main façade for RAN vendor integration.  <a href="classlibe3_1_1E3Agent.html#details">More...</a><br /></td></tr>
@@ -208,6 +210,16 @@ Typedefs</h2></td></tr>
 <tr class="separator:a9d1455ef59bceaa9cda598743f149d24"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42840d6cf3ad96e4396b617cb875d99f" id="r_a42840d6cf3ad96e4396b617cb875d99f"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a42840d6cf3ad96e4396b617cb875d99f">DAppStatusChangedHandler</a> = std::function&lt; void()&gt;</td></tr>
 <tr class="separator:a42840d6cf3ad96e4396b617cb875d99f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fcfc9952b728e760c5beb5877438e23" id="r_a4fcfc9952b728e760c5beb5877438e23"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a4fcfc9952b728e760c5beb5877438e23">SetupResponseHandler</a> = std::function&lt; void(const <a class="el" href="structlibe3_1_1SetupResponse.html">SetupResponse</a> &amp;)&gt;</td></tr>
+<tr class="separator:a4fcfc9952b728e760c5beb5877438e23"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84fc3dc4ee58abf42f32b86e7bd23567" id="r_a84fc3dc4ee58abf42f32b86e7bd23567"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a84fc3dc4ee58abf42f32b86e7bd23567">SubscriptionResponseHandler</a> = std::function&lt; void(const <a class="el" href="structlibe3_1_1SubscriptionResponse.html">SubscriptionResponse</a> &amp;)&gt;</td></tr>
+<tr class="separator:a84fc3dc4ee58abf42f32b86e7bd23567"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f55e4b49ec33973d8157c9992285149" id="r_a8f55e4b49ec33973d8157c9992285149"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a8f55e4b49ec33973d8157c9992285149">IndicationHandler</a> = std::function&lt; void(const <a class="el" href="structlibe3_1_1IndicationMessage.html">IndicationMessage</a> &amp;)&gt;</td></tr>
+<tr class="separator:a8f55e4b49ec33973d8157c9992285149"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72f225a3f390d8ac8015806a178e1703" id="r_a72f225a3f390d8ac8015806a178e1703"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a72f225a3f390d8ac8015806a178e1703">XAppControlHandler</a> = std::function&lt; void(const <a class="el" href="structlibe3_1_1XAppControlAction.html">XAppControlAction</a> &amp;)&gt;</td></tr>
+<tr class="separator:a72f225a3f390d8ac8015806a178e1703"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adec1d2fe5180a57e9b2f3ebcd4261630" id="r_adec1d2fe5180a57e9b2f3ebcd4261630"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#adec1d2fe5180a57e9b2f3ebcd4261630">MessageAckHandler</a> = std::function&lt; void(const <a class="el" href="structlibe3_1_1MessageAck.html">MessageAck</a> &amp;)&gt;</td></tr>
+<tr class="separator:adec1d2fe5180a57e9b2f3ebcd4261630"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad1e039c5cbadc833a3fe4d1fb8fb203" id="r_aad1e039c5cbadc833a3fe4d1fb8fb203"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:aad1e039c5cbadc833a3fe4d1fb8fb203"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#aad1e039c5cbadc833a3fe4d1fb8fb203">EncodeResult</a> = tl::expected&lt; T, <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> &gt;</td></tr>
 <tr class="memdesc:aad1e039c5cbadc833a3fe4d1fb8fb203"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result type for encoding/decoding operations.  <br /></td></tr>
@@ -257,6 +269,11 @@ Enumerations</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:a6cf81048dab516aa29417bb0dc741d0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Link layer types (matches Python E3LinkLayer)  <a href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0e">More...</a><br /></td></tr>
 <tr class="separator:a6cf81048dab516aa29417bb0dc741d0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42d84c47e47cdcae78a4214ab412b2ec" id="r_a42d84c47e47cdcae78a4214ab412b2ec"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a> : uint8_t { <a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c">RAN</a> = 0
+, <a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ecaf6d65812e5d7fae71a473c63c22b9d4a">DAPP</a> = 1
+ }</td></tr>
+<tr class="memdesc:a42d84c47e47cdcae78a4214ab412b2ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Role this E3 endpoint plays in the protocol.  <a href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">More...</a><br /></td></tr>
+<tr class="separator:a42d84c47e47cdcae78a4214ab412b2ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a24bf966c6225dc47ac47d7a8a1986c40" id="r_a24bf966c6225dc47ac47d7a8a1986c40"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40">E3TransportLayer</a> : uint8_t { <a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40a74096394e1dbe6f5b2ac4d54d4e88c97">SCTP</a> = 0
 , <a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40ab136ef5f6a01d816991fe3cf7a6ac763">TCP</a> = 1
 , <a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40ac8660c6d72e7323867ec800d6bb953df">IPC</a> = 2
@@ -320,9 +337,9 @@ Functions</h2></td></tr>
 <tr class="memitem:acf6808999eb4ab8698c77b30b933b284" id="r_acf6808999eb4ab8698c77b30b933b284"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#acf6808999eb4ab8698c77b30b933b284">version</a> (int &amp;major, int &amp;minor, int &amp;patch) noexcept</td></tr>
 <tr class="memdesc:acf6808999eb4ab8698c77b30b933b284"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get <a class="el" href="namespacelibe3.html">libe3</a> version as components.  <br /></td></tr>
 <tr class="separator:acf6808999eb4ab8698c77b30b933b284"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5ada47bc605351d31fe904d874c45eac" id="r_a5ada47bc605351d31fe904d874c45eac"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classlibe3_1_1E3Connector.html">E3Connector</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a5ada47bc605351d31fe904d874c45eac">create_connector</a> (<a class="el" href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0e">E3LinkLayer</a> link_layer, <a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40">E3TransportLayer</a> transport_layer, const std::string &amp;setup_endpoint, const std::string &amp;inbound_endpoint, const std::string &amp;outbound_endpoint, uint16_t setup_port, uint16_t inbound_port, uint16_t outbound_port, size_t io_threads=2)</td></tr>
-<tr class="memdesc:a5ada47bc605351d31fe904d874c45eac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory function to create appropriate connector.  <br /></td></tr>
-<tr class="separator:a5ada47bc605351d31fe904d874c45eac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9ff798ade0521070e6332830f7d35bd" id="r_aa9ff798ade0521070e6332830f7d35bd"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classlibe3_1_1E3Connector.html">E3Connector</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#aa9ff798ade0521070e6332830f7d35bd">create_connector</a> (<a class="el" href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0e">E3LinkLayer</a> link_layer, <a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40">E3TransportLayer</a> transport_layer, const std::string &amp;setup_endpoint, const std::string &amp;inbound_endpoint, const std::string &amp;outbound_endpoint, uint16_t setup_port, uint16_t inbound_port, uint16_t outbound_port, size_t io_threads=2, <a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a> role=<a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c">E3Role::RAN</a>)</td></tr>
+<tr class="memdesc:aa9ff798ade0521070e6332830f7d35bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory function to create appropriate connector.  <br /></td></tr>
+<tr class="separator:aa9ff798ade0521070e6332830f7d35bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3fd9e4c182481cd094c35bab83ede638" id="r_a3fd9e4c182481cd094c35bab83ede638"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classlibe3_1_1E3Encoder.html">E3Encoder</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a3fd9e4c182481cd094c35bab83ede638">create_encoder</a> (<a class="el" href="namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444">EncodingFormat</a> format)</td></tr>
 <tr class="memdesc:a3fd9e4c182481cd094c35bab83ede638"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory function to create appropriate encoder.  <br /></td></tr>
 <tr class="separator:a3fd9e4c182481cd094c35bab83ede638"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -347,6 +364,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a7cd0e90b0c01822a4a7fbe5b64842fc1" id="r_a7cd0e90b0c01822a4a7fbe5b64842fc1"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a7cd0e90b0c01822a4a7fbe5b64842fc1">agent_state_to_string</a> (<a class="el" href="namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1fe">AgentState</a> state) noexcept</td></tr>
 <tr class="memdesc:a7cd0e90b0c01822a4a7fbe5b64842fc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert AgentState to string representation.  <br /></td></tr>
 <tr class="separator:a7cd0e90b0c01822a4a7fbe5b64842fc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f2cb4f48ecbef9a7aeb214aaf885202" id="r_a7f2cb4f48ecbef9a7aeb214aaf885202"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a7f2cb4f48ecbef9a7aeb214aaf885202">role_to_string</a> (<a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a> role) noexcept</td></tr>
+<tr class="memdesc:a7f2cb4f48ecbef9a7aeb214aaf885202"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert E3Role to string representation.  <br /></td></tr>
+<tr class="separator:a7f2cb4f48ecbef9a7aeb214aaf885202"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa315ed8a2ba72534a600f7d9305b5ff8" id="r_aa315ed8a2ba72534a600f7d9305b5ff8"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#aa315ed8a2ba72534a600f7d9305b5ff8">link_layer_to_string</a> (<a class="el" href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0e">E3LinkLayer</a> layer) noexcept</td></tr>
 <tr class="memdesc:aa315ed8a2ba72534a600f7d9305b5ff8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert E3LinkLayer to string representation.  <br /></td></tr>
 <tr class="separator:aa315ed8a2ba72534a600f7d9305b5ff8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -388,7 +408,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>Callback for incoming dApp reports (dApp → RAN). Set before start() to handle reports. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8hpp_source.html#l00027">27</a> of file <a class="el" href="e3__agent_8hpp_source.html">e3_agent.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8hpp_source.html#l00029">29</a> of file <a class="el" href="e3__agent_8hpp_source.html">e3_agent.hpp</a>.</p>
 
 </div>
 </div>
@@ -405,7 +425,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>Callback when dApp status changes (connect, disconnect, subscribe, unsubscribe). </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8hpp_source.html#l00030">30</a> of file <a class="el" href="e3__agent_8hpp_source.html">e3_agent.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8hpp_source.html#l00032">32</a> of file <a class="el" href="e3__agent_8hpp_source.html">e3_agent.hpp</a>.</p>
 
 </div>
 </div>
@@ -426,6 +446,22 @@ template&lt;typename T &gt; </div>
 <p>Result type for encoding/decoding operations. </p>
 
 <p class="definition">Definition at line <a class="el" href="e3__encoder_8hpp_source.html#l00025">25</a> of file <a class="el" href="e3__encoder_8hpp_source.html">e3_encoder.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a8f55e4b49ec33973d8157c9992285149" name="a8f55e4b49ec33973d8157c9992285149"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f55e4b49ec33973d8157c9992285149">&#9670;&#160;</a></span>IndicationHandler</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::function&lt; void(const <a class="el" href="structlibe3_1_1IndicationMessage.html">IndicationMessage</a> &amp;)&gt; <a class="el" href="namespacelibe3.html#a8f55e4b49ec33973d8157c9992285149">libe3::IndicationHandler</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="e3__agent_8hpp_source.html#l00037">37</a> of file <a class="el" href="e3__agent_8hpp_source.html">e3_agent.hpp</a>.</p>
 
 </div>
 </div>
@@ -455,6 +491,22 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
+<a id="adec1d2fe5180a57e9b2f3ebcd4261630" name="adec1d2fe5180a57e9b2f3ebcd4261630"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adec1d2fe5180a57e9b2f3ebcd4261630">&#9670;&#160;</a></span>MessageAckHandler</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::function&lt; void(const <a class="el" href="structlibe3_1_1MessageAck.html">MessageAck</a> &amp;)&gt; <a class="el" href="namespacelibe3.html#adec1d2fe5180a57e9b2f3ebcd4261630">libe3::MessageAckHandler</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="e3__agent_8hpp_source.html#l00039">39</a> of file <a class="el" href="e3__agent_8hpp_source.html">e3_agent.hpp</a>.</p>
+
+</div>
+</div>
 <a id="a96fc2d6b828c73ec46d6acbd03393486" name="a96fc2d6b828c73ec46d6acbd03393486"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a96fc2d6b828c73ec46d6acbd03393486">&#9670;&#160;</a></span>PduChoice</h2>
 
@@ -469,7 +521,7 @@ template&lt;typename T &gt; </div>
 
 <p>Generic E3AP PDU using std::variant for type-safe union. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00279">279</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00294">294</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -487,7 +539,23 @@ template&lt;typename T &gt; </div>
 
 <p>Callback types for <a class="el" href="classlibe3_1_1E3Interface.html" title="E3Interface - Internal protocol coordination.">E3Interface</a> events. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00034">34</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00039">39</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a4fcfc9952b728e760c5beb5877438e23" name="a4fcfc9952b728e760c5beb5877438e23"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4fcfc9952b728e760c5beb5877438e23">&#9670;&#160;</a></span>SetupResponseHandler</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::function&lt; void(const <a class="el" href="structlibe3_1_1SetupResponse.html">SetupResponse</a> &amp;)&gt; <a class="el" href="namespacelibe3.html#a4fcfc9952b728e760c5beb5877438e23">libe3::SetupResponseHandler</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="e3__agent_8hpp_source.html#l00035">35</a> of file <a class="el" href="e3__agent_8hpp_source.html">e3_agent.hpp</a>.</p>
 
 </div>
 </div>
@@ -547,7 +615,23 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00035">35</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00040">40</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a84fc3dc4ee58abf42f32b86e7bd23567" name="a84fc3dc4ee58abf42f32b86e7bd23567"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84fc3dc4ee58abf42f32b86e7bd23567">&#9670;&#160;</a></span>SubscriptionResponseHandler</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::function&lt; void(const <a class="el" href="structlibe3_1_1SubscriptionResponse.html">SubscriptionResponse</a> &amp;)&gt; <a class="el" href="namespacelibe3.html#a84fc3dc4ee58abf42f32b86e7bd23567">libe3::SubscriptionResponseHandler</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="e3__agent_8hpp_source.html#l00036">36</a> of file <a class="el" href="e3__agent_8hpp_source.html">e3_agent.hpp</a>.</p>
 
 </div>
 </div>
@@ -565,7 +649,23 @@ template&lt;typename T &gt; </div>
 
 <p>Timestamp type using steady_clock for monotonic time. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00409">409</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00432">432</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a72f225a3f390d8ac8015806a178e1703" name="a72f225a3f390d8ac8015806a178e1703"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72f225a3f390d8ac8015806a178e1703">&#9670;&#160;</a></span>XAppControlHandler</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::function&lt; void(const <a class="el" href="structlibe3_1_1XAppControlAction.html">XAppControlAction</a> &amp;)&gt; <a class="el" href="namespacelibe3.html#a72f225a3f390d8ac8015806a178e1703">libe3::XAppControlHandler</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="e3__agent_8hpp_source.html#l00038">38</a> of file <a class="el" href="e3__agent_8hpp_source.html">e3_agent.hpp</a>.</p>
 
 </div>
 </div>
@@ -600,7 +700,7 @@ template&lt;typename T &gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00056">56</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00071">71</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -644,7 +744,7 @@ template&lt;typename T &gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00090">90</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00105">105</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -680,6 +780,40 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
+<a id="a42d84c47e47cdcae78a4214ab412b2ec" name="a42d84c47e47cdcae78a4214ab412b2ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42d84c47e47cdcae78a4214ab412b2ec">&#9670;&#160;</a></span>E3Role</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">libe3::E3Role</a> : uint8_t</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Role this E3 endpoint plays in the protocol. </p>
+<p>RAN is the existing behaviour: the agent binds the setup/inbound/outbound sockets and answers dApp requests. DAPP is the symmetric client side: the agent connects to those endpoints and drives setup/subscribe/release.</p>
+<p>Default is RAN so that any caller compiled against earlier <a class="el" href="namespacelibe3.html">libe3</a> headers keeps today's behaviour. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c" name="a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c"></a>RAN&#160;</td><td class="fielddoc"><p>RAN function (binds sockets; today's only behaviour) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a42d84c47e47cdcae78a4214ab412b2ecaf6d65812e5d7fae71a473c63c22b9d4a" name="a42d84c47e47cdcae78a4214ab412b2ecaf6d65812e5d7fae71a473c63c22b9d4a"></a>DAPP&#160;</td><td class="fielddoc"><p>dApp (connects to a RAN agent) </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00054">54</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
 <a id="a24bf966c6225dc47ac47d7a8a1986c40" name="a24bf966c6225dc47ac47d7a8a1986c40"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a24bf966c6225dc47ac47d7a8a1986c40">&#9670;&#160;</a></span>E3TransportLayer</h2>
 
@@ -710,7 +844,7 @@ template&lt;typename T &gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00047">47</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00062">62</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -772,7 +906,7 @@ template&lt;typename T &gt; </div>
 <tr><td class="fieldname"><a id="a0f455c3a80f115f8aa8ad664850d6bb3a4951c208dce6a888038bdc3926e5636f" name="a0f455c3a80f115f8aa8ad664850d6bb3a4951c208dce6a888038bdc3926e5636f"></a>LIBE3_ERROR_CODE_LIST&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00105">105</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00120">120</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -845,7 +979,7 @@ template&lt;typename T &gt; </div>
 <tr><td class="fieldname"><a id="a675f37e2936d707807212fcd3cfa8185ae63ef0287e5a1f4b52c19f8f12b247ca" name="a675f37e2936d707807212fcd3cfa8185ae63ef0287e5a1f4b52c19f8f12b247ca"></a>MESSAGE_ACK&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00073">73</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00088">88</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -877,7 +1011,7 @@ template&lt;typename T &gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00065">65</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00080">80</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -908,7 +1042,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert ActionType to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00453">453</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00476">476</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -938,7 +1072,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert AgentState to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00506">506</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00529">529</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -972,8 +1106,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a5ada47bc605351d31fe904d874c45eac" name="a5ada47bc605351d31fe904d874c45eac"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5ada47bc605351d31fe904d874c45eac">&#9670;&#160;</a></span>create_connector()</h2>
+<a id="aa9ff798ade0521070e6332830f7d35bd" name="aa9ff798ade0521070e6332830f7d35bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9ff798ade0521070e6332830f7d35bd">&#9670;&#160;</a></span>create_connector()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1030,7 +1164,13 @@ template&lt;typename T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>io_threads</em> = <code>2</code>&#160;</td>
+          <td class="paramname"><em>io_threads</em> = <code>2</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a>&#160;</td>
+          <td class="paramname"><em>role</em> = <code><a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c">E3Role::RAN</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1115,7 +1255,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert ErrorCode to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00476">476</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00499">499</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1145,7 +1285,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert ErrorCode to string name (C++ wrapper) </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00114">114</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00129">129</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1175,7 +1315,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert E3LinkLayer to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00523">523</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00557">557</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1205,7 +1345,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert PduType to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00433">433</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00456">456</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1235,7 +1375,37 @@ template&lt;typename T &gt; </div>
 
 <p>Convert ResponseCode to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00465">465</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00488">488</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a7f2cb4f48ecbef9a7aeb214aaf885202" name="a7f2cb4f48ecbef9a7aeb214aaf885202"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f2cb4f48ecbef9a7aeb214aaf885202">&#9670;&#160;</a></span>role_to_string()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * libe3::role_to_string </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a>&#160;</td>
+          <td class="paramname"><em>role</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Convert E3Role to string representation. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00546">546</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1265,7 +1435,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert E3TransportLayer to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00534">534</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00568">568</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1401,7 +1571,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00129">129</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00144">144</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1425,7 +1595,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00132">132</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00147">147</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1449,7 +1619,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00125">125</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00140">140</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1473,7 +1643,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00126">126</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00141">141</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1497,7 +1667,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00124">124</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00139">139</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1521,7 +1691,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00128">128</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00143">143</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1545,7 +1715,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00127">127</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00142">142</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

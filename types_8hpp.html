@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.4</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -206,6 +206,11 @@ Enumerations</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:a6cf81048dab516aa29417bb0dc741d0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Link layer types (matches Python E3LinkLayer)  <a href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0e">More...</a><br /></td></tr>
 <tr class="separator:a6cf81048dab516aa29417bb0dc741d0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42d84c47e47cdcae78a4214ab412b2ec" id="r_a42d84c47e47cdcae78a4214ab412b2ec"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">libe3::E3Role</a> : uint8_t { <a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c">libe3::RAN</a> = 0
+, <a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ecaf6d65812e5d7fae71a473c63c22b9d4a">libe3::DAPP</a> = 1
+ }</td></tr>
+<tr class="memdesc:a42d84c47e47cdcae78a4214ab412b2ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Role this E3 endpoint plays in the protocol.  <a href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">More...</a><br /></td></tr>
+<tr class="separator:a42d84c47e47cdcae78a4214ab412b2ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a24bf966c6225dc47ac47d7a8a1986c40" id="r_a24bf966c6225dc47ac47d7a8a1986c40"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40">libe3::E3TransportLayer</a> : uint8_t { <a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40a74096394e1dbe6f5b2ac4d54d4e88c97">libe3::SCTP</a> = 0
 , <a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40ab136ef5f6a01d816991fe3cf7a6ac763">libe3::TCP</a> = 1
 , <a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40ac8660c6d72e7323867ec800d6bb953df">libe3::IPC</a> = 2
@@ -281,6 +286,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a7cd0e90b0c01822a4a7fbe5b64842fc1" id="r_a7cd0e90b0c01822a4a7fbe5b64842fc1"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a7cd0e90b0c01822a4a7fbe5b64842fc1">libe3::agent_state_to_string</a> (<a class="el" href="namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1fe">AgentState</a> state) noexcept</td></tr>
 <tr class="memdesc:a7cd0e90b0c01822a4a7fbe5b64842fc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert AgentState to string representation.  <br /></td></tr>
 <tr class="separator:a7cd0e90b0c01822a4a7fbe5b64842fc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f2cb4f48ecbef9a7aeb214aaf885202" id="r_a7f2cb4f48ecbef9a7aeb214aaf885202"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a7f2cb4f48ecbef9a7aeb214aaf885202">libe3::role_to_string</a> (<a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a> role) noexcept</td></tr>
+<tr class="memdesc:a7f2cb4f48ecbef9a7aeb214aaf885202"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert E3Role to string representation.  <br /></td></tr>
+<tr class="separator:a7f2cb4f48ecbef9a7aeb214aaf885202"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa315ed8a2ba72534a600f7d9305b5ff8" id="r_aa315ed8a2ba72534a600f7d9305b5ff8"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#aa315ed8a2ba72534a600f7d9305b5ff8">libe3::link_layer_to_string</a> (<a class="el" href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0e">E3LinkLayer</a> layer) noexcept</td></tr>
 <tr class="memdesc:aa315ed8a2ba72534a600f7d9305b5ff8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert E3LinkLayer to string representation.  <br /></td></tr>
 <tr class="separator:aa315ed8a2ba72534a600f7d9305b5ff8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -338,7 +346,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00106">106</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00121">121</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -368,7 +376,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00106">106</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00121">121</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

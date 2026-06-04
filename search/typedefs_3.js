@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['pduchoice_0',['PduChoice',['../namespacelibe3.html#a96fc2d6b828c73ec46d6acbd03393486',1,'libe3']]]
+  ['logcallback_0',['LogCallback',['../namespacelibe3.html#a2ae6d18d3575e3d816ad3dd4a3c8ac86',1,'libe3']]]
 ];

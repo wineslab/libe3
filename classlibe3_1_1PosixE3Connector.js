@@ -7,11 +7,16 @@ var classlibe3_1_1PosixE3Connector =
     [ "link_layer", "classlibe3_1_1PosixE3Connector.html#a00b3eb462edc5ba4216db2d11034149c", null ],
     [ "receive", "classlibe3_1_1PosixE3Connector.html#a78be8b3116078571b637153efb88b96d", null ],
     [ "recv_setup_request", "classlibe3_1_1PosixE3Connector.html#a522da91e27c5c45d132a08fdda32fba9", null ],
+    [ "recv_setup_response_client", "classlibe3_1_1PosixE3Connector.html#aa1148301c1383f0a68681a6e529efc9b", null ],
     [ "send", "classlibe3_1_1PosixE3Connector.html#a7a3d61abfe45806f412e20aeaeaeb4a9", null ],
     [ "send_response", "classlibe3_1_1PosixE3Connector.html#aba3ef581574f53cc9831325dc6cb1ec9", null ],
+    [ "send_setup_request_client", "classlibe3_1_1PosixE3Connector.html#a050f26143b9390d56ff01ec94eebfead", null ],
     [ "setup_inbound_connection", "classlibe3_1_1PosixE3Connector.html#aebc794e9cf5f6e92a817610fc1c1a202", null ],
+    [ "setup_inbound_connection_client", "classlibe3_1_1PosixE3Connector.html#adbe1526c1f351a3e6e6bf971ac94ee53", null ],
     [ "setup_initial_connection", "classlibe3_1_1PosixE3Connector.html#ae0b5bed5d0bde736bfc8cee16bb57bb7", null ],
+    [ "setup_initial_connection_client", "classlibe3_1_1PosixE3Connector.html#a821510b86a0d1aec24a7feafc3309c01", null ],
     [ "setup_outbound_connection", "classlibe3_1_1PosixE3Connector.html#af87b02230d7feff391c9eba51a568814", null ],
+    [ "setup_outbound_connection_client", "classlibe3_1_1PosixE3Connector.html#ad733335f58c2b16785cfbe6b03ce78b5", null ],
     [ "shutdown", "classlibe3_1_1PosixE3Connector.html#ad24cf60976a943de987c1cb0e3f64b8f", null ],
     [ "transport_layer", "classlibe3_1_1PosixE3Connector.html#a8853039ece3574b0ad72f7cc27fcf8c8", null ]
 ];

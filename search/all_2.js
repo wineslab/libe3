@@ -20,7 +20,7 @@ var searchData=
   ['control_5fids_5fs_17',['control_ids_s',['../structe3__service__model__handle__s.html#a6411eebc7d84a4422cc3dc77dee2edc9',1,'e3_service_model_handle_s']]],
   ['copy_5fvector_5fu32_5fto_5fc_18',['copy_vector_u32_to_c',['../c__api_8cpp.html#af59fba4576569e2106460af906ba9d31',1,'c_api.cpp']]],
   ['cpu_5frelax_19',['cpu_relax',['../namespacelibe3.html#a979479d8033aec7c1268d3a5af3223c7',1,'libe3']]],
-  ['create_5fconnector_20',['create_connector',['../namespacelibe3.html#a5ada47bc605351d31fe904d874c45eac',1,'libe3']]],
+  ['create_5fconnector_20',['create_connector',['../namespacelibe3.html#aa9ff798ade0521070e6332830f7d35bd',1,'libe3']]],
   ['create_5fencoder_21',['create_encoder',['../namespacelibe3.html#a3fd9e4c182481cd094c35bab83ede638',1,'libe3']]],
   ['created_5ftime_22',['created_time',['../structlibe3_1_1SubscriptionEntry.html#a37511953fc0634a15ce4396d53cfccde',1,'libe3::SubscriptionEntry']]]
 ];

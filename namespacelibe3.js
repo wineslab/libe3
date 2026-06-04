@@ -4,6 +4,7 @@ var namespacelibe3 =
     [ "DAppControlAction", "structlibe3_1_1DAppControlAction.html", "structlibe3_1_1DAppControlAction" ],
     [ "DAppEntry", "structlibe3_1_1DAppEntry.html", "structlibe3_1_1DAppEntry" ],
     [ "DAppReport", "structlibe3_1_1DAppReport.html", "structlibe3_1_1DAppReport" ],
+    [ "DAppSubscriptionState", "classlibe3_1_1DAppSubscriptionState.html", "classlibe3_1_1DAppSubscriptionState" ],
     [ "E3Agent", "classlibe3_1_1E3Agent.html", "classlibe3_1_1E3Agent" ],
     [ "E3Config", "structlibe3_1_1E3Config.html", "structlibe3_1_1E3Config" ],
     [ "E3Connector", "classlibe3_1_1E3Connector.html", "classlibe3_1_1E3Connector" ],
@@ -36,13 +37,18 @@ var namespacelibe3 =
     [ "DAppReportHandler", "namespacelibe3.html#a9d1455ef59bceaa9cda598743f149d24", null ],
     [ "DAppStatusChangedHandler", "namespacelibe3.html#a42840d6cf3ad96e4396b617cb875d99f", null ],
     [ "EncodeResult", "namespacelibe3.html#aad1e039c5cbadc833a3fe4d1fb8fb203", null ],
+    [ "IndicationHandler", "namespacelibe3.html#a8f55e4b49ec33973d8157c9992285149", null ],
     [ "LogCallback", "namespacelibe3.html#a2ae6d18d3575e3d816ad3dd4a3c8ac86", null ],
+    [ "MessageAckHandler", "namespacelibe3.html#adec1d2fe5180a57e9b2f3ebcd4261630", null ],
     [ "PduChoice", "namespacelibe3.html#a96fc2d6b828c73ec46d6acbd03393486", null ],
     [ "SetupRequestHandler", "namespacelibe3.html#a2f4eae0463a7d611bf5a513fa9ecbd5d", null ],
+    [ "SetupResponseHandler", "namespacelibe3.html#a4fcfc9952b728e760c5beb5877438e23", null ],
     [ "SmFactory", "namespacelibe3.html#a3a19b9bc486782858770ce84489531b7", null ],
     [ "SmLifecycleCallback", "namespacelibe3.html#af5e9b5f4f68033c023906bd7cbde5d10", null ],
     [ "SubscriptionRequestHandler", "namespacelibe3.html#a9a3f6928b23cbd0dbb3999e24eb21963", null ],
+    [ "SubscriptionResponseHandler", "namespacelibe3.html#a84fc3dc4ee58abf42f32b86e7bd23567", null ],
     [ "Timestamp", "namespacelibe3.html#a7c745cdd0a014b7bcfa5d182a2d15ead", null ],
+    [ "XAppControlHandler", "namespacelibe3.html#a72f225a3f390d8ac8015806a178e1703", null ],
     [ "ActionType", "namespacelibe3.html#ac1c5533fc81586565ca7822bf00eee90", [
       [ "INSERT", "namespacelibe3.html#ac1c5533fc81586565ca7822bf00eee90a61ee777e7f71dc466c3b2c685d8d313b", null ],
       [ "UPDATE", "namespacelibe3.html#ac1c5533fc81586565ca7822bf00eee90a15a8022d0ed9cd9c2a2e756822703eb4", null ],
@@ -61,6 +67,10 @@ var namespacelibe3 =
     [ "E3LinkLayer", "namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0e", [
       [ "ZMQ", "namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea38cf8f016825407fb4e79e319d87bd5e", null ],
       [ "POSIX", "namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea0028405011724c5677faba466637b1e5", null ]
+    ] ],
+    [ "E3Role", "namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec", [
+      [ "RAN", "namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c", null ],
+      [ "DAPP", "namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ecaf6d65812e5d7fae71a473c63c22b9d4a", null ]
     ] ],
     [ "E3TransportLayer", "namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40", [
       [ "SCTP", "namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40a74096394e1dbe6f5b2ac4d54d4e88c97", null ],
@@ -103,13 +113,14 @@ var namespacelibe3 =
     [ "action_type_to_string", "namespacelibe3.html#a73e5843bd75cd76372b7bfff4894fcf5", null ],
     [ "agent_state_to_string", "namespacelibe3.html#a7cd0e90b0c01822a4a7fbe5b64842fc1", null ],
     [ "cpu_relax", "namespacelibe3.html#a979479d8033aec7c1268d3a5af3223c7", null ],
-    [ "create_connector", "namespacelibe3.html#a5ada47bc605351d31fe904d874c45eac", null ],
+    [ "create_connector", "namespacelibe3.html#aa9ff798ade0521070e6332830f7d35bd", null ],
     [ "create_encoder", "namespacelibe3.html#a3fd9e4c182481cd094c35bab83ede638", null ],
     [ "error_code_to_string", "namespacelibe3.html#aee2a6ca3a33bc7c111aa5256811a61eb", null ],
     [ "ErrorCodeToString", "namespacelibe3.html#a1e67547ed0251e57fee673a53a8e935f", null ],
     [ "link_layer_to_string", "namespacelibe3.html#aa315ed8a2ba72534a600f7d9305b5ff8", null ],
     [ "pdu_type_to_string", "namespacelibe3.html#a635f33e375e8c160ecd82d0759742300", null ],
     [ "response_code_to_string", "namespacelibe3.html#a91f7245a15a8f381b892d146355c0429", null ],
+    [ "role_to_string", "namespacelibe3.html#a7f2cb4f48ecbef9a7aeb214aaf885202", null ],
     [ "transport_layer_to_string", "namespacelibe3.html#a952757655773611abf6832b06ce0914d", null ],
     [ "version", "namespacelibe3.html#a85c33a76111e517c006df1b1fc0411bc", null ],
     [ "version", "namespacelibe3.html#acf6808999eb4ab8698c77b30b933b284", null ],

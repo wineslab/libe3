@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.4</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -147,6 +147,21 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad97ada69d4a0ef8a6c4b7085f048d03e" id="r_ad97ada69d4a0ef8a6c4b7085f048d03e"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Connector.html#ad97ada69d4a0ef8a6c4b7085f048d03e">send</a> (const std::vector&lt; uint8_t &gt; &amp;data)=0</td></tr>
 <tr class="memdesc:ad97ada69d4a0ef8a6c4b7085f048d03e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send data on the outbound channel.  <br /></td></tr>
 <tr class="separator:ad97ada69d4a0ef8a6c4b7085f048d03e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac64419ab3462491e8256634c9e4582db" id="r_ac64419ab3462491e8256634c9e4582db"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Connector.html#ac64419ab3462491e8256634c9e4582db">setup_initial_connection_client</a> ()</td></tr>
+<tr class="memdesc:ac64419ab3462491e8256634c9e4582db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connect the setup channel (dApp role: REQ connect).  <br /></td></tr>
+<tr class="separator:ac64419ab3462491e8256634c9e4582db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9ada1094b5a7755b7e8f0ae9dcc324c" id="r_af9ada1094b5a7755b7e8f0ae9dcc324c"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Connector.html#af9ada1094b5a7755b7e8f0ae9dcc324c">send_setup_request_client</a> (const std::vector&lt; uint8_t &gt; &amp;)</td></tr>
+<tr class="memdesc:af9ada1094b5a7755b7e8f0ae9dcc324c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a <a class="el" href="structlibe3_1_1SetupRequest.html" title="E3AP Setup Request structure.">SetupRequest</a> on the setup channel (dApp role).  <br /></td></tr>
+<tr class="separator:af9ada1094b5a7755b7e8f0ae9dcc324c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3e7eb321d9d16ec223a12f9ad4d31b9" id="r_ad3e7eb321d9d16ec223a12f9ad4d31b9"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Connector.html#ad3e7eb321d9d16ec223a12f9ad4d31b9">recv_setup_response_client</a> (std::vector&lt; uint8_t &gt; &amp;)</td></tr>
+<tr class="memdesc:ad3e7eb321d9d16ec223a12f9ad4d31b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receive a <a class="el" href="structlibe3_1_1SetupResponse.html" title="E3AP Setup Response structure.">SetupResponse</a> on the setup channel (dApp role).  <br /></td></tr>
+<tr class="separator:ad3e7eb321d9d16ec223a12f9ad4d31b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae506107a0cb3901bec193ba928238973" id="r_ae506107a0cb3901bec193ba928238973"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Connector.html#ae506107a0cb3901bec193ba928238973">setup_inbound_connection_client</a> ()</td></tr>
+<tr class="memdesc:ae506107a0cb3901bec193ba928238973"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connect the inbound channel (dApp role: SUB connect to the RAN's publisher endpoint).  <br /></td></tr>
+<tr class="separator:ae506107a0cb3901bec193ba928238973"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfba946cbc267f9380d541de0525adef" id="r_adfba946cbc267f9380d541de0525adef"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Connector.html#adfba946cbc267f9380d541de0525adef">setup_outbound_connection_client</a> ()</td></tr>
+<tr class="memdesc:adfba946cbc267f9380d541de0525adef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connect the outbound channel (dApp role: PUB connect to the RAN's subscriber endpoint).  <br /></td></tr>
+<tr class="separator:adfba946cbc267f9380d541de0525adef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7742bb39d7c324eff95c0ca2f60e26c5" id="r_a7742bb39d7c324eff95c0ca2f60e26c5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Connector.html#a7742bb39d7c324eff95c0ca2f60e26c5">dispose</a> ()=0</td></tr>
 <tr class="memdesc:a7742bb39d7c324eff95c0ca2f60e26c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clean up and release all resources.  <br /></td></tr>
 <tr class="separator:a7742bb39d7c324eff95c0ca2f60e26c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -162,6 +177,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a274eb381d4386c9c398b43d8714bbdbd" id="r_a274eb381d4386c9c398b43d8714bbdbd"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Connector.html#a274eb381d4386c9c398b43d8714bbdbd">is_connected</a> () const noexcept=0</td></tr>
 <tr class="memdesc:a274eb381d4386c9c398b43d8714bbdbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if connector is connected.  <br /></td></tr>
 <tr class="separator:a274eb381d4386c9c398b43d8714bbdbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1516d57fecd57b70f4da303a9663c90c" id="r_a1516d57fecd57b70f4da303a9663c90c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Connector.html#a1516d57fecd57b70f4da303a9663c90c">set_role</a> (<a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a> <a class="el" href="classlibe3_1_1E3Connector.html#ae18788c3f11f5bbbe1fbfbb7ba49a7af">role</a>) noexcept</td></tr>
+<tr class="memdesc:a1516d57fecd57b70f4da303a9663c90c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set role (RAN or DAPP). Affects bind vs connect direction and cleanup behaviour. Must be set before any setup_* call. Default RAN.  <br /></td></tr>
+<tr class="separator:a1516d57fecd57b70f4da303a9663c90c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae18788c3f11f5bbbe1fbfbb7ba49a7af" id="r_ae18788c3f11f5bbbe1fbfbb7ba49a7af"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Connector.html#ae18788c3f11f5bbbe1fbfbb7ba49a7af">role</a> () const noexcept</td></tr>
+<tr class="memdesc:ae18788c3f11f5bbbe1fbfbb7ba49a7af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current role.  <br /></td></tr>
+<tr class="separator:ae18788c3f11f5bbbe1fbfbb7ba49a7af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51b45f40452e21a57d900cb036da692e" id="r_a51b45f40452e21a57d900cb036da692e"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Connector.html#a51b45f40452e21a57d900cb036da692e">setup_endpoint</a> () const noexcept</td></tr>
 <tr class="memdesc:a51b45f40452e21a57d900cb036da692e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get setup endpoint.  <br /></td></tr>
 <tr class="separator:a51b45f40452e21a57d900cb036da692e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -185,6 +206,8 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a21d8f22cf14920aed9cc31815fa287d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a22c5fef59ef90a5a9b0c11ed540d1819" id="r_a22c5fef59ef90a5a9b0c11ed540d1819"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Connector.html#a22c5fef59ef90a5a9b0c11ed540d1819">outbound_endpoint_</a></td></tr>
 <tr class="separator:a22c5fef59ef90a5a9b0c11ed540d1819"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15706dd6a95c019900ab528e39b4760d" id="r_a15706dd6a95c019900ab528e39b4760d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Connector.html#a15706dd6a95c019900ab528e39b4760d">role_</a> {<a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c">E3Role::RAN</a>}</td></tr>
+<tr class="separator:a15706dd6a95c019900ab528e39b4760d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Abstract base class for E3AP transport connectors. </p>
@@ -353,7 +376,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Get inbound endpoint. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00132">132</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00190">190</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -492,7 +515,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Get outbound endpoint. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00137">137</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00195">195</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -570,6 +593,67 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="ad3e7eb321d9d16ec223a12f9ad4d31b9" name="ad3e7eb321d9d16ec223a12f9ad4d31b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3e7eb321d9d16ec223a12f9ad4d31b9">&#9670;&#160;</a></span>recv_setup_response_client()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int libe3::E3Connector::recv_setup_response_client </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; uint8_t &gt; &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Receive a <a class="el" href="structlibe3_1_1SetupResponse.html" title="E3AP Setup Response structure.">SetupResponse</a> on the setup channel (dApp role). </p>
+
+<p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#aa1148301c1383f0a68681a6e529efc9b">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#aeaa674b75ad9c9ac9e8509e4c2a1c668">libe3::ZmqE3Connector</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00123">123</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ae18788c3f11f5bbbe1fbfbb7ba49a7af" name="ae18788c3f11f5bbbe1fbfbb7ba49a7af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae18788c3f11f5bbbe1fbfbb7ba49a7af">&#9670;&#160;</a></span>role()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a> libe3::E3Connector::role </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get current role. </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00180">180</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+
+</div>
+</div>
 <a id="ad97ada69d4a0ef8a6c4b7085f048d03e" name="ad97ada69d4a0ef8a6c4b7085f048d03e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad97ada69d4a0ef8a6c4b7085f048d03e">&#9670;&#160;</a></span>send()</h2>
 
@@ -644,6 +728,68 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="af9ada1094b5a7755b7e8f0ae9dcc324c" name="af9ada1094b5a7755b7e8f0ae9dcc324c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9ada1094b5a7755b7e8f0ae9dcc324c">&#9670;&#160;</a></span>send_setup_request_client()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> libe3::E3Connector::send_setup_request_client </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; uint8_t &gt; &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send a <a class="el" href="structlibe3_1_1SetupRequest.html" title="E3AP Setup Request structure.">SetupRequest</a> on the setup channel (dApp role). </p>
+
+<p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#a050f26143b9390d56ff01ec94eebfead">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#a5d8b4a806fb8bac843e01884652c62bd">libe3::ZmqE3Connector</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00116">116</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a1516d57fecd57b70f4da303a9663c90c" name="a1516d57fecd57b70f4da303a9663c90c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1516d57fecd57b70f4da303a9663c90c">&#9670;&#160;</a></span>set_role()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void libe3::E3Connector::set_role </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a>&#160;</td>
+          <td class="paramname"><em>role</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set role (RAN or DAPP). Affects bind vs connect direction and cleanup behaviour. Must be set before any setup_* call. Default RAN. </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00175">175</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+
+</div>
+</div>
 <a id="a51b45f40452e21a57d900cb036da692e" name="a51b45f40452e21a57d900cb036da692e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a51b45f40452e21a57d900cb036da692e">&#9670;&#160;</a></span>setup_endpoint()</h2>
 
@@ -669,7 +815,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Get setup endpoint. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00127">127</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00185">185</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -703,6 +849,37 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="ae506107a0cb3901bec193ba928238973" name="ae506107a0cb3901bec193ba928238973"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae506107a0cb3901bec193ba928238973">&#9670;&#160;</a></span>setup_inbound_connection_client()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> libe3::E3Connector::setup_inbound_connection_client </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Connect the inbound channel (dApp role: SUB connect to the RAN's publisher endpoint). </p>
+
+<p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#adbe1526c1f351a3e6e6bf971ac94ee53">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#ac4011323bb13d364a645b970d64540d0">libe3::ZmqE3Connector</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00131">131</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+
+</div>
+</div>
 <a id="ade5a39793a7868d70c809323fabe0929" name="ade5a39793a7868d70c809323fabe0929"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ade5a39793a7868d70c809323fabe0929">&#9670;&#160;</a></span>setup_initial_connection()</h2>
 
@@ -730,6 +907,37 @@ Protected Attributes</h2></td></tr>
 <p>This establishes the REQ/REP channel used for E3 Setup procedures. </p><dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success, error code otherwise </dd></dl>
 
 <p>Implemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#ae0b5bed5d0bde736bfc8cee16bb57bb7">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#a96a3a5e417f7d26d64174f71a1fdc4c2">libe3::ZmqE3Connector</a>.</p>
+
+</div>
+</div>
+<a id="ac64419ab3462491e8256634c9e4582db" name="ac64419ab3462491e8256634c9e4582db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac64419ab3462491e8256634c9e4582db">&#9670;&#160;</a></span>setup_initial_connection_client()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> libe3::E3Connector::setup_initial_connection_client </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Connect the setup channel (dApp role: REQ connect). </p>
+
+<p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#a821510b86a0d1aec24a7feafc3309c01">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#a96fe3afe2ba766b96fb795daca3f4d66">libe3::ZmqE3Connector</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00109">109</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -763,6 +971,37 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="adfba946cbc267f9380d541de0525adef" name="adfba946cbc267f9380d541de0525adef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adfba946cbc267f9380d541de0525adef">&#9670;&#160;</a></span>setup_outbound_connection_client()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> libe3::E3Connector::setup_outbound_connection_client </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Connect the outbound channel (dApp role: PUB connect to the RAN's subscriber endpoint). </p>
+
+<p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#ad733335f58c2b16785cfbe6b03ce78b5">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#a0b0349e33978730857f5f2be77ce6313">libe3::ZmqE3Connector</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00139">139</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+
+</div>
+</div>
 <a id="a553d5da93e1cf9ac15e5d2aea433be7c" name="a553d5da93e1cf9ac15e5d2aea433be7c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a553d5da93e1cf9ac15e5d2aea433be7c">&#9670;&#160;</a></span>shutdown()</h2>
 
@@ -791,7 +1030,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#ad24cf60976a943de987c1cb0e3f64b8f">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#aec115f18a6d0df057b6da23624d2c04f">libe3::ZmqE3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00107">107</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00154">154</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -845,7 +1084,7 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00143">143</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00201">201</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -869,7 +1108,31 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00144">144</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00202">202</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a15706dd6a95c019900ab528e39b4760d" name="a15706dd6a95c019900ab528e39b4760d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15706dd6a95c019900ab528e39b4760d">&#9670;&#160;</a></span>role_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a> libe3::E3Connector::role_ {<a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c">E3Role::RAN</a>}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00203">203</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -893,7 +1156,7 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00142">142</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00200">200</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>

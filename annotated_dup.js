@@ -5,6 +5,7 @@ var annotated_dup =
       [ "DAppControlAction", "structlibe3_1_1DAppControlAction.html", "structlibe3_1_1DAppControlAction" ],
       [ "DAppEntry", "structlibe3_1_1DAppEntry.html", "structlibe3_1_1DAppEntry" ],
       [ "DAppReport", "structlibe3_1_1DAppReport.html", "structlibe3_1_1DAppReport" ],
+      [ "DAppSubscriptionState", "classlibe3_1_1DAppSubscriptionState.html", "classlibe3_1_1DAppSubscriptionState" ],
       [ "E3Agent", "classlibe3_1_1E3Agent.html", "classlibe3_1_1E3Agent" ],
       [ "E3Config", "structlibe3_1_1E3Config.html", "structlibe3_1_1E3Config" ],
       [ "E3Connector", "classlibe3_1_1E3Connector.html", "classlibe3_1_1E3Connector" ],
