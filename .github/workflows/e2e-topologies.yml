@@ -1,0 +1,253 @@
+name: E2E Topologies (multi-dApp / multi-RAN)
+
+# Process-level end-to-end tests that validate the multi-peer capabilities of
+# the dApp role (issue #15):
+#   1) 1 RAN - 1 dApp   (baseline)
+#   2) 1 RAN - 2 dApps  (a RAN serves multiple dApps; told apart by subscription_id)
+#   3) 2 RANs - 1 dApp  (a dApp drives multiple RANs; told apart by ran_identifier)
+#
+# Each topology launches the real example binaries as separate processes over
+# zmq, for both ipc and tcp transports. RANs are given distinct addresses:
+# distinct IPC socket dirs over ipc, distinct port offsets over tcp.
+#
+# Indication "age" (transport + inbound queueing latency) is reported per dApp
+# but is NOT a hard gate — ZMQ_CONFLATE was removed to let a RAN fan out to many
+# dApps, and these tests surface any resulting queueing growth (flagged >1ms).
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-topologies-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  topologies:
+    name: "Topologies (zmq/${{ matrix.transport }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        transport: [ipc, tcp]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          chmod +x ./build_libe3
+          ./build_libe3 -I
+
+      - name: Build Release with examples
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j $(nproc)
+
+      - name: Prepare IPC base directory
+        run: |
+          sudo mkdir -p /tmp/dapps
+          sudo chmod 777 /tmp/dapps
+
+      - name: Run topologies (zmq/${{ matrix.transport }})
+        id: run
+        env:
+          T: ${{ matrix.transport }}
+        run: |
+          set -e
+          SUMMARY=/tmp/summary_${T}.md
+          echo "### zmq/${T}" > "$SUMMARY"
+          echo "" >> "$SUMMARY"
+
+          AGENT=./build/example_simple_agent
+          DAPP=./build/example_simple_dapp
+          fail=0
+
+          # Emit a per-dApp queueing note (report-only) into the summary.
+          report_age() {  # $1 = dApp log file, $2 = label
+            grep -E "peer=.* indications=" "$1" | while read -r line; do
+              echo "  - \`$2\` $line" >> "$SUMMARY"
+            done
+            if grep -q "indication queueing >1ms" "$1"; then
+              echo "  - ⚠️ \`$2\` indication queueing exceeded 1ms (report-only)" >> "$SUMMARY"
+            fi
+          }
+
+          ############################################################
+          # Topology 1: 1 RAN - 1 dApp (baseline)
+          ############################################################
+          echo "==== Topology 1: 1 RAN - 1 dApp ===="
+          if [ "$T" = ipc ]; then mkdir -p /tmp/t11 && chmod 777 /tmp/t11; A11="-d /tmp/t11"; D11="-d /tmp/t11"; else A11=""; D11=""; fi
+          $AGENT -t $T $A11 -r ran-solo > /tmp/a11.log 2>&1 &
+          AG=$!
+          sleep 1
+          set +e
+          timeout 30s $DAPP -t $T $D11 -c --timed 12 > /tmp/d11.log 2>&1
+          RC=$?
+          set -e
+          kill -INT $AG 2>/dev/null || true; wait $AG 2>/dev/null || true
+          T1_IND=$(grep -c "Indication #" /tmp/d11.log || true)
+          if [ "$RC" -ne 0 ] || [ "$T1_IND" -eq 0 ]; then
+            echo "FAIL topo1: dApp exit=$RC indications=$T1_IND"
+            echo "- ❌ **1 RAN - 1 dApp**: exit=\`$RC\` indications=\`$T1_IND\`" >> "$SUMMARY"
+            fail=1
+          else
+            echo "- ✅ **1 RAN - 1 dApp**: indications=\`$T1_IND\`" >> "$SUMMARY"
+            report_age /tmp/d11.log dapp
+          fi
+
+          ############################################################
+          # Topology 2: 1 RAN - 2 dApps (distinct subscription_ids)
+          ############################################################
+          echo "==== Topology 2: 1 RAN - 2 dApps ===="
+          if [ "$T" = ipc ]; then mkdir -p /tmp/t12 && chmod 777 /tmp/t12; A12="-d /tmp/t12"; D12="-d /tmp/t12"; else A12=""; D12=""; fi
+          $AGENT -t $T $A12 -r ran-shared > /tmp/a12.log 2>&1 &
+          AG=$!
+          sleep 1
+          set +e
+          timeout 30s $DAPP -t $T $D12 --timed 12 > /tmp/d12_1.log 2>&1 &
+          D1=$!
+          sleep 1
+          timeout 30s $DAPP -t $T $D12 --timed 12 > /tmp/d12_2.log 2>&1 &
+          D2=$!
+          wait $D1; R1=$?
+          wait $D2; R2=$?
+          set -e
+          kill -INT $AG 2>/dev/null || true; wait $AG 2>/dev/null || true
+          I1=$(grep -c "Indication #" /tmp/d12_1.log || true)
+          I2=$(grep -c "Indication #" /tmp/d12_2.log || true)
+          S1=$(grep -oE "subscription_id=[0-9]+" /tmp/d12_1.log | head -1 | cut -d= -f2)
+          S2=$(grep -oE "subscription_id=[0-9]+" /tmp/d12_2.log | head -1 | cut -d= -f2)
+          MAXDAPPS=$(grep -oE "dApps: [0-9]+" /tmp/a12.log | grep -oE "[0-9]+" | sort -n | tail -1)
+          ok2=1
+          [ "${R1:-1}" -eq 0 ] && [ "${R2:-1}" -eq 0 ] || ok2=0
+          [ "${I1:-0}" -gt 0 ] && [ "${I2:-0}" -gt 0 ] || ok2=0
+          [ -n "$S1" ] && [ -n "$S2" ] && [ "$S1" != "$S2" ] || ok2=0
+          [ "${MAXDAPPS:-0}" -ge 2 ] || ok2=0
+          if [ "$ok2" -eq 1 ]; then
+            echo "- ✅ **1 RAN - 2 dApps**: dApp#1 ind=\`$I1\` sub=\`$S1\`, dApp#2 ind=\`$I2\` sub=\`$S2\`, RAN saw \`$MAXDAPPS\` dApps" >> "$SUMMARY"
+            report_age /tmp/d12_1.log dapp1
+            report_age /tmp/d12_2.log dapp2
+          else
+            echo "FAIL topo2: R1=$R1 R2=$R2 I1=$I1 I2=$I2 S1=$S1 S2=$S2 maxDapps=$MAXDAPPS"
+            echo "- ❌ **1 RAN - 2 dApps**: ind=(\`$I1\`,\`$I2\`) sub=(\`$S1\`,\`$S2\`) RAN-dApps=\`$MAXDAPPS\`" >> "$SUMMARY"
+            fail=1
+          fi
+
+          ############################################################
+          # Topology 3: 2 RANs - 1 dApp (distinct ran_identifiers)
+          ############################################################
+          echo "==== Topology 3: 2 RANs - 1 dApp ===="
+          if [ "$T" = ipc ]; then
+            mkdir -p /tmp/t2a /tmp/t2b && chmod 777 /tmp/t2a /tmp/t2b
+            AA="-d /tmp/t2a"; AB="-d /tmp/t2b"; DD="-d /tmp/t2a -d /tmp/t2b"
+          else
+            AA="--port-offset 0"; AB="--port-offset 100"; DD="--port-offset 0 --port-offset 100"
+          fi
+          $AGENT -t $T $AA -r ran-a > /tmp/a2a.log 2>&1 &
+          A1=$!
+          $AGENT -t $T $AB -r ran-b > /tmp/a2b.log 2>&1 &
+          A2=$!
+          sleep 1
+          set +e
+          timeout 30s $DAPP -t $T $DD -c --timed 12 > /tmp/d2.log 2>&1
+          RC=$?
+          set -e
+          kill -INT $A1 $A2 2>/dev/null || true; wait $A1 2>/dev/null || true; wait $A2 2>/dev/null || true
+          NA=$(grep -E "peer=.* ran=ran-a .* indications=" /tmp/d2.log | grep -oE "indications=[0-9]+" | head -1 | cut -d= -f2)
+          NB=$(grep -E "peer=.* ran=ran-b .* indications=" /tmp/d2.log | grep -oE "indications=[0-9]+" | head -1 | cut -d= -f2)
+          ok3=1
+          [ "$RC" -eq 0 ] || ok3=0
+          [ "${NA:-0}" -gt 0 ] && [ "${NB:-0}" -gt 0 ] || ok3=0
+          if [ "$ok3" -eq 1 ]; then
+            echo "- ✅ **2 RANs - 1 dApp**: from ran-a ind=\`$NA\`, from ran-b ind=\`$NB\`" >> "$SUMMARY"
+            report_age /tmp/d2.log dapp
+          else
+            echo "FAIL topo3: dApp exit=$RC ran-a ind=$NA ran-b ind=$NB"
+            echo "- ❌ **2 RANs - 1 dApp**: exit=\`$RC\` ran-a=\`$NA\` ran-b=\`$NB\`" >> "$SUMMARY"
+            fail=1
+          fi
+
+          echo "" >> "$SUMMARY"
+          cat "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"
+          echo "---- dApp logs (tails) ----"
+          tail -25 /tmp/d12_2.log || true
+          tail -25 /tmp/d2.log || true
+
+          exit $fail
+
+      - name: Upload topology summary
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: topo-summary-${{ matrix.transport }}
+          path: /tmp/summary_${{ matrix.transport }}.md
+          if-no-files-found: warn
+
+  comment:
+    name: Post PR comment
+    needs: topologies
+    if: ${{ always() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: /tmp/topo-summaries
+          pattern: topo-summary-*
+
+      - name: Aggregate and post
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const root = '/tmp/topo-summaries';
+            let combined = '';
+            try {
+              for (const dir of fs.readdirSync(root)) {
+                for (const f of fs.readdirSync(path.join(root, dir))) {
+                  combined += fs.readFileSync(path.join(root, dir, f), 'utf8') + '\n';
+                }
+              }
+            } catch (e) {
+              combined = '_(no summaries collected — check job logs)_';
+            }
+            const marker = '<!-- e2e-topologies-results -->';
+            const sha = context.payload.pull_request.head.sha.substring(0, 7);
+            const body = [
+              marker,
+              `## 🔀 E2E Topologies — multi-dApp / multi-RAN (commit \`${sha}\`)`,
+              '',
+              combined,
+              `> _example_simple_agent + example_simple_dapp on ubuntu-latest, Release. Indication age is report-only._`,
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
