@@ -2,18 +2,20 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://isocpp.org/)
-[![Version](https://img.shields.io/badge/version-0.0.1-green.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-0.0.4-green.svg)](VERSION)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://wineslab.github.io/dApp-libe3/)
 
-**libe3** is a standalone, vendor-neutral C++ library for implementing the E3AP (E3 Application Protocol) in RAN functions such as DU, CU-CP, and CU-UP. It provides a clean object-oriented API for RAN vendors while hiding transport, encoding, and protocol complexity.
+**libe3** is a standalone, vendor-neutral C++ library for implementing the E3AP (E3 Application Protocol) on **both sides of the protocol** — RAN functions (DU, CU-CP, CU-UP) AND dApp clients. It provides a clean object-oriented API for both roles while hiding transport, encoding, and protocol complexity.
 
 ## Features
 
 - **Vendor-Neutral API**: Clean E3Agent facade that hides implementation details
+- **Both Roles**: Single `E3Agent` class acts as either **RAN** (server, binds sockets) or **dApp** (client, connects to a remote RAN), switched by `E3Config.role`
+- **Multi-Peer dApps**: One dApp process can hold N `E3Agent` instances connecting to N different RAN agents (e.g. a DU-HIGH and a DU-LOW)
 - **Multiple Transports**: Support for ZeroMQ and POSIX sockets (TCP, SCTP, Unix Domain)
 - **Multiple Encodings**: ASN.1 APER (primary) and JSON encoders
 - **Service Model Extensions**: Easy-to-implement SM interface for custom functionality
-- **Simulation Mode**: Test without real RAN infrastructure
+- **Python Bindings**: Optional SWIG bindings (`LIBE3_ENABLE_SWIG=ON`) so the same C++ library can back Python dApps
 - **Thread-Safe**: Proper synchronization for concurrent dApp operations
 - **Modern C++17**: Uses std::variant, std::optional, RAII patterns
 - **Lightweight**: Minimal external dependencies
@@ -115,11 +117,13 @@ make -j$(nproc)
 |--------|---------|-------------|
 | `LIBE3_BUILD_TESTS` | ON | Build unit tests |
 | `LIBE3_BUILD_EXAMPLES` | ON | Build examples |
+| `LIBE3_BUILD_INTEGRATION_TESTS` | OFF | Build the integration test suite (multi-role end-to-end tests + full-loop benchmark) |
 | `LIBE3_ENABLE_ZMQ` | ON | Enable ZeroMQ transport |
 | `LIBE3_ENABLE_ASN1` | ON | Enable ASN.1 encoding |
 | `LIBE3_ENABLE_JSON` | OFF | Enable JSON encoding (mutually exclusive with ASN.1) |
 | `LIBE3_ENABLE_ASAN` | OFF | Enable AddressSanitizer |
 | `LIBE3_ENABLE_TSAN` | OFF | Enable ThreadSanitizer |
+| `LIBE3_ENABLE_SWIG` | OFF | Build the SWIG-generated Python bindings (`_libe3py.so` + `libe3py.py`) |
 
 ### Running Tests
 
@@ -164,6 +168,78 @@ int main() {
     return 0;
 }
 ```
+
+### dApp Role
+
+The same `E3Agent` class can act as a dApp client. Set `E3Config.role` to `E3Role::DAPP` and register handlers for the messages flowing back from the RAN:
+
+```cpp
+#include <libe3/libe3.hpp>
+
+int main() {
+    libe3::E3Config config;
+    config.role = libe3::E3Role::DAPP;
+    config.dapp_name = "MyDApp";
+    config.dapp_version = "1.0.0";
+    config.vendor = "WinesLab";
+    config.link_layer = libe3::E3LinkLayer::ZMQ;
+    config.transport_layer = libe3::E3TransportLayer::IPC;
+
+    libe3::E3Agent agent(std::move(config));
+
+    agent.set_indication_handler([](const libe3::IndicationMessage& msg) {
+        // Decode msg.protocol_data with your SM-specific encoder.
+    });
+    agent.set_subscription_response_handler([](const libe3::SubscriptionResponse& r) {
+        // Inspect r.subscription_id, r.response_code.
+    });
+
+    if (agent.start() != libe3::ErrorCode::SUCCESS) {
+        return 1;
+    }
+    if (agent.wait_for_setup(std::chrono::seconds(5)) != libe3::ErrorCode::SUCCESS) {
+        return 1;
+    }
+
+    agent.subscribe(/*ran_function_id=*/1, /*telemetry_ids=*/{1}, /*control_ids=*/{1});
+
+    // ... do work; control loop on the application side ...
+
+    agent.release();
+    agent.stop();
+    return 0;
+}
+```
+
+See `examples/simple_dapp.cpp` for a complete reference dApp using the Simple service model. It pairs with `examples/simple_agent.cpp` (and is wire-compatible with `spear-dApp`'s Python `simple_dapp.py`).
+
+#### Multi-peer dApps
+
+A single dApp process can connect to multiple RAN agents simultaneously by instantiating multiple `E3Agent` objects, each with its own configuration:
+
+```cpp
+// Connect one dApp process to a DU-HIGH and a DU-LOW
+libe3::E3Config cfg_high; cfg_high.role = libe3::E3Role::DAPP;
+cfg_high.setup_endpoint      = "ipc:///tmp/dapps_high/setup";
+cfg_high.subscriber_endpoint = "ipc:///tmp/dapps_high/dapp_socket";
+cfg_high.publisher_endpoint  = "ipc:///tmp/dapps_high/e3_socket";
+
+libe3::E3Config cfg_low = cfg_high;
+cfg_low.setup_endpoint      = "ipc:///tmp/dapps_low/setup";
+cfg_low.subscriber_endpoint = "ipc:///tmp/dapps_low/dapp_socket";
+cfg_low.publisher_endpoint  = "ipc:///tmp/dapps_low/e3_socket";
+
+libe3::E3Agent dapp_to_high(std::move(cfg_high));
+libe3::E3Agent dapp_to_low (std::move(cfg_low));
+
+dapp_to_high.set_indication_handler([&](const libe3::IndicationMessage& m){ /* DU-HIGH */ });
+dapp_to_low .set_indication_handler([&](const libe3::IndicationMessage& m){ /* DU-LOW  */ });
+
+dapp_to_high.start();
+dapp_to_low.start();
+```
+
+Each instance has its own threads, connector, encoder, and per-peer `DAppSubscriptionState`. The library guarantees that N coexisting `E3Agent` instances in one process do not share mutable state.
 
 ### Custom Service Model
 
@@ -230,15 +306,28 @@ The main facade class for RAN vendors.
 | `get_available_ran_functions()` | Get available RAN function IDs from registered SMs |
 | `set_dapp_report_handler(handler)` | Set callback for incoming dApp reports (dApp → RAN) |
 | `set_dapp_status_changed_handler(handler)` | Set callback for dApp status changes (connect, disconnect, subscribe, unsubscribe) |
-| `send_indication(dapp_id, ran_function_id, data)` | Send an indication to a specific dApp |
-| `send_xapp_control(dapp_id, ran_function_id, data)` | Forward an xApp control action to a specific dApp |
-| `send_message_ack(request_id, response_code)` | Send a message acknowledgment (positive or negative) to a dApp |
-| `get_registered_dapps()` | Get list of registered dApp IDs |
-| `get_dapp_subscriptions(dapp_id)` | Get subscriptions for a dApp |
-| `get_ran_function_subscribers(ran_function_id)` | Get subscribers for a RAN function |
+| `send_indication(dapp_id, ran_function_id, data)` | (RAN) Send an indication to a specific dApp |
+| `send_xapp_control(dapp_id, ran_function_id, data)` | (RAN) Forward an xApp control action to a specific dApp |
+| `send_message_ack(request_id, response_code)` | (RAN) Send a message acknowledgment to a dApp |
+| `get_registered_dapps()` | (RAN) Get list of registered dApp IDs |
+| `get_dapp_subscriptions(dapp_id)` | (RAN) Get subscriptions for a dApp |
+| `get_ran_function_subscribers(ran_function_id)` | (RAN) Get subscribers for a RAN function |
+| `set_indication_handler(handler)` | (dApp) Callback for incoming `IndicationMessage` |
+| `set_subscription_response_handler(handler)` | (dApp) Callback for incoming `SubscriptionResponse` |
+| `set_setup_response_handler(handler)` | (dApp) Callback for incoming `SetupResponse` |
+| `set_xapp_control_handler(handler)` | (dApp) Callback for incoming `XAppControlAction` |
+| `set_message_ack_handler(handler)` | (dApp) Callback for incoming `MessageAck` |
+| `wait_for_setup(timeout)` | (dApp) Block until setup handshake completes |
+| `subscribe(ran_function_id, telemetry, control, ...)` | (dApp) Subscribe to a RAN function |
+| `unsubscribe(ran_function_id)` | (dApp) Tear down a subscription |
+| `send_control(ran_function_id, control_id, data)` | (dApp) Send a control action to the RAN |
+| `send_report(ran_function_id, data)` | (dApp) Send a dApp report to the RAN |
+| `release()` | (dApp) Send `ReleaseMessage` to the RAN |
+| `dapp_id()` | (dApp) Identifier assigned by the RAN in `SetupResponse` |
+| `subscribed_ran_functions()` / `active_subscription_ids()` | (dApp) Per-instance subscription state |
 | `config()` | Access current `E3Config` |
-| `dapp_count()` | Number of registered dApps |
-| `subscription_count()` | Number of active subscriptions |
+| `dapp_count()` | (RAN) Number of registered dApps. (dApp) 0/1 based on assignment |
+| `subscription_count()` | Number of active subscriptions on this side |
 
 ### E3Config
 
@@ -247,7 +336,11 @@ for local development (IPC) or production deployments.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `ran_identifier` | string | Unique RAN identifier |
+| `role` | E3Role | `RAN` (default — binds sockets) or `DAPP` (connects to a remote RAN) |
+| `ran_identifier` | string | Unique RAN identifier (used when role=RAN) |
+| `dapp_name` | string | dApp name advertised in `SetupRequest` (used when role=DAPP) |
+| `dapp_version` | string | dApp version advertised in `SetupRequest` |
+| `vendor` | string | Vendor name for `SetupRequest` |
 | `e3ap_version` | string | E3AP protocol version string |
 | `link_layer` | E3LinkLayer | ZMQ or POSIX |
 | `transport_layer` | E3TransportLayer | SCTP, TCP, IPC |
@@ -349,6 +442,24 @@ sudo apt-get install doxygen graphviz
 # Open in browser
 xdg-open build/docs/html/index.html
 ```
+
+## Python Bindings (SWIG)
+
+libe3 ships an optional SWIG-generated Python binding so the same C++ library can back Python dApps. It is **off by default** — enable it with `-DLIBE3_ENABLE_SWIG=ON`:
+
+```bash
+# Install SWIG and Python development headers (Ubuntu)
+sudo apt-get install -y swig python3-dev
+
+# Configure with bindings enabled
+cmake -S . -B build -DLIBE3_ENABLE_SWIG=ON
+cmake --build build --target libe3py -j $(nproc)
+
+# Smoke test (also run automatically by CTest under label "swig")
+PYTHONPATH=build/swig python3 tests/test_swig_smoke.py
+```
+
+The build produces `build/swig/_libe3py.so` and the matching `libe3py.py` shim. Python users can construct an `E3Config`, flip its `role` to `DAPP`, instantiate an `E3Agent`, and call the dApp verbs. The minimal seam intentionally **does not** wrap the encoders (`Asn1E3Encoder` / `JsonE3Encoder`) — per-SM encoding stays in Python, so existing `spear-dApp` SM decoders work unchanged. See `swig/libe3.i` for the exposed surface.
 
 ## License
 
