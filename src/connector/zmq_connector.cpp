@@ -14,6 +14,8 @@
 #include <unistd.h>
 #include <grp.h>
 #include <cerrno>
+#include <chrono>
+#include <thread>
 
 namespace libe3 {
 
@@ -21,6 +23,7 @@ namespace {
 constexpr const char* LOG_TAG = "ZmqConn";
 constexpr const char* IPC_BASE_DIR = "/tmp/dapps";
 constexpr int RECV_TIMEOUT_MS = 500;  // Timeout for graceful shutdown
+constexpr int PUB_CONNECT_SETTLE_MS = 200;  // PUB/SUB slow-joiner settle (client outbound)
 }
 
 ZmqE3Connector::ZmqE3Connector(
@@ -183,11 +186,10 @@ ErrorCode ZmqE3Connector::setup_inbound_connection() {
     
     // Subscribe to all messages
     zmq_setsockopt(inbound_socket_, ZMQ_SUBSCRIBE, "", 0);
-    
-    // Keep only the latest message (conflate)
-    int conflate = 1;
-    zmq_setsockopt(inbound_socket_, ZMQ_CONFLATE, &conflate, sizeof(conflate));
-    
+
+    // No ZMQ_CONFLATE: multiple dApps multiplex onto this SUB; conflating would
+    // drop all but the newest message and starve all but one dApp (issue #15).
+
     // Set receive timeout to allow graceful shutdown
     int recv_timeout = RECV_TIMEOUT_MS;
     zmq_setsockopt(inbound_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
@@ -362,8 +364,8 @@ ErrorCode ZmqE3Connector::setup_inbound_connection_client() {
         return ErrorCode::CONNECTION_FAILED;
     }
     zmq_setsockopt(inbound_socket_, ZMQ_SUBSCRIBE, "", 0);
-    int conflate = 1;
-    zmq_setsockopt(inbound_socket_, ZMQ_CONFLATE, &conflate, sizeof(conflate));
+    // No ZMQ_CONFLATE: the RAN broadcasts per-dApp indications over one PUB and
+    // each dApp filters its own; conflating would starve all but one (issue #15).
     int recv_timeout = RECV_TIMEOUT_MS;
     zmq_setsockopt(inbound_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
 
@@ -396,6 +398,13 @@ ErrorCode ZmqE3Connector::setup_outbound_connection_client() {
         return ErrorCode::CONNECTION_FAILED;
     }
     E3_LOG_INFO(LOG_TAG) << "Outbound PUB socket connected to " << outbound_cep;
+
+    // ZMQ PUB/SUB slow-joiner: a freshly connected PUB silently drops outgoing
+    // messages until the peer SUB's subscription has propagated to it. The
+    // dApp's first outbound message is the subscription request; without a
+    // brief settle it can be lost — reliably so for a second peer over TCP,
+    // where connection establishment is slower. Wait for the link to settle.
+    std::this_thread::sleep_for(std::chrono::milliseconds(PUB_CONNECT_SETTLE_MS));
     return ErrorCode::SUCCESS;
 }
 

@@ -12,6 +12,7 @@
 #include <iostream>
 #include <csignal>
 #include <atomic>
+#include <chrono>
 #include <thread>
 #include <cstring>
 #include <ctime>
@@ -120,7 +121,13 @@ private:
 
             libe3_examples::SimpleIndication si;
             si.data1 = seq_;
-            si.timestamp = static_cast<uint32_t>(std::time(nullptr));
+            // Wall-clock send time in milliseconds, masked into the 31-bit
+            // ASN.1 range. The dApp uses this to measure per-indication age
+            // (transport + queueing delay) in the E2E tests — this lives only
+            // in the example, the libe3 core does no timing.
+            const auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
+            si.timestamp = static_cast<uint32_t>(now_ms & 0x7FFFFFFF);
 
             std::vector<uint8_t> encoded;
             if (!libe3_examples::encode_simple_indication(si, encoded)) {
@@ -152,6 +159,12 @@ void print_usage(const char* program_name) {
               << "  -l, --link <layer>       Link layer: zmq, posix (default: zmq)\n"
               << "  -t, --transport <layer>  Transport layer: sctp, tcp, ipc (default: ipc)\n"
               << "  -e, --encoding <format>  Encoding format: asn1, json (default: asn1)\n"
+              << "  -r, --ran_id <id>        RAN identifier advertised in setup (default: example-ran-001)\n"
+              << "  -d, --socket-dir <dir>   IPC socket directory (default: /tmp/dapps).\n"
+              << "                           Lets multiple RANs coexist on one host over IPC.\n"
+              << "      --port-offset <K>    TCP port offset added to the default ports\n"
+              << "                           (setup 9990+K, subscriber 9999+K, publisher 9991+K).\n"
+              << "                           Lets multiple RANs coexist on one host over TCP.\n"
               << "  -h, --help               Show this help message\n";
 }
 
@@ -183,18 +196,23 @@ int main(int argc, char* argv[]) {
     libe3::E3TransportLayer transport_layer = libe3::E3TransportLayer::IPC;
     libe3::EncodingFormat encoding = libe3::EncodingFormat::ASN1;
     std::string ran_id = "example-ran-001";
+    std::string socket_dir;   // empty => library default (/tmp/dapps)
+    int port_offset = 0;      // TCP: added to the default ports
 
-    // Command-line options
+    // Command-line options. --port-offset is long-only (val 1000).
     static struct option long_options[] = {
-        {"link",      required_argument, nullptr, 'l'},
-        {"transport", required_argument, nullptr, 't'},
-        {"encoding",  required_argument, nullptr, 'e'},
-        {"help",      no_argument,       nullptr, 'h'},
-        {nullptr,     0,                 nullptr,  0 }
+        {"link",        required_argument, nullptr, 'l'},
+        {"transport",   required_argument, nullptr, 't'},
+        {"encoding",    required_argument, nullptr, 'e'},
+        {"ran_id",      required_argument, nullptr, 'r'},
+        {"socket-dir",  required_argument, nullptr, 'd'},
+        {"port-offset", required_argument, nullptr, 1000},
+        {"help",        no_argument,       nullptr, 'h'},
+        {nullptr,       0,                 nullptr,  0 }
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "l:t:e:r:h", long_options, nullptr)) != -1) {
+    while ((opt = getopt_long(argc, argv, "l:t:e:r:d:h", long_options, nullptr)) != -1) {
         switch (opt) {
             case 'l':
                 link_layer = parse_link_layer(optarg);
@@ -207,6 +225,12 @@ int main(int argc, char* argv[]) {
                 break;
             case 'r':
                 ran_id = optarg;
+                break;
+            case 'd':
+                socket_dir = optarg;
+                break;
+            case 1000:
+                port_offset = std::atoi(optarg);
                 break;
             case 'h':
                 print_usage(argv[0]);
@@ -232,12 +256,27 @@ int main(int argc, char* argv[]) {
     config.encoding = encoding;
     // Enable debug logging for diagnostics
     config.log_level = 4;
-    
+
+    // Optional per-RAN addressing so multiple RANs can coexist on one host:
+    //   IPC -> a distinct socket directory; TCP -> a distinct port offset.
+    if (!socket_dir.empty()) {
+        config.setup_endpoint      = "ipc://" + socket_dir + "/setup";
+        config.subscriber_endpoint = "ipc://" + socket_dir + "/dapp_socket";
+        config.publisher_endpoint  = "ipc://" + socket_dir + "/e3_socket";
+    }
+    if (port_offset != 0) {
+        config.setup_port      = static_cast<uint16_t>(config.setup_port + port_offset);
+        config.subscriber_port = static_cast<uint16_t>(config.subscriber_port + port_offset);
+        config.publisher_port  = static_cast<uint16_t>(config.publisher_port + port_offset);
+    }
+
     std::cout << "Configuration:\n"
               << "  RAN ID: " << ran_id << "\n"
               << "  Link layer: " << libe3::link_layer_to_string(link_layer) << "\n"
               << "  Transport layer: " << libe3::transport_layer_to_string(transport_layer) << "\n"
-              << "  Encoding: " << (encoding == libe3::EncodingFormat::JSON ? "json" : "asn1") << "\n\n";
+              << "  Encoding: " << (encoding == libe3::EncodingFormat::JSON ? "json" : "asn1") << "\n"
+              << "  Socket dir: " << (socket_dir.empty() ? "/tmp/dapps (default)" : socket_dir) << "\n"
+              << "  Port offset: " << port_offset << "\n\n";
     
     // Create the agent
     libe3::E3Agent agent(std::move(config));
