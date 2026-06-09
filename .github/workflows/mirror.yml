@@ -8,7 +8,7 @@ on:
 jobs:
   mirror:
     runs-on: ubuntu-latest
-    if: github.repository != 'wineslab/dApp-libe3'
+    if: github.repository != 'wineslab/libe3'
 
     steps:
     - name: Checkout
