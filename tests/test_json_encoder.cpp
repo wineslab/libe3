@@ -8,6 +8,7 @@
 #include "test_framework.hpp"
 #include "libe3/e3_encoder.hpp"
 #include "libe3/types.hpp"
+#include <nlohmann/json.hpp>
 
 using namespace libe3;
 
@@ -34,7 +35,7 @@ TEST(JsonEncoder_encode_setup_request) {
     
     // Verify JSON contains expected fields
     std::string json(encoded->buffer.begin(), encoded->buffer.end());
-    ASSERT_TRUE(json.find("SetupRequest") != std::string::npos);
+    ASSERT_TRUE(json.find("setupRequest") != std::string::npos);
     ASSERT_TRUE(json.find("TestDApp") != std::string::npos);
     ASSERT_TRUE(json.find("TestVendor") != std::string::npos);
 }
@@ -78,7 +79,7 @@ TEST(JsonEncoder_encode_setup_response) {
     ASSERT_TRUE(encoded.has_value());
     
     std::string json(encoded->buffer.begin(), encoded->buffer.end());
-    ASSERT_TRUE(json.find("SetupResponse") != std::string::npos);
+    ASSERT_TRUE(json.find("setupResponse") != std::string::npos);
 }
 
 TEST(JsonEncoder_encode_decode_subscription_request) {
@@ -150,7 +151,8 @@ TEST(JsonEncoder_encode_decode_indication_message) {
     IndicationMessage msg;
     msg.dapp_identifier = 77;
     msg.ran_function_identifier = 55;
-    msg.protocol_data = {0x01, 0x02, 0x03, 0x04, 0xAB, 0xCD};
+    std::string payload = R"({"rnti":42069,"mcs":9,"snr":12.5})";
+    msg.protocol_data.assign(payload.begin(), payload.end());
     original.choice = msg;
     
     auto encoded = encoder->encode(original);
@@ -162,8 +164,9 @@ TEST(JsonEncoder_encode_decode_indication_message) {
     auto& restored = std::get<IndicationMessage>((*decoded).choice);
     ASSERT_EQ(restored.dapp_identifier, 77u);
     ASSERT_EQ(restored.ran_function_identifier, 55u);
-    ASSERT_EQ(restored.protocol_data.size(), 6u);
-    ASSERT_EQ(restored.protocol_data[4], 0xAB);
+    auto restored_json = nlohmann::json::parse(restored.protocol_data);
+    ASSERT_EQ(restored_json["rnti"].get<int>(), 42069);
+    ASSERT_EQ(restored_json["mcs"].get<int>(), 9);
 }
 
 TEST(JsonEncoder_encode_decode_control_action) {
@@ -260,11 +263,12 @@ TEST(JsonEncoder_roundtrip_large_data) {
     Pdu original(PduType::INDICATION_MESSAGE);
     IndicationMessage msg;
     msg.dapp_identifier = 1;
-    // 1KB of data
-    msg.protocol_data.resize(1024);
-    for (size_t i = 0; i < msg.protocol_data.size(); ++i) {
-        msg.protocol_data[i] = static_cast<uint8_t>(i & 0xFF);
+    nlohmann::json large;
+    for (int i = 0; i < 256; ++i) {
+        large["k" + std::to_string(i)] = i;
     }
+    std::string payload = large.dump();
+    msg.protocol_data.assign(payload.begin(), payload.end());
     original.choice = msg;
     
     auto encoded = encoder->encode(original);
@@ -274,10 +278,159 @@ TEST(JsonEncoder_roundtrip_large_data) {
     ASSERT_TRUE(decoded.has_value());
     
     auto& restored = std::get<IndicationMessage>((*decoded).choice);
-    ASSERT_EQ(restored.protocol_data.size(), 1024u);
-    for (size_t i = 0; i < restored.protocol_data.size(); ++i) {
-        ASSERT_EQ(restored.protocol_data[i], static_cast<uint8_t>(i & 0xFF));
-    }
+    auto restored_json = nlohmann::json::parse(restored.protocol_data);
+    ASSERT_EQ(restored_json.size(), 256u);
+    ASSERT_EQ(restored_json["k0"].get<int>(), 0);
+    ASSERT_EQ(restored_json["k255"].get<int>(), 255);
+}
+
+TEST(JsonEncoder_reject_nested_data_wrapper) {
+    auto encoder = create_encoder();
+
+    std::string nested_json = R"({
+        "type": "setupRequest",
+        "id": 99,
+        "timestamp": 0,
+        "data": {
+            "e3apProtocolVersion": "2.0.0",
+            "dAppName": "NestedDApp",
+            "dAppVersion": "3.0.0",
+            "vendor": "NestedVendor"
+        }
+    })";
+
+    std::vector<uint8_t> buf(nested_json.begin(), nested_json.end());
+    auto result = encoder->decode(buf.data(), buf.size());
+    ASSERT_FALSE(result.has_value());
+}
+
+TEST(JsonEncoder_reject_pascal_case_pdu_type) {
+    auto encoder = create_encoder();
+
+    std::string pascal_json = R"({
+        "type": "SetupRequest",
+        "id": 1,
+        "timestamp": 0,
+        "dAppName": "Test",
+        "dAppVersion": "1.0",
+        "vendor": "V"
+    })";
+
+    std::vector<uint8_t> buf(pascal_json.begin(), pascal_json.end());
+    auto result = encoder->decode(buf.data(), buf.size());
+    ASSERT_FALSE(result.has_value());
+}
+
+// ---------------------------------------------------------------------------
+// actionData payload-shape acceptance matrix
+//
+// libe3 must tolerate every binary-payload shape a peer might emit (Postel's
+// law on the receive side). These tests pin the four accepted shapes:
+//   1. inline JSON object   (cuBB / libe3-self / spear-dApp)
+//   2. {"__hex__": "..."}   (libe3's opaque-bytes sentinel)
+//   3. plain hex string     (NVIDIA aerial, spear-aerial-sample-apps@19f9bd3)
+//   4. plain UTF-8 string   (final-fallback so any text payload survives)
+// ---------------------------------------------------------------------------
+
+namespace {
+std::vector<uint8_t> decode_action_data(const std::string& wire) {
+    auto encoder = create_encoder();
+    std::vector<uint8_t> buf(wire.begin(), wire.end());
+    auto decoded = encoder->decode(buf.data(), buf.size());
+    if (!decoded.has_value()) return {};
+    return std::get<DAppControlAction>(decoded->choice).action_data;
+}
+}  // namespace
+
+TEST(JsonEncoder_actionData_inline_object) {
+    // Shape 1 — inline JSON object. The SM-facing bytes are the compact
+    // re-dump of that object.
+    std::string wire = R"({
+        "type": "dAppControlAction",
+        "id": 1, "timestamp": 0,
+        "dAppIdentifier": 7,
+        "ranFunctionIdentifier": 4,
+        "controlIdentifier": 1,
+        "actionData": {"enabled": false, "ul_bw": 40}
+    })";
+    auto bytes = decode_action_data(wire);
+    ASSERT_FALSE(bytes.empty());
+    auto reparsed = nlohmann::json::parse(bytes);
+    ASSERT_TRUE(reparsed.is_object());
+    ASSERT_EQ(reparsed["ul_bw"].get<int>(), 40);
+    ASSERT_EQ(reparsed["enabled"].get<bool>(), false);
+}
+
+TEST(JsonEncoder_actionData_hex_sentinel) {
+    // Shape 2 — explicit {"__hex__": "<hex>"} wrapper. Bytes are the literal
+    // hex-decoded blob.
+    std::string wire = R"({
+        "type": "dAppControlAction",
+        "id": 2, "timestamp": 0,
+        "dAppIdentifier": 7,
+        "ranFunctionIdentifier": 4,
+        "controlIdentifier": 1,
+        "actionData": {"__hex__": "deadbeef"}
+    })";
+    auto bytes = decode_action_data(wire);
+    ASSERT_EQ(bytes.size(), 4u);
+    ASSERT_EQ(bytes[0], 0xDEu);
+    ASSERT_EQ(bytes[1], 0xADu);
+    ASSERT_EQ(bytes[2], 0xBEu);
+    ASSERT_EQ(bytes[3], 0xEFu);
+}
+
+TEST(JsonEncoder_actionData_plain_hex_string) {
+    // Shape 3 — NVIDIA aerial convention (spear-aerial-sample-apps@19f9bd3,
+    // e3_manager.cpp:1022+). actionData is a bare JSON string whose chars
+    // are pairwise hex digits of the inner JSON payload. Decoder must
+    // hex-decode rather than treat the string as opaque UTF-8.
+    // "7b22656e61626c6564223a747275657d" == `{"enabled":true}`.
+    std::string wire = R"({
+        "type": "dAppControlAction",
+        "id": 3, "timestamp": 0,
+        "dAppIdentifier": 7,
+        "ranFunctionIdentifier": 4,
+        "controlIdentifier": 1,
+        "actionData": "7b22656e61626c6564223a747275657d"
+    })";
+    auto bytes = decode_action_data(wire);
+    ASSERT_FALSE(bytes.empty());
+    auto reparsed = nlohmann::json::parse(bytes);
+    ASSERT_TRUE(reparsed.is_object());
+    ASSERT_EQ(reparsed["enabled"].get<bool>(), true);
+}
+
+TEST(JsonEncoder_actionData_plain_utf8_string) {
+    // Shape 4 — bare string that is NOT pure hex. Decoder must NOT attempt
+    // hex-decode; the SM receives the literal UTF-8 bytes of the string.
+    std::string wire = R"({
+        "type": "dAppControlAction",
+        "id": 4, "timestamp": 0,
+        "dAppIdentifier": 7,
+        "ranFunctionIdentifier": 4,
+        "controlIdentifier": 1,
+        "actionData": "hello world"
+    })";
+    auto bytes = decode_action_data(wire);
+    std::string recovered(bytes.begin(), bytes.end());
+    ASSERT_EQ(recovered, std::string("hello world"));
+}
+
+// Edge: hex-looking string of odd length must NOT be hex-decoded (length
+// invariant violated) — fall through to plain UTF-8 shape.
+TEST(JsonEncoder_actionData_odd_length_hex_is_utf8) {
+    std::string wire = R"({
+        "type": "dAppControlAction",
+        "id": 5, "timestamp": 0,
+        "dAppIdentifier": 7,
+        "ranFunctionIdentifier": 4,
+        "controlIdentifier": 1,
+        "actionData": "abc"
+    })";
+    auto bytes = decode_action_data(wire);
+    std::string recovered(bytes.begin(), bytes.end());
+    ASSERT_EQ(recovered, std::string("abc"));
 }
 
 int main() {
