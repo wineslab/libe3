@@ -60,6 +60,35 @@ jobs:
       - name: Run integration tests
         run: cd build && ctest -L integration --output-on-failure
 
+  dual-encoding:
+    # Regression guard for issue #26: ASN.1 and JSON must be buildable together
+    # (the encoder is selected at runtime via E3Config.encoding).
+    name: Dual Encoding (ASN.1 + JSON)
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          chmod +x ./build_libe3 || true
+          ./build_libe3 -I || true
+
+      - name: Configure with both encoders enabled
+        run: |
+          cmake -S . -B build-both \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLIBE3_ENABLE_ASN1=ON \
+            -DLIBE3_ENABLE_JSON=ON
+
+      - name: Build
+        run: cmake --build build-both -j $(nproc)
+
+      - name: Run tests
+        run: cd build-both && ctest --output-on-failure
+
   swig:
     name: SWIG Python Bindings
     runs-on: ubuntu-latest
