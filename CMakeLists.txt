@@ -41,10 +41,17 @@ include(libe3Dependencies)
 include(libe3Version)
 
 # ============================================================================
-# Mutual exclusion between ASN.1 and JSON encoders
+# Encoder selection
 # ============================================================================
+# ASN.1 and JSON can be enabled together: the encoder factory
+# (src/encoder/encoder_factory.cpp) creates the right encoder per
+# EncodingFormat at runtime, so a single build can serve either encoding
+# (selected by E3Config.encoding). At least one must be enabled.
+if(NOT LIBE3_ENABLE_ASN1 AND NOT LIBE3_ENABLE_JSON)
+    message(FATAL_ERROR "Neither LIBE3_ENABLE_ASN1 nor LIBE3_ENABLE_JSON is enabled. Enable at least one encoding.")
+endif()
 if(LIBE3_ENABLE_ASN1 AND LIBE3_ENABLE_JSON)
-    message(FATAL_ERROR "Both LIBE3_ENABLE_ASN1 and LIBE3_ENABLE_JSON are enabled. Please enable only one encoding: ASN.1 or JSON.")
+    message(STATUS "Both ASN.1 and JSON encoders enabled; encoding is selected at runtime via E3Config.encoding.")
 endif()
 
 # ============================================================================
