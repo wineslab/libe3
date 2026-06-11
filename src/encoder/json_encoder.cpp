@@ -404,6 +404,7 @@ EncodeResult<Pdu> JsonE3Encoder::decode(const uint8_t* data, size_t size) {
         
         Pdu pdu;
         
+        // Get PDU type
         std::string pdu_type_str = root.value("type", "");
         auto pdu_type = string_to_pdu_type(pdu_type_str);
         if (!pdu_type) {
