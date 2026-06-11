@@ -21,20 +21,15 @@ Please note we have a code of conduct, please follow it in all your interactions
 
 ## Development Workflow
 
-Active development happens on a **private internal repository**. The **public** repository **`wineslab/dApp-libe3`** is a 1:1 mirror of that internal repo, updated automatically by `.github/workflows/mirror.yml` on every push to `main`. **Do not open pull requests against the public mirror — they will not be merged.**
+Development happens in the open on **`wineslab/libe3`**.
 
 ### For maintainers and existing collaborators
 
-Fork or branch from the internal repository, open the PR there, follow the templates in `.github/`, and let CI run.
+Branch from `main`, open the PR against `wineslab/libe3`, follow the templates in `.github/`, and let CI run.
 
 ### For external contributors
 
-External contributors must request access to the internal repository before opening a PR. Two channels are accepted:
-
-1. **Preferred:** open an issue on the public mirror at https://github.com/wineslab/dApp-libe3/issues using the *"Request access to the internal development repository"* contact link (or any template with the `access-request` label). Tell us briefly what you want to work on.
-2. **Fallback:** email **a.lacava@northeastern.edu** with the same information.
-
-Once access is granted, you will be invited to the internal repository; fork it from there, push your branch, and open the PR against the internal repo.
+Fork **`wineslab/libe3`**, push your branch, and open a PR against `main`. Before starting non-trivial work, please open an issue (or email **a.lacava@northeastern.edu**) describing what you intend to change so we can coordinate.
 
 ## Mandatory checks
 
