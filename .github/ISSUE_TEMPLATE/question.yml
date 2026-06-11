@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Please confirm this is a usage question, not a bug. Check `README.md`, the Doxygen docs at https://wineslab.github.io/dApp-libe3/, and `examples/` first.
+        Please confirm this is a usage question, not a bug. Check `README.md`, the Doxygen docs at https://wineslab.github.io/libe3/, and `examples/` first.
 
   - type: textarea
     id: question

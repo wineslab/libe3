@@ -11,7 +11,7 @@ Email the maintainer directly at **a.lacava@northeastern.edu** with the subject 
 - The version / commit you tested against.
 - Any suggested mitigation, if you have one.
 
-You may use GitHub's [private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability) on the public mirror as an alternative.
+You may use GitHub's [private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability) on **`wineslab/libe3`** as an alternative.
 
 ## Supported versions
 

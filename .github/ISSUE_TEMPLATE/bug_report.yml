@@ -8,7 +8,7 @@ body:
       value: |
         Thanks for taking the time to report a bug. Please fill in every required field — bug reports without reproduction info or environment details cannot be triaged and will be closed.
 
-        Before submitting, please confirm you have searched the existing issues on the public mirror (`wineslab/dApp-libe3`) and, if you have access, on the internal repository for duplicates.
+        Before submitting, please confirm you have searched the existing issues on `wineslab/libe3` for duplicates.
 
   - type: checkboxes
     id: prerequisites
