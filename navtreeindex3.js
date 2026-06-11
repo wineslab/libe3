@@ -1,11 +1,13 @@
 var NAVTREEINDEX3 =
 {
+"functions.html":[2,3,0,0],
+"functions_b.html":[2,3,0,1],
 "functions_c.html":[2,3,0,2],
 "functions_d.html":[2,3,0,3],
 "functions_e.html":[2,3,0,4],
 "functions_f.html":[2,3,0,5],
-"functions_func.html":[2,3,1,0],
 "functions_func.html":[2,3,1],
+"functions_func.html":[2,3,1,0],
 "functions_func_c.html":[2,3,1,1],
 "functions_func_d.html":[2,3,1,2],
 "functions_func_e.html":[2,3,1,3],
@@ -50,11 +52,12 @@ var NAVTREEINDEX3 =
 "functions_z.html":[2,3,0,23],
 "functions_~.html":[2,3,0,24],
 "globals.html":[3,1,0],
-"globals_defs.html":[3,1,5],
-"globals_enum.html":[3,1,3],
-"globals_eval.html":[3,1,4],
+"globals_defs.html":[3,1,6],
+"globals_enum.html":[3,1,4],
+"globals_eval.html":[3,1,5],
 "globals_func.html":[3,1,1],
-"globals_type.html":[3,1,2],
+"globals_type.html":[3,1,3],
+"globals_vars.html":[3,1,2],
 "group__error__codes.html":[0,0],
 "group__error__codes.html#ga36076106bfe5aefabf75dbd1d52175fd":[0,0,0],
 "hierarchy.html":[2,2],
@@ -246,8 +249,5 @@ var NAVTREEINDEX3 =
 "structe3__service__model__handle__s.html#a6411eebc7d84a4422cc3dc77dee2edc9":[2,0,4,14],
 "structe3__service__model__handle__s.html#a81c699ff47ef07b699006b3cb156b7de":[2,0,4,5],
 "structe3__service__model__handle__s.html#a89e98c39a2307701b741313faae30265":[2,0,4,6],
-"structe3__service__model__handle__s.html#a8c0862f55c44d044e46d8cf4378155b0":[2,0,4,12],
-"structe3__service__model__handle__s.html#a8f02c5543e0bfb59ca7036e197212a95":[2,0,4,23],
-"structe3__service__model__handle__s.html#a9622e81e2ea89ddddea1d0141519ca5c":[2,0,4,26],
-"structe3__service__model__handle__s.html#a9b8e98ddefc317262cf97ea499e5757b":[2,0,4,7]
+"structe3__service__model__handle__s.html#a8c0862f55c44d044e46d8cf4378155b0":[2,0,4,12]
 };
