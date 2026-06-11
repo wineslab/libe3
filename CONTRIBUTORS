@@ -24,4 +24,4 @@ We are grateful for every contribution, big or small, that helped shape this pro
 
 - Davide Villa <dvilla@nvidia.com> (NVIDIA Corporation)
   - JSON encoder: camelCase wire format with nested-JSON protocolData
-  - Subscription manager: per-subscription metadata, C API queries
+  - Subscription manager: per-subscription metadata, C API subscription getters
