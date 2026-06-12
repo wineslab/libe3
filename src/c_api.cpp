@@ -300,6 +300,37 @@ e3_error_t e3_agent_set_dapp_report_handler(
         return copy_vector_u32_to_c(v, out_len);
     }
 
+    uint32_t e3_agent_get_subscription_periodicity(
+        e3_agent_handle_t* agent,
+        uint32_t dapp_id,
+        uint32_t ran_function_id
+    ) {
+        if (!agent || !agent->agent) return 0;
+        return agent->agent->get_subscription_periodicity(dapp_id, ran_function_id);
+    }
+
+    uint32_t* e3_agent_get_subscription_telemetry_ids(
+        e3_agent_handle_t* agent,
+        uint32_t dapp_id,
+        uint32_t ran_function_id,
+        size_t* out_len
+    ) {
+        if (!agent || !agent->agent) { if (out_len) *out_len = 0; return nullptr; }
+        auto v = agent->agent->get_subscription_telemetry_ids(dapp_id, ran_function_id);
+        return copy_vector_u32_to_c(v, out_len);
+    }
+
+    uint32_t* e3_agent_get_subscription_control_ids(
+        e3_agent_handle_t* agent,
+        uint32_t dapp_id,
+        uint32_t ran_function_id,
+        size_t* out_len
+    ) {
+        if (!agent || !agent->agent) { if (out_len) *out_len = 0; return nullptr; }
+        auto v = agent->agent->get_subscription_control_ids(dapp_id, ran_function_id);
+        return copy_vector_u32_to_c(v, out_len);
+    }
+
     void e3_agent_free_uint32_array(uint32_t* arr) {
         free(arr);
     }

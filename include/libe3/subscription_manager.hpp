@@ -23,6 +23,15 @@
 namespace libe3 {
 
 /**
+ * @brief Per-subscription metadata stored by the SubscriptionManager.
+ */
+struct SubscriptionDetails {
+    std::vector<uint32_t> telemetry_ids;
+    std::vector<uint32_t> control_ids;
+    uint32_t periodicity_us{0};  ///< 0 = use SM default
+};
+
+/**
  * @brief Callback type for SM lifecycle events
  *
  * Called when a RAN function gains its first subscriber or loses
@@ -116,13 +125,21 @@ public:
      *
      * @param dapp_id dApp identifier
      * @param ran_function_id RAN function identifier (0-255)
+     * @param telemetry_ids Telemetry IDs the dApp wants
+     * @param control_ids Control IDs the dApp wants
+     * @param periodicity_us Reporting periodicity in microseconds (0 = SM default)
      * @return std::pair containing:
      *         - ErrorCode::SUCCESS on success, or error code on failure
      *         - The assigned subscription ID (valid only if ErrorCode::SUCCESS)
      * @return ErrorCode::DAPP_NOT_REGISTERED if dApp not registered
      * @return ErrorCode::SUBSCRIPTION_EXISTS if already subscribed
      */
-    std::pair<ErrorCode, uint32_t> add_subscription(uint32_t dapp_id, uint32_t ran_function_id);
+    std::pair<ErrorCode, uint32_t> add_subscription(
+        uint32_t dapp_id,
+        uint32_t ran_function_id,
+        const std::vector<uint32_t>& telemetry_ids = {},
+        const std::vector<uint32_t>& control_ids = {},
+        uint32_t periodicity_us = 0);
 
     /**
      * @brief Remove a subscription between dApp and RAN function
@@ -158,6 +175,13 @@ public:
      * @brief Get all dApps subscribed to a RAN function
      */
     std::vector<uint32_t> get_subscribed_dapps(uint32_t ran_function_id) const;
+
+    /**
+     * @brief Get subscription details for a specific dApp + RAN function pair
+     *
+     * @return nullptr if no such subscription exists
+     */
+    const SubscriptionDetails* get_subscription_details(uint32_t dapp_id, uint32_t ran_function_id) const;
 
     /**
      * @brief Get count of subscribers for a RAN function
@@ -215,6 +239,9 @@ private:
     
     // (dApp ID, RAN function ID) -> Subscription ID reverse mapping
     std::unordered_map<uint64_t, uint32_t> subscription_id_reverse_;
+
+    // (dApp ID, RAN function ID) -> per-subscription metadata
+    std::unordered_map<uint64_t, SubscriptionDetails> subscription_details_;
     
     // Callback for SM lifecycle events
     SmLifecycleCallback sm_lifecycle_callback_;

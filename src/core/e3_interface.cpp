@@ -626,9 +626,13 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
     if (!subscription_manager_->is_dapp_registered(request.dapp_identifier)) {
         E3_LOG_ERROR(LOG_TAG) << "dApp " << request.dapp_identifier << " not registered";
     } else {
+        uint32_t period = request.periodicity.value_or(0);
         auto [result, sub_id] = subscription_manager_->add_subscription(
             request.dapp_identifier,
-            request.ran_function_identifier
+            request.ran_function_identifier,
+            request.telemetry_identifier_list,
+            request.control_identifier_list,
+            period
         );
         subscription_id = sub_id;
         
@@ -681,13 +685,17 @@ void E3Interface::handle_subscription_delete(const SubscriptionDelete& del, uint
                               << error_code_to_string(result);
     }
     
-    // Create and queue ack response
-    Pdu response_pdu(PduType::MESSAGE_ACK);
-    MessageAck ack;
+    // Create and queue response
+    Pdu response_pdu(PduType::SUBSCRIPTION_RESPONSE);
+    SubscriptionResponse resp;
     response_pdu.message_id = generate_message_id();
-    ack.request_id = request_message_id;
-    ack.response_code = response_code;
-    response_pdu.choice = ack;
+    resp.request_id = request_message_id;
+    resp.dapp_identifier = del.dapp_identifier;
+    resp.response_code = response_code;
+    if (response_code == ResponseCode::POSITIVE) {
+        resp.subscription_id = del.subscription_id;
+    }
+    response_pdu.choice = resp;
     
     queue_outbound(std::move(response_pdu));
 }

@@ -17,6 +17,13 @@ namespace libe3 {
  * @brief JSON encoder for E3AP PDUs
  *
  * Provides JSON encoding/decoding for development and debugging.
+ *
+ * JSON wire format uses camelCase keys (e.g. "dAppName", "ranFunctionIdentifier")
+ * and camelCase PDU type strings (e.g. "setupRequest", "indicationMessage").
+ * PascalCase PDU types are rejected by the decoder.
+ *
+ * Envelope format is flat: payload fields sit alongside "type", "id", and
+ * "timestamp" at root level.  Messages with a "data" wrapper are rejected.
  */
 class JsonE3Encoder : public E3Encoder {
 public:
@@ -60,7 +67,7 @@ private:
     static std::vector<uint8_t> hex_to_binary(const std::string& hex);
 
     // Helper methods for type conversions
-    PduType string_to_pdu_type(const std::string& s) const;
+    std::optional<PduType> string_to_pdu_type(const std::string& s) const;
     ErrorCode string_to_error_code(const std::string& s) const;
 };
 
