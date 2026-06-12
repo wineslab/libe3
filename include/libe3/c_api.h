@@ -316,6 +316,21 @@ uint32_t* e3_agent_get_subscription_telemetry_ids(
 );
 
 /**
+ * @brief Get the control IDs a dApp requested for a RAN function.
+ *
+ * Caller must free the returned array with e3_agent_free_uint32_array().
+ *
+ * @param out_len receives the number of elements (set to 0 on error/empty)
+ * @return newly-allocated array, or NULL if empty/error
+ */
+uint32_t* e3_agent_get_subscription_control_ids(
+    e3_agent_handle_t* agent,
+    uint32_t dapp_id,
+    uint32_t ran_function_id,
+    size_t* out_len
+);
+
+/**
  * @brief Free an array previously returned by the e3_agent_get_* helpers.
  */
 void e3_agent_free_uint32_array(uint32_t* arr);

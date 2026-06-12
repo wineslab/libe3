@@ -289,6 +289,15 @@ std::vector<uint32_t> E3Agent::get_subscription_telemetry_ids(uint32_t dapp_id, 
     return details ? details->telemetry_ids : std::vector<uint32_t>{};
 }
 
+std::vector<uint32_t> E3Agent::get_subscription_control_ids(uint32_t dapp_id, uint32_t ran_function_id) const {
+    if (!impl_->interface) {
+        return {};
+    }
+    const auto* details = impl_->interface->subscription_manager()
+                              .get_subscription_details(dapp_id, ran_function_id);
+    return details ? details->control_ids : std::vector<uint32_t>{};
+}
+
 // =========================================================================
 // Configuration
 // =========================================================================

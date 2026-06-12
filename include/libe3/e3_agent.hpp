@@ -324,6 +324,15 @@ public:
         uint32_t dapp_id, uint32_t ran_function_id
     ) const;
 
+    /**
+     * @brief Get the control IDs a dApp requested for a RAN function
+     *
+     * @return vector of control IDs (empty if none requested or subscription not found)
+     */
+    std::vector<uint32_t> get_subscription_control_ids(
+        uint32_t dapp_id, uint32_t ran_function_id
+    ) const;
+
     // =========================================================================
     // Configuration
     // =========================================================================

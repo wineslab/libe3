@@ -160,6 +160,7 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::add_subscription(
         uint32_t dapp_id,
         uint32_t ran_function_id,
         const std::vector<uint32_t>& telemetry_ids,
+        const std::vector<uint32_t>& control_ids,
         uint32_t periodicity_us) {
     std::unique_lock lock(mutex_);
 
@@ -200,9 +201,8 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::add_subscription(
 
     // Store per-subscription metadata
     SubscriptionDetails details;
-    details.dapp_id = dapp_id;
-    details.ran_function_id = ran_function_id;
     details.telemetry_ids = telemetry_ids;
+    details.control_ids = control_ids;
     details.periodicity_us = periodicity_us;
     subscription_details_[sub_key] = std::move(details);
 
@@ -210,7 +210,8 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::add_subscription(
                          << " -> RAN function " << ran_function_id
                          << " (subscription_id=" << subscription_id
                          << ", periodicity_us=" << periodicity_us
-                         << ", telemetry_ids=" << telemetry_ids.size() << ")";
+                         << ", telemetry_ids=" << telemetry_ids.size()
+                         << ", control_ids=" << control_ids.size() << ")";
 
     // Notify about SM lifecycle change if this is the first subscriber
     lock.unlock();

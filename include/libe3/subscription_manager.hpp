@@ -26,9 +26,8 @@ namespace libe3 {
  * @brief Per-subscription metadata stored by the SubscriptionManager.
  */
 struct SubscriptionDetails {
-    uint32_t dapp_id{0};
-    uint32_t ran_function_id{0};
     std::vector<uint32_t> telemetry_ids;
+    std::vector<uint32_t> control_ids;
     uint32_t periodicity_us{0};  ///< 0 = use SM default
 };
 
@@ -126,7 +125,8 @@ public:
      *
      * @param dapp_id dApp identifier
      * @param ran_function_id RAN function identifier (0-255)
-     * @param telemetry_ids Telemetry IDs the dApp wants (empty = all)
+     * @param telemetry_ids Telemetry IDs the dApp wants
+     * @param control_ids Control IDs the dApp wants
      * @param periodicity_us Reporting periodicity in microseconds (0 = SM default)
      * @return std::pair containing:
      *         - ErrorCode::SUCCESS on success, or error code on failure
@@ -138,6 +138,7 @@ public:
         uint32_t dapp_id,
         uint32_t ran_function_id,
         const std::vector<uint32_t>& telemetry_ids = {},
+        const std::vector<uint32_t>& control_ids = {},
         uint32_t periodicity_us = 0);
 
     /**

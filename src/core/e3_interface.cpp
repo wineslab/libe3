@@ -631,6 +631,7 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
             request.dapp_identifier,
             request.ran_function_identifier,
             request.telemetry_identifier_list,
+            request.control_identifier_list,
             period
         );
         subscription_id = sub_id;

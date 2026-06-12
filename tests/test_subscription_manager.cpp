@@ -283,18 +283,20 @@ TEST(SubscriptionManager_subscription_details_stored) {
     auto [reg_result, dapp_id] = mgr.register_dapp();
 
     std::vector<uint32_t> tids = {10, 20, 30};
-    auto [result, sub_id] = mgr.add_subscription(dapp_id, 200, tids, 5000);
+    std::vector<uint32_t> cids = {7, 8};
+    auto [result, sub_id] = mgr.add_subscription(dapp_id, 200, tids, cids, 5000);
     ASSERT_TRUE(result == ErrorCode::SUCCESS);
 
     const auto* details = mgr.get_subscription_details(dapp_id, 200);
     ASSERT_TRUE(details != nullptr);
-    ASSERT_EQ(details->dapp_id, dapp_id);
-    ASSERT_EQ(details->ran_function_id, 200u);
     ASSERT_EQ(details->periodicity_us, 5000u);
     ASSERT_EQ(details->telemetry_ids.size(), 3u);
     ASSERT_EQ(details->telemetry_ids[0], 10u);
     ASSERT_EQ(details->telemetry_ids[1], 20u);
     ASSERT_EQ(details->telemetry_ids[2], 30u);
+    ASSERT_EQ(details->control_ids.size(), 2u);
+    ASSERT_EQ(details->control_ids[0], 7u);
+    ASSERT_EQ(details->control_ids[1], 8u);
 }
 
 TEST(SubscriptionManager_subscription_details_defaults) {
@@ -308,6 +310,7 @@ TEST(SubscriptionManager_subscription_details_defaults) {
     ASSERT_TRUE(details != nullptr);
     ASSERT_EQ(details->periodicity_us, 0u);
     ASSERT_TRUE(details->telemetry_ids.empty());
+    ASSERT_TRUE(details->control_ids.empty());
 }
 
 TEST(SubscriptionManager_subscription_details_removed_on_delete) {
@@ -315,7 +318,7 @@ TEST(SubscriptionManager_subscription_details_removed_on_delete) {
     auto [reg_result, dapp_id] = mgr.register_dapp();
 
     std::vector<uint32_t> tids = {1};
-    mgr.add_subscription(dapp_id, 200, tids, 1000);
+    mgr.add_subscription(dapp_id, 200, tids, {}, 1000);
     mgr.remove_subscription(dapp_id, 200);
 
     const auto* details = mgr.get_subscription_details(dapp_id, 200);
@@ -327,7 +330,7 @@ TEST(SubscriptionManager_subscription_details_removed_on_unregister) {
     auto [reg_result, dapp_id] = mgr.register_dapp();
 
     std::vector<uint32_t> tids = {5, 6};
-    mgr.add_subscription(dapp_id, 300, tids, 2000);
+    mgr.add_subscription(dapp_id, 300, tids, {}, 2000);
     mgr.unregister_dapp(dapp_id);
 
     const auto* details = mgr.get_subscription_details(dapp_id, 300);
