@@ -15,11 +15,6 @@ namespace {
 constexpr const char* LOG_TAG = "SmReg";
 }
 
-SmRegistry& SmRegistry::instance() {
-    static SmRegistry registry;
-    return registry;
-}
-
 ErrorCode SmRegistry::register_sm(std::unique_ptr<ServiceModel> sm) {
     if (!sm) {
         return ErrorCode::INVALID_PARAM;

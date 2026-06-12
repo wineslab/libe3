@@ -208,6 +208,12 @@ private:
     // Core components
     std::unique_ptr<E3Connector> connector_;
     std::unique_ptr<E3Encoder> encoder_;
+    // Service Models registered with THIS interface. Owned per interface
+    // (not process-wide) so multiple agents in one process can host SMs
+    // with the same RAN function id, and stopping one agent cannot wipe
+    // another agent's registry. Only the RAN role registers SMs; on the
+    // dApp role this stays empty.
+    SmRegistry sm_registry_;
     // RAN-only state (nullptr when role==DAPP).
     std::unique_ptr<SubscriptionManager> subscription_manager_;
     // dApp-only state (nullptr when role==RAN).
