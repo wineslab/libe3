@@ -1,83 +1,83 @@
 /**
- * @file test_response_queue.cpp
- * @brief Unit tests for ResponseQueue
+ * @file test_lockfree_queue.cpp
+ * @brief Unit tests for LockFreeQueue<T>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 #include "test_framework.hpp"
-#include "libe3/response_queue.hpp"
+#include "libe3/lockfree_queue.hpp"
 #include <thread>
 #include <chrono>
 #include <atomic>
 
 using namespace libe3;
 
-TEST(ResponseQueue_initial_state) {
-    ResponseQueue queue(100);
+TEST(LockFreeQueue_initial_state) {
+    LockFreeQueue<Pdu> queue(100);
     ASSERT_TRUE(queue.empty());
     ASSERT_EQ(queue.size(), 0u);
 }
 
-TEST(ResponseQueue_push_pop) {
-    ResponseQueue queue(100);
-    
+TEST(LockFreeQueue_push_pop) {
+    LockFreeQueue<Pdu> queue(100);
+
     Pdu pdu(PduType::INDICATION_MESSAGE);
     pdu.message_id = 42;
-    
+
     auto pushed = queue.push(pdu);
     ASSERT_TRUE(pushed == ErrorCode::SUCCESS);
     ASSERT_FALSE(queue.empty());
     ASSERT_EQ(queue.size(), 1u);
-    
+
     auto popped = queue.pop();
     ASSERT_EQ(popped.message_id, 42u);
     ASSERT_TRUE(queue.empty());
 }
 
-TEST(ResponseQueue_try_pop_empty) {
-    ResponseQueue queue(100);
-    
+TEST(LockFreeQueue_try_pop_empty) {
+    LockFreeQueue<Pdu> queue(100);
+
     auto result = queue.try_pop();
     ASSERT_FALSE(result.has_value());
 }
 
-TEST(ResponseQueue_pop_with_timeout) {
-    ResponseQueue queue(100);
-    
+TEST(LockFreeQueue_pop_with_timeout) {
+    LockFreeQueue<Pdu> queue(100);
+
     auto start = std::chrono::steady_clock::now();
     auto result = queue.pop(std::chrono::milliseconds(50));
     auto end = std::chrono::steady_clock::now();
-    
+
     ASSERT_FALSE(result.has_value());
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     ASSERT_GE(elapsed.count(), 40); // Allow some slack
 }
 
-TEST(ResponseQueue_fifo_order) {
-    ResponseQueue queue(100);
-    
+TEST(LockFreeQueue_fifo_order) {
+    LockFreeQueue<Pdu> queue(100);
+
     for (uint32_t i = 0; i < 5; ++i) {
         Pdu pdu(PduType::INDICATION_MESSAGE);
         pdu.message_id = i;
         auto result = queue.push(pdu);
         (void)result;  // ignore nodiscard warning
     }
-    
+
     ASSERT_EQ(queue.size(), 5u);
-    
+
     for (uint32_t i = 0; i < 5; ++i) {
         auto pdu = queue.pop();
         ASSERT_EQ(pdu.message_id, i);
     }
-    
+
     ASSERT_TRUE(queue.empty());
 }
 
-TEST(ResponseQueue_capacity_limit) {
+TEST(LockFreeQueue_capacity_limit) {
     // The ring buffer rounds capacity up to the next power of two; use 4
     // (already a power of two) so the logical capacity is well-defined.
-    ResponseQueue queue(4);
+    LockFreeQueue<Pdu> queue(4);
 
     for (int i = 0; i < 4; ++i) {
         Pdu pdu(PduType::INDICATION_MESSAGE);
@@ -93,12 +93,12 @@ TEST(ResponseQueue_capacity_limit) {
     ASSERT_TRUE(pushed == ErrorCode::BUFFER_TOO_SMALL);
 }
 
-TEST(ResponseQueue_producer_consumer) {
-    ResponseQueue queue(100);
+TEST(LockFreeQueue_producer_consumer) {
+    LockFreeQueue<Pdu> queue(100);
     std::atomic<int> produced{0};
     std::atomic<int> consumed{0};
     std::atomic<bool> done{false};
-    
+
     // Producer thread
     std::thread producer([&]() {
         for (int i = 0; i < 50; ++i) {
@@ -110,7 +110,7 @@ TEST(ResponseQueue_producer_consumer) {
         }
         done = true;
     });
-    
+
     // Consumer thread
     std::thread consumer([&]() {
         while (!done || !queue.empty()) {
@@ -120,20 +120,20 @@ TEST(ResponseQueue_producer_consumer) {
             }
         }
     });
-    
+
     producer.join();
     consumer.join();
-    
+
     ASSERT_EQ(produced.load(), 50);
     ASSERT_EQ(consumed.load(), 50);
 }
 
-TEST(ResponseQueue_multiple_producers) {
-    ResponseQueue queue(1000);
+TEST(LockFreeQueue_multiple_producers) {
+    LockFreeQueue<Pdu> queue(1000);
     const int items_per_producer = 100;
     const int num_producers = 4;
     std::atomic<int> total_produced{0};
-    
+
     std::vector<std::thread> producers;
     for (int p = 0; p < num_producers; ++p) {
         producers.emplace_back([&, p]() {
@@ -145,59 +145,81 @@ TEST(ResponseQueue_multiple_producers) {
             }
         });
     }
-    
+
     for (auto& t : producers) {
         t.join();
     }
-    
+
     ASSERT_EQ(total_produced.load(), num_producers * items_per_producer);
     ASSERT_EQ(queue.size(), static_cast<size_t>(num_producers * items_per_producer));
 }
 
-TEST(ResponseQueue_clear) {
-    ResponseQueue queue(100);
-    
+TEST(LockFreeQueue_clear) {
+    LockFreeQueue<Pdu> queue(100);
+
     for (int i = 0; i < 10; ++i) {
         Pdu pdu(PduType::INDICATION_MESSAGE);
         (void)queue.push(pdu);
     }
-    
+
     ASSERT_EQ(queue.size(), 10u);
-    
+
     queue.clear();
-    
+
     ASSERT_TRUE(queue.empty());
     ASSERT_EQ(queue.size(), 0u);
 }
 
-TEST(ResponseQueue_capacity) {
+TEST(LockFreeQueue_capacity) {
     // capacity() returns the actual ring-buffer size, which is the next
     // power of two >= the requested capacity.  64 is the next power of two
     // greater than or equal to 42.
-    ResponseQueue queue(42);
+    LockFreeQueue<Pdu> queue(42);
     ASSERT_EQ(queue.capacity(), 64u);
 }
 
-TEST(ResponseQueue_blocking_pop) {
-    ResponseQueue queue(100);
+TEST(LockFreeQueue_blocking_pop) {
+    LockFreeQueue<Pdu> queue(100);
     std::atomic<bool> got_item{false};
-    
+
     std::thread consumer([&]() {
         auto pdu = queue.pop(); // Will block
         got_item = true;
         (void)pdu;  // Use the result
     });
-    
+
     // Give consumer time to block
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     ASSERT_FALSE(got_item.load());
-    
+
     // Push an item
     Pdu pdu(PduType::INDICATION_MESSAGE);
     (void)queue.push(pdu);
-    
+
     consumer.join();
     ASSERT_TRUE(got_item.load());
+}
+
+// The same wrapper is reused for the inbound dApp-report path
+// (LockFreeQueue<DAppReport>); exercise that specialisation too so the
+// template stays generic.
+TEST(LockFreeQueue_dapp_report_specialisation) {
+    LockFreeQueue<DAppReport> queue(8);
+
+    DAppReport r;
+    r.dapp_identifier = 7;
+    r.ran_function_identifier = 3;
+    r.report_data = {1, 2, 3, 4};
+
+    ASSERT_TRUE(queue.push(std::move(r)) == ErrorCode::SUCCESS);
+    ASSERT_EQ(queue.size(), 1u);
+
+    auto popped = queue.pop(std::chrono::milliseconds(50));
+    ASSERT_TRUE(popped.has_value());
+    ASSERT_EQ(popped->dapp_identifier, 7u);
+    ASSERT_EQ(popped->ran_function_identifier, 3u);
+    ASSERT_EQ(popped->report_data.size(), 4u);
+    ASSERT_TRUE(queue.empty());
 }
 
 int main() {

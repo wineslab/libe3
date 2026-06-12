@@ -11,7 +11,7 @@
  *  - Zero locks / zero condition variables in the fast path
  *  - head_ and tail_ are on separate cache lines to eliminate false sharing
  *  - Capacity is rounded up to the nearest power of two for cheap masking
- *  - Provides try_push / try_pop (non-blocking) used by ResponseQueue
+ *  - Provides try_push / try_pop (non-blocking) used by LockFreeQueue
  *
  * SPDX-License-Identifier: Apache-2.0
  */

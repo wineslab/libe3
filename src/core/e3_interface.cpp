@@ -117,7 +117,10 @@ ErrorCode E3Interface::init() {
     }
 
     // Create response queue
-    response_queue_ = std::make_unique<ResponseQueue>();
+    response_queue_ = std::make_unique<LockFreeQueue<Pdu>>();
+
+    // Create dApp-report queue (RAN side drains it via the report worker)
+    report_queue_ = std::make_unique<LockFreeQueue<DAppReport>>(1024);
 
     // Create connector
     connector_ = create_connector(
@@ -174,6 +177,8 @@ ErrorCode E3Interface::start() {
         setup_thread_ = std::make_unique<std::thread>(&E3Interface::setup_loop_ran, this);
         inbound_thread_ = std::make_unique<std::thread>(&E3Interface::inbound_loop_ran, this);
         outbound_thread_ = std::make_unique<std::thread>(&E3Interface::outbound_loop_ran, this);
+        // RAN receives dApp reports; drain them off the inbound thread.
+        report_worker_thread_ = std::make_unique<std::thread>(&E3Interface::report_worker_loop, this);
     } else {
         setup_thread_ = std::make_unique<std::thread>(&E3Interface::setup_loop_dapp, this);
         inbound_thread_ = std::make_unique<std::thread>(&E3Interface::inbound_loop_dapp, this);
@@ -200,7 +205,12 @@ void E3Interface::stop() {
     if (response_queue_) {
         response_queue_->shutdown();
     }
-    
+
+    // Wake up the report queue so the report worker's blocking pop returns.
+    if (report_queue_) {
+        report_queue_->shutdown();
+    }
+
     // Interrupt blocking socket operations
     if (connector_) {
         connector_->shutdown();
@@ -218,6 +228,9 @@ void E3Interface::stop() {
     }
     if (sm_data_thread_ && sm_data_thread_->joinable()) {
         sm_data_thread_->join();
+    }
+    if (report_worker_thread_ && report_worker_thread_->joinable()) {
+        report_worker_thread_->join();
     }
 
     // Wake up anyone blocked in wait_for_setup so they don't hang.
@@ -384,7 +397,14 @@ void E3Interface::inbound_loop_ran() {
             case PduType::DAPP_REPORT: {
                 auto* report = std::get_if<DAppReport>(&pdu.choice);
                 if (report) {
-                    handle_dapp_report(*report);
+                    if (report_queue_) {
+                        // Hand off to the report worker so downstream work
+                        // never blocks the inbound read path. The queue logs
+                        // on overflow; surface it here as an error too.
+                        if (report_queue_->push(std::move(*report)) != ErrorCode::SUCCESS) {
+                            E3_LOG_ERROR(LOG_TAG) << "Report queue full — dropping dApp report";
+                        }
+                    }
                 }
                 break;
             }
@@ -457,6 +477,27 @@ void E3Interface::outbound_loop_ran() {
     }
     
     E3_LOG_INFO(LOG_TAG) << "Outbound loop (RAN) stopped";
+}
+
+void E3Interface::report_worker_loop() {
+    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness);
+    E3_LOG_INFO(LOG_TAG) << "Report worker loop started";
+
+    while (!should_stop_.load()) {
+        // Blocking pop with the queue's adaptive spin-wait, mirroring
+        // outbound_loop_ran's use of response_queue_.
+        auto report_opt = report_queue_->pop(std::chrono::milliseconds(10));
+        if (report_opt) {
+            handle_dapp_report(*report_opt);
+        }
+    }
+
+    // Drain anything left after shutdown was signalled.
+    while (auto report_opt = report_queue_->try_pop()) {
+        handle_dapp_report(*report_opt);
+    }
+
+    E3_LOG_INFO(LOG_TAG) << "Report worker loop stopped";
 }
 
 void E3Interface::sm_data_handler_loop() {
