@@ -21,3 +21,7 @@ We are grateful for every contribution, big or small, that helped shape this pro
 
 - Filippo Olimpieri <126257005+Ninjabippo1205@users.noreply.github.com>
   - Callback mechanism for dApp status reporting to the E2 Agent
+
+- Davide Villa <dvilla@nvidia.com> (NVIDIA Corporation)
+  - JSON encoder: camelCase wire format with nested-JSON protocolData
+  - Subscription manager: per-subscription metadata, C API subscription getters
