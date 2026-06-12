@@ -86,7 +86,10 @@ ErrorCode ZmqE3Connector::setup_initial_connection() {
     if (transport_layer_ == E3TransportLayer::IPC) {
         struct stat st{};
         if (stat(IPC_BASE_DIR, &st) == -1) {
-            if (mkdir(IPC_BASE_DIR, 0777) == -1) {
+            // EEXIST: another agent/test process created it between the stat
+            // and the mkdir (the directory existing is exactly what we want).
+            // The POSIX connector guards the same race the same way.
+            if (mkdir(IPC_BASE_DIR, 0777) == -1 && errno != EEXIST) {
                 E3_LOG_ERROR(LOG_TAG) << "Failed to create IPC directory: " << strerror(errno);
                 return ErrorCode::CONNECTION_FAILED;
             }
@@ -454,7 +457,11 @@ void ZmqE3Connector::dispose() {
         path = extract_path(outbound_endpoint_);
         if (!path.empty()) unlink(path.c_str());
 
-        rmdir(IPC_BASE_DIR);
+        // Deliberately do NOT rmdir(IPC_BASE_DIR): it is a shared directory
+        // (multiple agents/tests use it concurrently). Removing it here races
+        // with another agent that has already stat()'d it and is about to
+        // bind a socket inside it, making that bind fail with ENOENT. Leaving
+        // the empty directory behind is harmless.
     }
     
     connected_ = false;

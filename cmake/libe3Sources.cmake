@@ -9,7 +9,7 @@ set(LIBE3_PUBLIC_HEADERS
     include/libe3/e3_encoder.hpp
     include/libe3/mpmc_queue.hpp
     include/libe3/subscription_manager.hpp
-    include/libe3/response_queue.hpp
+    include/libe3/lockfree_queue.hpp
     include/libe3/sm_interface.hpp
     include/libe3/e3_interface.hpp
     include/libe3/e3_agent.hpp
@@ -23,7 +23,6 @@ set(LIBE3_SOURCES
     src/core/e3_agent.cpp
     src/core/e3_interface.cpp
     src/core/subscription_manager.cpp
-    src/core/response_queue.cpp
     src/core/sm_registry.cpp
     
     # Encoder

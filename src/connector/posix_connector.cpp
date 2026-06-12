@@ -636,7 +636,9 @@ void PosixE3Connector::dispose() {
         unlink(setup_endpoint_.c_str());
         unlink(inbound_endpoint_.c_str());
         unlink(outbound_endpoint_.c_str());
-        rmdir(IPC_BASE_DIR);
+        // Deliberately do NOT rmdir(IPC_BASE_DIR): it is shared across agents
+        // and tests. Removing it races with another agent binding a socket
+        // inside it (ENOENT). Leaving the empty directory behind is harmless.
     }
     
     setup_socket_ = -1;
