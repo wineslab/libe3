@@ -308,6 +308,17 @@ private:
     void handle_release_message(const ReleaseMessage &release);
     void handle_dapp_disconnection(uint32_t dapp_id);
 
+    /**
+     * @brief Complete a setup REQ/REP exchange with a best-effort empty reply.
+     *
+     * Used whenever a received setup message cannot be answered with a real
+     * SetupResponse (undecodable bytes, wrong PDU type, response encode
+     * failure). A ZMQ REP socket must send exactly one reply per received
+     * request before it can receive again; bailing out without replying
+     * wedges the setup channel for every subsequent dApp until restart.
+     */
+    void send_empty_setup_reply();
+
     // dApp-role handlers
     void handle_setup_response(const SetupResponse& response);
     void handle_subscription_response(const SubscriptionResponse& response);

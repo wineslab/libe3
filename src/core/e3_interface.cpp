@@ -315,26 +315,32 @@ void E3Interface::setup_loop_ran() {
 
         E3_LOG_INFO(LOG_TAG) << "Setup request received: " << ret << " bytes";
         
-        // Decode the setup request
+        // Decode the setup request. On any failure we must still complete
+        // the REQ/REP exchange (see send_empty_setup_reply) or the setup
+        // channel wedges for every subsequent dApp.
         auto decode_result = encoder_->decode(buffer.data(), static_cast<size_t>(ret));
         if (!decode_result) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to decode setup request; ret=" << ret;
+            E3_LOG_WARN(LOG_TAG) << "Undecodable setup message (" << ret
+                                 << " bytes, wrong encoding or garbage); replying empty";
+            send_empty_setup_reply();
             continue;
         }
-        
+
         Pdu& pdu = *decode_result;
         if (pdu.type != PduType::SETUP_REQUEST) {
-            E3_LOG_ERROR(LOG_TAG) << "Unexpected PDU type in setup: " 
-                                  << pdu_type_to_string(pdu.type);
+            E3_LOG_WARN(LOG_TAG) << "Unexpected PDU type in setup: "
+                                 << pdu_type_to_string(pdu.type) << "; replying empty";
+            send_empty_setup_reply();
             continue;
         }
-        
+
         auto* request = std::get_if<SetupRequest>(&pdu.choice);
         if (!request) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to get SetupRequest from PDU";
+            E3_LOG_WARN(LOG_TAG) << "Failed to get SetupRequest from PDU; replying empty";
+            send_empty_setup_reply();
             continue;
         }
-        
+
         handle_setup_request(*request, pdu.message_id);
     }
     
@@ -603,15 +609,34 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
     
     if (!encode_result) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to encode setup response for request id " << request_message_id;
+        // Still complete the REQ/REP exchange so the setup channel survives.
+        send_empty_setup_reply();
         return;
     }
-    
+
     ErrorCode send_result = connector_->send_response(encode_result->buffer);
     if (send_result != ErrorCode::SUCCESS) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to send setup response for request id " << request_message_id
                               << "; error=" << error_code_to_string(send_result);
     } else {
         E3_LOG_INFO(LOG_TAG) << "Sent setup response for request id " << request_message_id;
+    }
+}
+
+void E3Interface::send_empty_setup_reply() {
+    // The RAN side of the setup channel is a ZMQ REP socket: it must send
+    // exactly one reply per received request before it can receive again.
+    // Returning without replying (undecodable request, wrong PDU type,
+    // response-encode failure) leaves the socket in the send state, where
+    // every later recv fails — all future dApp setups stall until the
+    // connector resets or the agent restarts. Completing the exchange with
+    // an empty frame keeps the channel alive; the peer treats the empty
+    // reply as a failed setup and retries. On connectors without a REP
+    // state machine (POSIX) the empty send is harmless.
+    ErrorCode rc = connector_->send_response({});
+    if (rc != ErrorCode::SUCCESS) {
+        E3_LOG_WARN(LOG_TAG) << "Failed to send empty setup reply: "
+                             << error_code_to_string(rc);
     }
 }
 
