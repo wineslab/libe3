@@ -10,5 +10,9 @@ var searchData=
   ['get_5fregistered_5fdapps_7',['get_registered_dapps',['../classlibe3_1_1E3Agent.html#a016a0efdb7a2f6b37e163c6549f2c269',1,'libe3::E3Agent::get_registered_dapps()'],['../classlibe3_1_1SubscriptionManager.html#a0c770119290b55626b5df3ad30bacd25',1,'libe3::SubscriptionManager::get_registered_dapps() const']]],
   ['get_5fsubscribed_5fdapps_8',['get_subscribed_dapps',['../classlibe3_1_1SubscriptionManager.html#ac689fd298f04ba0b021ba62bb283fecd',1,'libe3::SubscriptionManager']]],
   ['get_5fsubscriber_5fcount_9',['get_subscriber_count',['../classlibe3_1_1SubscriptionManager.html#a563617597d3818bea37f3b5264865ef9',1,'libe3::SubscriptionManager']]],
-  ['get_5fsubscribers_10',['get_subscribers',['../classlibe3_1_1ServiceModel.html#a29fc96ee477223cb4a6c76e1b03bebb4',1,'libe3::ServiceModel']]]
+  ['get_5fsubscribers_10',['get_subscribers',['../classlibe3_1_1ServiceModel.html#a29fc96ee477223cb4a6c76e1b03bebb4',1,'libe3::ServiceModel']]],
+  ['get_5fsubscription_5fcontrol_5fids_11',['get_subscription_control_ids',['../classlibe3_1_1E3Agent.html#a981396ba0e4de0d5f264b806ad2b978f',1,'libe3::E3Agent']]],
+  ['get_5fsubscription_5fdetails_12',['get_subscription_details',['../classlibe3_1_1SubscriptionManager.html#a7933f25ebd8922b93dae78728f677334',1,'libe3::SubscriptionManager']]],
+  ['get_5fsubscription_5fperiodicity_13',['get_subscription_periodicity',['../classlibe3_1_1E3Agent.html#a5b9b0158cd26e9e3f85b4410b04ed342',1,'libe3::E3Agent']]],
+  ['get_5fsubscription_5ftelemetry_5fids_14',['get_subscription_telemetry_ids',['../classlibe3_1_1E3Agent.html#a1b61ca8643b457c111afcec81cfdc75a',1,'libe3::E3Agent']]]
 ];

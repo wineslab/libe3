@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.5</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.6</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -140,6 +140,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1JsonE3Encoder.html">JsonE3Encoder</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">JSON encoder for E3AP PDUs.  <a href="classlibe3_1_1JsonE3Encoder.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1LockFreeQueue.html">LockFreeQueue</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lock-free bounded blocking queue.  <a href="classlibe3_1_1LockFreeQueue.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1Logger.html">Logger</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classlibe3_1_1Logger.html" title="Logger singleton class.">Logger</a> singleton class.  <a href="classlibe3_1_1Logger.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -167,9 +170,6 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1ReleaseMessage.html">ReleaseMessage</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">E3AP Release Message structure.  <a href="structlibe3_1_1ReleaseMessage.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1ResponseQueue.html">ResponseQueue</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lock-free bounded queue for E3AP PDUs.  <a href="classlibe3_1_1ResponseQueue.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1ServiceModel.html">ServiceModel</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract Service Model interface.  <a href="classlibe3_1_1ServiceModel.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -184,6 +184,9 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1SubscriptionDelete.html">SubscriptionDelete</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">E3AP Subscription Delete structure.  <a href="structlibe3_1_1SubscriptionDelete.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1SubscriptionDetails.html">SubscriptionDetails</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-subscription metadata stored by the <a class="el" href="classlibe3_1_1SubscriptionManager.html" title="E3 Subscription Manager.">SubscriptionManager</a>.  <a href="structlibe3_1_1SubscriptionDetails.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1SubscriptionEntry.html">SubscriptionEntry</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscription entry representing dApp-RAN function association.  <a href="structlibe3_1_1SubscriptionEntry.html#details">More...</a><br /></td></tr>
@@ -599,7 +602,7 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8hpp_source.html#l00035">35</a> of file <a class="el" href="subscription__manager_8hpp_source.html">subscription_manager.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8hpp_source.html#l00044">44</a> of file <a class="el" href="subscription__manager_8hpp_source.html">subscription_manager.hpp</a>.</p>
 
 </div>
 </div>

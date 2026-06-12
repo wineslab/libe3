@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.5</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.6</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -179,9 +179,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>JSON encoder for E3AP PDUs. </p>
-<p>Provides JSON encoding/decoding for development and debugging. </p>
+<p>Provides JSON encoding/decoding for development and debugging.</p>
+<p>JSON wire format uses camelCase keys (e.g. "dAppName", "ranFunctionIdentifier") and camelCase PDU type strings (e.g. "setupRequest", "indicationMessage"). PascalCase PDU types are rejected by the decoder.</p>
+<p>Envelope format is flat: payload fields sit alongside "type", "id", and "timestamp" at root level. Messages with a "data" wrapper are rejected. </p>
 
-<p class="definition">Definition at line <a class="el" href="json__encoder_8hpp_source.html#l00021">21</a> of file <a class="el" href="json__encoder_8hpp_source.html">json_encoder.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="json__encoder_8hpp_source.html#l00028">28</a> of file <a class="el" href="json__encoder_8hpp_source.html">json_encoder.hpp</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a49d5c3e026a8ec6cb5a2a92763ee694c" name="a49d5c3e026a8ec6cb5a2a92763ee694c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a49d5c3e026a8ec6cb5a2a92763ee694c">&#9670;&#160;</a></span>JsonE3Encoder()</h2>
@@ -269,7 +271,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Encoder.html#a7307745c5de56ed0a1ef00b314774253">libe3::E3Encoder</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="json__encoder_8cpp_source.html#l00376">376</a> of file <a class="el" href="json__encoder_8cpp_source.html">json_encoder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="json__encoder_8cpp_source.html#l00388">388</a> of file <a class="el" href="json__encoder_8cpp_source.html">json_encoder.cpp</a>.</p>
 
 </div>
 </div>
@@ -319,7 +321,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Encoder.html#ac1c90f018d3d811304f0f231311c5f04">libe3::E3Encoder</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="json__encoder_8cpp_source.html#l00380">380</a> of file <a class="el" href="json__encoder_8cpp_source.html">json_encoder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="json__encoder_8cpp_source.html#l00392">392</a> of file <a class="el" href="json__encoder_8cpp_source.html">json_encoder.cpp</a>.</p>
 
 </div>
 </div>
@@ -358,7 +360,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Encoder.html#ad95787cb0ed484b24102bedd2c9fd1a0">libe3::E3Encoder</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="json__encoder_8cpp_source.html#l00311">311</a> of file <a class="el" href="json__encoder_8cpp_source.html">json_encoder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="json__encoder_8cpp_source.html#l00324">324</a> of file <a class="el" href="json__encoder_8cpp_source.html">json_encoder.cpp</a>.</p>
 
 </div>
 </div>
@@ -389,13 +391,13 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Encoder.html#a9ae1888c12898963998dcdf2b20a4429">libe3::E3Encoder</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="json__encoder_8hpp_source.html#l00029">29</a> of file <a class="el" href="json__encoder_8hpp_source.html">json_encoder.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="json__encoder_8hpp_source.html#l00036">36</a> of file <a class="el" href="json__encoder_8hpp_source.html">json_encoder.hpp</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>/home/runner/work/spear-libe3/spear-libe3/src/encoder/<a class="el" href="json__encoder_8hpp_source.html">json_encoder.hpp</a></li>
-<li>/home/runner/work/spear-libe3/spear-libe3/src/encoder/<a class="el" href="json__encoder_8cpp_source.html">json_encoder.cpp</a></li>
+<li>/home/runner/work/libe3/libe3/src/encoder/<a class="el" href="json__encoder_8hpp_source.html">json_encoder.hpp</a></li>
+<li>/home/runner/work/libe3/libe3/src/encoder/<a class="el" href="json__encoder_8cpp_source.html">json_encoder.cpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

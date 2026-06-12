@@ -13,7 +13,6 @@ var searchData=
   ['messageack_10',['MessageAck',['../structlibe3_1_1MessageAck.html',1,'libe3']]],
   ['messageackhandler_11',['MessageAckHandler',['../namespacelibe3.html#adec1d2fe5180a57e9b2f3ebcd4261630',1,'libe3']]],
   ['mpmc_5fqueue_2ehpp_12',['mpmc_queue.hpp',['../mpmc__queue_8hpp.html',1,'']]],
-  ['mpmcqueue_13',['mpmcqueue',['../classlibe3_1_1MpmcQueue.html#a518e3b6d33d5f65a94797e7d6c95e65e',1,'libe3::MpmcQueue::MpmcQueue(const MpmcQueue &amp;)=delete'],['../classlibe3_1_1MpmcQueue.html#afcbc42780099c1ec8d171ba58a1e2a60',1,'libe3::MpmcQueue::MpmcQueue(MpmcQueue &amp;&amp;)=delete'],['../classlibe3_1_1MpmcQueue.html#af91f986684fb4873f8888e7e365c56a5',1,'libe3::MpmcQueue::MpmcQueue(size_t min_capacity)'],['../classlibe3_1_1MpmcQueue.html',1,'libe3::MpmcQueue&lt; T &gt;']]],
-  ['mpmcqueue_3c_20libe3_3a_3apdu_20_3e_14',['MpmcQueue&lt; libe3::Pdu &gt;',['../classlibe3_1_1MpmcQueue.html',1,'libe3']]],
-  ['mu_15',['mu',['../classlibe3_1_1DAppSubscriptionState.html#a68a31bb303c90eb6c8b00f070b3d3371',1,'libe3::DAppSubscriptionState']]]
+  ['mpmcqueue_13',['mpmcqueue',['../classlibe3_1_1MpmcQueue.html#afcbc42780099c1ec8d171ba58a1e2a60',1,'libe3::MpmcQueue::MpmcQueue(MpmcQueue &amp;&amp;)=delete'],['../classlibe3_1_1MpmcQueue.html#a518e3b6d33d5f65a94797e7d6c95e65e',1,'libe3::MpmcQueue::MpmcQueue(const MpmcQueue &amp;)=delete'],['../classlibe3_1_1MpmcQueue.html#af91f986684fb4873f8888e7e365c56a5',1,'libe3::MpmcQueue::MpmcQueue(size_t min_capacity)'],['../classlibe3_1_1MpmcQueue.html',1,'libe3::MpmcQueue&lt; T &gt;']]],
+  ['mu_14',['mu',['../classlibe3_1_1DAppSubscriptionState.html#a68a31bb303c90eb6c8b00f070b3d3371',1,'libe3::DAppSubscriptionState']]]
 ];

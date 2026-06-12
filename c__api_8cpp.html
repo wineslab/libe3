@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>libe3: /home/runner/work/spear-libe3/spear-libe3/src/c_api.cpp File Reference</title>
+<title>libe3: /home/runner/work/libe3/libe3/src/c_api.cpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.5</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.6</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -179,6 +179,15 @@ Functions</h2></td></tr>
 <tr class="memitem:a2d435d6a82ac4f6bfdfd9e11b492cf75" id="r_a2d435d6a82ac4f6bfdfd9e11b492cf75"><td class="memItemLeft" align="right" valign="top">uint32_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c__api_8cpp.html#a2d435d6a82ac4f6bfdfd9e11b492cf75">e3_agent_get_ran_function_subscribers</a> (<a class="el" href="c__api_8h.html#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *agent, uint32_t ran_function_id, size_t *out_len)</td></tr>
 <tr class="memdesc:a2d435d6a82ac4f6bfdfd9e11b492cf75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a newly-allocated array of dApp IDs subscribed to a RAN function.  <br /></td></tr>
 <tr class="separator:a2d435d6a82ac4f6bfdfd9e11b492cf75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b318bb93c04a00bfee5682958393b0d" id="r_a2b318bb93c04a00bfee5682958393b0d"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c__api_8cpp.html#a2b318bb93c04a00bfee5682958393b0d">e3_agent_get_subscription_periodicity</a> (<a class="el" href="c__api_8h.html#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *agent, uint32_t dapp_id, uint32_t ran_function_id)</td></tr>
+<tr class="memdesc:a2b318bb93c04a00bfee5682958393b0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reporting periodicity a dApp requested for a RAN function.  <br /></td></tr>
+<tr class="separator:a2b318bb93c04a00bfee5682958393b0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7c2cfe3d6246922b2d2a7b8090f31b7" id="r_ae7c2cfe3d6246922b2d2a7b8090f31b7"><td class="memItemLeft" align="right" valign="top">uint32_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c__api_8cpp.html#ae7c2cfe3d6246922b2d2a7b8090f31b7">e3_agent_get_subscription_telemetry_ids</a> (<a class="el" href="c__api_8h.html#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *agent, uint32_t dapp_id, uint32_t ran_function_id, size_t *out_len)</td></tr>
+<tr class="memdesc:ae7c2cfe3d6246922b2d2a7b8090f31b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the telemetry IDs a dApp requested for a RAN function.  <br /></td></tr>
+<tr class="separator:ae7c2cfe3d6246922b2d2a7b8090f31b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6985d5ec13e7f1dc237f814e33bbe48" id="r_ad6985d5ec13e7f1dc237f814e33bbe48"><td class="memItemLeft" align="right" valign="top">uint32_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c__api_8cpp.html#ad6985d5ec13e7f1dc237f814e33bbe48">e3_agent_get_subscription_control_ids</a> (<a class="el" href="c__api_8h.html#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *agent, uint32_t dapp_id, uint32_t ran_function_id, size_t *out_len)</td></tr>
+<tr class="memdesc:ad6985d5ec13e7f1dc237f814e33bbe48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the control IDs a dApp requested for a RAN function.  <br /></td></tr>
+<tr class="separator:ad6985d5ec13e7f1dc237f814e33bbe48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a023e8229e71eb379000c3bca1b3337fd" id="r_a023e8229e71eb379000c3bca1b3337fd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c__api_8cpp.html#a023e8229e71eb379000c3bca1b3337fd">e3_agent_free_uint32_array</a> (uint32_t *arr)</td></tr>
 <tr class="memdesc:a023e8229e71eb379000c3bca1b3337fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free an array previously returned by the e3_agent_get_* helpers.  <br /></td></tr>
 <tr class="separator:a023e8229e71eb379000c3bca1b3337fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -344,7 +353,7 @@ Functions</h2></td></tr>
 
 <p>Number of registered dApps known to the agent. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00343">343</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00374">374</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -389,7 +398,7 @@ Functions</h2></td></tr>
 
 <p>Free an array previously returned by the e3_agent_get_* helpers. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00303">303</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00334">334</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -570,6 +579,149 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ad6985d5ec13e7f1dc237f814e33bbe48" name="ad6985d5ec13e7f1dc237f814e33bbe48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6985d5ec13e7f1dc237f814e33bbe48">&#9670;&#160;</a></span>e3_agent_get_subscription_control_ids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t * e3_agent_get_subscription_control_ids </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="c__api_8h.html#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *&#160;</td>
+          <td class="paramname"><em>agent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>dapp_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>ran_function_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>out_len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the control IDs a dApp requested for a RAN function. </p>
+<p>Caller must free the returned array with <a class="el" href="c__api_8h.html#a023e8229e71eb379000c3bca1b3337fd" title="Free an array previously returned by the e3_agent_get_* helpers.">e3_agent_free_uint32_array()</a>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">out_len</td><td>receives the number of elements (set to 0 on error/empty) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>newly-allocated array, or NULL if empty/error </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00323">323</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a2b318bb93c04a00bfee5682958393b0d" name="a2b318bb93c04a00bfee5682958393b0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b318bb93c04a00bfee5682958393b0d">&#9670;&#160;</a></span>e3_agent_get_subscription_periodicity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t e3_agent_get_subscription_periodicity </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="c__api_8h.html#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *&#160;</td>
+          <td class="paramname"><em>agent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>dapp_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>ran_function_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the reporting periodicity a dApp requested for a RAN function. </p>
+<dl class="section return"><dt>Returns</dt><dd>periodicity in microseconds, 0 if not set or subscription not found </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00303">303</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ae7c2cfe3d6246922b2d2a7b8090f31b7" name="ae7c2cfe3d6246922b2d2a7b8090f31b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7c2cfe3d6246922b2d2a7b8090f31b7">&#9670;&#160;</a></span>e3_agent_get_subscription_telemetry_ids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t * e3_agent_get_subscription_telemetry_ids </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="c__api_8h.html#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *&#160;</td>
+          <td class="paramname"><em>agent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>dapp_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>ran_function_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>out_len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the telemetry IDs a dApp requested for a RAN function. </p>
+<p>Caller must free the returned array with <a class="el" href="c__api_8h.html#a023e8229e71eb379000c3bca1b3337fd" title="Free an array previously returned by the e3_agent_get_* helpers.">e3_agent_free_uint32_array()</a>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">out_len</td><td>receives the number of elements (set to 0 on error/empty) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>newly-allocated array, or NULL if empty/error </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00312">312</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+
+</div>
+</div>
 <a id="aa5383403c63d596b90393a173b11951f" name="aa5383403c63d596b90393a173b11951f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa5383403c63d596b90393a173b11951f">&#9670;&#160;</a></span>e3_agent_init()</h2>
 
@@ -707,7 +859,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a> (see <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">libe3::ErrorCode</a>; 0 == SUCCESS) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00307">307</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00338">338</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -754,7 +906,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a> (see <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">libe3::ErrorCode</a>; 0 == SUCCESS) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00333">333</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00364">364</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -815,7 +967,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a> (see <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">libe3::ErrorCode</a>; 0 == SUCCESS) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00320">320</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00351">351</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -897,7 +1049,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a> (see <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">libe3::ErrorCode</a>; 0 == SUCCESS) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00362">362</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00393">393</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -965,7 +1117,7 @@ Functions</h2></td></tr>
 
 <p>Total number of active subscriptions tracked by the agent. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00348">348</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00379">379</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -994,7 +1146,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Null-terminated string with the symbolic name, or <code>"UNKNOWN_ERROR"</code> if the value is not recognised. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00353">353</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00384">384</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>

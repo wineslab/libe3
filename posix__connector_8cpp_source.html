@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>libe3: /home/runner/work/spear-libe3/spear-libe3/src/connector/posix_connector.cpp Source File</title>
+<title>libe3: /home/runner/work/libe3/libe3/src/connector/posix_connector.cpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.5</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.6</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -767,96 +767,98 @@ $(document).ready(function(){initNavTree('posix__connector_8cpp_source.html','')
 <div class="line"><a id="l00636" name="l00636"></a><span class="lineno">  636</span>        unlink(<a class="code hl_variable" href="classlibe3_1_1E3Connector.html#a29410065e037800e5b50ba4ab0518ee1">setup_endpoint_</a>.c_str());</div>
 <div class="line"><a id="l00637" name="l00637"></a><span class="lineno">  637</span>        unlink(<a class="code hl_variable" href="classlibe3_1_1E3Connector.html#a21d8f22cf14920aed9cc31815fa287d7">inbound_endpoint_</a>.c_str());</div>
 <div class="line"><a id="l00638" name="l00638"></a><span class="lineno">  638</span>        unlink(<a class="code hl_variable" href="classlibe3_1_1E3Connector.html#a22c5fef59ef90a5a9b0c11ed540d1819">outbound_endpoint_</a>.c_str());</div>
-<div class="line"><a id="l00639" name="l00639"></a><span class="lineno">  639</span>        rmdir(IPC_BASE_DIR);</div>
-<div class="line"><a id="l00640" name="l00640"></a><span class="lineno">  640</span>    }</div>
-<div class="line"><a id="l00641" name="l00641"></a><span class="lineno">  641</span>    </div>
-<div class="line"><a id="l00642" name="l00642"></a><span class="lineno">  642</span>    setup_socket_ = -1;</div>
-<div class="line"><a id="l00643" name="l00643"></a><span class="lineno">  643</span>    setup_connection_socket_ = UNUSED_SOCKET;</div>
-<div class="line"><a id="l00644" name="l00644"></a><span class="lineno">  644</span>    inbound_socket_ = -1;</div>
-<div class="line"><a id="l00645" name="l00645"></a><span class="lineno">  645</span>    inbound_connection_socket_ = UNUSED_SOCKET;</div>
-<div class="line"><a id="l00646" name="l00646"></a><span class="lineno">  646</span>    outbound_socket_ = -1;</div>
-<div class="line"><a id="l00647" name="l00647"></a><span class="lineno">  647</span>    outbound_connection_socket_ = UNUSED_SOCKET;</div>
-<div class="line"><a id="l00648" name="l00648"></a><span class="lineno">  648</span>    connected_ = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00649" name="l00649"></a><span class="lineno">  649</span>    </div>
-<div class="line"><a id="l00650" name="l00650"></a><span class="lineno">  650</span>    <a class="code hl_define" href="logger_8hpp.html#a906335a400f72df53e6a8658f73cd17b">E3_LOG_INFO</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;POSIX connector disposed&quot;</span>;</div>
-<div class="line"><a id="l00651" name="l00651"></a><span class="lineno">  651</span>}</div>
+<div class="line"><a id="l00639" name="l00639"></a><span class="lineno">  639</span>        <span class="comment">// Deliberately do NOT rmdir(IPC_BASE_DIR): it is shared across agents</span></div>
+<div class="line"><a id="l00640" name="l00640"></a><span class="lineno">  640</span>        <span class="comment">// and tests. Removing it races with another agent binding a socket</span></div>
+<div class="line"><a id="l00641" name="l00641"></a><span class="lineno">  641</span>        <span class="comment">// inside it (ENOENT). Leaving the empty directory behind is harmless.</span></div>
+<div class="line"><a id="l00642" name="l00642"></a><span class="lineno">  642</span>    }</div>
+<div class="line"><a id="l00643" name="l00643"></a><span class="lineno">  643</span>    </div>
+<div class="line"><a id="l00644" name="l00644"></a><span class="lineno">  644</span>    setup_socket_ = -1;</div>
+<div class="line"><a id="l00645" name="l00645"></a><span class="lineno">  645</span>    setup_connection_socket_ = UNUSED_SOCKET;</div>
+<div class="line"><a id="l00646" name="l00646"></a><span class="lineno">  646</span>    inbound_socket_ = -1;</div>
+<div class="line"><a id="l00647" name="l00647"></a><span class="lineno">  647</span>    inbound_connection_socket_ = UNUSED_SOCKET;</div>
+<div class="line"><a id="l00648" name="l00648"></a><span class="lineno">  648</span>    outbound_socket_ = -1;</div>
+<div class="line"><a id="l00649" name="l00649"></a><span class="lineno">  649</span>    outbound_connection_socket_ = UNUSED_SOCKET;</div>
+<div class="line"><a id="l00650" name="l00650"></a><span class="lineno">  650</span>    connected_ = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00651" name="l00651"></a><span class="lineno">  651</span>    </div>
+<div class="line"><a id="l00652" name="l00652"></a><span class="lineno">  652</span>    <a class="code hl_define" href="logger_8hpp.html#a906335a400f72df53e6a8658f73cd17b">E3_LOG_INFO</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;POSIX connector disposed&quot;</span>;</div>
+<div class="line"><a id="l00653" name="l00653"></a><span class="lineno">  653</span>}</div>
 </div>
-<div class="line"><a id="l00652" name="l00652"></a><span class="lineno">  652</span> </div>
-<div class="line"><a id="l00653" name="l00653"></a><span class="lineno">  653</span><span class="keywordtype">int</span> PosixE3Connector::send_in_chunks(<span class="keywordtype">int</span> sockfd, <span class="keyword">const</span> uint8_t* buffer, <span class="keywordtype">size_t</span> buffer_size) {</div>
-<div class="line"><a id="l00654" name="l00654"></a><span class="lineno">  654</span>    <span class="comment">// Send the buffer size first (4 bytes, network byte order)</span></div>
-<div class="line"><a id="l00655" name="l00655"></a><span class="lineno">  655</span>    uint32_t network_order_size = htonl(<span class="keyword">static_cast&lt;</span>uint32_t<span class="keyword">&gt;</span>(buffer_size));</div>
-<div class="line"><a id="l00656" name="l00656"></a><span class="lineno">  656</span>    ssize_t sent = <a class="code hl_function" href="classlibe3_1_1PosixE3Connector.html#a7a3d61abfe45806f412e20aeaeaeb4a9">::send</a>(sockfd, &amp;network_order_size, <span class="keyword">sizeof</span>(network_order_size), 0);</div>
-<div class="line"><a id="l00657" name="l00657"></a><span class="lineno">  657</span>    <span class="keywordflow">if</span> (sent != <span class="keyword">sizeof</span>(network_order_size)) {</div>
-<div class="line"><a id="l00658" name="l00658"></a><span class="lineno">  658</span>        <a class="code hl_define" href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;Failed to send buffer size: &quot;</span> &lt;&lt; strerror(errno);</div>
-<div class="line"><a id="l00659" name="l00659"></a><span class="lineno">  659</span>        <span class="keywordflow">return</span> -1;</div>
-<div class="line"><a id="l00660" name="l00660"></a><span class="lineno">  660</span>    }</div>
-<div class="line"><a id="l00661" name="l00661"></a><span class="lineno">  661</span>    </div>
-<div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span>    <span class="keywordtype">size_t</span> total_sent = 0;</div>
-<div class="line"><a id="l00663" name="l00663"></a><span class="lineno">  663</span>    <span class="keywordflow">while</span> (total_sent &lt; buffer_size) {</div>
-<div class="line"><a id="l00664" name="l00664"></a><span class="lineno">  664</span>        ssize_t bytes_to_send = <span class="keyword">static_cast&lt;</span>ssize_t<span class="keyword">&gt;</span>(std::min(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(CHUNK_SIZE), buffer_size - total_sent));</div>
-<div class="line"><a id="l00665" name="l00665"></a><span class="lineno">  665</span>        </div>
-<div class="line"><a id="l00666" name="l00666"></a><span class="lineno">  666</span>        ssize_t chunk_sent = 0;</div>
-<div class="line"><a id="l00667" name="l00667"></a><span class="lineno">  667</span>        <span class="keywordflow">while</span> (chunk_sent &lt; bytes_to_send) {</div>
-<div class="line"><a id="l00668" name="l00668"></a><span class="lineno">  668</span>            ssize_t sent_chunk = <a class="code hl_function" href="classlibe3_1_1PosixE3Connector.html#a7a3d61abfe45806f412e20aeaeaeb4a9">::send</a>(sockfd, buffer + total_sent + chunk_sent, </div>
-<div class="line"><a id="l00669" name="l00669"></a><span class="lineno">  669</span>                                       <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(bytes_to_send - chunk_sent), 0);</div>
-<div class="line"><a id="l00670" name="l00670"></a><span class="lineno">  670</span>            <span class="keywordflow">if</span> (sent_chunk == -1) {</div>
-<div class="line"><a id="l00671" name="l00671"></a><span class="lineno">  671</span>                <a class="code hl_define" href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;Failed to send data: &quot;</span> &lt;&lt; strerror(errno);</div>
-<div class="line"><a id="l00672" name="l00672"></a><span class="lineno">  672</span>                <span class="keywordflow">return</span> -1;</div>
-<div class="line"><a id="l00673" name="l00673"></a><span class="lineno">  673</span>            }</div>
-<div class="line"><a id="l00674" name="l00674"></a><span class="lineno">  674</span>            chunk_sent += sent_chunk;</div>
-<div class="line"><a id="l00675" name="l00675"></a><span class="lineno">  675</span>        }</div>
-<div class="line"><a id="l00676" name="l00676"></a><span class="lineno">  676</span>        total_sent += <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(chunk_sent);</div>
-<div class="line"><a id="l00677" name="l00677"></a><span class="lineno">  677</span>    }</div>
-<div class="line"><a id="l00678" name="l00678"></a><span class="lineno">  678</span>    </div>
-<div class="line"><a id="l00679" name="l00679"></a><span class="lineno">  679</span>    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00680" name="l00680"></a><span class="lineno">  680</span>}</div>
-<div class="line"><a id="l00681" name="l00681"></a><span class="lineno">  681</span> </div>
-<div class="line"><a id="l00682" name="l00682"></a><span class="lineno">  682</span><span class="keywordtype">int</span> PosixE3Connector::recv_with_size(<span class="keywordtype">int</span> sockfd, std::vector&lt;uint8_t&gt;&amp; buffer) {</div>
-<div class="line"><a id="l00683" name="l00683"></a><span class="lineno">  683</span>    <span class="comment">// Read the 4-byte size prefix (network byte order) — mirrors send_in_chunks</span></div>
-<div class="line"><a id="l00684" name="l00684"></a><span class="lineno">  684</span>    uint32_t network_order_size = 0;</div>
-<div class="line"><a id="l00685" name="l00685"></a><span class="lineno">  685</span>    <span class="keywordtype">size_t</span> header_received = 0;</div>
-<div class="line"><a id="l00686" name="l00686"></a><span class="lineno">  686</span>    <span class="keywordflow">while</span> (header_received &lt; <span class="keyword">sizeof</span>(network_order_size)) {</div>
-<div class="line"><a id="l00687" name="l00687"></a><span class="lineno">  687</span>        ssize_t ret = ::recv(sockfd,</div>
-<div class="line"><a id="l00688" name="l00688"></a><span class="lineno">  688</span>                             <span class="keyword">reinterpret_cast&lt;</span>uint8_t*<span class="keyword">&gt;</span>(&amp;network_order_size) + header_received,</div>
-<div class="line"><a id="l00689" name="l00689"></a><span class="lineno">  689</span>                             <span class="keyword">sizeof</span>(network_order_size) - header_received, 0);</div>
-<div class="line"><a id="l00690" name="l00690"></a><span class="lineno">  690</span>        <span class="keywordflow">if</span> (ret &lt;= 0) {</div>
-<div class="line"><a id="l00691" name="l00691"></a><span class="lineno">  691</span>            <span class="keywordflow">if</span> (ret == 0) {</div>
-<div class="line"><a id="l00692" name="l00692"></a><span class="lineno">  692</span>                <a class="code hl_define" href="logger_8hpp.html#a8b7f640421222e88795f275b8c98a138">E3_LOG_DEBUG</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;Connection closed while reading size header&quot;</span>;</div>
-<div class="line"><a id="l00693" name="l00693"></a><span class="lineno">  693</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00694" name="l00694"></a><span class="lineno">  694</span>                <a class="code hl_define" href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;Failed to receive size header: &quot;</span> &lt;&lt; strerror(errno);</div>
-<div class="line"><a id="l00695" name="l00695"></a><span class="lineno">  695</span>            }</div>
-<div class="line"><a id="l00696" name="l00696"></a><span class="lineno">  696</span>            <span class="keywordflow">return</span> ret == 0 ? 0 : <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(ErrorCode::TRANSPORT_ERROR);</div>
-<div class="line"><a id="l00697" name="l00697"></a><span class="lineno">  697</span>        }</div>
-<div class="line"><a id="l00698" name="l00698"></a><span class="lineno">  698</span>        header_received += <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(ret);</div>
-<div class="line"><a id="l00699" name="l00699"></a><span class="lineno">  699</span>    }</div>
-<div class="line"><a id="l00700" name="l00700"></a><span class="lineno">  700</span> </div>
-<div class="line"><a id="l00701" name="l00701"></a><span class="lineno">  701</span>    uint32_t payload_size = ntohl(network_order_size);</div>
-<div class="line"><a id="l00702" name="l00702"></a><span class="lineno">  702</span>    <span class="keywordflow">if</span> (payload_size == 0 || payload_size &gt; <a class="code hl_variable" href="namespacelibe3.html#a581a3bc9ba0fad9e97f52c00fdce32b9">MAX_PROTOCOL_DATA_SIZE</a> * 2) {</div>
-<div class="line"><a id="l00703" name="l00703"></a><span class="lineno">  703</span>        <a class="code hl_define" href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;Invalid payload size: &quot;</span> &lt;&lt; payload_size;</div>
-<div class="line"><a id="l00704" name="l00704"></a><span class="lineno">  704</span>        <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(ErrorCode::TRANSPORT_ERROR);</div>
-<div class="line"><a id="l00705" name="l00705"></a><span class="lineno">  705</span>    }</div>
-<div class="line"><a id="l00706" name="l00706"></a><span class="lineno">  706</span> </div>
-<div class="line"><a id="l00707" name="l00707"></a><span class="lineno">  707</span>    buffer.resize(payload_size);</div>
-<div class="line"><a id="l00708" name="l00708"></a><span class="lineno">  708</span>    <span class="keywordtype">size_t</span> total_received = 0;</div>
-<div class="line"><a id="l00709" name="l00709"></a><span class="lineno">  709</span>    <span class="keywordflow">while</span> (total_received &lt; payload_size) {</div>
-<div class="line"><a id="l00710" name="l00710"></a><span class="lineno">  710</span>        <span class="keywordtype">size_t</span> to_read = std::min(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(CHUNK_SIZE), payload_size - total_received);</div>
-<div class="line"><a id="l00711" name="l00711"></a><span class="lineno">  711</span>        ssize_t ret = ::recv(sockfd, buffer.data() + total_received, to_read, 0);</div>
-<div class="line"><a id="l00712" name="l00712"></a><span class="lineno">  712</span>        <span class="keywordflow">if</span> (ret &lt;= 0) {</div>
-<div class="line"><a id="l00713" name="l00713"></a><span class="lineno">  713</span>            <span class="keywordflow">if</span> (ret == 0) {</div>
-<div class="line"><a id="l00714" name="l00714"></a><span class="lineno">  714</span>                <a class="code hl_define" href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;Connection closed during chunked receive&quot;</span>;</div>
-<div class="line"><a id="l00715" name="l00715"></a><span class="lineno">  715</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00716" name="l00716"></a><span class="lineno">  716</span>                <a class="code hl_define" href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;Failed to receive chunk: &quot;</span> &lt;&lt; strerror(errno);</div>
-<div class="line"><a id="l00717" name="l00717"></a><span class="lineno">  717</span>            }</div>
-<div class="line"><a id="l00718" name="l00718"></a><span class="lineno">  718</span>            <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(ErrorCode::TRANSPORT_ERROR);</div>
-<div class="line"><a id="l00719" name="l00719"></a><span class="lineno">  719</span>        }</div>
-<div class="line"><a id="l00720" name="l00720"></a><span class="lineno">  720</span>        total_received += <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(ret);</div>
-<div class="line"><a id="l00721" name="l00721"></a><span class="lineno">  721</span>    }</div>
-<div class="line"><a id="l00722" name="l00722"></a><span class="lineno">  722</span> </div>
-<div class="line"><a id="l00723" name="l00723"></a><span class="lineno">  723</span>    <a class="code hl_define" href="logger_8hpp.html#a3e18bb494d10f456291f77eff01f0b1b">E3_LOG_TRACE</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;recv_with_size: &quot;</span> &lt;&lt; payload_size &lt;&lt; <span class="stringliteral">&quot; bytes&quot;</span>;</div>
-<div class="line"><a id="l00724" name="l00724"></a><span class="lineno">  724</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(payload_size);</div>
-<div class="line"><a id="l00725" name="l00725"></a><span class="lineno">  725</span>}</div>
-<div class="line"><a id="l00726" name="l00726"></a><span class="lineno">  726</span> </div>
-<div class="line"><a id="l00727" name="l00727"></a><span class="lineno">  727</span>} <span class="comment">// namespace libe3</span></div>
+<div class="line"><a id="l00654" name="l00654"></a><span class="lineno">  654</span> </div>
+<div class="line"><a id="l00655" name="l00655"></a><span class="lineno">  655</span><span class="keywordtype">int</span> PosixE3Connector::send_in_chunks(<span class="keywordtype">int</span> sockfd, <span class="keyword">const</span> uint8_t* buffer, <span class="keywordtype">size_t</span> buffer_size) {</div>
+<div class="line"><a id="l00656" name="l00656"></a><span class="lineno">  656</span>    <span class="comment">// Send the buffer size first (4 bytes, network byte order)</span></div>
+<div class="line"><a id="l00657" name="l00657"></a><span class="lineno">  657</span>    uint32_t network_order_size = htonl(<span class="keyword">static_cast&lt;</span>uint32_t<span class="keyword">&gt;</span>(buffer_size));</div>
+<div class="line"><a id="l00658" name="l00658"></a><span class="lineno">  658</span>    ssize_t sent = <a class="code hl_function" href="classlibe3_1_1PosixE3Connector.html#a7a3d61abfe45806f412e20aeaeaeb4a9">::send</a>(sockfd, &amp;network_order_size, <span class="keyword">sizeof</span>(network_order_size), 0);</div>
+<div class="line"><a id="l00659" name="l00659"></a><span class="lineno">  659</span>    <span class="keywordflow">if</span> (sent != <span class="keyword">sizeof</span>(network_order_size)) {</div>
+<div class="line"><a id="l00660" name="l00660"></a><span class="lineno">  660</span>        <a class="code hl_define" href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;Failed to send buffer size: &quot;</span> &lt;&lt; strerror(errno);</div>
+<div class="line"><a id="l00661" name="l00661"></a><span class="lineno">  661</span>        <span class="keywordflow">return</span> -1;</div>
+<div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span>    }</div>
+<div class="line"><a id="l00663" name="l00663"></a><span class="lineno">  663</span>    </div>
+<div class="line"><a id="l00664" name="l00664"></a><span class="lineno">  664</span>    <span class="keywordtype">size_t</span> total_sent = 0;</div>
+<div class="line"><a id="l00665" name="l00665"></a><span class="lineno">  665</span>    <span class="keywordflow">while</span> (total_sent &lt; buffer_size) {</div>
+<div class="line"><a id="l00666" name="l00666"></a><span class="lineno">  666</span>        ssize_t bytes_to_send = <span class="keyword">static_cast&lt;</span>ssize_t<span class="keyword">&gt;</span>(std::min(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(CHUNK_SIZE), buffer_size - total_sent));</div>
+<div class="line"><a id="l00667" name="l00667"></a><span class="lineno">  667</span>        </div>
+<div class="line"><a id="l00668" name="l00668"></a><span class="lineno">  668</span>        ssize_t chunk_sent = 0;</div>
+<div class="line"><a id="l00669" name="l00669"></a><span class="lineno">  669</span>        <span class="keywordflow">while</span> (chunk_sent &lt; bytes_to_send) {</div>
+<div class="line"><a id="l00670" name="l00670"></a><span class="lineno">  670</span>            ssize_t sent_chunk = <a class="code hl_function" href="classlibe3_1_1PosixE3Connector.html#a7a3d61abfe45806f412e20aeaeaeb4a9">::send</a>(sockfd, buffer + total_sent + chunk_sent, </div>
+<div class="line"><a id="l00671" name="l00671"></a><span class="lineno">  671</span>                                       <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(bytes_to_send - chunk_sent), 0);</div>
+<div class="line"><a id="l00672" name="l00672"></a><span class="lineno">  672</span>            <span class="keywordflow">if</span> (sent_chunk == -1) {</div>
+<div class="line"><a id="l00673" name="l00673"></a><span class="lineno">  673</span>                <a class="code hl_define" href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;Failed to send data: &quot;</span> &lt;&lt; strerror(errno);</div>
+<div class="line"><a id="l00674" name="l00674"></a><span class="lineno">  674</span>                <span class="keywordflow">return</span> -1;</div>
+<div class="line"><a id="l00675" name="l00675"></a><span class="lineno">  675</span>            }</div>
+<div class="line"><a id="l00676" name="l00676"></a><span class="lineno">  676</span>            chunk_sent += sent_chunk;</div>
+<div class="line"><a id="l00677" name="l00677"></a><span class="lineno">  677</span>        }</div>
+<div class="line"><a id="l00678" name="l00678"></a><span class="lineno">  678</span>        total_sent += <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(chunk_sent);</div>
+<div class="line"><a id="l00679" name="l00679"></a><span class="lineno">  679</span>    }</div>
+<div class="line"><a id="l00680" name="l00680"></a><span class="lineno">  680</span>    </div>
+<div class="line"><a id="l00681" name="l00681"></a><span class="lineno">  681</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00682" name="l00682"></a><span class="lineno">  682</span>}</div>
+<div class="line"><a id="l00683" name="l00683"></a><span class="lineno">  683</span> </div>
+<div class="line"><a id="l00684" name="l00684"></a><span class="lineno">  684</span><span class="keywordtype">int</span> PosixE3Connector::recv_with_size(<span class="keywordtype">int</span> sockfd, std::vector&lt;uint8_t&gt;&amp; buffer) {</div>
+<div class="line"><a id="l00685" name="l00685"></a><span class="lineno">  685</span>    <span class="comment">// Read the 4-byte size prefix (network byte order) — mirrors send_in_chunks</span></div>
+<div class="line"><a id="l00686" name="l00686"></a><span class="lineno">  686</span>    uint32_t network_order_size = 0;</div>
+<div class="line"><a id="l00687" name="l00687"></a><span class="lineno">  687</span>    <span class="keywordtype">size_t</span> header_received = 0;</div>
+<div class="line"><a id="l00688" name="l00688"></a><span class="lineno">  688</span>    <span class="keywordflow">while</span> (header_received &lt; <span class="keyword">sizeof</span>(network_order_size)) {</div>
+<div class="line"><a id="l00689" name="l00689"></a><span class="lineno">  689</span>        ssize_t ret = ::recv(sockfd,</div>
+<div class="line"><a id="l00690" name="l00690"></a><span class="lineno">  690</span>                             <span class="keyword">reinterpret_cast&lt;</span>uint8_t*<span class="keyword">&gt;</span>(&amp;network_order_size) + header_received,</div>
+<div class="line"><a id="l00691" name="l00691"></a><span class="lineno">  691</span>                             <span class="keyword">sizeof</span>(network_order_size) - header_received, 0);</div>
+<div class="line"><a id="l00692" name="l00692"></a><span class="lineno">  692</span>        <span class="keywordflow">if</span> (ret &lt;= 0) {</div>
+<div class="line"><a id="l00693" name="l00693"></a><span class="lineno">  693</span>            <span class="keywordflow">if</span> (ret == 0) {</div>
+<div class="line"><a id="l00694" name="l00694"></a><span class="lineno">  694</span>                <a class="code hl_define" href="logger_8hpp.html#a8b7f640421222e88795f275b8c98a138">E3_LOG_DEBUG</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;Connection closed while reading size header&quot;</span>;</div>
+<div class="line"><a id="l00695" name="l00695"></a><span class="lineno">  695</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00696" name="l00696"></a><span class="lineno">  696</span>                <a class="code hl_define" href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;Failed to receive size header: &quot;</span> &lt;&lt; strerror(errno);</div>
+<div class="line"><a id="l00697" name="l00697"></a><span class="lineno">  697</span>            }</div>
+<div class="line"><a id="l00698" name="l00698"></a><span class="lineno">  698</span>            <span class="keywordflow">return</span> ret == 0 ? 0 : <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(ErrorCode::TRANSPORT_ERROR);</div>
+<div class="line"><a id="l00699" name="l00699"></a><span class="lineno">  699</span>        }</div>
+<div class="line"><a id="l00700" name="l00700"></a><span class="lineno">  700</span>        header_received += <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(ret);</div>
+<div class="line"><a id="l00701" name="l00701"></a><span class="lineno">  701</span>    }</div>
+<div class="line"><a id="l00702" name="l00702"></a><span class="lineno">  702</span> </div>
+<div class="line"><a id="l00703" name="l00703"></a><span class="lineno">  703</span>    uint32_t payload_size = ntohl(network_order_size);</div>
+<div class="line"><a id="l00704" name="l00704"></a><span class="lineno">  704</span>    <span class="keywordflow">if</span> (payload_size == 0 || payload_size &gt; <a class="code hl_variable" href="namespacelibe3.html#a581a3bc9ba0fad9e97f52c00fdce32b9">MAX_PROTOCOL_DATA_SIZE</a> * 2) {</div>
+<div class="line"><a id="l00705" name="l00705"></a><span class="lineno">  705</span>        <a class="code hl_define" href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;Invalid payload size: &quot;</span> &lt;&lt; payload_size;</div>
+<div class="line"><a id="l00706" name="l00706"></a><span class="lineno">  706</span>        <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(ErrorCode::TRANSPORT_ERROR);</div>
+<div class="line"><a id="l00707" name="l00707"></a><span class="lineno">  707</span>    }</div>
+<div class="line"><a id="l00708" name="l00708"></a><span class="lineno">  708</span> </div>
+<div class="line"><a id="l00709" name="l00709"></a><span class="lineno">  709</span>    buffer.resize(payload_size);</div>
+<div class="line"><a id="l00710" name="l00710"></a><span class="lineno">  710</span>    <span class="keywordtype">size_t</span> total_received = 0;</div>
+<div class="line"><a id="l00711" name="l00711"></a><span class="lineno">  711</span>    <span class="keywordflow">while</span> (total_received &lt; payload_size) {</div>
+<div class="line"><a id="l00712" name="l00712"></a><span class="lineno">  712</span>        <span class="keywordtype">size_t</span> to_read = std::min(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(CHUNK_SIZE), payload_size - total_received);</div>
+<div class="line"><a id="l00713" name="l00713"></a><span class="lineno">  713</span>        ssize_t ret = ::recv(sockfd, buffer.data() + total_received, to_read, 0);</div>
+<div class="line"><a id="l00714" name="l00714"></a><span class="lineno">  714</span>        <span class="keywordflow">if</span> (ret &lt;= 0) {</div>
+<div class="line"><a id="l00715" name="l00715"></a><span class="lineno">  715</span>            <span class="keywordflow">if</span> (ret == 0) {</div>
+<div class="line"><a id="l00716" name="l00716"></a><span class="lineno">  716</span>                <a class="code hl_define" href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;Connection closed during chunked receive&quot;</span>;</div>
+<div class="line"><a id="l00717" name="l00717"></a><span class="lineno">  717</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00718" name="l00718"></a><span class="lineno">  718</span>                <a class="code hl_define" href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;Failed to receive chunk: &quot;</span> &lt;&lt; strerror(errno);</div>
+<div class="line"><a id="l00719" name="l00719"></a><span class="lineno">  719</span>            }</div>
+<div class="line"><a id="l00720" name="l00720"></a><span class="lineno">  720</span>            <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(ErrorCode::TRANSPORT_ERROR);</div>
+<div class="line"><a id="l00721" name="l00721"></a><span class="lineno">  721</span>        }</div>
+<div class="line"><a id="l00722" name="l00722"></a><span class="lineno">  722</span>        total_received += <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(ret);</div>
+<div class="line"><a id="l00723" name="l00723"></a><span class="lineno">  723</span>    }</div>
+<div class="line"><a id="l00724" name="l00724"></a><span class="lineno">  724</span> </div>
+<div class="line"><a id="l00725" name="l00725"></a><span class="lineno">  725</span>    <a class="code hl_define" href="logger_8hpp.html#a3e18bb494d10f456291f77eff01f0b1b">E3_LOG_TRACE</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;recv_with_size: &quot;</span> &lt;&lt; payload_size &lt;&lt; <span class="stringliteral">&quot; bytes&quot;</span>;</div>
+<div class="line"><a id="l00726" name="l00726"></a><span class="lineno">  726</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(payload_size);</div>
+<div class="line"><a id="l00727" name="l00727"></a><span class="lineno">  727</span>}</div>
+<div class="line"><a id="l00728" name="l00728"></a><span class="lineno">  728</span> </div>
+<div class="line"><a id="l00729" name="l00729"></a><span class="lineno">  729</span>} <span class="comment">// namespace libe3</span></div>
 <div class="ttc" id="aclasslibe3_1_1E3Connector_html_a15706dd6a95c019900ab528e39b4760d"><div class="ttname"><a href="classlibe3_1_1E3Connector.html#a15706dd6a95c019900ab528e39b4760d">libe3::E3Connector::role_</a></div><div class="ttdeci">E3Role role_</div><div class="ttdef"><b>Definition</b> <a href="e3__connector_8hpp_source.html#l00203">e3_connector.hpp:203</a></div></div>
 <div class="ttc" id="aclasslibe3_1_1E3Connector_html_a21d8f22cf14920aed9cc31815fa287d7"><div class="ttname"><a href="classlibe3_1_1E3Connector.html#a21d8f22cf14920aed9cc31815fa287d7">libe3::E3Connector::inbound_endpoint_</a></div><div class="ttdeci">std::string inbound_endpoint_</div><div class="ttdef"><b>Definition</b> <a href="e3__connector_8hpp_source.html#l00201">e3_connector.hpp:201</a></div></div>
 <div class="ttc" id="aclasslibe3_1_1E3Connector_html_a22c5fef59ef90a5a9b0c11ed540d1819"><div class="ttname"><a href="classlibe3_1_1E3Connector.html#a22c5fef59ef90a5a9b0c11ed540d1819">libe3::E3Connector::outbound_endpoint_</a></div><div class="ttdeci">std::string outbound_endpoint_</div><div class="ttdef"><b>Definition</b> <a href="e3__connector_8hpp_source.html#l00202">e3_connector.hpp:202</a></div></div>

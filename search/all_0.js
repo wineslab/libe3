@@ -5,7 +5,7 @@ var searchData=
   ['actiontype_2',['ActionType',['../namespacelibe3.html#ac1c5533fc81586565ca7822bf00eee90',1,'libe3']]],
   ['active_5fsubscription_5fids_3',['active_subscription_ids',['../classlibe3_1_1E3Agent.html#a51737b257127e158fd94313876eefa07',1,'libe3::E3Agent::active_subscription_ids()'],['../classlibe3_1_1E3Interface.html#ad476cf72e7d567bccc5bd842bece7d34',1,'libe3::E3Interface::active_subscription_ids()']]],
   ['active_5fsubscriptions_4',['active_subscriptions',['../classlibe3_1_1DAppSubscriptionState.html#ac517de82d3e1cd2cd6d8181e6906a020',1,'libe3::DAppSubscriptionState']]],
-  ['add_5fsubscription_5',['add_subscription',['../classlibe3_1_1SubscriptionManager.html#a58c7c0741dc8ae3253b6485cac9348c4',1,'libe3::SubscriptionManager']]],
+  ['add_5fsubscription_5',['add_subscription',['../classlibe3_1_1SubscriptionManager.html#aebac59907540edc5eb351b4f31576e44',1,'libe3::SubscriptionManager']]],
   ['agent_6',['agent',['../structe3__agent__handle__s.html#a5f3b06f2fc8bac4d79ef4daa3307a5cf',1,'e3_agent_handle_s']]],
   ['agent_5fstate_5fto_5fstring_7',['agent_state_to_string',['../namespacelibe3.html#a7cd0e90b0c01822a4a7fbe5b64842fc1',1,'libe3']]],
   ['agentstate_8',['AgentState',['../namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1fe',1,'libe3']]],

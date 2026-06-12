@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>libe3: /home/runner/work/spear-libe3/spear-libe3/include/libe3/response_queue.hpp File Reference</title>
+<title>libe3: /home/runner/work/libe3/libe3/include/libe3/lockfree_queue.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.5</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.6</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -64,7 +64,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(document).ready(function(){initNavTree('response__queue_8hpp.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('lockfree__queue_8hpp.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -93,24 +93,26 @@ $(document).ready(function(){initNavTree('response__queue_8hpp.html',''); initRe
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a>  </div>
-  <div class="headertitle"><div class="title">response_queue.hpp File Reference</div></div>
+  <div class="headertitle"><div class="title">lockfree_queue.hpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>Lock-free bounded queue for E3AP outbound PDUs.  
+<p>Lock-free bounded blocking queue for the E3AP hot paths.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="types_8hpp_source.html">types.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="logger_8hpp_source.html">logger.hpp</a>&quot;</code><br />
 <code>#include &lt;atomic&gt;</code><br />
 <code>#include &lt;optional&gt;</code><br />
 <code>#include &lt;chrono&gt;</code><br />
+<code>#include &lt;thread&gt;</code><br />
 </div>
-<p><a href="response__queue_8hpp_source.html">Go to the source code of this file.</a></p>
+<p><a href="lockfree__queue_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1ResponseQueue.html">libe3::ResponseQueue</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lock-free bounded queue for E3AP PDUs.  <a href="classlibe3_1_1ResponseQueue.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1LockFreeQueue.html">libe3::LockFreeQueue&lt; T &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lock-free bounded blocking queue.  <a href="classlibe3_1_1LockFreeQueue.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -119,21 +121,21 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Lock-free bounded queue for E3AP outbound PDUs. </p>
-<p>Replaces the original mutex + condition-variable implementation with a lock-free MPMC ring buffer (see <a class="el" href="mpmc__queue_8hpp.html" title="Lock-free bounded Multi-Producer Multi-Consumer (MPMC) ring buffer.">mpmc_queue.hpp</a>) to eliminate mutex contention on the hot publish path and to reduce latency jitter in sub-millisecond control loops.</p>
-<p>Producer/consumer pattern in <a class="el" href="namespacelibe3.html">libe3</a>:</p><ul>
-<li>Producers: subscriber_loop thread, sm_data_handler_loop thread, and any caller of E3Interface::queue_outbound() (MPSC / MPMC).</li>
-<li>Consumer: publisher_loop thread (single consumer).</li>
+<div class="textblock"><p>Lock-free bounded blocking queue for the E3AP hot paths. </p>
+<p>Wraps the lock-free MPMC ring buffer (see <a class="el" href="mpmc__queue_8hpp.html" title="Lock-free bounded Multi-Producer Multi-Consumer (MPMC) ring buffer.">mpmc_queue.hpp</a>) in a small, reusable object that adds blocking pop variants and shutdown semantics. It eliminates mutex contention on the hot publish path and reduces latency jitter in sub-millisecond control loops.</p>
+<p><a class="el" href="namespacelibe3.html">libe3</a> uses two specialisations:</p><ul>
+<li>LockFreeQueue&lt;Pdu&gt; — outbound E3AP PDUs (publisher/outbound thread consumes; many threads produce).</li>
+<li>LockFreeQueue&lt;DAppReport&gt; — inbound dApp reports handed from the RAN inbound thread to the report worker thread.</li>
 </ul>
 <p>SPDX-License-Identifier: Apache-2.0 </p>
 
-<p class="definition">Definition in file <a class="el" href="response__queue_8hpp_source.html">response_queue.hpp</a>.</p>
+<p class="definition">Definition in file <a class="el" href="lockfree__queue_8hpp_source.html">lockfree_queue.hpp</a>.</p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_135843e1f81d3caf7eeb1d08d96592ba.html">libe3</a></li><li class="navelem"><a class="el" href="response__queue_8hpp.html">response_queue.hpp</a></li>
+    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_135843e1f81d3caf7eeb1d08d96592ba.html">libe3</a></li><li class="navelem"><a class="el" href="lockfree__queue_8hpp.html">lockfree_queue.hpp</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
