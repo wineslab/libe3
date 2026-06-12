@@ -240,13 +240,12 @@ void E3Interface::stop() {
     }
     setup_complete_cv_.notify_all();
     
-    // Clean up SM registry — only the RAN role owns SMs. Doing this
-    // unconditionally would wipe a sibling RAN-role E3Interface's registered
-    // SMs in a two-roles-in-one-process scenario (integration tests, the
-    // latency benchmark, multi-peer dApps colocated with a RAN). The dApp
-    // role never registers an SM, so there's nothing to clear.
+    // Clean up this interface's own SM registry — only the RAN role owns
+    // SMs (the dApp role never registers any, so its registry is empty).
+    // The registry is per-interface, so this cannot affect a sibling
+    // E3Interface's SMs in a multi-agent process.
     if (config_.role == E3Role::RAN) {
-        SmRegistry::instance().clear();
+        sm_registry_.clear();
     }
     
     // Dispose connector
@@ -266,7 +265,7 @@ ErrorCode E3Interface::queue_outbound(Pdu pdu) {
 }
 
 std::vector<uint32_t> E3Interface::get_available_ran_functions() const {
-    return SmRegistry::instance().get_available_ran_functions();
+    return sm_registry_.get_available_ran_functions();
 }
 
 ErrorCode E3Interface::register_sm(std::unique_ptr<ServiceModel> sm) {
@@ -286,7 +285,7 @@ ErrorCode E3Interface::register_sm(std::unique_ptr<ServiceModel> sm) {
         }
         return queue_outbound(std::move(pdu));
     });
-    return SmRegistry::instance().register_sm(std::move(sm));
+    return sm_registry_.register_sm(std::move(sm));
 }
 
 void E3Interface::notify_dapp_status_changed() {
@@ -302,7 +301,7 @@ void E3Interface::notify_dapp_status_changed() {
 void E3Interface::setup_loop_ran() {
     E3_LOG_INFO(LOG_TAG) << "Setup loop (RAN) started";
     
-    auto available_ran_functions = SmRegistry::instance().get_available_ran_functions();
+    auto available_ran_functions = sm_registry_.get_available_ran_functions();
     
     while (!should_stop_.load()) {
         std::vector<uint8_t> buffer;
@@ -529,7 +528,7 @@ void E3Interface::sm_data_handler_loop() {
             }
             
             // Get SM for this RAN function
-            ServiceModel* sm = SmRegistry::instance().get_by_ran_function(ran_func);
+            ServiceModel* sm = sm_registry_.get_by_ran_function(ran_func);
             
             if (!sm || !sm->is_running()) {
                 continue;
@@ -574,13 +573,13 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
     
     // Create and send response
     // Get available RAN functions and convert to RanFunctionDef list
-    auto available_ran_function_ids = SmRegistry::instance().get_available_ran_functions();
+    auto available_ran_function_ids = sm_registry_.get_available_ran_functions();
     E3_LOG_DEBUG(LOG_TAG) << "Available RAN function ids count: " << available_ran_function_ids.size();
     std::vector<RanFunctionDef> ran_function_list;
     for (auto id : available_ran_function_ids) {
         RanFunctionDef func;
         func.ran_function_identifier = id;
-        ServiceModel* sm = SmRegistry::instance().get_by_ran_function(id);
+        ServiceModel* sm = sm_registry_.get_by_ran_function(id);
         if (sm) {
             func.telemetry_identifier_list = sm->telemetry_ids();
             func.control_identifier_list = sm->control_ids();
@@ -723,7 +722,7 @@ void E3Interface::handle_control_action(const DAppControlAction& action, uint32_
                          << " control " << action.control_identifier
                          << " (" << action.action_data.size() << " bytes)";
 
-    ServiceModel* sm = SmRegistry::instance().get_by_ran_function(action.ran_function_identifier);
+    ServiceModel* sm = sm_registry_.get_by_ran_function(action.ran_function_identifier);
 
     if (sm && sm->is_running()) {
         ErrorCode result = sm->handle_control_action(request_message_id, action);
@@ -1154,13 +1153,13 @@ ErrorCode E3Interface::wait_for_setup(std::chrono::milliseconds timeout) {
 
 void E3Interface::on_sm_lifecycle_change(uint32_t ran_function_id, bool should_start) {
     if (should_start) {
-        ErrorCode result = SmRegistry::instance().start_sm(ran_function_id);
+        ErrorCode result = sm_registry_.start_sm(ran_function_id);
         if (result != ErrorCode::SUCCESS) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to start SM for RAN function " 
                                   << ran_function_id << ": " << error_code_to_string(result);
         }
     } else {
-        ErrorCode result = SmRegistry::instance().stop_sm(ran_function_id);
+        ErrorCode result = sm_registry_.stop_sm(ran_function_id);
         if (result != ErrorCode::SUCCESS) {
             E3_LOG_WARN(LOG_TAG) << "Failed to stop SM for RAN function " 
                                  << ran_function_id << ": " << error_code_to_string(result);
