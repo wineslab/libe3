@@ -208,6 +208,12 @@ private:
     // Core components
     std::unique_ptr<E3Connector> connector_;
     std::unique_ptr<E3Encoder> encoder_;
+    // Service Models registered with THIS interface. Owned per interface
+    // (not process-wide) so multiple agents in one process can host SMs
+    // with the same RAN function id, and stopping one agent cannot wipe
+    // another agent's registry. Only the RAN role registers SMs; on the
+    // dApp role this stays empty.
+    SmRegistry sm_registry_;
     // RAN-only state (nullptr when role==DAPP).
     std::unique_ptr<SubscriptionManager> subscription_manager_;
     // dApp-only state (nullptr when role==RAN).
@@ -307,6 +313,17 @@ private:
     void handle_dapp_report(const DAppReport& report);
     void handle_release_message(const ReleaseMessage &release);
     void handle_dapp_disconnection(uint32_t dapp_id);
+
+    /**
+     * @brief Complete a setup REQ/REP exchange with a best-effort empty reply.
+     *
+     * Used whenever a received setup message cannot be answered with a real
+     * SetupResponse (undecodable bytes, wrong PDU type, response encode
+     * failure). A ZMQ REP socket must send exactly one reply per received
+     * request before it can receive again; bailing out without replying
+     * wedges the setup channel for every subsequent dApp until restart.
+     */
+    void send_empty_setup_reply();
 
     // dApp-role handlers
     void handle_setup_response(const SetupResponse& response);

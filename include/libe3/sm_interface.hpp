@@ -212,15 +212,18 @@ using SmFactory = std::function<std::unique_ptr<ServiceModel>()>;
 /**
  * @brief SM Registry for managing registered Service Models
  *
- * This class provides a central registry for Service Models.
- * It's used by the E3Agent to find and manage SMs.
+ * Each E3Interface owns one SmRegistry instance: the registry is scoped to
+ * its owning interface/agent, not to the process. Two agents in the same
+ * process (e.g. integration tests, multi-RAN deployments) can therefore
+ * register Service Models with the same RAN function id independently, and
+ * tearing one agent down only clears that agent's own SMs.
  */
 class SmRegistry {
 public:
-    /**
-     * @brief Get the singleton instance
-     */
-    static SmRegistry& instance();
+    SmRegistry() = default;
+    ~SmRegistry() = default;
+    SmRegistry(const SmRegistry&) = delete;
+    SmRegistry& operator=(const SmRegistry&) = delete;
 
     /**
      * @brief Register a Service Model
@@ -277,11 +280,6 @@ public:
     void clear();
 
 private:
-    SmRegistry() = default;
-    ~SmRegistry() = default;
-    SmRegistry(const SmRegistry&) = delete;
-    SmRegistry& operator=(const SmRegistry&) = delete;
-
     mutable std::mutex mutex_;
     std::unordered_map<uint32_t, std::unique_ptr<ServiceModel>> sms_;
     std::unordered_map<uint32_t, SmFactory> factories_;

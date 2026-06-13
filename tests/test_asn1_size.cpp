@@ -225,6 +225,63 @@ TEST(Asn1Size_growsLinearlyWithPayload) {
     ASSERT_LE(delta, 2 * naive_payload_delta + ENVELOPE_OVERHEAD_MAX);
 }
 
+/**
+ * A setupResponse that advertises an SM with EMPTY ran_function_data must
+ * still encode. The schema makes ranFunctionData a mandatory
+ * OCTET STRING (SIZE (1..32768)), so the encoder substitutes a 1-byte 0x00
+ * placeholder; without that substitution the APER size constraint fails and
+ * the whole setupResponse encode aborts. The result must also decode, with
+ * the placeholder visible to the peer and every other field intact.
+ */
+TEST(Asn1_setupResponse_emptyRanFunctionData_stillEncodes) {
+    auto enc = make_encoder();
+
+    RanFunctionDef with_data;
+    with_data.ran_function_identifier = 1;
+    with_data.telemetry_identifier_list = {1, 2};
+    with_data.control_identifier_list = {10};
+    with_data.ran_function_data = {0xAB, 0xCD};
+
+    RanFunctionDef without_data;
+    without_data.ran_function_identifier = 2;
+    without_data.telemetry_identifier_list = {3};
+    without_data.control_identifier_list = {20};
+    // ran_function_data deliberately left empty (ServiceModel default)
+
+    auto encoded = enc->encode_setup_response(
+        7,                              // message_id
+        42,                             // request_id
+        ResponseCode::POSITIVE,
+        std::string("1.0.0"),           // e3ap_protocol_version
+        3u,                             // dapp_identifier
+        "asn1-test-ran",                // ran_identifier
+        {with_data, without_data});
+    ASSERT_TRUE(encoded.has_value());
+
+    auto decoded = enc->decode(encoded->buffer.data(), encoded->buffer.size());
+    ASSERT_TRUE(decoded.has_value());
+    ASSERT_EQ(static_cast<int>(decoded->type),
+              static_cast<int>(PduType::SETUP_RESPONSE));
+
+    auto* resp = std::get_if<SetupResponse>(&decoded->choice);
+    ASSERT_TRUE(resp != nullptr);
+    ASSERT_EQ(static_cast<int>(resp->response_code),
+              static_cast<int>(ResponseCode::POSITIVE));
+    ASSERT_EQ(resp->request_id, 42u);
+    ASSERT_EQ(resp->ran_function_list.size(), 2u);
+
+    // SM with real data: payload round-trips byte-for-byte.
+    ASSERT_EQ(resp->ran_function_list[0].ran_function_identifier, 1u);
+    ASSERT_EQ(resp->ran_function_list[0].ran_function_data.size(), 2u);
+    ASSERT_EQ(static_cast<int>(resp->ran_function_list[0].ran_function_data[0]), 0xAB);
+    ASSERT_EQ(static_cast<int>(resp->ran_function_list[0].ran_function_data[1]), 0xCD);
+
+    // SM without data: the wire carries the 1-byte 0x00 placeholder.
+    ASSERT_EQ(resp->ran_function_list[1].ran_function_identifier, 2u);
+    ASSERT_EQ(resp->ran_function_list[1].ran_function_data.size(), 1u);
+    ASSERT_EQ(static_cast<int>(resp->ran_function_list[1].ran_function_data[0]), 0x00);
+}
+
 // ---------------------------------------------------------------------------
 
 int main() {

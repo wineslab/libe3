@@ -219,9 +219,25 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                         ASN_SEQUENCE_ADD(&ran_func->controlIdentifierList, id);
                     }
                     
-                    OCTET_STRING_fromBuf(&ran_func->ranFunctionData,
-                        reinterpret_cast<const char*>(func.ran_function_data.data()),
-                        static_cast<int>(func.ran_function_data.size()));
+                    if (func.ran_function_data.empty()) {
+                        // ranFunctionData is MANDATORY in the E3AP schema and
+                        // constrained to OCTET STRING (SIZE (1..32768))
+                        // (messages/asn1/V1/e3ap-1.0.0.asn1,
+                        // E3-RanFunctionDefinition): it can be neither omitted
+                        // nor empty. An SM that provides no RAN-function data
+                        // (ServiceModel::ran_function_data() defaults to {})
+                        // would otherwise violate the APER size constraint and
+                        // abort the encode of the entire setupResponse, taking
+                        // every other registered RAN function down with it.
+                        // Substitute a 1-byte 0x00 placeholder instead.
+                        static const char kPlaceholder = '\0';
+                        OCTET_STRING_fromBuf(&ran_func->ranFunctionData,
+                                             &kPlaceholder, 1);
+                    } else {
+                        OCTET_STRING_fromBuf(&ran_func->ranFunctionData,
+                            reinterpret_cast<const char*>(func.ran_function_data.data()),
+                            static_cast<int>(func.ran_function_data.size()));
+                    }
 
                     // Ensure ranFunctionList container is allocated (optional field)
                     if (!asn1_pdu->msg.choice.setupResponse->ranFunctionList) {
