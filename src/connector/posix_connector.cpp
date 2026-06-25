@@ -114,6 +114,8 @@ ErrorCode PosixE3Connector::setup_initial_connection() {
     
     if (transport_layer_ == E3TransportLayer::SCTP) {
         sock = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+        int reuse = 1;
+        setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
         addr.sin_port = htons(setup_port_);
@@ -122,6 +124,8 @@ ErrorCode PosixE3Connector::setup_initial_connection() {
     }
     else if (transport_layer_ == E3TransportLayer::TCP) {
         sock = socket(AF_INET, SOCK_STREAM, 0);
+        int reuse = 1;
+        setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
         addr.sin_port = htons(setup_port_);
@@ -235,6 +239,8 @@ ErrorCode PosixE3Connector::setup_inbound_connection() {
     
     if (transport_layer_ == E3TransportLayer::SCTP) {
         sock = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+        int reuse = 1;
+        setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
         addr.sin_port = htons(inbound_port_);
@@ -243,6 +249,8 @@ ErrorCode PosixE3Connector::setup_inbound_connection() {
     }
     else if (transport_layer_ == E3TransportLayer::TCP) {
         sock = socket(AF_INET, SOCK_STREAM, 0);
+        int reuse = 1;
+        setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
         addr.sin_port = htons(inbound_port_);
