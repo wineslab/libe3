@@ -120,10 +120,15 @@ make -j$(nproc)
 | `LIBE3_BUILD_INTEGRATION_TESTS` | OFF | Build the integration test suite (multi-role end-to-end tests + full-loop benchmark) |
 | `LIBE3_ENABLE_ZMQ` | ON | Enable ZeroMQ transport |
 | `LIBE3_ENABLE_ASN1` | ON | Enable ASN.1 encoding |
-| `LIBE3_ENABLE_JSON` | OFF | Enable JSON encoding (mutually exclusive with ASN.1) |
+| `LIBE3_ENABLE_JSON` | OFF | Enable JSON encoding support |
 | `LIBE3_ENABLE_ASAN` | OFF | Enable AddressSanitizer |
 | `LIBE3_ENABLE_TSAN` | OFF | Enable ThreadSanitizer |
 | `LIBE3_ENABLE_SWIG` | OFF | Build the SWIG-generated Python bindings (`_libe3py.so` + `libe3py.py`) |
+
+> **Note on encoding selection:** `LIBE3_ENABLE_ASN1` and `LIBE3_ENABLE_JSON` are independent
+> compile-time inclusion flags — both can be `ON` simultaneously to build a library that supports
+> both encodings. The active encoding is **selected at runtime** via the `encoding` field of
+> `e3_config_t` (0 = ASN1, 1 = JSON) when calling `e3_agent_create_with_config()`.
 
 ### Running Tests
 
