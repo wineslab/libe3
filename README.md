@@ -5,7 +5,7 @@
 [![Version](https://img.shields.io/badge/version-0.0.4-green.svg)](VERSION)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://wineslab.github.io/libe3/)
 
-**libe3** is a standalone, vendor-neutral C++ library for implementing the E3AP (E3 Application Protocol) on **both sides of the protocol** — RAN functions (DU, CU-CP, CU-UP) AND dApp clients. It provides a clean object-oriented API for both roles while hiding transport, encoding, and protocol complexity.
+**libe3** is a standalone, vendor-neutral C++ library for implementing the E3AP (E3 Application Protocol) on **both sides of the protocol** — RAN functions (DU, CU-CP, CU-UP) and dApp clients. It provides a clean object-oriented API for both roles while hiding transport, encoding, and protocol complexity.
 
 ## Features
 
@@ -15,38 +15,58 @@
 - **Multiple Transports**: Support for ZeroMQ and POSIX sockets (TCP, SCTP, Unix Domain)
 - **Multiple Encodings**: ASN.1 APER (primary) and JSON encoders
 - **Service Model Extensions**: Easy-to-implement SM interface for custom functionality
-- **Python Bindings**: Optional SWIG bindings (`LIBE3_ENABLE_SWIG=ON`) so the same C++ library can back Python dApps
+- **Python Bindings**: Optional SWIG bindings (`LIBE3_ENABLE_SWIG=ON`) so the same C++ library can back Python dApp clients
 - **Thread-Safe**: Proper synchronization for concurrent dApp operations
 - **Modern C++17**: Uses std::variant, std::optional, RAII patterns
 - **Lightweight**: Minimal external dependencies
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        RAN Application                              │
-│                        (DU, CU-CP, CU-UP)                           │
-└────────────────────────────────┬────────────────────────────────────┘
-                                 │
-                    ┌────────────▼────────────┐
-                    │        E3Agent          │  ◄── Public API
-                    │      (Facade)           │
-                    └────────────┬────────────┘
-                                 │
-          ┌──────────────────────┼──────────────────────┐
-          │                      │                      │
-┌─────────▼─────────┐  ┌─────────▼─────────┐  ┌────────▼────────┐
-│   E3Connector     │  │    E3Encoder      │  │ SubscriptionMgr │
-│   (Transport)     │  │    (Encoding)     │  │   (dApp Track)  │
-├───────────────────┤  ├───────────────────┤  └─────────────────┘
-│ - ZmqConnector    │  │ - JsonEncoder     │
-│ - PosixConnector  │  │ - Asn1Encoder     │
-└───────────────────┘  └───────────────────┘
+### Deployment topology
 
-                         ┌─────────────────┐
-                         │  ServiceModel   │  ◄── SM Extension Point
-                         │   Interface     │
-                         └─────────────────┘
+`E3Agent` serves both sides of the E3 interface — the same class, switched by one config field:
+
+```
+  RAN Application                                       dApp Application
+  (DU · CU-CP · CU-UP                                  (C++ · Python ·
+   OAI · OCUDU · Aerial)                                C++ · Python)
+          │                                                    │
+          │  role = RAN                         role = DAPP    │
+          ▼                                                    ▼
+  ┌───────────────────┐    ◄─── E3AP PDUs ───►   ┌──────────────────────┐
+  │     E3Agent       │◄──────────────────────────►│     E3Agent          │
+  │                   │  ZMQ / POSIX               │                      │
+  │  register_sm(...) │  IPC · TCP · SCTP          │  set_indication_     │
+  │  send_indication  │  ASN.1 APER · JSON         │    handler(fn)       │
+  │  send_xapp_ctrl   │                            │  subscribe(rfid, …)  │
+  └───────────────────┘                            │  send_control(…)     │
+                                                   │  send_report(…)      │
+                                                   │  wait_for_setup()    │
+                                                   │  release()           │
+                                                   └──────────────────────┘
+
+  One dApp process can connect to N RANs simultaneously by instantiating
+  N E3Agent(role=DAPP) objects — each with independent threads and state.
+```
+
+### E3Agent internals (same on both sides)
+
+```
+                    ┌────────────────────────────────────────┐
+                    │               E3Agent                  │  ◄── Public API
+                    └──────────────────┬─────────────────────┘
+                                       │
+          ┌────────────────────────────┼──────────────────────────┐
+          │                            │                          │
+┌─────────▼──────────┐     ┌───────────▼──────────┐    ┌─────────▼────────┐
+│   E3Connector      │     │     E3Encoder         │    │   ServiceModel   │
+│   (Transport)      │     │     (Encoding)        │    │   (RAN-side SM   │
+├────────────────────┤     ├──────────────────────┤    │    extension     │
+│  ZmqConnector      │     │  Asn1Encoder          │    │    point)        │
+│  PosixConnector    │     │  JsonEncoder          │    ├──────────────────┤
+└────────────────────┘     └──────────────────────┘    │  SimpleSM        │
+                                                        │  custom SMs …    │
+                                                        └──────────────────┘
 ```
 
 ## Quick Start
@@ -59,7 +79,7 @@
 - `asn1c` — ASN.1 APER encoder, required by `messages/`
 - `nlohmann-json3-dev` — Header-only JSON library; CMake expects the `nlohmann_json` target
 - `libzmq3-dev` for ZMQ transport
- - `libsctp-dev` — SCTP development headers/libraries for POSIX/SCTP transport
+- `libsctp-dev` — SCTP development headers/libraries for POSIX/SCTP transport
 
 ### Install Dependencies
 
@@ -120,10 +140,15 @@ make -j$(nproc)
 | `LIBE3_BUILD_INTEGRATION_TESTS` | OFF | Build the integration test suite (multi-role end-to-end tests + full-loop benchmark) |
 | `LIBE3_ENABLE_ZMQ` | ON | Enable ZeroMQ transport |
 | `LIBE3_ENABLE_ASN1` | ON | Enable ASN.1 encoding |
-| `LIBE3_ENABLE_JSON` | OFF | Enable JSON encoding (mutually exclusive with ASN.1) |
+| `LIBE3_ENABLE_JSON` | OFF | Enable JSON encoding support |
 | `LIBE3_ENABLE_ASAN` | OFF | Enable AddressSanitizer |
 | `LIBE3_ENABLE_TSAN` | OFF | Enable ThreadSanitizer |
 | `LIBE3_ENABLE_SWIG` | OFF | Build the SWIG-generated Python bindings (`_libe3py.so` + `libe3py.py`) |
+
+> **Note on encoding selection:** `LIBE3_ENABLE_ASN1` and `LIBE3_ENABLE_JSON` are independent
+> compile-time inclusion flags — both can be `ON` simultaneously to build a library that supports
+> both encodings. The active encoding is **selected at runtime** via the `encoding` field of
+> `e3_config_t` (0 = ASN1, 1 = JSON) when calling `e3_agent_create_with_config()`.
 
 ### Running Tests
 
@@ -211,7 +236,7 @@ int main() {
 }
 ```
 
-See `examples/simple_dapp.cpp` for a complete reference dApp using the Simple service model. It pairs with `examples/simple_agent.cpp` (and is wire-compatible with `spear-dApp`'s Python `simple_dapp.py`).
+See `examples/simple_dapp.cpp` for a complete reference dApp using the Simple service model. It pairs with `examples/simple_agent.cpp` and is wire-compatible with Python dApp clients that implement the same Simple SM encoding.
 
 #### Multi-peer dApps
 
@@ -293,7 +318,7 @@ endpoints and transport selection to run in isolated/local environments.
 
 ### E3Agent
 
-The main facade class for RAN vendors.
+The single entry-point class for both roles. Configure `E3Config.role = E3Role::RAN` to bind as a RAN function, or `E3Role::DAPP` to connect as a dApp client. Methods are annotated `(RAN)` or `(dApp)` where they apply to only one role; the rest are common.
 
 | Method | Description |
 |--------|-------------|
@@ -445,7 +470,7 @@ xdg-open build/docs/html/index.html
 
 ## Python Bindings (SWIG)
 
-libe3 ships an optional SWIG-generated Python binding so the same C++ library can back Python dApps. It is **off by default** — enable it with `-DLIBE3_ENABLE_SWIG=ON`:
+libe3 ships an optional SWIG-generated Python binding so the same C++ library can back Python dApp clients. It is **off by default** — enable it with `-DLIBE3_ENABLE_SWIG=ON`:
 
 ```bash
 # Install SWIG and Python development headers (Ubuntu)
@@ -459,7 +484,7 @@ cmake --build build --target libe3py -j $(nproc)
 PYTHONPATH=build/swig python3 tests/test_swig_smoke.py
 ```
 
-The build produces `build/swig/_libe3py.so` and the matching `libe3py.py` shim. Python users can construct an `E3Config`, flip its `role` to `DAPP`, instantiate an `E3Agent`, and call the dApp verbs. The minimal seam intentionally **does not** wrap the encoders (`Asn1E3Encoder` / `JsonE3Encoder`) — per-SM encoding stays in Python, so existing `spear-dApp` SM decoders work unchanged. See `swig/libe3.i` for the exposed surface.
+The build produces `build/swig/_libe3py.so` and the matching `libe3py.py` shim. Python users can construct an `E3Config`, flip its `role` to `DAPP`, instantiate an `E3Agent`, and call the dApp verbs. The minimal seam intentionally **does not** wrap the encoders (`Asn1E3Encoder` / `JsonE3Encoder`) — per-SM encoding stays in Python so that existing Python SM implementations work unchanged. See `swig/libe3.i` for the exposed surface.
 
 ## License
 

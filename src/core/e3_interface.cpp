@@ -9,9 +9,11 @@
 
 #include "libe3/e3_interface.hpp"
 #include "libe3/logger.hpp"
+#include <cctype>
 #include <chrono>
 #include <random>
 #include <signal.h>
+#include <string>
 
 #ifdef __linux__
 #include <pthread.h>
@@ -36,6 +38,37 @@ constexpr auto SM_POLL_INTERVAL = std::chrono::milliseconds(10);
  * @param affinity  Logical CPU core to pin to, or -1 to skip pinning.
  * @param niceness  Nice value in [-20, 19], or 0 to skip.
  */
+/**
+ * @brief Build the default log-file path for a given role/identifier.
+ *
+ * Produces `/tmp/e3_<role>[_<sanitized-id>]_<euid>.log`. The id is sanitized
+ * to `[A-Za-z0-9._-]` (other bytes become '_') and omitted when empty. The
+ * effective uid is appended so the file is always owned by the opener,
+ * sidestepping `fs.protected_regular` denials in sticky /tmp.
+ */
+std::string default_log_path(E3Role role, const std::string& id) {
+    std::string san;
+    san.reserve(id.size());
+    for (char c : id) {
+        san.push_back((std::isalnum(static_cast<unsigned char>(c)) ||
+                       c == '.' || c == '_' || c == '-')
+                          ? c
+                          : '_');
+    }
+    std::string path = "/tmp/e3_";
+    path += (role == E3Role::DAPP) ? "dapp" : "agent";
+    if (!san.empty()) {
+        path += '_';
+        path += san;
+    }
+#ifdef __linux__
+    path += '_';
+    path += std::to_string(static_cast<unsigned long>(geteuid()));
+#endif
+    path += ".log";
+    return path;
+}
+
 void apply_thread_config(int affinity, int niceness) noexcept {
 #ifdef __linux__
     if (affinity >= 0) {
@@ -75,9 +108,13 @@ E3Interface::E3Interface(const E3Config& config)
     // the same process — integration tests, the latency benchmark, or
     // production multi-peer dApps) coexist without racing on the same file.
     if (config.log_level > 0) {
-        const char* log_path = (config.role == E3Role::DAPP)
-            ? "/tmp/e3_dapp.log"
-            : "/tmp/e3_agent.log";
+        std::string log_path = config.log_path;
+        if (log_path.empty()) {
+            const std::string& id = (config.role == E3Role::DAPP)
+                ? config.dapp_name
+                : config.ran_identifier;
+            log_path = default_log_path(config.role, id);
+        }
         Logger::instance().set_log_file(log_path);
     }
     Logger::instance().set_level(config.log_level);
