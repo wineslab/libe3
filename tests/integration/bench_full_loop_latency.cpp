@@ -34,6 +34,8 @@
 #include <condition_variable>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+#include <getopt.h>
 #include <iostream>
 #include <memory>
 #include <mutex>
@@ -203,12 +205,42 @@ private:
     bool may_emit_{true};
 };
 
-std::string make_tmpdir() {
+std::string make_ipc_dir() {
     char tmpl[] = "/tmp/libe3_bench_full_loop_XXXXXX";
     char* d = mkdtemp(tmpl);
     if (!d) throw std::runtime_error("mkdtemp failed");
     chmod(d, 0777);
     return std::string(d);
+}
+
+E3LinkLayer parse_link(const char* s) {
+    if (std::strcmp(s, "posix") == 0) return E3LinkLayer::POSIX;
+    if (std::strcmp(s, "zmq")   == 0) return E3LinkLayer::ZMQ;
+    std::fprintf(stderr, "Unknown link layer '%s'; using zmq\n", s);
+    return E3LinkLayer::ZMQ;
+}
+
+E3TransportLayer parse_transport(const char* s) {
+    if (std::strcmp(s, "tcp")  == 0) return E3TransportLayer::TCP;
+    if (std::strcmp(s, "sctp") == 0) return E3TransportLayer::SCTP;
+    if (std::strcmp(s, "ipc")  == 0) return E3TransportLayer::IPC;
+    std::fprintf(stderr, "Unknown transport '%s'; using ipc\n", s);
+    return E3TransportLayer::IPC;
+}
+
+EncodingFormat parse_encoding(const char* s) {
+    if (std::strcmp(s, "json") == 0) return EncodingFormat::JSON;
+    if (std::strcmp(s, "asn1") == 0) return EncodingFormat::ASN1;
+    std::fprintf(stderr, "Unknown encoding '%s'; using asn1\n", s);
+    return EncodingFormat::ASN1;
+}
+
+const char* encoding_str(EncodingFormat e) {
+    switch (e) {
+        case EncodingFormat::JSON: return "JSON";
+        case EncodingFormat::ASN1: return "ASN.1 APER";
+        default:                   return "unknown";
+    }
 }
 
 int64_t percentile(std::vector<int64_t>& v, double p) {
@@ -227,23 +259,60 @@ double mean(const std::vector<int64_t>& v) {
 
 }  // namespace
 
-int main() {
-    const std::string dir = make_tmpdir();
+int main(int argc, char* argv[]) {
+    // Defaults.
+    E3LinkLayer     link     = E3LinkLayer::ZMQ;
+    E3TransportLayer transport = E3TransportLayer::IPC;
+    EncodingFormat  encoding = EncodingFormat::ASN1;
+
+    static const struct option long_opts[] = {
+        {"link",      required_argument, nullptr, 'l'},
+        {"transport", required_argument, nullptr, 't'},
+        {"encoding",  required_argument, nullptr, 'e'},
+        {"help",      no_argument,       nullptr, 'h'},
+        {nullptr,     0,                 nullptr,  0},
+    };
+    int opt;
+    while ((opt = getopt_long(argc, argv, "l:t:e:h", long_opts, nullptr)) != -1) {
+        switch (opt) {
+            case 'l': link      = parse_link(optarg);      break;
+            case 't': transport = parse_transport(optarg); break;
+            case 'e': encoding  = parse_encoding(optarg);  break;
+            case 'h':
+                std::printf("Usage: %s [--link zmq|posix] [--transport ipc|tcp|sctp]"
+                            " [--encoding asn1|json]\n", argv[0]);
+                return 0;
+            default:
+                std::fprintf(stderr, "Unknown option; use --help\n");
+                return 1;
+        }
+    }
 
     E3Config ran_cfg;
     ran_cfg.role = E3Role::RAN;
     ran_cfg.ran_identifier = "bench-ran";
-    ran_cfg.link_layer = E3LinkLayer::ZMQ;
-    ran_cfg.transport_layer = E3TransportLayer::IPC;
-    ran_cfg.encoding = EncodingFormat::ASN1;
+    ran_cfg.link_layer = link;
+    ran_cfg.transport_layer = transport;
+    ran_cfg.encoding = encoding;
     ran_cfg.log_level = 0;
-    ran_cfg.setup_endpoint = "ipc://" + dir + "/setup";
-    ran_cfg.subscriber_endpoint = "ipc://" + dir + "/dapp_socket";
-    ran_cfg.publisher_endpoint = "ipc://" + dir + "/e3_socket";
+
+    // IPC transport: use a private tmpdir so the benchmark is self-contained.
+    // TCP/SCTP: both sides run in the same process on localhost; the default
+    // ports (9990/9991/9999) are used.
+    std::string ipc_dir;
+    if (transport == E3TransportLayer::IPC) {
+        ipc_dir = make_ipc_dir();
+        ran_cfg.setup_endpoint      = "ipc://" + ipc_dir + "/setup";
+        ran_cfg.subscriber_endpoint = "ipc://" + ipc_dir + "/dapp_socket";
+        ran_cfg.publisher_endpoint  = "ipc://" + ipc_dir + "/e3_socket";
+    }
 
     auto dapp_cfg = ran_cfg;
     dapp_cfg.role = E3Role::DAPP;
     dapp_cfg.dapp_name = "BenchDApp";
+    // For IPC the dApp inherits the same explicit endpoints from ran_cfg.
+    // For TCP/SCTP the dApp connects to localhost on the default ports,
+    // which is correct since both sides run in the same process.
 
     SharedTraces shared;
     E3Agent ran(ran_cfg);
@@ -314,6 +383,14 @@ int main() {
 
     dapp.stop();
     ran.stop();
+    if (!ipc_dir.empty()) {
+        // Remove the IPC socket files created by the benchmark.
+        for (const char* name : {"setup", "dapp_socket", "e3_socket"}) {
+            std::string path = ipc_dir + "/" + name;
+            ::unlink(path.c_str());
+        }
+        ::rmdir(ipc_dir.c_str());
+    }
 
     // Compute per-phase deltas (microseconds), dropping warmup.
     std::vector<int64_t> p1, p2, p3, p4, p5, p6, p7, p8, total_us;
@@ -351,7 +428,9 @@ int main() {
 
     std::printf("## Full-loop latency benchmark (N=%d after %d warmup)\n\n",
                 static_cast<int>(p1.size()), kWarmupIterations);
-    std::printf("All values in microseconds (us). Transport: ZMQ over IPC, encoding: ASN.1 APER.\n\n");
+    std::printf("All values in microseconds (us). Link: %s, transport: %s, encoding: %s.\n\n",
+                link_layer_to_string(link), transport_layer_to_string(transport),
+                encoding_str(encoding));
     std::printf("| Phase                               | mean |  p50 |  p99 |   max |\n");
     std::printf("|-------------------------------------|-----:|-----:|-----:|------:|\n");
     emit_row("1. Collect indication data",          p1);

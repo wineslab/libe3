@@ -424,6 +424,18 @@ struct E3Config {
 
     // Logging level (0=none, 1=error, 2=warn, 3=info, 4=debug, 5=trace)
     int log_level{3};  ///< Logging verbosity: 0=none, 1=error, 2=warn, 3=info, 4=debug, 5=trace
+
+    /**
+     * @brief Path of the shared log file. Empty (default) => auto-generated.
+     *
+     * When left empty the library derives a per-process path of the form
+     * `/tmp/e3_<role>[_<sanitized-id>]_<euid>.log` (see E3Interface ctor).
+     * The trailing effective-uid keeps the file owned by whoever opens it,
+     * which avoids `fs.protected_regular` blocking an O_CREAT re-open of a
+     * /tmp file owned by a different user (e.g. a root gNB vs. a prior
+     * non-sudo run). Set this explicitly to override the location entirely.
+     */
+    std::string log_path;
 };
 
 /**

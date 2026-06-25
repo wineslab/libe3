@@ -18,6 +18,8 @@
 #include <sstream>
 #include <mutex>
 #include <cstdio>
+#include <cerrno>
+#include <cstring>
 #include <ctime>
 #include <chrono>
 
@@ -116,7 +118,8 @@ public:
             if (file_) {
                 std::setvbuf(file_, nullptr, _IOLBF, 0);
             } else {
-                std::fprintf(stderr, "[Logger] Failed to open log file %s\n", path.c_str());
+                std::fprintf(stderr, "[Logger] Failed to open log file %s: %s (errno %d)\n",
+                             path.c_str(), std::strerror(errno), errno);
             }
         }
     }

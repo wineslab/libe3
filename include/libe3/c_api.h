@@ -166,6 +166,7 @@ typedef struct {
     int encoding;         /* 0=ASN1, 1=JSON, -1=default */
     size_t io_threads;    /* 0=default */
     int log_level;        /* -1=default */
+    const char* log_path; /* NULL=auto (/tmp/e3_<role>[_<id>]_<euid>.log) */
 } e3_config_t;
 
 /**
