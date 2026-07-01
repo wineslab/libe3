@@ -28,12 +28,11 @@
 
 ```
   RAN Application                                       dApp Application
-  (DU · CU-CP · CU-UP                                  (C++ · Python ·
-   OAI · OCUDU · Aerial)                                C++ · Python)
+  (DU · CU-CP/UP · OAI · OCUDU · Aerial)                  (C++ · Python)                              
           │                                                    │
           │  role = RAN                         role = DAPP    │
           ▼                                                    ▼
-  ┌───────────────────┐    ◄─── E3AP PDUs ───►   ┌──────────────────────┐
+  ┌───────────────────┐  ◄─── E3AP PDUs ───►       ┌──────────────────────┐
   │     E3Agent       │◄──────────────────────────►│     E3Agent          │
   │                   │  ZMQ / POSIX               │                      │
   │  register_sm(...) │  IPC · TCP · SCTP          │  set_indication_     │
@@ -56,17 +55,17 @@
                     │               E3Agent                  │  ◄── Public API
                     └──────────────────┬─────────────────────┘
                                        │
-          ┌────────────────────────────┼──────────────────────────┐
-          │                            │                          │
+          ┌────────────────────────────┼─────────────────────────┐
+          │                            │                         │
 ┌─────────▼──────────┐     ┌───────────▼──────────┐    ┌─────────▼────────┐
-│   E3Connector      │     │     E3Encoder         │    │   ServiceModel   │
-│   (Transport)      │     │     (Encoding)        │    │   (RAN-side SM   │
+│   E3Connector      │     │     E3Encoder        │    │   ServiceModel   │
+│   (Transport)      │     │     (Encoding)       │    │   (RAN-side SM   │
 ├────────────────────┤     ├──────────────────────┤    │    extension     │
-│  ZmqConnector      │     │  Asn1Encoder          │    │    point)        │
-│  PosixConnector    │     │  JsonEncoder          │    ├──────────────────┤
+│  ZmqConnector      │     │  Asn1Encoder         │    │    point)        │
+│  PosixConnector    │     │  JsonEncoder         │    ├──────────────────┤
 └────────────────────┘     └──────────────────────┘    │  SimpleSM        │
-                                                        │  custom SMs …    │
-                                                        └──────────────────┘
+                                                       │  custom SMs …    │
+                                                       └──────────────────┘
 ```
 
 ## Quick Start
