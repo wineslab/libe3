@@ -14,6 +14,9 @@ set -e
 # ============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Single source of truth for the version: the VERSION file (same as CMake reads).
+LIBE3_VERSION="$(tr -d '[:space:]' < "$SCRIPT_DIR/VERSION" 2>/dev/null)"
+LIBE3_VERSION="${LIBE3_VERSION:-unknown}"
 BUILD_DIR="build"
 CMAKE_BUILD_TYPE="Release"
 CMAKE_GENERATOR=""
@@ -71,7 +74,7 @@ echo_error() {
 
 print_help() {
     cat << EOF
-libe3 - A Vendor-Neutral E3AP C++ Library, v0.0.1
+libe3 - A Vendor-Neutral E3AP C++ Library, v${LIBE3_VERSION}
 Copyright (c) 2026 Andrea Lacava <thecave003@gmail.com> and contributors.
 ==================
 
@@ -442,14 +445,14 @@ uninstall_library() {
             "$prefix/lib/liblibe3.a" \
             "$prefix/lib/liblibe3.so" \
             "$prefix/lib/liblibe3.so.0" \
-            "$prefix/lib/liblibe3.so.0.0.1" \
+            "$prefix/lib/liblibe3.so.$LIBE3_VERSION" \
             "$prefix/lib/libasn1_e3ap.a" \
             "$prefix/lib/pkgconfig/libe3.pc" \
             "$prefix/lib/cmake/libe3" \
             "$prefix/lib64/liblibe3.a" \
             "$prefix/lib64/liblibe3.so" \
             "$prefix/lib64/liblibe3.so.0" \
-            "$prefix/lib64/liblibe3.so.0.0.1" \
+            "$prefix/lib64/liblibe3.so.$LIBE3_VERSION" \
             "$prefix/lib64/libasn1_e3ap.a" \
             "$prefix/lib64/pkgconfig/libe3.pc" \
             "$prefix/lib64/cmake/libe3"
