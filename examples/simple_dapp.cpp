@@ -48,7 +48,7 @@ static void print_usage(const char* program_name) {
               << "Options:\n"
               << "  -l, --link <layer>       Link layer: zmq, posix (default: zmq)\n"
               << "  -t, --transport <layer>  Transport: sctp, tcp, ipc (default: ipc)\n"
-              << "  -e, --encoding <format>  Encoding: asn1, json (default: asn1)\n"
+              << "  -e, --encoding <format>  Encoding: asn1, json, protobuf (default: asn1)\n"
               << "  -c, --control            Send a Simple-Control every 5th indication\n"
               << "  -T, --timed <secs>       Stop after this many seconds (0 = unlimited)\n"
               << "  -d, --socket-dir <dir>   IPC socket dir of a RAN to connect to.\n"
@@ -113,8 +113,18 @@ static libe3::E3TransportLayer parse_transport_layer(const char* str) {
 static libe3::EncodingFormat parse_encoding(const char* str) {
     if (std::strcmp(str, "asn1") == 0) return libe3::EncodingFormat::ASN1;
     if (std::strcmp(str, "json") == 0) return libe3::EncodingFormat::JSON;
+    if (std::strcmp(str, "protobuf") == 0) return libe3::EncodingFormat::PROTOBUF;
     std::cerr << "Invalid encoding: " << str << " (using asn1)\n";
     return libe3::EncodingFormat::ASN1;
+}
+
+static const char* encoding_to_cstr(libe3::EncodingFormat enc) {
+    switch (enc) {
+        case libe3::EncodingFormat::JSON:     return "json";
+        case libe3::EncodingFormat::PROTOBUF: return "protobuf";
+        case libe3::EncodingFormat::ASN1:     return "asn1";
+    }
+    return "asn1";
 }
 
 int main(int argc, char* argv[]) {
@@ -191,7 +201,7 @@ int main(int argc, char* argv[]) {
               << "  Role: dapp\n"
               << "  Link: " << libe3::link_layer_to_string(link_layer) << "\n"
               << "  Transport: " << libe3::transport_layer_to_string(transport_layer) << "\n"
-              << "  Encoding: " << (encoding == libe3::EncodingFormat::JSON ? "json" : "asn1") << "\n"
+              << "  Encoding: " << encoding_to_cstr(encoding) << "\n"
               << "  Control: " << (control_enabled ? "on" : "off") << "\n"
               << "  Timed (s): " << timed_seconds << "\n"
               << "  RAN peers: " << peers.size() << "\n\n";
@@ -224,9 +234,9 @@ int main(int argc, char* argv[]) {
 
         p->agent = std::make_unique<libe3::E3Agent>(std::move(config));
 
-        p->agent->set_indication_handler([p, control_enabled, quiet](const libe3::IndicationMessage& msg) {
+        p->agent->set_indication_handler([p, control_enabled, quiet, encoding](const libe3::IndicationMessage& msg) {
             libe3_examples::SimpleIndication si;
-            if (!libe3_examples::decode_simple_indication(msg.protocol_data, si)) {
+            if (!libe3_examples::decode_simple_indication(msg.protocol_data, si, encoding)) {
                 std::cerr << "[SIMPLE] peer=" << p->label << " failed to decode indication ("
                           << msg.protocol_data.size() << " bytes)\n";
                 return;
@@ -279,7 +289,7 @@ int main(int argc, char* argv[]) {
             if (control_enabled && seq % 5 == 0) {
                 const int sampling = static_cast<int>(seq % 101);
                 std::vector<uint8_t> encoded;
-                if (libe3_examples::encode_simple_control(sampling, encoded)) {
+                if (libe3_examples::encode_simple_control(sampling, encoded, encoding)) {
                     auto rc = p->agent->send_control(/*ran_function_id=*/1, /*control_id=*/1, encoded);
                     if (rc == libe3::ErrorCode::SUCCESS) {
                         if (!quiet) {

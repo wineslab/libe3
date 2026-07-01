@@ -49,7 +49,7 @@ ctest -LE integration      # only unit tests
 PYTHONPATH=build/swig python3 tests/test_swig_smoke.py   # SWIG bindings smoke test
 ```
 
-**Build options** live in `cmake/libe3Options.cmake`: `LIBE3_BUILD_TESTS` (ON), `LIBE3_BUILD_EXAMPLES` (ON), `LIBE3_BUILD_INTEGRATION_TESTS` (OFF), `LIBE3_ENABLE_SWIG` (OFF), `LIBE3_ENABLE_ZMQ` (ON), `LIBE3_ENABLE_ASN1` (ON), `LIBE3_ENABLE_JSON` (OFF), `LIBE3_ENABLE_ASAN`/`LIBE3_ENABLE_TSAN` (OFF), `LIBE3_BUILD_DOCS` (OFF). **At least one of `LIBE3_ENABLE_ASN1` / `LIBE3_ENABLE_JSON` must be ON**; both can be built together and the encoder is chosen at runtime.
+**Build options** live in `cmake/libe3Options.cmake`: `LIBE3_BUILD_TESTS` (ON), `LIBE3_BUILD_EXAMPLES` (ON), `LIBE3_BUILD_INTEGRATION_TESTS` (OFF), `LIBE3_ENABLE_SWIG` (OFF), `LIBE3_ENABLE_ZMQ` (ON), `LIBE3_ENABLE_ASN1` (ON), `LIBE3_ENABLE_JSON` (OFF), `LIBE3_ENABLE_PROTOBUF` (OFF), `LIBE3_ENABLE_ASAN`/`LIBE3_ENABLE_TSAN` (OFF), `LIBE3_BUILD_DOCS` (OFF). **At least one of `LIBE3_ENABLE_ASN1` / `LIBE3_ENABLE_JSON` / `LIBE3_ENABLE_PROTOBUF` must be ON**; any combination can be built together and the encoder is chosen at runtime. `build_libe3` has a dedicated `--enable-protobuf` flag; JSON and SWIG use `--cmake-opt`.
 
 ## Architecture (big picture)
 
@@ -64,7 +64,7 @@ The design has one façade over three pluggable seams, plus a real-time data pat
 
 **Real-time data path.** Producers never touch the network directly. Lock-free MPMC ring buffers (`include/libe3/mpmc_queue.hpp`, wrapped by `lockfree_queue.hpp`) decouple work from dedicated I/O threads that `E3Interface` spawns: setup, inbound, and outbound, plus RAN-only threads that poll Service Models for telemetry and drain dApp reports off the receive path. Optional CPU affinity and niceness (Linux) are set from `E3Config` to cut scheduling jitter in sub-millisecond loops.
 
-**State & types.** `SubscriptionManager` (RAN side) and `DAppSubscriptionState` (dApp side) track subscriptions and assigned IDs. The 11 E3AP message types are modeled as a `std::variant`-based `Pdu` in `include/libe3/types.hpp`. The wire protocol's source of truth is the ASN.1 grammar `messages/asn1/V1/e3ap-1.0.0.asn1`, from which `asn1c` generates C encode/decode code at build time (the `asn1_e3ap` target).
+**State & types.** `SubscriptionManager` (RAN side) and `DAppSubscriptionState` (dApp side) track subscriptions and assigned IDs. The 11 E3AP message types are modeled as a `std::variant`-based `Pdu` in `include/libe3/types.hpp`. Each wire encoding has its own grammar under `messages/`, generated at build time into a dedicated library: ASN.1 in `messages/asn1/V1/e3ap-1.0.0.asn1` (`asn1c` -> `asn1_e3ap`, C) and Protocol Buffers in `messages/proto/V1/e3ap-1.0.0.proto` (`protoc` -> `pb_e3ap`, C++). Keep these grammars in sync with the `Pdu` structs when adding fields.
 
 **Bindings & examples.** A C API lives in `include/libe3/c_api.h`; Python bindings via SWIG (`swig/libe3.i` → the `libe3py` module). `examples/simple_agent.cpp` (RAN) and `examples/simple_dapp.cpp` (dApp), with the reference Simple SM in `examples/sm_simple/`, are the best runnable illustration of the two roles (they require ASN.1).
 

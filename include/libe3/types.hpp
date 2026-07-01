@@ -29,8 +29,9 @@ namespace libe3 {
  * @brief E3AP encoding formats supported by the library
  */
 enum class EncodingFormat : uint8_t {
-    ASN1 = 0,   ///< ASN.1 PER encoding (standard O-RAN format)
-    JSON = 1    ///< JSON encoding (for development/debugging)
+    ASN1 = 0,      ///< ASN.1 PER encoding (standard O-RAN format)
+    JSON = 1,      ///< JSON encoding (for development/debugging)
+    PROTOBUF = 2   ///< Protocol Buffers encoding
 };
 
 /**

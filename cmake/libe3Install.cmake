@@ -25,6 +25,10 @@ if(LIBE3_ENABLE_ASN1)
     list(APPEND LIBE3_INSTALL_TARGETS asn1_e3ap)
 endif()
 
+if(LIBE3_ENABLE_PROTOBUF)
+    list(APPEND LIBE3_INSTALL_TARGETS pb_e3ap)
+endif()
+
 install(TARGETS ${LIBE3_INSTALL_TARGETS}
     EXPORT libe3Targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -49,6 +53,14 @@ if(LIBE3_ENABLE_ASN1)
     install(DIRECTORY ${ASN1_GENERATED_DIR}/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libe3/asn1
         FILES_MATCHING PATTERN "*.h"
+    )
+endif()
+
+# Install Protobuf generated headers
+if(LIBE3_ENABLE_PROTOBUF)
+    install(DIRECTORY ${PROTOBUF_GENERATED_DIR}/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libe3/proto
+        FILES_MATCHING PATTERN "*.pb.h"
     )
 endif()
 
