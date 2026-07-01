@@ -60,10 +60,12 @@ jobs:
       - name: Run integration tests
         run: cd build && ctest -L integration --output-on-failure
 
-  dual-encoding:
-    # Regression guard for issue #26: ASN.1 and JSON must be buildable together
-    # (the encoder is selected at runtime via E3Config.encoding).
-    name: Dual Encoding (ASN.1 + JSON)
+  all-encodings:
+    # Regression guard: ASN.1, JSON, and Protocol Buffers must all be buildable
+    # together in a single libe3 (the encoder is selected at runtime via
+    # E3Config.encoding). Builds one library with every encoder compiled in and
+    # runs the full test suite against it.
+    name: All Encodings (ASN.1 + JSON + Protobuf)
     runs-on: ubuntu-latest
     needs: test
     steps:
@@ -76,18 +78,19 @@ jobs:
           chmod +x ./build_libe3 || true
           ./build_libe3 -I || true
 
-      - name: Configure with both encoders enabled
+      - name: Configure with all encoders enabled
         run: |
-          cmake -S . -B build-both \
+          cmake -S . -B build-all \
             -DCMAKE_BUILD_TYPE=Release \
             -DLIBE3_ENABLE_ASN1=ON \
-            -DLIBE3_ENABLE_JSON=ON
+            -DLIBE3_ENABLE_JSON=ON \
+            -DLIBE3_ENABLE_PROTOBUF=ON
 
       - name: Build
-        run: cmake --build build-both -j $(nproc)
+        run: cmake --build build-all -j $(nproc)
 
       - name: Run tests
-        run: cd build-both && ctest --output-on-failure
+        run: cd build-all && ctest --output-on-failure
 
   swig:
     name: SWIG Python Bindings

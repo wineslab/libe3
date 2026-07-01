@@ -27,6 +27,12 @@ if(LIBE3_ENABLE_JSON)
     endif()
 endif()
 
+# Required: Protocol Buffers (libprotobuf runtime + protoc compiler) for protobuf encoding
+if(LIBE3_ENABLE_PROTOBUF)
+    find_package(Protobuf REQUIRED)
+    message(STATUS "Protobuf found: ${Protobuf_VERSION} (protoc: ${Protobuf_PROTOC_EXECUTABLE})")
+endif()
+
 # Required: tl::expected for C++17 std::expected-like functionality
 include(FetchContent)
 FetchContent_Declare(

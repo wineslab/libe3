@@ -39,6 +39,11 @@ if(LIBE3_ENABLE_ASN1)
     target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_ASN1)
 endif()
 
+if(LIBE3_ENABLE_PROTOBUF)
+    target_link_libraries(libe3 PUBLIC pb_e3ap protobuf::libprotobuf)
+    target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_PROTOBUF)
+endif()
+
 if(LIBE3_ENABLE_ZMQ)
     target_compile_definitions(libe3 PUBLIC LIBE3_HAS_ZMQ=1)
     target_link_libraries(libe3 PRIVATE PkgConfig::ZMQ)
@@ -86,6 +91,11 @@ endif()
 if(LIBE3_ENABLE_ASN1)
     target_link_libraries(libe3_shared PUBLIC asn1_e3ap)
     target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_ASN1)
+endif()
+
+if(LIBE3_ENABLE_PROTOBUF)
+    target_link_libraries(libe3_shared PUBLIC pb_e3ap protobuf::libprotobuf)
+    target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_PROTOBUF)
 endif()
 
 if(LIBE3_ENABLE_ZMQ)

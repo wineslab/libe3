@@ -27,6 +27,10 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
         message(STATUS "Skipping test_json_encoder: JSON support disabled")
         continue()
     endif()
+    if(NOT LIBE3_ENABLE_PROTOBUF AND simple_name STREQUAL "protobuf_encoder")
+        message(STATUS "Skipping test_protobuf_encoder: Protobuf support disabled")
+        continue()
+    endif()
 
     add_executable(${target_name} "${CMAKE_CURRENT_SOURCE_DIR}/${test_src}")
     target_link_libraries(${target_name}

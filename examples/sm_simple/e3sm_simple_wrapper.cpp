@@ -1,4 +1,5 @@
-/* Example wrapper helpers that use ASN.1 generated types.
+/* Example wrapper helpers that use ASN.1 generated types (and, when libe3 is
+ * built with protobuf support, the generated Simple SM protobuf types).
  * These are compiled only into the examples binary and are not part
  * of the main libe3 public API.
  */
@@ -21,12 +22,33 @@ extern "C" {
 }
 #endif
 
+#ifdef LIBE3_ENABLE_PROTOBUF
+#include "e3sm_simple.pb.h"
+#endif
+
 #include <cstring>
 #include <cstdlib>
 
 namespace libe3_examples {
 
-bool encode_simple_indication(const SimpleIndication& in, std::vector<uint8_t>& out) {
+#ifdef LIBE3_ENABLE_PROTOBUF
+namespace smpb = libe3::sm::simple::v1;
+#endif
+
+bool encode_simple_indication(const SimpleIndication& in, std::vector<uint8_t>& out,
+                              libe3::EncodingFormat enc) {
+    (void)enc;
+#ifdef LIBE3_ENABLE_PROTOBUF
+    if (enc == libe3::EncodingFormat::PROTOBUF) {
+        smpb::SimpleIndication m;
+        m.set_data1(in.data1);
+        if (in.timestamp.has_value()) m.set_timestamp(*in.timestamp);
+        std::string s;
+        if (!m.SerializeToString(&s)) return false;
+        out.assign(s.begin(), s.end());
+        return true;
+    }
+#endif
     Simple_Indication_t si;
     memset(&si, 0, sizeof(si));
     si.data1 = in.data1;
@@ -49,7 +71,19 @@ bool encode_simple_indication(const SimpleIndication& in, std::vector<uint8_t>& 
     return true;
 }
 
-bool decode_simple_indication(const std::vector<uint8_t>& in, SimpleIndication& out) {
+bool decode_simple_indication(const std::vector<uint8_t>& in, SimpleIndication& out,
+                              libe3::EncodingFormat enc) {
+    (void)enc;
+#ifdef LIBE3_ENABLE_PROTOBUF
+    if (enc == libe3::EncodingFormat::PROTOBUF) {
+        smpb::SimpleIndication m;
+        if (!m.ParseFromArray(in.data(), static_cast<int>(in.size()))) return false;
+        out.data1 = m.data1();
+        if (m.has_timestamp()) out.timestamp = m.timestamp();
+        else out.timestamp.reset();
+        return true;
+    }
+#endif
     Simple_Indication_t *si = nullptr;
     asn_dec_rval_t dr = aper_decode(NULL, &asn_DEF_Simple_Indication, (void **)&si, in.data(), in.size(), 0, 0);
     if (dr.code != RC_OK || !si) return false;
@@ -62,7 +96,18 @@ bool decode_simple_indication(const std::vector<uint8_t>& in, SimpleIndication& 
     return true;
 }
 
-bool decode_simple_control(const std::vector<uint8_t>& in, int& samplingThreshold) {
+bool decode_simple_control(const std::vector<uint8_t>& in, int& samplingThreshold,
+                           libe3::EncodingFormat enc) {
+    (void)enc;
+#ifdef LIBE3_ENABLE_PROTOBUF
+    if (enc == libe3::EncodingFormat::PROTOBUF) {
+        smpb::SimpleControl m;
+        if (!m.ParseFromArray(in.data(), static_cast<int>(in.size()))) return false;
+        if (!m.has_sampling_threshold()) return false;
+        samplingThreshold = static_cast<int>(m.sampling_threshold());
+        return true;
+    }
+#endif
     Simple_Control_t *sc = nullptr;
     asn_dec_rval_t dr = aper_decode(NULL, &asn_DEF_Simple_Control, (void **)&sc, in.data(), in.size(), 0, 0);
     if (dr.code != RC_OK || !sc) return false;
@@ -77,7 +122,19 @@ bool decode_simple_control(const std::vector<uint8_t>& in, int& samplingThreshol
     return true;
 }
 
-bool encode_simple_control(int samplingThreshold, std::vector<uint8_t>& out) {
+bool encode_simple_control(int samplingThreshold, std::vector<uint8_t>& out,
+                           libe3::EncodingFormat enc) {
+    (void)enc;
+#ifdef LIBE3_ENABLE_PROTOBUF
+    if (enc == libe3::EncodingFormat::PROTOBUF) {
+        smpb::SimpleControl m;
+        m.set_sampling_threshold(static_cast<uint32_t>(samplingThreshold));
+        std::string s;
+        if (!m.SerializeToString(&s)) return false;
+        out.assign(s.begin(), s.end());
+        return true;
+    }
+#endif
     Simple_Control_t sc;
     memset(&sc, 0, sizeof(sc));
     sc.samplingThreshold = (long *)malloc(sizeof(long));
@@ -94,7 +151,19 @@ bool encode_simple_control(int samplingThreshold, std::vector<uint8_t>& out) {
     return true;
 }
 
-bool encode_ran_function_data(const std::string name, std::vector<uint8_t>& out) {
+bool encode_ran_function_data(const std::string name, std::vector<uint8_t>& out,
+                              libe3::EncodingFormat enc) {
+    (void)enc;
+#ifdef LIBE3_ENABLE_PROTOBUF
+    if (enc == libe3::EncodingFormat::PROTOBUF) {
+        smpb::SimpleRanFunctionData m;
+        m.set_name(name);
+        std::string s;
+        if (!m.SerializeToString(&s)) return false;
+        out.assign(s.begin(), s.end());
+        return true;
+    }
+#endif
     Simple_RanFunctionData_t srd;
     memset(&srd, 0, sizeof(srd));
 
@@ -116,7 +185,17 @@ bool encode_ran_function_data(const std::string name, std::vector<uint8_t>& out)
     return true;
 }
 
-bool decode_simple_dapp_report(const std::vector<uint8_t>& in, SimpleDAppReport& out) {
+bool decode_simple_dapp_report(const std::vector<uint8_t>& in, SimpleDAppReport& out,
+                               libe3::EncodingFormat enc) {
+    (void)enc;
+#ifdef LIBE3_ENABLE_PROTOBUF
+    if (enc == libe3::EncodingFormat::PROTOBUF) {
+        smpb::SimpleDAppReport m;
+        if (!m.ParseFromArray(in.data(), static_cast<int>(in.size()))) return false;
+        out.bin1 = static_cast<int>(m.bin1());
+        return true;
+    }
+#endif
     Simple_DAppReport_t* rep = nullptr;
     asn_dec_rval_t dr = aper_decode(NULL, &asn_DEF_Simple_DAppReport, (void**)&rep, in.data(), in.size(), 0, 0);
     if (dr.code != RC_OK || !rep) return false;
@@ -125,7 +204,19 @@ bool decode_simple_dapp_report(const std::vector<uint8_t>& in, SimpleDAppReport&
     return true;
 }
 
-bool encode_simple_config_control(const SimpleConfigControl& in, std::vector<uint8_t>& out) {
+bool encode_simple_config_control(const SimpleConfigControl& in, std::vector<uint8_t>& out,
+                                  libe3::EncodingFormat enc) {
+    (void)enc;
+#ifdef LIBE3_ENABLE_PROTOBUF
+    if (enc == libe3::EncodingFormat::PROTOBUF) {
+        smpb::SimpleConfigControl m;
+        m.set_enable(in.enable);
+        std::string s;
+        if (!m.SerializeToString(&s)) return false;
+        out.assign(s.begin(), s.end());
+        return true;
+    }
+#endif
     Simple_ConfigControl_t scc;
     memset(&scc, 0, sizeof(scc));
     scc.enable = in.enable ? 1 : 0;
@@ -140,7 +231,17 @@ bool encode_simple_config_control(const SimpleConfigControl& in, std::vector<uin
     return true;
 }
 
-bool decode_simple_config_control(const std::vector<uint8_t>& in, SimpleConfigControl& out) {
+bool decode_simple_config_control(const std::vector<uint8_t>& in, SimpleConfigControl& out,
+                                  libe3::EncodingFormat enc) {
+    (void)enc;
+#ifdef LIBE3_ENABLE_PROTOBUF
+    if (enc == libe3::EncodingFormat::PROTOBUF) {
+        smpb::SimpleConfigControl m;
+        if (!m.ParseFromArray(in.data(), static_cast<int>(in.size()))) return false;
+        out.enable = m.enable();
+        return true;
+    }
+#endif
     Simple_ConfigControl_t* scc = nullptr;
     asn_dec_rval_t dr = aper_decode(NULL, &asn_DEF_Simple_ConfigControl, (void**)&scc, in.data(), in.size(), 0, 0);
     if (dr.code != RC_OK || !scc) return false;

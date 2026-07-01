@@ -48,3 +48,7 @@ endif()
 if(LIBE3_ENABLE_JSON)
     list(APPEND LIBE3_SOURCES src/encoder/json_encoder.cpp)
 endif()
+
+if(LIBE3_ENABLE_PROTOBUF)
+    list(APPEND LIBE3_SOURCES src/encoder/protobuf_encoder.cpp)
+endif()
