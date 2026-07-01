@@ -85,6 +85,7 @@ inline int run_all_tests() {
         try {
             test.func();
             std::cout << "[PASS] " << test.name << "\n";
+            report_pass(test.name);
         } catch (const std::exception& e) {
             std::cout << "[FAIL] " << test.name << "\n";
             std::cout << "       Exception: " << e.what() << "\n";

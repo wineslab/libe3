@@ -1,7 +1,9 @@
 # Build directories
 build/
+build-*/
 cmake-build-*/
 out/
+dist/
 
 # Compiled objects
 *.o

@@ -11,10 +11,13 @@ VERSION=$(cat VERSION | tr -d '[:space:]')
 BUILD_DIR="$ROOT_DIR/build"
 DEB_OUT_DIR="$BUILD_DIR"
 USE_EXISTING_BUILD=0
+VARIANT=""
 
 usage() {
-    echo "Usage: $0 [--use-existing-build] [--build-dir DIR] [amd64|arm64|all]"
+    echo "Usage: $0 [--use-existing-build] [--build-dir DIR] [--variant NAME] [amd64|arm64|all]"
     echo "If no architecture argument is given, host architecture (dpkg --print-architecture) is used."
+    echo "--variant NAME produces libe3-NAME_<version>_<arch>.deb (Package: libe3-NAME);"
+    echo "without it, the package is libe3_<version>_<arch>.deb (Package: libe3)."
 }
 
 ARG_ARCH=""
@@ -31,6 +34,15 @@ while [ "$#" -gt 0 ]; do
                 exit 1
             fi
             BUILD_DIR="$2"
+            shift 2
+            ;;
+        --variant)
+            if [ -z "${2:-}" ]; then
+                echo "Missing value for --variant"
+                usage
+                exit 1
+            fi
+            VARIANT="$2"
             shift 2
             ;;
         amd64|arm64|all|x86_64|x64|aarch64)
@@ -115,8 +127,17 @@ build_for() {
     DEBIAN_DIR="$PKG_ROOT/DEBIAN"
     mkdir -p "$DEBIAN_DIR"
 
+    # Variant packages carry a distinct Package name and filename suffix so the
+    # per-encoding builds can coexist alongside the default (all-encodings) one.
+    local pkg_name="libe3"
+    local deb_name="libe3_${VERSION}_${ARCH}.deb"
+    if [ -n "$VARIANT" ]; then
+        pkg_name="libe3-${VARIANT}"
+        deb_name="libe3-${VARIANT}_${VERSION}_${ARCH}.deb"
+    fi
+
     cat >"$DEBIAN_DIR/control" <<EOF
-Package: libe3
+Package: ${pkg_name}
 Version: ${VERSION}
 Section: libs
 Priority: optional
@@ -133,9 +154,9 @@ EOF
 
     echo "Building .deb package for $ARCH..."
     mkdir -p "$DEB_OUT_DIR"
-    dpkg-deb --build "$PKG_ROOT" "$DEB_OUT_DIR/libe3_${VERSION}_${ARCH}.deb"
+    dpkg-deb --build "$PKG_ROOT" "$DEB_OUT_DIR/${deb_name}"
 
-    echo "Package created: $DEB_OUT_DIR/libe3_${VERSION}_${ARCH}.deb"
+    echo "Package created: $DEB_OUT_DIR/${deb_name}"
 }
 
 for ARCH in $ARCHS; do

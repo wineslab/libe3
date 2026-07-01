@@ -11,6 +11,7 @@ option(LIBE3_ENABLE_SWIG
 option(LIBE3_ENABLE_ZMQ "Enable ZeroMQ transport" ON)
 option(LIBE3_ENABLE_ASN1 "Enable ASN.1 encoding support" ON)
 option(LIBE3_ENABLE_JSON "Enable JSON encoding support" OFF)
+option(LIBE3_ENABLE_PROTOBUF "Enable Protocol Buffers encoding support" OFF)
 option(LIBE3_ENABLE_ASAN "Enable AddressSanitizer" OFF)
 option(LIBE3_ENABLE_TSAN "Enable ThreadSanitizer" OFF)
 option(LIBE3_BUILD_DOCS "Build documentation" OFF)

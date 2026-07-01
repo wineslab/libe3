@@ -12,6 +12,9 @@
 #if LIBE3_ENABLE_JSON
 #include "json_encoder.hpp"
 #endif
+#if LIBE3_ENABLE_PROTOBUF
+#include "protobuf_encoder.hpp"
+#endif
 #include "libe3/logger.hpp"
 
 namespace libe3 {
@@ -32,6 +35,8 @@ EncodingInfo encoding_info(EncodingFormat format) {
             return {"ASN.1", "LIBE3_ENABLE_ASN1"};
         case EncodingFormat::JSON:
             return {"JSON", "LIBE3_ENABLE_JSON"};
+        case EncodingFormat::PROTOBUF:
+            return {"Protocol Buffers", "LIBE3_ENABLE_PROTOBUF"};
     }
     return {"unknown", nullptr};
 }
@@ -46,6 +51,10 @@ std::unique_ptr<E3Encoder> create_encoder(EncodingFormat format) {
 #if LIBE3_ENABLE_JSON
         case EncodingFormat::JSON:
             return std::make_unique<JsonE3Encoder>();
+#endif
+#if LIBE3_ENABLE_PROTOBUF
+        case EncodingFormat::PROTOBUF:
+            return std::make_unique<ProtobufE3Encoder>();
 #endif
         default:
             break;

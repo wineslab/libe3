@@ -1,0 +1,38 @@
+// Simple Service Model message definitions, Protocol Buffers form.
+//
+// Protocol Buffers counterpart of examples/sm_simple/e3sm_simple.asn. These
+// messages are carried inside the opaque E3AP payload fields (protocol_data,
+// action_data, xapp_control_data, report_data) when the Simple SM example runs
+// with protobuf encoding.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+
+package libe3.sm.simple.v1;
+
+// RAN function data (advertised in the Setup Response ran_function_data).
+message SimpleRanFunctionData {
+  string name = 1;  // Human-readable Service Model name
+}
+
+// Indication payload (RAN -> dApp).
+message SimpleIndication {
+  uint32 data1 = 1;             // Random data / monotonic sequence counter
+  optional uint32 timestamp = 2;  // Unix timestamp when samples were captured
+}
+
+// Control payload (dApp -> RAN).
+message SimpleControl {
+  optional uint32 sampling_threshold = 1;  // Sampling delivery ratio (0..100)
+}
+
+// Configuration control payload (xApp -> dApp via RAN).
+message SimpleConfigControl {
+  bool enable = 1;  // Enable/disable data delivery
+}
+
+// dApp report payload (dApp -> RAN).
+message SimpleDAppReport {
+  uint32 bin1 = 1;
+}

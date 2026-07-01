@@ -230,5 +230,12 @@ int main() {
     }
 #endif
 
+#ifdef LIBE3_ENABLE_PROTOBUF
+    {
+        auto enc = create_encoder(EncodingFormat::PROTOBUF);
+        if (enc) run_encoder(*enc, "protobuf");
+    }
+#endif
+
     return 0;
 }

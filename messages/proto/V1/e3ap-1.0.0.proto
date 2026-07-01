@@ -1,0 +1,129 @@
+// E3AP (E3 Application Protocol) message definitions, Protocol Buffers form.
+//
+// This schema is the Protocol Buffers counterpart of the ASN.1 grammar in
+// messages/asn1/V1/e3ap-1.0.0.asn1. Field layout mirrors the C++ PDU structs
+// in include/libe3/types.hpp so the encoder round-trips them losslessly. The
+// oneof cases follow the E3AP PDU type ordering (0..10).
+//
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+
+package libe3.e3ap.v1;
+
+// Response code shared by setup, subscription, and acknowledgment messages.
+enum ResponseCode {
+  RESPONSE_CODE_POSITIVE = 0;  // Request accepted
+  RESPONSE_CODE_NEGATIVE = 1;  // Request rejected
+}
+
+// E3 Setup Request (dApp -> RAN).
+message SetupRequest {
+  string e3ap_protocol_version = 1;
+  string dapp_name = 2;
+  string dapp_version = 3;
+  string vendor = 4;
+}
+
+// RAN function advertised in a Setup Response.
+message RanFunctionDef {
+  uint32 ran_function_identifier = 1;
+  repeated uint32 telemetry_identifier_list = 2;
+  repeated uint32 control_identifier_list = 3;
+  bytes ran_function_data = 4;
+}
+
+// E3 Setup Response (RAN -> dApp).
+message SetupResponse {
+  uint32 request_id = 1;
+  ResponseCode response_code = 2;
+  optional string e3ap_protocol_version = 3;
+  optional uint32 dapp_identifier = 4;
+  string ran_identifier = 5;
+  repeated RanFunctionDef ran_function_list = 6;
+}
+
+// Subscription Request (dApp -> RAN).
+message SubscriptionRequest {
+  uint32 dapp_identifier = 1;
+  uint32 ran_function_identifier = 2;
+  repeated uint32 telemetry_identifier_list = 3;
+  repeated uint32 control_identifier_list = 4;
+  optional uint32 subscription_time = 5;
+  optional uint32 periodicity = 6;
+}
+
+// Subscription Delete (dApp -> RAN).
+message SubscriptionDelete {
+  uint32 dapp_identifier = 1;
+  uint32 subscription_id = 2;
+}
+
+// Subscription Response (RAN -> dApp).
+message SubscriptionResponse {
+  uint32 request_id = 1;
+  uint32 dapp_identifier = 2;
+  ResponseCode response_code = 3;
+  optional uint32 subscription_id = 4;
+}
+
+// Indication Message (RAN -> dApp). protocol_data carries the opaque
+// Service Model payload.
+message IndicationMessage {
+  uint32 dapp_identifier = 1;
+  uint32 ran_function_identifier = 2;
+  bytes protocol_data = 3;
+}
+
+// dApp Control Action (dApp -> RAN). action_data is Service Model opaque.
+message DAppControlAction {
+  uint32 dapp_identifier = 1;
+  uint32 ran_function_identifier = 2;
+  uint32 control_identifier = 3;
+  bytes action_data = 4;
+}
+
+// dApp Report (dApp -> RAN). report_data is Service Model opaque.
+message DAppReport {
+  uint32 dapp_identifier = 1;
+  uint32 ran_function_identifier = 2;
+  bytes report_data = 3;
+}
+
+// xApp Control Action (xApp -> dApp via RAN). xapp_control_data is opaque.
+message XAppControlAction {
+  uint32 dapp_identifier = 1;
+  uint32 ran_function_identifier = 2;
+  bytes xapp_control_data = 3;
+}
+
+// Release Message (dApp -> RAN).
+message ReleaseMessage {
+  uint32 dapp_identifier = 1;
+}
+
+// Generic message acknowledgment.
+message MessageAck {
+  uint32 request_id = 1;
+  ResponseCode response_code = 2;
+}
+
+// Top-level E3AP PDU envelope. The oneof case identifies the PDU type; its
+// ordering matches the E3AP PDU type enumeration (SETUP_REQUEST=0 .. MESSAGE_ACK=10).
+message E3Pdu {
+  uint32 id = 1;         // message identifier
+  uint64 timestamp = 2;  // milliseconds since epoch
+  oneof msg {
+    SetupRequest setup_request = 3;
+    SetupResponse setup_response = 4;
+    SubscriptionRequest subscription_request = 5;
+    SubscriptionDelete subscription_delete = 6;
+    SubscriptionResponse subscription_response = 7;
+    IndicationMessage indication_message = 8;
+    DAppControlAction dapp_control_action = 9;
+    DAppReport dapp_report = 10;
+    XAppControlAction xapp_control_action = 11;
+    ReleaseMessage release_message = 12;
+    MessageAck message_ack = 13;
+  }
+}

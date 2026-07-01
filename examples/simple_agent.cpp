@@ -33,8 +33,9 @@ public:
     // period_us: microseconds between indication emissions. Sub-millisecond
     // values stress the conflate/queueing balance; the per-send log is silenced
     // below 1 ms so stdout I/O does not dominate the measurement.
-    explicit SimpleServiceModel(uint64_t period_us = 2'000'000)
-        : period_us_(period_us), quiet_(period_us < 1000) {}
+    explicit SimpleServiceModel(uint64_t period_us = 2'000'000,
+                                libe3::EncodingFormat encoding = libe3::EncodingFormat::ASN1)
+        : period_us_(period_us), quiet_(period_us < 1000), encoding_(encoding) {}
 
     std::string name() const override { return "SIMPLE"; }
     uint32_t version() const override { return 1; }
@@ -69,7 +70,7 @@ public:
     std::vector<uint8_t> ran_function_data() const override {
         const std::string name = "SIMPLE";
         std::vector<uint8_t> out;
-        if (libe3_examples::encode_ran_function_data(name, out)) {
+        if (libe3_examples::encode_ran_function_data(name, out, encoding_)) {
             return out;
         }
         return {};
@@ -93,7 +94,7 @@ public:
         const libe3::DAppControlAction& action
     ) override {
         int sampling = 0;
-        bool decode_ok = libe3_examples::decode_simple_control(action.action_data, sampling);
+        bool decode_ok = libe3_examples::decode_simple_control(action.action_data, sampling, encoding_);
         if (decode_ok) {
             std::cout << "[SIMPLE] Control action " << action.control_identifier
                       << ": samplingThreshold=" << sampling << "\n";
@@ -115,6 +116,7 @@ private:
     uint32_t seq_{0};
     uint64_t period_us_{2'000'000};
     bool quiet_{false};
+    libe3::EncodingFormat encoding_{libe3::EncodingFormat::ASN1};
 
     void worker_loop() {
         while (running_) {
@@ -141,7 +143,7 @@ private:
             si.timestamp = static_cast<uint32_t>(now_ms & 0x7FFFFFFF);
 
             std::vector<uint8_t> encoded;
-            if (!libe3_examples::encode_simple_indication(si, encoded)) {
+            if (!libe3_examples::encode_simple_indication(si, encoded, encoding_)) {
                 std::cerr << "Failed to encode Simple-Indication\n";
                 continue;
             }
@@ -171,7 +173,7 @@ void print_usage(const char* program_name) {
               << "Options:\n"
               << "  -l, --link <layer>       Link layer: zmq, posix (default: zmq)\n"
               << "  -t, --transport <layer>  Transport layer: sctp, tcp, ipc (default: ipc)\n"
-              << "  -e, --encoding <format>  Encoding format: asn1, json (default: asn1)\n"
+              << "  -e, --encoding <format>  Encoding format: asn1, json, protobuf (default: asn1)\n"
               << "  -r, --ran_id <id>        RAN identifier advertised in setup (default: example-ran-001)\n"
               << "  -d, --socket-dir <dir>   IPC socket directory (default: /tmp/dapps).\n"
               << "                           Lets multiple RANs coexist on one host over IPC.\n"
@@ -202,8 +204,18 @@ libe3::E3TransportLayer parse_transport_layer(const char* str) {
 libe3::EncodingFormat parse_encoding(const char* str) {
     if (std::strcmp(str, "asn1") == 0) return libe3::EncodingFormat::ASN1;
     if (std::strcmp(str, "json") == 0) return libe3::EncodingFormat::JSON;
+    if (std::strcmp(str, "protobuf") == 0) return libe3::EncodingFormat::PROTOBUF;
     std::cerr << "Invalid encoding format: " << str << ". Using default (asn1).\n";
-    return libe3::EncodingFormat::JSON;
+    return libe3::EncodingFormat::ASN1;
+}
+
+static const char* encoding_to_cstr(libe3::EncodingFormat enc) {
+    switch (enc) {
+        case libe3::EncodingFormat::JSON:     return "json";
+        case libe3::EncodingFormat::PROTOBUF: return "protobuf";
+        case libe3::EncodingFormat::ASN1:     return "asn1";
+    }
+    return "asn1";
 }
 
 int main(int argc, char* argv[]) {
@@ -295,7 +307,7 @@ int main(int argc, char* argv[]) {
               << "  RAN ID: " << ran_id << "\n"
               << "  Link layer: " << libe3::link_layer_to_string(link_layer) << "\n"
               << "  Transport layer: " << libe3::transport_layer_to_string(transport_layer) << "\n"
-              << "  Encoding: " << (encoding == libe3::EncodingFormat::JSON ? "json" : "asn1") << "\n"
+              << "  Encoding: " << encoding_to_cstr(encoding) << "\n"
               << "  Socket dir: " << (socket_dir.empty() ? "/tmp/dapps (default)" : socket_dir) << "\n"
               << "  Port offset: " << port_offset << "\n"
               << "  Period: " << period_us << " us\n\n";
@@ -313,7 +325,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Register the simple service model (with the configured emission period)
-    auto sm_result = agent.register_sm(std::make_unique<SimpleServiceModel>(period_us));
+    auto sm_result = agent.register_sm(std::make_unique<SimpleServiceModel>(period_us, encoding));
     if (sm_result != libe3::ErrorCode::SUCCESS) {
         std::cerr << "Failed to register Simple SM: "
                   << libe3::error_code_to_string(sm_result) << "\n";
@@ -328,10 +340,10 @@ int main(int argc, char* argv[]) {
     });
 
     // Handle dApp reports for the RAN
-    agent.set_dapp_report_handler([](const libe3::DAppReport& report) {
+    agent.set_dapp_report_handler([encoding](const libe3::DAppReport& report) {
         // In the RAN report is sent to the xApp through E2, here we just decode it as en example
         libe3_examples::SimpleDAppReport decoded;
-        if (libe3_examples::decode_simple_dapp_report(report.report_data, decoded)) {
+        if (libe3_examples::decode_simple_dapp_report(report.report_data, decoded, encoding)) {
             std::cout << "[SIMPLE] dApp report from dApp " << report.dapp_identifier
                       << " (RAN function " << report.ran_function_identifier
                       << "): bin1=" << decoded.bin1 << "\n";

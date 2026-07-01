@@ -13,7 +13,7 @@
 - **Both Roles**: Single `E3Agent` class acts as either **RAN** (server, binds sockets) or **dApp** (client, connects to a remote RAN), switched by `E3Config.role`
 - **Multi-Peer dApps**: One dApp process can hold N `E3Agent` instances connecting to N different RAN agents (e.g. a DU-HIGH and a DU-LOW)
 - **Multiple Transports**: Support for ZeroMQ and POSIX sockets (TCP, SCTP, Unix Domain)
-- **Multiple Encodings**: ASN.1 APER (primary) and JSON encoders
+- **Multiple Encodings**: ASN.1 APER (primary), JSON, and Protocol Buffers encoders
 - **Service Model Extensions**: Easy-to-implement SM interface for custom functionality
 - **Python Bindings**: Optional SWIG bindings (`LIBE3_ENABLE_SWIG=ON`) so the same C++ library can back Python dApp clients
 - **Thread-Safe**: Proper synchronization for concurrent dApp operations
@@ -36,7 +36,7 @@
   │     E3Agent       │◄──────────────────────────►│     E3Agent          │
   │                   │  ZMQ / POSIX               │                      │
   │  register_sm(...) │  IPC · TCP · SCTP          │  set_indication_     │
-  │  send_indication  │  ASN.1 APER · JSON         │    handler(fn)       │
+  │  send_indication  │  ASN.1 · JSON · Protobuf   │    handler(fn)       │
   │  send_xapp_ctrl   │                            │  subscribe(rfid, …)  │
   └───────────────────┘                            │  send_control(…)     │
                                                    │  send_report(…)      │
@@ -77,6 +77,7 @@
 - pthreads
 - `asn1c` — ASN.1 APER encoder, required by `messages/`
 - `nlohmann-json3-dev` — Header-only JSON library; CMake expects the `nlohmann_json` target
+- `protobuf-compiler` + `libprotobuf-dev` — `protoc` and the Protocol Buffers runtime (only when `LIBE3_ENABLE_PROTOBUF=ON`)
 - `libzmq3-dev` for ZMQ transport
 - `libsctp-dev` — SCTP development headers/libraries for POSIX/SCTP transport
 
@@ -90,7 +91,7 @@ Install all required packages using the project's installer (recommended) or man
 
 # Manual (Debian/Ubuntu)
 sudo apt update
-sudo apt install -y build-essential cmake pkg-config libzmq3-dev ninja-build git asn1c nlohmann-json3-dev libsctp-dev dpkg-dev debhelper fakeroot
+sudo apt install -y build-essential cmake pkg-config libzmq3-dev ninja-build git asn1c nlohmann-json3-dev protobuf-compiler libprotobuf-dev libsctp-dev dpkg-dev debhelper fakeroot
 ```
 
 The packaging tools (`dpkg-dev`, `debhelper`, `fakeroot`) are only needed by `scripts/create_deb.sh`.
@@ -140,14 +141,16 @@ make -j$(nproc)
 | `LIBE3_ENABLE_ZMQ` | ON | Enable ZeroMQ transport |
 | `LIBE3_ENABLE_ASN1` | ON | Enable ASN.1 encoding |
 | `LIBE3_ENABLE_JSON` | OFF | Enable JSON encoding support |
+| `LIBE3_ENABLE_PROTOBUF` | OFF | Enable Protocol Buffers encoding support |
 | `LIBE3_ENABLE_ASAN` | OFF | Enable AddressSanitizer |
 | `LIBE3_ENABLE_TSAN` | OFF | Enable ThreadSanitizer |
 | `LIBE3_ENABLE_SWIG` | OFF | Build the SWIG-generated Python bindings (`_libe3py.so` + `libe3py.py`) |
 
-> **Note on encoding selection:** `LIBE3_ENABLE_ASN1` and `LIBE3_ENABLE_JSON` are independent
-> compile-time inclusion flags — both can be `ON` simultaneously to build a library that supports
-> both encodings. The active encoding is **selected at runtime** via the `encoding` field of
-> `e3_config_t` (0 = ASN1, 1 = JSON) when calling `e3_agent_create_with_config()`.
+> **Note on encoding selection:** `LIBE3_ENABLE_ASN1`, `LIBE3_ENABLE_JSON`, and
+> `LIBE3_ENABLE_PROTOBUF` are independent compile-time inclusion flags — any combination can be
+> `ON` simultaneously to build a library that supports several encodings. The active encoding is
+> **selected at runtime** via the `encoding` field of `e3_config_t` (0 = ASN1, 1 = JSON,
+> 2 = PROTOBUF) when calling `e3_agent_create_with_config()`.
 
 ### Running Tests
 
@@ -371,7 +374,7 @@ for local development (IPC) or production deployments.
 | `setup_endpoint` | string | Setup connection endpoint (default: ipc:///tmp/dapps/setup) |
 | `subscriber_endpoint` | string | Subscriber endpoint (default: ipc:///tmp/dapps/dapp_socket) |
 | `publisher_endpoint` | string | Publisher endpoint (default: ipc:///tmp/dapps/e3_socket) |
-| `encoding` | EncodingFormat | ASN1 or JSON |
+| `encoding` | EncodingFormat | ASN1, JSON, or PROTOBUF |
 | `connect_timeout_ms` | uint32_t | Connect timeout (ms) |
 | `recv_timeout_ms` | uint32_t | Receive timeout (ms) |
 | `send_timeout_ms` | uint32_t | Send timeout (ms) |

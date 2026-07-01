@@ -43,24 +43,23 @@ include(libe3Version)
 # ============================================================================
 # Encoder selection
 # ============================================================================
-# ASN.1 and JSON can be enabled together: the encoder factory
-# (src/encoder/encoder_factory.cpp) creates the right encoder per
-# EncodingFormat at runtime, so a single build can serve either encoding
+# ASN.1, JSON, and Protocol Buffers can be enabled together: the encoder
+# factory (src/encoder/encoder_factory.cpp) creates the right encoder per
+# EncodingFormat at runtime, so a single build can serve any enabled encoding
 # (selected by E3Config.encoding). At least one must be enabled.
-if(NOT LIBE3_ENABLE_ASN1 AND NOT LIBE3_ENABLE_JSON)
-    message(FATAL_ERROR "Neither LIBE3_ENABLE_ASN1 nor LIBE3_ENABLE_JSON is enabled. Enable at least one encoding.")
-endif()
-if(LIBE3_ENABLE_ASN1 AND LIBE3_ENABLE_JSON)
-    message(STATUS "Both ASN.1 and JSON encoders enabled; encoding is selected at runtime via E3Config.encoding.")
+if(NOT LIBE3_ENABLE_ASN1 AND NOT LIBE3_ENABLE_JSON AND NOT LIBE3_ENABLE_PROTOBUF)
+    message(FATAL_ERROR "No encoding enabled. Enable at least one of LIBE3_ENABLE_ASN1, LIBE3_ENABLE_JSON, or LIBE3_ENABLE_PROTOBUF.")
 endif()
 
 # ============================================================================
-# ASN.1 Messages Library
+# Generated Message Libraries (ASN.1 and/or Protocol Buffers)
 # ============================================================================
-if(LIBE3_ENABLE_ASN1)
+# The messages/ subdirectory generates the asn1_e3ap and/or pb_e3ap libraries
+# from the E3AP grammars, gated internally on the enabled encodings.
+if(LIBE3_ENABLE_ASN1 OR LIBE3_ENABLE_PROTOBUF)
     add_subdirectory(messages)
 else()
-    message(STATUS "ASN.1 encoding support disabled by configuration")
+    message(STATUS "ASN.1 and Protobuf encoding support disabled by configuration")
 endif()
 
 # ============================================================================
