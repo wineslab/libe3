@@ -49,6 +49,28 @@ message(STATUS "tl::expected: Fetched from GitHub")
 # Optional Dependencies
 # ============================================================================
 
+# Optional: Google Benchmark for the integration micro-benchmarks
+# (dev-only; never linked into the shipped library)
+if(LIBE3_BUILD_INTEGRATION_TESTS)
+    find_package(benchmark 1.8 QUIET)
+    if(NOT benchmark_FOUND)
+        set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+        set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "" FORCE)
+        set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+        set(BENCHMARK_INSTALL_DOCS OFF CACHE BOOL "" FORCE)
+        FetchContent_Declare(
+            googlebenchmark
+            GIT_REPOSITORY https://github.com/google/benchmark.git
+            GIT_TAG v1.9.1
+            GIT_SHALLOW TRUE
+        )
+        FetchContent_MakeAvailable(googlebenchmark)
+        message(STATUS "Google Benchmark: Fetched from GitHub")
+    else()
+        message(STATUS "Google Benchmark: Found installed version")
+    endif()
+endif()
+
 # Optional: ZeroMQ
 if(LIBE3_ENABLE_ZMQ)
     find_package(PkgConfig QUIET)
