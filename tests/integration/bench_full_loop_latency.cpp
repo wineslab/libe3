@@ -89,7 +89,7 @@ struct SharedTraces {
 
 class BenchSM : public ServiceModel {
 public:
-    explicit BenchSM(SharedTraces& s) : shared_(s) {}
+    BenchSM(SharedTraces& s, EncodingFormat enc) : shared_(s), enc_(enc) {}
     std::string name() const override { return "BENCH"; }
     uint32_t version() const override { return 1; }
     uint32_t ran_function_id() const override { return kRanFunctionId; }
@@ -101,7 +101,7 @@ public:
 
     std::vector<uint8_t> ran_function_data() const override {
         std::vector<uint8_t> out;
-        if (libe3_examples::encode_ran_function_data("BENCH", out)) return out;
+        if (libe3_examples::encode_ran_function_data("BENCH", out, enc_)) return out;
         return {0x01};
     }
 
@@ -137,7 +137,7 @@ public:
                 // Phase 2: encode
                 int64_t t2 = now_ns();
                 std::vector<uint8_t> enc;
-                if (!libe3_examples::encode_simple_indication(si, enc)) continue;
+                if (!libe3_examples::encode_simple_indication(si, enc, enc_)) continue;
                 int64_t t3 = now_ns();
                 {
                     std::lock_guard<std::mutex> lk(shared_.mu);
@@ -180,7 +180,7 @@ public:
             shared_.current.t8_recv_control = t8;
         }
         int sampling = 0;
-        (void)libe3_examples::decode_simple_control(a.action_data, sampling);
+        (void)libe3_examples::decode_simple_control(a.action_data, sampling, enc_);
         int64_t t9 = now_ns();
         {
             std::lock_guard<std::mutex> lk(shared_.mu);
@@ -198,6 +198,7 @@ public:
 
 private:
     SharedTraces& shared_;
+    EncodingFormat enc_;
     std::atomic<bool> running_{false};
     std::thread worker_;
     std::mutex emit_mu_;
@@ -229,17 +230,19 @@ E3TransportLayer parse_transport(const char* s) {
 }
 
 EncodingFormat parse_encoding(const char* s) {
-    if (std::strcmp(s, "json") == 0) return EncodingFormat::JSON;
-    if (std::strcmp(s, "asn1") == 0) return EncodingFormat::ASN1;
+    if (std::strcmp(s, "json")     == 0) return EncodingFormat::JSON;
+    if (std::strcmp(s, "asn1")     == 0) return EncodingFormat::ASN1;
+    if (std::strcmp(s, "protobuf") == 0) return EncodingFormat::PROTOBUF;
     std::fprintf(stderr, "Unknown encoding '%s'; using asn1\n", s);
     return EncodingFormat::ASN1;
 }
 
 const char* encoding_str(EncodingFormat e) {
     switch (e) {
-        case EncodingFormat::JSON: return "JSON";
-        case EncodingFormat::ASN1: return "ASN.1 APER";
-        default:                   return "unknown";
+        case EncodingFormat::JSON:     return "JSON";
+        case EncodingFormat::ASN1:     return "ASN.1 APER";
+        case EncodingFormat::PROTOBUF: return "Protocol Buffers";
+        default:                       return "unknown";
     }
 }
 
@@ -280,7 +283,7 @@ int main(int argc, char* argv[]) {
             case 'e': encoding  = parse_encoding(optarg);  break;
             case 'h':
                 std::printf("Usage: %s [--link zmq|posix] [--transport ipc|tcp|sctp]"
-                            " [--encoding asn1|json]\n", argv[0]);
+                            " [--encoding asn1|json|protobuf]\n", argv[0]);
                 return 0;
             default:
                 std::fprintf(stderr, "Unknown option; use --help\n");
@@ -316,7 +319,7 @@ int main(int argc, char* argv[]) {
 
     SharedTraces shared;
     E3Agent ran(ran_cfg);
-    auto* sm = new BenchSM(shared);
+    auto* sm = new BenchSM(shared, encoding);
     if (ran.register_sm(std::unique_ptr<ServiceModel>(sm)) != ErrorCode::SUCCESS) {
         std::cerr << "register_sm failed\n";
         return 1;
@@ -330,12 +333,12 @@ int main(int argc, char* argv[]) {
     dapp.set_indication_handler([&](const IndicationMessage& msg) {
         int64_t t4 = now_ns();
         libe3_examples::SimpleIndication si;
-        if (!libe3_examples::decode_simple_indication(msg.protocol_data, si)) return;
+        if (!libe3_examples::decode_simple_indication(msg.protocol_data, si, encoding)) return;
         int64_t t5 = now_ns();
 
         int64_t t6 = now_ns();
         std::vector<uint8_t> ctrl;
-        if (!libe3_examples::encode_simple_control(static_cast<int>(si.data1 % 101), ctrl)) return;
+        if (!libe3_examples::encode_simple_control(static_cast<int>(si.data1 % 101), ctrl, encoding)) return;
         int64_t t7 = now_ns();
 
         {
