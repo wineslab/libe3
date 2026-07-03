@@ -221,7 +221,14 @@ using SmFactory = std::function<std::unique_ptr<ServiceModel>()>;
 class SmRegistry {
 public:
     SmRegistry() = default;
-    ~SmRegistry() = default;
+    /**
+     * @brief Destructor — equivalent to clear().
+     *
+     * Runs the full SM lifecycle (stop() if running, then destroy()) on
+     * every SM still registered, so the hooks fire on every teardown path
+     * — including an E3Interface destroyed without a prior stop().
+     */
+    ~SmRegistry() { clear(); }
     SmRegistry(const SmRegistry&) = delete;
     SmRegistry& operator=(const SmRegistry&) = delete;
 

@@ -23,6 +23,11 @@
  *       still running, still has its SM registered, and still serves a
  *       full setup handshake advertising that RAN function to a dApp.
  *
+ *   (4) An SM registered with an agent that is destroyed without ever
+ *       being started/stopped still gets its destroy() lifecycle hook
+ *       (the per-interface registry runs the full lifecycle from its
+ *       destructor; the singleton was simply never torn down).
+ *
  * The test uses whichever encoding the build provides (JSON preferred) so
  * it runs on JSON-only, ASN.1-only, and dual-encoder builds.
  *
@@ -202,6 +207,40 @@ TEST(MultiAgent_sameRanFunctionId_independentRegistries) {
 
     dapp.stop();
     agent2.stop();
+}
+
+namespace {
+
+/// RegistryTestSM variant that reports its lifecycle hooks to the caller.
+class HookTrackingSM : public RegistryTestSM {
+public:
+    HookTrackingSM(uint32_t ran_function_id, bool* destroyed)
+        : RegistryTestSM(ran_function_id), destroyed_(destroyed) {}
+    void destroy() override {
+        RegistryTestSM::destroy();
+        *destroyed_ = true;
+    }
+private:
+    bool* destroyed_;
+};
+
+}  // namespace
+
+TEST(SmRegistry_destroyHookRunsWhenAgentDiesWithoutStop) {
+    constexpr uint32_t RAN_FUNC_ID = 1;
+    bool destroyed = false;
+    {
+        const RanEndpoints ep{unique_ipc("setup3"), unique_ipc("in3"), unique_ipc("out3")};
+        // The agent is destroyed without ever being started: E3Interface::stop()
+        // early-returns from the UNINITIALIZED state, so only the registry's
+        // own destructor can run the SM lifecycle.
+        E3Agent agent(make_ran_config(ep, "multireg-ran-3", pick_encoding()));
+        ASSERT_EQ(error_to_int(agent.register_sm(
+                      std::make_unique<HookTrackingSM>(RAN_FUNC_ID, &destroyed))),
+                  error_to_int(ErrorCode::SUCCESS));
+        ASSERT_TRUE(!destroyed);
+    }
+    ASSERT_TRUE(destroyed);
 }
 
 // ---------------------------------------------------------------------------
