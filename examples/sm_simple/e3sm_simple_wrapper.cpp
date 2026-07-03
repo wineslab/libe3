@@ -1,7 +1,7 @@
 /* Example wrapper helpers that use ASN.1 generated types (and, when libe3 is
- * built with protobuf support, the generated Simple SM protobuf types).
- * These are compiled only into the examples binary and are not part
- * of the main libe3 public API.
+ * built with JSON or protobuf support, JSON text payloads or the generated
+ * Simple SM protobuf types). These are compiled only into the examples binary
+ * and are not part of the main libe3 public API.
  */
 
 #include "e3sm_simple_wrapper.hpp"
@@ -26,6 +26,10 @@ extern "C" {
 #include "e3sm_simple.pb.h"
 #endif
 
+#ifdef LIBE3_ENABLE_JSON
+#include <nlohmann/json.hpp>
+#endif
+
 #include <cstring>
 #include <cstdlib>
 
@@ -33,6 +37,23 @@ namespace libe3_examples {
 
 #ifdef LIBE3_ENABLE_PROTOBUF
 namespace smpb = libe3::sm::simple::v1;
+#endif
+
+#ifdef LIBE3_ENABLE_JSON
+namespace {
+// JSON SM payloads are UTF-8 JSON text bytes with camelCase keys, matching
+// the JSON envelope encoder convention (the envelope nests the indication
+// payload as a JSON object on the wire).
+inline void json_to_bytes(const nlohmann::json& j, std::vector<uint8_t>& out) {
+    const std::string s = j.dump();
+    out.assign(s.begin(), s.end());
+}
+
+inline bool bytes_to_json(const std::vector<uint8_t>& in, nlohmann::json& j) {
+    j = nlohmann::json::parse(in.begin(), in.end(), nullptr, false);
+    return !j.is_discarded();
+}
+}  // namespace
 #endif
 
 bool encode_simple_indication(const SimpleIndication& in, std::vector<uint8_t>& out,
@@ -46,6 +67,15 @@ bool encode_simple_indication(const SimpleIndication& in, std::vector<uint8_t>& 
         std::string s;
         if (!m.SerializeToString(&s)) return false;
         out.assign(s.begin(), s.end());
+        return true;
+    }
+#endif
+#ifdef LIBE3_ENABLE_JSON
+    if (enc == libe3::EncodingFormat::JSON) {
+        nlohmann::json j;
+        j["data1"] = in.data1;
+        if (in.timestamp.has_value()) j["timestamp"] = *in.timestamp;
+        json_to_bytes(j, out);
         return true;
     }
 #endif
@@ -84,6 +114,16 @@ bool decode_simple_indication(const std::vector<uint8_t>& in, SimpleIndication& 
         return true;
     }
 #endif
+#ifdef LIBE3_ENABLE_JSON
+    if (enc == libe3::EncodingFormat::JSON) {
+        nlohmann::json j;
+        if (!bytes_to_json(in, j) || !j.contains("data1")) return false;
+        out.data1 = j["data1"].get<uint32_t>();
+        if (j.contains("timestamp")) out.timestamp = j["timestamp"].get<uint32_t>();
+        else out.timestamp.reset();
+        return true;
+    }
+#endif
     Simple_Indication_t *si = nullptr;
     asn_dec_rval_t dr = aper_decode(NULL, &asn_DEF_Simple_Indication, (void **)&si, in.data(), in.size(), 0, 0);
     if (dr.code != RC_OK || !si) return false;
@@ -105,6 +145,14 @@ bool decode_simple_control(const std::vector<uint8_t>& in, int& samplingThreshol
         if (!m.ParseFromArray(in.data(), static_cast<int>(in.size()))) return false;
         if (!m.has_sampling_threshold()) return false;
         samplingThreshold = static_cast<int>(m.sampling_threshold());
+        return true;
+    }
+#endif
+#ifdef LIBE3_ENABLE_JSON
+    if (enc == libe3::EncodingFormat::JSON) {
+        nlohmann::json j;
+        if (!bytes_to_json(in, j) || !j.contains("samplingThreshold")) return false;
+        samplingThreshold = j["samplingThreshold"].get<int>();
         return true;
     }
 #endif
@@ -135,6 +183,14 @@ bool encode_simple_control(int samplingThreshold, std::vector<uint8_t>& out,
         return true;
     }
 #endif
+#ifdef LIBE3_ENABLE_JSON
+    if (enc == libe3::EncodingFormat::JSON) {
+        nlohmann::json j;
+        j["samplingThreshold"] = samplingThreshold;
+        json_to_bytes(j, out);
+        return true;
+    }
+#endif
     Simple_Control_t sc;
     memset(&sc, 0, sizeof(sc));
     sc.samplingThreshold = (long *)malloc(sizeof(long));
@@ -161,6 +217,14 @@ bool encode_ran_function_data(const std::string name, std::vector<uint8_t>& out,
         std::string s;
         if (!m.SerializeToString(&s)) return false;
         out.assign(s.begin(), s.end());
+        return true;
+    }
+#endif
+#ifdef LIBE3_ENABLE_JSON
+    if (enc == libe3::EncodingFormat::JSON) {
+        nlohmann::json j;
+        j["name"] = name;
+        json_to_bytes(j, out);
         return true;
     }
 #endif
@@ -196,6 +260,14 @@ bool decode_simple_dapp_report(const std::vector<uint8_t>& in, SimpleDAppReport&
         return true;
     }
 #endif
+#ifdef LIBE3_ENABLE_JSON
+    if (enc == libe3::EncodingFormat::JSON) {
+        nlohmann::json j;
+        if (!bytes_to_json(in, j) || !j.contains("bin1")) return false;
+        out.bin1 = j["bin1"].get<int>();
+        return true;
+    }
+#endif
     Simple_DAppReport_t* rep = nullptr;
     asn_dec_rval_t dr = aper_decode(NULL, &asn_DEF_Simple_DAppReport, (void**)&rep, in.data(), in.size(), 0, 0);
     if (dr.code != RC_OK || !rep) return false;
@@ -214,6 +286,14 @@ bool encode_simple_config_control(const SimpleConfigControl& in, std::vector<uin
         std::string s;
         if (!m.SerializeToString(&s)) return false;
         out.assign(s.begin(), s.end());
+        return true;
+    }
+#endif
+#ifdef LIBE3_ENABLE_JSON
+    if (enc == libe3::EncodingFormat::JSON) {
+        nlohmann::json j;
+        j["enable"] = in.enable;
+        json_to_bytes(j, out);
         return true;
     }
 #endif
@@ -239,6 +319,14 @@ bool decode_simple_config_control(const std::vector<uint8_t>& in, SimpleConfigCo
         smpb::SimpleConfigControl m;
         if (!m.ParseFromArray(in.data(), static_cast<int>(in.size()))) return false;
         out.enable = m.enable();
+        return true;
+    }
+#endif
+#ifdef LIBE3_ENABLE_JSON
+    if (enc == libe3::EncodingFormat::JSON) {
+        nlohmann::json j;
+        if (!bytes_to_json(in, j) || !j.contains("enable")) return false;
+        out.enable = j["enable"].get<bool>();
         return true;
     }
 #endif
