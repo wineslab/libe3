@@ -4,9 +4,10 @@
  *
  * The Service Model payload encoding is independent of the E3AP transport
  * encoding, but the example selects it from the same EncodingFormat so a run
- * started with `-e protobuf` is protobuf end-to-end (envelope and SM payload).
- * The protobuf branch is only available when libe3 was built with
- * LIBE3_ENABLE_PROTOBUF; otherwise these helpers use ASN.1 APER.
+ * started with `-e json` or `-e protobuf` uses that encoding end-to-end
+ * (envelope and SM payload). The JSON and protobuf branches are only
+ * available when libe3 was built with LIBE3_ENABLE_JSON /
+ * LIBE3_ENABLE_PROTOBUF respectively; otherwise these helpers use ASN.1 APER.
  */
 #pragma once
 
