@@ -10,6 +10,7 @@
 #include "posix_connector.hpp"
 #include "libe3/logger.hpp"
 #include <sys/socket.h>
+#include <sys/uio.h>
 #include <sys/un.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
@@ -695,31 +696,44 @@ void PosixE3Connector::dispose() {
 }
 
 int PosixE3Connector::send_in_chunks(int sockfd, const uint8_t* buffer, size_t buffer_size) {
-    // Send the buffer size first (4 bytes, network byte order)
+    // Coalesce the 4-byte length prefix (network byte order) and the payload
+    // into a single writev() so each message costs one syscall and one wire
+    // segment instead of two. The old separate send() for the prefix produced
+    // a tiny segment per message, which interacted badly with Nagle-style
+    // bundling (see set_nodelay) and doubled the syscall cost of the data path.
     uint32_t network_order_size = htonl(static_cast<uint32_t>(buffer_size));
-    ssize_t sent = ::send(sockfd, &network_order_size, sizeof(network_order_size), 0);
-    if (sent != sizeof(network_order_size)) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to send buffer size: " << strerror(errno);
-        return -1;
-    }
-    
+    struct iovec iov[2];
+    iov[0].iov_base = &network_order_size;
+    iov[0].iov_len = sizeof(network_order_size);
+    iov[1].iov_base = const_cast<uint8_t*>(buffer);
+    iov[1].iov_len = buffer_size;
+
+    size_t total_len = sizeof(network_order_size) + buffer_size;
     size_t total_sent = 0;
-    while (total_sent < buffer_size) {
-        ssize_t bytes_to_send = static_cast<ssize_t>(std::min(static_cast<size_t>(CHUNK_SIZE), buffer_size - total_sent));
-        
-        ssize_t chunk_sent = 0;
-        while (chunk_sent < bytes_to_send) {
-            ssize_t sent_chunk = ::send(sockfd, buffer + total_sent + chunk_sent, 
-                                       static_cast<size_t>(bytes_to_send - chunk_sent), 0);
-            if (sent_chunk == -1) {
-                E3_LOG_ERROR(LOG_TAG) << "Failed to send data: " << strerror(errno);
-                return -1;
-            }
-            chunk_sent += sent_chunk;
+    while (total_sent < total_len) {
+        ssize_t sent;
+        if (total_sent < sizeof(network_order_size)) {
+            // First pass (or short write inside the prefix): send prefix +
+            // payload together, skipping whatever already went out.
+            struct iovec cur[2];
+            cur[0].iov_base = reinterpret_cast<uint8_t*>(&network_order_size) + total_sent;
+            cur[0].iov_len = sizeof(network_order_size) - total_sent;
+            cur[1] = iov[1];
+            sent = ::writev(sockfd, cur, 2);
+        } else {
+            size_t payload_sent = total_sent - sizeof(network_order_size);
+            size_t to_send = std::min(static_cast<size_t>(CHUNK_SIZE),
+                                      buffer_size - payload_sent);
+            sent = ::send(sockfd, buffer + payload_sent, to_send, 0);
         }
-        total_sent += static_cast<size_t>(chunk_sent);
+        if (sent < 0) {
+            if (errno == EINTR) continue;
+            E3_LOG_ERROR(LOG_TAG) << "Failed to send data: " << strerror(errno);
+            return -1;
+        }
+        total_sent += static_cast<size_t>(sent);
     }
-    
+
     return 0;
 }
 
