@@ -609,6 +609,11 @@ void PosixE3Connector::shutdown() {
     if (inbound_socket_ >= 0) {
         ::shutdown(inbound_socket_, SHUT_RDWR);
     }
+    // The outbound listener was missing here, so a RAN whose outbound
+    // accept() was still waiting for a dApp could never be joined by stop().
+    if (outbound_socket_ >= 0) {
+        ::shutdown(outbound_socket_, SHUT_RDWR);
+    }
 }
 
 void PosixE3Connector::dispose() {
