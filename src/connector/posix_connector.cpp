@@ -13,6 +13,7 @@
 #include <sys/un.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <netinet/sctp.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -42,6 +43,29 @@ int wait_for_socket(int sockfd, int timeout_ms) {
     pfd.events = POLLIN;
     pfd.revents = 0;
     return poll(&pfd, 1, timeout_ms);
+}
+
+/**
+ * @brief Disable Nagle-style segment bundling on a connected data socket.
+ *
+ * Without this every framed message (small length prefix + payload) stalls
+ * roughly one RTT waiting for the previous segment's SACK/ACK: measured as a
+ * hard ~214 msg/s ceiling on SCTP regardless of offered rate. Real-time
+ * control-loop traffic must be flushed per message, so NODELAY is set on
+ * every accepted and connected TCP/SCTP data socket (Linux does not reliably
+ * inherit it from the listener). No-op for UNIX-domain (IPC) sockets.
+ */
+void set_nodelay(int sockfd, E3TransportLayer transport) {
+    int one = 1;
+    int ret = 0;
+    if (transport == E3TransportLayer::TCP) {
+        ret = setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+    } else if (transport == E3TransportLayer::SCTP) {
+        ret = setsockopt(sockfd, IPPROTO_SCTP, SCTP_NODELAY, &one, sizeof(one));
+    }
+    if (ret != 0) {
+        E3_LOG_WARN(LOG_TAG) << "Failed to set NODELAY: " << strerror(errno);
+    }
 }
 }
 
@@ -194,7 +218,9 @@ int PosixE3Connector::recv_setup_request(std::vector<uint8_t>& buffer) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to accept setup connection: " << strerror(errno);
         return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
     }
-    
+    set_nodelay(setup_connection_socket_, transport_layer_);
+
+
     buffer.resize(DEFAULT_BUFFER_SIZE);
     ssize_t ret = recv(setup_connection_socket_, buffer.data(), buffer.size(), 0);
     if (ret < 0) {
@@ -318,7 +344,8 @@ ErrorCode PosixE3Connector::setup_inbound_connection() {
         E3_LOG_ERROR(LOG_TAG) << "Failed to accept inbound connection: " << strerror(errno);
         return ErrorCode::CONNECTION_FAILED;
     }
-    
+    set_nodelay(inbound_connection_socket_, transport_layer_);
+
     E3_LOG_INFO(LOG_TAG) << "Inbound connection established";
     return ErrorCode::SUCCESS;
 }
@@ -432,7 +459,8 @@ ErrorCode PosixE3Connector::setup_outbound_connection() {
         E3_LOG_ERROR(LOG_TAG) << "Failed to accept outbound connection: " << strerror(errno);
         return ErrorCode::CONNECTION_FAILED;
     }
-    
+    set_nodelay(outbound_connection_socket_, transport_layer_);
+
     E3_LOG_INFO(LOG_TAG) << "Outbound connection established";
     return ErrorCode::SUCCESS;
 }
@@ -508,6 +536,7 @@ int posix_connect_for(E3TransportLayer transport,
         close(sock);
         return -1;
     }
+    set_nodelay(sock, transport);
     return sock;
 }
 }  // anonymous namespace
