@@ -119,9 +119,25 @@ private:
     libe3::EncodingFormat encoding_{libe3::EncodingFormat::ASN1};
 
     void worker_loop() {
+        // Compensated pacing: sleep to an absolute monotonic deadline that
+        // advances by exactly one period per cycle, so the offered rate is
+        // 1/period regardless of how long the cycle's own work (encode +
+        // emit) takes. A plain sleep_for(period) makes each cycle cost
+        // period + work, which capped the offered rate well below the
+        // configured one (~6.7 kHz instead of 10 kHz at a 100 us period).
+        // If the loop falls behind by more than one period (scheduling
+        // stall), the deadline is re-anchored instead of bursting to catch
+        // up, so the instantaneous rate never exceeds the configured one.
+        auto next = std::chrono::steady_clock::now();
         while (running_) {
             if (period_us_ > 0) {
-                std::this_thread::sleep_for(std::chrono::microseconds(period_us_));
+                next += std::chrono::microseconds(period_us_);
+                const auto now = std::chrono::steady_clock::now();
+                if (next > now) {
+                    std::this_thread::sleep_until(next);
+                } else {
+                    next = now;  // behind schedule: re-anchor, don't burst
+                }
             }
             if (!running_) {
                 break;
