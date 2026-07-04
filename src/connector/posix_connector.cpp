@@ -19,6 +19,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <grp.h>
+#include <algorithm>
 #include <cstring>
 #include <cerrno>
 #include <poll.h>
@@ -67,6 +68,30 @@ void set_nodelay(int sockfd, E3TransportLayer transport) {
     if (ret != 0) {
         E3_LOG_WARN(LOG_TAG) << "Failed to set NODELAY: " << strerror(errno);
     }
+}
+
+/**
+ * @brief Accept every connection currently pending on a listener.
+ *
+ * Non-blocking (0-timeout poll before each accept). Each accepted peer
+ * socket gets NODELAY and is appended to @p peers. Returns the number of
+ * peers accepted in this call.
+ */
+int drain_accept(int listener, E3TransportLayer transport,
+                 std::vector<int>& peers, const char* label) {
+    int accepted = 0;
+    while (listener >= 0 && wait_for_socket(listener, 0) == 1) {
+        int fd = accept(listener, nullptr, nullptr);
+        if (fd < 0) {
+            break;  // EAGAIN/EINTR/shutdown: nothing more to accept now
+        }
+        set_nodelay(fd, transport);
+        peers.push_back(fd);
+        ++accepted;
+        E3_LOG_INFO(LOG_TAG) << label << " peer connected ("
+                             << peers.size() << " total)";
+    }
+    return accepted;
 }
 }
 
@@ -312,55 +337,53 @@ ErrorCode PosixE3Connector::setup_inbound_connection() {
     }
     
     inbound_socket_ = sock;
-    
-    // Wait for incoming connection with timeout loop
-    // This loop allows periodic checks during shutdown
-    while (!shutdown_requested_.load()) {
-        int poll_ret = wait_for_socket(inbound_socket_, POLL_TIMEOUT_MS);
-        if (poll_ret < 0) {
-            if (errno == EINTR || shutdown_requested_.load()) {
-                break;  // Interrupted or shutdown requested
-            }
-            E3_LOG_ERROR(LOG_TAG) << "Poll failed on inbound socket: " << strerror(errno);
-            return ErrorCode::CONNECTION_FAILED;
-        }
-        if (poll_ret == 0) {
-            // Timeout - check shutdown flag and continue waiting
-            continue;
-        }
-        break;  // Socket is ready
-    }
-    
-    if (shutdown_requested_.load()) {
-        E3_LOG_INFO(LOG_TAG) << "Inbound connection setup cancelled by shutdown";
-        return ErrorCode::CANCELLED;
-    }
-    
-    // Accept connection
-    inbound_connection_socket_ = accept(inbound_socket_, nullptr, nullptr);
-    if (inbound_connection_socket_ < 0) {
-        if (shutdown_requested_.load()) {
-            return ErrorCode::CANCELLED;
-        }
-        E3_LOG_ERROR(LOG_TAG) << "Failed to accept inbound connection: " << strerror(errno);
-        return ErrorCode::CONNECTION_FAILED;
-    }
-    set_nodelay(inbound_connection_socket_, transport_layer_);
 
-    E3_LOG_INFO(LOG_TAG) << "Inbound connection established";
+    // Multi-peer: do not block waiting for the first dApp here. receive()
+    // polls the listener alongside every accepted peer socket, so peers can
+    // attach (and re-attach) at any point in the connector's lifetime.
+    E3_LOG_INFO(LOG_TAG) << "Inbound listener ready (multi-peer)";
     return ErrorCode::SUCCESS;
 }
 
 int PosixE3Connector::receive(std::vector<uint8_t>& buffer) {
-    if (inbound_connection_socket_ < 0) {
+    // On the dApp role our peer (RAN) uses send() = send_in_chunks() which
+    // emits a 4-byte length-prefix frame, so we decode it accordingly. The
+    // dApp keeps its original single-socket path.
+    if (role_ == E3Role::DAPP) {
+        if (inbound_connection_socket_ < 0) {
+            return static_cast<int>(ErrorCode::NOT_CONNECTED);
+        }
+        int poll_ret = wait_for_socket(inbound_connection_socket_, POLL_TIMEOUT_MS);
+        if (poll_ret == 0) {
+            return 0;  // Timeout - allow shutdown check
+        }
+        if (poll_ret < 0) {
+            if (errno == EINTR) {
+                return 0;  // Interrupted, allow shutdown check
+            }
+            E3_LOG_ERROR(LOG_TAG) << "Poll failed on receive: " << strerror(errno);
+            return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
+        }
+        return recv_with_size(inbound_connection_socket_, buffer);
+    }
+
+    // RAN role, multi-peer: poll the listener (new peers) plus every
+    // accepted subscriber socket. Raw (unframed) recv per peer is preserved
+    // for compatibility with the Python dApp framework's framing convention.
+    if (inbound_socket_ < 0) {
         return static_cast<int>(ErrorCode::NOT_CONNECTED);
     }
 
-    // Wait for data with timeout
-    int poll_ret = wait_for_socket(inbound_connection_socket_, POLL_TIMEOUT_MS);
+    std::vector<struct pollfd> pfds;
+    pfds.reserve(1 + inbound_peer_sockets_.size());
+    pfds.push_back({inbound_socket_, POLLIN, 0});
+    for (int fd : inbound_peer_sockets_) {
+        pfds.push_back({fd, POLLIN, 0});
+    }
+
+    int poll_ret = poll(pfds.data(), pfds.size(), POLL_TIMEOUT_MS);
     if (poll_ret == 0) {
-        // Timeout - return 0 to allow shutdown check
-        return 0;
+        return 0;  // Timeout - allow shutdown check
     }
     if (poll_ret < 0) {
         if (errno == EINTR) {
@@ -370,27 +393,38 @@ int PosixE3Connector::receive(std::vector<uint8_t>& buffer) {
         return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
     }
 
-    // On the dApp role our peer (RAN) uses send() = send_in_chunks() which
-    // emits a 4-byte length-prefix frame, so we decode it accordingly. On
-    // the RAN role we preserve the existing raw recv behaviour for
-    // compatibility with the Python spear-dApp's framing convention.
-    if (role_ == E3Role::DAPP) {
-        return recv_with_size(inbound_connection_socket_, buffer);
+    if (pfds[0].revents & POLLIN) {
+        drain_accept(inbound_socket_, transport_layer_, inbound_peer_sockets_,
+                     "Inbound (subscriber)");
     }
 
-    buffer.resize(DEFAULT_BUFFER_SIZE);
-    ssize_t ret = recv(inbound_connection_socket_, buffer.data(), buffer.size(), 0);
-    if (ret < 0) {
-        if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) {
-            return 0;  // Allow shutdown check
+    // Read from the first ready peer; remaining ready peers stay readable
+    // and are picked up on the next call (the inbound loop calls receive()
+    // continuously).
+    for (size_t i = 1; i < pfds.size(); ++i) {
+        if (!(pfds[i].revents & (POLLIN | POLLHUP | POLLERR))) {
+            continue;
         }
-        E3_LOG_ERROR(LOG_TAG) << "Failed to receive: " << strerror(errno);
-        return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
+        int fd = pfds[i].fd;
+        buffer.resize(DEFAULT_BUFFER_SIZE);
+        ssize_t ret = recv(fd, buffer.data(), buffer.size(), 0);
+        if (ret > 0) {
+            buffer.resize(static_cast<size_t>(ret));
+            E3_LOG_TRACE(LOG_TAG) << "Received: " << ret << " bytes";
+            return static_cast<int>(ret);
+        }
+        if (ret == 0 || (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK)) {
+            // Peer closed (or hard error): drop it and keep serving the rest.
+            close(fd);
+            inbound_peer_sockets_.erase(
+                std::remove(inbound_peer_sockets_.begin(),
+                            inbound_peer_sockets_.end(), fd),
+                inbound_peer_sockets_.end());
+            E3_LOG_INFO(LOG_TAG) << "Inbound (subscriber) peer disconnected ("
+                                 << inbound_peer_sockets_.size() << " remain)";
+        }
     }
-
-    buffer.resize(static_cast<size_t>(ret));
-    E3_LOG_TRACE(LOG_TAG) << "Received: " << ret << " bytes";
-    return static_cast<int>(ret);
+    return 0;
 }
 
 ErrorCode PosixE3Connector::setup_outbound_connection() {
@@ -453,28 +487,21 @@ ErrorCode PosixE3Connector::setup_outbound_connection() {
     }
     
     outbound_socket_ = sock;
-    
-    // Accept connection (blocking)
-    outbound_connection_socket_ = accept(outbound_socket_, nullptr, nullptr);
-    if (outbound_connection_socket_ < 0) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to accept outbound connection: " << strerror(errno);
-        return ErrorCode::CONNECTION_FAILED;
-    }
-    set_nodelay(outbound_connection_socket_, transport_layer_);
 
-    E3_LOG_INFO(LOG_TAG) << "Outbound connection established";
+    // Multi-peer: no blocking accept here. send() drains the listener before
+    // each broadcast, so peers can attach at any time; with no peer attached
+    // a send is dropped, mirroring ZMQ PUB semantics with no subscriber.
+    E3_LOG_INFO(LOG_TAG) << "Outbound listener ready (multi-peer)";
     return ErrorCode::SUCCESS;
 }
 
 ErrorCode PosixE3Connector::send(const std::vector<uint8_t>& data) {
-    if (outbound_connection_socket_ < 0) {
-        return ErrorCode::NOT_CONNECTED;
-    }
-
     // dApp role sends to RAN's receive() which uses raw recv. Use a raw
-    // send to match. RAN role keeps the existing framed send so it stays
-    // wire-compatible with the Python spear-dApp's recv_in_chunks().
+    // send to match. The dApp keeps its original single-socket path.
     if (role_ == E3Role::DAPP) {
+        if (outbound_connection_socket_ < 0) {
+            return ErrorCode::NOT_CONNECTED;
+        }
         ssize_t sent = ::send(outbound_connection_socket_, data.data(), data.size(), 0);
         if (sent < 0 || static_cast<size_t>(sent) != data.size()) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to send dApp outbound: " << strerror(errno);
@@ -484,12 +511,36 @@ ErrorCode PosixE3Connector::send(const std::vector<uint8_t>& data) {
         return ErrorCode::SUCCESS;
     }
 
-    int ret = send_in_chunks(outbound_connection_socket_, data.data(), data.size());
-    if (ret < 0) {
-        return ErrorCode::TRANSPORT_ERROR;
+    // RAN role, multi-peer: accept any newly connected peers, then broadcast
+    // the framed message to all of them. Delivery mirrors ZMQ PUB/SUB: every
+    // peer gets every message and each dApp filters by its own identifier;
+    // with no peer attached the message is dropped (PUB with no subscriber).
+    if (outbound_socket_ < 0) {
+        return ErrorCode::NOT_CONNECTED;
+    }
+    drain_accept(outbound_socket_, transport_layer_, outbound_peer_sockets_,
+                 "Outbound (indication)");
+
+    bool any_failed = false;
+    for (auto it = outbound_peer_sockets_.begin();
+         it != outbound_peer_sockets_.end();) {
+        if (send_in_chunks(*it, data.data(), data.size()) < 0) {
+            // Dead peer: drop it and keep serving the rest.
+            close(*it);
+            it = outbound_peer_sockets_.erase(it);
+            any_failed = true;
+            E3_LOG_INFO(LOG_TAG) << "Outbound (indication) peer disconnected ("
+                                 << outbound_peer_sockets_.size() << " remain)";
+        } else {
+            ++it;
+        }
     }
 
-    E3_LOG_TRACE(LOG_TAG) << "Sent: " << data.size() << " bytes";
+    if (any_failed && outbound_peer_sockets_.empty()) {
+        return ErrorCode::TRANSPORT_ERROR;
+    }
+    E3_LOG_TRACE(LOG_TAG) << "Sent: " << data.size() << " bytes to "
+                          << outbound_peer_sockets_.size() << " peer(s)";
     return ErrorCode::SUCCESS;
 }
 
@@ -660,7 +711,16 @@ void PosixE3Connector::dispose() {
     if (outbound_connection_socket_ != UNUSED_SOCKET && outbound_connection_socket_ >= 0) {
         close(outbound_connection_socket_);
     }
-    
+
+    for (int fd : inbound_peer_sockets_) {
+        close(fd);
+    }
+    inbound_peer_sockets_.clear();
+    for (int fd : outbound_peer_sockets_) {
+        close(fd);
+    }
+    outbound_peer_sockets_.clear();
+
     if (inbound_socket_ >= 0) {
         close(inbound_socket_);
     }

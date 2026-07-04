@@ -14,6 +14,10 @@
  * is the same property that matters when each E3Agent connects to a
  * different remote RAN.
  *
+ * The scenario runs over BOTH link layers: ZMQ (PUB/SUB broadcast) and
+ * POSIX (multi-peer accept loops + broadcast fan-out), which must deliver
+ * the same no-crosstalk semantics.
+ *
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -120,16 +124,15 @@ private:
     std::thread worker_;
 };
 
-}  // namespace
-
-TEST(multi_peer_two_dapps_distinct_rfs_no_crosstalk) {
+// Shared scenario body, parametrized on the link layer.
+void run_multi_peer_two_dapps(E3LinkLayer link) {
     const std::string dir = make_tmpdir();
     const auto ep = make_endpoints(dir);
 
     E3Config ran_cfg;
     ran_cfg.role = E3Role::RAN;
     ran_cfg.ran_identifier = "test-ran";
-    ran_cfg.link_layer = E3LinkLayer::ZMQ;
+    ran_cfg.link_layer = link;
     ran_cfg.transport_layer = E3TransportLayer::IPC;
     ran_cfg.encoding = EncodingFormat::ASN1;
     ran_cfg.log_level = 0;
@@ -201,7 +204,7 @@ TEST(multi_peer_two_dapps_distinct_rfs_no_crosstalk) {
     ASSERT_TRUE(dapp_b.dapp_id().has_value());
     ASSERT_NE(*dapp_a.dapp_id(), *dapp_b.dapp_id());
 
-    std::this_thread::sleep_for(500ms);  // ZMQ PUB/SUB settle
+    std::this_thread::sleep_for(500ms);  // PUB/SUB (or accept-loop) settle
 
     // dApp A subscribes to rf=1; dApp B subscribes to rf=2.
     ASSERT_TRUE(dapp_a.subscribe(1, {1}, {1}) == ErrorCode::SUCCESS);
@@ -241,6 +244,16 @@ TEST(multi_peer_two_dapps_distinct_rfs_no_crosstalk) {
     dapp_a.stop();
     dapp_b.stop();
     ran.stop();
+}
+
+}  // namespace
+
+TEST(multi_peer_two_dapps_distinct_rfs_no_crosstalk_zmq) {
+    run_multi_peer_two_dapps(E3LinkLayer::ZMQ);
+}
+
+TEST(multi_peer_two_dapps_distinct_rfs_no_crosstalk_posix) {
+    run_multi_peer_two_dapps(E3LinkLayer::POSIX);
 }
 
 int main() {
