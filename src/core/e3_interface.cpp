@@ -28,7 +28,6 @@ namespace libe3 {
 
 namespace {
 constexpr const char* LOG_TAG = "E3Iface";
-constexpr auto SM_POLL_INTERVAL = std::chrono::milliseconds(10);
 
 /**
  * @brief Apply CPU-affinity and niceness to the calling thread.
@@ -216,8 +215,8 @@ ErrorCode E3Interface::start() {
 
     state_.store(AgentState::CONNECTED);
 
-    // Start threads. RAN runs setup+inbound+outbound+sm_data; dApp runs
-    // setup+inbound+outbound (no sm_data — dApps don't host SMs).
+    // Start threads. RAN runs setup+inbound+outbound plus a report worker; dApp
+    // runs setup+inbound+outbound (dApps host no SMs and receive no reports).
     if (config_.role == E3Role::RAN) {
         setup_thread_ = std::make_unique<std::thread>(&E3Interface::setup_loop_ran, this);
         inbound_thread_ = std::make_unique<std::thread>(&E3Interface::inbound_loop_ran, this);
@@ -270,9 +269,6 @@ void E3Interface::stop() {
     }
     if (outbound_thread_ && outbound_thread_->joinable()) {
         outbound_thread_->join();
-    }
-    if (sm_data_thread_ && sm_data_thread_->joinable()) {
-        sm_data_thread_->join();
     }
     if (report_worker_thread_ && report_worker_thread_->joinable()) {
         report_worker_thread_->join();
@@ -549,47 +545,6 @@ void E3Interface::report_worker_loop() {
     }
 
     E3_LOG_INFO(LOG_TAG) << "Report worker loop stopped";
-}
-
-void E3Interface::sm_data_handler_loop() {
-    E3_LOG_INFO(LOG_TAG) << "SM data handler started";
-    
-    while (!should_stop_.load()) {
-        bool data_processed = false;
-        
-        // Get active RAN functions
-        auto ran_functions = subscription_manager_->get_active_ran_functions();
-        
-        if (ran_functions.empty()) {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            continue;
-        }
-        
-        for (uint32_t ran_func : ran_functions) {
-            // Get subscribers for this RAN function
-            auto subscribers = subscription_manager_->get_subscribed_dapps(ran_func);
-            
-            if (subscribers.empty()) {
-                continue;
-            }
-            
-            // Get SM for this RAN function
-            ServiceModel* sm = SmRegistry::instance().get_by_ran_function(ran_func);
-            
-            if (!sm || !sm->is_running()) {
-                continue;
-            }
-            
-            // In a full implementation, we would poll the SM for indication data here
-            // For now, indication data is delivered through callbacks
-        }
-        
-        if (!data_processed) {
-            std::this_thread::sleep_for(SM_POLL_INTERVAL);
-        }
-    }
-    
-    E3_LOG_INFO(LOG_TAG) << "SM data handler stopped";
 }
 
 // =========================================================================
