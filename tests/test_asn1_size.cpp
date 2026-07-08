@@ -189,6 +189,42 @@ TEST(Asn1Size_DAppReport_roundTrip_preservesPayload) {
 }
 
 /**
+ * Encode → decode round-trip of a SubscriptionRequest: the OPTIONAL
+ * subscriptionTime and periodicity members must survive.
+ */
+TEST(Asn1Size_SubscriptionRequest_roundTrip_preservesOptionals) {
+    auto enc = make_encoder();
+
+    Pdu pdu(PduType::SUBSCRIPTION_REQUEST);
+    pdu.message_id = 7;
+    SubscriptionRequest req;
+    req.dapp_identifier = 42;
+    req.ran_function_identifier = 2;
+    req.telemetry_identifier_list = {1, 2, 3};
+    req.control_identifier_list = {1};
+    req.subscription_time = 60;
+    req.periodicity = 500;
+    pdu.choice = req;
+
+    auto encoded = enc->encode(pdu);
+    ASSERT_TRUE(encoded.has_value());
+
+    auto decoded = enc->decode(encoded->buffer.data(), encoded->buffer.size());
+    ASSERT_TRUE(decoded.has_value());
+    ASSERT_EQ(static_cast<int>(decoded->type),
+              static_cast<int>(PduType::SUBSCRIPTION_REQUEST));
+
+    auto* out = std::get_if<SubscriptionRequest>(&decoded->choice);
+    ASSERT_TRUE(out != nullptr);
+    ASSERT_EQ(out->dapp_identifier, 42u);
+    ASSERT_EQ(out->ran_function_identifier, 2u);
+    ASSERT_TRUE(out->subscription_time.has_value());
+    ASSERT_EQ(out->subscription_time.value(), 60u);
+    ASSERT_TRUE(out->periodicity.has_value());
+    ASSERT_EQ(out->periodicity.value(), 500u);
+}
+
+/**
  * Encoded size grows linearly with payload size: the delta between
  * small-payload and large-payload encodings tracks the payload delta
  * plus the fixed envelope.
