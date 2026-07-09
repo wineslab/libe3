@@ -4,5 +4,6 @@ var searchData=
   ['pdu_5ftype_5fto_5fstring_1',['pdu_type_to_string',['../namespacelibe3.html#a635f33e375e8c160ecd82d0759742300',1,'libe3']]],
   ['pop_2',['pop',['../classlibe3_1_1LockFreeQueue.html#ae19091d1178d9b1531a8c894fb3456a6',1,'libe3::LockFreeQueue::pop()'],['../classlibe3_1_1LockFreeQueue.html#a7bde5e907a5c539c93acdb4d4b8f65bf',1,'libe3::LockFreeQueue::pop(std::chrono::milliseconds timeout)']]],
   ['posixe3connector_3',['PosixE3Connector',['../classlibe3_1_1PosixE3Connector.html#aa615ce435e73e3f417376560be582d7f',1,'libe3::PosixE3Connector']]],
-  ['push_4',['push',['../classlibe3_1_1LockFreeQueue.html#a4f9321c30d18f2a07b65f4af73cd4e88',1,'libe3::LockFreeQueue']]]
+  ['protobufe3encoder_4',['ProtobufE3Encoder',['../classlibe3_1_1ProtobufE3Encoder.html#a17a684d817090cb367a91a62292b2c38',1,'libe3::ProtobufE3Encoder']]],
+  ['push_5',['push',['../classlibe3_1_1LockFreeQueue.html#a4f9321c30d18f2a07b65f4af73cd4e88',1,'libe3::LockFreeQueue']]]
 ];

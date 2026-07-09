@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.6</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.7</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -91,6 +91,7 @@ $(document).ready(function(){initNavTree('namespacelibe3.html',''); initResizabl
 
 <div class="header">
   <div class="summary">
+<a href="#namespaces">Namespaces</a> &#124;
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
 <a href="#enum-members">Enumerations</a> &#124;
@@ -100,6 +101,11 @@ $(document).ready(function(){initNavTree('namespacelibe3.html',''); initResizabl
 </div><!--header-->
 <div class="contents">
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespacelibe3_1_1e3ap" id="r_namespacelibe3_1_1e3ap"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3_1_1e3ap.html">e3ap</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1Asn1E3Encoder.html">Asn1E3Encoder</a></td></tr>
@@ -160,6 +166,9 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1PosixE3Connector.html">PosixE3Connector</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">POSIX socket-based E3 connector.  <a href="classlibe3_1_1PosixE3Connector.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1ProtobufE3Encoder.html">ProtobufE3Encoder</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Protocol Buffers encoder implementation.  <a href="classlibe3_1_1ProtobufE3Encoder.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1RanFunctionDef.html">RanFunctionDef</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">RAN Function Definition for Setup Response.  <a href="structlibe3_1_1RanFunctionDef.html#details">More...</a><br /></td></tr>
@@ -264,6 +273,7 @@ Enumerations</h2></td></tr>
 <tr class="separator:a509338e1414d84a610f21816d04940a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f13391272eb5ca90bf9d7f86b841444" id="r_a7f13391272eb5ca90bf9d7f86b841444"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444">EncodingFormat</a> : uint8_t { <a class="el" href="namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444a4638457c14ad3dac251404cf286de87c">ASN1</a> = 0
 , <a class="el" href="namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8">JSON</a> = 1
+, <a class="el" href="namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444ad938347008a2e932aaa4a568a3c3f2e7">PROTOBUF</a> = 2
  }</td></tr>
 <tr class="memdesc:a7f13391272eb5ca90bf9d7f86b841444"><td class="mdescLeft">&#160;</td><td class="mdescRight">E3AP encoding formats supported by the library.  <a href="namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444">More...</a><br /></td></tr>
 <tr class="separator:a7f13391272eb5ca90bf9d7f86b841444"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -490,7 +500,7 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00046">46</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00048">48</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
 
 </div>
 </div>
@@ -524,7 +534,7 @@ template&lt;typename T &gt; </div>
 
 <p>Generic E3AP PDU using std::variant for type-safe union. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00294">294</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00295">295</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -652,7 +662,7 @@ template&lt;typename T &gt; </div>
 
 <p>Timestamp type using steady_clock for monotonic time. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00432">432</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00445">445</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -703,7 +713,7 @@ template&lt;typename T &gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00071">71</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00072">72</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -747,7 +757,7 @@ template&lt;typename T &gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00105">105</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00106">106</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -779,7 +789,7 @@ template&lt;typename T &gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00039">39</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00040">40</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -813,7 +823,7 @@ template&lt;typename T &gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00054">54</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00055">55</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -847,7 +857,7 @@ template&lt;typename T &gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00062">62</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00063">63</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -876,6 +886,8 @@ template&lt;typename T &gt; </div>
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a7f13391272eb5ca90bf9d7f86b841444a4638457c14ad3dac251404cf286de87c" name="a7f13391272eb5ca90bf9d7f86b841444a4638457c14ad3dac251404cf286de87c"></a>ASN1&#160;</td><td class="fielddoc"><p>ASN.1 PER encoding (standard O-RAN format) </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8" name="a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8"></a>JSON&#160;</td><td class="fielddoc"><p>JSON encoding (for development/debugging) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a7f13391272eb5ca90bf9d7f86b841444ad938347008a2e932aaa4a568a3c3f2e7" name="a7f13391272eb5ca90bf9d7f86b841444ad938347008a2e932aaa4a568a3c3f2e7"></a>PROTOBUF&#160;</td><td class="fielddoc"><p>Protocol Buffers encoding. </p>
 </td></tr>
 </table>
 
@@ -909,7 +921,7 @@ template&lt;typename T &gt; </div>
 <tr><td class="fieldname"><a id="a0f455c3a80f115f8aa8ad664850d6bb3a4951c208dce6a888038bdc3926e5636f" name="a0f455c3a80f115f8aa8ad664850d6bb3a4951c208dce6a888038bdc3926e5636f"></a>LIBE3_ERROR_CODE_LIST&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00120">120</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00121">121</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -943,7 +955,7 @@ template&lt;typename T &gt; </div>
 <tr><td class="fieldname"><a id="a509338e1414d84a610f21816d04940a0a2d3e4144aa384b18849ab9a8abad74d6" name="a509338e1414d84a610f21816d04940a0a2d3e4144aa384b18849ab9a8abad74d6"></a>TRACE&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00029">29</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00031">31</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
 
 </div>
 </div>
@@ -982,7 +994,7 @@ template&lt;typename T &gt; </div>
 <tr><td class="fieldname"><a id="a675f37e2936d707807212fcd3cfa8185ae63ef0287e5a1f4b52c19f8f12b247ca" name="a675f37e2936d707807212fcd3cfa8185ae63ef0287e5a1f4b52c19f8f12b247ca"></a>MESSAGE_ACK&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00088">88</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00089">89</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1014,7 +1026,7 @@ template&lt;typename T &gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00080">80</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00081">81</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1045,7 +1057,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert ActionType to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00476">476</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00489">489</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1075,7 +1087,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert AgentState to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00529">529</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00542">542</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1228,7 +1240,7 @@ template&lt;typename T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Unique pointer to created encoder, nullptr on failure </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="encoder__factory_8cpp_source.html#l00040">40</a> of file <a class="el" href="encoder__factory_8cpp_source.html">encoder_factory.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="encoder__factory_8cpp_source.html#l00045">45</a> of file <a class="el" href="encoder__factory_8cpp_source.html">encoder_factory.cpp</a>.</p>
 
 </div>
 </div>
@@ -1258,7 +1270,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert ErrorCode to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00499">499</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00512">512</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1288,7 +1300,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert ErrorCode to string name (C++ wrapper) </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00129">129</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00130">130</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1318,7 +1330,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert E3LinkLayer to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00557">557</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00570">570</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1348,7 +1360,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert PduType to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00456">456</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00469">469</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1378,7 +1390,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert ResponseCode to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00488">488</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00501">501</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1408,7 +1420,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert E3Role to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00546">546</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00559">559</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1438,7 +1450,7 @@ template&lt;typename T &gt; </div>
 
 <p>Convert E3TransportLayer to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00568">568</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00581">581</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1574,7 +1586,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00144">144</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00145">145</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1598,7 +1610,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00147">147</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00148">148</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1622,7 +1634,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00140">140</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00141">141</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1646,7 +1658,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00141">141</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00142">142</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1670,7 +1682,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00139">139</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00140">140</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1694,7 +1706,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00143">143</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00144">144</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1718,7 +1730,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00142">142</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00143">143</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

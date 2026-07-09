@@ -10,7 +10,8 @@ var searchData=
   ['_7elogstream_7',['~LogStream',['../classlibe3_1_1LogStream.html#a2a4a53729988364f1694d1097015dc74',1,'libe3::LogStream']]],
   ['_7empmcqueue_8',['~MpmcQueue',['../classlibe3_1_1MpmcQueue.html#a7985bb0c1eb33e8dca373439a64f3444',1,'libe3::MpmcQueue']]],
   ['_7eposixe3connector_9',['~PosixE3Connector',['../classlibe3_1_1PosixE3Connector.html#a09050e9c1adc050d26d7d345e0ca130d',1,'libe3::PosixE3Connector']]],
-  ['_7eservicemodel_10',['~ServiceModel',['../classlibe3_1_1ServiceModel.html#a4e7def12f11c843da1581d69cb5d6b9b',1,'libe3::ServiceModel']]],
-  ['_7esubscriptionmanager_11',['~SubscriptionManager',['../classlibe3_1_1SubscriptionManager.html#a8a2372bc4da0b3ddac68c26634d214d7',1,'libe3::SubscriptionManager']]],
-  ['_7ezmqe3connector_12',['~ZmqE3Connector',['../classlibe3_1_1ZmqE3Connector.html#aaa68eb185549c7b2094b8cdecb813ed7',1,'libe3::ZmqE3Connector']]]
+  ['_7eprotobufe3encoder_10',['~ProtobufE3Encoder',['../classlibe3_1_1ProtobufE3Encoder.html#a63f5ae3b5b4166e7f5353f65014a560e',1,'libe3::ProtobufE3Encoder']]],
+  ['_7eservicemodel_11',['~ServiceModel',['../classlibe3_1_1ServiceModel.html#a4e7def12f11c843da1581d69cb5d6b9b',1,'libe3::ServiceModel']]],
+  ['_7esubscriptionmanager_12',['~SubscriptionManager',['../classlibe3_1_1SubscriptionManager.html#a8a2372bc4da0b3ddac68c26634d214d7',1,'libe3::SubscriptionManager']]],
+  ['_7ezmqe3connector_13',['~ZmqE3Connector',['../classlibe3_1_1ZmqE3Connector.html#aaa68eb185549c7b2094b8cdecb813ed7',1,'libe3::ZmqE3Connector']]]
 ];

@@ -21,6 +21,7 @@ var annotated_dup =
       [ "MpmcQueue", "classlibe3_1_1MpmcQueue.html", "classlibe3_1_1MpmcQueue" ],
       [ "Pdu", "structlibe3_1_1Pdu.html", "structlibe3_1_1Pdu" ],
       [ "PosixE3Connector", "classlibe3_1_1PosixE3Connector.html", "classlibe3_1_1PosixE3Connector" ],
+      [ "ProtobufE3Encoder", "classlibe3_1_1ProtobufE3Encoder.html", "classlibe3_1_1ProtobufE3Encoder" ],
       [ "RanFunctionDef", "structlibe3_1_1RanFunctionDef.html", "structlibe3_1_1RanFunctionDef" ],
       [ "RanFunctionDefinition", "structlibe3_1_1RanFunctionDefinition.html", "structlibe3_1_1RanFunctionDefinition" ],
       [ "ReleaseMessage", "structlibe3_1_1ReleaseMessage.html", "structlibe3_1_1ReleaseMessage" ],

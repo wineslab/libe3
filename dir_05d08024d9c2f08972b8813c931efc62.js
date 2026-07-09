@@ -5,5 +5,7 @@ var dir_05d08024d9c2f08972b8813c931efc62 =
     [ "e3_encoder.cpp", "e3__encoder_8cpp.html", null ],
     [ "encoder_factory.cpp", "encoder__factory_8cpp.html", "encoder__factory_8cpp" ],
     [ "json_encoder.cpp", "json__encoder_8cpp.html", null ],
-    [ "json_encoder.hpp", "json__encoder_8hpp.html", "json__encoder_8hpp" ]
+    [ "json_encoder.hpp", "json__encoder_8hpp.html", "json__encoder_8hpp" ],
+    [ "protobuf_encoder.cpp", "protobuf__encoder_8cpp.html", null ],
+    [ "protobuf_encoder.hpp", "protobuf__encoder_8hpp.html", "protobuf__encoder_8hpp" ]
 ];

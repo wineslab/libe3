@@ -52,7 +52,8 @@ var types_8hpp =
     ] ],
     [ "EncodingFormat", "types_8hpp.html#a7f13391272eb5ca90bf9d7f86b841444", [
       [ "ASN1", "types_8hpp.html#a7f13391272eb5ca90bf9d7f86b841444a4638457c14ad3dac251404cf286de87c", null ],
-      [ "JSON", "types_8hpp.html#a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8", null ]
+      [ "JSON", "types_8hpp.html#a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8", null ],
+      [ "PROTOBUF", "types_8hpp.html#a7f13391272eb5ca90bf9d7f86b841444ad938347008a2e932aaa4a568a3c3f2e7", null ]
     ] ],
     [ "ErrorCode", "types_8hpp.html#a0f455c3a80f115f8aa8ad664850d6bb3", [
       [ "X", "types_8hpp.html#a0f455c3a80f115f8aa8ad664850d6bb3ac600f554f23d57fafb04144fe3ceb5e0", null ],

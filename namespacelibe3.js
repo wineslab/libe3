@@ -1,5 +1,6 @@
 var namespacelibe3 =
 [
+    [ "e3ap", "namespacelibe3_1_1e3ap.html", "namespacelibe3_1_1e3ap" ],
     [ "Asn1E3Encoder", "classlibe3_1_1Asn1E3Encoder.html", "classlibe3_1_1Asn1E3Encoder" ],
     [ "DAppControlAction", "structlibe3_1_1DAppControlAction.html", "structlibe3_1_1DAppControlAction" ],
     [ "DAppEntry", "structlibe3_1_1DAppEntry.html", "structlibe3_1_1DAppEntry" ],
@@ -20,6 +21,7 @@ var namespacelibe3 =
     [ "MpmcQueue", "classlibe3_1_1MpmcQueue.html", "classlibe3_1_1MpmcQueue" ],
     [ "Pdu", "structlibe3_1_1Pdu.html", "structlibe3_1_1Pdu" ],
     [ "PosixE3Connector", "classlibe3_1_1PosixE3Connector.html", "classlibe3_1_1PosixE3Connector" ],
+    [ "ProtobufE3Encoder", "classlibe3_1_1ProtobufE3Encoder.html", "classlibe3_1_1ProtobufE3Encoder" ],
     [ "RanFunctionDef", "structlibe3_1_1RanFunctionDef.html", "structlibe3_1_1RanFunctionDef" ],
     [ "RanFunctionDefinition", "structlibe3_1_1RanFunctionDefinition.html", "structlibe3_1_1RanFunctionDefinition" ],
     [ "ReleaseMessage", "structlibe3_1_1ReleaseMessage.html", "structlibe3_1_1ReleaseMessage" ],
@@ -80,7 +82,8 @@ var namespacelibe3 =
     ] ],
     [ "EncodingFormat", "namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444", [
       [ "ASN1", "namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444a4638457c14ad3dac251404cf286de87c", null ],
-      [ "JSON", "namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8", null ]
+      [ "JSON", "namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8", null ],
+      [ "PROTOBUF", "namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444ad938347008a2e932aaa4a568a3c3f2e7", null ]
     ] ],
     [ "ErrorCode", "namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3", [
       [ "X", "namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3ac600f554f23d57fafb04144fe3ceb5e0", null ],

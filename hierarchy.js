@@ -15,7 +15,8 @@ var hierarchy =
     ] ],
     [ "libe3::E3Encoder", "classlibe3_1_1E3Encoder.html", [
       [ "libe3::Asn1E3Encoder", "classlibe3_1_1Asn1E3Encoder.html", null ],
-      [ "libe3::JsonE3Encoder", "classlibe3_1_1JsonE3Encoder.html", null ]
+      [ "libe3::JsonE3Encoder", "classlibe3_1_1JsonE3Encoder.html", null ],
+      [ "libe3::ProtobufE3Encoder", "classlibe3_1_1ProtobufE3Encoder.html", null ]
     ] ],
     [ "libe3::E3Interface", "classlibe3_1_1E3Interface.html", null ],
     [ "libe3::EncodedMessage", "structlibe3_1_1EncodedMessage.html", null ],

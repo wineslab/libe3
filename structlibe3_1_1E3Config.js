@@ -10,6 +10,7 @@ var structlibe3_1_1E3Config =
     [ "io_threads", "structlibe3_1_1E3Config.html#ae51015b0eff46f7c09c89e995d62b1de", null ],
     [ "link_layer", "structlibe3_1_1E3Config.html#a7b709230e627834bc85cd5cb8749c3fa", null ],
     [ "log_level", "structlibe3_1_1E3Config.html#a38f5a15184eb32679fcdaeba7f1dfaa9", null ],
+    [ "log_path", "structlibe3_1_1E3Config.html#a2520f863a22b6fc52b5390262f36c946", null ],
     [ "publisher_endpoint", "structlibe3_1_1E3Config.html#aa187882329d11f91fcbfbfcf664e76ec", null ],
     [ "publisher_port", "structlibe3_1_1E3Config.html#af70da70b2892c05d4c85f45f80246df3", null ],
     [ "ran_identifier", "structlibe3_1_1E3Config.html#ad2753835626e34f72103c1a5f6f2b198", null ],

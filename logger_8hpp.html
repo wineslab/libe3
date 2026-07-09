@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.6</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.7</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -108,6 +108,8 @@ $(document).ready(function(){initNavTree('logger_8hpp.html',''); initResizable()
 <code>#include &lt;sstream&gt;</code><br />
 <code>#include &lt;mutex&gt;</code><br />
 <code>#include &lt;cstdio&gt;</code><br />
+<code>#include &lt;cerrno&gt;</code><br />
+<code>#include &lt;cstring&gt;</code><br />
 <code>#include &lt;ctime&gt;</code><br />
 <code>#include &lt;chrono&gt;</code><br />
 </div>
@@ -197,9 +199,9 @@ Enumerations</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="classlibe3_1_1Logger.html#a8f40bcd6249ad424b8eb15e60049f65e">::libe3::Logger::instance</a>().should_log(level)) \</div>
 <div class="line">        ::libe3::LogStream(level, component)</div>
-<div class="ttc" id="aclasslibe3_1_1Logger_html_a8f40bcd6249ad424b8eb15e60049f65e"><div class="ttname"><a href="classlibe3_1_1Logger.html#a8f40bcd6249ad424b8eb15e60049f65e">libe3::Logger::instance</a></div><div class="ttdeci">static Logger &amp; instance()</div><div class="ttdoc">Get the singleton logger instance.</div><div class="ttdef"><b>Definition</b> <a href="logger_8hpp_source.html#l00056">logger.hpp:56</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1Logger_html_a8f40bcd6249ad424b8eb15e60049f65e"><div class="ttname"><a href="classlibe3_1_1Logger.html#a8f40bcd6249ad424b8eb15e60049f65e">libe3::Logger::instance</a></div><div class="ttdeci">static Logger &amp; instance()</div><div class="ttdoc">Get the singleton logger instance.</div><div class="ttdef"><b>Definition</b> <a href="logger_8hpp_source.html#l00058">logger.hpp:58</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00213">213</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00216">216</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
 
 </div>
 </div>
@@ -219,7 +221,7 @@ Enumerations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00220">220</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00223">223</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
 
 </div>
 </div>
@@ -239,7 +241,7 @@ Enumerations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00217">217</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00220">220</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
 
 </div>
 </div>
@@ -259,7 +261,7 @@ Enumerations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00219">219</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00222">222</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
 
 </div>
 </div>
@@ -279,7 +281,7 @@ Enumerations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00221">221</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00224">224</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
 
 </div>
 </div>
@@ -299,7 +301,7 @@ Enumerations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00218">218</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="logger_8hpp_source.html#l00221">221</a> of file <a class="el" href="logger_8hpp_source.html">logger.hpp</a>.</p>
 
 </div>
 </div>
