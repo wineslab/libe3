@@ -37,7 +37,7 @@ EncodeResult<EncodedMessage> E3Encoder::encode_setup_response(
     const std::optional<std::string>& e3ap_protocol_version,
     const std::optional<uint32_t>& dapp_identifier,
     const std::string& ran_identifier,
-    const std::vector<RanFunctionDef>& ran_function_list
+    const std::optional<std::vector<RanFunctionDef>>& ran_function_list
 ) {
     Pdu pdu(PduType::SETUP_RESPONSE);
     SetupResponse resp;
@@ -46,7 +46,9 @@ EncodeResult<EncodedMessage> E3Encoder::encode_setup_response(
     resp.e3ap_protocol_version = e3ap_protocol_version;
     resp.dapp_identifier = dapp_identifier;
     resp.ran_identifier = ran_identifier;
-    resp.ran_function_list = ran_function_list;
+    if (ran_function_list.has_value()) {
+        resp.ran_function_list = ran_function_list.value();
+    }
     pdu.message_id = message_id;
     pdu.choice = resp;
     return encode(pdu);

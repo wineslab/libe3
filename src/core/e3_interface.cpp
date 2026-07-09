@@ -11,6 +11,7 @@
 #include "libe3/logger.hpp"
 #include <cctype>
 #include <chrono>
+#include <cstdlib>
 #include <random>
 #include <signal.h>
 #include <string>
@@ -98,6 +99,13 @@ uint32_t E3Interface::generate_message_id() {
     thread_local std::mt19937 rng(std::random_device{}());
     std::uniform_int_distribution<uint32_t> dist(1, 1000);
     return dist(rng);
+}
+
+uint32_t E3Interface::sanitize_request_message_id(uint32_t request_id) {
+    if (request_id >= 1 && request_id <= 1000) {
+        return request_id;
+    }
+    return generate_message_id();
 }
 
 E3Interface::E3Interface(const E3Config& config)
@@ -352,26 +360,32 @@ void E3Interface::setup_loop_ran() {
 
         E3_LOG_INFO(LOG_TAG) << "Setup request received: " << ret << " bytes";
         
-        // Decode the setup request
+        // Decode the setup request. On any failure the REQ/REP exchange
+        // must still be completed (see send_negative_setup_reply) or the
+        // setup channel wedges for every subsequent dApp.
         auto decode_result = encoder_->decode(buffer.data(), static_cast<size_t>(ret));
         if (!decode_result) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to decode setup request; ret=" << ret;
+            E3_LOG_WARN(LOG_TAG) << "Undecodable setup message (" << ret
+                                 << " bytes, wrong encoding or garbage); rejecting";
+            send_negative_setup_reply(0);
             continue;
         }
-        
+
         Pdu& pdu = *decode_result;
         if (pdu.type != PduType::SETUP_REQUEST) {
-            E3_LOG_ERROR(LOG_TAG) << "Unexpected PDU type in setup: " 
-                                  << pdu_type_to_string(pdu.type);
+            E3_LOG_WARN(LOG_TAG) << "Unexpected PDU type in setup: "
+                                 << pdu_type_to_string(pdu.type) << "; rejecting";
+            send_negative_setup_reply(pdu.message_id);
             continue;
         }
-        
+
         auto* request = std::get_if<SetupRequest>(&pdu.choice);
         if (!request) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to get SetupRequest from PDU";
+            E3_LOG_WARN(LOG_TAG) << "Failed to get SetupRequest from PDU; rejecting";
+            send_negative_setup_reply(pdu.message_id);
             continue;
         }
-        
+
         handle_setup_request(*request, pdu.message_id);
     }
     
@@ -583,6 +597,7 @@ void E3Interface::sm_data_handler_loop() {
 // =========================================================================
 
 void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t request_message_id) {
+    request_message_id = sanitize_request_message_id(request_message_id);
     E3_LOG_INFO(LOG_TAG) << "Handling setup request from dApp '" << request.dapp_name 
                          << "' (version=" << request.dapp_version 
                          << ", vendor=" << request.vendor 
@@ -633,22 +648,63 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
         request_message_id,
         response_code,
         config_.e3ap_version,
-        assigned_dapp_id,  // dapp_identifier
+        // A failed registration assigns no id; engaging the optional with 0
+        // would violate E3-DAppID (1..100) at encode.
+        response_code == ResponseCode::POSITIVE
+            ? std::optional<uint32_t>(assigned_dapp_id)
+            : std::nullopt,
         config_.ran_identifier,  // ran_identifier
         ran_function_list
     );
-    
+
     if (!encode_result) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to encode setup response for request id " << request_message_id;
-        return;
+        // The peer-controlled inputs are sanitized above, so a failure here
+        // is an internal encoder or configuration bug.
+        E3_LOG_ERROR(LOG_TAG) << "Failed to encode setup response for request id "
+                              << request_message_id << "; aborting";
+        std::abort();
     }
-    
+
     ErrorCode send_result = connector_->send_response(encode_result->buffer);
     if (send_result != ErrorCode::SUCCESS) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to send setup response for request id " << request_message_id
                               << "; error=" << error_code_to_string(send_result);
     } else {
         E3_LOG_INFO(LOG_TAG) << "Sent setup response for request id " << request_message_id;
+    }
+}
+
+void E3Interface::send_negative_setup_reply(uint32_t request_id) {
+    // A bare negative SetupResponse omits every OPTIONAL field
+    // (ranFunctionList included), so with the fixed, mutually known
+    // encoding it always encodes. The mandatory fields have to satisfy
+    // their schema constraints, though: requestId is E3-MessageID
+    // INTEGER (1..1000) — an id that cannot be echoed (0 from undecodable
+    // bytes, or out of range from a peer the decoder did not constrain) is
+    // replaced with a freshly generated one — and ranIdentifier is
+    // SIZE (1..64), hence the placeholder when the config left it empty.
+    uint32_t message_id = generate_message_id();
+    request_id = sanitize_request_message_id(request_id);
+    auto encode_result = encoder_->encode_setup_response(
+        message_id,
+        request_id,
+        ResponseCode::NEGATIVE,
+        config_.e3ap_version,
+        std::nullopt,  // no dApp identifier assigned
+        config_.ran_identifier.empty() ? "unknown" : config_.ran_identifier,
+        std::nullopt   // no RAN functions advertised
+    );
+
+    if (!encode_result) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to encode negative setup response for request id "
+                              << request_id << "; setup channel may be left unusable";
+        return;
+    }
+
+    ErrorCode send_result = connector_->send_response(encode_result->buffer);
+    if (send_result != ErrorCode::SUCCESS) {
+        E3_LOG_WARN(LOG_TAG) << "Failed to send negative setup response for request id "
+                             << request_id << "; error=" << error_code_to_string(send_result);
     }
 }
 
