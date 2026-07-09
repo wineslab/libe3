@@ -269,6 +269,12 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                     static_cast<long*>(malloc(sizeof(long)));
                 *asn1_pdu->msg.choice.subscriptionRequest->subscriptionTime = req->subscription_time.value();
             }
+            // Set optional periodicity
+            if (req->periodicity.has_value()) {
+                asn1_pdu->msg.choice.subscriptionRequest->periodicity = 
+                    static_cast<long*>(malloc(sizeof(long)));
+                *asn1_pdu->msg.choice.subscriptionRequest->periodicity = req->periodicity.value();
+            }
             break;
         }
         
@@ -537,6 +543,10 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             // Decode optional subscriptionTime
             if (asn1_pdu->msg.choice.subscriptionRequest->subscriptionTime) {
                 req.subscription_time = *asn1_pdu->msg.choice.subscriptionRequest->subscriptionTime;
+            }
+            // Decode optional periodicity
+            if (asn1_pdu->msg.choice.subscriptionRequest->periodicity) {
+                req.periodicity = static_cast<uint32_t>(*asn1_pdu->msg.choice.subscriptionRequest->periodicity);
             }
             
             pdu.choice = req;
