@@ -17,7 +17,7 @@ Please note we have a code of conduct, please follow it in all your interactions
    This repository is part of a framework that includes a Python library for dApps and a fork of OpenAirInterface written in C.
    We do not accept major patches that break or reduce compatibility with the twin repository.
 4. Submitted code must have been tested and should work with all the compatible configurations of the framework.
-5. Merging should always be performed via squash commits. Pull Requests must be updated through rebasing, without duplicating commits or altering the original branch history. Merges without prior approval are not allowed, and any accidental violations will result in the deletion of the merge commit.
+5. Merging should always be performed via rebase commits. Pull Requests must be updated through rebasing, without duplicating commits or altering the original branch history. Merges without prior approval are not allowed, and any accidental violations will result in the deletion of the merge commit.
 
 ## Development Workflow
 
