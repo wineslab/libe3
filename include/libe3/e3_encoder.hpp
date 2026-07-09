@@ -98,7 +98,9 @@ public:
      * @param e3ap_protocol_version E3AP protocol version (optional)
      * @param dapp_identifier Assigned dApp identifier (optional)
      * @param ran_identifier RAN identifier
-     * @param ran_function_list List of available RAN functions (optional)
+     * @param ran_function_list List of available RAN functions (optional).
+     *        std::nullopt and an empty list both encode with the OPTIONAL
+     *        ranFunctionList absent on the wire.
      */
     EncodeResult<EncodedMessage> encode_setup_response(
         uint32_t message_id,
@@ -107,7 +109,7 @@ public:
         const std::optional<std::string>& e3ap_protocol_version = std::nullopt,
         const std::optional<uint32_t>& dapp_identifier = std::nullopt,
         const std::string& ran_identifier = "",
-        const std::vector<RanFunctionDef>& ran_function_list = {}
+        const std::optional<std::vector<RanFunctionDef>>& ran_function_list = std::nullopt
     );
 
     /**
