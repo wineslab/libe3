@@ -22,7 +22,7 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         telemetryIdentifierList SEQUENCE (SIZE (0..100)) OF INTEGER (1..100),
         controlIdentifierList   SEQUENCE (SIZE (0..100)) OF INTEGER (1..100),
         subscriptionTime        INTEGER (0..3600) OPTIONAL,
-        periodicity             INTEGER (0..1000) OPTIONAL
+        periodicity             INTEGER (0..10000000) OPTIONAL
     }
 
     E3-SubscriptionDelete ::= SEQUENCE {

@@ -225,6 +225,39 @@ TEST(Asn1Size_SubscriptionRequest_roundTrip_preservesOptionals) {
 }
 
 /**
+ * The periodicity is expressed in microseconds, so realistic values exceed
+ * 65535 (e.g. 100000 = 100 ms). They must round-trip unchanged up to the
+ * schema ceiling of 10000000.
+ */
+TEST(Asn1Size_SubscriptionRequest_roundTrip_preservesMicrosecondPeriodicity) {
+    auto enc = make_encoder();
+
+    const uint32_t microsecond_values[] = {100000u, 10000000u};
+    for (uint32_t periodicity_us : microsecond_values) {
+        Pdu pdu(PduType::SUBSCRIPTION_REQUEST);
+        pdu.message_id = 8;
+        SubscriptionRequest req;
+        req.dapp_identifier = 42;
+        req.ran_function_identifier = 2;
+        req.telemetry_identifier_list = {1};
+        req.control_identifier_list = {};
+        req.periodicity = periodicity_us;
+        pdu.choice = req;
+
+        auto encoded = enc->encode(pdu);
+        ASSERT_TRUE(encoded.has_value());
+
+        auto decoded = enc->decode(encoded->buffer.data(), encoded->buffer.size());
+        ASSERT_TRUE(decoded.has_value());
+
+        auto* out = std::get_if<SubscriptionRequest>(&decoded->choice);
+        ASSERT_TRUE(out != nullptr);
+        ASSERT_TRUE(out->periodicity.has_value());
+        ASSERT_EQ(out->periodicity.value(), periodicity_us);
+    }
+}
+
+/**
  * Encoded size grows linearly with payload size: the delta between
  * small-payload and large-payload encodings tracks the payload delta
  * plus the fixed envelope.

@@ -215,7 +215,7 @@ struct SubscriptionRequest {
     std::vector<uint32_t> telemetry_identifier_list; ///< List of telemetry identifiers
     std::vector<uint32_t> control_identifier_list;   ///< List of control identifiers
     std::optional<uint32_t> subscription_time;       ///< How long to keep the subscription (0-3600 sec)
-    std::optional<uint32_t> periodicity;             ///< Periodicity of data delivery (0-10000 microseconds)
+    std::optional<uint32_t> periodicity;             ///< Periodicity of data delivery (0-10000000 microseconds)
 };
 
 /**

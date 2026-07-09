@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://isocpp.org/)
-[![Version](https://img.shields.io/badge/version-0.0.4-green.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-0.0.7-green.svg)](VERSION)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://wineslab.github.io/libe3/)
 
 **libe3** is a standalone, vendor-neutral C++ library for implementing the E3AP (E3 Application Protocol) on **both sides of the protocol** — RAN functions (DU, CU-CP, CU-UP) and dApp clients. It provides a clean object-oriented API for both roles while hiding transport, encoding, and protocol complexity.
