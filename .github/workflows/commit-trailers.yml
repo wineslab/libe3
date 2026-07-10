@@ -1,0 +1,32 @@
+name: Commit trailers
+
+# Enforce the AI-assistant commit-trailer policy documented in CONTRIBUTING.md:
+# AI agents must not add Co-authored-by/Signed-off-by, AI assistance is disclosed
+# via an `Assisted-by: AGENT_NAME:MODEL_VERSION` trailer, and Assisted-by trailers
+# must be well formed.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-trailers:
+    name: AI-assistant trailer policy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check commit trailers
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+          else
+            base="${{ github.event.before }}"
+            head="${{ github.sha }}"
+          fi
+          python3 scripts/check_commit_trailers.py --base "$base" --head "$head"
