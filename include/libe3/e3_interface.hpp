@@ -301,6 +301,26 @@ private:
     void handle_release_message(const ReleaseMessage &release);
     void handle_dapp_disconnection(uint32_t dapp_id);
 
+    /**
+     * @brief Reply to a setup request that cannot be answered positively.
+     *
+     * The RAN side of the setup channel is a REQ/REP exchange: exactly one
+     * reply must be sent per received request before the next one can be
+     * received (a ZMQ REP socket enforces this in its state machine).
+     * Bailing out without replying (undecodable bytes, wrong PDU type)
+     * wedges the setup channel for every subsequent dApp until the agent
+     * restarts. The encoding is fixed and known a priori by both peers, so
+     * a negative SetupResponse can always be produced; the peer gets an
+     * explicit rejection instead of a silent timeout.
+     *
+     * @param request_id Message ID of the offending request, or any id that
+     *                   cannot be echoed (0 when the request bytes never
+     *                   decoded, out of E3-MessageID range otherwise) — a
+     *                   fresh id is then substituted on the wire (dApps do
+     *                   not correlate setup replies by ID).
+     */
+    void send_negative_setup_reply(uint32_t request_id);
+
     // dApp-role handlers
     void handle_setup_response(const SetupResponse& response);
     void handle_subscription_response(const SubscriptionResponse& response);
@@ -322,6 +342,17 @@ public:
      * @brief Generate message ID (1-1000, randomized)
      */
     uint32_t generate_message_id();
+
+    /**
+     * @brief Return a request id that can be echoed into a response.
+     *
+     * The decoders do not enforce integer range constraints, so a
+     * peer-supplied message id outside E3-MessageID's 1..1000 can reach
+     * the handlers; echoing it into a response would fail the encode.
+     * In-range ids pass through, anything else is replaced with a fresh
+     * generated id (dApps do not correlate setup replies by ID).
+     */
+    uint32_t sanitize_request_message_id(uint32_t request_id);
 };
 
 } // namespace libe3

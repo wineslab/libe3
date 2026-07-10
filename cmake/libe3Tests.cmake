@@ -16,6 +16,16 @@ target_include_directories(libe3_test_framework INTERFACE
 
 file(GLOB LIBE3_TEST_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "tests/*.cpp")
 
+# Tests that hardcode the ASN.1 wire format: test_asn1_size exercises the
+# APER encoder directly, and test_e2e_report_path configures its agent and
+# fake-dApp peer with EncodingFormat::ASN1. On builds with
+# LIBE3_ENABLE_ASN1=OFF the encoder factory cannot create an ASN.1 encoder,
+# so these tests can only fail; exclude them instead of weakening them.
+set(LIBE3_ASN1_ONLY_TESTS
+    asn1_size
+    e2e_report_path
+)
+
 foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
     # Derive a target name from the source file name: tests/test_foo.cpp -> test_foo
     get_filename_component(test_name ${test_src} NAME_WE)
@@ -29,6 +39,10 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
     endif()
     if(NOT LIBE3_ENABLE_PROTOBUF AND simple_name STREQUAL "protobuf_encoder")
         message(STATUS "Skipping test_protobuf_encoder: Protobuf support disabled")
+        continue()
+    endif()
+    if(NOT LIBE3_ENABLE_ASN1 AND simple_name IN_LIST LIBE3_ASN1_ONLY_TESTS)
+        message(STATUS "Skipping test_${simple_name}: ASN.1 support disabled")
         continue()
     endif()
 
