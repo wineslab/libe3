@@ -12,6 +12,7 @@
 #include <cctype>
 #include <chrono>
 #include <cstdlib>
+#include <fstream>
 #include <random>
 #include <signal.h>
 #include <string>
@@ -303,6 +304,11 @@ ErrorCode E3Interface::queue_outbound(Pdu pdu) {
     if (!response_queue_) {
         return ErrorCode::NOT_INITIALIZED;
     }
+    // Steady-clock enqueue stamp so the RAN outbound loop can attribute
+    // queue_us (enqueue -> pop) in the publisher-stage CSV.
+    pdu.enqueue_ts_ns = static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count());
     return response_queue_->push(std::move(pdu));
 }
 
@@ -499,30 +505,91 @@ void E3Interface::outbound_loop_ran() {
         return;
     }
     E3_LOG_INFO(LOG_TAG) << "Outbound connection established";
-    
+
+    // --- Publisher-stage CSV (disabled unless a path was configured) ---
+    // Schema: message_id,queue_us,encode_us,zmq_send_us,t_sent_us
+    //   queue_us     outbound-queue residency: queue_outbound -> pop
+    //   encode_us    E3AP wire encode (encoder_->encode)
+    //   zmq_send_us  connector send call (PUB-side enqueue to the io thread)
+    //   t_sent_us    CLOCK_REALTIME epoch us right after send returns
+    // Rows are written for indication PDUs only (one row per SM-emitted
+    // PDU); control-plane PDUs pass through unlogged. Joins with the SM's
+    // --stats-log row-by-row (1:1 per slot per subscriber) and with
+    // receiver-side arrival stamps via t_sent_us.
+    std::string pub_stages_path = config_.pub_stages_log_path;
+    if (pub_stages_path.empty()) {
+        if (const char* env = std::getenv("LIBE3_PUB_STAGES_LOG_PATH")) {
+            pub_stages_path = env;
+        }
+    }
+    const bool stages_enabled = !pub_stages_path.empty();
+    std::ofstream pub_stages_log;
+    using steady = std::chrono::steady_clock;
+    auto steady_ns = [](steady::time_point tp) {
+        return static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::nanoseconds>(
+                tp.time_since_epoch()).count());
+    };
+
     while (!should_stop_.load()) {
         // Pop from queue (blocking)
         auto pdu_opt = response_queue_->pop(std::chrono::milliseconds(10));
-        
+
         if (!pdu_opt) {
             continue;
         }
-        
+        const auto t_pop = stages_enabled ? steady::now() : steady::time_point{};
+
         // Encode and send
         auto encode_result = encoder_->encode(*pdu_opt);
         if (!encode_result) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to encode PDU for sending";
             continue;
         }
-        
+        const auto t_encoded = stages_enabled ? steady::now() : steady::time_point{};
+
         ErrorCode send_result = connector_->send(encode_result->buffer);
         if (send_result != ErrorCode::SUCCESS) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to send PDU";
         } else {
             E3_LOG_DEBUG(LOG_TAG) << "Sent PDU: " << pdu_type_to_string(pdu_opt->type);
         }
+
+        if (!stages_enabled || pdu_opt->type != PduType::INDICATION_MESSAGE) {
+            continue;
+        }
+        const auto t_sent = steady::now();
+        const uint64_t t_sent_us = static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::microseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count());
+        if (!pub_stages_log.is_open()) {
+            pub_stages_log.open(pub_stages_path, std::ios::out | std::ios::trunc);
+            if (!pub_stages_log) {
+                E3_LOG_ERROR(LOG_TAG) << "Failed to open publisher-stage log: "
+                                      << pub_stages_path;
+                pub_stages_path.clear();
+                continue;
+            }
+            pub_stages_log << "message_id,queue_us,encode_us,zmq_send_us,t_sent_us\n";
+        }
+        // Saturating: enqueue_ts_ns is 0 for PDUs that predate the stamp
+        // (or came from another path); clamp instead of underflowing.
+        const uint64_t pop_ns = steady_ns(t_pop);
+        const uint64_t queue_us =
+            (pdu_opt->enqueue_ts_ns != 0 && pop_ns > pdu_opt->enqueue_ts_ns)
+                ? (pop_ns - pdu_opt->enqueue_ts_ns) / 1000ULL : 0ULL;
+        const uint64_t encode_us = static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::microseconds>(
+                t_encoded - t_pop).count());
+        const uint64_t zmq_send_us = static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::microseconds>(
+                t_sent - t_encoded).count());
+        pub_stages_log << pdu_opt->message_id << ',' << queue_us << ','
+                       << encode_us << ',' << zmq_send_us << ','
+                       << t_sent_us << '\n';
+        pub_stages_log.flush();
     }
-    
+
     E3_LOG_INFO(LOG_TAG) << "Outbound loop (RAN) stopped";
 }
 

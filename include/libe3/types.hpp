@@ -314,6 +314,7 @@ struct Pdu {
     PduChoice choice;
     uint32_t message_id{0};        ///< Unique message identifier
     uint64_t timestamp{0};         ///< Message timestamp (milliseconds since epoch)
+    uint64_t enqueue_ts_ns{0};     ///< steady_clock ns stamped by queue_outbound; 0 = never enqueued. Feeds queue_us in the publisher-stage CSV.
 
     Pdu() : timestamp(static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -422,6 +423,20 @@ struct E3Config {
      * Applied via setpriority(PRIO_PROCESS, tid, value) on Linux.
      */
     int io_thread_niceness{0};
+
+    /**
+     * @brief Path of the per-PDU publisher-stage CSV (RAN role only).
+     *
+     * When non-empty, the RAN outbound loop writes one row per SM-emitted
+     * indication PDU: message_id,queue_us,encode_us,zmq_send_us,t_sent_us.
+     * queue_us is outbound-queue residency (queue_outbound -> pop),
+     * encode_us the E3AP wire encode, zmq_send_us the connector send call,
+     * and t_sent_us the CLOCK_REALTIME epoch microsecond right after the
+     * send returns (joinable with receiver-side arrival stamps).
+     * Empty (default) disables the log. The LIBE3_PUB_STAGES_LOG_PATH
+     * environment variable is honoured as a fallback when empty.
+     */
+    std::string pub_stages_log_path{};
 
     // Logging level (0=none, 1=error, 2=warn, 3=info, 4=debug, 5=trace)
     int log_level{3};  ///< Logging verbosity: 0=none, 1=error, 2=warn, 3=info, 4=debug, 5=trace
