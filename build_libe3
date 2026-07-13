@@ -105,6 +105,8 @@ Features:
   --disable-zmq           Disable ZeroMQ transport
   --enable-asn1           Enable ASN.1 encoding support (default: ON)
   --disable-asn1          Disable ASN.1 encoding
+  --enable-json           Enable JSON encoding support (default: OFF)
+  --disable-json          Disable JSON encoding
   --enable-protobuf       Enable Protocol Buffers encoding support (default: OFF)
   --disable-protobuf      Disable Protocol Buffers encoding
   --enable-tests          Build unit tests (default: ON)
@@ -578,6 +580,14 @@ main() {
                 ;;
             --disable-asn1)
                 ENABLE_ASN1=0
+                shift
+                ;;
+            --enable-json)
+                ENABLE_JSON=1
+                shift
+                ;;
+            --disable-json)
+                ENABLE_JSON=0
                 shift
                 ;;
             --enable-protobuf)

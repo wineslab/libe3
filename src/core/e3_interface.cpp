@@ -9,6 +9,7 @@
 
 #include "libe3/e3_interface.hpp"
 #include "libe3/logger.hpp"
+#include "latrec.h"
 #include <cctype>
 #include <chrono>
 #include <cstdlib>
@@ -29,6 +30,24 @@ namespace libe3 {
 
 namespace {
 constexpr const char* LOG_TAG = "E3Iface";
+
+/* [latrec] per-thread ring for the L0 enqueue stamp: queue_outbound is called
+ * from SM/caller threads (single-writer invariant => one ring per thread,
+ * named by tid). Never explicitly closed — the format is crash-safe (records
+ * are valid iff t_ns != 0) and the offline reader scans instead of trusting
+ * rec_count. No-op unless LATREC_DIR is set. */
+latrec_t& latrec_enq_ring() {
+    static thread_local latrec_t ring;
+    static thread_local bool init = false;
+    if (!init) {
+        char name[64];
+        std::snprintf(name, sizeof(name), "libe3.enq.%ld",
+                      static_cast<long>(::syscall(SYS_gettid)));
+        latrec_open(&ring, name, 22);
+        init = true;
+    }
+    return ring;
+}
 
 /**
  * @brief Apply CPU-affinity and niceness to the calling thread.
@@ -309,7 +328,20 @@ ErrorCode E3Interface::queue_outbound(Pdu pdu) {
     pdu.enqueue_ts_ns = static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::nanoseconds>(
             std::chrono::steady_clock::now().time_since_epoch()).count());
-    return response_queue_->push(std::move(pdu));
+    // [latrec] L0: per-PDU identity for the stage records. The caller's own
+    // stamp (e.g. the SM's W4) immediately precedes this call on the SAME
+    // thread, so the offline join is time-adjacency within the thread.
+    static std::atomic<uint64_t> enq_counter{0};
+    const uint64_t seq =
+        enq_counter.fetch_add(1, std::memory_order_relaxed) + 1;
+    pdu.enqueue_seq = seq;
+    latrec_stamp(&latrec_enq_ring(), seq, LATREC_L0_ENQUEUE, 0,
+                 static_cast<uint64_t>(pdu.type));
+    const ErrorCode rc = response_queue_->push(std::move(pdu));
+    if (rc != ErrorCode::SUCCESS)
+        latrec_stamp(&latrec_enq_ring(), seq, LATREC_L9_DROP, 0,
+                     1 /* queue push failed */);
+    return rc;
 }
 
 std::vector<uint32_t> E3Interface::get_available_ran_functions() const {
@@ -531,6 +563,12 @@ void E3Interface::outbound_loop_ran() {
                 tp.time_since_epoch()).count());
     };
 
+    // [latrec] publisher-thread stage records (L1..L3, L9), keyed by
+    // Pdu::enqueue_seq — joins the L0 record from queue_outbound. Independent
+    // of the pub-stages CSV above (LATREC_DIR-gated, own timestamps).
+    latrec_t lr;
+    latrec_open(&lr, "libe3.pub", 22);
+
     while (!should_stop_.load()) {
         // Pop from queue (blocking)
         auto pdu_opt = response_queue_->pop(std::chrono::milliseconds(10));
@@ -538,21 +576,31 @@ void E3Interface::outbound_loop_ran() {
         if (!pdu_opt) {
             continue;
         }
+        latrec_stamp(&lr, pdu_opt->enqueue_seq, LATREC_L1_DEQUEUE, 0,
+                     static_cast<uint64_t>(pdu_opt->type));
         const auto t_pop = stages_enabled ? steady::now() : steady::time_point{};
 
         // Encode and send
         auto encode_result = encoder_->encode(*pdu_opt);
         if (!encode_result) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to encode PDU for sending";
+            latrec_stamp(&lr, pdu_opt->enqueue_seq, LATREC_L9_DROP, 0,
+                         2 /* encode failed */);
             continue;
         }
+        latrec_stamp(&lr, pdu_opt->enqueue_seq, LATREC_L2_ENCODE_DONE,
+                     encode_result->buffer.size(), 0);
         const auto t_encoded = stages_enabled ? steady::now() : steady::time_point{};
 
         ErrorCode send_result = connector_->send(encode_result->buffer);
         if (send_result != ErrorCode::SUCCESS) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to send PDU";
+            latrec_stamp(&lr, pdu_opt->enqueue_seq, LATREC_L9_DROP, 0,
+                         3 /* connector send failed */);
         } else {
             E3_LOG_DEBUG(LOG_TAG) << "Sent PDU: " << pdu_type_to_string(pdu_opt->type);
+            latrec_stamp(&lr, pdu_opt->enqueue_seq, LATREC_L3_ZMQ_SENT,
+                         pdu_opt->message_id, 0);
         }
 
         if (!stages_enabled || pdu_opt->type != PduType::INDICATION_MESSAGE) {
@@ -590,6 +638,7 @@ void E3Interface::outbound_loop_ran() {
         pub_stages_log.flush();
     }
 
+    latrec_close(&lr);
     E3_LOG_INFO(LOG_TAG) << "Outbound loop (RAN) stopped";
 }
 

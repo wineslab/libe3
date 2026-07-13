@@ -315,6 +315,7 @@ struct Pdu {
     uint32_t message_id{0};        ///< Unique message identifier
     uint64_t timestamp{0};         ///< Message timestamp (milliseconds since epoch)
     uint64_t enqueue_ts_ns{0};     ///< steady_clock ns stamped by queue_outbound; 0 = never enqueued. Feeds queue_us in the publisher-stage CSV.
+    uint64_t enqueue_seq{0};       ///< process-wide monotonic enqueue counter stamped by queue_outbound; keys the [latrec] L-stage records (0 = never enqueued).
 
     Pdu() : timestamp(static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(
