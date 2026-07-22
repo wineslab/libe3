@@ -16,9 +16,22 @@
  *   encoding, message_type, encoded_bytes, info_bytes,
  *   encode_ns_p50, encode_ns_p99, decode_ns_p50, decode_ns_p99
  *
- * `info_bytes` is the intrinsic information content of the sample PDU (sum
- * of the raw sizes of the fields it carries), so encoded_bytes/info_bytes
- * reads as the framing overhead of each encoding.
+ * `info_bytes` is the intrinsic information content of the sample PDU. It is
+ * NOT measured by any encoder: it is computed analytically in make_samples()
+ * from the sample PDU's own field values, using the fixed-width in-memory
+ * (C++ value) representation of each field — see the comment above kU32
+ * below for the exact accounting. encoded_bytes/info_bytes therefore reads
+ * as the framing overhead of each encoding relative to a fixed-width binary
+ * copy of the values. Bit-packed binary encodings can legitimately land
+ * BELOW this baseline: ASN.1 APER encodes the E3AP integers, which are all
+ * range-constrained in the ASN.1 module (e.g. INTEGER (1..100) -> 7 bits;
+ * the message id INTEGER (1..1000), whose range exceeds 255, -> 2 aligned
+ * bytes (16 bits), since APER byte-aligns a constrained integer once its
+ * range passes 255; the 11-way PDU CHOICE index -> 4 bits), in their minimal
+ * width with no per-field tags, so e.g. SubscriptionDelete measures 5 wire
+ * bytes against 12 info bytes (16 + 4 + 7 + 7 = 34 bits = 5 bytes). Text
+ * encodings sit far above the baseline because field names and punctuation
+ * travel on the wire as text.
  *
  * Usage:
  *   ./bench_encoding_size
@@ -82,6 +95,16 @@ struct Sample {
     Sample(const char* n, PduType t) : name(n), pdu(t), info_bytes(0) {}
 };
 
+// info_bytes accounting: the fixed-width in-memory size of each field value.
+//   - integer fields:        sizeof(uint32_t) = 4 bytes each (kU32)
+//   - bool / enum fields:    1 byte (kEnum; ResponseCode has 2 values)
+//   - strings:               actual byte length (no terminator)
+//   - opaque payload fields: actual byte length of the sample payload
+//   - the PDU message id:    counted like any integer field (kMsgId)
+// This deliberately charges every integer its machine width regardless of
+// value, which is what makes the baseline comparable across encodings: a
+// bit-packed encoding (APER) may go below it, a tagged or textual encoding
+// sits above it.
 constexpr size_t kU32 = sizeof(uint32_t);
 constexpr size_t kEnum = 1;  // ResponseCode fits one byte of information
 constexpr size_t kMsgId = kU32;

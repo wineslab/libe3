@@ -246,18 +246,18 @@ const char* encoding_str(EncodingFormat e) {
     }
 }
 
-int64_t percentile(std::vector<int64_t>& v, double p) {
-    if (v.empty()) return 0;
+double percentile(std::vector<double>& v, double p) {
+    if (v.empty()) return 0.0;
     std::sort(v.begin(), v.end());
-    size_t idx = static_cast<size_t>(p * (v.size() - 1));
+    size_t idx = static_cast<size_t>(p * static_cast<double>(v.size() - 1));
     return v[idx];
 }
 
-double mean(const std::vector<int64_t>& v) {
+double mean(const std::vector<double>& v) {
     if (v.empty()) return 0.0;
-    int64_t sum = 0;
+    double sum = 0.0;
     for (auto x : v) sum += x;
-    return static_cast<double>(sum) / v.size();
+    return sum / static_cast<double>(v.size());
 }
 
 }  // namespace
@@ -395,14 +395,17 @@ int main(int argc, char* argv[]) {
         ::rmdir(ipc_dir.c_str());
     }
 
-    // Compute per-phase deltas (microseconds), dropping warmup.
-    std::vector<int64_t> p1, p2, p3, p4, p5, p6, p7, p8, total_us;
+    // Compute per-phase deltas (fractional microseconds, dropping warmup).
+    // Several phases are sub-microsecond; integer us would truncate them to 0.
+    std::vector<double> p1, p2, p3, p4, p5, p6, p7, p8, total_us;
     {
         std::lock_guard<std::mutex> lk(shared.mu);
         for (const auto& t : shared.traces) {
             if (!t.complete) continue;
             if (t.seq < static_cast<uint32_t>(kWarmupIterations)) continue;
-            auto us = [](int64_t a, int64_t b) { return (b - a) / 1000; };
+            auto us = [](int64_t a, int64_t b) {
+                return static_cast<double>(b - a) / 1000.0;
+            };
             p1.push_back(us(t.t1_collect_begin, t.t2_encode_begin));
             p2.push_back(us(t.t2_encode_begin, t.t3_send_indication));
             p3.push_back(us(t.t3_send_indication, t.t4_recv_indication));
@@ -415,13 +418,13 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // Emit markdown.
-    auto emit_row = [](const char* label, std::vector<int64_t>& v) {
+    // Emit markdown (fractional us, two decimals).
+    auto emit_row = [](const char* label, std::vector<double>& v) {
         if (v.empty()) {
-            std::printf("| %-35s |  -   |  -  |  -  |  -   |\n", label);
+            std::printf("| %-35s |    -    |    -    |    -    |     -    |\n", label);
             return;
         }
-        std::printf("| %-35s | %4.0f | %4ld | %4ld | %5ld |\n",
+        std::printf("| %-35s | %7.2f | %7.2f | %7.2f | %8.2f |\n",
                     label,
                     mean(v),
                     percentile(v, 0.50),
@@ -434,8 +437,8 @@ int main(int argc, char* argv[]) {
     std::printf("All values in microseconds (us). Link: %s, transport: %s, encoding: %s.\n\n",
                 link_layer_to_string(link), transport_layer_to_string(transport),
                 encoding_str(encoding));
-    std::printf("| Phase                               | mean |  p50 |  p99 |   max |\n");
-    std::printf("|-------------------------------------|-----:|-----:|-----:|------:|\n");
+    std::printf("| Phase                               |  mean   |   p50   |   p99   |    max   |\n");
+    std::printf("|-------------------------------------|--------:|--------:|--------:|---------:|\n");
     emit_row("1. Collect indication data",          p1);
     emit_row("2. Create & encode indication",       p2);
     emit_row("3. Deliver indication (RAN -> dApp)", p3);
