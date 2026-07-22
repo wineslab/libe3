@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.8</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.9</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -310,24 +310,37 @@ $(document).ready(function(){initNavTree('lockfree__queue_8hpp_source.html','');
 <div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>        <span class="keywordflow">return</span> shutdown_.load(std::memory_order_relaxed);</div>
 <div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    }</div>
 </div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span> </div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* LOG_TAG = <span class="stringliteral">&quot;Queue&quot;</span>;</div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span> </div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    <a class="code hl_class" href="classlibe3_1_1MpmcQueue.html">MpmcQueue&lt;T&gt;</a> ring_;</div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    std::atomic&lt;bool&gt; shutdown_{<span class="keyword">false</span>};</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span> </div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    <span class="comment">// Adaptive spin-wait tuning constants</span></div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">size_t</span> SPIN_COUNT  = 40;   <span class="comment">///&lt; CPU-pause iterations</span></div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">size_t</span> YIELD_COUNT = 100;  <span class="comment">///&lt; thread-yield iterations</span><span class="comment"></span></div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span><span class="comment">    /// Sleep duration between attempts in the slow path (µs)</span></div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span><span class="comment"></span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">auto</span> SLEEP_DURATION = std::chrono::microseconds(50);</div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>};</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span><span class="comment"></span> </div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span><span class="comment">     * @brief Clear shutdown and discard any residual items so the queue is</span></div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span><span class="comment">     * reusable after a shutdown(). The queue object itself is not moved, so any</span></div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span><span class="comment">     * reference/pointer held by a consumer stays valid across a re-arm.</span></div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span><span class="comment">     */</span></div>
+<div class="foldopen" id="foldopen00200" data-start="{" data-end="}">
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno"><a class="line" href="classlibe3_1_1LockFreeQueue.html#ae31b92de452540fe3bd17e645d68aae9">  200</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classlibe3_1_1LockFreeQueue.html#ae31b92de452540fe3bd17e645d68aae9">rearm</a>() {</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        <a class="code hl_function" href="classlibe3_1_1LockFreeQueue.html#aa99081934ae4ec29e7bbbea5a37e78ca">clear</a>();</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        shutdown_.store(<span class="keyword">false</span>, std::memory_order_relaxed);</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>        <a class="code hl_define" href="logger_8hpp.html#a8b7f640421222e88795f275b8c98a138">E3_LOG_DEBUG</a>(LOG_TAG) &lt;&lt; <span class="stringliteral">&quot;Queue re-armed&quot;</span>;</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>    }</div>
 </div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span> </div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>} <span class="comment">// namespace libe3</span></div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span> </div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span><span class="preprocessor">#endif </span><span class="comment">// LIBE3_LOCKFREE_QUEUE_HPP</span></div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* LOG_TAG = <span class="stringliteral">&quot;Queue&quot;</span>;</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span> </div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>    <a class="code hl_class" href="classlibe3_1_1MpmcQueue.html">MpmcQueue&lt;T&gt;</a> ring_;</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>    std::atomic&lt;bool&gt; shutdown_{<span class="keyword">false</span>};</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span> </div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    <span class="comment">// Adaptive spin-wait tuning constants</span></div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">size_t</span> SPIN_COUNT  = 40;   <span class="comment">///&lt; CPU-pause iterations</span></div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">size_t</span> YIELD_COUNT = 100;  <span class="comment">///&lt; thread-yield iterations</span><span class="comment"></span></div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span><span class="comment">    /// Sleep duration between attempts in the slow path (µs)</span></div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span><span class="comment"></span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">auto</span> SLEEP_DURATION = std::chrono::microseconds(50);</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>};</div>
+</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>} <span class="comment">// namespace libe3</span></div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span> </div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span><span class="preprocessor">#endif </span><span class="comment">// LIBE3_LOCKFREE_QUEUE_HPP</span></div>
 <div class="ttc" id="aclasslibe3_1_1LockFreeQueue_html"><div class="ttname"><a href="classlibe3_1_1LockFreeQueue.html">libe3::LockFreeQueue</a></div><div class="ttdoc">Lock-free bounded blocking queue.</div><div class="ttdef"><b>Definition</b> <a href="lockfree__queue_8hpp_source.html#l00044">lockfree_queue.hpp:44</a></div></div>
 <div class="ttc" id="aclasslibe3_1_1LockFreeQueue_html_a4f9321c30d18f2a07b65f4af73cd4e88"><div class="ttname"><a href="classlibe3_1_1LockFreeQueue.html#a4f9321c30d18f2a07b65f4af73cd4e88">libe3::LockFreeQueue::push</a></div><div class="ttdeci">ErrorCode push(T item)</div><div class="ttdoc">Enqueue an item (non-blocking, lock-free).</div><div class="ttdef"><b>Definition</b> <a href="lockfree__queue_8hpp_source.html#l00078">lockfree_queue.hpp:78</a></div></div>
 <div class="ttc" id="aclasslibe3_1_1LockFreeQueue_html_a518f6a918ff93110164cd84176d26d21"><div class="ttname"><a href="classlibe3_1_1LockFreeQueue.html#a518f6a918ff93110164cd84176d26d21">libe3::LockFreeQueue::operator=</a></div><div class="ttdeci">LockFreeQueue &amp; operator=(const LockFreeQueue &amp;)=delete</div></div>
@@ -342,6 +355,7 @@ $(document).ready(function(){initNavTree('lockfree__queue_8hpp_source.html','');
 <div class="ttc" id="aclasslibe3_1_1LockFreeQueue_html_abdf051c110e72b90d9850db33249fb59"><div class="ttname"><a href="classlibe3_1_1LockFreeQueue.html#abdf051c110e72b90d9850db33249fb59">libe3::LockFreeQueue::capacity</a></div><div class="ttdeci">size_t capacity() const noexcept</div><div class="ttdoc">Return the ring buffer capacity (always a power of two).</div><div class="ttdef"><b>Definition</b> <a href="lockfree__queue_8hpp_source.html#l00173">lockfree_queue.hpp:173</a></div></div>
 <div class="ttc" id="aclasslibe3_1_1LockFreeQueue_html_ac29617658ee49864ae1f951dfdc0622f"><div class="ttname"><a href="classlibe3_1_1LockFreeQueue.html#ac29617658ee49864ae1f951dfdc0622f">libe3::LockFreeQueue::~LockFreeQueue</a></div><div class="ttdeci">~LockFreeQueue()</div><div class="ttdoc">Destructor – signals shutdown so any blocked pop() returns.</div><div class="ttdef"><b>Definition</b> <a href="lockfree__queue_8hpp_source.html#l00061">lockfree_queue.hpp:61</a></div></div>
 <div class="ttc" id="aclasslibe3_1_1LockFreeQueue_html_ae19091d1178d9b1531a8c894fb3456a6"><div class="ttname"><a href="classlibe3_1_1LockFreeQueue.html#ae19091d1178d9b1531a8c894fb3456a6">libe3::LockFreeQueue::pop</a></div><div class="ttdeci">T pop()</div><div class="ttdoc">Dequeue an item, blocking indefinitely until one is available.</div><div class="ttdef"><b>Definition</b> <a href="lockfree__queue_8hpp_source.html#l00097">lockfree_queue.hpp:97</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1LockFreeQueue_html_ae31b92de452540fe3bd17e645d68aae9"><div class="ttname"><a href="classlibe3_1_1LockFreeQueue.html#ae31b92de452540fe3bd17e645d68aae9">libe3::LockFreeQueue::rearm</a></div><div class="ttdeci">void rearm()</div><div class="ttdoc">Clear shutdown and discard any residual items so the queue is reusable after a shutdown()....</div><div class="ttdef"><b>Definition</b> <a href="lockfree__queue_8hpp_source.html#l00200">lockfree_queue.hpp:200</a></div></div>
 <div class="ttc" id="aclasslibe3_1_1LockFreeQueue_html_af6e3acdd773c4019d90b107f6f7cb3a9"><div class="ttname"><a href="classlibe3_1_1LockFreeQueue.html#af6e3acdd773c4019d90b107f6f7cb3a9">libe3::LockFreeQueue::operator=</a></div><div class="ttdeci">LockFreeQueue &amp; operator=(LockFreeQueue &amp;&amp;)=delete</div></div>
 <div class="ttc" id="aclasslibe3_1_1LockFreeQueue_html_af7c39522f8cd6592b17674ad47e592fe"><div class="ttname"><a href="classlibe3_1_1LockFreeQueue.html#af7c39522f8cd6592b17674ad47e592fe">libe3::LockFreeQueue::is_shutdown</a></div><div class="ttdeci">bool is_shutdown() const</div><div class="ttdoc">Return true if shutdown() has been called.</div><div class="ttdef"><b>Definition</b> <a href="lockfree__queue_8hpp_source.html#l00191">lockfree_queue.hpp:191</a></div></div>
 <div class="ttc" id="aclasslibe3_1_1LockFreeQueue_html_affd50a3c47f12bbbf0ff796aebf857d8"><div class="ttname"><a href="classlibe3_1_1LockFreeQueue.html#affd50a3c47f12bbbf0ff796aebf857d8">libe3::LockFreeQueue::LockFreeQueue</a></div><div class="ttdeci">LockFreeQueue(const LockFreeQueue &amp;)=delete</div></div>

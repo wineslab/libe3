@@ -25,6 +25,15 @@
 var NAVTREE =
 [
   [ "libe3", "index.html", [
+    [ "libe3 Python bindings (<tt>libe3py</tt>)", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html", [
+      [ "The split: E3AP in libe3, E3SM in Python", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md1", null ],
+      [ "Two layers", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md2", null ],
+      [ "Why batched drain + GIL release (not callbacks)", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md3", null ],
+      [ "Lifecycle", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md4", null ],
+      [ "Minimal Python example", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md5", null ],
+      [ "Build & install", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md6", null ],
+      [ "Service-model definitions", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md7", null ]
+    ] ],
     [ "Topics", "topics.html", "topics" ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
@@ -33,7 +42,8 @@ var NAVTREE =
         [ "Functions", "namespacemembers_func.html", null ],
         [ "Variables", "namespacemembers_vars.html", null ],
         [ "Typedefs", "namespacemembers_type.html", null ],
-        [ "Enumerations", "namespacemembers_enum.html", null ]
+        [ "Enumerations", "namespacemembers_enum.html", null ],
+        [ "Enumerator", "namespacemembers_eval.html", null ]
       ] ]
     ] ],
     [ "Classes", "annotated.html", [
@@ -65,11 +75,12 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"classlibe3_1_1E3Connector.html#a97d282b7213769e360ed861bb31cf662",
-"classlibe3_1_1PosixE3Connector.html#a00b3eb462edc5ba4216db2d11034149c",
-"error__codes_8h.html#a3f30e282e3e14ec6ba778ca4266f51fd",
-"structe3__c__service__model__desc__t.html#a251ff9cccad6049f569909f4ac8d51ac",
-"structlibe3_1_1SubscriptionDelete.html"
+"classlibe3_1_1E3Connector.html",
+"classlibe3_1_1Logger.html#a8f40bcd6249ad424b8eb15e60049f65e",
+"classlibe3_1_1py_1_1DAppSession.html#a15e58ad99e35b52d722124953d2dd8f3",
+"namespacelibe3.html#a2ae6d18d3575e3d816ad3dd4a3c8ac86",
+"structlibe3_1_1E3Config.html#abb5028cf948af60a47e76ffdf182c4a3",
+"types_8hpp.html#a675f37e2936d707807212fcd3cfa8185acc618538af7364bd959eab4a6382de1d"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

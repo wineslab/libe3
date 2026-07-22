@@ -1,6 +1,8 @@
 var searchData=
 [
-  ['vendor_0',['vendor',['../structlibe3_1_1SetupRequest.html#a5f9b64febc7f338303eaa2182b155359',1,'libe3::SetupRequest::vendor'],['../structlibe3_1_1E3Config.html#af7cca75f0e517f5a8d3143d7d407b156',1,'libe3::E3Config::vendor']]],
-  ['version_1',['version',['../structe3__c__service__model__desc__t.html#a07b97ac1d5e8d9d71142ab1748603f1f',1,'e3_c_service_model_desc_t::version'],['../classlibe3_1_1ServiceModel.html#a2d17ab4667c5ccfff19d5079a47f7677',1,'libe3::ServiceModel::version()'],['../structe3__service__model__handle__s.html#ab4e885a71302bfdce43f7c4a3dcbb431',1,'e3_service_model_handle_s::version()'],['../namespacelibe3.html#a85c33a76111e517c006df1b1fc0411bc',1,'libe3::version() noexcept'],['../namespacelibe3.html#acf6808999eb4ab8698c77b30b933b284',1,'libe3::version(int &amp;major, int &amp;minor, int &amp;patch) noexcept']]],
-  ['version_5fs_2',['version_s',['../structe3__service__model__handle__s.html#ac03969c8ed0d1c1dea54fe4ef4556d7d',1,'e3_service_model_handle_s']]]
+  ['uninitialized_0',['UNINITIALIZED',['../namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1feadd652546039b18970b8dcf2cff824268',1,'libe3']]],
+  ['unregister_5fdapp_1',['unregister_dapp',['../classlibe3_1_1SubscriptionManager.html#a31b2b3b526c1205edd5e8f0e7548d5df',1,'libe3::SubscriptionManager']]],
+  ['unregister_5fsm_2',['unregister_sm',['../classlibe3_1_1SmRegistry.html#a457164e750ad3eab42e10d35ee1623d3',1,'libe3::SmRegistry']]],
+  ['unsubscribe_3',['unsubscribe',['../classlibe3_1_1E3Agent.html#a6c24b5b987280d40ce95661c83a04bb9',1,'libe3::E3Agent::unsubscribe()'],['../classlibe3_1_1py_1_1DAppSession.html#a281047a21ea464eaf35816d26b730af1',1,'libe3::py::DAppSession::unsubscribe()'],['../classlibe3_1_1E3Agent.html#a6c24b5b987280d40ce95661c83a04bb9',1,'libe3::E3Agent::unsubscribe()']]],
+  ['update_4',['UPDATE',['../namespacelibe3.html#ac1c5533fc81586565ca7822bf00eee90a15a8022d0ed9cd9c2a2e756822703eb4',1,'libe3']]]
 ];

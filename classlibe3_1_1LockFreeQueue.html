@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.8</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.9</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -148,6 +148,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af7c39522f8cd6592b17674ad47e592fe" id="r_af7c39522f8cd6592b17674ad47e592fe"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1LockFreeQueue.html#af7c39522f8cd6592b17674ad47e592fe">is_shutdown</a> () const</td></tr>
 <tr class="memdesc:af7c39522f8cd6592b17674ad47e592fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if <a class="el" href="classlibe3_1_1LockFreeQueue.html#aa23c2c98d162d660fc61a68906946cdd" title="Signal shutdown so that all blocked pop() calls return promptly.">shutdown()</a> has been called.  <br /></td></tr>
 <tr class="separator:af7c39522f8cd6592b17674ad47e592fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae31b92de452540fe3bd17e645d68aae9" id="r_ae31b92de452540fe3bd17e645d68aae9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1LockFreeQueue.html#ae31b92de452540fe3bd17e645d68aae9">rearm</a> ()</td></tr>
+<tr class="memdesc:ae31b92de452540fe3bd17e645d68aae9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear shutdown and discard any residual items so the queue is reusable after a <a class="el" href="classlibe3_1_1LockFreeQueue.html#aa23c2c98d162d660fc61a68906946cdd" title="Signal shutdown so that all blocked pop() calls return promptly.">shutdown()</a>. The queue object itself is not moved, so any reference/pointer held by a consumer stays valid across a re-arm.  <br /></td></tr>
+<tr class="separator:ae31b92de452540fe3bd17e645d68aae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename T&gt;<br />
@@ -571,6 +574,37 @@ ErrorCode::BUFFER_TOO_SMALL if the ring buffer is full. </dd>
 ErrorCode::NOT_INITIALIZED if <a class="el" href="classlibe3_1_1LockFreeQueue.html#aa23c2c98d162d660fc61a68906946cdd" title="Signal shutdown so that all blocked pop() calls return promptly.">shutdown()</a> has been called. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="lockfree__queue_8hpp_source.html#l00078">78</a> of file <a class="el" href="lockfree__queue_8hpp_source.html">lockfree_queue.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ae31b92de452540fe3bd17e645d68aae9" name="ae31b92de452540fe3bd17e645d68aae9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae31b92de452540fe3bd17e645d68aae9">&#9670;&#160;</a></span>rearm()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classlibe3_1_1LockFreeQueue.html">libe3::LockFreeQueue</a>&lt; T &gt;::rearm </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Clear shutdown and discard any residual items so the queue is reusable after a <a class="el" href="classlibe3_1_1LockFreeQueue.html#aa23c2c98d162d660fc61a68906946cdd" title="Signal shutdown so that all blocked pop() calls return promptly.">shutdown()</a>. The queue object itself is not moved, so any reference/pointer held by a consumer stays valid across a re-arm. </p>
+
+<p class="definition">Definition at line <a class="el" href="lockfree__queue_8hpp_source.html#l00200">200</a> of file <a class="el" href="lockfree__queue_8hpp_source.html">lockfree_queue.hpp</a>.</p>
 
 </div>
 </div>

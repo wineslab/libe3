@@ -1,5 +1,6 @@
 var files_dup =
 [
     [ "include", "dir_d44c64559bbebec7f509842c48db8b23.html", "dir_d44c64559bbebec7f509842c48db8b23" ],
-    [ "src", "dir_68267d1309a1af8e8297ef4c3efbcdba.html", "dir_68267d1309a1af8e8297ef4c3efbcdba" ]
+    [ "src", "dir_68267d1309a1af8e8297ef4c3efbcdba.html", "dir_68267d1309a1af8e8297ef4c3efbcdba" ],
+    [ "swig", "dir_921b7fe62329ee5986df8fde73ed97c3.html", "dir_921b7fe62329ee5986df8fde73ed97c3" ]
 ];

@@ -13,6 +13,7 @@ var classlibe3_1_1LockFreeQueue =
     [ "pop", "classlibe3_1_1LockFreeQueue.html#ae19091d1178d9b1531a8c894fb3456a6", null ],
     [ "pop", "classlibe3_1_1LockFreeQueue.html#a7bde5e907a5c539c93acdb4d4b8f65bf", null ],
     [ "push", "classlibe3_1_1LockFreeQueue.html#a4f9321c30d18f2a07b65f4af73cd4e88", null ],
+    [ "rearm", "classlibe3_1_1LockFreeQueue.html#ae31b92de452540fe3bd17e645d68aae9", null ],
     [ "shutdown", "classlibe3_1_1LockFreeQueue.html#aa23c2c98d162d660fc61a68906946cdd", null ],
     [ "size", "classlibe3_1_1LockFreeQueue.html#a92b4111b3922838b34bfa6dc63f8095f", null ],
     [ "try_pop", "classlibe3_1_1LockFreeQueue.html#a793126e57a1f9bf6000443985cd52836", null ]

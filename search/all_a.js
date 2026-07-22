@@ -1,23 +1,4 @@
 var searchData=
 [
-  ['level_0',['level',['../classlibe3_1_1Logger.html#a8f42ecc6a9445d9658df515e4cf84ded',1,'libe3::Logger']]],
-  ['libe3_1',['libe3',['../namespacelibe3.html',1,'']]],
-  ['libe3_20error_20codes_2',['libe3 Error Codes',['../group__error__codes.html',1,'']]],
-  ['libe3_2ehpp_3',['libe3.hpp',['../libe3_8hpp.html',1,'(Global Namespace)'],['../libe3_2libe3_8hpp.html',1,'(Global Namespace)']]],
-  ['libe3_3a_3ae3ap_4',['e3ap',['../namespacelibe3_1_1e3ap.html',1,'libe3']]],
-  ['libe3_3a_3ae3ap_3a_3av1_5',['v1',['../namespacelibe3_1_1e3ap_1_1v1.html',1,'libe3::e3ap']]],
-  ['libe3_5ferror_5fcode_5flist_6',['libe3_error_code_list',['../group__error__codes.html#ga36076106bfe5aefabf75dbd1d52175fd',1,'LIBE3_ERROR_CODE_LIST:&#160;error_codes.h'],['../namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3a4951c208dce6a888038bdc3926e5636f',1,'libe3::LIBE3_ERROR_CODE_LIST']]],
-  ['libe3_5fprotocol_5fversion_7',['LIBE3_PROTOCOL_VERSION',['../namespacelibe3.html#ac69f2e5f639ef2bdb04445cf7ac2b408',1,'libe3']]],
-  ['link_5flayer_8',['link_layer',['../structe3__config__t.html#a2fa01fda5689c80e7e8cfda843f54203',1,'e3_config_t::link_layer'],['../structlibe3_1_1E3Config.html#a7b709230e627834bc85cd5cb8749c3fa',1,'libe3::E3Config::link_layer'],['../classlibe3_1_1E3Connector.html#a799a30389abe8a7ed32628f74acf42d4',1,'libe3::E3Connector::link_layer()'],['../classlibe3_1_1PosixE3Connector.html#a00b3eb462edc5ba4216db2d11034149c',1,'libe3::PosixE3Connector::link_layer()'],['../classlibe3_1_1ZmqE3Connector.html#a17db571c6bc4da600719e5c23fa981f5',1,'libe3::ZmqE3Connector::link_layer()']]],
-  ['link_5flayer_5fto_5fstring_9',['link_layer_to_string',['../namespacelibe3.html#aa315ed8a2ba72534a600f7d9305b5ff8',1,'libe3']]],
-  ['lockfree_5fqueue_2ehpp_10',['lockfree_queue.hpp',['../lockfree__queue_8hpp.html',1,'']]],
-  ['lockfreequeue_11',['lockfreequeue',['../classlibe3_1_1LockFreeQueue.html#a83dbc1bb419fbfa7b67b1ae435314eec',1,'libe3::LockFreeQueue::LockFreeQueue(size_t capacity=128)'],['../classlibe3_1_1LockFreeQueue.html#a7dbfc469a3c090a52685735270a79c62',1,'libe3::LockFreeQueue::LockFreeQueue(LockFreeQueue &amp;&amp;)=delete'],['../classlibe3_1_1LockFreeQueue.html#affd50a3c47f12bbbf0ff796aebf857d8',1,'libe3::LockFreeQueue::LockFreeQueue(const LockFreeQueue &amp;)=delete'],['../classlibe3_1_1LockFreeQueue.html',1,'libe3::LockFreeQueue&lt; T &gt;']]],
-  ['log_12',['log',['../classlibe3_1_1Logger.html#ae7bc54c8cea7ae9ba40b99056f87aa20',1,'libe3::Logger']]],
-  ['log_5flevel_13',['log_level',['../structe3__config__t.html#a2535720ff7b2f8c0a1f7e3af8a8b5d4d',1,'e3_config_t::log_level'],['../structlibe3_1_1E3Config.html#a38f5a15184eb32679fcdaeba7f1dfaa9',1,'libe3::E3Config::log_level']]],
-  ['log_5fpath_14',['log_path',['../structe3__config__t.html#a537dc596a0dd2bdfb3af8c42384703aa',1,'e3_config_t::log_path'],['../structlibe3_1_1E3Config.html#a2520f863a22b6fc52b5390262f36c946',1,'libe3::E3Config::log_path']]],
-  ['logcallback_15',['LogCallback',['../namespacelibe3.html#a2ae6d18d3575e3d816ad3dd4a3c8ac86',1,'libe3']]],
-  ['logger_16',['Logger',['../classlibe3_1_1Logger.html',1,'libe3']]],
-  ['logger_2ehpp_17',['logger.hpp',['../logger_8hpp.html',1,'']]],
-  ['loglevel_18',['LogLevel',['../namespacelibe3.html#a509338e1414d84a610f21816d04940a0',1,'libe3']]],
-  ['logstream_19',['logstream',['../classlibe3_1_1LogStream.html#a818ac1789d1a862863d793b8797b1165',1,'libe3::LogStream::LogStream()'],['../classlibe3_1_1LogStream.html',1,'libe3::LogStream']]]
+  ['kind_0',['kind',['../structlibe3_1_1py_1_1E3Event.html#a32878e95b8bbe48ae73fa982f348ce81',1,'libe3::py::E3Event']]]
 ];

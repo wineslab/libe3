@@ -1,6 +1,10 @@
 var annotated_dup =
 [
     [ "libe3", "namespacelibe3.html", [
+      [ "py", "namespacelibe3_1_1py.html", [
+        [ "DAppSession", "classlibe3_1_1py_1_1DAppSession.html", "classlibe3_1_1py_1_1DAppSession" ],
+        [ "E3Event", "structlibe3_1_1py_1_1E3Event.html", "structlibe3_1_1py_1_1E3Event" ]
+      ] ],
       [ "Asn1E3Encoder", "classlibe3_1_1Asn1E3Encoder.html", "classlibe3_1_1Asn1E3Encoder" ],
       [ "DAppControlAction", "structlibe3_1_1DAppControlAction.html", "structlibe3_1_1DAppControlAction" ],
       [ "DAppEntry", "structlibe3_1_1DAppEntry.html", "structlibe3_1_1DAppEntry" ],
