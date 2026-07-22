@@ -13,7 +13,7 @@ if(LIBE3_ENABLE_ASN1)
         examples/sm_simple/e3sm_simple_wrapper.cpp
     )
 
-    target_link_libraries(example_simple_agent PRIVATE libe3::libe3 asn1_e3ap)
+    target_link_libraries(example_simple_agent PRIVATE libe3::libe3 asn1_e3ap libe3_warnings libe3_sanitizers)
     target_include_directories(example_simple_agent PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../examples)
     target_include_directories(example_simple_agent PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../examples/sm_simple)
 
@@ -25,7 +25,7 @@ if(LIBE3_ENABLE_ASN1)
         examples/sm_simple/e3sm_simple_wrapper.cpp
     )
 
-    target_link_libraries(example_simple_dapp PRIVATE libe3::libe3 asn1_e3ap)
+    target_link_libraries(example_simple_dapp PRIVATE libe3::libe3 asn1_e3ap libe3_warnings libe3_sanitizers)
     target_include_directories(example_simple_dapp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../examples)
     target_include_directories(example_simple_dapp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../examples/sm_simple)
 else()

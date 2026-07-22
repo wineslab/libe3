@@ -30,7 +30,17 @@ target_link_libraries(libe3
 
 # Conditionally link JSON and ASN.1 libraries and expose compile-time flags
 if(LIBE3_ENABLE_JSON)
-    target_link_libraries(libe3 PUBLIC nlohmann_json::nlohmann_json)
+    # nlohmann/json is header-only and used only inside the implementation
+    # (src/encoder/json_encoder.*), never in a public header, and it is fully
+    # compiled into libe3.a. Scope it to the BUILD interface: for a STATIC
+    # library even a PRIVATE dependency is re-exported as $<LINK_ONLY:...> (so
+    # consumers would be required to link it), which pulls the un-exported
+    # nlohmann_json target into install(EXPORT) and breaks it. $<BUILD_INTERFACE:>
+    # keeps the include dirs available while building libe3 but drops the target
+    # from the installed/exported interface, where consumers do not need it. The
+    # LIBE3_ENABLE_JSON define stays PUBLIC: it only selects a default enum in the
+    # public types.hpp and carries no nlohmann dependency.
+    target_link_libraries(libe3 PRIVATE $<BUILD_INTERFACE:nlohmann_json::nlohmann_json>)
     target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_JSON)
 endif()
 
@@ -84,7 +94,10 @@ target_link_libraries(libe3_shared
 
 # Conditionally link JSON and ASN.1 libraries and expose compile-time flags
 if(LIBE3_ENABLE_JSON)
-    target_link_libraries(libe3_shared PUBLIC nlohmann_json::nlohmann_json)
+    # Header-only, implementation-only dependency (see the static libe3 target
+    # above); $<BUILD_INTERFACE:> keeps it out of the exported interface so
+    # install(EXPORT) does not require the un-exported nlohmann_json target.
+    target_link_libraries(libe3_shared PRIVATE $<BUILD_INTERFACE:nlohmann_json::nlohmann_json>)
     target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_JSON)
 endif()
 

@@ -11,10 +11,11 @@ if(@LIBE3_ENABLE_ZMQ@)
     endif()
 endif()
 
-# If libe3 was built with JSON support, make downstream consumers find nlohmann/json
-if(@LIBE3_ENABLE_JSON@)
-    find_dependency(nlohmann_json 3.11 REQUIRED)
-endif()
+# nlohmann/json is intentionally NOT a find_dependency: it is header-only and
+# used only inside libe3's implementation (compiled into the library, scoped to
+# the BUILD interface in libe3Targets.cmake), so consumers of the installed
+# library never need it. Requiring it here would make find_package(libe3) fail
+# on machines without a system-wide nlohmann_json for no reason.
 
 # If libe3 was built with Protobuf support, make downstream consumers find Protobuf
 if(@LIBE3_ENABLE_PROTOBUF@)
