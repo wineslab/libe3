@@ -89,7 +89,7 @@ public:
     /**
      * @brief Start the interface processing loops
      *
-     * Spawns the subscriber, publisher, and SM data handler threads.
+     * Spawns the setup, inbound, and outbound threads, plus the report worker on the RAN role.
      * @return ErrorCode::SUCCESS on success
      */
     ErrorCode start();
@@ -221,11 +221,10 @@ private:
     // Threads. setup_thread_ runs the setup loop (RAN: serves; dApp: drives once).
     // inbound_thread_ / outbound_thread_ replace the old subscriber_thread_ /
     // publisher_thread_ names since on the dApp side what flows in is not a
-    // subscription. sm_data_thread_ only runs on RAN role.
+    // subscription.
     std::unique_ptr<std::thread> setup_thread_;
     std::unique_ptr<std::thread> inbound_thread_;
     std::unique_ptr<std::thread> outbound_thread_;
-    std::unique_ptr<std::thread> sm_data_thread_;
     std::unique_ptr<std::thread> report_worker_thread_;
 
     // RAN-side handlers
@@ -281,12 +280,6 @@ private:
      *        report/release back to the RAN.
      */
     void outbound_loop_dapp();
-
-    /**
-     * @brief SM data handler - polls SMs and queues indication messages.
-     *        Only runs on RAN role.
-     */
-    void sm_data_handler_loop();
 
     /**
      * @brief Report worker thread - drains report_queue_ and invokes
