@@ -17,6 +17,7 @@
 #include <memory>
 #include <sstream>
 #include <mutex>
+#include <atomic>
 #include <cstdio>
 #include <cerrno>
 #include <cstring>
@@ -64,21 +65,21 @@ public:
      * @brief Set the log level
      */
     void set_level(LogLevel level) noexcept {
-        level_ = level;
+        level_.store(level, std::memory_order_relaxed);
     }
 
     /**
      * @brief Set the log level from integer
      */
     void set_level(int level) noexcept {
-        level_ = static_cast<LogLevel>(level);
+        level_.store(static_cast<LogLevel>(level), std::memory_order_relaxed);
     }
 
     /**
      * @brief Get current log level
      */
     LogLevel level() const noexcept {
-        return level_;
+        return level_.load(std::memory_order_relaxed);
     }
 
     /**
@@ -128,7 +129,7 @@ public:
      * @brief Check if a level should be logged
      */
     bool should_log(LogLevel level) const noexcept {
-        return static_cast<int>(level) <= static_cast<int>(level_);
+        return static_cast<int>(level) <= static_cast<int>(level_.load(std::memory_order_relaxed));
     }
 
     /**
@@ -178,7 +179,10 @@ private:
         }
     }
 
-    LogLevel level_{LogLevel::INFO};
+    // Read on every log call from many threads and written by set_level();
+    // atomic (relaxed: the level needs no ordering w.r.t. other state) so the
+    // read/write pair is not a data race.
+    std::atomic<LogLevel> level_{LogLevel::INFO};
     LogCallback callback_;
     FILE* file_{nullptr};
     std::mutex mutex_;
