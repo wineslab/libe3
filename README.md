@@ -478,15 +478,30 @@ libe3 ships an optional SWIG-generated Python binding so the same C++ library ca
 # Install SWIG and Python development headers (Ubuntu)
 sudo apt-get install -y swig python3-dev
 
-# Configure with bindings enabled
+# Build + install into the active interpreter's site-packages (activate your venv first)
+./build_libe3 --install --enable-swig \
+  --cmake-opt "-DLIBE3_ENABLE_ASN1=ON -DLIBE3_ENABLE_JSON=ON"
+python3 -c "import libe3py; print('libe3py OK')"
+
+# Or, build only (no install) and run the smoke test (CTest label "swig")
 cmake -S . -B build -DLIBE3_ENABLE_SWIG=ON
 cmake --build build --target libe3py -j $(nproc)
-
-# Smoke test (also run automatically by CTest under label "swig")
 PYTHONPATH=build/swig python3 tests/test_swig_smoke.py
 ```
 
-The build produces `build/swig/_libe3py.so` and the matching `libe3py.py` shim. Python users can construct an `E3Config`, flip its `role` to `DAPP`, instantiate an `E3Agent`, and call the dApp verbs. The minimal seam intentionally **does not** wrap the encoders (`Asn1E3Encoder` / `JsonE3Encoder`) — per-SM encoding stays in Python so that existing Python SM implementations work unchanged. See `swig/libe3.i` for the exposed surface.
+The module exposes two layers: a backwards-compatible minimal `E3Agent` view, and
+the full **`DAppSession`** dApp seam — a complete lifecycle (`start` /
+`wait_for_setup` / `subscribe` / `send_control` / `release` / `stop`) plus a
+**batched, lock-free inbound queue** drained via `poll_events(max_batch,
+timeout_ms)`, designed for the sub-millisecond / high-throughput E3AP path
+(GIL released during blocking calls). SM payloads cross as native `bytes`;
+per-SM encoding stays in Python so existing Python SM implementations work
+unchanged. `build_libe3 --install --enable-swig` installs `_libe3py.so` +
+`libe3py.py` into `Python3_SITEARCH`.
+
+See **[`swig/README.md`](swig/README.md)** for the architecture, rationale, and a
+full Python usage example, and [`swig/e3_dapp_session.hpp`](swig/e3_dapp_session.hpp)
+for the documented API.
 
 ## License
 
