@@ -24,6 +24,17 @@ constexpr const char* LOG_TAG = "ZmqConn";
 constexpr const char* IPC_BASE_DIR = "/tmp/dapps";
 constexpr int RECV_TIMEOUT_MS = 500;  // Timeout for graceful shutdown
 constexpr int PUB_CONNECT_SETTLE_MS = 200;  // PUB/SUB slow-joiner settle (client outbound)
+
+// Every socket gets ZMQ_LINGER = 0: the default (-1) makes zmq_ctx_destroy
+// block until all queued messages are flushed, so a RAN with undelivered
+// indications on its PUB socket hangs forever in dispose() and the process
+// ignores SIGTERM (the signal handler runs, but stop() never returns).
+// Dropping unsent messages on teardown is the correct trade for a
+// real-time control-loop transport.
+void set_linger0(void* socket) {
+    int linger = 0;
+    zmq_setsockopt(socket, ZMQ_LINGER, &linger, sizeof(linger));
+}
 }
 
 ZmqE3Connector::ZmqE3Connector(
@@ -120,18 +131,19 @@ ErrorCode ZmqE3Connector::setup_initial_connection() {
     // Set receive timeout to allow graceful shutdown
     int recv_timeout = RECV_TIMEOUT_MS;
     zmq_setsockopt(setup_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
-    
+    set_linger0(setup_socket_);
+
     int ret = zmq_bind(setup_socket_, setup_endpoint_.c_str());
     if (ret != 0) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to bind setup socket: " << zmq_strerror(errno);
         return ErrorCode::CONNECTION_FAILED;
     }
-    
+
     // Set IPC permissions if needed
     if (transport_layer_ == E3TransportLayer::IPC) {
         setup_ipc_permissions(setup_endpoint_);
     }
-    
+
     E3_LOG_INFO(LOG_TAG) << "Setup socket bound to " << setup_endpoint_;
     connected_ = true;
     
@@ -196,7 +208,8 @@ ErrorCode ZmqE3Connector::setup_inbound_connection() {
     // Set receive timeout to allow graceful shutdown
     int recv_timeout = RECV_TIMEOUT_MS;
     zmq_setsockopt(inbound_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
-    
+    set_linger0(inbound_socket_);
+
     int ret = zmq_bind(inbound_socket_, inbound_endpoint_.c_str());
     if (ret != 0) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to bind inbound socket: " << zmq_strerror(errno);
@@ -242,7 +255,8 @@ ErrorCode ZmqE3Connector::setup_outbound_connection() {
         E3_LOG_ERROR(LOG_TAG) << "Failed to create outbound socket: " << zmq_strerror(errno);
         return ErrorCode::CONNECTION_FAILED;
     }
-    
+    set_linger0(outbound_socket_);
+
     int ret = zmq_bind(outbound_socket_, outbound_endpoint_.c_str());
     if (ret != 0) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to bind outbound socket: " << zmq_strerror(errno);
@@ -318,8 +332,7 @@ ErrorCode ZmqE3Connector::setup_initial_connection_client() {
 
     int recv_timeout = RECV_TIMEOUT_MS;
     zmq_setsockopt(setup_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
-    int linger = 0;  // Don't block on close if RAN never replied
-    zmq_setsockopt(setup_socket_, ZMQ_LINGER, &linger, sizeof(linger));
+    set_linger0(setup_socket_);  // Don't block on close if RAN never replied
 
     const std::string setup_cep = to_connect_endpoint(setup_endpoint_);
     int ret = zmq_connect(setup_socket_, setup_cep.c_str());
@@ -371,6 +384,7 @@ ErrorCode ZmqE3Connector::setup_inbound_connection_client() {
     // each dApp filters its own; conflating would starve all but one (issue #15).
     int recv_timeout = RECV_TIMEOUT_MS;
     zmq_setsockopt(inbound_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+    set_linger0(inbound_socket_);
 
     const std::string inbound_cep = to_connect_endpoint(outbound_endpoint_);
     int ret = zmq_connect(inbound_socket_, inbound_cep.c_str());
@@ -392,6 +406,7 @@ ErrorCode ZmqE3Connector::setup_outbound_connection_client() {
         E3_LOG_ERROR(LOG_TAG) << "Failed to create outbound PUB socket: " << zmq_strerror(errno);
         return ErrorCode::CONNECTION_FAILED;
     }
+    set_linger0(outbound_socket_);
 
     const std::string outbound_cep = to_connect_endpoint(inbound_endpoint_);
     int ret = zmq_connect(outbound_socket_, outbound_cep.c_str());
@@ -512,6 +527,7 @@ bool ZmqE3Connector::reset_setup_socket() {
 
     int recv_timeout = RECV_TIMEOUT_MS;
     zmq_setsockopt(setup_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+    set_linger0(setup_socket_);
 
     int ret = zmq_bind(setup_socket_, setup_endpoint_.c_str());
     if (ret != 0) {

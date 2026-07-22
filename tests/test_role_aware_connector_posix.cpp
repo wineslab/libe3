@@ -19,7 +19,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <vector>
+#include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/un.h>
 #include <thread>
 #include <unistd.h>
 
@@ -132,6 +135,52 @@ TEST(posix_role_aware_connector_dapp_tcp_setup_request_response_roundtrip) {
     ASSERT_TRUE(n > 0);
 
     dapp->dispose();
+    ran->dispose();
+}
+
+TEST(posix_ran_delivers_final_message_before_clean_close_ipc) {
+    // Regression: on AF_UNIX a dApp that sends a final message (control, report,
+    // release) and then closes shows up as POLLIN|POLLHUP on the same poll. The
+    // RAN's receive() must deliver those bytes before dropping the peer, not
+    // discard them.
+    const std::string dir = make_tmpdir();
+    const std::string setup    = "ipc://" + dir + "/setup";
+    const std::string inbound  = "ipc://" + dir + "/dapp_socket";
+    const std::string outbound = "ipc://" + dir + "/e3_socket";
+
+    auto ran = create_connector(E3LinkLayer::POSIX, E3TransportLayer::IPC,
+                                setup, inbound, outbound,
+                                0, 0, 0, /*io_threads=*/1, E3Role::RAN);
+    ASSERT_TRUE(ran != nullptr);
+    ASSERT_TRUE(ran->setup_inbound_connection() == ErrorCode::SUCCESS);
+
+    // Raw dApp-side connection to the RAN's inbound (subscriber) endpoint:
+    // send one message, then close immediately.
+    int cli = socket(AF_UNIX, SOCK_STREAM, 0);
+    ASSERT_TRUE(cli >= 0);
+    struct sockaddr_un addr{};
+    addr.sun_family = AF_UNIX;
+    const std::string path = dir + "/dapp_socket";
+    std::strncpy(addr.sun_path, path.c_str(), sizeof(addr.sun_path) - 1);
+    ASSERT_TRUE(connect(cli, reinterpret_cast<struct sockaddr*>(&addr),
+                        sizeof(addr)) == 0);
+
+    const std::string payload = "FINAL-CONTROL-MESSAGE";
+    ASSERT_TRUE(::send(cli, payload.data(), payload.size(), 0) ==
+                static_cast<ssize_t>(payload.size()));
+    close(cli);  // clean close right after the send
+
+    // Drive receive(): the first call accepts the peer, a later call must
+    // deliver the buffered message even though POLLHUP is already set.
+    std::vector<uint8_t> got;
+    for (int i = 0; i < 20 && got.empty(); ++i) {
+        std::vector<uint8_t> buf;
+        int n = ran->receive(buf);
+        if (n > 0) got.assign(buf.begin(), buf.begin() + n);
+    }
+    ASSERT_EQ(got.size(), payload.size());
+    ASSERT_TRUE(std::memcmp(got.data(), payload.data(), payload.size()) == 0);
+
     ran->dispose();
 }
 
