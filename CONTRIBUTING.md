@@ -59,16 +59,16 @@ The following are **mandatory** for every contribution. PRs that do not meet the
 Contributions developed with the help of AI tools (LLM coding assistants, agents, and similar) are welcome, subject to the following **mandatory** rules, adapted from the Linux kernel and OpenAirInterface contribution guidelines.
 
 - **AI agents must not add `Signed-off-by` or `Co-authored-by` trailers.** Those trailers certify human authorship and origin, which only a human contributor can provide; `Co-authored-by` is reserved for human collaborators.
-- When an AI tool materially assisted a commit, disclose it with one `Assisted-by` trailer per tool, in the form:
+- When an AI tool materially assisted a commit, disclose it with one `Assisted-by` trailer per tool. The value is free-form (any non-empty descriptor); both the compact `AGENT_NAME:MODEL_VERSION` form and the Linux-kernel `Name <email>` form are accepted, for example:
 
   ```
-  Assisted-by: AGENT_NAME:MODEL_VERSION
+  Assisted-by: Claude:claude-opus-4-8
+  Assisted-by: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+  Assisted-by: Genesis agents based on Claude:claude-opus-4-8
   ```
-
-  for example `Assisted-by: Claude:claude-opus-4-8` or `Assisted-by: Copilot:copilot-swe-agent`.
 - The human submitter bears full responsibility for reviewing AI-generated code, for its correctness, and for its compatibility with this project's Apache-2.0 license (retain the SPDX identifiers already present in the sources).
 
-These rules are enforced by the `Commit trailers` workflow (`.github/workflows/commit-trailers.yml`), which fails any commit that attributes an AI agent through `Co-authored-by`/`Signed-off-by` or that carries a malformed `Assisted-by` trailer. You can run the same check locally with `python3 scripts/check_commit_trailers.py --base origin/main --head HEAD`.
+These rules are enforced by the `Commit trailers` workflow (`.github/workflows/commit-trailers.yml`), which fails any commit that attributes an AI agent through `Co-authored-by`/`Signed-off-by` or that carries an empty `Assisted-by` trailer. You can run the same check locally with `python3 scripts/check_commit_trailers.py --base origin/main --head HEAD`.
 
 ### Service Models and twin-repo coordination
 

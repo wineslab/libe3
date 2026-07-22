@@ -1,9 +1,8 @@
 name: Commit trailers
 
 # Enforce the AI-assistant commit-trailer policy documented in CONTRIBUTING.md:
-# AI agents must not add Co-authored-by/Signed-off-by, AI assistance is disclosed
-# via an `Assisted-by: AGENT_NAME:MODEL_VERSION` trailer, and Assisted-by trailers
-# must be well formed.
+# AI agents must not add Co-authored-by/Signed-off-by; AI assistance is disclosed
+# via an `Assisted-by:` trailer whose value is free-form (any non-empty descriptor).
 
 on:
   pull_request:

@@ -5,7 +5,11 @@
 For every commit in the checked range, this fails if:
   * a `Co-authored-by` or `Signed-off-by` trailer attributes an AI agent
     (only humans may certify authorship/origin), or
-  * an `Assisted-by` trailer is malformed (not `AGENT_NAME:MODEL_VERSION`).
+  * an `Assisted-by` trailer is empty.
+
+The `Assisted-by` value is free-form: any non-empty descriptor is accepted,
+e.g. `Assisted-by: Claude:claude-opus-4-8` or
+`Assisted-by: Claude Opus 4.8 (1M context) <noreply@anthropic.com>`.
 
 Usage:
   check_commit_trailers.py --base <base-sha> --head <head-sha>
@@ -57,15 +61,16 @@ def check_commit(sha: str) -> list[str]:
             if any(k in value.lower() for k in AI_KEYWORDS):
                 problems.append(
                     f"AI agent attributed via '{trailer}': {line.strip()!r}. "
-                    f"Use an 'Assisted-by: AGENT_NAME:MODEL_VERSION' trailer instead."
+                    f"Use an 'Assisted-by:' trailer instead."
                 )
         assisted = ASSISTED.match(line)
         if assisted:
-            agent, sep, model = assisted.group(1).partition(":")
-            if not sep or not agent.strip() or not model.strip():
+            # Free-form value; only reject an empty one. Both
+            # `AGENT_NAME:MODEL_VERSION` and the kernel `Name <email>` form pass.
+            if not assisted.group(1).strip():
                 problems.append(
-                    f"Malformed Assisted-by trailer: {line.strip()!r}. "
-                    f"Expected 'Assisted-by: AGENT_NAME:MODEL_VERSION'."
+                    f"Empty Assisted-by trailer: {line.strip()!r}. "
+                    f"Provide a non-empty agent descriptor."
                 )
     return problems
 
