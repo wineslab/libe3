@@ -64,6 +64,17 @@ if(LIBE3_ENABLE_PROTOBUF)
     )
 endif()
 
+# Install the Simple SM service-model definitions so Python (and other)
+# consumers can reuse the exact grammar instead of copying it. dApp-library's
+# examples/simple_dapp.py loads e3sm_simple.asn from here to stay wire-compatible
+# with examples/simple_agent.cpp. Location is exported to the .pc file as
+# `smdir` (see cmake/libe3.pc.in) and defaults to <datadir>/libe3/sm.
+install(FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/examples/sm_simple/e3sm_simple.asn"
+    "${CMAKE_CURRENT_SOURCE_DIR}/examples/sm_simple/e3sm_simple.proto"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/libe3/sm/sm_simple"
+)
+
 # Export targets
 install(EXPORT libe3Targets
     FILE libe3Targets.cmake

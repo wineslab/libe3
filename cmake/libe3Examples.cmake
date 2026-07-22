@@ -19,7 +19,7 @@ if(LIBE3_ENABLE_ASN1)
 
     # Symmetric dApp-role counterpart of simple_agent. Pairs with the same
     # sm_simple wrapper and is wire-compatible with the Python
-    # spear-dApp/examples/simple_dapp.py.
+    # dApp-library/examples/simple_dapp.py.
     add_executable(example_simple_dapp
         examples/simple_dapp.cpp
         examples/sm_simple/e3sm_simple_wrapper.cpp

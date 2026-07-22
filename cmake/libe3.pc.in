@@ -2,6 +2,11 @@ prefix=@CMAKE_INSTALL_PREFIX@
 exec_prefix=${prefix}
 libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
 includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+datarootdir=${prefix}/@CMAKE_INSTALL_DATADIR@
+# Root of the installed service-model definitions; each SM lives in its own
+# subdir, e.g. ${smdir}/sm_simple/e3sm_simple.asn (ASN.1) and .../e3sm_simple.proto
+# (Protobuf) — both are installed. Query with: pkg-config --variable=smdir libe3
+smdir=${datarootdir}/libe3/sm
 
 Name: libe3
 Description: @PROJECT_DESCRIPTION@
