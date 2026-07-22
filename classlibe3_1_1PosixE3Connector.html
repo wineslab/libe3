@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.7</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.8</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -212,9 +212,10 @@ Additional Inherited Members</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>POSIX socket-based E3 connector. </p>
-<p>Provides transport using POSIX sockets. Supports TCP, SCTP, and IPC transports. Ported from the original C implementation's posix_* functions. </p>
+<p>Provides transport using POSIX sockets. Supports TCP, SCTP, and IPC transports. Ported from the original C implementation's posix_* functions.</p>
+<p>RAN role serves multiple dApp peers: both data listeners keep accepting for the connector's lifetime, <a class="el" href="classlibe3_1_1PosixE3Connector.html#a78be8b3116078571b637153efb88b96d" title="Receive data from the inbound channel.">receive()</a> polls every accepted subscriber socket, and <a class="el" href="classlibe3_1_1PosixE3Connector.html#a7a3d61abfe45806f412e20aeaeaeb4a9" title="Send data on the outbound channel.">send()</a> broadcasts each framed message to every accepted indication socket (mirroring the ZMQ PUB/SUB semantics, where the RAN broadcasts and each dApp filters by its own dApp identifier). Peer sockets are only touched by their owning I/O thread: inbound sockets by the inbound loop, outbound sockets by the outbound loop. </p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00022">22</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00032">32</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aa615ce435e73e3f417376560be582d7f" name="aa615ce435e73e3f417376560be582d7f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa615ce435e73e3f417376560be582d7f">&#9670;&#160;</a></span>PosixE3Connector()</h2>
@@ -272,7 +273,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00065">65</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00174">174</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -299,7 +300,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00095">95</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00204">204</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -331,7 +332,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a7742bb39d7c324eff95c0ca2f60e26c5">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00614">614</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00810">810</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -362,7 +363,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a274eb381d4386c9c398b43d8714bbdbd">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00062">62</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00072">72</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -393,7 +394,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a799a30389abe8a7ed32628f74acf42d4">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00054">54</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00064">64</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -432,7 +433,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a9963f7ca5b31c539904853ad27e471a9">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00326">326</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00428">428</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -471,7 +472,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a0ab089ce40dd51cecbd8faf39aceb771">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00169">169</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00279">279</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -503,7 +504,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#ad3e7eb321d9d16ec223a12f9ad4d31b9">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00550">550</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00741">741</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -542,7 +543,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#ad97ada69d4a0ef8a6c4b7085f048d03e">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00440">440</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00608">608</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -581,7 +582,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a97d282b7213769e360ed861bb31cf662">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00210">210</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00341">341</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -613,7 +614,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#af9ada1094b5a7755b7e8f0ae9dcc324c">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00536">536</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00727">727</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -645,7 +646,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a01a61ff0e6aef94ac217231b3844b277">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00224">224</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00355">355</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -676,7 +677,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#ae506107a0cb3901bec193ba928238973">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00561">561</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00752">752</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -708,7 +709,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#ade5a39793a7868d70c809323fabe0929">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00099">99</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00208">208</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -739,7 +740,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#ac64419ab3462491e8256634c9e4582db">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00515">515</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00706">706</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -771,7 +772,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a46ec267c4c5c30bd078c644dbe3c1805">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00368">368</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00539">539</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -802,7 +803,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#adfba946cbc267f9380d541de0525adef">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00581">581</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00772">772</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -834,7 +835,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#a553d5da93e1cf9ac15e5d2aea433be7c">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00601">601</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00792">792</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -865,7 +866,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#aac74457370377b4f2e1c061a225cb6b3">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00058">58</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00068">68</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
 
 </div>
 </div>

@@ -9,6 +9,7 @@ var c__api_8cpp =
     [ "e3_agent_dapp_count", "c__api_8cpp.html#adaf92e0d137467869ca91195ea57900a", null ],
     [ "e3_agent_destroy", "c__api_8cpp.html#a315c94d725df914a14bf9ab9906db8e9", null ],
     [ "e3_agent_free_uint32_array", "c__api_8cpp.html#a023e8229e71eb379000c3bca1b3337fd", null ],
+    [ "e3_agent_get_active_ran_functions", "c__api_8cpp.html#ab3526f719929791eed5ac646cd222c01", null ],
     [ "e3_agent_get_available_ran_functions", "c__api_8cpp.html#ae8f8f036cb8025b4a299a419e04310f9", null ],
     [ "e3_agent_get_dapp_subscriptions", "c__api_8cpp.html#ab3a745629d7eed0c97515a25c04b9c1d", null ],
     [ "e3_agent_get_ran_function_subscribers", "c__api_8cpp.html#a2d435d6a82ac4f6bfdfd9e11b492cf75", null ],

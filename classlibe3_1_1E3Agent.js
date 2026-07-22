@@ -9,6 +9,7 @@ var classlibe3_1_1E3Agent =
     [ "config", "classlibe3_1_1E3Agent.html#a94e98e9001263ed16d869dce6d647abc", null ],
     [ "dapp_count", "classlibe3_1_1E3Agent.html#a72c80c0625b1a86e6f68e5e429efa11d", null ],
     [ "dapp_id", "classlibe3_1_1E3Agent.html#a3ced5792a47e610a82fc6f94cc066178", null ],
+    [ "get_active_ran_functions", "classlibe3_1_1E3Agent.html#ac7ffb4b2aee3dc30f4d6c0b9a5585d0f", null ],
     [ "get_available_ran_functions", "classlibe3_1_1E3Agent.html#a41bdbca494f861c38458819fd7288209", null ],
     [ "get_dapp_subscriptions", "classlibe3_1_1E3Agent.html#a4299228f5926a7e9aa142e1fc933685a", null ],
     [ "get_ran_function_subscribers", "classlibe3_1_1E3Agent.html#a5529f15833d60f57ad0ab86b0bbd5ec3", null ],

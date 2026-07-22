@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.7</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.8</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -141,9 +141,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3d705ce16bb03bfe4156f9c5f3c10511" id="r_a3d705ce16bb03bfe4156f9c5f3c10511"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#aad1e039c5cbadc833a3fe4d1fb8fb203">EncodeResult</a>&lt; <a class="el" href="structlibe3_1_1EncodedMessage.html">EncodedMessage</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Encoder.html#a3d705ce16bb03bfe4156f9c5f3c10511">encode_setup_request</a> (uint32_t message_id, const std::string &amp;e3ap_protocol_version, const std::string &amp;dapp_name, const std::string &amp;dapp_version, const std::string &amp;vendor)</td></tr>
 <tr class="memdesc:a3d705ce16bb03bfe4156f9c5f3c10511"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create and encode a Setup Request PDU.  <br /></td></tr>
 <tr class="separator:a3d705ce16bb03bfe4156f9c5f3c10511"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a575a36dde16020c45b808e7fee501ce5" id="r_a575a36dde16020c45b808e7fee501ce5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#aad1e039c5cbadc833a3fe4d1fb8fb203">EncodeResult</a>&lt; <a class="el" href="structlibe3_1_1EncodedMessage.html">EncodedMessage</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Encoder.html#a575a36dde16020c45b808e7fee501ce5">encode_setup_response</a> (uint32_t message_id, uint32_t request_id, <a class="el" href="namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5">ResponseCode</a> response_code, const std::optional&lt; std::string &gt; &amp;e3ap_protocol_version=std::nullopt, const std::optional&lt; uint32_t &gt; &amp;dapp_identifier=std::nullopt, const std::string &amp;ran_identifier=&quot;&quot;, const std::vector&lt; <a class="el" href="structlibe3_1_1RanFunctionDef.html">RanFunctionDef</a> &gt; &amp;ran_function_list={})</td></tr>
-<tr class="memdesc:a575a36dde16020c45b808e7fee501ce5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create and encode a Setup Response PDU.  <br /></td></tr>
-<tr class="separator:a575a36dde16020c45b808e7fee501ce5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af10bbd51e4f3b9299496a7f55c02c8cc" id="r_af10bbd51e4f3b9299496a7f55c02c8cc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#aad1e039c5cbadc833a3fe4d1fb8fb203">EncodeResult</a>&lt; <a class="el" href="structlibe3_1_1EncodedMessage.html">EncodedMessage</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Encoder.html#af10bbd51e4f3b9299496a7f55c02c8cc">encode_setup_response</a> (uint32_t message_id, uint32_t request_id, <a class="el" href="namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5">ResponseCode</a> response_code, const std::optional&lt; std::string &gt; &amp;e3ap_protocol_version=std::nullopt, const std::optional&lt; uint32_t &gt; &amp;dapp_identifier=std::nullopt, const std::string &amp;ran_identifier=&quot;&quot;, const std::optional&lt; std::vector&lt; <a class="el" href="structlibe3_1_1RanFunctionDef.html">RanFunctionDef</a> &gt; &gt; &amp;ran_function_list=std::nullopt)</td></tr>
+<tr class="memdesc:af10bbd51e4f3b9299496a7f55c02c8cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create and encode a Setup Response PDU.  <br /></td></tr>
+<tr class="separator:af10bbd51e4f3b9299496a7f55c02c8cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab9857ba71d67d0270b18288c8d3a5259" id="r_ab9857ba71d67d0270b18288c8d3a5259"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#aad1e039c5cbadc833a3fe4d1fb8fb203">EncodeResult</a>&lt; <a class="el" href="structlibe3_1_1EncodedMessage.html">EncodedMessage</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Encoder.html#ab9857ba71d67d0270b18288c8d3a5259">encode_subscription_request</a> (uint32_t message_id, uint32_t dapp_identifier, uint32_t ran_function_identifier, const std::vector&lt; uint32_t &gt; &amp;telemetry_identifier_list, const std::vector&lt; uint32_t &gt; &amp;control_identifier_list, const std::optional&lt; uint32_t &gt; &amp;subscription_time=std::nullopt)</td></tr>
 <tr class="memdesc:ab9857ba71d67d0270b18288c8d3a5259"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create and encode a Subscription Request PDU.  <br /></td></tr>
 <tr class="separator:ab9857ba71d67d0270b18288c8d3a5259"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -465,7 +465,7 @@ Protected Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00123">123</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00125">125</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
 
 </div>
 </div>
@@ -515,7 +515,7 @@ Protected Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00141">141</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00143">143</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
 
 </div>
 </div>
@@ -568,7 +568,7 @@ Protected Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00107">107</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00109">109</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
 
 </div>
 </div>
@@ -612,7 +612,7 @@ Protected Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00173">173</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00175">175</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
 
 </div>
 </div>
@@ -676,8 +676,8 @@ Protected Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a575a36dde16020c45b808e7fee501ce5" name="a575a36dde16020c45b808e7fee501ce5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a575a36dde16020c45b808e7fee501ce5">&#9670;&#160;</a></span>encode_setup_response()</h2>
+<a id="af10bbd51e4f3b9299496a7f55c02c8cc" name="af10bbd51e4f3b9299496a7f55c02c8cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af10bbd51e4f3b9299496a7f55c02c8cc">&#9670;&#160;</a></span>encode_setup_response()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -721,8 +721,8 @@ Protected Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::vector&lt; <a class="el" href="structlibe3_1_1RanFunctionDef.html">RanFunctionDef</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>ran_function_list</em> = <code>{}</code>&#160;</td>
+          <td class="paramtype">const std::optional&lt; std::vector&lt; <a class="el" href="structlibe3_1_1RanFunctionDef.html">RanFunctionDef</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>ran_function_list</em> = <code>std::nullopt</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -741,7 +741,7 @@ Protected Member Functions</h2></td></tr>
     <tr><td class="paramname">e3ap_protocol_version</td><td>E3AP protocol version (optional) </td></tr>
     <tr><td class="paramname">dapp_identifier</td><td>Assigned dApp identifier (optional) </td></tr>
     <tr><td class="paramname">ran_identifier</td><td>RAN identifier </td></tr>
-    <tr><td class="paramname">ran_function_list</td><td>List of available RAN functions (optional) </td></tr>
+    <tr><td class="paramname">ran_function_list</td><td>List of available RAN functions (optional). std::nullopt and an empty list both encode with the OPTIONAL ranFunctionList absent on the wire. </td></tr>
   </table>
   </dd>
 </dl>
@@ -792,7 +792,7 @@ Protected Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00075">75</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00077">77</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
 
 </div>
 </div>
@@ -859,7 +859,7 @@ Protected Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00055">55</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00057">57</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
 
 </div>
 </div>
@@ -919,7 +919,7 @@ Protected Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00089">89</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00091">91</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
 
 </div>
 </div>
@@ -969,7 +969,7 @@ Protected Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00157">157</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00159">159</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
 
 </div>
 </div>

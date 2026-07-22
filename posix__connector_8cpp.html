@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.7</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.8</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -101,13 +101,18 @@ $(document).ready(function(){initNavTree('posix__connector_8cpp.html',''); initR
 <div class="textblock"><code>#include &quot;<a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="logger_8hpp_source.html">libe3/logger.hpp</a>&quot;</code><br />
 <code>#include &lt;sys/socket.h&gt;</code><br />
+<code>#include &lt;sys/uio.h&gt;</code><br />
 <code>#include &lt;sys/un.h&gt;</code><br />
 <code>#include &lt;sys/stat.h&gt;</code><br />
 <code>#include &lt;netinet/in.h&gt;</code><br />
+<code>#include &lt;netinet/tcp.h&gt;</code><br />
 <code>#include &lt;netinet/sctp.h&gt;</code><br />
 <code>#include &lt;arpa/inet.h&gt;</code><br />
 <code>#include &lt;unistd.h&gt;</code><br />
 <code>#include &lt;grp.h&gt;</code><br />
+<code>#include &lt;fcntl.h&gt;</code><br />
+<code>#include &lt;sys/time.h&gt;</code><br />
+<code>#include &lt;algorithm&gt;</code><br />
 <code>#include &lt;cstring&gt;</code><br />
 <code>#include &lt;cerrno&gt;</code><br />
 <code>#include &lt;poll.h&gt;</code><br />
