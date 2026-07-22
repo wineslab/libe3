@@ -301,6 +301,12 @@ e3_error_t e3_agent_set_dapp_report_handler(
         return copy_vector_u32_to_c(v, out_len);
     }
 
+    uint32_t* e3_agent_get_active_ran_functions(e3_agent_handle_t* agent, size_t* out_len) {
+        if (!agent || !agent->agent) { if (out_len) *out_len = 0; return nullptr; }
+        auto v = agent->agent->get_active_ran_functions();
+        return copy_vector_u32_to_c(v, out_len);
+    }
+
     uint32_t e3_agent_get_subscription_periodicity(
         e3_agent_handle_t* agent,
         uint32_t dapp_id,

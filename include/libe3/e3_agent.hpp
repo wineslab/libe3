@@ -307,6 +307,17 @@ public:
     ) const;
 
     /**
+     * @brief Get the RAN functions that currently have at least one subscriber
+     *
+     * RAN role only. Unlike get_available_ran_functions() (which lists every
+     * registered Service Model), this returns only the RAN functions a dApp is
+     * actively subscribed to.
+     *
+     * @return List of RAN function IDs with one or more subscribers
+     */
+    std::vector<uint32_t> get_active_ran_functions() const;
+
+    /**
      * @brief Get the reporting periodicity a dApp requested for a RAN function
      *
      * @return periodicity in microseconds, 0 if not set or subscription not found
