@@ -271,6 +271,13 @@ std::vector<uint32_t> E3Agent::get_ran_function_subscribers(uint32_t ran_functio
     return impl_->interface->subscription_manager().get_subscribed_dapps(ran_function_id);
 }
 
+std::vector<uint32_t> E3Agent::get_active_ran_functions() const {
+    if (!impl_->interface || impl_->config.role != E3Role::RAN) {
+        return {};
+    }
+    return impl_->interface->subscription_manager().get_active_ran_functions();
+}
+
 uint32_t E3Agent::get_subscription_periodicity(uint32_t dapp_id, uint32_t ran_function_id) const {
     if (!impl_->interface) {
         return 0;

@@ -291,6 +291,14 @@ uint32_t* e3_agent_get_dapp_subscriptions(e3_agent_handle_t* agent, uint32_t dap
 uint32_t* e3_agent_get_ran_function_subscribers(e3_agent_handle_t* agent, uint32_t ran_function_id, size_t* out_len);
 
 /**
+ * @brief Return a newly-allocated array of RAN function IDs that currently have
+ *        at least one subscriber (RAN role).
+ *
+ * See `e3_agent_get_available_ran_functions` for ownership semantics.
+ */
+uint32_t* e3_agent_get_active_ran_functions(e3_agent_handle_t* agent, size_t* out_len);
+
+/**
  * @brief Get the reporting periodicity a dApp requested for a RAN function.
  *
  * @return periodicity in microseconds, 0 if not set or subscription not found
