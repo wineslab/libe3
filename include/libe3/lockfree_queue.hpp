@@ -192,6 +192,17 @@ public:
         return shutdown_.load(std::memory_order_relaxed);
     }
 
+    /**
+     * @brief Clear shutdown and discard any residual items so the queue is
+     * reusable after a shutdown(). The queue object itself is not moved, so any
+     * reference/pointer held by a consumer stays valid across a re-arm.
+     */
+    void rearm() {
+        clear();
+        shutdown_.store(false, std::memory_order_relaxed);
+        E3_LOG_DEBUG(LOG_TAG) << "Queue re-armed";
+    }
+
 private:
     static constexpr const char* LOG_TAG = "Queue";
 

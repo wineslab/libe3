@@ -7,7 +7,7 @@ option(LIBE3_BUILD_EXAMPLES "Build examples" ON)
 option(LIBE3_BUILD_INTEGRATION_TESTS
     "Build the integration test suite (multi-role end-to-end tests)" OFF)
 option(LIBE3_ENABLE_SWIG
-    "Build the SWIG Python bindings (minimal seam for spear-dApp adoption)" OFF)
+    "Build the SWIG Python bindings" OFF)
 option(LIBE3_ENABLE_ZMQ "Enable ZeroMQ transport" ON)
 option(LIBE3_ENABLE_ASN1 "Enable ASN.1 encoding support" ON)
 option(LIBE3_ENABLE_JSON "Enable JSON encoding support" OFF)

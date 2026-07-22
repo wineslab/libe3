@@ -35,6 +35,7 @@ ENABLE_JSON=0
 ENABLE_PROTOBUF=0
 ENABLE_ASAN=0
 ENABLE_TSAN=0
+ENABLE_SWIG=0
 ENABLE_UBSAN=0
 ENABLE_MSAN=0
 VERBOSE=0
@@ -107,6 +108,10 @@ Features:
   --disable-asn1          Disable ASN.1 encoding
   --enable-protobuf       Enable Protocol Buffers encoding support (default: OFF)
   --disable-protobuf      Disable Protocol Buffers encoding
+  --enable-swig           Build + install the Python (SWIG) bindings, libe3py
+                          (default: OFF). With --install, installs libe3py into
+                          the active interpreter's site-packages.
+  --disable-swig          Disable the Python (SWIG) bindings
   --enable-tests          Build unit tests (default: ON)
   --disable-tests         Disable unit tests
   --enable-examples       Build examples (default: ON)
@@ -230,7 +235,9 @@ install_dependencies() {
             nlohmann-json3-dev \
             libsctp-dev \
             protobuf-compiler \
-            libprotobuf-dev
+            libprotobuf-dev \
+            swig \
+            python3-dev
         # Build and install asn1c from source (some distros ship old versions)
         INSTALLER="apt-get"
         install_asn1c_from_source
@@ -247,7 +254,9 @@ install_dependencies() {
             nlohmann-json-devel \
             lksctp-tools-devel \
             protobuf-compiler \
-            protobuf-devel
+            protobuf-devel \
+            swig \
+            python3-devel
     elif check_command pacman; then
         echo_info "Detected Arch Linux system"
         sudo pacman -Sy --noconfirm \
@@ -260,10 +269,12 @@ install_dependencies() {
             asn1c \
             nlohmann-json \
             lksctp-tools \
-            protobuf
+            protobuf \
+            swig \
+            python
     elif check_command brew; then
         echo_info "Detected macOS with Homebrew"
-        brew install cmake pkg-config zeromq ninja asn1c nlohmann-json protobuf
+        brew install cmake pkg-config zeromq ninja asn1c nlohmann-json protobuf swig python
     else
         echo_error "Unsupported package manager. Please install dependencies manually:"
         echo "  - cmake (>= 3.16)"
@@ -311,6 +322,7 @@ configure_cmake() {
         "-DLIBE3_ENABLE_PROTOBUF=$([ $ENABLE_PROTOBUF -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_ENABLE_ASAN=$([ $ENABLE_ASAN -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_ENABLE_TSAN=$([ $ENABLE_TSAN -eq 1 ] && echo ON || echo OFF)"
+        "-DLIBE3_ENABLE_SWIG=$([ $ENABLE_SWIG -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_BUILD_DOCS=$([ $BUILD_DOCS -eq 1 ] && echo ON || echo OFF)"
     )
     
@@ -586,6 +598,14 @@ main() {
                 ;;
             --disable-protobuf)
                 ENABLE_PROTOBUF=0
+                shift
+                ;;
+            --enable-swig)
+                ENABLE_SWIG=1
+                shift
+                ;;
+            --disable-swig)
+                ENABLE_SWIG=0
                 shift
                 ;;
             --enable-tests)

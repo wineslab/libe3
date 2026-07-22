@@ -39,7 +39,7 @@ public:
     bool is_running() const noexcept;
 
     // Manual RAN-side operations (kept narrow — SM registration is not
-    // wrapped; spear-dApp keeps its Python SM encoders).
+    // wrapped; the Python consumer keeps its own SM encoders).
     ErrorCode send_indication(uint32_t dapp_id,
                               uint32_t ran_function_id,
                               const std::vector<uint8_t>& data);

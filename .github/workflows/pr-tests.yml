@@ -110,13 +110,25 @@ jobs:
         run: |
           cmake -S . -B build \
             -DCMAKE_BUILD_TYPE=Release \
-            -DLIBE3_ENABLE_SWIG=ON
+            -DCMAKE_INSTALL_PREFIX="$PWD/stage" \
+            -DLIBE3_ENABLE_SWIG=ON \
+            -DLIBE3_PYTHON_INSTALL_DIR="$PWD/stage/py"
 
       - name: Build SWIG bindings
         run: cmake --build build --target libe3py -j $(nproc)
 
       - name: Run SWIG smoke test
         run: PYTHONPATH=build/swig python3 tests/test_swig_smoke.py
+
+      - name: Install and verify (module import + sm defs + smdir)
+        run: |
+          cmake --build build -j $(nproc)   # full lib needed for install
+          cmake --install build
+          PYTHONPATH="$PWD/stage/py" python3 -c "import libe3py; print('libe3py import OK')"
+          smdir=$(PKG_CONFIG_PATH="$PWD/stage/lib/pkgconfig" pkg-config --variable=smdir libe3)
+          echo "smdir=$smdir"
+          test -f "$smdir/sm_simple/e3sm_simple.asn"
+          test -f "$smdir/sm_simple/e3sm_simple.proto"
 
   # NOTE: the MPMC Queue Benchmark moved to .github/workflows/mpmc-bench.yml,
   # where it is gated on changes to include/libe3/mpmc_queue.hpp so it only
