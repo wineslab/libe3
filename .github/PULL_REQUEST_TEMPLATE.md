@@ -42,7 +42,8 @@ These mirror what CI (`.github/workflows/pr-tests.yml`) enforces. **All boxes mu
 ## CI checklist
 
 - [ ] `Unit Tests` workflow is green (Debug + Release matrix on `ubuntu-latest`)
-- [ ] `MPMC Queue Benchmark` job has posted results to this PR with no regression
+- [ ] `Commit policy` workflow is green (trailers + linear history + each commit builds/tests independently)
+- [ ] `MPMC Queue Benchmark` shows no regression (only runs when `include/libe3/mpmc_queue.hpp` changes)
 
 ## Twin-repo coordination
 
@@ -54,5 +55,6 @@ Paired PR(s):
 
 ## Workflow confirmation
 
-- [ ] Commits will be **squashed** at merge time. Updates to this PR will be applied via **rebase** only — no merge commits, no duplicated history. (See `CONTRIBUTING.md` § Pull Request Process.)
+- [ ] My branch is a linear, fast-forward-able descendant of `main` (rebased if `main` moved), with no merge commits. (See `CONTRIBUTING.md` § Pull Request Process.)
+- [ ] Every commit builds and passes tests on its own (atomic, `git bisect`-safe) with a descriptive message.
 - [ ] I have read and followed `CONTRIBUTING.md`.

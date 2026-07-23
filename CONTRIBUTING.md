@@ -17,7 +17,13 @@ Please note we have a code of conduct, please follow it in all your interactions
    This repository is part of a framework that includes a Python library for dApps and a fork of OpenAirInterface written in C.
    We do not accept major patches that break or reduce compatibility with the twin repository.
 4. Submitted code must have been tested and should work with all the compatible configurations of the framework.
-5. Merging should always be performed via rebase commits. Pull Requests must be updated through rebasing, without duplicating commits or altering the original branch history. Merges without prior approval are not allowed, and any accidental violations will result in the deletion of the merge commit.
+5. Your branch must fast-forward onto `main`. Keep it a linear descendant of `main` (rebase onto the
+   latest `main` whenever `main` moves) with no merge commits, so the exact commits reviewed in the
+   Pull Request are the ones that land. Merges without prior approval are not allowed.
+6. Every commit must stand on its own. Each commit must build and pass tests independently, so
+   `git bisect` stays usable. Fold "WIP"/"fixup" commits into coherent commits (`git rebase -i`)
+   before review, and give each a descriptive message: an imperative subject line and, for
+   non-trivial changes, a body explaining the *what* and *why*.
 
 ## Development Workflow
 
@@ -30,6 +36,16 @@ Branch from `main`, open the PR against `wineslab/libe3`, follow the templates i
 ### For external contributors
 
 Fork **`wineslab/libe3`**, push your branch, and open a PR against `main`. Before starting non-trivial work, please open an issue (or email **a.lacava@northeastern.edu**) describing what you intend to change so we can coordinate.
+
+### Merging (maintainers)
+
+Merges into `main` are fast-forward only, performed by a maintainer from the command line:
+
+```
+git fetch origin && git checkout main && git merge --ff-only <approved-branch> && git push origin main
+```
+
+Do not merge through the GitHub merge button: it would rewrite or add commits and would not preserve the exact reviewed commits. GitHub requires at least one merge method to stay enabled ("Squash and merge" is left on for that reason only), so maintainers must ignore it and merge from the command line as above. `main` is protected, so the fast-forward push is performed by a maintainer with push (bypass) rights on the branch. The `Commit policy` workflow posts the ready-to-run merge command when the PR is approved.
 
 ## Mandatory checks
 
@@ -44,9 +60,10 @@ The following are **mandatory** for every contribution. PRs that do not meet the
 
 - All PRs must use `.github/PULL_REQUEST_TEMPLATE.md` and complete every checklist item.
 - The following CI workflows must be green on the latest commit before review:
-  - **`Unit Tests`** (`.github/workflows/pr-tests.yml`) — builds and runs `ctest --output-on-failure` for both `Debug` and `Release` on `ubuntu-latest`, then runs the MPMC queue benchmark and posts results as a PR comment.
-  - **`Commit trailers`** (`.github/workflows/commit-trailers.yml`) — validates the AI-assistant trailer policy on every commit in the PR (see [AI assistants](#ai-assistants)).
+  - **`Unit Tests`** (`.github/workflows/pr-tests.yml`) — builds and runs `ctest --output-on-failure` for both `Debug` and `Release` on `ubuntu-latest`, plus the integration, all-encodings, and SWIG jobs.
+  - **`Commit policy`** (`.github/workflows/commit-trailers.yml`) — validates the AI-assistant trailer policy on every commit (see [AI assistants](#ai-assistants)), that the branch is a linear, fast-forward-able descendant of `main` (no merge commits), and that every commit builds and passes tests on its own.
 - The following local checks must be reported in the PR description as run by the contributor (mirroring CI):
+  - The branch is rebased on the latest `main`, `git log --merges origin/main..HEAD` is empty, and each commit builds and passes tests independently.
   - `./build_libe3 -c -d build -j $(nproc) -r -t` passes (Release + tests).
   - `./build_libe3 -c -d build -j $(nproc) -g -t` passes (Debug + tests).
   - The MPMC benchmark (`./build/test_bench_mpmc_queue`) shows no regression vs `main`.
@@ -68,7 +85,7 @@ Contributions developed with the help of AI tools (LLM coding assistants, agents
   ```
 - The human submitter bears full responsibility for reviewing AI-generated code, for its correctness, and for its compatibility with this project's Apache-2.0 license (retain the SPDX identifiers already present in the sources).
 
-These rules are enforced by the `Commit trailers` workflow (`.github/workflows/commit-trailers.yml`), which fails any commit that attributes an AI agent through `Co-authored-by`/`Signed-off-by` or that carries an empty `Assisted-by` trailer. You can run the same check locally with `python3 scripts/check_commit_trailers.py --base origin/main --head HEAD`.
+These rules are enforced by the `Commit policy` workflow (`.github/workflows/commit-trailers.yml`), which fails any commit that attributes an AI agent through `Co-authored-by`/`Signed-off-by` or that carries an empty `Assisted-by` trailer. You can run the same check locally with `python3 scripts/check_commit_trailers.py --base origin/main --head HEAD`.
 
 ### Service Models and twin-repo coordination
 
