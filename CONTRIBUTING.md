@@ -62,6 +62,7 @@ The following are **mandatory** for every contribution. PRs that do not meet the
 - The following CI workflows must be green on the latest commit before review:
   - **`Unit Tests`** (`.github/workflows/pr-tests.yml`) — builds and runs `ctest --output-on-failure` for both `Debug` and `Release` on `ubuntu-latest`, plus the integration, all-encodings, and SWIG jobs.
   - **`Commit policy`** (`.github/workflows/commit-trailers.yml`) — validates the AI-assistant trailer policy on every commit (see [AI assistants](#ai-assistants)), that the branch is a linear, fast-forward-able descendant of `main` (no merge commits), and that every commit builds and passes tests on its own.
+- Build and test workflows do not run on documentation- or CI-only PRs; a `Detect code changes` job gates them so they run only when a PR changes code (the trailer and linear-history checks still run on every PR).
 - The following local checks must be reported in the PR description as run by the contributor (mirroring CI):
   - The branch is rebased on the latest `main`, `git log --merges origin/main..HEAD` is empty, and each commit builds and passes tests independently.
   - `./build_libe3 -c -d build -j $(nproc) -r -t` passes (Release + tests).

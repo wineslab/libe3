@@ -9,6 +9,14 @@ on:
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - '*.md'
+      - '**/*.md'
+      - 'docs/**'
+      - '.github/**'
+      - 'LICENSE'
+      - 'CONTRIBUTORS'
+      - '.gitignore'
   workflow_dispatch:
 
 concurrency:
