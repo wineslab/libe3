@@ -61,6 +61,10 @@ else()
     target_compile_definitions(libe3 PUBLIC LIBE3_HAS_ZMQ=0)
 endif()
 
+if(LIBE3_ENABLE_LATENCY)
+    target_compile_definitions(libe3 PRIVATE LIBE3_LATENCY)
+endif()
+
 set_target_properties(libe3 PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR}
@@ -116,6 +120,10 @@ if(LIBE3_ENABLE_ZMQ)
     target_link_libraries(libe3_shared PRIVATE PkgConfig::ZMQ)
 else()
     target_compile_definitions(libe3_shared PUBLIC LIBE3_HAS_ZMQ=0)
+endif()
+
+if(LIBE3_ENABLE_LATENCY)
+    target_compile_definitions(libe3_shared PRIVATE LIBE3_LATENCY)
 endif()
 
 set_target_properties(libe3_shared PROPERTIES
