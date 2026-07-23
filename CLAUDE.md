@@ -74,6 +74,7 @@ The design has one façade over three pluggable seams, plus a real-time data pat
 - **Custom test framework.** Tests use a small header-only framework registered with CTest, not GoogleTest or Catch2. Follow the existing `tests/test_*.cpp` pattern when adding tests.
 - **`VERSION` is the single source of truth** for the release version (consumed by CMake, `build_libe3`, and CI, which auto-tags on merge to main). Bump it (SemVer) when the public API/ABI changes.
 - **Twin-repo coordination.** Per `CONTRIBUTING.md`, changes to the wire protocol, a Service Model, or the public API require paired PRs in the companion dApps framework and `dApp-openairinterface5g`. Open an issue first and make sure PR CI passes in both Debug and Release; the MPMC queue benchmark must not regress.
+- **Fast-forward merges, atomic commits.** PRs land on `main` fast-forward only: keep the branch a linear descendant of `main` (rebase when it moves) so the reviewed commits land unchanged. Every commit must build and pass tests on its own. See `CONTRIBUTING.md` § Pull Request Process and the `Commit policy` workflow.
 
 ## Pointers
 
