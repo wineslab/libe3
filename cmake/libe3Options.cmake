@@ -15,3 +15,7 @@ option(LIBE3_ENABLE_PROTOBUF "Enable Protocol Buffers encoding support" OFF)
 option(LIBE3_ENABLE_ASAN "Enable AddressSanitizer" OFF)
 option(LIBE3_ENABLE_TSAN "Enable ThreadSanitizer" OFF)
 option(LIBE3_BUILD_DOCS "Build documentation" OFF)
+# Optional [LAT] latency-profiling log points (see include/libe3/latency.hpp).
+# Off by default: compiled out entirely, so normal builds are unaffected and
+# enabling it does not require raising the logger to DEBUG.
+option(LIBE3_ENABLE_LATENCY "Emit [LAT] latency-profiling log points" OFF)

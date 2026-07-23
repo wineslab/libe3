@@ -9,6 +9,7 @@
 
 #include "libe3/e3_interface.hpp"
 #include "libe3/logger.hpp"
+#include "libe3/latency.hpp"
 #include <cctype>
 #include <chrono>
 #include <cstdlib>
@@ -391,6 +392,7 @@ void E3Interface::setup_loop_ran() {
 void E3Interface::inbound_loop_ran() {
     apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness);
     E3_LOG_INFO(LOG_TAG) << "Inbound loop (RAN) started";
+    E3_LAT_CLOCK_OFFSET(LOG_TAG);
 
     ErrorCode result = connector_->setup_inbound_connection();
     if (result != ErrorCode::SUCCESS) {
@@ -436,6 +438,7 @@ void E3Interface::inbound_loop_ran() {
             case PduType::DAPP_CONTROL_ACTION: {
                 auto* action = std::get_if<DAppControlAction>(&pdu.choice);
                 if (action) {
+                    E3_LAT(LOG_TAG, "ctrl_wire_rx", 0) << " bytes=" << action->action_data.size();
                     handle_control_action(*action, pdu.message_id);
                 }
                 break;
@@ -516,6 +519,12 @@ void E3Interface::outbound_loop_ran() {
         }
         
         ErrorCode send_result = connector_->send(encode_result->buffer);
+        // Stage 5 (last libe3 instant out): the encoded indication/response hits
+        // the wire. The producer timestamp lives inside the opaque SM payload, so
+        // anchor is 0 here; the collector pairs it to the gNB's ind_emit_oai by
+        // consecutive line.
+        E3_LAT(LOG_TAG, "ind_wire_tx", 0) << " type=" << pdu_type_to_string(pdu_opt->type)
+                                          << " bytes=" << encode_result->buffer.size();
         if (send_result != ErrorCode::SUCCESS) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to send PDU";
         } else {
@@ -757,6 +766,8 @@ void E3Interface::handle_control_action(const DAppControlAction& action, uint32_
     ServiceModel* sm = SmRegistry::instance().get_by_ran_function(action.ran_function_identifier);
 
     if (sm && sm->is_running()) {
+        E3_LAT(LOG_TAG, "ctrl_dispatch", 0) << " rf=" << action.ran_function_identifier
+                                            << " ctrl=" << action.control_identifier;
         ErrorCode result = sm->handle_control_action(request_message_id, action);
         if (result != ErrorCode::SUCCESS) {
             E3_LOG_ERROR(LOG_TAG) << "SM failed to process control action: "

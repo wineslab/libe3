@@ -5,6 +5,7 @@
 set(LIBE3_PUBLIC_HEADERS
     include/libe3/types.hpp
     include/libe3/logger.hpp
+    include/libe3/latency.hpp
     include/libe3/e3_connector.hpp
     include/libe3/e3_encoder.hpp
     include/libe3/mpmc_queue.hpp
