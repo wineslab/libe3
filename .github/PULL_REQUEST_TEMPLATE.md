@@ -43,7 +43,7 @@ These mirror what CI (`.github/workflows/pr-tests.yml`) enforces. **All boxes mu
 
 - [ ] `Unit Tests` workflow is green (Debug + Release matrix on `ubuntu-latest`)
 - [ ] `Commit policy` workflow is green (trailers + linear history + each commit builds/tests independently)
-- [ ] `MPMC Queue Benchmark` job has posted results to this PR with no regression
+- [ ] `MPMC Queue Benchmark` shows no regression (only runs when `include/libe3/mpmc_queue.hpp` changes)
 
 ## Twin-repo coordination
 

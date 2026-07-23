@@ -45,7 +45,7 @@ Merges into `main` are fast-forward only, performed by a maintainer from the com
 git fetch origin && git checkout main && git merge --ff-only <approved-branch> && git push origin main
 ```
 
-Do not merge through the GitHub merge button: it would rewrite or add commits and would not preserve the exact reviewed commits. GitHub requires at least one merge method to stay enabled ("Squash and merge" is left on for that reason only), so maintainers must ignore it and merge from the command line as above. The `Commit policy` workflow posts the ready-to-run merge command when the PR is approved.
+Do not merge through the GitHub merge button: it would rewrite or add commits and would not preserve the exact reviewed commits. GitHub requires at least one merge method to stay enabled ("Squash and merge" is left on for that reason only), so maintainers must ignore it and merge from the command line as above. `main` is protected, so the fast-forward push is performed by a maintainer with push (bypass) rights on the branch. The `Commit policy` workflow posts the ready-to-run merge command when the PR is approved.
 
 ## Mandatory checks
 
@@ -60,8 +60,9 @@ The following are **mandatory** for every contribution. PRs that do not meet the
 
 - All PRs must use `.github/PULL_REQUEST_TEMPLATE.md` and complete every checklist item.
 - The following CI workflows must be green on the latest commit before review:
-  - **`Unit Tests`** (`.github/workflows/pr-tests.yml`) — builds and runs `ctest --output-on-failure` for both `Debug` and `Release` on `ubuntu-latest`, then runs the MPMC queue benchmark and posts results as a PR comment.
+  - **`Unit Tests`** (`.github/workflows/pr-tests.yml`) — builds and runs `ctest --output-on-failure` for both `Debug` and `Release` on `ubuntu-latest`, plus the integration, all-encodings, and SWIG jobs.
   - **`Commit policy`** (`.github/workflows/commit-trailers.yml`) — validates the AI-assistant trailer policy on every commit (see [AI assistants](#ai-assistants)), that the branch is a linear, fast-forward-able descendant of `main` (no merge commits), and that every commit builds and passes tests on its own.
+- Build and test workflows do not run on documentation- or CI-only PRs; a `Detect code changes` job gates them so they run only when a PR changes code (the trailer and linear-history checks still run on every PR).
 - The following local checks must be reported in the PR description as run by the contributor (mirroring CI):
   - The branch is rebased on the latest `main`, `git log --merges origin/main..HEAD` is empty, and each commit builds and passes tests independently.
   - `./build_libe3 -c -d build -j $(nproc) -r -t` passes (Release + tests).
