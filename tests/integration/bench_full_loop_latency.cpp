@@ -27,6 +27,7 @@
 
 #include <libe3/libe3.hpp>
 #include "sm_simple/e3sm_simple_wrapper.hpp"
+#include "sm_simple/simple_service_model.hpp"
 
 #include <algorithm>
 #include <atomic>
@@ -83,127 +84,7 @@ struct SharedTraces {
     std::mutex mu;
     std::vector<Trace> traces;
     Trace current;  // in-flight trace being filled
-    int next_seq = 0;
     int completed = 0;
-};
-
-class BenchSM : public ServiceModel {
-public:
-    BenchSM(SharedTraces& s, EncodingFormat enc) : shared_(s), enc_(enc) {}
-    std::string name() const override { return "BENCH"; }
-    uint32_t version() const override { return 1; }
-    uint32_t ran_function_id() const override { return kRanFunctionId; }
-    std::vector<uint32_t> telemetry_ids() const override { return {1}; }
-    std::vector<uint32_t> control_ids() const override { return {kControlId}; }
-    ErrorCode init() override { return ErrorCode::SUCCESS; }
-    void destroy() override { stop(); }
-    bool is_running() const override { return running_; }
-
-    std::vector<uint8_t> ran_function_data() const override {
-        std::vector<uint8_t> out;
-        if (libe3_examples::encode_ran_function_data("BENCH", out, enc_)) return out;
-        return {0x01};
-    }
-
-    ErrorCode start() override {
-        if (running_) return ErrorCode::SUCCESS;
-        running_ = true;
-        worker_ = std::thread([this]() {
-            while (running_) {
-                // Wait for the dApp's previous control to land before
-                // emitting the next indication (back-to-back).
-                {
-                    std::unique_lock<std::mutex> lk(emit_mu_);
-                    emit_cv_.wait_for(lk, std::chrono::milliseconds(50),
-                                      [this]() { return !running_ || may_emit_; });
-                    if (!running_) break;
-                    may_emit_ = false;
-                }
-                auto subs = get_subscribers();
-                if (subs.empty()) continue;
-
-                // Phase 1: collect indication data
-                int64_t t1 = now_ns();
-                uint32_t seq;
-                {
-                    std::lock_guard<std::mutex> lk(shared_.mu);
-                    shared_.current = Trace{};
-                    seq = static_cast<uint32_t>(shared_.next_seq++);
-                    shared_.current.seq = seq;
-                    shared_.current.t1_collect_begin = t1;
-                }
-                libe3_examples::SimpleIndication si{seq, 0};
-
-                // Phase 2: encode
-                int64_t t2 = now_ns();
-                std::vector<uint8_t> enc;
-                if (!libe3_examples::encode_simple_indication(si, enc, enc_)) continue;
-                int64_t t3 = now_ns();
-                {
-                    std::lock_guard<std::mutex> lk(shared_.mu);
-                    shared_.current.t2_encode_begin = t2;
-                    shared_.current.t3_send_indication = t3;
-                }
-
-                for (auto did : subs) {
-                    Pdu pdu = make_indication_pdu(did, kRanFunctionId, enc);
-                    (void)emit_outbound(std::move(pdu));
-                }
-            }
-        });
-        return ErrorCode::SUCCESS;
-    }
-
-    void stop() override {
-        if (!running_) return;
-        running_ = false;
-        {
-            std::lock_guard<std::mutex> lk(emit_mu_);
-            may_emit_ = true;
-        }
-        emit_cv_.notify_all();
-        if (worker_.joinable()) worker_.join();
-    }
-
-    // Allow the benchmark driver to gate emission to back-to-back.
-    void allow_next_emit() {
-        std::lock_guard<std::mutex> lk(emit_mu_);
-        may_emit_ = true;
-        emit_cv_.notify_one();
-    }
-
-    ErrorCode handle_control_action(uint32_t request_message_id,
-                                    const DAppControlAction& a) override {
-        int64_t t8 = now_ns();
-        {
-            std::lock_guard<std::mutex> lk(shared_.mu);
-            shared_.current.t8_recv_control = t8;
-        }
-        int sampling = 0;
-        (void)libe3_examples::decode_simple_control(a.action_data, sampling, enc_);
-        int64_t t9 = now_ns();
-        {
-            std::lock_guard<std::mutex> lk(shared_.mu);
-            shared_.current.t9_control_handler_done = t9;
-            shared_.current.complete = true;
-            shared_.traces.push_back(shared_.current);
-            ++shared_.completed;
-        }
-        // Send ack and signal the worker to emit the next indication.
-        Pdu ack = make_message_ack_pdu(request_message_id, ResponseCode::POSITIVE);
-        ErrorCode rc = emit_outbound(std::move(ack));
-        allow_next_emit();
-        return rc;
-    }
-
-private:
-    SharedTraces& shared_;
-    EncodingFormat enc_;
-    std::atomic<bool> running_{false};
-    std::thread worker_;
-    std::mutex emit_mu_;
-    std::condition_variable emit_cv_;
-    bool may_emit_{true};
 };
 
 std::string make_ipc_dir() {
@@ -319,8 +200,41 @@ int main(int argc, char* argv[]) {
 
     SharedTraces shared;
     E3Agent ran(ran_cfg);
-    auto* sm = new BenchSM(shared, encoding);
-    if (ran.register_sm(std::unique_ptr<ServiceModel>(sm)) != ErrorCode::SUCCESS) {
+    // Drive the shipped Simple SM in PingPong mode (one indication in flight,
+    // next emit gated on the control round trip) and capture the RAN-side phase
+    // boundaries through its trace hook. The dApp-side phases (t4..t7) are still
+    // captured in the indication handler below. period_us=0 makes the SM quiet,
+    // so stdout carries only the markdown table this benchmark prints.
+    auto sm = std::make_unique<libe3_examples::SimpleServiceModel>(
+        /*period_us=*/0, encoding,
+        libe3_examples::SimpleServiceModel::PacingMode::PingPong);
+    using TP = libe3_examples::SimpleServiceModel::TracePhase;
+    sm->set_trace_hook([&shared](uint32_t seq, TP phase, int64_t ts) {
+        std::lock_guard<std::mutex> lk(shared.mu);
+        switch (phase) {
+            case TP::CollectBegin:
+                shared.current = Trace{};
+                shared.current.seq = seq;
+                shared.current.t1_collect_begin = ts;
+                break;
+            case TP::EncodeBegin:
+                shared.current.t2_encode_begin = ts;
+                break;
+            case TP::SendIndication:
+                shared.current.t3_send_indication = ts;
+                break;
+            case TP::ControlRecv:
+                shared.current.t8_recv_control = ts;
+                break;
+            case TP::ControlDone:
+                shared.current.t9_control_handler_done = ts;
+                shared.current.complete = true;
+                shared.traces.push_back(shared.current);
+                ++shared.completed;
+                break;
+        }
+    });
+    if (ran.register_sm(std::move(sm)) != ErrorCode::SUCCESS) {
         std::cerr << "register_sm failed\n";
         return 1;
     }
