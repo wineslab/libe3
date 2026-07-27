@@ -163,7 +163,7 @@ typedef struct {
     const char* setup_endpoint;
     const char* subscriber_endpoint;
     const char* publisher_endpoint;
-    int encoding;         /* 0=ASN1, 1=JSON, -1=default */
+    int encoding;         /* 0=ASN1, 1=JSON, 2=PROTOBUF, -1=default */
     size_t io_threads;    /* 0=default */
     int log_level;        /* -1=default */
     const char* log_path; /* NULL=auto (/tmp/e3_<role>[_<id>]_<euid>.log) */

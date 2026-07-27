@@ -262,12 +262,17 @@ public:
 
     /**
      * @brief Subscribe to a RAN function. Must be called after a positive setup.
+     *
+     * @param out_request_id when non-null, receives the assigned E3-MessageID on
+     *        success, so the caller can correlate the SubscriptionResponse
+     *        (which echoes request_id) back to this subscribe call.
      */
     ErrorCode subscribe(uint32_t ran_function_id,
                         std::vector<uint32_t> telemetry_ids,
                         std::vector<uint32_t> control_ids,
                         std::optional<uint32_t> sub_time = std::nullopt,
-                        std::optional<uint32_t> periodicity = std::nullopt);
+                        std::optional<uint32_t> periodicity = std::nullopt,
+                        uint32_t* out_request_id = nullptr);
 
     /** Send a SubscriptionDelete for a previously subscribed RAN function. */
     ErrorCode unsubscribe(uint32_t ran_function_id);

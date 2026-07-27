@@ -178,11 +178,15 @@ public:
     std::vector<RanFunctionDef> remote_ran_functions() const;
 
     // dApp-side outbound helpers (queue PDUs that the outbound loop will encode + send)
+    // out_request_id, when non-null, receives the assigned E3-MessageID on
+    // success, so the caller can correlate the eventual SubscriptionResponse
+    // (which echoes request_id) back to this request.
     ErrorCode queue_subscription_request(uint32_t ran_function_id,
                                          std::vector<uint32_t> telemetry_ids,
                                          std::vector<uint32_t> control_ids,
                                          std::optional<uint32_t> sub_time = std::nullopt,
-                                         std::optional<uint32_t> periodicity = std::nullopt);
+                                         std::optional<uint32_t> periodicity = std::nullopt,
+                                         uint32_t* out_request_id = nullptr);
     ErrorCode queue_subscription_delete(uint32_t ran_function_id);
     ErrorCode queue_dapp_control_action(uint32_t ran_function_id,
                                         uint32_t control_id,
@@ -204,6 +208,12 @@ private:
     // State
     std::atomic<AgentState> state_{AgentState::UNINITIALIZED};
     std::atomic<bool> should_stop_{false};
+
+    // Monotonic source for E3-MessageID (1..1000). A wrapping counter gives
+    // unique ids across the small window of in-flight requests, unlike the
+    // former random draw which could collide (birthday hazard) and defeat
+    // request/response correlation.
+    std::atomic<uint32_t> next_message_id_{0};
 
     // Core components
     std::unique_ptr<E3Connector> connector_;
@@ -339,7 +349,11 @@ private:
 
 public:
     /**
-     * @brief Generate message ID (1-1000, randomized)
+     * @brief Generate the next message ID, monotonic within 1..1000.
+     *
+     * Wraps a lock-free counter into the ASN.1 E3-MessageID (1..1000) range.
+     * Monotonic (not random) so an id is unique across the in-flight window,
+     * letting a caller correlate a response by the id it was assigned.
      */
     uint32_t generate_message_id();
 

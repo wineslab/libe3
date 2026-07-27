@@ -187,9 +187,17 @@ int DAppSession::subscribe(uint32_t ran_function_id,
                            std::vector<uint32_t> control_ids,
                            int sub_time_ms,
                            int periodicity) {
-    return static_cast<int>(impl_->agent->subscribe(
+    uint32_t request_id = 0;
+    ErrorCode rc = impl_->agent->subscribe(
         ran_function_id, std::move(telemetry_ids), std::move(control_ids),
-        opt_u32(sub_time_ms), opt_u32(periodicity)));
+        opt_u32(sub_time_ms), opt_u32(periodicity), &request_id);
+    // On success return the assigned request id (positive, 1..1000) so Python
+    // can correlate the SubscriptionResponse by id; on failure return the
+    // ErrorCode (all error codes are negative, SUCCESS is 0).
+    if (rc == ErrorCode::SUCCESS) {
+        return static_cast<int>(request_id);
+    }
+    return static_cast<int>(rc);
 }
 
 int DAppSession::unsubscribe(uint32_t ran_function_id) {

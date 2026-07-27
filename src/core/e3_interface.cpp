@@ -12,7 +12,6 @@
 #include <cctype>
 #include <chrono>
 #include <cstdlib>
-#include <random>
 #include <signal.h>
 #include <string>
 
@@ -95,9 +94,9 @@ void apply_thread_config(int affinity, int niceness) noexcept {
 } // anonymous namespace
 
 uint32_t E3Interface::generate_message_id() {
-    thread_local std::mt19937 rng(std::random_device{}());
-    std::uniform_int_distribution<uint32_t> dist(1, 1000);
-    return dist(rng);
+    // Monotonic, wrapping into the ASN.1 E3-MessageID (1..1000) range. Unique
+    // across the in-flight window so responses can be correlated by id.
+    return static_cast<uint32_t>(next_message_id_.fetch_add(1, std::memory_order_relaxed) % 1000) + 1;
 }
 
 uint32_t E3Interface::sanitize_request_message_id(uint32_t request_id) {
@@ -1088,7 +1087,8 @@ ErrorCode E3Interface::queue_subscription_request(
     std::vector<uint32_t> telemetry_ids,
     std::vector<uint32_t> control_ids,
     std::optional<uint32_t> sub_time,
-    std::optional<uint32_t> periodicity
+    std::optional<uint32_t> periodicity,
+    uint32_t* out_request_id
 ) {
     if (!dapp_state_) return ErrorCode::STATE_ERROR;
     auto id = dapp_id();
@@ -1103,8 +1103,13 @@ ErrorCode E3Interface::queue_subscription_request(
     req.subscription_time = sub_time;
     req.periodicity = periodicity;
     pdu.choice = std::move(req);
-    pdu.message_id = generate_message_id();
-    return queue_outbound(std::move(pdu));
+    const uint32_t mid = generate_message_id();
+    pdu.message_id = mid;
+    ErrorCode rc = queue_outbound(std::move(pdu));
+    if (rc == ErrorCode::SUCCESS && out_request_id) {
+        *out_request_id = mid;
+    }
+    return rc;
 }
 
 ErrorCode E3Interface::queue_subscription_delete(uint32_t ran_function_id) {

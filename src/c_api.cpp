@@ -184,7 +184,7 @@ e3_agent_handle_t* e3_agent_create_with_config(const e3_config_t* config) {
             if (config->setup_endpoint) cfg.setup_endpoint = config->setup_endpoint;
             if (config->subscriber_endpoint) cfg.subscriber_endpoint = config->subscriber_endpoint;
             if (config->publisher_endpoint) cfg.publisher_endpoint = config->publisher_endpoint;
-            if (config->encoding >= 0 && config->encoding <= 1)
+            if (config->encoding >= 0 && config->encoding <= 2)
                 cfg.encoding = static_cast<EncodingFormat>(config->encoding);
             if (config->io_threads != 0) cfg.io_threads = config->io_threads;
             if (config->log_level >= 0) cfg.log_level = config->log_level;

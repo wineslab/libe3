@@ -143,7 +143,9 @@ public:
      * @brief Subscribe to a RAN function (after a positive setup).
      * @param sub_time_ms subscription time, or -1 for unset.
      * @param periodicity delivery periodicity (µs), or -1 for unset.
-     * @return ErrorCode as int.
+     * @return the assigned request id (positive, 1..1000) on success, so the
+     *         caller can correlate the SubscriptionResponse by its request_id;
+     *         a negative ErrorCode on failure.
      */
     int subscribe(uint32_t ran_function_id,
                   std::vector<uint32_t> telemetry_ids,

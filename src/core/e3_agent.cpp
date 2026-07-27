@@ -403,11 +403,13 @@ ErrorCode E3Agent::subscribe(uint32_t ran_function_id,
                              std::vector<uint32_t> telemetry_ids,
                              std::vector<uint32_t> control_ids,
                              std::optional<uint32_t> sub_time,
-                             std::optional<uint32_t> periodicity) {
+                             std::optional<uint32_t> periodicity,
+                             uint32_t* out_request_id) {
     if (impl_->config.role != E3Role::DAPP) return ErrorCode::STATE_ERROR;
     if (!impl_->interface || !impl_->interface->is_running()) return ErrorCode::NOT_INITIALIZED;
     return impl_->interface->queue_subscription_request(
-        ran_function_id, std::move(telemetry_ids), std::move(control_ids), sub_time, periodicity);
+        ran_function_id, std::move(telemetry_ids), std::move(control_ids), sub_time, periodicity,
+        out_request_id);
 }
 
 ErrorCode E3Agent::unsubscribe(uint32_t ran_function_id) {
