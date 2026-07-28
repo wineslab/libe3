@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.9</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.10</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -170,8 +170,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a2cb820c7e493703035f85c608676eb28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adbe12dacaf72ee82b6cc3d168b7b0aef" id="r_adbe12dacaf72ee82b6cc3d168b7b0aef"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structlibe3_1_1RanFunctionDef.html">RanFunctionDef</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Interface.html#adbe12dacaf72ee82b6cc3d168b7b0aef">remote_ran_functions</a> () const</td></tr>
 <tr class="separator:adbe12dacaf72ee82b6cc3d168b7b0aef"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8036f8c010b285fc1ba7bfab0d625107" id="r_a8036f8c010b285fc1ba7bfab0d625107"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Interface.html#a8036f8c010b285fc1ba7bfab0d625107">queue_subscription_request</a> (uint32_t ran_function_id, std::vector&lt; uint32_t &gt; telemetry_ids, std::vector&lt; uint32_t &gt; control_ids, std::optional&lt; uint32_t &gt; sub_time=std::nullopt, std::optional&lt; uint32_t &gt; periodicity=std::nullopt)</td></tr>
-<tr class="separator:a8036f8c010b285fc1ba7bfab0d625107"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6fcfc65385c63d4f9d6a2ae6b784732b" id="r_a6fcfc65385c63d4f9d6a2ae6b784732b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Interface.html#a6fcfc65385c63d4f9d6a2ae6b784732b">queue_subscription_request</a> (uint32_t ran_function_id, std::vector&lt; uint32_t &gt; telemetry_ids, std::vector&lt; uint32_t &gt; control_ids, std::optional&lt; uint32_t &gt; sub_time=std::nullopt, std::optional&lt; uint32_t &gt; periodicity=std::nullopt, uint32_t *out_request_id=nullptr)</td></tr>
+<tr class="separator:a6fcfc65385c63d4f9d6a2ae6b784732b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3fdfe171dd195854bfeaf8ebb8f17e9a" id="r_a3fdfe171dd195854bfeaf8ebb8f17e9a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Interface.html#a3fdfe171dd195854bfeaf8ebb8f17e9a">queue_subscription_delete</a> (uint32_t ran_function_id)</td></tr>
 <tr class="separator:a3fdfe171dd195854bfeaf8ebb8f17e9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2446d560cf6e9bd8ce0dde29c170116b" id="r_a2446d560cf6e9bd8ce0dde29c170116b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Interface.html#a2446d560cf6e9bd8ce0dde29c170116b">queue_dapp_control_action</a> (uint32_t ran_function_id, uint32_t control_id, std::vector&lt; uint8_t &gt; action_data)</td></tr>
@@ -185,7 +185,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a17e0ec39836a9f3e8547143c16df330d" id="r_a17e0ec39836a9f3e8547143c16df330d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Interface.html#a17e0ec39836a9f3e8547143c16df330d">notify_dapp_status_changed</a> ()</td></tr>
 <tr class="separator:a17e0ec39836a9f3e8547143c16df330d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a71828c38211f84941a98e4a9da4028b3" id="r_a71828c38211f84941a98e4a9da4028b3"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Interface.html#a71828c38211f84941a98e4a9da4028b3">generate_message_id</a> ()</td></tr>
-<tr class="memdesc:a71828c38211f84941a98e4a9da4028b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate message ID (1-1000, randomized)  <br /></td></tr>
+<tr class="memdesc:a71828c38211f84941a98e4a9da4028b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate the next message ID, monotonic within 1..1000.  <br /></td></tr>
 <tr class="separator:a71828c38211f84941a98e4a9da4028b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afada17b0b8a1833ecd7b279db8d3babe" id="r_afada17b0b8a1833ecd7b279db8d3babe"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Interface.html#afada17b0b8a1833ecd7b279db8d3babe">sanitize_request_message_id</a> (uint32_t request_id)</td></tr>
 <tr class="memdesc:afada17b0b8a1833ecd7b279db8d3babe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a request id that can be echoed into a response.  <br /></td></tr>
@@ -229,7 +229,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Construct with configuration. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00110">110</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00109">109</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -250,7 +250,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Destructor - ensures clean shutdown. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00131">131</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00130">130</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -322,7 +322,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01070">1070</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01069">1069</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -349,7 +349,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01064">1064</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01063">1063</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -368,9 +368,10 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Generate message ID (1-1000, randomized) </p>
+<p>Generate the next message ID, monotonic within 1..1000. </p>
+<p>Wraps a lock-free counter into the ASN.1 E3-MessageID (1..1000) range. Monotonic (not random) so an id is unique across the in-flight window, letting a caller correlate a response by the id it was assigned. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00097">97</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00096">96</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -391,7 +392,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Get available RAN functions. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00309">309</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00308">308</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -413,7 +414,7 @@ Public Member Functions</h2></td></tr>
 <p>Initialize the interface. </p>
 <p>Creates connector, encoder, and initializes internal state. </p><dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00136">136</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00135">135</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -461,7 +462,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00333">333</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00332">332</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -549,7 +550,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01126">1126</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01131">1131</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -579,7 +580,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01146">1146</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01151">1151</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -601,7 +602,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Queue a PDU for outbound transmission. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00302">302</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00301">301</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -620,7 +621,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01164">1164</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01169">1169</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -640,12 +641,12 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01110">1110</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01115">1115</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a8036f8c010b285fc1ba7bfab0d625107" name="a8036f8c010b285fc1ba7bfab0d625107"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8036f8c010b285fc1ba7bfab0d625107">&#9670;&#160;</a></span>queue_subscription_request()</h2>
+<a id="a6fcfc65385c63d4f9d6a2ae6b784732b" name="a6fcfc65385c63d4f9d6a2ae6b784732b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6fcfc65385c63d4f9d6a2ae6b784732b">&#9670;&#160;</a></span>queue_subscription_request()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -678,7 +679,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">std::optional&lt; uint32_t &gt;&#160;</td>
-          <td class="paramname"><em>periodicity</em> = <code>std::nullopt</code>&#160;</td>
+          <td class="paramname"><em>periodicity</em> = <code>std::nullopt</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t *&#160;</td>
+          <td class="paramname"><em>out_request_id</em> = <code>nullptr</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -688,7 +695,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01086">1086</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01085">1085</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -710,7 +717,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Register a Service Model. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00313">313</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00312">312</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -729,7 +736,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01080">1080</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01079">1079</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -781,7 +788,7 @@ Public Member Functions</h2></td></tr>
 <p>Return a request id that can be echoed into a response. </p>
 <p>The decoders do not enforce integer range constraints, so a peer-supplied message id outside E3-MessageID's 1..1000 can reach the handlers; echoing it into a response would fail the encode. In-range ids pass through, anything else is replaced with a fresh generated id (dApps do not correlate setup replies by ID). </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00103">103</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00102">102</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -999,7 +1006,7 @@ Public Member Functions</h2></td></tr>
 <p>Start the interface processing loops. </p>
 <p>Spawns the setup, inbound, and outbound threads, plus the report worker on the RAN role. </p><dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00194">194</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00193">193</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -1050,7 +1057,7 @@ Public Member Functions</h2></td></tr>
 <p>Stop the interface. </p>
 <p>Signals all threads to stop and waits for them to finish. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00238">238</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00237">237</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -1069,7 +1076,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01075">1075</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01074">1074</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -1118,7 +1125,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01177">1177</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01182">1182</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>

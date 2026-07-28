@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.9</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.10</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -181,9 +181,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a24c6437c7fa13f08506207c22713e99f" id="r_a24c6437c7fa13f08506207c22713e99f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a24c6437c7fa13f08506207c22713e99f">wait_for_setup</a> (std::chrono::milliseconds timeout)</td></tr>
 <tr class="memdesc:a24c6437c7fa13f08506207c22713e99f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Block until the dApp setup handshake completes.  <br /></td></tr>
 <tr class="separator:a24c6437c7fa13f08506207c22713e99f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a981544935028c732084b18e414c53cdb" id="r_a981544935028c732084b18e414c53cdb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a981544935028c732084b18e414c53cdb">subscribe</a> (uint32_t ran_function_id, std::vector&lt; uint32_t &gt; telemetry_ids, std::vector&lt; uint32_t &gt; control_ids, std::optional&lt; uint32_t &gt; sub_time=std::nullopt, std::optional&lt; uint32_t &gt; periodicity=std::nullopt)</td></tr>
-<tr class="memdesc:a981544935028c732084b18e414c53cdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscribe to a RAN function. Must be called after a positive setup.  <br /></td></tr>
-<tr class="separator:a981544935028c732084b18e414c53cdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19f94a7eaa807bf4defd45b444583a1b" id="r_a19f94a7eaa807bf4defd45b444583a1b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a19f94a7eaa807bf4defd45b444583a1b">subscribe</a> (uint32_t ran_function_id, std::vector&lt; uint32_t &gt; telemetry_ids, std::vector&lt; uint32_t &gt; control_ids, std::optional&lt; uint32_t &gt; sub_time=std::nullopt, std::optional&lt; uint32_t &gt; periodicity=std::nullopt, uint32_t *out_request_id=nullptr)</td></tr>
+<tr class="memdesc:a19f94a7eaa807bf4defd45b444583a1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscribe to a RAN function. Must be called after a positive setup.  <br /></td></tr>
+<tr class="separator:a19f94a7eaa807bf4defd45b444583a1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c24b5b987280d40ce95661c83a04bb9" id="r_a6c24b5b987280d40ce95661c83a04bb9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a6c24b5b987280d40ce95661c83a04bb9">unsubscribe</a> (uint32_t ran_function_id)</td></tr>
 <tr class="separator:a6c24b5b987280d40ce95661c83a04bb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c44d22ac933a40fba7b75714315e530" id="r_a5c44d22ac933a40fba7b75714315e530"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a5c44d22ac933a40fba7b75714315e530">send_control</a> (uint32_t ran_function_id, uint32_t control_id, std::vector&lt; uint8_t &gt; action_data)</td></tr>
@@ -1033,7 +1033,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 </div><div class="memdoc">
 <p>Send a <a class="el" href="structlibe3_1_1ReleaseMessage.html" title="E3AP Release Message structure.">ReleaseMessage</a>. The dApp stays running until <a class="el" href="classlibe3_1_1E3Agent.html#a170f30d908456a6a760ac76e1435e6ac" title="Stop the agent.">stop()</a> is called. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00434">434</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00436">436</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1087,7 +1087,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 </div><div class="memdoc">
 <p>Send a dApp control action to the RAN. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00419">419</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00421">421</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1301,7 +1301,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 </div><div class="memdoc">
 <p>Send a dApp report to the RAN. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00428">428</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00430">430</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1662,8 +1662,8 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 
 </div>
 </div>
-<a id="a981544935028c732084b18e414c53cdb" name="a981544935028c732084b18e414c53cdb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a981544935028c732084b18e414c53cdb">&#9670;&#160;</a></span>subscribe()</h2>
+<a id="a19f94a7eaa807bf4defd45b444583a1b" name="a19f94a7eaa807bf4defd45b444583a1b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19f94a7eaa807bf4defd45b444583a1b">&#9670;&#160;</a></span>subscribe()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1696,7 +1696,13 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">std::optional&lt; uint32_t &gt;&#160;</td>
-          <td class="paramname"><em>periodicity</em> = <code>std::nullopt</code>&#160;</td>
+          <td class="paramname"><em>periodicity</em> = <code>std::nullopt</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t *&#160;</td>
+          <td class="paramname"><em>out_request_id</em> = <code>nullptr</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1707,6 +1713,12 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 </div><div class="memdoc">
 
 <p>Subscribe to a RAN function. Must be called after a positive setup. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">out_request_id</td><td>when non-null, receives the assigned E3-MessageID on success, so the caller can correlate the <a class="el" href="structlibe3_1_1SubscriptionResponse.html" title="E3AP Subscription Response structure.">SubscriptionResponse</a> (which echoes request_id) back to this subscribe call. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00402">402</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
@@ -1804,7 +1816,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 </div><div class="memdoc">
 <p>Send a <a class="el" href="structlibe3_1_1SubscriptionDelete.html" title="E3AP Subscription Delete structure.">SubscriptionDelete</a> for a previously subscribed RAN function. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00413">413</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00415">415</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
