@@ -31,7 +31,7 @@ BUILD_TESTS=1
 BUILD_EXAMPLES=1
 ENABLE_ZMQ=1
 ENABLE_ASN1=1
-ENABLE_JSON=0
+ENABLE_JSON=1
 ENABLE_PROTOBUF=0
 ENABLE_ASAN=0
 ENABLE_TSAN=0
@@ -106,6 +106,8 @@ Features:
   --disable-zmq           Disable ZeroMQ transport
   --enable-asn1           Enable ASN.1 encoding support (default: ON)
   --disable-asn1          Disable ASN.1 encoding
+  --enable-json           Enable JSON encoding support (default: ON)
+  --disable-json          Disable JSON encoding
   --enable-protobuf       Enable Protocol Buffers encoding support (default: OFF)
   --disable-protobuf      Disable Protocol Buffers encoding
   --enable-swig           Build + install the Python (SWIG) bindings, libe3py
@@ -590,6 +592,14 @@ main() {
                 ;;
             --disable-asn1)
                 ENABLE_ASN1=0
+                shift
+                ;;
+            --enable-json)
+                ENABLE_JSON=1
+                shift
+                ;;
+            --disable-json)
+                ENABLE_JSON=0
                 shift
                 ;;
             --enable-protobuf)
