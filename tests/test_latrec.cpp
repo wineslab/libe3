@@ -453,6 +453,7 @@ TEST(a_reader_never_sees_a_half_written_record) {
     ASSERT_EQ(latrec_open(&r, "concurrent", kLog2), 1);
 
     std::atomic<bool> writing{true};
+    std::atomic<bool> reader_up{false};
     std::atomic<uint64_t> torn{0}, seen{0};
 
     std::thread reader([&] {
@@ -460,6 +461,7 @@ TEST(a_reader_never_sees_a_half_written_record) {
         const latrec_rec* recs =
             reinterpret_cast<const latrec_rec*>(static_cast<uint8_t*>(r.map) + LATREC_HDR_LEN);
         const uint64_t entries = 1ull << kLog2;
+        reader_up.store(true, std::memory_order_release);
         while (writing.load(std::memory_order_relaxed)) {
             for (uint64_t i = 0; i < entries; i++) {
                 const uint64_t t = LATREC_LOAD_ACQUIRE(&recs[i].t_ns);
@@ -473,7 +475,16 @@ TEST(a_reader_never_sees_a_half_written_record) {
         }
     });
 
-    for (uint64_t i = 1; i <= kWrites; i++) latrec_stamp(&r, i, LATREC_L4_RECV, i * 2, i * 3);
+    // Creating the reader does not put it on a CPU: wait until it runs.
+    while (!reader_up.load(std::memory_order_acquire)) std::this_thread::yield();
+    uint64_t i = 1;
+    for (; i <= kWrites; i++) latrec_stamp(&r, i, LATREC_L4_RECV, i * 2, i * 3);
+    for (const uint64_t cap = 1ull << kLog2;
+         i <= cap && seen.load(std::memory_order_relaxed) == 0; i++) {
+        // Extend the window until the reader samples a record, within one ring
+        // pass: a wrap pairs one write's t_ns with the next write's payload.
+        latrec_stamp(&r, i, LATREC_L4_RECV, i * 2, i * 3);
+    }
     writing.store(false);
     reader.join();
     latrec_close(&r);

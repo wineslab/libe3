@@ -50,6 +50,11 @@ install(PROGRAMS ${LIBE3_TOOLS}
     DESTINATION ${CMAKE_INSTALL_DATADIR}/libe3/tools
 )
 
+# Settings template latrec.sh sources.
+install(FILES tools/latrec.conf.example
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/libe3/tools
+)
+
 # Install generated version header
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/libe3/version.hpp
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libe3
