@@ -1,0 +1,374 @@
+/**
+ * @file test_latrec_stages.cpp
+ * @brief Asserts that the libe3 call sites stamp the right stages, in order.
+ *
+ * Drives every C++ path of a live RAN + dApp pair at once -- indications one
+ * way, reports and controls the other -- then checks, per message, that each
+ * leg is complete, ordered and free of duplicate stamps. A stamp on the wrong
+ * side of a call changes the order without changing the record count, so the
+ * per-message ordering is what is asserted rather than the totals.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include <libe3/e3_agent.hpp>
+#include <libe3/latrec.h>
+
+#include "sm_simple/simple_service_model.hpp"
+#include "latrec_ring_reader.hpp"
+#include "test_framework.hpp"
+
+#include <algorithm>
+#include <atomic>
+#include <chrono>
+#include <cstdlib>
+#include <cstring>
+#include <map>
+#include <memory>
+#include <string>
+#include <thread>
+#include <vector>
+
+using namespace libe3;
+using namespace latrec_test;
+
+namespace {
+
+/* Every record captured by the harness, from every ring and every transport /
+ * encoding combination. Merging is safe because latrec_seq_next() is
+ * process-wide, so no two combos can hand out the same seq. */
+std::vector<latrec_rec> g_recs;
+
+/* One transport + encoding pairing to drive the whole stage set through. */
+struct Combo {
+    const char* name;
+    E3LinkLayer link;
+    E3TransportLayer transport;
+    EncodingFormat encoding;
+};
+
+struct ComboResult { std::string name; bool ran{false}; size_t records{0}; };
+std::vector<ComboResult> g_combos;
+
+/* Base of the fake producer trace seqs the driver publishes with
+ * latrec_ctx_set() before each indication. Far above any real seq, so a record
+ * carrying one is unambiguously the context and not a stray value. */
+constexpr uint64_t ORIGIN_BASE = 0xE300000000ull;
+
+/* seq -> (stage -> timestamps), restricted to one leg's stages. */
+std::map<uint64_t, std::map<uint8_t, std::vector<uint64_t>>>
+group(const std::vector<uint8_t>& stages) {
+    std::map<uint64_t, std::map<uint8_t, std::vector<uint64_t>>> by;
+    for (const auto& r : g_recs) {
+        for (uint8_t s : stages) {
+            if (stage_of(r) == s) by[seq_of(r)][stage_of(r)].push_back(r.t_ns);
+        }
+    }
+    return by;
+}
+
+size_t count(uint8_t stage) {
+    size_t n = 0;
+    for (const auto& r : g_recs) if (stage_of(r) == stage) n++;
+    return n;
+}
+
+/* Every message that entered a leg must pass through the rest of it, in order,
+ * exactly once.
+ *
+ * The anchor is the leg's first stage, not its last: a producer thread with no
+ * ring discards its own first stamp, so a message can reach the last stage
+ * with no entry record. The example SM's emitter thread is such a producer.
+ * Messages that were dropped, or were still in flight when the capture ended,
+ * are excluded. */
+void assert_leg_ordered(const char* name, const std::vector<uint8_t>& chain,
+                        size_t min_complete) {
+    auto by = group(chain);
+    auto dropped = group({LATREC_L9_DROP});
+    const uint8_t first = chain.front();
+    size_t complete = 0;
+    for (const auto& [seq, stamps] : by) {
+        if (!stamps.count(first)) continue;
+        if (dropped.count(seq)) continue;
+        if (!stamps.count(chain.back())) continue;   // still in flight at capture end
+        complete++;
+        uint64_t prev = 0;
+        for (uint8_t s : chain) {
+            const auto it = stamps.find(s);
+            ASSERT_TRUE(it != stamps.end());        // no stage skipped
+            ASSERT_EQ(it->second.size(), 1u);       // and none stamped twice
+            ASSERT_GE(it->second[0], prev);         // non-decreasing in time
+            prev = it->second[0];
+        }
+    }
+    std::printf("      [%s] %zu complete messages checked\n", name, complete);
+    ASSERT_GE(complete, min_complete);
+}
+
+}  // namespace
+
+// ---------------------------------------------------------------------------
+
+TEST(ran_outbound_stages_are_ordered) {
+    // L0 enqueue -> L1 dequeue -> L2 encoded -> L3 sent
+    assert_leg_ordered("outbound", {LATREC_L0_ENQUEUE, LATREC_L1_DEQUEUE,
+                                    LATREC_L2_ENCODE_DONE, LATREC_L3_SEND_DONE}, 20);
+}
+
+TEST(emit_entry_precedes_the_enqueue) {
+    // LE0 is not in the outbound chain (only the emit APIs stamp it, so acks and
+    // setup responses have none), which is why its order is asserted here.
+    auto by = group({LATREC_LE0_EMIT_ENTER, LATREC_L0_ENQUEUE});
+    size_t checked = 0;
+    for (const auto& [seq, stamps] : by) {
+        const auto le0 = stamps.find(LATREC_LE0_EMIT_ENTER);
+        const auto l0 = stamps.find(LATREC_L0_ENQUEUE);
+        if (le0 == stamps.end() || l0 == stamps.end()) continue;
+        ASSERT_EQ(le0->second.size(), 1u);
+        ASSERT_GE(l0->second[0], le0->second[0]);
+        checked++;
+    }
+    std::printf("      %zu indications entered libe3 before being enqueued\n", checked);
+    ASSERT_GT(checked, 0u);
+}
+
+TEST(emit_entry_carries_the_producers_context) {
+    // aux is the producer's own trace seq, the key its records are joined on;
+    // aux2 is the RAN function. Without this the outbound leg cannot be tied
+    // back to whatever generated the payload.
+    size_t checked = 0;
+    for (const auto& r : g_recs) {
+        if (stage_of(r) != LATREC_LE0_EMIT_ENTER) continue;
+        ASSERT_GT(r.aux, ORIGIN_BASE);      // the driver's context, not a stray value
+        ASSERT_EQ(r.aux2, 1u);              // ran_function_id
+        checked++;
+    }
+    std::printf("      %zu emit-entry records carry a producer context\n", checked);
+    ASSERT_GT(checked, 0u);
+}
+
+TEST(inbound_stages_are_ordered) {
+    // L4 recv -> L5 decoded -> L6 dispatched
+    assert_leg_ordered("inbound", {LATREC_L4_RECV, LATREC_L5_DECODED,
+                                   LATREC_L6_DISPATCHED}, 20);
+}
+
+TEST(connector_stages_nest_inside_the_send) {
+    assert_leg_ordered("connector", {LATREC_LC0_SEND_ENTER, LATREC_LC1_SEND_RETURNED}, 20);
+}
+
+TEST(report_queue_stages_are_ordered) {
+    // L7 queued -> L8 handled, on two different threads
+    assert_leg_ordered("report", {LATREC_L7_REPORT_QUEUED, LATREC_L8_REPORT_DONE}, 1);
+}
+
+TEST(setup_handshake_is_stamped) {
+    // On this leg seq is the E3 request message_id, not the process-wide
+    // counter: it restarts per E3Interface and is confined to the ASN.1 range
+    // 1..1000, so several agents reuse the same value. The handshakes are
+    // serialised, so the records are paired in time order instead.
+    std::vector<uint64_t> recv, sent;
+    for (const auto& r : g_recs) {
+        if (stage_of(r) == LATREC_LS0_SETUP_RECV) recv.push_back(r.t_ns);
+        else if (stage_of(r) == LATREC_LS1_SETUP_SENT) sent.push_back(r.t_ns);
+    }
+    std::sort(recv.begin(), recv.end());
+    std::sort(sent.begin(), sent.end());
+    std::printf("      [setup] %zu handshakes\n", recv.size());
+    ASSERT_GT(recv.size(), 0u);
+    ASSERT_EQ(recv.size(), sent.size());          // every request got a reply stamp
+    for (size_t i = 0; i < recv.size(); i++) ASSERT_GE(sent[i], recv[i]);
+}
+
+TEST(connector_send_is_bracketed_by_the_outbound_encode_and_sent_stamps) {
+    // LC0/LC1 carry the PDU's seq through the thread-local context, so for
+    // each sent PDU the transport call falls between L2 and L3.
+    auto by = group({LATREC_L2_ENCODE_DONE, LATREC_LC0_SEND_ENTER,
+                     LATREC_LC1_SEND_RETURNED, LATREC_L3_SEND_DONE});
+    size_t checked = 0;
+    for (const auto& [seq, s] : by) {
+        if (!s.count(LATREC_L3_SEND_DONE) || !s.count(LATREC_LC0_SEND_ENTER)) continue;
+        ASSERT_GE(s.at(LATREC_LC0_SEND_ENTER)[0], s.at(LATREC_L2_ENCODE_DONE)[0]);
+        ASSERT_GE(s.at(LATREC_L3_SEND_DONE)[0], s.at(LATREC_LC1_SEND_RETURNED)[0]);
+        checked++;
+    }
+    std::printf("      [nesting] %zu sends checked\n", checked);
+    ASSERT_GE(checked, 20u);
+}
+
+TEST(every_instrumented_path_produced_records) {
+    // A path that stops firing produces no records and no failures elsewhere.
+    struct { const char* name; uint8_t stage; } expect[] = {
+        {"emit API entry",       LATREC_LE0_EMIT_ENTER},
+        {"RAN outbound enqueue", LATREC_L0_ENQUEUE},
+        {"outbound sent",        LATREC_L3_SEND_DONE},
+        {"inbound recv",         LATREC_L4_RECV},
+        {"inbound dispatched",   LATREC_L6_DISPATCHED},
+        {"report queued",        LATREC_L7_REPORT_QUEUED},
+        {"report handled",       LATREC_L8_REPORT_DONE},
+        {"setup received",       LATREC_LS0_SETUP_RECV},
+        {"connector send",       LATREC_LC1_SEND_RETURNED},
+    };
+    for (const auto& e : expect) {
+        const size_t n = count(e.stage);
+        std::printf("      %-22s %6zu records\n", e.name, n);
+        ASSERT_GT(n, 0u);
+    }
+}
+
+TEST(every_transport_and_encoding_combination_was_exercised) {
+    // The ordering checks run over the merged records, so a combo that
+    // produced nothing contributes no violations and would otherwise be
+    // indistinguishable from one that passed.
+    ASSERT_GT(g_combos.size(), 0u);
+    size_t ran = 0;
+    for (const auto& c : g_combos) {
+        std::printf("      %-22s %s (%zu records)\n", c.name.c_str(),
+                    c.ran ? "ran" : "SKIPPED (encoder not built)", c.records);
+        if (c.ran) { ASSERT_GT(c.records, 0u); ran++; }
+    }
+    ASSERT_GE(ran, 2u);        // at minimum both transports must have run
+}
+
+TEST(no_drops_were_recorded) {
+    // The harness stays well below saturation, so any drop is a defect. Report
+    // the reasons: which seam gave up is the whole diagnostic.
+    std::map<uint64_t, size_t> by_reason;
+    for (const auto& r : g_recs) {
+        if (stage_of(r) == LATREC_L9_DROP) by_reason[r.aux2]++;
+    }
+    for (const auto& [reason, n] : by_reason) {
+        std::printf("      drop reason %llu: %zu records\n",
+                    static_cast<unsigned long long>(reason), n);
+    }
+    ASSERT_EQ(count(LATREC_L9_DROP), 0u);
+}
+
+TEST(l0_is_only_stamped_by_threads_that_opened_a_ring) {
+    // queue_outbound stamps L0 on the caller's thread, and the stamp path does
+    // not open a ring. The driver thread calls latrec_tls_open_as() and is
+    // recorded; the example SM's emitter thread does not and is not.
+    const size_t entered = count(LATREC_L0_ENQUEUE);
+    const size_t sent = count(LATREC_L3_SEND_DONE);
+    ASSERT_GT(entered, 0u);                 // ring-owning producers are recorded
+    ASSERT_LT(entered, sent);               // the SM's thread is not
+    std::printf("      L0=%zu of L3=%zu: %zu PDUs came from a thread with no ring\n",
+                entered, sent, sent - entered);
+}
+
+// ---------------------------------------------------------------------------
+
+/* Drives every instrumented path once over one transport + encoding pairing.
+ * Returns false when the encoder is not compiled into this build. */
+bool run_combo(const Combo& c, const std::string& trace_dir) {
+    char ipctmpl[] = "/tmp/latrec_stages_ipc_XXXXXX";
+    const std::string ipc = mkdtemp(ipctmpl);
+
+    E3Config ran_cfg;
+    ran_cfg.role = E3Role::RAN;
+    ran_cfg.ran_identifier = "stages-ran";
+    ran_cfg.link_layer = c.link;
+    ran_cfg.transport_layer = c.transport;
+    ran_cfg.encoding = c.encoding;
+    ran_cfg.log_level = 0;
+    ran_cfg.setup_endpoint      = "ipc://" + ipc + "/setup";
+    ran_cfg.subscriber_endpoint = "ipc://" + ipc + "/dapp_socket";
+    ran_cfg.publisher_endpoint  = "ipc://" + ipc + "/e3_socket";
+    auto dapp_cfg = ran_cfg;
+    dapp_cfg.role = E3Role::DAPP;
+    dapp_cfg.dapp_name = "StagesDApp";
+
+    E3Agent ran(ran_cfg);
+    // 5 ms period: fills every leg while staying below the rate at which
+    // anything is dropped.
+    auto sm = std::make_unique<libe3_examples::SimpleServiceModel>(
+        /*period_us=*/5000, c.encoding,
+        libe3_examples::SimpleServiceModel::PacingMode::FixedRate);
+    if (ran.register_sm(std::move(sm)) != ErrorCode::SUCCESS) return false;
+    if (ran.start() != ErrorCode::SUCCESS) return false;   // encoder not built in
+
+    E3Agent dapp(dapp_cfg);
+    if (dapp.start() != ErrorCode::SUCCESS) { ran.stop(); return false; }
+    dapp.wait_for_setup(std::chrono::seconds(5));
+    dapp.subscribe(/*ran_function_id=*/1, {}, {});
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    // Drives the dApp -> RAN direction alongside the indication flow, so the
+    // inbound loop, the report queue and the report worker run while the
+    // outbound path is busy. queue_outbound stamps L0 on this thread, which
+    // therefore needs its own ring.
+    std::atomic<bool> stop{false};
+    std::thread driver([&] {
+        latrec_tls_open_as("stages.driver");
+        // A short burst of indications from a ring-owning thread, so the
+        // emit-entry stage is recorded at all: the example SM's emitter thread
+        // has no ring. The context published before each one is what that stage
+        // must carry into aux. Kept off the loop below, whose rate is set to
+        // fill every leg without provoking a drop.
+        // protocolData has to be valid JSON: the JSON encoder embeds it as a
+        // nested object rather than a string, so it parses what it is given.
+        static const char kPayload[] = "{\"stages\":1}";
+        const std::vector<uint8_t> payload(kPayload, kPayload + sizeof(kPayload) - 1);
+        // The context encodes which combo produced the record, so a drop can be
+        // attributed to its encoding.
+        const uint64_t base = ORIGIN_BASE
+                            + (static_cast<uint64_t>(c.encoding) << 8);
+        for (uint64_t i = 1; i <= 10; i++) {
+            latrec_ctx_set(base + i);
+            ran.send_indication(1, /*ran_function_id=*/1, payload);
+        }
+        while (!stop.load()) {
+            dapp.send_report(1, std::vector<uint8_t>(32, 0xAB));
+            dapp.send_control(1, 1, std::vector<uint8_t>(16, 0xCD));
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        }
+    });
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    stop.store(true);
+    driver.join();
+    dapp.stop();
+    ran.stop();
+    (void)trace_dir;
+    const std::string rm = "rm -rf '" + ipc + "'";
+    if (system(rm.c_str()) != 0) { /* best effort */ }
+    return true;
+}
+
+int main() {
+    char tmpl[] = "/tmp/latrec_stages_XXXXXX";
+    const char* trace_dir = mkdtemp(tmpl);
+    if (!trace_dir) { std::fprintf(stderr, "cannot create LATREC_DIR\n"); return 1; }
+    setenv("LATREC_DIR", trace_dir, 1);
+    setenv("LATREC_ENTRIES_LOG2", "16", 1);
+
+    // The POSIX RAN send() accepts new peers and broadcasts to all of them,
+    // which the ZMQ one does not; JSON and Protobuf change what L1->L2 and
+    // L4->L5 measure.
+    const Combo combos[] = {
+        {"zmq-ipc-asn1",     E3LinkLayer::ZMQ,   E3TransportLayer::IPC, EncodingFormat::ASN1},
+        {"posix-ipc-asn1",   E3LinkLayer::POSIX, E3TransportLayer::IPC, EncodingFormat::ASN1},
+        {"zmq-ipc-json",     E3LinkLayer::ZMQ,   E3TransportLayer::IPC, EncodingFormat::JSON},
+        {"zmq-ipc-protobuf", E3LinkLayer::ZMQ,   E3TransportLayer::IPC, EncodingFormat::PROTOBUF},
+    };
+
+    for (const Combo& c : combos) {
+        const size_t before = read_ring_dir(trace_dir).size();
+        const bool ran = run_combo(c, trace_dir);
+        const size_t after = read_ring_dir(trace_dir).size();
+        g_combos.push_back({c.name, ran, ran ? after - before : 0});
+        std::printf("combo %-18s %s\n", c.name,
+                    ran ? "ok" : "skipped (encoder not built)");
+    }
+
+    g_recs = read_ring_dir(trace_dir);
+    std::printf("\ncaptured %zu records across %zu combos\n\n",
+                g_recs.size(), g_combos.size());
+    const int rc = RUN_ALL_TESTS();
+
+    const std::string rm = std::string("rm -rf '") + trace_dir + "'";
+    if (system(rm.c_str()) != 0) { /* best effort */ }
+    unsetenv("LATREC_DIR");
+    unsetenv("LATREC_ENTRIES_LOG2");
+    return rc;
+}

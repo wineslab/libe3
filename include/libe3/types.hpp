@@ -271,6 +271,7 @@ struct DAppReport {
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0};
     std::vector<uint8_t> report_data;
+    uint64_t recv_seq{0};          ///< Set by the inbound loop; keys the [latrec] L-stage records
 };
 
 /**
@@ -314,6 +315,7 @@ struct Pdu {
     PduChoice choice;
     uint32_t message_id{0};        ///< Unique message identifier
     uint64_t timestamp{0};         ///< Message timestamp (milliseconds since epoch)
+    uint64_t enqueue_seq{0};       ///< Set by queue_outbound; keys the [latrec] L-stage records
 
     Pdu() : timestamp(static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(

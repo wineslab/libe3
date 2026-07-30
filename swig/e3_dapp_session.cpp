@@ -8,6 +8,7 @@
 #include "e3_dapp_session.hpp"
 
 #include <libe3/e3_agent.hpp>
+#include <libe3/latrec.h>
 #include <libe3/lockfree_queue.hpp>
 
 #include <algorithm>
@@ -45,8 +46,14 @@ struct DAppSession::Impl {
     libe3::SetupResponse setup;
 
     void enqueue(E3Event ev) {
+        const uint64_t seq = latrec_seq_next();
+        ev.trace_seq = seq;
+        const uint64_t kind = static_cast<uint64_t>(ev.kind);
         if (queue.push(std::move(ev)) != libe3::ErrorCode::SUCCESS) {
             dropped.fetch_add(1, std::memory_order_relaxed);
+            latrec_tstamp(seq, LATREC_L9_DROP, 0, LATREC_DROP_SESSION_QUEUE);
+        } else {
+            latrec_tstamp(seq, LATREC_LQ0_QUEUED, kind, 0);
         }
     }
 };
@@ -224,6 +231,9 @@ std::vector<E3Event> DAppSession::poll_events(std::size_t max_batch, int timeout
     std::vector<E3Event> out;
     if (max_batch == 0) return out;
     auto& queue = impl_->queue;
+    // libe3 does not start this thread, so it has no ring. The open happens
+    // once, on a per-batch call rather than a per-event one.
+    latrec_tls_open_as("libe3.session");
 
     // timeout_ms <= 0 is a non-blocking poll (try_pop); a positive value blocks
     // up to that long for the first event. (pop() spins/yields before checking
@@ -239,6 +249,11 @@ std::vector<E3Event> DAppSession::poll_events(std::size_t max_batch, int timeout
         auto next = queue.try_pop();
         if (!next) break;
         out.push_back(std::move(*next));
+    }
+    // aux is the position in the batch and aux2 its size, so a backlog shows
+    // as batches reaching max_batch.
+    for (std::size_t i = 0; i < out.size(); ++i) {
+        latrec_tstamp(out[i].trace_seq, LATREC_LQ1_POLLED, i, out.size());
     }
     return out;
 }

@@ -1,0 +1,70 @@
+name: latrec portability
+
+# latrec.h is a public header consumed by C and C++ callers across several
+# repos, and its correctness depends on things that only differ off x86:
+# the release store on t_ns is a no-op barrier on x86 but a real one on
+# weakly-ordered targets, and the cpu-id branch flips. Compiling it for
+# aarch64 keeps both honest without needing an aarch64 runner.
+
+on:
+  pull_request:
+    paths:
+      - 'include/libe3/latrec.h'
+      - 'src/core/latrec.c'
+      - '.github/workflows/latrec-portability.yml'
+  workflow_dispatch:
+
+jobs:
+  cross-compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the aarch64 cross toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gcc-aarch64-linux-gnu
+
+      - name: Compile latrec for aarch64 and x86-64, C and C++, strict dialects
+        run: |
+          set -e
+          cat > /tmp/latrec_probe.c <<'EOF'
+          #ifndef _GNU_SOURCE          /* g++ predefines it */
+          #define _GNU_SOURCE
+          #endif
+          #include <libe3/latrec.h>
+          void do_stamp(latrec_t* r) { latrec_stamp(r, 1, LATREC_L0_ENQUEUE, 2, 3); }
+          void do_ctx(uint64_t s) { latrec_ctx_set(s); }
+          int main(void) { latrec_t r; latrec_open(&r, "probe", 12); do_stamp(&r);
+                           latrec_close(&r); return 0; }
+          EOF
+          W="-Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Werror"
+          for std in c99 c11 gnu11; do
+            aarch64-linux-gnu-gcc -O2 -std=$std $W -Iinclude -c /tmp/latrec_probe.c -o /dev/null
+            gcc                   -O2 -std=$std $W -Iinclude -c /tmp/latrec_probe.c -o /dev/null
+            echo "  ok: $std"
+          done
+          for std in c++17 gnu++17; do
+            g++ -O2 -std=$std $W -Wold-style-cast -Iinclude -x c++ -c /tmp/latrec_probe.c -o /dev/null
+            echo "  ok: $std"
+          done
+
+      - name: Assert the aarch64 release store is a real barrier
+        run: |
+          set -e
+          aarch64-linux-gnu-gcc -O2 -std=gnu11 -Iinclude -S /tmp/latrec_probe.c -o /tmp/latrec_probe.s
+          # t_ns must be published with stlr; a plain str would silently break
+          # the "nonzero t_ns implies the rest of the record is visible" rule
+          # that every reader, including the CSV converter, relies on.
+          if ! sed -n '/^do_stamp:/,/ret/p' /tmp/latrec_probe.s | grep -q 'stlr'; then
+            echo "ERROR: no stlr in latrec_stamp on aarch64 -- the release store was lost"
+            sed -n '/^do_stamp:/,/ret/p' /tmp/latrec_probe.s
+            exit 1
+          fi
+          echo "  ok: stlr present"
+          # Off x86 the stamp must not call sched_getcpu: it can be a syscall there.
+          if sed -n '/^do_stamp:/,/ret/p' /tmp/latrec_probe.s | grep -q 'bl.*sched_getcpu'; then
+            echo "ERROR: latrec_stamp calls sched_getcpu on aarch64"
+            exit 1
+          fi
+          echo "  ok: cpu id comes from the cached value"

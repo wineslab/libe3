@@ -4,6 +4,7 @@
 #include "libe3/sm_interface.hpp"
 #include "libe3/types.hpp"
 #include "libe3/error_codes.h"
+#include "libe3/latrec.h"
 
 #include <string>
 #include <vector>
@@ -138,6 +139,12 @@ e3_error_t e3_service_model_emit_indication(
     if (!sm) return static_cast<int>(ErrorCode::INVALID_PARAM);
 
     Pdu pdu(PduType::INDICATION_MESSAGE);
+    // Keys the outbound leg from this boundary, so the payload copy and the Pdu
+    // construction below fall inside it. aux carries the producer's own trace
+    // seq, which joins its stages to this leg.
+    pdu.enqueue_seq = latrec_seq_next();
+    latrec_tstamp(pdu.enqueue_seq, LATREC_LE0_EMIT_ENTER, latrec_ctx(), ran_function_id);
+
     IndicationMessage msg;
     msg.dapp_identifier = dapp_id;
     msg.ran_function_identifier = ran_function_id;

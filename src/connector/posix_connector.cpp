@@ -8,6 +8,7 @@
  */
 
 #include "posix_connector.hpp"
+#include "libe3/latrec.h"
 #include "libe3/logger.hpp"
 #include <sys/socket.h>
 #include <sys/uio.h>
@@ -612,11 +613,13 @@ ErrorCode PosixE3Connector::send(const std::vector<uint8_t>& data) {
         if (outbound_connection_socket_ < 0) {
             return ErrorCode::NOT_CONNECTED;
         }
+        latrec_tstamp(latrec_ctx(), LATREC_LC0_SEND_ENTER, data.size(), 0);
         ssize_t sent = ::send(outbound_connection_socket_, data.data(), data.size(), 0);
         if (sent < 0 || static_cast<size_t>(sent) != data.size()) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to send dApp outbound: " << strerror(errno);
             return ErrorCode::TRANSPORT_ERROR;
         }
+        latrec_tstamp(latrec_ctx(), LATREC_LC1_SEND_RETURNED, data.size(), 1);
         E3_LOG_TRACE(LOG_TAG) << "Sent (dApp raw): " << data.size() << " bytes";
         return ErrorCode::SUCCESS;
     }
@@ -628,6 +631,7 @@ ErrorCode PosixE3Connector::send(const std::vector<uint8_t>& data) {
     if (outbound_socket_ < 0) {
         return ErrorCode::NOT_CONNECTED;
     }
+    latrec_tstamp(latrec_ctx(), LATREC_LC0_SEND_ENTER, data.size(), 0);
     drain_accept(outbound_socket_, transport_layer_, outbound_peer_sockets_,
                  "Outbound (indication)");
 
@@ -649,6 +653,9 @@ ErrorCode PosixE3Connector::send(const std::vector<uint8_t>& data) {
     if (any_failed && outbound_peer_sockets_.empty()) {
         return ErrorCode::TRANSPORT_ERROR;
     }
+    // aux2 = peers served, which scales the cost of this call.
+    latrec_tstamp(latrec_ctx(), LATREC_LC1_SEND_RETURNED, data.size(),
+                  outbound_peer_sockets_.size());
     E3_LOG_TRACE(LOG_TAG) << "Sent: " << data.size() << " bytes to "
                           << outbound_peer_sockets_.size() << " peer(s)";
     return ErrorCode::SUCCESS;

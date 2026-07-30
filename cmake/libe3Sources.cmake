@@ -16,12 +16,14 @@ set(LIBE3_PUBLIC_HEADERS
     include/libe3/libe3.hpp
     include/libe3/c_api.h
     include/libe3/error_codes.h
+    include/libe3/latrec.h
 )
 
 set(LIBE3_SOURCES
     # Core
     src/core/e3_agent.cpp
     src/core/e3_interface.cpp
+    src/core/latrec.c
     src/core/subscription_manager.cpp
     src/core/sm_registry.cpp
     

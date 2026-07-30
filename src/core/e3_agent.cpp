@@ -7,6 +7,7 @@
 
 #include "libe3/e3_agent.hpp"
 #include "libe3/e3_interface.hpp"
+#include "libe3/latrec.h"
 #include "libe3/logger.hpp"
 #include "libe3/version.hpp"
 
@@ -205,6 +206,11 @@ ErrorCode E3Agent::send_indication(
     }
     
     Pdu pdu(PduType::INDICATION_MESSAGE);
+    // As in e3_service_model_emit_indication: the outbound leg starts at this
+    // boundary whichever API the producer used.
+    pdu.enqueue_seq = latrec_seq_next();
+    latrec_tstamp(pdu.enqueue_seq, LATREC_LE0_EMIT_ENTER, latrec_ctx(), ran_function_id);
+
     uint32_t mid = impl_->interface->generate_message_id();
     pdu.message_id = mid;
     IndicationMessage msg;

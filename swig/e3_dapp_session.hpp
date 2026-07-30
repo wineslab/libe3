@@ -80,6 +80,7 @@ struct E3Event {
     uint32_t request_id{0};         ///< request id (subscription response / ack)
     int response_code{-1};          ///< 0=positive, 1=negative, -1=n/a
     std::vector<uint8_t> payload;   ///< opaque E3SM bytes (indication / xApp control)
+    uint64_t trace_seq{0};          ///< set when queued; keys the [latrec] LQ-stage records
     // NOTE: in Python (libe3py) the payload is read via ev.get_payload(), which
     // returns native `bytes`. SWIG member getters return a wrapped vector, so the
     // binding exposes the payload as a by-value method instead (see swig/libe3.i).

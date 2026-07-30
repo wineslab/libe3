@@ -7,6 +7,7 @@
  */
 
 #include "zmq_connector.hpp"
+#include "libe3/latrec.h"
 #include "libe3/logger.hpp"
 #include <zmq.h>
 #include <cstring>
@@ -276,12 +277,14 @@ ErrorCode ZmqE3Connector::send(const std::vector<uint8_t>& data) {
         return ErrorCode::NOT_CONNECTED;
     }
     
+    latrec_tstamp(latrec_ctx(), LATREC_LC0_SEND_ENTER, data.size(), 0);
     int ret = zmq_send(outbound_socket_, data.data(), data.size(), 0);
     if (ret < 0) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to send: " << zmq_strerror(errno);
         return ErrorCode::TRANSPORT_ERROR;
     }
     
+    latrec_tstamp(latrec_ctx(), LATREC_LC1_SEND_RETURNED, data.size(), 0);
     E3_LOG_TRACE(LOG_TAG) << "Sent: " << data.size() << " bytes";
     return ErrorCode::SUCCESS;
 }
