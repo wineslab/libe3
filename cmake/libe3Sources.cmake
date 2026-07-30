@@ -19,6 +19,14 @@ set(LIBE3_PUBLIC_HEADERS
     include/libe3/latrec.h
 )
 
+# The reader for the ring format and the converter built on it, installed so
+# downstream users of latrec.h get the tooling that parses what it writes.
+# latrec2csv.py needs numpy; latrec_reader.py is standard library only.
+set(LIBE3_TOOLS
+    tools/latrec_reader.py
+    tools/latrec2csv.py
+)
+
 set(LIBE3_SOURCES
     # Core
     src/core/e3_agent.cpp

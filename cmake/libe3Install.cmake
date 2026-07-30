@@ -43,6 +43,13 @@ install(DIRECTORY include/libe3
     FILES_MATCHING PATTERN "*.hpp"
 )
 
+# The reader for the ring format latrec.h writes and the converter over it.
+# PROGRAMS, not FILES: both are run from the command line, and latrec2csv.py
+# locates the reader beside itself.
+install(PROGRAMS ${LIBE3_TOOLS}
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/libe3/tools
+)
+
 # Install generated version header
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/libe3/version.hpp
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libe3

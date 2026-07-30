@@ -94,3 +94,39 @@ if(LIBE3_BUILD_INTEGRATION_TESTS AND LIBE3_ENABLE_ASN1)
         set_tests_properties(${target_name} PROPERTIES LABELS "integration")
     endforeach()
 endif()
+
+# --- latrec format round trip -------------------------------------------------
+# The ring format and the stage catalog are mirrored by four writers and read by
+# tools/latrec_reader.py. latrec_fixture writes a ring with the real writer and
+# the Python test reads it back field by field, so neither the layout nor the
+# catalog can change on one side only.
+add_executable(latrec_fixture "${CMAKE_CURRENT_SOURCE_DIR}/tests/latrec_fixture.c")
+target_link_libraries(latrec_fixture PRIVATE libe3::libe3)
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME test_latrec_reader
+             COMMAND ${Python3_EXECUTABLE}
+                     "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_latrec_reader.py"
+                     $<TARGET_FILE:latrec_fixture>
+                     "${CMAKE_CURRENT_SOURCE_DIR}/include/libe3/latrec.h")
+else()
+    message(STATUS "Skipping test_latrec_reader: no Python 3 interpreter")
+endif()
+
+# --- latrec2csv against injected ground truth ---------------------------------
+# Synthetic rings whose hops are known in advance, so the CSVs are checked
+# against the delays that were written rather than against themselves. Needs
+# numpy, which the converter uses and the reader does not.
+if(Python3_Interpreter_FOUND)
+    execute_process(COMMAND ${Python3_EXECUTABLE} -c "import numpy"
+                    RESULT_VARIABLE LIBE3_NO_NUMPY
+                    OUTPUT_QUIET ERROR_QUIET)
+    if(LIBE3_NO_NUMPY EQUAL 0)
+        add_test(NAME test_latrec2csv
+                 COMMAND ${Python3_EXECUTABLE}
+                         "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_latrec2csv.py"
+                         "${CMAKE_CURRENT_SOURCE_DIR}/tools/latrec2csv.py")
+    else()
+        message(STATUS "Skipping test_latrec2csv: numpy not available")
+    endif()
+endif()
