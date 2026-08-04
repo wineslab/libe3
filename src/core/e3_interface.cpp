@@ -317,6 +317,9 @@ ErrorCode E3Interface::queue_outbound(Pdu pdu) {
     if (!response_queue_) {
         return ErrorCode::NOT_INITIALIZED;
     }
+    // Per-thread ring: open the producer thread's outbound ring so the L0 stamp
+    // below is recorded (idempotent; no-op with tracing off).
+    latrec_tls_open_as(LATREC_ROLE_OUTBOUND);
     // enqueue_seq identifies this PDU across the latrec stage records. An emit
     // path that already stamped LATREC_LE0_EMIT_ENTER allocated it there, so
     // that record and these share one key; everything else allocates here.
