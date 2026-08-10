@@ -104,6 +104,7 @@ bool ProtobufE3Encoder::pdu_to_proto(const Pdu& pdu, pb::E3Pdu& out) const {
             m->set_dapp_identifier(s->dapp_identifier);
             m->set_ran_function_identifier(s->ran_function_identifier);
             m->set_protocol_data(s->protocol_data.data(), s->protocol_data.size());
+            m->set_message_timestamp(s->message_timestamp);
             return true;
         }
         case PduType::DAPP_CONTROL_ACTION: {
@@ -114,6 +115,7 @@ bool ProtobufE3Encoder::pdu_to_proto(const Pdu& pdu, pb::E3Pdu& out) const {
             m->set_ran_function_identifier(s->ran_function_identifier);
             m->set_control_identifier(s->control_identifier);
             m->set_action_data(s->action_data.data(), s->action_data.size());
+            m->set_message_timestamp(s->message_timestamp);
             return true;
         }
         case PduType::DAPP_REPORT: {
@@ -123,6 +125,7 @@ bool ProtobufE3Encoder::pdu_to_proto(const Pdu& pdu, pb::E3Pdu& out) const {
             m->set_dapp_identifier(s->dapp_identifier);
             m->set_ran_function_identifier(s->ran_function_identifier);
             m->set_report_data(s->report_data.data(), s->report_data.size());
+            m->set_message_timestamp(s->message_timestamp);
             return true;
         }
         case PduType::XAPP_CONTROL_ACTION: {
@@ -132,6 +135,7 @@ bool ProtobufE3Encoder::pdu_to_proto(const Pdu& pdu, pb::E3Pdu& out) const {
             m->set_dapp_identifier(s->dapp_identifier);
             m->set_ran_function_identifier(s->ran_function_identifier);
             m->set_xapp_control_data(s->xapp_control_data.data(), s->xapp_control_data.size());
+            m->set_message_timestamp(s->message_timestamp);
             return true;
         }
         case PduType::RELEASE_MESSAGE: {
@@ -147,6 +151,7 @@ bool ProtobufE3Encoder::pdu_to_proto(const Pdu& pdu, pb::E3Pdu& out) const {
             auto* m = out.mutable_message_ack();
             m->set_request_id(s->request_id);
             m->set_response_code(to_pb_response_code(s->response_code));
+            m->set_message_timestamp(s->message_timestamp);
             return true;
         }
     }
@@ -234,6 +239,7 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
             s.dapp_identifier = m.dapp_identifier();
             s.ran_function_identifier = m.ran_function_identifier();
             s.protocol_data = to_bytes(m.protocol_data());
+            s.message_timestamp = m.message_timestamp();
             pdu.type = PduType::INDICATION_MESSAGE;
             pdu.choice = std::move(s);
             break;
@@ -245,6 +251,7 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
             s.ran_function_identifier = m.ran_function_identifier();
             s.control_identifier = m.control_identifier();
             s.action_data = to_bytes(m.action_data());
+            s.message_timestamp = m.message_timestamp();
             pdu.type = PduType::DAPP_CONTROL_ACTION;
             pdu.choice = std::move(s);
             break;
@@ -255,6 +262,7 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
             s.dapp_identifier = m.dapp_identifier();
             s.ran_function_identifier = m.ran_function_identifier();
             s.report_data = to_bytes(m.report_data());
+            s.message_timestamp = m.message_timestamp();
             pdu.type = PduType::DAPP_REPORT;
             pdu.choice = std::move(s);
             break;
@@ -265,6 +273,7 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
             s.dapp_identifier = m.dapp_identifier();
             s.ran_function_identifier = m.ran_function_identifier();
             s.xapp_control_data = to_bytes(m.xapp_control_data());
+            s.message_timestamp = m.message_timestamp();
             pdu.type = PduType::XAPP_CONTROL_ACTION;
             pdu.choice = std::move(s);
             break;
@@ -282,6 +291,7 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
             MessageAck s;
             s.request_id = m.request_id();
             s.response_code = from_pb_response_code(m.response_code());
+            s.message_timestamp = m.message_timestamp();
             pdu.type = PduType::MESSAGE_ACK;
             pdu.choice = std::move(s);
             break;
@@ -293,6 +303,9 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
 }
 
 EncodeResult<EncodedMessage> ProtobufE3Encoder::encode(const Pdu& pdu) {
+    if (!timestamps_present(pdu)) {
+        return tl::unexpected(ErrorCode::ENCODE_FAILED);
+    }
     pb::E3Pdu proto;
     if (!pdu_to_proto(pdu, proto)) {
         return tl::unexpected(ErrorCode::ENCODE_FAILED);
@@ -320,7 +333,11 @@ EncodeResult<Pdu> ProtobufE3Encoder::decode(const uint8_t* data, size_t size) {
     if (proto.msg_case() == pb::E3Pdu::MSG_NOT_SET) {
         return tl::unexpected(ErrorCode::DECODE_FAILED);
     }
-    return proto_to_pdu(proto);
+    Pdu pdu = proto_to_pdu(proto);
+    if (!timestamps_present(pdu)) {
+        return tl::unexpected(ErrorCode::DECODE_FAILED);
+    }
+    return pdu;
 }
 
 } // namespace libe3

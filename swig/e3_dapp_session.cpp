@@ -62,6 +62,7 @@ DAppSession::DAppSession(libe3::E3Config config, std::size_t queue_capacity) {
         ev.kind = E3_EVENT_INDICATION;
         ev.dapp_id = m.dapp_identifier;
         ev.ran_function_id = m.ran_function_identifier;
+        ev.message_timestamp = m.message_timestamp;
         ev.payload = m.protocol_data;  // one copy from libe3's const&
         impl->enqueue(std::move(ev));
     });
@@ -71,6 +72,7 @@ DAppSession::DAppSession(libe3::E3Config config, std::size_t queue_capacity) {
         ev.kind = E3_EVENT_XAPP_CONTROL;
         ev.dapp_id = a.dapp_identifier;
         ev.ran_function_id = a.ran_function_identifier;
+        ev.message_timestamp = a.message_timestamp;
         ev.payload = a.xapp_control_data;
         impl->enqueue(std::move(ev));
     });
@@ -104,6 +106,7 @@ DAppSession::DAppSession(libe3::E3Config config, std::size_t queue_capacity) {
         ev.kind = E3_EVENT_MESSAGE_ACK;
         ev.request_id = ack.request_id;
         ev.response_code = static_cast<int>(ack.response_code);
+        ev.message_timestamp = ack.message_timestamp;
         impl->enqueue(std::move(ev));
     });
 }

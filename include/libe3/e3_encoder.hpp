@@ -222,6 +222,19 @@ public:
 
 protected:
     E3Encoder() = default;
+
+    /**
+     * @brief Whether the PDU's mandatory timestamps are populated.
+     *
+     * proto3 has no `required` and a missing JSON key decodes as zero, so the
+     * check lives here and all three encodings reject an unset timestamp alike.
+     * A realtime-epoch reading is never zero, so this also detects absence.
+     *
+     * @param pdu PDU to check
+     * @return true when the envelope and, for the data-plane types, the message
+     *         timestamp are both set
+     */
+    static bool timestamps_present(const Pdu& pdu) noexcept;
 };
 
 /**

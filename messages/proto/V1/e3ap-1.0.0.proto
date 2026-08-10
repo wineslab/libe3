@@ -73,6 +73,7 @@ message IndicationMessage {
   uint32 dapp_identifier = 1;
   uint32 ran_function_identifier = 2;
   bytes protocol_data = 3;
+  uint64 message_timestamp = 4;  // ns since the Unix epoch, realtime clock
 }
 
 // dApp Control Action (dApp -> RAN). action_data is Service Model opaque.
@@ -81,6 +82,7 @@ message DAppControlAction {
   uint32 ran_function_identifier = 2;
   uint32 control_identifier = 3;
   bytes action_data = 4;
+  uint64 message_timestamp = 5;  // ns since the Unix epoch, realtime clock
 }
 
 // dApp Report (dApp -> RAN). report_data is Service Model opaque.
@@ -88,6 +90,7 @@ message DAppReport {
   uint32 dapp_identifier = 1;
   uint32 ran_function_identifier = 2;
   bytes report_data = 3;
+  uint64 message_timestamp = 4;  // ns since the Unix epoch, realtime clock
 }
 
 // xApp Control Action (xApp -> dApp via RAN). xapp_control_data is opaque.
@@ -95,6 +98,7 @@ message XAppControlAction {
   uint32 dapp_identifier = 1;
   uint32 ran_function_identifier = 2;
   bytes xapp_control_data = 3;
+  uint64 message_timestamp = 4;  // ns since the Unix epoch, realtime clock
 }
 
 // Release Message (dApp -> RAN).
@@ -106,13 +110,14 @@ message ReleaseMessage {
 message MessageAck {
   uint32 request_id = 1;
   ResponseCode response_code = 2;
+  uint64 message_timestamp = 3;  // ns since the Unix epoch, realtime clock
 }
 
 // Top-level E3AP PDU envelope. The oneof case identifies the PDU type; its
 // ordering matches the E3AP PDU type enumeration (SETUP_REQUEST=0 .. MESSAGE_ACK=10).
 message E3Pdu {
   uint32 id = 1;         // message identifier
-  uint64 timestamp = 2;  // milliseconds since epoch
+  uint64 timestamp = 2;  // ns since the Unix epoch, realtime clock
   oneof msg {
     SetupRequest setup_request = 3;
     SetupResponse setup_response = 4;

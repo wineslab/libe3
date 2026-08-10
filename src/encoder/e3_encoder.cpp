@@ -6,6 +6,9 @@
  */
 
 #include "libe3/e3_encoder.hpp"
+
+#include <type_traits>
+#include <variant>
 #include "libe3/logger.hpp"
 
 namespace libe3 {
@@ -184,6 +187,24 @@ EncodeResult<EncodedMessage> E3Encoder::encode_message_ack(
     pdu.message_id = message_id;
     pdu.choice = ack;
     return encode(pdu);
+}
+
+bool E3Encoder::timestamps_present(const Pdu& pdu) noexcept
+{
+    if (pdu.timestamp == 0) return false;
+
+    return std::visit([](auto&& m) {
+        using T = std::decay_t<decltype(m)>;
+        if constexpr (std::is_same_v<T, IndicationMessage>
+                   || std::is_same_v<T, DAppControlAction>
+                   || std::is_same_v<T, DAppReport>
+                   || std::is_same_v<T, XAppControlAction>
+                   || std::is_same_v<T, MessageAck>) {
+            return m.message_timestamp != 0;
+        } else {
+            return true;  // setup / subscription / release carry no message timestamp
+        }
+    }, pdu.choice);
 }
 
 } // namespace libe3

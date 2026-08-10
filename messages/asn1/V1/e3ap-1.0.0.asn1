@@ -49,6 +49,7 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     E3-IndicationMessage ::= SEQUENCE {
         dAppIdentifier          E3-DAppID,
         ranFunctionIdentifier   INTEGER (1..100),
+        messageTimestamp        E3-Timestamp,
         protocolData            OCTET STRING (SIZE (1..32768))
     }
 
@@ -56,18 +57,21 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         dAppIdentifier          E3-DAppID,
         ranFunctionIdentifier   INTEGER (1..100),
         controlIdentifier       INTEGER (1..100),
+        messageTimestamp        E3-Timestamp,
         actionData              OCTET STRING (SIZE (1..32768))
     }
 
     E3-DAppReport ::= SEQUENCE {
         dAppIdentifier          E3-DAppID,
         ranFunctionIdentifier   INTEGER (1..100),
+        messageTimestamp        E3-Timestamp,
         reportData              OCTET STRING (SIZE (1..32768))
     }
 
     E3-XAppControlAction ::= SEQUENCE {
         dAppIdentifier          E3-DAppID,
         ranFunctionIdentifier   INTEGER (1..100),
+        messageTimestamp        E3-Timestamp,
         xAppControlData         OCTET STRING (SIZE (1..32768))
     }
 
@@ -77,7 +81,8 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
 
     E3-MessageAck ::= SEQUENCE {
         requestId            E3-MessageID,
-        responseCode         E3-ResponseCode
+        responseCode         E3-ResponseCode,
+        messageTimestamp     E3-Timestamp
     }
 
     E3-DAppID ::= INTEGER (1..100)
@@ -85,9 +90,15 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     E3-Version ::= UTF8String (SIZE (1..11))
     E3-ResponseCode ::= ENUMERATED { positive(0), negative(1) }
 
+    -- Nanoseconds since the Unix epoch, from the realtime clock so the value
+    -- stays comparable across hosts. Left unconstrained: asn1c maps that to a
+    -- native long, which keeps the codec allocation-free on the indication path.
+    E3-Timestamp ::= INTEGER
+
     E3-PDU ::= SEQUENCE {
-        id      E3-MessageID,
-        msg     CHOICE {
+        id        E3-MessageID,
+        timestamp E3-Timestamp,
+        msg       CHOICE {
             setupRequest          [0]  E3-SetupRequest,
             setupResponse         [1]  E3-SetupResponse,
             subscriptionRequest   [2]  E3-SubscriptionRequest,

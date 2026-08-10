@@ -32,6 +32,7 @@ typedef e3_error_t (*e3_sm_process_control_cb)(
     uint32_t dapp_id,
     uint32_t ran_function_id,
     uint32_t control_id,
+    uint64_t message_timestamp, /* ns since the Unix epoch, stamped by the dApp */
     const uint8_t* data,
     size_t data_len
 );
@@ -40,6 +41,7 @@ typedef e3_error_t (*e3_sm_process_control_cb)(
 typedef void (*e3_dapp_report_cb)(
     uint32_t dapp_id,
     uint32_t ran_function_id,
+    uint64_t message_timestamp, /* ns since the Unix epoch, stamped by the dApp */
     const uint8_t* report_data,
     size_t report_data_len
 );

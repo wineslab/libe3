@@ -40,6 +40,11 @@ constexpr const char* LOG_TAG = "Asn1Enc";
 // ============================================================================
 
 EncodeResult<EncodedMessage> Asn1E3Encoder::encode(const Pdu& pdu) {
+    if (!timestamps_present(pdu)) {
+        E3_LOG_ERROR(LOG_TAG) << "Refusing to encode a PDU with an unset timestamp";
+        return tl::unexpected(ErrorCode::ENCODE_FAILED);
+    }
+
     E3_PDU* asn1_pdu = pdu_to_asn1(pdu);
     if (!asn1_pdu) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to convert PDU to ASN.1";
@@ -116,6 +121,11 @@ EncodeResult<Pdu> Asn1E3Encoder::decode(const uint8_t* data, size_t size) {
     
     ASN_STRUCT_FREE(asn_DEF_E3_PDU, asn1_pdu);
     
+    if (!timestamps_present(pdu)) {
+        E3_LOG_ERROR(LOG_TAG) << "Decoded PDU has an unset timestamp";
+        return tl::unexpected(ErrorCode::DECODE_FAILED);
+    }
+    
     return pdu;
 }
 
@@ -131,6 +141,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
     
     // Set top-level message ID (E3-PDU.id)
     asn1_pdu->id = pdu.message_id;
+    asn1_pdu->timestamp = static_cast<long>(pdu.timestamp);
     
     switch (pdu.type) {
         case PduType::SETUP_REQUEST: {
@@ -326,6 +337,8 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             
             asn1_pdu->msg.choice.indicationMessage->dAppIdentifier = msg->dapp_identifier;
             asn1_pdu->msg.choice.indicationMessage->ranFunctionIdentifier = msg->ran_function_identifier;
+            asn1_pdu->msg.choice.indicationMessage->messageTimestamp =
+                static_cast<long>(msg->message_timestamp);
             
             // Copy protocol data
             OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.indicationMessage->protocolData,
@@ -346,6 +359,8 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             asn1_pdu->msg.choice.dAppControlAction->dAppIdentifier = action->dapp_identifier;
             asn1_pdu->msg.choice.dAppControlAction->ranFunctionIdentifier = action->ran_function_identifier;
             asn1_pdu->msg.choice.dAppControlAction->controlIdentifier = action->control_identifier;
+            asn1_pdu->msg.choice.dAppControlAction->messageTimestamp =
+                static_cast<long>(action->message_timestamp);
             
             OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.dAppControlAction->actionData,
                 reinterpret_cast<const char*>(action->action_data.data()),
@@ -364,6 +379,8 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             
             asn1_pdu->msg.choice.dAppReport->dAppIdentifier = report->dapp_identifier;
             asn1_pdu->msg.choice.dAppReport->ranFunctionIdentifier = report->ran_function_identifier;
+            asn1_pdu->msg.choice.dAppReport->messageTimestamp =
+                static_cast<long>(report->message_timestamp);
             
             OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.dAppReport->reportData,
                 reinterpret_cast<const char*>(report->report_data.data()),
@@ -382,6 +399,8 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             
             asn1_pdu->msg.choice.xAppControlAction->dAppIdentifier = action->dapp_identifier;
             asn1_pdu->msg.choice.xAppControlAction->ranFunctionIdentifier = action->ran_function_identifier;
+            asn1_pdu->msg.choice.xAppControlAction->messageTimestamp =
+                static_cast<long>(action->message_timestamp);
             
             OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.xAppControlAction->xAppControlData,
                 reinterpret_cast<const char*>(action->xapp_control_data.data()),
@@ -401,6 +420,8 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             asn1_pdu->msg.choice.messageAck->requestId = ack->request_id;
             asn1_pdu->msg.choice.messageAck->responseCode = 
                 (ack->response_code == ResponseCode::POSITIVE) ? 0 : 1;
+            asn1_pdu->msg.choice.messageAck->messageTimestamp =
+                static_cast<long>(ack->message_timestamp);
             break;
         }
         
@@ -434,6 +455,7 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
     
     // Read top-level message ID (E3-PDU.id)
     pdu.message_id = static_cast<uint32_t>(asn1_pdu->id);
+    pdu.timestamp = static_cast<uint64_t>(asn1_pdu->timestamp);
     
     switch (asn1_pdu->msg.present) {
         case E3_PDU__msg_PR_setupRequest: {
@@ -588,6 +610,7 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             IndicationMessage msg;
             msg.dapp_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.indicationMessage->dAppIdentifier);
             msg.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.indicationMessage->ranFunctionIdentifier);
+            msg.message_timestamp = static_cast<uint64_t>(asn1_pdu->msg.choice.indicationMessage->messageTimestamp);
             
             // Copy protocol data
             const OCTET_STRING_t* data = &asn1_pdu->msg.choice.indicationMessage->protocolData;
@@ -604,6 +627,7 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             action.dapp_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppControlAction->dAppIdentifier);
             action.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppControlAction->ranFunctionIdentifier);
             action.control_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppControlAction->controlIdentifier);
+            action.message_timestamp = static_cast<uint64_t>(asn1_pdu->msg.choice.dAppControlAction->messageTimestamp);
             
             const OCTET_STRING_t* data = &asn1_pdu->msg.choice.dAppControlAction->actionData;
             action.action_data.assign(data->buf, data->buf + data->size);
@@ -618,6 +642,7 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             DAppReport report;
             report.dapp_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppReport->dAppIdentifier);
             report.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppReport->ranFunctionIdentifier);
+            report.message_timestamp = static_cast<uint64_t>(asn1_pdu->msg.choice.dAppReport->messageTimestamp);
             
             const OCTET_STRING_t* data = &asn1_pdu->msg.choice.dAppReport->reportData;
             report.report_data.assign(data->buf, data->buf + data->size);
@@ -632,6 +657,7 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             XAppControlAction action;
             action.dapp_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.xAppControlAction->dAppIdentifier);
             action.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.xAppControlAction->ranFunctionIdentifier);
+            action.message_timestamp = static_cast<uint64_t>(asn1_pdu->msg.choice.xAppControlAction->messageTimestamp);
             
             const OCTET_STRING_t* data = &asn1_pdu->msg.choice.xAppControlAction->xAppControlData;
             action.xapp_control_data.assign(data->buf, data->buf + data->size);
@@ -647,6 +673,7 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             ack.request_id = static_cast<uint32_t>(asn1_pdu->msg.choice.messageAck->requestId);
             ack.response_code = (asn1_pdu->msg.choice.messageAck->responseCode == 0)
                 ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
+            ack.message_timestamp = static_cast<uint64_t>(asn1_pdu->msg.choice.messageAck->messageTimestamp);
             
             pdu.choice = ack;
             break;

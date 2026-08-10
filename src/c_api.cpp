@@ -100,6 +100,7 @@ struct e3_service_model_handle_s : public ServiceModel {
             action.dapp_identifier,
             action.ran_function_identifier,
             action.control_identifier,
+            action.message_timestamp,
             action.action_data.empty() ? nullptr : action.action_data.data(),
             action.action_data.size()
         ));
@@ -259,6 +260,7 @@ e3_error_t e3_agent_set_dapp_report_handler(
                 handler(
                     report.dapp_identifier,
                     report.ran_function_identifier,
+                    report.message_timestamp,
                     report_data,
                     report.report_data.size()
                 );

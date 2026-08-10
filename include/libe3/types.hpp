@@ -26,6 +26,20 @@
 namespace libe3 {
 
 /**
+ * @brief Nanoseconds since the Unix epoch, from the realtime clock.
+ *
+ * Realtime rather than monotonic so the value is comparable across hosts.
+ * Service Model payloads carry their own monotonic timestamps, so an
+ * indication holds both.
+ */
+inline uint64_t now_realtime_ns() noexcept {
+    return static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+        ).count());
+}
+
+/**
  * @brief E3AP encoding formats supported by the library
  */
 enum class EncodingFormat : uint8_t {
@@ -244,6 +258,7 @@ struct IndicationMessage {
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0}; ///< RAN function identifier
     std::vector<uint8_t> protocol_data;
+    uint64_t message_timestamp{now_realtime_ns()};  ///< ns since the Unix epoch, realtime clock
 };
 
 /**
@@ -254,6 +269,7 @@ struct DAppControlAction {
     uint32_t ran_function_identifier{0};
     uint32_t control_identifier{0};      ///< Control identifier
     std::vector<uint8_t> action_data;
+    uint64_t message_timestamp{now_realtime_ns()};  ///< ns since the Unix epoch, realtime clock
 };
 
 /**
@@ -262,6 +278,7 @@ struct DAppControlAction {
 struct MessageAck {
     uint32_t request_id{0};              ///< ID of the request being acknowledged
     ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
+    uint64_t message_timestamp{now_realtime_ns()};  ///< ns since the Unix epoch, realtime clock
 };
 
 /**
@@ -271,6 +288,7 @@ struct DAppReport {
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0};
     std::vector<uint8_t> report_data;
+    uint64_t message_timestamp{now_realtime_ns()};  ///< ns since the Unix epoch, realtime clock
 };
 
 /**
@@ -280,6 +298,7 @@ struct XAppControlAction {
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0};
     std::vector<uint8_t> xapp_control_data;
+    uint64_t message_timestamp{now_realtime_ns()};  ///< ns since the Unix epoch, realtime clock
 };
 
 /**
@@ -313,24 +332,15 @@ struct Pdu {
     PduType type{PduType::SETUP_REQUEST};
     PduChoice choice;
     uint32_t message_id{0};        ///< Unique message identifier
-    uint64_t timestamp{0};         ///< Message timestamp (milliseconds since epoch)
+    uint64_t timestamp{0};         ///< ns since the Unix epoch, realtime clock
 
-    Pdu() : timestamp(static_cast<uint64_t>(
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()
-        ).count())) {}
-    
-    explicit Pdu(PduType t) : type(t), timestamp(static_cast<uint64_t>(
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()
-        ).count())) {}
-    
+    Pdu() : timestamp(now_realtime_ns()) {}
+
+    explicit Pdu(PduType t) : type(t), timestamp(now_realtime_ns()) {}
+
     template<typename T>
-    Pdu(PduType t, T&& data) : type(t), choice(std::forward<T>(data)),
-        timestamp(static_cast<uint64_t>(
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::system_clock::now().time_since_epoch()
-            ).count())) {}
+    Pdu(PduType t, T&& data)
+        : type(t), choice(std::forward<T>(data)), timestamp(now_realtime_ns()) {}
 
     /**
      * @brief Get PDU data with type checking

@@ -151,6 +151,7 @@ nlohmann::json JsonE3Encoder::encode_indication_message(const IndicationMessage&
     nlohmann::json j;
     j["dAppIdentifier"] = msg.dapp_identifier;
     j["ranFunctionIdentifier"] = msg.ran_function_identifier;
+    j["messageTimestamp"] = msg.message_timestamp;
     j["protocolData"] = nlohmann::json::parse(msg.protocol_data);
     return j;
 }
@@ -160,6 +161,7 @@ nlohmann::json JsonE3Encoder::encode_dapp_control_action(const DAppControlAction
     j["dAppIdentifier"] = action.dapp_identifier;
     j["ranFunctionIdentifier"] = action.ran_function_identifier;
     j["controlIdentifier"] = action.control_identifier;
+    j["messageTimestamp"] = action.message_timestamp;
     j["actionData"] = binary_to_hex(action.action_data);
     return j;
 }
@@ -168,6 +170,7 @@ nlohmann::json JsonE3Encoder::encode_dapp_report(const DAppReport& report) const
     nlohmann::json j;
     j["dAppIdentifier"] = report.dapp_identifier;
     j["ranFunctionIdentifier"] = report.ran_function_identifier;
+    j["messageTimestamp"] = report.message_timestamp;
     j["reportData"] = binary_to_hex(report.report_data);
     return j;
 }
@@ -176,6 +179,7 @@ nlohmann::json JsonE3Encoder::encode_xapp_control_action(const XAppControlAction
     nlohmann::json j;
     j["dAppIdentifier"] = action.dapp_identifier;
     j["ranFunctionIdentifier"] = action.ran_function_identifier;
+    j["messageTimestamp"] = action.message_timestamp;
     j["xAppControlData"] = binary_to_hex(action.xapp_control_data);
     return j;
 }
@@ -184,6 +188,7 @@ nlohmann::json JsonE3Encoder::encode_message_ack(const MessageAck& ack) const {
     nlohmann::json j;
     j["requestId"] = ack.request_id;
     j["responseCode"] = (ack.response_code == ResponseCode::POSITIVE) ? "positive" : "negative";
+    j["messageTimestamp"] = ack.message_timestamp;
     return j;
 }
 
@@ -266,6 +271,7 @@ IndicationMessage JsonE3Encoder::decode_indication_message(const nlohmann::json&
     IndicationMessage msg;
     msg.dapp_identifier = j.value("dAppIdentifier", 0u);
     msg.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
+    msg.message_timestamp = j.value("messageTimestamp", 0ull);
     std::string dumped = j["protocolData"].dump();
     msg.protocol_data.assign(dumped.begin(), dumped.end());
     return msg;
@@ -276,6 +282,7 @@ DAppControlAction JsonE3Encoder::decode_dapp_control_action(const nlohmann::json
     action.dapp_identifier = j.value("dAppIdentifier", 0u);
     action.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
     action.control_identifier = j.value("controlIdentifier", 0u);
+    action.message_timestamp = j.value("messageTimestamp", 0ull);
     action.action_data = hex_to_binary(j.value("actionData", ""));
     return action;
 }
@@ -284,6 +291,7 @@ DAppReport JsonE3Encoder::decode_dapp_report(const nlohmann::json& j) const {
     DAppReport report;
     report.dapp_identifier = j.value("dAppIdentifier", 0u);
     report.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
+    report.message_timestamp = j.value("messageTimestamp", 0ull);
     report.report_data = hex_to_binary(j.value("reportData", ""));
     return report;
 }
@@ -292,6 +300,7 @@ XAppControlAction JsonE3Encoder::decode_xapp_control_action(const nlohmann::json
     XAppControlAction action;
     action.dapp_identifier = j.value("dAppIdentifier", 0u);
     action.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
+    action.message_timestamp = j.value("messageTimestamp", 0ull);
     action.xapp_control_data = hex_to_binary(j.value("xAppControlData", ""));
     return action;
 }
@@ -301,6 +310,7 @@ MessageAck JsonE3Encoder::decode_message_ack(const nlohmann::json& j) const {
     ack.request_id = j.value("requestId", 0u);
     std::string response_code_str = j.value("responseCode", "negative");
     ack.response_code = (response_code_str == "positive") ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
+    ack.message_timestamp = j.value("messageTimestamp", 0ull);
     return ack;
 }
 
@@ -322,6 +332,10 @@ ReleaseMessage JsonE3Encoder::decode_release_message(const nlohmann::json& j) co
 // ============================================================================
 
 EncodeResult<EncodedMessage> JsonE3Encoder::encode(const Pdu& pdu) {
+    if (!timestamps_present(pdu)) {
+        E3_LOG_ERROR(LOG_TAG) << "Refusing to encode a PDU with an unset timestamp";
+        return tl::unexpected(ErrorCode::ENCODE_FAILED);
+    }
     try {
         nlohmann::json root;
         root["type"] = to_camel_case(pdu_type_to_string(pdu.type));
@@ -460,6 +474,11 @@ EncodeResult<Pdu> JsonE3Encoder::decode(const uint8_t* data, size_t size) {
                 return tl::unexpected(ErrorCode::DECODE_FAILED);
         }
         
+        if (!timestamps_present(pdu)) {
+            E3_LOG_ERROR(LOG_TAG) << "Decoded PDU has an unset timestamp";
+            return tl::unexpected(ErrorCode::DECODE_FAILED);
+        }
+
         E3_LOG_TRACE(LOG_TAG) << "Decoded " << pdu_type_to_string(pdu.type);
         return pdu;
     }

@@ -79,6 +79,7 @@ struct E3Event {
     uint32_t subscription_id{0};    ///< subscription id (subscription response)
     uint32_t request_id{0};         ///< request id (subscription response / ack)
     int response_code{-1};          ///< 0=positive, 1=negative, -1=n/a
+    uint64_t message_timestamp{0};  ///< ns since the Unix epoch, stamped by the sender
     std::vector<uint8_t> payload;   ///< opaque E3SM bytes (indication / xApp control)
     // NOTE: in Python (libe3py) the payload is read via ev.get_payload(), which
     // returns native `bytes`. SWIG member getters return a wrapped vector, so the
