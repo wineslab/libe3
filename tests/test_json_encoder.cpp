@@ -7,6 +7,7 @@
 
 #include "test_framework.hpp"
 #include "libe3/e3_encoder.hpp"
+#include "libe3/logger.hpp"
 #include "libe3/types.hpp"
 #include <nlohmann/json.hpp>
 
@@ -302,6 +303,135 @@ TEST(JsonEncoder_reject_nested_data_wrapper) {
     std::vector<uint8_t> buf(nested_json.begin(), nested_json.end());
     auto result = encoder->decode(buf.data(), buf.size());
     ASSERT_FALSE(result.has_value());
+}
+
+TEST(JsonEncoder_encode_malformed_protocol_data_fails_with_attribution) {
+    // Regression for issue #48 item 1: a malformed SM payload must fail
+    // encode() with an attributable log (RAN function id + payload size),
+    // not just the generic "JSON encode error" the outer catch produced.
+    auto encoder = create_encoder();
+
+    std::string captured;
+    Logger::instance().set_callback([&](LogLevel level, const std::string&, const std::string& msg) {
+        if (level == LogLevel::ERROR) captured = msg;
+    });
+
+    Pdu pdu(PduType::INDICATION_MESSAGE);
+    IndicationMessage msg;
+    msg.dapp_identifier = 7;
+    msg.ran_function_identifier = 55;
+    std::string bad = R"({"rnti":42069,)";  // truncated / malformed JSON
+    msg.protocol_data.assign(bad.begin(), bad.end());
+    pdu.choice = msg;
+
+    auto result = encoder->encode(pdu);
+
+    Logger::instance().clear_callback();
+
+    ASSERT_FALSE(result.has_value());
+    ASSERT_TRUE(result.error() == ErrorCode::ENCODE_FAILED);
+    ASSERT_TRUE(captured.find("55") != std::string::npos);
+    ASSERT_TRUE(captured.find(std::to_string(bad.size())) != std::string::npos);
+}
+
+TEST(JsonEncoder_indication_roundtrip_preserves_bytes_exactly) {
+    // Regression for issue #48 item 2: encode+decode must preserve the SM's
+    // protocol_data bytes exactly, not just its parsed field values. Keys
+    // are deliberately out of alphabetical order with extra internal
+    // whitespace: a DOM round trip (today's pre-fix decode) would silently
+    // reorder/reformat this, so this must fail pre-fix and pass post-fix.
+    auto encoder = create_encoder();
+
+    Pdu original(PduType::INDICATION_MESSAGE);
+    IndicationMessage msg;
+    msg.dapp_identifier = 77;
+    msg.ran_function_identifier = 55;
+    std::string payload = R"({"snr": 12.5,  "rnti":42069, "mcs":9})";
+    msg.protocol_data.assign(payload.begin(), payload.end());
+    original.choice = msg;
+
+    auto encoded = encoder->encode(original);
+    ASSERT_TRUE(encoded.has_value());
+
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+
+    auto& restored = std::get<IndicationMessage>(decoded->choice);
+    std::string restored_str(restored.protocol_data.begin(), restored.protocol_data.end());
+    ASSERT_STREQ(restored_str.c_str(), payload.c_str());
+}
+
+TEST(JsonEncoder_indication_roundtrip_payload_is_scalar) {
+    // Scanner edge case: protocolData is a bare JSON scalar, not an object,
+    // exercising skip_json_value's bare-token path.
+    auto encoder = create_encoder();
+
+    Pdu original(PduType::INDICATION_MESSAGE);
+    IndicationMessage msg;
+    msg.dapp_identifier = 1;
+    msg.ran_function_identifier = 2;
+    std::string payload = "42";
+    msg.protocol_data.assign(payload.begin(), payload.end());
+    original.choice = msg;
+
+    auto encoded = encoder->encode(original);
+    ASSERT_TRUE(encoded.has_value());
+
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+
+    auto& restored = std::get<IndicationMessage>(decoded->choice);
+    std::string restored_str(restored.protocol_data.begin(), restored.protocol_data.end());
+    ASSERT_STREQ(restored_str.c_str(), payload.c_str());
+}
+
+TEST(JsonEncoder_indication_roundtrip_nested_protocoldata_key) {
+    // Scanner edge case: the payload itself contains a nested key literally
+    // named "protocolData", confirming the scanner isn't confused by the
+    // substring appearing again inside the very value it's extracting.
+    auto encoder = create_encoder();
+
+    Pdu original(PduType::INDICATION_MESSAGE);
+    IndicationMessage msg;
+    msg.dapp_identifier = 1;
+    msg.ran_function_identifier = 2;
+    std::string payload = R"({"protocolData":{"nested":1}})";
+    msg.protocol_data.assign(payload.begin(), payload.end());
+    original.choice = msg;
+
+    auto encoded = encoder->encode(original);
+    ASSERT_TRUE(encoded.has_value());
+
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+
+    auto& restored = std::get<IndicationMessage>(decoded->choice);
+    std::string restored_str(restored.protocol_data.begin(), restored.protocol_data.end());
+    ASSERT_STREQ(restored_str.c_str(), payload.c_str());
+}
+
+TEST(JsonEncoder_indication_roundtrip_escaped_quotes_in_payload) {
+    // Scanner edge case: an escaped quote/backslash inside a string value,
+    // exercising skip_json_string's escape handling.
+    auto encoder = create_encoder();
+
+    Pdu original(PduType::INDICATION_MESSAGE);
+    IndicationMessage msg;
+    msg.dapp_identifier = 1;
+    msg.ran_function_identifier = 2;
+    std::string payload = R"({"msg":"a\"b\\c"})";
+    msg.protocol_data.assign(payload.begin(), payload.end());
+    original.choice = msg;
+
+    auto encoded = encoder->encode(original);
+    ASSERT_TRUE(encoded.has_value());
+
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+
+    auto& restored = std::get<IndicationMessage>(decoded->choice);
+    std::string restored_str(restored.protocol_data.begin(), restored.protocol_data.end());
+    ASSERT_STREQ(restored_str.c_str(), payload.c_str());
 }
 
 TEST(JsonEncoder_reject_pascal_case_pdu_type) {

@@ -8,7 +8,10 @@
 #include "json_encoder.hpp"
 #include "libe3/logger.hpp"
 #include <iomanip>
+#include <optional>
 #include <sstream>
+#include <stdexcept>
+#include <utility>
 
 namespace libe3 {
 
@@ -20,6 +23,147 @@ std::string to_camel_case(const char* pascal) {
     std::string s(pascal);
     if (!s.empty()) s[0] = static_cast<char>(std::tolower(static_cast<unsigned char>(s[0])));
     return s;
+}
+
+bool is_json_ws(char c) {
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+}
+
+size_t skip_ws(const std::string& text, size_t pos) {
+    while (pos < text.size() && is_json_ws(text[pos])) {
+        ++pos;
+    }
+    return pos;
+}
+
+// Skips a JSON string starting at text[pos] == '"'. Returns the index just
+// past the closing quote, or nullopt on truncation/malformed escapes.
+std::optional<size_t> skip_json_string(const std::string& text, size_t pos) {
+    const size_t n = text.size();
+    if (pos >= n || text[pos] != '"') return std::nullopt;
+    ++pos;
+    while (pos < n) {
+        char c = text[pos];
+        if (c == '\\') {
+            if (pos + 1 >= n) return std::nullopt;
+            if (text[pos + 1] == 'u') {
+                if (pos + 6 > n) return std::nullopt;  // \ u X X X X
+                pos += 6;
+                continue;
+            }
+            pos += 2;
+            continue;
+        }
+        if (c == '"') {
+            return pos + 1;
+        }
+        ++pos;
+    }
+    return std::nullopt;
+}
+
+// Skips one JSON value starting at text[pos] (already at its first byte).
+// Returns the index just past the value, or nullopt on anything unexpected
+// or truncated. Objects/arrays are skipped by depth-counting braces/brackets
+// (with nested strings skipped via skip_json_string so a brace/bracket
+// character inside a string is never mistaken for structure); scalars (
+// numbers, true/false/null) are skipped up to the next structural delimiter
+// or whitespace.
+std::optional<size_t> skip_json_value(const std::string& text, size_t pos) {
+    const size_t n = text.size();
+    if (pos >= n) return std::nullopt;
+    char c = text[pos];
+    if (c == '"') {
+        return skip_json_string(text, pos);
+    }
+    if (c == '{' || c == '[') {
+        char open = c;
+        char close = (open == '{') ? '}' : ']';
+        int depth = 1;
+        ++pos;
+        while (pos < n && depth > 0) {
+            char cc = text[pos];
+            if (cc == '"') {
+                auto after = skip_json_string(text, pos);
+                if (!after) return std::nullopt;
+                pos = *after;
+                continue;
+            }
+            if (cc == open) {
+                ++depth;
+            } else if (cc == close) {
+                --depth;
+            }
+            ++pos;
+        }
+        if (depth != 0) return std::nullopt;
+        return pos;
+    }
+    // Bare token: number, true, false, or null.
+    while (pos < n) {
+        char cc = text[pos];
+        if (cc == ',' || cc == '}' || cc == ']' || is_json_ws(cc)) {
+            break;
+        }
+        ++pos;
+    }
+    return pos;
+}
+
+// Locates the byte span [start, end) of the value bound to `key` as a
+// top-level member of the JSON object beginning at text[obj_start]. `text`
+// is assumed to have already been proven well-formed JSON by the caller
+// (decode()'s prior nlohmann::json::parse succeeded), so this only has to
+// locate an already-guaranteed-to-exist member, not defend against
+// arbitrary malformed input; every access is still bounds-checked and any
+// unexpected byte pattern bails out to nullopt (never guesses), so a bug
+// here can only cost a caller its fast path, never correctness -- callers
+// are expected to fall back to re-serializing the parsed subtree on a miss.
+// Does not unescape keys: a key that itself contains an escape sequence
+// simply won't match and triggers the fallback (no encoder in this file
+// produces escaped key names).
+std::optional<std::pair<size_t, size_t>> find_top_level_member_span(
+        const std::string& text, size_t obj_start, const std::string& key) {
+    const size_t n = text.size();
+    if (obj_start >= n || text[obj_start] != '{') {
+        return std::nullopt;
+    }
+
+    size_t pos = obj_start + 1;
+    while (true) {
+        pos = skip_ws(text, pos);
+        if (pos >= n) return std::nullopt;
+        if (text[pos] == '}') {
+            return std::nullopt;  // key not found
+        }
+        if (text[pos] != '"') return std::nullopt;
+
+        size_t key_start = pos + 1;
+        auto after_key = skip_json_string(text, pos);
+        if (!after_key) return std::nullopt;
+        size_t key_end = *after_key - 1;  // index of the closing quote
+
+        pos = skip_ws(text, *after_key);
+        if (pos >= n || text[pos] != ':') return std::nullopt;
+        pos = skip_ws(text, pos + 1);
+
+        size_t value_start = pos;
+        auto after_value = skip_json_value(text, pos);
+        if (!after_value) return std::nullopt;
+
+        bool key_matches = (key_end - key_start == key.size()) &&
+                            text.compare(key_start, key.size(), key) == 0;
+        if (key_matches) {
+            return std::make_pair(value_start, *after_value);
+        }
+
+        pos = skip_ws(text, *after_value);
+        if (pos < n && text[pos] == ',') {
+            ++pos;
+            continue;
+        }
+        return std::nullopt;  // '}' (key not found) or anything unexpected
+    }
 }
 
 } // anonymous namespace
@@ -147,11 +291,19 @@ nlohmann::json JsonE3Encoder::encode_subscription_response(const SubscriptionRes
     return j;
 }
 
-nlohmann::json JsonE3Encoder::encode_indication_message(const IndicationMessage& msg) const {
+std::optional<nlohmann::json> JsonE3Encoder::encode_indication_message(const IndicationMessage& msg) const {
+    if (!nlohmann::json::accept(msg.protocol_data)) {
+        E3_LOG_ERROR(LOG_TAG) << "Malformed protocolData for indication message "
+                              << "(ranFunctionIdentifier=" << msg.ran_function_identifier
+                              << ", payload size=" << msg.protocol_data.size() << " bytes)";
+        return std::nullopt;  // caller reports ErrorCode::ENCODE_FAILED
+    }
     nlohmann::json j;
     j["dAppIdentifier"] = msg.dapp_identifier;
     j["ranFunctionIdentifier"] = msg.ran_function_identifier;
-    j["protocolData"] = nlohmann::json::parse(msg.protocol_data);
+    // protocolData intentionally omitted: encode() splices the validated raw
+    // bytes verbatim into the dumped envelope instead of parsing them into a
+    // DOM here only to have root.dump() re-serialize them a moment later.
     return j;
 }
 
@@ -262,12 +414,29 @@ SubscriptionResponse JsonE3Encoder::decode_subscription_response(const nlohmann:
     return resp;
 }
 
-IndicationMessage JsonE3Encoder::decode_indication_message(const nlohmann::json& j) const {
+IndicationMessage JsonE3Encoder::decode_indication_message(const nlohmann::json& j,
+                                                             const std::string& raw_json) const {
     IndicationMessage msg;
     msg.dapp_identifier = j.value("dAppIdentifier", 0u);
     msg.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
-    std::string dumped = j["protocolData"].dump();
-    msg.protocol_data.assign(dumped.begin(), dumped.end());
+
+    size_t obj_start = raw_json.find_first_not_of(" \t\r\n");
+    auto span = (obj_start == std::string::npos)
+        ? std::nullopt
+        : find_top_level_member_span(raw_json, obj_start, "protocolData");
+
+    if (span) {
+        // Verbatim splice: byte-identical to what the SM originally emitted,
+        // instead of re-dumping the parsed subtree (which would silently
+        // reorder keys / drop whitespace for non-canonical input).
+        msg.protocol_data.assign(raw_json.begin() + static_cast<long>(span->first),
+                                  raw_json.begin() + static_cast<long>(span->second));
+    } else {
+        E3_LOG_DEBUG(LOG_TAG) << "protocolData byte-range scan missed; falling back to DOM dump "
+                                 "(ranFunctionIdentifier=" << msg.ran_function_identifier << ")";
+        std::string dumped = j["protocolData"].dump();
+        msg.protocol_data.assign(dumped.begin(), dumped.end());
+    }
     return msg;
 }
 
@@ -327,11 +496,17 @@ EncodeResult<EncodedMessage> JsonE3Encoder::encode(const Pdu& pdu) {
         root["type"] = to_camel_case(pdu_type_to_string(pdu.type));
         root["id"] = pdu.message_id;
         root["timestamp"] = pdu.timestamp;
-        
+
+        // Set only for IndicationMessage: the SM's already-serialized payload,
+        // spliced verbatim into the dumped envelope below instead of being
+        // carried through the nlohmann tree (see encode_indication_message()).
+        std::optional<std::string> raw_protocol_data;
+        bool indication_payload_invalid = false;
+
         // Encode payload fields directly into root (flat format)
-        std::visit([this, &root](auto&& arg) {
+        std::visit([this, &root, &raw_protocol_data, &indication_payload_invalid](auto&& arg) {
             using T = std::decay_t<decltype(arg)>;
-            
+
             nlohmann::json fields;
             if constexpr (std::is_same_v<T, SetupRequest>) {
                 fields = encode_setup_request(arg);
@@ -349,7 +524,13 @@ EncodeResult<EncodedMessage> JsonE3Encoder::encode(const Pdu& pdu) {
                 fields = encode_subscription_response(arg);
             }
             else if constexpr (std::is_same_v<T, IndicationMessage>) {
-                fields = encode_indication_message(arg);
+                auto encoded_fields = encode_indication_message(arg);
+                if (!encoded_fields) {
+                    indication_payload_invalid = true;  // already logged with attribution
+                    return;
+                }
+                fields = *encoded_fields;
+                raw_protocol_data.emplace(arg.protocol_data.begin(), arg.protocol_data.end());
             }
             else if constexpr (std::is_same_v<T, DAppControlAction>) {
                 fields = encode_dapp_control_action(arg);
@@ -368,15 +549,36 @@ EncodeResult<EncodedMessage> JsonE3Encoder::encode(const Pdu& pdu) {
             }
             root.update(fields);
         }, pdu.choice);
-        
+
+        if (indication_payload_invalid) {
+            return tl::unexpected(ErrorCode::ENCODE_FAILED);
+        }
+
         std::string json_str = root.dump();
+
+        if (raw_protocol_data) {
+            // root.dump() sorts object keys lexicographically (documented
+            // nlohmann behavior); with protocolData excluded from the tree,
+            // "ranFunctionIdentifier" is exactly where protocolData would
+            // have sorted to ('d' < 'p' < 'r'), so this reproduces the same
+            // key position (and, for well-formed payloads, the same bytes)
+            // as before.
+            size_t pos = json_str.find("\"ranFunctionIdentifier\"");
+            if (pos == std::string::npos) {
+                E3_LOG_ERROR(LOG_TAG) << "Internal error: indication envelope missing "
+                                         "ranFunctionIdentifier; cannot splice protocolData";
+                return tl::unexpected(ErrorCode::ENCODE_FAILED);
+            }
+            json_str.insert(pos, "\"protocolData\":" + *raw_protocol_data + ",");
+        }
+
         EncodedMessage msg;
         msg.buffer.assign(json_str.begin(), json_str.end());
         msg.format = EncodingFormat::JSON;
-        
-        E3_LOG_TRACE(LOG_TAG) << "Encoded " << pdu_type_to_string(pdu.type) 
+
+        E3_LOG_TRACE(LOG_TAG) << "Encoded " << pdu_type_to_string(pdu.type)
                               << " (" << msg.size() << " bytes)";
-        
+
         return msg;
     }
     catch (const std::exception& e) {
@@ -438,7 +640,7 @@ EncodeResult<Pdu> JsonE3Encoder::decode(const uint8_t* data, size_t size) {
                 pdu.choice = decode_subscription_response(root);
                 break;
             case PduType::INDICATION_MESSAGE:
-                pdu.choice = decode_indication_message(root);
+                pdu.choice = decode_indication_message(root, json_str);
                 break;
             case PduType::DAPP_CONTROL_ACTION:
                 pdu.choice = decode_dapp_control_action(root);

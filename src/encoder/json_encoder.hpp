@@ -42,7 +42,7 @@ private:
     nlohmann::json encode_subscription_request(const SubscriptionRequest& req) const;
     nlohmann::json encode_subscription_delete(const SubscriptionDelete& del) const;
     nlohmann::json encode_subscription_response(const SubscriptionResponse& resp) const;
-    nlohmann::json encode_indication_message(const IndicationMessage& msg) const;
+    std::optional<nlohmann::json> encode_indication_message(const IndicationMessage& msg) const;
     nlohmann::json encode_dapp_control_action(const DAppControlAction& action) const;
     nlohmann::json encode_dapp_report(const DAppReport& report) const;
     nlohmann::json encode_xapp_control_action(const XAppControlAction& action) const;
@@ -55,7 +55,7 @@ private:
     SubscriptionRequest decode_subscription_request(const nlohmann::json& j) const;
     SubscriptionDelete decode_subscription_delete(const nlohmann::json& j) const;
     SubscriptionResponse decode_subscription_response(const nlohmann::json& j) const;
-    IndicationMessage decode_indication_message(const nlohmann::json& j) const;
+    IndicationMessage decode_indication_message(const nlohmann::json& j, const std::string& raw_json) const;
     DAppControlAction decode_dapp_control_action(const nlohmann::json& j) const;
     DAppReport decode_dapp_report(const nlohmann::json& j) const;
     XAppControlAction decode_xapp_control_action(const nlohmann::json& j) const;
