@@ -306,9 +306,9 @@ TEST(JsonEncoder_reject_nested_data_wrapper) {
 }
 
 TEST(JsonEncoder_encode_malformed_protocol_data_fails_with_attribution) {
-    // Regression for issue #48 item 1: a malformed SM payload must fail
-    // encode() with an attributable log (RAN function id + payload size),
-    // not just the generic "JSON encode error" the outer catch produced.
+    // A malformed SM payload must fail encode() with an attributable log
+    // (RAN function id + payload size), not just a generic "JSON encode
+    // error" with no context.
     auto encoder = create_encoder();
 
     std::string captured;
@@ -335,11 +335,10 @@ TEST(JsonEncoder_encode_malformed_protocol_data_fails_with_attribution) {
 }
 
 TEST(JsonEncoder_indication_roundtrip_preserves_bytes_exactly) {
-    // Regression for issue #48 item 2: encode+decode must preserve the SM's
-    // protocol_data bytes exactly, not just its parsed field values. Keys
-    // are deliberately out of alphabetical order with extra internal
-    // whitespace: a DOM round trip (today's pre-fix decode) would silently
-    // reorder/reformat this, so this must fail pre-fix and pass post-fix.
+    // encode+decode must preserve the SM's protocol_data bytes exactly, not
+    // just its parsed field values. Keys are deliberately out of alphabetical
+    // order with extra internal whitespace: a DOM round trip would silently
+    // reorder/reformat this instead of preserving it verbatim.
     auto encoder = create_encoder();
 
     Pdu original(PduType::INDICATION_MESSAGE);

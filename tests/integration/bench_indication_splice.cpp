@@ -1,9 +1,9 @@
 /**
  * @file bench_indication_splice.cpp
- * @brief Before/after micro-benchmark for JSON IndicationMessage encode/decode
- *        (issue #48): DOM parse+dump vs. verbatim byte splice.
+ * @brief Before/after micro-benchmark for JSON IndicationMessage encode/decode:
+ *        DOM parse+dump vs. verbatim byte splice.
  *
- * Run this binary once built against the commit before the issue #48 fix and
+ * Run this binary once built against a commit before the splice change and
  * once after to produce the two halves of a before/after comparison table
  * (not a permanently-shipped dual code path).
  *
@@ -83,7 +83,7 @@ int main() {
         (void)r;
     });
 
-    std::printf("## JSON IndicationMessage encode/decode microbenchmark (issue #48)\n\n");
+    std::printf("## JSON IndicationMessage encode/decode microbenchmark\n\n");
     std::printf("Payload: %zu bytes, N=%d iterations after %d warmup.\n\n",
                  payload.size(), kIterations, kWarmup);
     std::printf("| Operation | mean (us) | p50 (us) | p99 (us) |\n");
