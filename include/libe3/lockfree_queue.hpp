@@ -26,6 +26,8 @@
 #include <optional>
 #include <chrono>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 
 namespace libe3 {
 
@@ -33,10 +35,11 @@ namespace libe3 {
  * @brief Lock-free bounded blocking queue.
  *
  * Built on an MPMC lock-free ring buffer.  Blocking pop variants use an
- * adaptive spin-wait strategy:
+ * adaptive wait strategy:
  *  1. Spin with CPU pause hints  (lowest latency, nanoseconds)
  *  2. Thread yield               (cooperative, microseconds)
- *  3. Short sleep (50 µs)        (idle wait, avoids busy-loop when quiet)
+ *  3. Block on a condition variable, woken by push()/shutdown() (idle wait,
+ *     avoids busy-loop when quiet; wake latency instead of a poll period)
  *
  * @tparam T  Element type. Must be default-constructible and movable.
  */
@@ -85,6 +88,17 @@ public:
             return ErrorCode::BUFFER_TOO_SMALL;
         }
 
+        // Wake a consumer parked in the Phase 3 condition-variable wait (see
+        // pop()). Taking wait_mutex_ here (even with an empty critical
+        // section) is required, not just style: it is what prevents the
+        // classic missed-wakeup race against a consumer that is between its
+        // try_pop() check and its cv.wait() call. See the class-level
+        // comment on pop() for the full argument.
+        {
+            std::lock_guard<std::mutex> lock(wait_mutex_);
+        }
+        wait_cv_.notify_one();
+
         E3_LOG_TRACE(LOG_TAG) << "Pushed item";
         return ErrorCode::SUCCESS;
     }
@@ -111,11 +125,18 @@ public:
             std::this_thread::yield();
         }
 
-        // Phase 3: Short sleep until data arrives or shutdown is signalled
+        // Phase 3: Block on the condition variable until data arrives or
+        // shutdown is signalled. wait_mutex_ is held across the check and
+        // the wait() call (not just during the wait itself) so that a
+        // concurrent push()'s notify (which also takes wait_mutex_, see
+        // push()) can never land in the gap between "we checked and it was
+        // empty" and "we're registered as a waiter" -- that gap is exactly
+        // where a naive condvar/futex notify-on-push design loses wakeups.
+        std::unique_lock<std::mutex> lock(wait_mutex_);
         while (true) {
             if (ring_.try_pop(item)) return item;
             if (shutdown_.load(std::memory_order_relaxed)) return T{};
-            std::this_thread::sleep_for(SLEEP_DURATION);
+            wait_cv_.wait(lock);
         }
     }
 
@@ -141,11 +162,17 @@ public:
             std::this_thread::yield();
         }
 
-        // Phase 3: Timed sleep
-        while (std::chrono::steady_clock::now() < deadline) {
-            if (ring_.try_pop(item)) return item;
-            if (shutdown_.load(std::memory_order_relaxed)) return std::nullopt;
-            std::this_thread::sleep_for(SLEEP_DURATION);
+        // Phase 3: Block on the condition variable until data arrives,
+        // shutdown is signalled, or the deadline passes. See the infinite
+        // pop() overload above for why wait_mutex_ must be held across the
+        // check-then-wait sequence.
+        {
+            std::unique_lock<std::mutex> lock(wait_mutex_);
+            while (std::chrono::steady_clock::now() < deadline) {
+                if (ring_.try_pop(item)) return item;
+                if (shutdown_.load(std::memory_order_relaxed)) return std::nullopt;
+                wait_cv_.wait_until(lock, deadline);
+            }
         }
 
         // One last attempt after deadline
@@ -184,6 +211,12 @@ public:
      */
     void shutdown() {
         shutdown_.store(true, std::memory_order_relaxed);
+        // Wake any consumer blocked in pop()'s Phase 3 wait immediately,
+        // rather than letting it wait out its (possibly infinite) wait.
+        {
+            std::lock_guard<std::mutex> lock(wait_mutex_);
+        }
+        wait_cv_.notify_all();
         E3_LOG_DEBUG(LOG_TAG) << "Queue shutdown signalled";
     }
 
@@ -209,11 +242,13 @@ private:
     MpmcQueue<T> ring_;
     std::atomic<bool> shutdown_{false};
 
+    // Phase 3 wait/notify primitives (see pop() and push()).
+    std::mutex wait_mutex_;
+    std::condition_variable wait_cv_;
+
     // Adaptive spin-wait tuning constants
     static constexpr size_t SPIN_COUNT  = 40;   ///< CPU-pause iterations
     static constexpr size_t YIELD_COUNT = 100;  ///< thread-yield iterations
-    /// Sleep duration between attempts in the slow path (µs)
-    static constexpr auto SLEEP_DURATION = std::chrono::microseconds(50);
 };
 
 } // namespace libe3

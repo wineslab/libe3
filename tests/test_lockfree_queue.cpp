@@ -200,6 +200,37 @@ TEST(LockFreeQueue_blocking_pop) {
     ASSERT_TRUE(got_item.load());
 }
 
+// pop()'s Phase 3 wait is a notify-on-push condition variable wait, not a
+// sleep-poll, so the observed wake latency should be a small constant (wake
+// latency) rather than tracking a fixed poll period. Assert a generous upper
+// bound (well under the ~100us p95 ceiling a sleep-poll would produce, with
+// ample margin for CI scheduling jitter) so a regression back to
+// sleep_for-based polling would be caught.
+TEST(LockFreeQueue_wake_latency_after_push) {
+    LockFreeQueue<Pdu> queue(100);
+    std::atomic<std::chrono::steady_clock::time_point> woke_at;
+
+    std::thread consumer([&]() {
+        auto pdu = queue.pop(std::chrono::milliseconds(500));
+        woke_at.store(std::chrono::steady_clock::now());
+        (void)pdu;
+    });
+
+    // Let the consumer fall through Phase 1/2 and settle into the Phase 3
+    // condition-variable wait before pushing.
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+    Pdu pdu(PduType::INDICATION_MESSAGE);
+    auto pushed_at = std::chrono::steady_clock::now();
+    (void)queue.push(pdu);
+
+    consumer.join();
+
+    auto wake_latency = std::chrono::duration_cast<std::chrono::milliseconds>(
+        woke_at.load() - pushed_at);
+    ASSERT_LT(wake_latency.count(), 5);
+}
+
 // The same wrapper is reused for the inbound dApp-report path
 // (LockFreeQueue<DAppReport>); exercise that specialisation too so the
 // template stays generic.
