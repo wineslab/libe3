@@ -136,15 +136,15 @@ public:
             return;
         }
         running_ = false;
-        // Wake a PingPong worker blocked on the emission gate so it can observe
-        // !running_ and exit; FixedRate wakes on its own from sleep_until.
-        if (mode_ == PacingMode::PingPong) {
-            {
-                std::lock_guard<std::mutex> lk(emit_mu_);
-                may_emit_ = true;
-            }
-            emit_cv_.notify_all();
+        // Wake a worker parked on the emission-gate CV: PingPong's wait_for and
+        // FixedRate's wait_until (worker_loop) both block on emit_mu_/emit_cv_, so
+        // one notify_all() lets either mode observe !running_ immediately instead
+        // of waiting out the PingPong fallback timeout or the FixedRate period.
+        {
+            std::lock_guard<std::mutex> lk(emit_mu_);
+            may_emit_ = true;
         }
+        emit_cv_.notify_all();
         if (worker_.joinable()) {
             worker_.join();
         }
@@ -253,7 +253,12 @@ private:
                 next += std::chrono::microseconds(period_us_);
                 const auto now = std::chrono::steady_clock::now();
                 if (next > now) {
-                    std::this_thread::sleep_until(next);
+                    // Wait on the same emission-gate CV that PingPong uses
+                    // (stop(), above, notifies it): a FixedRate worker parked
+                    // here wakes as soon as running_ flips false instead of
+                    // waiting out the rest of the period.
+                    std::unique_lock<std::mutex> lk(emit_mu_);
+                    emit_cv_.wait_until(lk, next, [this]() { return !running_.load(); });
                 } else {
                     next = now;  // behind schedule: re-anchor, don't burst
                 }

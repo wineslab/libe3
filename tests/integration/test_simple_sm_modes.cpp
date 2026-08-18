@@ -137,6 +137,24 @@ TEST(fixed_rate_paces_approximately) {
     ASSERT_LT(n, 120);
 }
 
+TEST(fixed_rate_stop_returns_promptly) {
+    // A FixedRate worker parked in the pacing wait must wake as soon as stop()
+    // flips running_, not wait out the rest of the period. A multi-second period
+    // makes a blocked stop() obvious without slowing CI: the test only runs as
+    // long as stop() actually takes.
+    EmitterCounts c;
+    Harness sm(/*period_us=*/5'000'000, EncodingFormat::ASN1,
+               SimpleServiceModel::PacingMode::FixedRate);
+    wire(sm, c);
+    sm.start();
+    std::this_thread::sleep_for(50ms);  // let the worker enter the pacing wait
+
+    const auto t0 = std::chrono::steady_clock::now();
+    sm.stop();
+    const auto elapsed = std::chrono::steady_clock::now() - t0;
+    ASSERT_TRUE(elapsed < 200ms);
+}
+
 TEST(pingpong_is_gated_not_flooding) {
     // PingPong with no control acks: the loop is closed, so emissions are
     // bounded by the 50 ms liveness fallback (+ bootstrap), never a flood.
