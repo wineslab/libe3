@@ -383,10 +383,54 @@ enum {
     LATREC_XB_IND_RECV     = 0xBB, /* E2AP bytes received; aux = bytes                  */
     LATREC_XC_IND_DEC      = 0xBC, /* E2AP PDU decoded; aux = PDU type                  */
     LATREC_XD_IND_DISPATCH = 0xBD, /* handed to the SM callback; aux = PDU type         */
-    LATREC_XE_REP_RECV     = 0xBE  /* dApp report surfaced to the xApp app layer. The SM
+    LATREC_XE_REP_RECV     = 0xBE, /* dApp report surfaced to the xApp app layer. The SM
                                       callback runs on the dispatcher thread, not the
                                       receive loop, so this carries its own seq and
                                       pairs with XD by time                             */
+
+    /* ---- reservations below: identifiers only, not yet stamped by libe3 --- */
+
+    /* OCUDU: jbpf-based CU/DU IQ source and its E3 controller (ocudu-e3 jbpf
+     * hook -> E3Controller IQ pipeline). Covers the same span OAI's P+W
+     * blocks cover (IQ capture, pipeline processing, SM encode), collapsed
+     * into one block. Reserved before the OCUDU work starts; not stamped
+     * here. 0xC5-0xC7 left as headroom for the control-direction leg once
+     * OCUDU's control path is wired (not yet wired as of this reservation). */
+    LATREC_OC0_CAPTURE_ENTRY = 0xC0, /* jbpf capture_uplink_slot hook entered */
+    LATREC_OC1_CAPTURE_DONE  = 0xC1, /* capture published to shared memory */
+    LATREC_OC2_PIPELINE_WAKE = 0xC2, /* E3Controller IQ pipeline woken */
+    LATREC_OC3_PIPELINE_DONE = 0xC3, /* E3Controller IQ pipeline processing returned */
+    LATREC_OC4_ENCODE_DONE   = 0xC4, /* layer-1 SM encode done; ready for libe3's LE0 */
+
+    /* cuBB: L1 data-lake IQ source (cuBB data lake -> the Aerial dApp's E3
+     * manager), the "aerial" configuration's A1-A3 owner -- distinct from the
+     * D/V/E/K/R blocks the Aerial C++ dApp already stamps downstream of
+     * libe3. Reserved; not stamped here. 0xD5-0xD7 headroom. */
+    LATREC_CB0_LAKE_READ_ENTRY = 0xD0, /* cuBB data-lake IQ read entered */
+    LATREC_CB1_LAKE_READ_DONE  = 0xD1, /* IQ block read returned */
+    LATREC_CB2_AGENT_WAKE      = 0xD2, /* cuBB E3 agent woken with a new IQ block */
+    LATREC_CB3_AGENT_DONE      = 0xD3, /* cuBB E3 agent processing returned */
+    LATREC_CB4_ENCODE_DONE     = 0xD4, /* E3 manager E3SM encode done; ready for
+                                           libe3's LE0; anchor for the
+                                           backend=native vs backend=libe3
+                                           A/B comparison */
+
+    /* xDevSM: Python xApp/service-model framework. Closes Path B's "no stage
+     * block for the Python framework" gap (E2SM decode / xApp processing /
+     * E2SM encode, between the flexric binding and the E2AP encode on the
+     * xApp side). Reserved; not stamped here. 0xE5-0xE7 headroom. Prefix is
+     * "PY" (Python), not "XD": LATREC_XD_IND_DISPATCH above already names an
+     * unrelated flexric identifier and re-using "XD" as a block prefix here
+     * would be confusable with it. */
+    LATREC_PY0_IND_DISPATCH = 0xE0, /* E2 indication handed from the flexric
+                                        binding into the Python dispatcher */
+    LATREC_PY1_SM_DECODED   = 0xE1, /* E2SM decode done */
+    LATREC_PY2_XAPP_IN      = 0xE2, /* xApp callback entered */
+    LATREC_PY3_XAPP_OUT     = 0xE3, /* xApp callback returned with a decision */
+    LATREC_PY4_SM_ENCODED   = 0xE4  /* E2SM control payload encoded; handoff to
+                                        the flexric xApp-side E2AP encode (X0) */
+
+    /* 0xC5-0xC7, 0xD5-0xD7, 0xE5-0xE7, 0xE8-0xFF are free. */
 };
 
 /* D5 admission outcomes (aux2) */
