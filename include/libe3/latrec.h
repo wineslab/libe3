@@ -514,7 +514,15 @@ enum {
     LATREC_DROP_REPORT_QUEUE = 5,
     LATREC_DROP_NO_HANDLER   = 6,
     LATREC_DROP_SESSION_QUEUE = 7,
-    LATREC_DROP_FILTERED     = 8
+    LATREC_DROP_FILTERED     = 8,
+    /* A push rejected because shutdown() had already been called on that
+     * queue, distinct from LATREC_DROP_QUEUE_PUSH/REPORT_QUEUE (the ring was
+     * actually full). E3Interface::stop() shuts response_queue_/report_queue_
+     * down before joining a registered ServiceModel's own producer thread
+     * (which it does not own directly -- that happens later, via
+     * SmRegistry::clear()), so a handful of these during teardown is expected
+     * and does not indicate undersized capacity. */
+    LATREC_DROP_SHUTDOWN     = 9
 };
 
 #define LATREC_MAGIC   0x31524C41u /* "ALR1" */

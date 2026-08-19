@@ -341,8 +341,17 @@ ErrorCode E3Interface::queue_outbound(Pdu pdu) {
     const uint64_t seq = pdu.enqueue_seq;
     latrec_tstamp(seq, LATREC_L0_ENQUEUE, 0, static_cast<uint64_t>(pdu.type));
     const ErrorCode rc = response_queue_->push(std::move(pdu));
-    if (rc != ErrorCode::SUCCESS)
-        latrec_tstamp(seq, LATREC_L9_DROP, 0, LATREC_DROP_QUEUE_PUSH);
+    if (rc != ErrorCode::SUCCESS) {
+        // NOT_INITIALIZED means shutdown() had already been called on this
+        // queue (e.g. a registered SM's own producer thread, not one of
+        // E3Interface's own, still emitting in the window between
+        // response_queue_->shutdown() and that thread being joined via
+        // SmRegistry::clear() in stop()) -- distinct from the queue actually
+        // being full.
+        const uint64_t reason = (rc == ErrorCode::NOT_INITIALIZED)
+            ? LATREC_DROP_SHUTDOWN : LATREC_DROP_QUEUE_PUSH;
+        latrec_tstamp(seq, LATREC_L9_DROP, 0, reason);
+    }
     return rc;
 }
 
@@ -498,9 +507,15 @@ void E3Interface::inbound_loop_ran() {
                         // never blocks the inbound read path. The queue logs
                         // on overflow; surface it here as an error too.
                         report->recv_seq = seq;
-                        if (report_queue_->push(std::move(*report)) != ErrorCode::SUCCESS) {
+                        const ErrorCode report_rc = report_queue_->push(std::move(*report));
+                        if (report_rc != ErrorCode::SUCCESS) {
                             E3_LOG_ERROR(LOG_TAG) << "Report queue full — dropping dApp report";
-                            latrec_tstamp(seq, LATREC_L9_DROP, 0, LATREC_DROP_REPORT_QUEUE);
+                            // See queue_outbound: NOT_INITIALIZED means
+                            // shutdown() already ran, not that this queue was
+                            // actually full.
+                            const uint64_t reason = (report_rc == ErrorCode::NOT_INITIALIZED)
+                                ? LATREC_DROP_SHUTDOWN : LATREC_DROP_REPORT_QUEUE;
+                            latrec_tstamp(seq, LATREC_L9_DROP, 0, reason);
                         } else {
                             latrec_tstamp(seq, LATREC_L7_REPORT_QUEUED, 0, 0);
                         }
@@ -579,7 +594,11 @@ void E3Interface::outbound_loop_ran() {
         ErrorCode send_result = connector_->send(encode_result->buffer);
         if (send_result != ErrorCode::SUCCESS) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to send PDU";
-            latrec_tstamp(pdu_opt->enqueue_seq, LATREC_L9_DROP, 0, LATREC_DROP_SEND);
+            // CANCELLED means the connector's shutdown() had already run,
+            // distinct from a genuine transport failure.
+            const uint64_t reason = (send_result == ErrorCode::CANCELLED)
+                ? LATREC_DROP_SHUTDOWN : LATREC_DROP_SEND;
+            latrec_tstamp(pdu_opt->enqueue_seq, LATREC_L9_DROP, 0, reason);
         } else {
             E3_LOG_DEBUG(LOG_TAG) << "Sent PDU: " << pdu_type_to_string(pdu_opt->type);
             latrec_tstamp(pdu_opt->enqueue_seq, LATREC_L3_SEND_DONE, pdu_opt->message_id, 0);
@@ -1107,7 +1126,9 @@ void E3Interface::outbound_loop_dapp() {
         ErrorCode rc = connector_->send(enc->buffer);
         if (rc != ErrorCode::SUCCESS) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to send dApp outbound PDU";
-            latrec_tstamp(pdu_opt->enqueue_seq, LATREC_L9_DROP, 0, LATREC_DROP_SEND);
+            const uint64_t reason = (rc == ErrorCode::CANCELLED)
+                ? LATREC_DROP_SHUTDOWN : LATREC_DROP_SEND;
+            latrec_tstamp(pdu_opt->enqueue_seq, LATREC_L9_DROP, 0, reason);
         } else {
             E3_LOG_DEBUG(LOG_TAG) << "Sent dApp outbound PDU: "
                                   << pdu_type_to_string(pdu_opt->type);

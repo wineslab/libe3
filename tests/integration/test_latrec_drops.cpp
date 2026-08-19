@@ -15,7 +15,11 @@
  * encoders do not enforce the ASN.1 SIZE constraints and an oversized report
  * still encodes; decode and no-handler require a peer emitting frames libe3
  * does not produce; send requires the transport to fail mid-call.
- * session-queue belongs to the Python binding and has its own test.
+ * session-queue belongs to the Python binding and has its own test; filtered
+ * requires a second dApp identity to be rejected by handle_indication's own
+ * dApp-id filter. shutdown may appear incidentally (not provoked): stop()
+ * shuts response_queue_/report_queue_ down before joining a registered SM's
+ * own producer thread, so a straggling push from that window is expected.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -109,7 +113,7 @@ TEST(every_drop_carries_a_known_reason) {
         total++;
         seen[r.aux2]++;
         ASSERT_GE(r.aux2, static_cast<uint64_t>(LATREC_DROP_QUEUE_PUSH));
-        ASSERT_LE(r.aux2, static_cast<uint64_t>(LATREC_DROP_SESSION_QUEUE));
+        ASSERT_LE(r.aux2, static_cast<uint64_t>(LATREC_DROP_SHUTDOWN));
     }
     for (const auto& [reason, n] : seen)
         std::printf("      reason %llu: %zu\n", static_cast<unsigned long long>(reason), n);

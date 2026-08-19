@@ -76,11 +76,12 @@ size_t count(uint8_t stage) {
 /* Every message that entered a leg must pass through the rest of it, in order,
  * exactly once.
  *
- * The anchor is the leg's first stage, not its last: a producer thread with no
- * ring discards its own first stamp, so a message can reach the last stage
- * with no entry record. The example SM's emitter thread is such a producer.
- * Messages that were dropped, or were still in flight when the capture ended,
- * are excluded. */
+ * The anchor is the leg's first stage, not its last: still true in general
+ * (a producer thread that opens no ring at all -- there is no longer a known
+ * example of one in this harness, since a6970f5c has queue_outbound() open
+ * one on demand -- would discard its own first stamp and reach the last
+ * stage with no entry record). Messages that were dropped, or were still in
+ * flight when the capture ended, are excluded. */
 void assert_leg_ordered(const char* name, const std::vector<uint8_t>& chain,
                         size_t min_complete) {
     auto by = group(chain);
@@ -231,8 +232,14 @@ TEST(every_transport_and_encoding_combination_was_exercised) {
 }
 
 TEST(no_drops_were_recorded) {
-    // The harness stays well below saturation, so any drop is a defect. Report
-    // the reasons: which seam gave up is the whole diagnostic.
+    // The harness stays well below saturation, so any capacity-related drop
+    // is a defect. LATREC_DROP_SHUTDOWN is different: response_queue_ and
+    // report_queue_ are shut down early in E3Interface::stop(), before a
+    // registered ServiceModel's own producer thread -- not one of
+    // E3Interface's own threads -- is joined via SmRegistry::clear(). A
+    // handful of enqueue attempts from that window are rejected by design,
+    // not because either queue was actually full, so they are reported but
+    // not asserted to be zero.
     std::map<uint64_t, size_t> by_reason;
     for (const auto& r : g_recs) {
         if (stage_of(r) == LATREC_L9_DROP) by_reason[r.aux2]++;
@@ -241,19 +248,34 @@ TEST(no_drops_were_recorded) {
         std::printf("      drop reason %llu: %zu records\n",
                     static_cast<unsigned long long>(reason), n);
     }
-    ASSERT_EQ(count(LATREC_L9_DROP), 0u);
+    size_t capacity_drops = 0;
+    for (const auto& [reason, n] : by_reason) {
+        if (reason != LATREC_DROP_SHUTDOWN) capacity_drops += n;
+    }
+    ASSERT_EQ(capacity_drops, 0u);
 }
 
-TEST(l0_is_only_stamped_by_threads_that_opened_a_ring) {
-    // queue_outbound stamps L0 on the caller's thread, and the stamp path does
-    // not open a ring. The driver thread calls latrec_tls_open_as() and is
-    // recorded; the example SM's emitter thread does not and is not.
+TEST(every_enqueued_pdu_is_either_sent_or_dropped) {
+    // queue_outbound stamps L0 on the caller's thread, opening a ring for it
+    // on demand if it doesn't already have one (fixed in a6970f5c -- before
+    // that, a producer thread with no ring of its own, such as the example
+    // SM's emitter thread, silently discarded its L0 stamp). So every L0
+    // should now be accounted for: it either reaches L3_SEND_DONE, or the
+    // same seq carries an outbound-queue drop (LATREC_DROP_QUEUE_PUSH or
+    // LATREC_DROP_SHUTDOWN) -- nothing should vanish in between.
     const size_t entered = count(LATREC_L0_ENQUEUE);
     const size_t sent = count(LATREC_L3_SEND_DONE);
-    ASSERT_GT(entered, 0u);                 // ring-owning producers are recorded
-    ASSERT_LT(entered, sent);               // the SM's thread is not
-    std::printf("      L0=%zu of L3=%zu: %zu PDUs came from a thread with no ring\n",
-                entered, sent, sent - entered);
+    size_t outbound_drops = 0;
+    for (const auto& r : g_recs) {
+        if (stage_of(r) == LATREC_L9_DROP &&
+            (r.aux2 == LATREC_DROP_QUEUE_PUSH || r.aux2 == LATREC_DROP_SHUTDOWN)) {
+            outbound_drops++;
+        }
+    }
+    std::printf("      L0=%zu L3=%zu outbound-drops=%zu (L0 should equal L3+drops)\n",
+                entered, sent, outbound_drops);
+    ASSERT_GT(entered, 0u);
+    ASSERT_EQ(entered, sent + outbound_drops);
 }
 
 // ---------------------------------------------------------------------------

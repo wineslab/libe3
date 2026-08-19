@@ -146,7 +146,8 @@ std::string drop_breakdown(const Table& t) {
     }
     if (by_reason.empty()) return "-";
     const char* names[] = {"?", "queue-full", "encode", "send",
-                           "decode", "report-queue", "no-handler", "session-queue"};
+                           "decode", "report-queue", "no-handler", "session-queue",
+                           "filtered", "shutdown"};
     std::string out;
     for (const auto& [reason, n] : by_reason) {
         if (!out.empty()) out += " ";
