@@ -94,7 +94,15 @@ jobs:
   per-commit-build:
     name: Each commit builds and tests
     needs: changes
-    if: github.event_name == 'pull_request' && needs.changes.outputs.code == 'true'
+    # Job-level `if:` stays for the event-type check (this job is only
+    # meaningful for a pull_request event) but the code-change check moved to
+    # the steps below: a job-level `if: ... && code == 'true'` reports
+    # "skipped" (not "success") on a docs-only PR, and required-status-checks
+    # does not treat "skipped" as satisfied -- confirmed against this repo's
+    # own history (PR #43 merged with this exact context skipped, relying on
+    # admin bypass). Running unconditionally and skipping only the expensive
+    # steps keeps the same savings while still reporting success.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -103,6 +111,7 @@ jobs:
           fetch-depth: 0
 
       - name: Prepare /opt/asn1c for caching
+        if: needs.changes.outputs.code == 'true'
         run: |
           sudo mkdir -p /opt/asn1c
           sudo chown "$(id -u):$(id -g)" /opt/asn1c
@@ -110,18 +119,21 @@ jobs:
       - name: Cache asn1c build
         # Exact-match only: a hit must imply the pinned commit inside
         # build_libe3 is unchanged. Do not add restore-keys here.
+        if: needs.changes.outputs.code == 'true'
         uses: actions/cache@v4
         with:
           path: /opt/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
 
       - name: Install build dependencies
+        if: needs.changes.outputs.code == 'true'
         run: |
           sudo apt-get update
           chmod +x ./build_libe3
           ./build_libe3 -I
 
       - name: Build and test every commit (Release)
+        if: needs.changes.outputs.code == 'true'
         shell: bash
         run: |
           base="${{ github.event.pull_request.base.sha }}"
