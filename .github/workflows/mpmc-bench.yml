@@ -43,7 +43,6 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          sudo apt-get update
           chmod +x ./build_libe3
           ./build_libe3 -I
 

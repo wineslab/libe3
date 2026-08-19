@@ -240,14 +240,35 @@ check_command() {
     return 0
 }
 
+# Retry a package-manager command with a bounded per-attempt timeout. A
+# mirror can hang indefinitely mid-transfer (observed against
+# azure.archive.ubuntu.com on GitHub-hosted runners: multiple minutes of
+# silence after a partial "apt-get update"), and without a bound that
+# consumes the whole job's timeout-minutes budget on a transient hiccup
+# instead of retrying in seconds. 120s comfortably covers an actually
+# successful `apt-get update` (observed ~45s) or `install` of this list,
+# while still failing fast enough for 3 attempts to fit well inside the
+# job timeout.
+retry_apt() {
+    local attempt
+    for attempt in 1 2 3; do
+        if timeout 120 "$@"; then
+            return 0
+        fi
+        echo_warning "Command timed out or failed (attempt $attempt/3): $*"
+    done
+    echo_error "Command failed after 3 attempts: $*"
+    return 1
+}
+
 install_dependencies() {
     echo_info "Installing dependencies..."
     
     # Detect package manager
     if check_command apt-get; then
         echo_info "Detected Debian/Ubuntu system"
-        sudo apt-get update
-        sudo apt-get install -y \
+        retry_apt sudo apt-get update
+        retry_apt sudo apt-get install -y \
             build-essential \
             cmake \
             pkg-config \

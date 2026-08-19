@@ -70,7 +70,6 @@ jobs:
       - name: Install build dependencies
         if: needs.changes.outputs.code == 'true'
         run: |
-          sudo apt-get update
           chmod +x ./build_libe3
           ./build_libe3 -I
 
@@ -103,7 +102,6 @@ jobs:
       - name: Install build dependencies
         if: needs.changes.outputs.code == 'true'
         run: |
-          sudo apt-get update
           chmod +x ./build_libe3
           ./build_libe3 -I
 
@@ -144,7 +142,6 @@ jobs:
       - name: Install build dependencies
         if: needs.changes.outputs.code == 'true'
         run: |
-          sudo apt-get update
           chmod +x ./build_libe3
           ./build_libe3 -I
 
@@ -192,7 +189,6 @@ jobs:
       - name: Install build dependencies
         if: needs.changes.outputs.code == 'true'
         run: |
-          sudo apt-get update
           chmod +x ./build_libe3
           ./build_libe3 -I
 
@@ -237,7 +233,6 @@ jobs:
       - name: Install build + SWIG dependencies
         if: needs.changes.outputs.code == 'true'
         run: |
-          sudo apt-get update
           sudo apt-get install -y swig python3-dev
           chmod +x ./build_libe3
           ./build_libe3 -I

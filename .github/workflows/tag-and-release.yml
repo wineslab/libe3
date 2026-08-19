@@ -75,7 +75,6 @@ jobs:
 
       - name: Install build dependencies via build_libe3
         run: |
-          sudo apt-get update
           chmod +x ./build_libe3 || true
           ./build_libe3 -I
 
@@ -141,7 +140,6 @@ jobs:
 
       - name: Install build dependencies via build_libe3
         run: |
-          sudo apt-get update
           chmod +x ./build_libe3 || true
           ./build_libe3 -I
 
@@ -209,7 +207,6 @@ jobs:
 
       - name: Install build dependencies via build_libe3
         run: |
-          sudo apt-get update
           chmod +x ./build_libe3 || true
           ./build_libe3 -I
 
