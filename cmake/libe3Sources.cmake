@@ -33,14 +33,13 @@ set(LIBE3_SOURCES
     # Core
     src/core/e3_agent.cpp
     src/core/e3_interface.cpp
-    src/core/latrec.c
     src/core/subscription_manager.cpp
     src/core/sm_registry.cpp
-    
+
     # Encoder
     src/encoder/e3_encoder.cpp
     src/encoder/encoder_factory.cpp
-    
+
     # Connector
     src/connector/connector_factory.cpp
     src/connector/posix_connector.cpp
@@ -50,6 +49,14 @@ set(LIBE3_SOURCES
 # Conditionally add ZMQ connector
 if(LIBE3_ENABLE_ZMQ)
     list(APPEND LIBE3_SOURCES src/connector/zmq_connector.cpp)
+endif()
+
+# The latrec TLS ring registry backs include/libe3/latrec.h's convenience API
+# (latrec_tstamp/latrec_tls_open_as/latrec_seq_next). Excluded entirely when
+# the recorder is off, so a normal build carries none of it; latrec.h falls
+# back to inline no-op stubs for that same API in that case.
+if(LIBE3_ENABLE_LATREC)
+    list(APPEND LIBE3_SOURCES src/core/latrec.c)
 endif()
 
 # Conditionally include encoder implementations

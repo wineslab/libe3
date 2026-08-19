@@ -656,6 +656,24 @@ static inline void latrec_close(latrec_t* r)
 
 /* ---- per-thread rings (backed by latrec.c) -------------------------------- */
 
+/* latrec is a benchmarking feature, not a production one: libE3's job is
+ * serving a real-time protocol, not measuring itself. LIBE3_ENABLE_LATREC
+ * (a CMake option, OFF by default) decides at compile time whether any of
+ * this exists at all. The runtime LATREC_DIR gate above only matters once
+ * that build-time gate is on -- it picks which individual runs of an
+ * enabled build actually capture, not whether the mechanism is present.
+ *
+ * A caller building against a libe3 that was NOT built with
+ * LIBE3_ENABLE_LATREC must not define it either: the two branches below
+ * declare the same functions with incompatible bodies (real vs. stub), and
+ * LIBE3_ENABLE_LATREC is exported as a PUBLIC compile definition by
+ * cmake/libe3Targets.cmake precisely so a consumer linking against the
+ * libe3 CMake target inherits the matching setting automatically. A
+ * pkg-config consumer (OAI, flexric) must pass a matching
+ * -DLIBE3_ENABLE_LATREC=ON explicitly, the same way it already must for
+ * LIBE3_ENABLE_ASN1/LIBE3_ENABLE_JSON. */
+#ifdef LIBE3_ENABLE_LATREC
+
 /* Ring of the calling thread. Never NULL: it refers to a disabled ring until
  * the thread calls latrec_tls_open(), so a stamp before that is discarded. */
 extern __thread latrec_t* latrec_tls;
@@ -695,6 +713,25 @@ static inline void latrec_ctx_set(uint64_t seq)
     if (r->enabled) r->ctx_seq = seq;
 }
 static inline uint64_t latrec_ctx(void) { return latrec_tls->ctx_seq; }
+
+#else /* !LIBE3_ENABLE_LATREC */
+
+/* True no-op stubs, not just a disabled ring: with the recorder compiled
+ * out, every latrec_tstamp()/latrec_tls_open_as()/etc. call site already
+ * instrumented throughout libe3 (and OAI, flexric, the dApps) collapses to
+ * nothing here, with no dependency on latrec.c (which is excluded from the
+ * build in this configuration) and no linker symbol to resolve. */
+static inline latrec_t* latrec_tls_open_as(const char* role) { (void)role; return NULL; }
+static inline latrec_t* latrec_tls_open(void) { return NULL; }
+static inline uint64_t latrec_seq_next(void) { return 0; }
+static inline void latrec_tstamp(uint64_t seq, uint8_t stage, uint64_t aux, uint64_t aux2)
+{
+    (void)seq; (void)stage; (void)aux; (void)aux2;
+}
+static inline void latrec_ctx_set(uint64_t seq) { (void)seq; }
+static inline uint64_t latrec_ctx(void) { return 0; }
+
+#endif /* LIBE3_ENABLE_LATREC */
 
 #ifdef __cplusplus
 }
