@@ -18,17 +18,18 @@
  *     indication is emitted only after the dApp's control action round-trips.
  *     Used by the latency benchmark to measure a clean, unpipelined round trip.
  *
- * An optional trace hook (@ref set_trace_hook) exposes the RAN-side phase
- * boundaries (collect / encode / send, and the control-handler entry/exit) so
- * an instrument can time them without pulling any measurement machinery into
- * the shipped hot path. The hook is empty by default and, when unset, costs a
- * single predicted-not-taken branch with no clock read.
+ * RAN-side phase boundaries (collect / encode / send, and the
+ * control-handler entry/exit) are stamped directly with latrec's LATREC_EX*
+ * stage block (include/libe3/latrec.h), keyed on this SM's own indication
+ * counter. Every stamp resolves to a no-op unless the library was built with
+ * -DLIBE3_ENABLE_LATREC=ON, so this costs nothing in a normal build.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 #pragma once
 
 #include <libe3/libe3.hpp>
+#include <libe3/latrec.h>
 // Sibling header in this directory; the plain form resolves both when this
 // header is reached via the examples/ include path (integration tests) and via
 // the examples/sm_simple/ include path (example_simple_agent).
@@ -38,7 +39,6 @@
 #include <chrono>
 #include <condition_variable>
 #include <cstdint>
-#include <functional>
 #include <iostream>
 #include <mutex>
 #include <string>
@@ -57,20 +57,6 @@ public:
         PingPong,   ///< one in flight; next emit gated on the control round trip
     };
 
-    /// RAN-side phase boundaries reported to the trace hook, if installed.
-    enum class TracePhase {
-        CollectBegin,     ///< worker wake, before building the indication
-        EncodeBegin,      ///< immediately before encoding the indication
-        SendIndication,   ///< bytes ready, immediately before emit_outbound
-        ControlRecv,      ///< handle_control_action entry
-        ControlDone,      ///< after decoding the control action
-    };
-
-    /// Trace hook: (indication sequence, phase, steady_clock nanoseconds).
-    /// The timestamp is captured by the SM at the exact boundary and passed in,
-    /// so the hook implementation does not need to read the clock itself.
-    using TraceHook = std::function<void(uint32_t seq, TracePhase phase, int64_t ts_ns)>;
-
     // period_us: microseconds between indication emissions (FixedRate). Sub-ms
     // values stress the conflate/queueing balance; the per-send log is silenced
     // below 1 ms so stdout I/O does not dominate the measurement. mode selects
@@ -87,10 +73,6 @@ public:
           mode_(mode), pingpong_fallback_ms_(pingpong_fallback_ms) {}
 
     ~SimpleServiceModel() override { stop(); }
-
-    // Install a trace hook. Must be called before start(); the hook is only
-    // read from the worker / control-handler threads after the SM starts.
-    void set_trace_hook(TraceHook hook) { trace_hook_ = std::move(hook); }
 
     std::string name() const override { return "SIMPLE"; }
     uint32_t version() const override { return 1; }
@@ -160,12 +142,12 @@ public:
         const libe3::DAppControlAction& action
     ) override {
         const uint32_t seq = inflight_seq_.load(std::memory_order_relaxed);
-        if (trace_hook_) trace_hook_(seq, TracePhase::ControlRecv, trace_now_ns());
+        latrec_tstamp(seq, LATREC_EX3_CTRL_RECV, 0, 0);
 
         int sampling = 0;
         bool decode_ok = libe3_examples::decode_simple_control(action.action_data, sampling, encoding_);
 
-        if (trace_hook_) trace_hook_(seq, TracePhase::ControlDone, trace_now_ns());
+        latrec_tstamp(seq, LATREC_EX4_CTRL_DONE, 0, 0);
 
         if (!quiet_) {
             if (decode_ok) {
@@ -201,18 +183,11 @@ private:
     libe3::EncodingFormat encoding_{libe3::EncodingFormat::ASN1};
     PacingMode mode_{PacingMode::FixedRate};
     uint64_t pingpong_fallback_ms_{50};  ///< PingPong liveness-fallback timeout
-    TraceHook trace_hook_{};
 
     // PingPong emission gate.
     std::mutex emit_mu_;
     std::condition_variable emit_cv_;
     bool may_emit_{true};  // starts true so the first indication bootstraps
-
-    static int64_t trace_now_ns() {
-        return std::chrono::duration_cast<std::chrono::nanoseconds>(
-                   std::chrono::steady_clock::now().time_since_epoch())
-            .count();
-    }
 
     // PingPong only: release the next indication emission.
     void allow_next_emit() {
@@ -222,6 +197,11 @@ private:
     }
 
     void worker_loop() {
+        // This thread is spawned by the SM itself, not by E3Interface, so
+        // nothing else opens its latrec ring; the EX0..EX2 stamps below (and
+        // the latrec_ctx_set() bridge into LE0) are no-ops until this runs.
+        latrec_tls_open_as("ex.worker");
+
         // Compensated pacing (FixedRate): sleep to an absolute monotonic
         // deadline that advances by exactly one period per cycle, so the offered
         // rate is 1/period regardless of how long the cycle's own work (encode +
@@ -269,7 +249,7 @@ private:
 
             const uint32_t seq = seq_;
             inflight_seq_.store(seq, std::memory_order_relaxed);
-            if (trace_hook_) trace_hook_(seq, TracePhase::CollectBegin, trace_now_ns());
+            latrec_tstamp(seq, LATREC_EX0_COLLECT_BEGIN, 0, 0);
 
             libe3_examples::SimpleIndication si;
             si.data1 = seq;  // monotonic; data1 range was widened in the SM grammar
@@ -287,14 +267,19 @@ private:
                 std::chrono::system_clock::now().time_since_epoch()).count();
             si.timestamp = static_cast<uint32_t>(now_ms & 0x7FFFFFFF);
 
-            if (trace_hook_) trace_hook_(seq, TracePhase::EncodeBegin, trace_now_ns());
+            latrec_tstamp(seq, LATREC_EX1_ENCODE_BEGIN, 0, 0);
             std::vector<uint8_t> encoded;
             if (!libe3_examples::encode_simple_indication(si, encoded, encoding_)) {
                 std::cerr << "Failed to encode Simple-Indication\n";
                 continue;
             }
 
-            if (trace_hook_) trace_hook_(seq, TracePhase::SendIndication, trace_now_ns());
+            latrec_tstamp(seq, LATREC_EX2_SEND_INDICATION, 0, 0);
+            // Bridges this SM's own seq to libe3's Pdu::enqueue_seq: LE0's aux
+            // captures whatever latrec_ctx_set() last carried, which is what
+            // lets a reader join the EX0..EX2 chain above to the L0.. outbound
+            // leg below (see LATREC_LE0_EMIT_ENTER's doc comment).
+            latrec_ctx_set(seq);
             for (uint32_t dapp_id : subscribers) {
                 libe3::Pdu pdu = make_indication_pdu(dapp_id, RAN_FUNCTION_ID, encoded);
                 auto rc = emit_outbound(std::move(pdu));

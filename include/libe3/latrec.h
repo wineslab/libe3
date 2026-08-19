@@ -455,10 +455,32 @@ enum {
     LATREC_PY1_SM_DECODED   = 0xE1, /* E2SM decode done */
     LATREC_PY2_XAPP_IN      = 0xE2, /* xApp callback entered */
     LATREC_PY3_XAPP_OUT     = 0xE3, /* xApp callback returned with a decision */
-    LATREC_PY4_SM_ENCODED   = 0xE4  /* E2SM control payload encoded; handoff to
+    LATREC_PY4_SM_ENCODED   = 0xE4, /* E2SM control payload encoded; handoff to
                                         the flexric xApp-side E2AP encode (X0) */
 
-    /* 0xC5-0xC7, 0xD5-0xD7, 0xE5-0xE7, 0xE8-0xFF are free. */
+    /* ---- reservations below: stamped by this repo (examples/benchmark) --- */
+
+    /* The shipped reference Simple Service Model (examples/sm_simple),
+     * replacing its ad hoc TracePhase/trace_hook_ mechanism 1:1. seq = the
+     * SM's own indication counter (worker_loop's seq_ at emit time). Not a
+     * downstream repo -- libe3's own shipped example, whose purpose is to be
+     * measured by bench_full_loop_latency. */
+    LATREC_EX0_COLLECT_BEGIN   = 0xF0, /* worker wake, before building the indication */
+    LATREC_EX1_ENCODE_BEGIN    = 0xF1, /* immediately before encoding the indication */
+    LATREC_EX2_SEND_INDICATION = 0xF2, /* bytes ready, immediately before emit_outbound */
+    LATREC_EX3_CTRL_RECV       = 0xF3, /* handle_control_action entry */
+    LATREC_EX4_CTRL_DONE       = 0xF4, /* after decoding the control action */
+
+    /* The minimal example dApp handler inside bench_full_loop_latency.cpp
+     * itself. seq = the indication's business seq (SimpleIndication::data1),
+     * recovered by the benchmark's own reader after decode. No BD0:
+     * LATREC_LF0_FILTER_PASSED already marks handler entry one function call
+     * earlier, so a duplicate entry stamp isn't needed. */
+    LATREC_BD1_DECODED           = 0xF6, /* decode_simple_indication() returned */
+    LATREC_BD2_CTRL_ENCODE_BEGIN = 0xF7, /* immediately before encode_simple_control() */
+    LATREC_BD3_CTRL_ENCODE_DONE  = 0xF8  /* encode_simple_control() returned */
+
+    /* 0xC5-0xC7, 0xD5-0xD7, 0xE5-0xE7, 0xF5, 0xF9-0xFF are free. */
 };
 
 /* D5 admission outcomes (aux2) */

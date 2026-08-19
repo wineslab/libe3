@@ -67,6 +67,19 @@ endforeach()
 # example_simple_agent/example_simple_dapp executables for cross-process
 # scenarios. Each test gets the "integration" CTest label so callers can
 # `ctest -L integration` (or skip them with `ctest -LE integration`).
+#
+# These specifically exercise latrec's TLS convenience layer (or, for
+# simple_sm_modes, the shipped reference SM's LATREC_EX* stamps), which are
+# no-ops without LIBE3_ENABLE_LATREC=ON: skip them rather than let them build
+# and fail (or pass vacuously) against an empty capture.
+set(LIBE3_LATREC_ONLY_TESTS
+    bench_full_loop_latency
+    bench_latrec_load
+    latrec_drops
+    latrec_stages
+    simple_sm_modes
+)
+
 if(LIBE3_BUILD_INTEGRATION_TESTS AND LIBE3_ENABLE_ASN1)
     file(GLOB LIBE3_INTEGRATION_TEST_SOURCES
         RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
@@ -74,6 +87,10 @@ if(LIBE3_BUILD_INTEGRATION_TESTS AND LIBE3_ENABLE_ASN1)
     foreach(test_src IN LISTS LIBE3_INTEGRATION_TEST_SOURCES)
         get_filename_component(test_name ${test_src} NAME_WE)
         string(REGEX REPLACE "^test_" "" simple_name ${test_name})
+        if(NOT LIBE3_ENABLE_LATREC AND simple_name IN_LIST LIBE3_LATREC_ONLY_TESTS)
+            message(STATUS "Skipping test_${simple_name}: latrec disabled (LIBE3_ENABLE_LATREC=OFF)")
+            continue()
+        endif()
         set(target_name "test_${simple_name}")
         add_executable(${target_name} "${CMAKE_CURRENT_SOURCE_DIR}/${test_src}"
             "${CMAKE_CURRENT_SOURCE_DIR}/examples/sm_simple/e3sm_simple_wrapper.cpp")
