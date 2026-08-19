@@ -170,6 +170,16 @@ enum {
      * Numbered below 0x30 because the libe3 block is full; it grows downward. */
     LATREC_LE0_EMIT_ENTER  = 0x2F,
 
+    /* libe3 dApp-role indication delivery — the gap between the inbound
+     * filter (E3Interface::handle_indication) and the application callback.
+     * Only the Python/SWIG seam (LQ0/LQ1 below) was covered before; these
+     * close the direct C++ path. seq = the same key as the enclosing
+     * L4..L6 record. A message the dApp-id filter rejects gets neither: see
+     * LATREC_DROP_FILTERED instead. Continues the downward growth below LE0. */
+    LATREC_LF1_CALLBACK_DONE = 0x2D, /* indication_handler_() returned */
+    LATREC_LF0_FILTER_PASSED = 0x2E, /* filter passed; about to invoke the
+                                         application's indication_handler_() */
+
     /* libe3 outbound — LE0 (above) and the enqueue run on the caller's
      * thread, the rest on the publisher thread (e3_interface).
      * seq = Pdu::enqueue_seq. */
@@ -463,7 +473,8 @@ enum {
     LATREC_DROP_DECODE       = 4,
     LATREC_DROP_REPORT_QUEUE = 5,
     LATREC_DROP_NO_HANDLER   = 6,
-    LATREC_DROP_SESSION_QUEUE = 7
+    LATREC_DROP_SESSION_QUEUE = 7,
+    LATREC_DROP_FILTERED     = 8
 };
 
 #define LATREC_MAGIC   0x31524C41u /* "ALR1" */

@@ -347,7 +347,7 @@ private:
     // dApp-role handlers
     void handle_setup_response(const SetupResponse& response);
     void handle_subscription_response(const SubscriptionResponse& response);
-    void handle_indication(const IndicationMessage& msg);
+    void handle_indication(const IndicationMessage& msg, uint64_t latrec_seq);
     void handle_xapp_control_action(const XAppControlAction& action);
     void handle_message_ack(const MessageAck& ack);
 

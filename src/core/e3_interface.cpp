@@ -1049,7 +1049,7 @@ void E3Interface::inbound_loop_dapp() {
             }
             case PduType::INDICATION_MESSAGE: {
                 auto* m = std::get_if<IndicationMessage>(&pdu.choice);
-                if (m) handle_indication(*m);
+                if (m) handle_indication(*m, seq);
                 break;
             }
             case PduType::XAPP_CONTROL_ACTION: {
@@ -1157,7 +1157,7 @@ void E3Interface::handle_subscription_response(const SubscriptionResponse& resp)
     }
 }
 
-void E3Interface::handle_indication(const IndicationMessage& msg) {
+void E3Interface::handle_indication(const IndicationMessage& msg, uint64_t latrec_seq) {
     // ZMQ PUB broadcasts to every connected SUB, so a dApp instance will
     // receive indications addressed to other dApps connected to the same RAN.
     // Filter: an indication is only for us if its dApp identifier matches
@@ -1166,12 +1166,15 @@ void E3Interface::handle_indication(const IndicationMessage& msg) {
         std::lock_guard<std::mutex> lk(dapp_state_->mu);
         if (!dapp_state_->assigned_dapp_id.has_value() ||
             *dapp_state_->assigned_dapp_id != msg.dapp_identifier) {
+            latrec_tstamp(latrec_seq, LATREC_L9_DROP, 0, LATREC_DROP_FILTERED);
             return;  // not for us
         }
     }
+    latrec_tstamp(latrec_seq, LATREC_LF0_FILTER_PASSED, 0, 0);
     if (indication_handler_) {
         indication_handler_(msg);
     }
+    latrec_tstamp(latrec_seq, LATREC_LF1_CALLBACK_DONE, 0, 0);
 }
 
 void E3Interface::handle_xapp_control_action(const XAppControlAction& action) {
