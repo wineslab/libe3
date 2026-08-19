@@ -148,33 +148,96 @@ jobs:
 
   merge-command:
     name: Post fast-forward merge command
-    if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved'
+    # Used to trigger only on an approved pull_request_review, which never
+    # fires for a solo-authored PR (GitHub doesn't let an author approve
+    # their own PR, and there's no second reviewer) -- so this context sat
+    # permanently "skipped" for solo work. It isn't itself a required check,
+    # so that was harmless to mergeability, but it also meant the one job
+    # meant to hand the maintainer the exact merge command never ran.
+    #
+    # Decoupled from review state entirely: what actually matters for
+    # posting a trustworthy "ready to merge" comment is that the required
+    # checks for this exact commit are green, not who clicked approve. Polls
+    # the branch's *effective* required status checks (via the rules API,
+    # so it can't drift from whatever the ruleset currently requires) until
+    # they're all done, then posts only if every one succeeded.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 20
     permissions:
+      contents: read
       pull-requests: write
     steps:
-      - name: Comment the fast-forward merge command
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const head = context.payload.pull_request.head.sha;
-            const branch = context.payload.pull_request.head.ref;
-            const body = [
-              '### Ready to merge (fast-forward only)',
-              '',
-              'This PR is approved. A maintainer can land the reviewed commits with:',
-              '',
-              '```bash',
-              'git fetch origin',
-              `git checkout main && git merge --ff-only ${head} && git push origin main`,
-              '```',
-              '',
-              `Head: \`${head}\` (branch \`${branch}\`). If \`--ff-only\` fails as non-fast-forward, the branch must be rebased on the latest \`main\`.`,
-            ].join('\n');
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body,
-            });
+      - name: Wait for required checks, then post the merge command
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -e
+          required="$(gh api "repos/$REPO/rules/branches/main" \
+            --jq '.[] | select(.type=="required_status_checks") | .parameters.required_status_checks[].context')"
+          echo "Required contexts for main:"; echo "$required"
+
+          deadline=$(( $(date +%s) + 18*60 ))
+          while true; do
+            statuses="$(gh api "repos/$REPO/commits/$HEAD_SHA/check-runs" --paginate \
+              --jq '.check_runs[] | "\(.name)\t\(.status)\t\(.conclusion)"')"
+
+            all_done=true
+            all_success=true
+            while IFS=$'\t' read -r name status conclusion; do
+              [ -z "$name" ] && continue
+              # This job's own context isn't required, so skip it -- it's
+              # always "in_progress" while this very script is running.
+              if [ "$name" = "Post fast-forward merge command" ]; then
+                continue
+              fi
+              if echo "$required" | grep -qxF "$name"; then
+                if [ "$status" != "completed" ]; then
+                  all_done=false
+                elif [ "$conclusion" != "success" ]; then
+                  all_success=false
+                fi
+              fi
+            done <<< "$statuses"
+
+            if [ "$all_done" = "true" ]; then
+              break
+            fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then
+              echo "Timed out waiting for required checks to finish; not posting."
+              exit 0
+            fi
+            sleep 20
+          done
+
+          if [ "$all_success" != "true" ]; then
+            echo "Not every required check succeeded; not posting the merge command."
+            exit 0
+          fi
+
+          marker='<!-- ready-to-merge -->'
+          body=$(printf '%s\n' \
+            "$marker" \
+            '### Ready to merge (fast-forward only)' \
+            '' \
+            "All required checks are green for \`${HEAD_SHA:0:7}\`. A maintainer can land the reviewed commits with:" \
+            '' \
+            '```bash' \
+            'git fetch origin' \
+            "git checkout main && git merge --ff-only $HEAD_SHA && git push origin main" \
+            '```' \
+            '' \
+            "Head: \`$HEAD_SHA\` (branch \`$BRANCH\`). If \`--ff-only\` fails as non-fast-forward, the branch must be rebased on the latest \`main\`.")
+
+          existing="$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --paginate \
+            --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -1)"
+          if [ -n "$existing" ]; then
+            gh api "repos/$REPO/issues/comments/$existing" -X PATCH -f body="$body" > /dev/null
+          else
+            gh api "repos/$REPO/issues/$PR_NUMBER/comments" -X POST -f body="$body" > /dev/null
+          fi
+          echo "Posted/updated the ready-to-merge comment."
