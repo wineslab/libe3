@@ -12,6 +12,7 @@
 #include "libe3/latrec.h"
 #include <cctype>
 #include <chrono>
+#include <cstdio>
 #include <cstdlib>
 #include <signal.h>
 #include <string>
@@ -106,6 +107,9 @@ constexpr const char* LATREC_ROLE_OUTBOUND = "libe3.outbound";
 constexpr const char* LATREC_ROLE_INBOUND  = "libe3.inbound";
 constexpr const char* LATREC_ROLE_REPORT   = "libe3.report";
 constexpr const char* LATREC_ROLE_SETUP    = "libe3.setup";
+#ifdef LIBE3_ENABLE_LATREC
+constexpr const char* LATREC_ROLE_CONTEXT  = "libe3.context";
+#endif
 } // anonymous namespace
 
 uint32_t E3Interface::generate_message_id() {
@@ -243,6 +247,10 @@ ErrorCode E3Interface::start() {
         outbound_thread_ = std::make_unique<std::thread>(&E3Interface::outbound_loop_dapp, this);
     }
 
+#ifdef LIBE3_ENABLE_LATREC
+    context_thread_ = std::make_unique<std::thread>(&E3Interface::context_monitor_loop, this);
+#endif
+
     state_.store(AgentState::RUNNING);
     E3_LOG_INFO(LOG_TAG) << "E3Interface started successfully";
 
@@ -287,6 +295,11 @@ void E3Interface::stop() {
     if (report_worker_thread_ && report_worker_thread_->joinable()) {
         report_worker_thread_->join();
     }
+#ifdef LIBE3_ENABLE_LATREC
+    if (context_thread_ && context_thread_->joinable()) {
+        context_thread_->join();
+    }
+#endif
 
     // Wake up anyone blocked in wait_for_setup so they don't hang.
     {
@@ -597,6 +610,57 @@ void E3Interface::report_worker_loop() {
 
     E3_LOG_INFO(LOG_TAG) << "Report worker loop stopped";
 }
+
+#ifdef LIBE3_ENABLE_LATREC
+void E3Interface::context_monitor_loop() {
+    latrec_tls_open_as(LATREC_ROLE_CONTEXT);
+
+#ifdef __linux__
+    long prev_nivcsw = 0;
+    {
+        struct rusage ru {};
+        if (getrusage(RUSAGE_SELF, &ru) == 0) {
+            prev_nivcsw = ru.ru_nivcsw;
+        }
+    }
+#endif
+
+    while (!should_stop_.load()) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        if (should_stop_.load()) {
+            break;
+        }
+
+        uint64_t nivcsw_delta = 0;
+        uint64_t cur_freq_khz = 0;
+#ifdef __linux__
+        struct rusage ru {};
+        if (getrusage(RUSAGE_SELF, &ru) == 0) {
+            nivcsw_delta = static_cast<uint64_t>(ru.ru_nivcsw - prev_nivcsw);
+            prev_nivcsw = ru.ru_nivcsw;
+        }
+
+        // Best-effort: absent under most VMs/containers and some CI runners,
+        // in which case this stays 0 rather than failing the sample.
+        const int cpu = sched_getcpu();
+        if (cpu >= 0) {
+            char path[128];
+            std::snprintf(path, sizeof(path),
+                          "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_cur_freq", cpu);
+            if (FILE* f = std::fopen(path, "r")) {
+                long khz = 0;
+                if (std::fscanf(f, "%ld", &khz) == 1) {
+                    cur_freq_khz = static_cast<uint64_t>(khz);
+                }
+                std::fclose(f);
+            }
+        }
+#endif
+        // seq = 0: a 1 Hz slow-lane record carries no per-message key.
+        latrec_tstamp(0, LATREC_C0_CONTEXT, nivcsw_delta, cur_freq_khz);
+    }
+}
+#endif  // LIBE3_ENABLE_LATREC
 
 // =========================================================================
 // Message Handlers

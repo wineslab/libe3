@@ -236,6 +236,12 @@ private:
     std::unique_ptr<std::thread> inbound_thread_;
     std::unique_ptr<std::thread> outbound_thread_;
     std::unique_ptr<std::thread> report_worker_thread_;
+#ifdef LIBE3_ENABLE_LATREC
+    // ~1 Hz slow-lane sampler stamping LATREC_C0_CONTEXT (involuntary context
+    // switches, current CPU frequency), to explain p99 tails. Exists only in
+    // a latrec-enabled build: a normal build spawns no such thread at all.
+    std::unique_ptr<std::thread> context_thread_;
+#endif
 
     // RAN-side handlers
     DAppReportHandler dapp_report_handler_;
@@ -297,6 +303,13 @@ private:
      *        are never blocked by downstream (OAI / iApp) work.
      */
     void report_worker_loop();
+
+#ifdef LIBE3_ENABLE_LATREC
+    /**
+     * @brief ~1 Hz slow-lane sampler stamping LATREC_C0_CONTEXT.
+     */
+    void context_monitor_loop();
+#endif
 
     // =========================================================================
     // Message Handlers
