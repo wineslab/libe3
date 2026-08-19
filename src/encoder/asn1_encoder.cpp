@@ -25,6 +25,7 @@ extern "C" {
 #include "E3-XAppControlAction.h"
 #include "E3-ReleaseMessage.h"
 #include "E3-MessageAck.h"
+#include "E3-Timestamp.h"
 }
 
 #include <cstring>
@@ -33,6 +34,21 @@ namespace libe3 {
 
 namespace {
 constexpr const char* LOG_TAG = "Asn1Enc";
+
+// E3-Timestamp is an unconstrained INTEGER, which asn1c renders as a native
+// signed integer rather than the arbitrary-precision INTEGER_t. That keeps the
+// codec allocation-free on the indication path, at the cost of being tied to
+// the platform's long. Fail the build rather than silently truncating
+// Pdu::timestamp anywhere that type is narrower than the field it carries.
+//
+// The signedness costs nothing in practice: the conversions below are
+// two's-complement round trips, so the full uint64_t range survives intact.
+// Only past 2262-04-11, where a nanosecond stamp crosses 2^63, does the value
+// travel as a negative INTEGER, and it still decodes back bit-for-bit.
+static_assert(sizeof(E3_Timestamp_t) >= sizeof(uint64_t),
+              "E3_Timestamp_t is narrower than Pdu::timestamp; "
+              "give E3-Timestamp an explicit upper bound to force INTEGER_t "
+              "on this platform");
 } // anonymous namespace
 
 // ============================================================================
@@ -131,6 +147,21 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
     
     // Set top-level message ID (E3-PDU.id)
     asn1_pdu->id = pdu.message_id;
+
+    // Set the optional envelope timestamp (E3-PDU.timestamp). Zero is the
+    // "no producer reference" sentinel and is sent as an absent field, so a
+    // producer that does not stamp its PDUs pays one preamble bit, not nine
+    // octets. Failing to allocate is not fatal: the PDU still carries its
+    // payload, it just loses the timestamp, which is exactly what an
+    // unstamped PDU looks like.
+    if (pdu.timestamp != 0) {
+        asn1_pdu->timestamp =
+            static_cast<E3_Timestamp_t*>(calloc(1, sizeof(E3_Timestamp_t)));
+        if (asn1_pdu->timestamp) {
+            *asn1_pdu->timestamp = static_cast<E3_Timestamp_t>(pdu.timestamp);
+        }
+    }
+
     
     switch (pdu.type) {
         case PduType::SETUP_REQUEST: {
@@ -434,6 +465,16 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
     
     // Read top-level message ID (E3-PDU.id)
     pdu.message_id = static_cast<uint32_t>(asn1_pdu->id);
+
+    // Read the optional envelope timestamp (E3-PDU.timestamp). The assignment
+    // is unconditional on purpose: Pdu's default constructor stamps the
+    // current clock, so without the else branch an absent field would decode
+    // to the *receiver's* wall clock at decode time rather than to the
+    // "unset" sentinel, which is far harder to notice than a zero.
+    pdu.timestamp = asn1_pdu->timestamp
+                        ? static_cast<uint64_t>(*asn1_pdu->timestamp)
+                        : 0;
+
     
     switch (asn1_pdu->msg.present) {
         case E3_PDU__msg_PR_setupRequest: {

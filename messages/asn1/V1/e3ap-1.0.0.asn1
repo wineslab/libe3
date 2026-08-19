@@ -101,9 +101,26 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     -- response code is a wire change we are willing to pay for explicitly.
     E3-ResponseCode ::= ENUMERATED { positive(0), negative(1) }
 
+    -- Milliseconds since the Unix epoch on the realtime (UTC) clock. Absent
+    -- means "no producer reference", which is a normal message, not a
+    -- malformed one: a producer that does not want the clock read on its data
+    -- path simply omits it.
+    --
+    -- Unconstrained on purpose. asn1c renders this as a native signed integer
+    -- and APER length-prefixes it, so the field widens by itself instead of
+    -- capping the range, and the codec stays allocation-free on the
+    -- indication path.
+    --
+    -- Do not "tighten" this to INTEGER (0..MAX): a semi-constrained INTEGER is
+    -- APC_SEMI_CONSTRAINED, and asn1c 0.9.29's APER decoder has no branch for
+    -- that flag and fails every decode. An explicit upper bound works but
+    -- forces the arbitrary-precision INTEGER_t and a heap allocation per PDU.
+    E3-Timestamp ::= INTEGER
+
     E3-PDU ::= SEQUENCE {
-        id      E3-MessageID,
-        msg     CHOICE {
+        id        E3-MessageID,
+        timestamp E3-Timestamp OPTIONAL,
+        msg       CHOICE {
             setupRequest          [0]  E3-SetupRequest,
             setupResponse         [1]  E3-SetupResponse,
             subscriptionRequest   [2]  E3-SubscriptionRequest,

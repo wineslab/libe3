@@ -120,6 +120,7 @@ set(e3ap_source
     E3-SubscriptionDelete.c
     E3-SubscriptionRequest.c
     E3-SubscriptionResponse.c
+    E3-Timestamp.c
     E3-Version.c
     E3-XAppControlAction.c
 )
@@ -189,6 +190,7 @@ set(e3ap_headers
     E3-SubscriptionDelete.h
     E3-SubscriptionRequest.h
     E3-SubscriptionResponse.h
+    E3-Timestamp.h
     E3-Version.h
     E3-XAppControlAction.h
 )
