@@ -48,6 +48,8 @@ STAGES = {
     0x20: "W0_WAKE", 0x21: "W1_SLOT_SELECT", 0x22: "W2_META_BUILT",
     0x23: "W3_ENCODE_DONE", 0x24: "W4_SENT_TO_E3", 0x25: "W5_WAIT_ENTER",
     0x26: "W6_SKIPPED",
+    0x2B: "LS3_SUB_SENT", 0x2C: "LS2_SUB_RECV",
+    0x2D: "LF1_CALLBACK_DONE", 0x2E: "LF0_FILTER_PASSED",
     0x2F: "LE0_EMIT_ENTER",
     0x30: "L0_ENQUEUE", 0x31: "L1_DEQUEUE", 0x32: "L2_ENCODE_DONE",
     0x33: "L3_SEND_DONE", 0x34: "L4_RECV", 0x35: "L5_DECODED",
@@ -89,6 +91,19 @@ STAGES = {
     0xB6: "X6_AG_SM_DEC", 0xB7: "X7_AG_CTRL_OUT", 0xB8: "X8_AG_IND_ENC",
     0xB9: "X9_AG_IND_E2AP", 0xBA: "XA_AG_IND_SENT", 0xBB: "XB_IND_RECV",
     0xBC: "XC_IND_DEC", 0xBD: "XD_IND_DISPATCH", 0xBE: "XE_REP_RECV",
+    # Reserved: not yet stamped by libe3 itself (see include/libe3/latrec.h).
+    0xC0: "OC0_CAPTURE_ENTRY", 0xC1: "OC1_CAPTURE_DONE",
+    0xC2: "OC2_PIPELINE_WAKE", 0xC3: "OC3_PIPELINE_DONE",
+    0xC4: "OC4_ENCODE_DONE",
+    0xD0: "CB0_LAKE_READ_ENTRY", 0xD1: "CB1_LAKE_READ_DONE",
+    0xD2: "CB2_AGENT_WAKE", 0xD3: "CB3_AGENT_DONE", 0xD4: "CB4_ENCODE_DONE",
+    0xE0: "PY0_IND_DISPATCH", 0xE1: "PY1_SM_DECODED", 0xE2: "PY2_XAPP_IN",
+    0xE3: "PY3_XAPP_OUT", 0xE4: "PY4_SM_ENCODED",
+    # Stamped by this repo's examples/benchmark only.
+    0xF0: "EX0_COLLECT_BEGIN", 0xF1: "EX1_ENCODE_BEGIN",
+    0xF2: "EX2_SEND_INDICATION", 0xF3: "EX3_CTRL_RECV", 0xF4: "EX4_CTRL_DONE",
+    0xF6: "BD1_DECODED", 0xF7: "BD2_CTRL_ENCODE_BEGIN",
+    0xF8: "BD3_CTRL_ENCODE_DONE",
 }
 
 Record = namedtuple("Record", "seq cpu stage t_ns aux aux2")

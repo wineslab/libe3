@@ -111,10 +111,20 @@ COMPONENTS = [
         # restarts per agent and is confined to 1..1000, so rows from several
         # dApps or several runs in one capture can share a seq.
         ("setup",    [0x3A, 0x3B], [], "SetupRequest message_id (NOT globally unique)"),
+        # The subscription request/response leg, distinct from setup above.
+        # Numbered below the L block (see LATREC_LS2_SUB_RECV's comment in
+        # latrec.h), so the chain is chronological, not numeric order.
+        ("subscribe", [0x2C, 0x2B], [],
+         "SubscriptionRequest/Response message id (NOT globally unique)"),
         ("session",  [0x3C, 0x3D], [0x39],
          "session-ring counter (dApp binding seam)"),
         ("connector", [0x3E, 0x3F], [],
          "same seq as the outbound row being sent"),
+        # The dApp-role indication-delivery gap (E3Interface::handle_indication):
+        # filter passed -> application callback returned. Same seq as the
+        # enclosing inbound row; numbered below the L block, so chronological
+        # order here is the reverse of numeric order (0x2E before 0x2D).
+        ("callback", [0x2E, 0x2D], [], "same seq as the enclosing inbound row"),
     ]),
     ("dapp", [
         # D0/D1 precede the parse, so they carry no slot key and are their own
@@ -152,6 +162,18 @@ COMPONENTS = [
         # XE is stamped on the dispatcher thread, which has neither the receive
         # loop's ring nor its key, so it is a point event paired with XD by time.
         ("xapp_report", [0xBE], [], "xApp dispatcher counter"),
+    ]),
+    ("examples", [
+        # The shipped reference Simple Service Model (examples/sm_simple),
+        # not a downstream repo -- its own purpose is to be measured by
+        # bench_full_loop_latency.
+        ("sm", [0xF0, 0xF1, 0xF2, 0xF3, 0xF4], [], "SM's own indication counter"),
+        # bench_full_loop_latency's own minimal dApp handler. Same seq as the
+        # indication it decoded (SimpleIndication::data1), which is the "sm"
+        # leg's own key -- the two legs join directly on seq, unlike every
+        # other cross-component pairing in this table.
+        ("bench_dapp", [0xF6, 0xF7, 0xF8], [],
+         "decoded indication's business seq (joins directly to examples.sm)"),
     ]),
 ]
 
