@@ -188,21 +188,27 @@ jobs:
 
             all_done=true
             all_success=true
-            while IFS=$'\t' read -r name status conclusion; do
+            # Iterate over the required list, not over whatever check-runs
+            # happen to exist yet: a required context that hasn't been
+            # *created* yet (e.g. a matrix leg still queued behind another
+            # job) never appears in $statuses at all, so a loop keyed off
+            # $statuses would silently skip it and could see "everything
+            # found is done" while a required check hasn't even started.
+            while IFS= read -r name; do
               [ -z "$name" ] && continue
-              # This job's own context isn't required, so skip it -- it's
-              # always "in_progress" while this very script is running.
-              if [ "$name" = "Post fast-forward merge command" ]; then
+              line="$(printf '%s\n' "$statuses" | awk -F'\t' -v n="$name" '$1==n{print; exit}')"
+              if [ -z "$line" ]; then
+                all_done=false
                 continue
               fi
-              if echo "$required" | grep -qxF "$name"; then
-                if [ "$status" != "completed" ]; then
-                  all_done=false
-                elif [ "$conclusion" != "success" ]; then
-                  all_success=false
-                fi
+              status="$(printf '%s' "$line" | cut -f2)"
+              conclusion="$(printf '%s' "$line" | cut -f3)"
+              if [ "$status" != "completed" ]; then
+                all_done=false
+              elif [ "$conclusion" != "success" ]; then
+                all_success=false
               fi
-            done <<< "$statuses"
+            done <<< "$required"
 
             if [ "$all_done" = "true" ]; then
               break
