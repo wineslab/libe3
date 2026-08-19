@@ -254,14 +254,25 @@ check_command() {
 # hung) mirror -- observed downloading real packages the whole time and
 # still not finishing in 120s. A single shared budget would either be too
 # tight for install or too loose to fail a hung update quickly.
+#
+# Takes the bare apt-get subcommand (no leading "sudo"): `sudo timeout N
+# apt-get ...` runs timeout as the direct parent of apt-get, so its kill
+# signal reaches apt-get directly. The reverse order, `timeout N sudo
+# apt-get ...`, sends the signal to sudo instead -- observed NOT reliably
+# forwarded to apt-get's own dpkg child, leaving dpkg running orphaned
+# after a "timed out" attempt and holding /var/lib/dpkg/lock, so every
+# subsequent retry failed instantly with "Could not get lock" instead of
+# getting a fresh 90/180s budget. `dpkg --configure -a` between attempts
+# lets dpkg finish or clean up whatever an interrupted run left behind.
 retry_apt() {
     local timeout_s="$1"; shift
     local attempt
     for attempt in 1 2 3; do
-        if timeout "$timeout_s" "$@"; then
+        if sudo timeout "$timeout_s" "$@"; then
             return 0
         fi
         echo_warning "Command timed out or failed (attempt $attempt/3, ${timeout_s}s budget): $*"
+        sudo dpkg --configure -a > /dev/null 2>&1 || true
     done
     echo_error "Command failed after 3 attempts: $*"
     return 1
@@ -273,8 +284,8 @@ install_dependencies() {
     # Detect package manager
     if check_command apt-get; then
         echo_info "Detected Debian/Ubuntu system"
-        retry_apt 90 sudo apt-get update
-        retry_apt 180 sudo apt-get install -y \
+        retry_apt 90 apt-get update
+        retry_apt 180 apt-get install -y \
             build-essential \
             cmake \
             pkg-config \
