@@ -15,11 +15,16 @@ on:
     branches:
       - main
 
+concurrency:
+  group: commit-policy-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-trailers:
     name: AI-assistant trailer policy
     if: github.event_name != 'pull_request_review'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,6 +45,7 @@ jobs:
     name: Fast-forward / linear history
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
@@ -65,6 +71,7 @@ jobs:
     name: Detect code changes
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       code: ${{ steps.filter.outputs.code }}
     steps:
@@ -89,16 +96,30 @@ jobs:
     needs: changes
     if: github.event_name == 'pull_request' && needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Prepare /opt/asn1c for caching
+        run: |
+          sudo mkdir -p /opt/asn1c
+          sudo chown "$(id -u):$(id -g)" /opt/asn1c
+
+      - name: Cache asn1c build
+        # Exact-match only: a hit must imply the pinned commit inside
+        # build_libe3 is unchanged. Do not add restore-keys here.
+        uses: actions/cache@v4
+        with:
+          path: /opt/asn1c
+          key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
+
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          chmod +x ./build_libe3 || true
-          ./build_libe3 -I || true
+          chmod +x ./build_libe3
+          ./build_libe3 -I
 
       - name: Build and test every commit (Release)
         shell: bash
@@ -118,6 +139,7 @@ jobs:
     name: Post fast-forward merge command
     if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       pull-requests: write
     steps:

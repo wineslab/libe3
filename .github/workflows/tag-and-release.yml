@@ -8,6 +8,7 @@ on:
 jobs:
   create-tag:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       version: ${{ steps.get_version.outputs.version }}
       tag_created: ${{ steps.set_output.outputs.tag_created }}
@@ -53,10 +54,24 @@ jobs:
     runs-on: ubuntu-latest
     needs: create-tag
     if: ${{ needs.create-tag.outputs.tag_created == 'true' }}
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+
+      - name: Prepare /opt/asn1c for caching
+        run: |
+          sudo mkdir -p /opt/asn1c
+          sudo chown "$(id -u):$(id -g)" /opt/asn1c
+
+      - name: Cache asn1c build
+        # Exact-match only: a hit must imply the pinned commit inside
+        # build_libe3 is unchanged. Do not add restore-keys here.
+        uses: actions/cache@v4
+        with:
+          path: /opt/asn1c
+          key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
 
       - name: Install build dependencies via build_libe3
         run: |
@@ -105,10 +120,24 @@ jobs:
     runs-on: ubuntu-24.04-arm
     needs: create-tag
     if: ${{ needs.create-tag.outputs.tag_created == 'true' }}
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+
+      - name: Prepare /opt/asn1c for caching
+        run: |
+          sudo mkdir -p /opt/asn1c
+          sudo chown "$(id -u):$(id -g)" /opt/asn1c
+
+      - name: Cache asn1c build
+        # Exact-match only: a hit must imply the pinned commit inside
+        # build_libe3 is unchanged. Do not add restore-keys here.
+        uses: actions/cache@v4
+        with:
+          path: /opt/asn1c
+          key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
 
       - name: Install build dependencies via build_libe3
         run: |
@@ -157,12 +186,26 @@ jobs:
     runs-on: ubuntu-latest
     needs: create-tag
     if: ${{ needs.create-tag.outputs.tag_created == 'true' }}
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+
+      - name: Prepare /opt/asn1c for caching
+        run: |
+          sudo mkdir -p /opt/asn1c
+          sudo chown "$(id -u):$(id -g)" /opt/asn1c
+
+      - name: Cache asn1c build
+        # Exact-match only: a hit must imply the pinned commit inside
+        # build_libe3 is unchanged. Do not add restore-keys here.
+        uses: actions/cache@v4
+        with:
+          path: /opt/asn1c
+          key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
 
       - name: Install build dependencies via build_libe3
         run: |
@@ -219,6 +262,7 @@ jobs:
       - create-tag
     runs-on: ubuntu-latest
     if: ${{ needs.create-tag.outputs.tag_created == 'true' }}
+    timeout-minutes: 5
     permissions:
       contents: write
     steps:
@@ -255,6 +299,7 @@ jobs:
       - create-tag
     runs-on: ubuntu-latest
     if: ${{ needs.create-tag.outputs.tag_created == 'true' }}
+    timeout-minutes: 5
     permissions:
       contents: write
     steps:
