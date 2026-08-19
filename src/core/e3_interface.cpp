@@ -783,9 +783,10 @@ void E3Interface::send_negative_setup_reply(uint32_t request_id) {
 }
 
 void E3Interface::handle_subscription_request(const SubscriptionRequest& request, uint32_t request_message_id) {
+    latrec_tstamp(request_message_id, LATREC_LS2_SUB_RECV, 0, 0);
     E3_LOG_INFO(LOG_TAG) << "Handling subscription request from dApp " << request.dapp_identifier
                          << " for RAN function " << request.ran_function_identifier;
-    
+
     ResponseCode response_code = ResponseCode::NEGATIVE;
     uint32_t subscription_id = 1;
     
@@ -828,7 +829,9 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
         resp.subscription_id = subscription_id;
     }
     response_pdu.choice = resp;
-    
+
+    latrec_tstamp(request_message_id, LATREC_LS3_SUB_SENT, 0,
+                  response_code == ResponseCode::POSITIVE ? 1 : 0);
     queue_outbound(std::move(response_pdu));
 }
 
@@ -1132,6 +1135,7 @@ void E3Interface::handle_setup_response(const SetupResponse& resp) {
 }
 
 void E3Interface::handle_subscription_response(const SubscriptionResponse& resp) {
+    latrec_tstamp(resp.request_id, LATREC_LS2_SUB_RECV, 0, 0);
     if (dapp_state_) {
         std::lock_guard<std::mutex> lk(dapp_state_->mu);
         if (!dapp_state_->assigned_dapp_id.has_value() ||

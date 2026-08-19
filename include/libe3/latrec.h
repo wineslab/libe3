@@ -180,6 +180,17 @@ enum {
     LATREC_LF0_FILTER_PASSED = 0x2E, /* filter passed; about to invoke the
                                          application's indication_handler_() */
 
+    /* libe3 subscription control plane (RAN side handle_subscription_request,
+     * dApp side handle_subscription_response) -- the setup handshake (LS0/LS1
+     * below) was the only control-plane leg stamped before this. Numerically
+     * distant from LS0/LS1 because the L block (0x30-0x39) and the setup pair
+     * (0x3A/0x3B) are both full; continues the same downward growth as
+     * LE0/LF0/LF1. seq = request_message_id. */
+    LATREC_LS3_SUB_SENT    = 0x2B, /* SubscriptionResponse queued; aux2 = 1
+                                       accepted, 0 rejected */
+    LATREC_LS2_SUB_RECV    = 0x2C, /* SubscriptionRequest/Response reached the
+                                       handler */
+
     /* libe3 outbound — LE0 (above) and the enqueue run on the caller's
      * thread, the rest on the publisher thread (e3_interface).
      * seq = Pdu::enqueue_seq. */
