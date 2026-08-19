@@ -243,19 +243,25 @@ check_command() {
 # Retry a package-manager command with a bounded per-attempt timeout. A
 # mirror can hang indefinitely mid-transfer (observed against
 # azure.archive.ubuntu.com on GitHub-hosted runners: multiple minutes of
-# silence after a partial "apt-get update"), and without a bound that
-# consumes the whole job's timeout-minutes budget on a transient hiccup
-# instead of retrying in seconds. 120s comfortably covers an actually
-# successful `apt-get update` (observed ~45s) or `install` of this list,
-# while still failing fast enough for 3 attempts to fit well inside the
-# job timeout.
+# total silence after a partial "apt-get update"), and without a bound
+# that consumes the whole job's timeout-minutes budget on a hiccup instead
+# of retrying in seconds.
+#
+# Takes the per-attempt timeout explicitly rather than hardcoding one:
+# `apt-get update` only fetches metadata (observed 45-90s under this same
+# mirror when it isn't outright stuck), but `apt-get install` of a real
+# package list can legitimately need several minutes under a slow (not
+# hung) mirror -- observed downloading real packages the whole time and
+# still not finishing in 120s. A single shared budget would either be too
+# tight for install or too loose to fail a hung update quickly.
 retry_apt() {
+    local timeout_s="$1"; shift
     local attempt
     for attempt in 1 2 3; do
-        if timeout 120 "$@"; then
+        if timeout "$timeout_s" "$@"; then
             return 0
         fi
-        echo_warning "Command timed out or failed (attempt $attempt/3): $*"
+        echo_warning "Command timed out or failed (attempt $attempt/3, ${timeout_s}s budget): $*"
     done
     echo_error "Command failed after 3 attempts: $*"
     return 1
@@ -267,8 +273,8 @@ install_dependencies() {
     # Detect package manager
     if check_command apt-get; then
         echo_info "Detected Debian/Ubuntu system"
-        retry_apt sudo apt-get update
-        retry_apt sudo apt-get install -y \
+        retry_apt 90 sudo apt-get update
+        retry_apt 180 sudo apt-get install -y \
             build-essential \
             cmake \
             pkg-config \

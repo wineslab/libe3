@@ -51,7 +51,7 @@ jobs:
     name: Full-loop latency
     needs: changes
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     permissions:
       contents: read
       pull-requests: write

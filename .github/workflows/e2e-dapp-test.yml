@@ -55,7 +55,7 @@ jobs:
     name: Warm asn1c cache
     needs: changes
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -85,7 +85,7 @@ jobs:
     name: "E2E ${{ matrix.link }}/${{ matrix.transport }}"
     needs: [changes, asn1c-cache]
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     strategy:
       fail-fast: false
