@@ -43,7 +43,8 @@ jobs:
         run: |
           cmake -S . -B build \
             -DCMAKE_BUILD_TYPE=Release \
-            -DLIBE3_BUILD_INTEGRATION_TESTS=ON
+            -DLIBE3_BUILD_INTEGRATION_TESTS=ON \
+            -DLIBE3_ENABLE_LATREC=ON
           cmake --build build --target test_bench_full_loop_latency -j $(nproc)
 
       - name: Run benchmark
