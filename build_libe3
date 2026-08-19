@@ -185,26 +185,52 @@ EOF
 
 # Install ASN.1 compiler from source (used on Debian where package may be outdated)
 install_asn1c_from_source() {
+    local pinned_commit="940dd5fa9f3917913fd487b13dfddfacd0ded06e"
+    local stamp="/opt/asn1c/.installed-commit"
+
+    # Already installed for this exact pinned commit (e.g. restored from a CI
+    # cache) - nothing to do. Checking the stamp, not just the binary's
+    # presence, matters for commit-trailers.yml's per-commit-build job: it
+    # checks out several commits in the same container, and an earlier commit
+    # could pin a different asn1c revision than the one already on disk.
+    if [[ -x /opt/asn1c/bin/asn1c ]] && [[ "$(cat "$stamp" 2>/dev/null)" == "$pinned_commit" ]]; then
+        echo_info "asn1c already installed at /opt/asn1c for commit $pinned_commit, skipping rebuild"
+        return 0
+    fi
+
     local asn1_install_log="$SCRIPT_DIR/build/log/asn1c_install_log.txt"
     mkdir -p "$SCRIPT_DIR/build/log"
     echo_info "\nInstalling ASN1 from source. Log: $asn1_install_log"
+    # set +e around the subshell: without it, this function's inherited `set -e`
+    # would abort here on a non-zero subshell exit before `status=$?` below ever
+    # runs, skipping the diagnostics entirely. The inner `set -e` is still needed
+    # so a failing step (e.g. checkout) stops the sequence instead of silently
+    # continuing to build an unpinned tree.
+    set +e
     (
+        set -e
         sudo $INSTALLER -y install bison flex autoconf automake libtool m4 || true
         sudo rm -rf /tmp/asn1c || true
         git clone https://github.com/mouse07410/asn1c /tmp/asn1c
         cd /tmp/asn1c
-        git checkout 940dd5fa9f3917913fd487b13dfddfacd0ded06e || true
+        git checkout "$pinned_commit"
         git log -n1 || true
-        autoreconf -iv || true
-        ./configure --prefix /opt/asn1c/ || true
-        make -j"$(nproc)" || true
-        sudo make install || true
-        cd - || true
-        sudo ldconfig || true
-        if [[ -v CI_ENV ]]; then
-            sudo rm -rf /tmp/asn1c || true
-        fi
-    ) > "$asn1_install_log" 2>&1 || true
+        autoreconf -iv
+        ./configure --prefix /opt/asn1c/
+        make -j"$(nproc)"
+        sudo make install
+    ) > "$asn1_install_log" 2>&1
+    local status=$?
+    set -e
+    if [[ -v CI_ENV ]]; then
+        sudo rm -rf /tmp/asn1c || true
+    fi
+    if [[ $status -ne 0 ]]; then
+        echo_error "asn1c build from source failed (exit $status). Last 200 lines of $asn1_install_log:"
+        tail -n 200 "$asn1_install_log"
+        return "$status"
+    fi
+    echo "$pinned_commit" | sudo tee "$stamp" > /dev/null
 }
 
 check_command() {
