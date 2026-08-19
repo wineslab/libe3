@@ -101,8 +101,10 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     -- response code is a wire change we are willing to pay for explicitly.
     E3-ResponseCode ::= ENUMERATED { positive(0), negative(1) }
 
-    -- Milliseconds since the Unix epoch on the realtime (UTC) clock. Absent
-    -- means "no producer reference", which is a normal message, not a
+    -- Nanoseconds since the Unix epoch on the realtime (UTC) clock. Never
+    -- subtract it from a monotonic stamp.
+    --
+    -- Absent means "no producer reference", which is a normal message, not a
     -- malformed one: a producer that does not want the clock read on its data
     -- path simply omits it.
     --

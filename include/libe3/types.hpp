@@ -26,6 +26,25 @@
 namespace libe3 {
 
 /**
+ * @brief Current realtime clock reading, in nanoseconds since the Unix epoch.
+ *
+ * This is the clock behind every producer-side timestamp libE3 puts on the
+ * wire, chosen so the value stays comparable across hosts (bounded by whatever
+ * NTP or PTP discipline is in place) rather than being meaningful only within
+ * one process.
+ *
+ * @warning This is @c CLOCK_REALTIME, not a monotonic clock. It can step
+ *          backwards or jump when the system clock is adjusted, and it must
+ *          never be subtracted from a monotonic reading to derive a duration.
+ */
+inline uint64_t now_realtime_ns() noexcept {
+    return static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+        ).count());
+}
+
+/**
  * @brief E3AP encoding formats supported by the library
  */
 enum class EncodingFormat : uint8_t {
@@ -313,24 +332,28 @@ struct Pdu {
     PduType type{PduType::SETUP_REQUEST};
     PduChoice choice;
     uint32_t message_id{0};        ///< Unique message identifier
-    uint64_t timestamp{0};         ///< Message timestamp (milliseconds since epoch)
 
-    Pdu() : timestamp(static_cast<uint64_t>(
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()
-        ).count())) {}
-    
-    explicit Pdu(PduType t) : type(t), timestamp(static_cast<uint64_t>(
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()
-        ).count())) {}
-    
+    /**
+     * @brief Producer timestamp, in nanoseconds since the Unix epoch.
+     *
+     * Stamped from the realtime clock (see @ref now_realtime_ns) when the PDU
+     * is constructed, so a caller gets one for free. Zero means "no producer
+     * reference": every encoding transmits it as an absent field and decodes
+     * an absent field back to zero, so the clock read is opt-out and a PDU
+     * without a timestamp is a normal message rather than a malformed one.
+     *
+     * @warning Realtime, not monotonic. Never subtract it from a monotonic
+     *          reading.
+     */
+    uint64_t timestamp{0};
+
+    Pdu() : timestamp(now_realtime_ns()) {}
+
+    explicit Pdu(PduType t) : type(t), timestamp(now_realtime_ns()) {}
+
     template<typename T>
-    Pdu(PduType t, T&& data) : type(t), choice(std::forward<T>(data)),
-        timestamp(static_cast<uint64_t>(
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::system_clock::now().time_since_epoch()
-            ).count())) {}
+    Pdu(PduType t, T&& data)
+        : type(t), choice(std::forward<T>(data)), timestamp(now_realtime_ns()) {}
 
     /**
      * @brief Get PDU data with type checking

@@ -112,7 +112,10 @@ message MessageAck {
 // ordering matches the E3AP PDU type enumeration (SETUP_REQUEST=0 .. MESSAGE_ACK=10).
 message E3Pdu {
   uint32 id = 1;         // message identifier
-  uint64 timestamp = 2;  // milliseconds since epoch
+  // Producer timestamp: nanoseconds since the Unix epoch, realtime (UTC)
+  // clock. Zero means "no producer reference", which proto3 implicit
+  // presence already encodes as an absent field.
+  uint64 timestamp = 2;
   oneof msg {
     SetupRequest setup_request = 3;
     SetupResponse setup_response = 4;

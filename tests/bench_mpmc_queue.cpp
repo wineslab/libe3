@@ -129,9 +129,10 @@ struct RQLatResult {
 
 /**
  * Like the MpmcQueue latency test but uses the full LockFreeQueue API.
- * The push timestamp (nanoseconds) is stored in Pdu::timestamp, which the
- * Pdu constructor sets to milliseconds; we intentionally override it with
- * nanoseconds for this measurement.
+ * The push timestamp is stored in Pdu::timestamp, whose unit is nanoseconds,
+ * so the override below re-stamps the field rather than repurposing it. Note
+ * that now_ns() here is monotonic while the constructor's stamp is realtime;
+ * only the monotonic pair is ever differenced.
  */
 static RQLatResult rq_spsc_latency(size_t queue_cap, int n_items) {
     LockFreeQueue<Pdu> rq(queue_cap);
