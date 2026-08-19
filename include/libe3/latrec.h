@@ -18,7 +18,10 @@
  * payload. A live reader must therefore keep up, or detect the wrap from
  * rec_count and the single descent in t_ns.
  *
- * Every latrec_* call is a no-op unless LATREC_DIR is set.
+ * Gated twice: at compile time by LIBE3_ENABLE_LATREC (off by default -- a
+ * normal build carries none of this, not even a disabled-ring branch; see
+ * the bottom of this file), and, in a build with that enabled, at runtime --
+ * every latrec_* call is then a no-op unless LATREC_DIR is set.
  *
  * File layout: a 4 KiB latrec_hdr followed by `entries` 32-byte records. v1
  * field offsets are frozen and v2 fields appended inside the header pad, so a
@@ -30,6 +33,10 @@
  * spear-dApp/src/e3interface/latrec.py and the C++ dApps'
  * dapps/common/e3_manager/dapp_latrec.h -- and the stage catalog below carries
  * their ids too, so it stays the one place a new id is checked for collisions.
+ *
+ * @see \ref latrec_guide "docs/latrec.md" for the full guide: the clock
+ *      model, ring naming/sizing, the stage catalog table, and the
+ *      capture-to-CSV workflow.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
