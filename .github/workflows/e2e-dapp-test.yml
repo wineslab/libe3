@@ -136,6 +136,7 @@ jobs:
         id: e2e
         run: |
           set -e
+          source ./scripts/wait_with_diagnostics.sh
           LOG_AGENT=/tmp/agent_${{ matrix.link }}_${{ matrix.transport }}.log
           LOG_DAPP=/tmp/dapp_${{ matrix.link }}_${{ matrix.transport }}.log
 
@@ -147,16 +148,18 @@ jobs:
           sleep 1
 
           set +e
-          timeout 25s ./build/example_simple_dapp \
+          timeout -k 10 25s ./build/example_simple_dapp \
             --link ${{ matrix.link }} \
             --transport ${{ matrix.transport }} \
             --encoding asn1 --control --timed 15 > "$LOG_DAPP" 2>&1
           DAPP_EXIT=$?
           set -e
 
-          # Stop the agent
+          # Stop the agent. wait_with_diagnostics bounds this at 30s and dumps
+          # process state before SIGKILLing, instead of hanging indefinitely
+          # if the agent ignores SIGINT (issue #60's E2E/Topologies deadlock).
           kill -INT $AGENT_PID 2>/dev/null || true
-          wait $AGENT_PID 2>/dev/null || true
+          wait_with_diagnostics "$AGENT_PID" 30 "example_simple_agent (${{ matrix.link }}/${{ matrix.transport }})" || true
 
           echo "---- AGENT LOG (tail) ----"
           tail -40 "$LOG_AGENT" || true

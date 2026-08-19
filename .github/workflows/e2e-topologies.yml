@@ -140,6 +140,7 @@ jobs:
           T: ${{ matrix.transport }}
         run: |
           set -e
+          source ./scripts/wait_with_diagnostics.sh
           SUMMARY=/tmp/summary_${T}.md
           echo "### zmq/${T}" > "$SUMMARY"
           echo "" >> "$SUMMARY"
@@ -167,10 +168,11 @@ jobs:
           AG=$!
           sleep 1
           set +e
-          timeout 30s $DAPP -t $T $D11 -c --timed 12 > /tmp/d11.log 2>&1
+          timeout -k 10 30s $DAPP -t $T $D11 -c --timed 12 > /tmp/d11.log 2>&1
           RC=$?
           set -e
-          kill -INT $AG 2>/dev/null || true; wait $AG 2>/dev/null || true
+          kill -INT $AG 2>/dev/null || true
+          wait_with_diagnostics "$AG" 30 "example_simple_agent ran-solo (zmq/$T)" || true
           T1_IND=$(grep -c "Indication #" /tmp/d11.log || true)
           if [ "$RC" -ne 0 ] || [ "$T1_IND" -eq 0 ]; then
             echo "FAIL topo1: dApp exit=$RC indications=$T1_IND"
@@ -190,15 +192,16 @@ jobs:
           AG=$!
           sleep 1
           set +e
-          timeout 30s $DAPP -t $T $D12 --timed 12 > /tmp/d12_1.log 2>&1 &
+          timeout -k 10 30s $DAPP -t $T $D12 --timed 12 > /tmp/d12_1.log 2>&1 &
           D1=$!
           sleep 1
-          timeout 30s $DAPP -t $T $D12 --timed 12 > /tmp/d12_2.log 2>&1 &
+          timeout -k 10 30s $DAPP -t $T $D12 --timed 12 > /tmp/d12_2.log 2>&1 &
           D2=$!
           wait $D1; R1=$?
           wait $D2; R2=$?
           set -e
-          kill -INT $AG 2>/dev/null || true; wait $AG 2>/dev/null || true
+          kill -INT $AG 2>/dev/null || true
+          wait_with_diagnostics "$AG" 30 "example_simple_agent ran-shared (zmq/$T)" || true
           I1=$(grep -c "Indication #" /tmp/d12_1.log || true)
           I2=$(grep -c "Indication #" /tmp/d12_2.log || true)
           S1=$(grep -oE "subscription_id=[0-9]+" /tmp/d12_1.log | head -1 | cut -d= -f2)
@@ -235,10 +238,12 @@ jobs:
           A2=$!
           sleep 1
           set +e
-          timeout 30s $DAPP -t $T $DD -c --timed 12 > /tmp/d2.log 2>&1
+          timeout -k 10 30s $DAPP -t $T $DD -c --timed 12 > /tmp/d2.log 2>&1
           RC=$?
           set -e
-          kill -INT $A1 $A2 2>/dev/null || true; wait $A1 2>/dev/null || true; wait $A2 2>/dev/null || true
+          kill -INT $A1 $A2 2>/dev/null || true
+          wait_with_diagnostics "$A1" 30 "example_simple_agent ran-a (zmq/$T)" || true
+          wait_with_diagnostics "$A2" 30 "example_simple_agent ran-b (zmq/$T)" || true
           NA=$(grep -E "peer=.* ran=ran-a .* indications=" /tmp/d2.log | grep -oE "indications=[0-9]+" | head -1 | cut -d= -f2)
           NB=$(grep -E "peer=.* ran=ran-b .* indications=" /tmp/d2.log | grep -oE "indications=[0-9]+" | head -1 | cut -d= -f2)
           ok3=1
