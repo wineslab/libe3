@@ -22,11 +22,12 @@ set(LIBE3_PUBLIC_HEADERS
 # The reader for the ring format and the converter built on it, installed so
 # downstream users of latrec.h get the tooling that parses what it writes.
 # latrec2csv.py needs numpy; latrec_reader.py is standard library only.
-# latrec.sh drives a capture; its `on` and `off` must be sourced.
+# Capturing is `export LATREC_DIR=...` / `unset LATREC_DIR` directly (see
+# docs/latrec.md) -- no wrapper script; latrec2csv.py's --watch subsumes the
+# multi-host quiet-period polling a wrapper would otherwise own.
 set(LIBE3_TOOLS
     tools/latrec_reader.py
     tools/latrec2csv.py
-    tools/latrec.sh
 )
 
 set(LIBE3_SOURCES

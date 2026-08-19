@@ -16,11 +16,17 @@ per family; joining across families by seq would fuse unrelated messages. Where
 one family's records carry another's key, it is surfaced as its own column (see
 AUX_COLS) rather than assumed -- origin_seq in libe3.csv is the OAI publish
 sequence, and is what makes a producer-to-send join possible.
+
+Capturing itself needs no wrapper script: build with -DLIBE3_ENABLE_LATREC=ON,
+`export LATREC_DIR=<dir>` around the run, `unset LATREC_DIR` when done. Pass
+--watch to have this tool wait for the rings to go quiet first, e.g. as the
+last step of a capture script driving a backgrounded traced process.
 """
 import argparse
 import glob
 import os
 import sys
+import time
 
 import numpy as np
 
@@ -205,6 +211,46 @@ def load_ring(path, wall=False):
     return meta, recs
 
 
+def wait_for_quiet(dirs, quiet_secs, timeout_secs, poll_secs=2.0):
+    """Block until every *.latrec file under `dirs` has been unchanged (by
+    mtime and size) for `quiet_secs`, or `timeout_secs` has elapsed.
+
+    A capture directory that has nothing in it yet, or gains a new ring
+    mid-poll, resets the quiet clock -- the run is not idle until nothing
+    has changed anywhere for a full quiet window. Giving up after the
+    timeout is not an error: conversion is safe to run against a capture
+    that is still growing (see the module docstring), so this only trades
+    a possibly-incomplete tail for not hanging forever.
+    """
+    deadline = time.monotonic() + timeout_secs
+    quiet_since = None
+    last_state = None
+    while True:
+        state = {}
+        for d in dirs:
+            for path in glob.glob(os.path.join(d, "*.latrec")):
+                try:
+                    st = os.stat(path)
+                except OSError:
+                    continue
+                state[path] = (st.st_mtime, st.st_size)
+
+        now = time.monotonic()
+        if state == last_state and state:
+            quiet_since = quiet_since or now
+            if now - quiet_since >= quiet_secs:
+                return
+        else:
+            quiet_since = None
+        last_state = state
+
+        if now >= deadline:
+            print(f"  ! --watch timed out after {timeout_secs}s; "
+                  f"converting whatever is on disk now")
+            return
+        time.sleep(min(poll_secs, deadline - now) if deadline > now else poll_secs)
+
+
 def where(stage):
     """(component, leg) that owns a stage, for the long-format table."""
     for comp, legs in COMPONENTS:
@@ -227,7 +273,23 @@ def main():
                          "unrelated; only as good as their clock sync (us under "
                          "PTP, ms under NTP). Within one host leave it off: "
                          "monotonic cannot be stepped.")
+    ap.add_argument("--watch", action="store_true",
+                    help="wait until every *.latrec file under the given "
+                         "directories has stopped growing (see --quiet-secs) "
+                         "before converting, instead of converting immediately. "
+                         "For driving this from a capture script: run the traced "
+                         "process(es) in the background, then run this tool with "
+                         "--watch as the last step.")
+    ap.add_argument("--quiet-secs", type=float, default=15.0,
+                    help="with --watch, how long every ring must be unchanged "
+                         "before the capture is considered done (default: 15)")
+    ap.add_argument("--timeout", type=float, default=7200.0,
+                    help="with --watch, give up waiting after this many seconds "
+                         "and convert whatever is on disk (default: 7200)")
     args = ap.parse_args()
+
+    if args.watch:
+        wait_for_quiet(args.run, args.quiet_secs, args.timeout)
 
     # Several directories rather than one, so a multi-node capture is never
     # merged into a single directory: ring files are <role>.<tid>.latrec and
