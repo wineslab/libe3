@@ -5,19 +5,28 @@
  * Drives a colocated RAN + dApp pair (ZMQ IPC, one process) with all three
  * traffic types running at once -- indications carrying IQ downstream, xApp
  * controls relayed downstream, dApp reports upstream -- and reports, per rate
- * tier, what latrec recorded for each flow and each stage.
+ * tier, achieved throughput two ways: independent atomic counters incremented
+ * in the receiving handlers (always on, latrec-free) and, when LATREC_DIR is
+ * set, what latrec recorded for each flow and each stage. This is the
+ * end-to-end ablation vehicle: run this binary once with LATREC_DIR unset
+ * (and, separately, built with LIBE3_ENABLE_LATREC=OFF for the true
+ * production case) and once with it set, and compare the independent
+ * counters between the two -- the latrec-derived tables only exist in the
+ * traced run, by construction.
  *
  * Run together, the flows contend for the inbound loop, the report worker,
  * the outbound queue and the single process-wide sequence counter. Unlike
  * bench_full_loop_latency, which paces one round trip at a time and keeps its
- * own timestamps, the figures here are read back from the shipped
- * instrumentation.
+ * own timestamps, the latrec-derived figures here are read back from the
+ * shipped instrumentation.
  *
  * Flows are told apart by the PduType that L1_DEQUEUE already records in aux2,
  * so one merged read of the rings still yields per-flow numbers. All tiers
  * share one LATREC_DIR and are separated by the wall-clock window each ran in,
  * because a thread's ring is opened once and cannot follow a change of
- * directory.
+ * directory. This benchmark never sets LATREC_DIR itself -- see main() --
+ * unlike bench_full_loop_latency, whose whole purpose is to read its own
+ * trace back.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -77,6 +86,15 @@ Stats summarize(std::vector<double> v) {
 }
 
 struct Window { Tier tier; uint64_t t0, t1; };
+
+/* Independent, latrec-free counters: incremented in the receiving handlers,
+ * so they measure end-to-end delivery regardless of whether latrec is
+ * compiled in, enabled, or capturing. */
+struct FlowCounters {
+    std::atomic<uint64_t> ind_recv{0}, ctrl_recv{0}, rep_recv{0};
+};
+
+struct TierCounts { Tier tier; uint64_t ind, ctrl, rep; };
 
 /* One tier's records, indexed by seq then stage. */
 using Table = std::map<uint64_t, std::map<uint8_t, latrec_rec>>;
@@ -183,16 +201,24 @@ std::thread spawn_driver(const char* role, uint64_t rate_hz,
 }  // namespace
 
 int main() {
-    const std::string trace_dir = mkdir_tmp("latrec_mix");
-    setenv("LATREC_DIR", trace_dir.c_str(), 1);
-    setenv("LATREC_ENTRIES_LOG2", "19", 1);   // ~500 k records per thread
+    // Respect the caller's environment rather than forcing it: this is what
+    // makes the same binary usable both as the ablation's "off" run
+    // (LATREC_DIR unset -- or, for the true production case, built with
+    // LIBE3_ENABLE_LATREC=OFF entirely) and its "on" run (LATREC_DIR set to
+    // wherever the caller wants the capture). Nothing here creates or
+    // deletes a directory on the caller's behalf.
+    const char* env_dir = getenv("LATREC_DIR");
+    const std::string trace_dir = (env_dir && *env_dir) ? env_dir : std::string();
+    const bool tracing = !trace_dir.empty();
 
     std::printf("libe3 under mixed bidirectional load (%d s per tier, ZMQ IPC)\n",
                 kSecondsPerTier);
     std::printf("  downstream: indications (IQ) + xApp controls   "
-                "upstream: dApp reports\n\n");
+                "upstream: dApp reports\n");
+    std::printf("  latrec: %s\n\n", tracing ? trace_dir.c_str() : "not tracing (LATREC_DIR unset)");
 
     std::vector<Window> windows;
+    std::vector<TierCounts> tier_counts;
     {
         MuteStdout mute;
         for (const Tier& tier : kTiers) {
@@ -210,7 +236,11 @@ int main() {
             dapp_cfg.role = E3Role::DAPP;
             dapp_cfg.dapp_name = "MixDApp";
 
+            FlowCounters counters;
             E3Agent ran(ran_cfg);
+            ran.set_dapp_report_handler([&counters](const DAppReport&) {
+                counters.rep_recv.fetch_add(1, std::memory_order_relaxed);
+            });
             auto sm = std::make_unique<libe3_examples::SimpleServiceModel>(
                 tier.ind_hz ? 1'000'000ull / tier.ind_hz : 0, EncodingFormat::ASN1,
                 libe3_examples::SimpleServiceModel::PacingMode::FixedRate);
@@ -220,6 +250,12 @@ int main() {
                 return 1;
             }
             E3Agent dapp(dapp_cfg);
+            dapp.set_indication_handler([&counters](const IndicationMessage&) {
+                counters.ind_recv.fetch_add(1, std::memory_order_relaxed);
+            });
+            dapp.set_xapp_control_handler([&counters](const XAppControlAction&) {
+                counters.ctrl_recv.fetch_add(1, std::memory_order_relaxed);
+            });
             if (dapp.start() != ErrorCode::SUCCESS) {
                 std::fprintf(stderr, "dApp start failed\n");
                 return 1;
@@ -246,77 +282,105 @@ int main() {
             rep.join();
             dapp.stop();
             ran.stop();
+            // Sampled after stop() has joined every internal thread, so
+            // nothing more will be processed and the counts are final.
+            tier_counts.push_back({tier, counters.ind_recv.load(), counters.ctrl_recv.load(),
+                                    counters.rep_recv.load()});
             const std::string rm = "rm -rf '" + ipc + "'";
             if (system(rm.c_str()) != 0) { /* best effort */ }
         }
     }
 
-    bool wrapped = false;
-    const std::vector<latrec_rec> recs = read_ring_dir(trace_dir, &wrapped);
-
-    std::vector<Table> tables;
     bool ok = true;
 
-    std::printf("Achieved throughput per flow, msg/s (offered in brackets)\n");
-    std::printf("| tier   | indications      | xApp controls   | dApp reports    | drops |\n");
-    std::printf("|--------|------------------|-----------------|-----------------|-------|\n");
-    for (const auto& w : windows) {
-        const Table t = index_window(recs, w);
-        tables.push_back(t);
-        const double s = static_cast<double>(w.t1 - w.t0) / 1e9;
-        const size_t ind = count_type(t, LATREC_L1_DEQUEUE, PduType::INDICATION_MESSAGE);
-        const size_t ctl = count_type(t, LATREC_L1_DEQUEUE, PduType::XAPP_CONTROL_ACTION);
-        const size_t rep = count_type(t, LATREC_L1_DEQUEUE, PduType::DAPP_REPORT);
-        const size_t drops = count_stage(t, LATREC_L9_DROP);
+    // Independent counters: always meaningful, whether or not latrec is
+    // compiled in, enabled, or capturing -- this is the ablation's actual
+    // comparison point between an untraced and a traced run.
+    std::printf("Achieved throughput per flow, msg/s (independent counters; offered in brackets)\n");
+    std::printf("| tier   | indications      | xApp controls   | dApp reports    |\n");
+    std::printf("|--------|------------------|-----------------|-----------------|\n");
+    for (const auto& tc : tier_counts) {
+        const double s = static_cast<double>(kSecondsPerTier);
         char offered[24];
-        if (w.tier.ind_hz) std::snprintf(offered, sizeof(offered), "%llu",
-                                         static_cast<unsigned long long>(w.tier.ind_hz));
+        if (tc.tier.ind_hz) std::snprintf(offered, sizeof(offered), "%llu",
+                                          static_cast<unsigned long long>(tc.tier.ind_hz));
         else std::snprintf(offered, sizeof(offered), "max");
-        std::printf("| %-6s | %7.0f [%6s] | %6.0f [%6llu] | %6.0f [%6llu] | %5zu |\n",
-                    w.tier.name, static_cast<double>(ind) / s, offered,
-                    static_cast<double>(ctl) / s,
-                    static_cast<unsigned long long>(w.tier.ctrl_hz),
-                    static_cast<double>(rep) / s,
-                    static_cast<unsigned long long>(w.tier.rep_hz), drops);
+        std::printf("| %-6s | %7.0f [%6s] | %6.0f [%6llu] | %6.0f [%6llu] |\n",
+                    tc.tier.name, static_cast<double>(tc.ind) / s, offered,
+                    static_cast<double>(tc.ctrl) / s,
+                    static_cast<unsigned long long>(tc.tier.ctrl_hz),
+                    static_cast<double>(tc.rep) / s,
+                    static_cast<unsigned long long>(tc.tier.rep_hz));
         // A flow with no records at all indicates a broken path.
-        if (ind == 0 || ctl == 0 || rep == 0) {
+        if (tc.ind == 0 || tc.ctrl == 0 || tc.rep == 0) {
             std::fprintf(stderr, "ERROR: tier '%s' lost a whole flow "
-                                 "(ind=%zu ctrl=%zu rep=%zu)\n",
-                         w.tier.name, ind, ctl, rep);
+                                 "(ind=%llu ctrl=%llu rep=%llu)\n",
+                         tc.tier.name, static_cast<unsigned long long>(tc.ind),
+                         static_cast<unsigned long long>(tc.ctrl),
+                         static_cast<unsigned long long>(tc.rep));
             ok = false;
         }
     }
 
-    std::printf("\nStage latency, us (p50 / p99 / max)\n");
-    std::printf("| tier   | outbound L1->L3    | inbound L4->L6     "
-                "| report queue L7->L8       | connector LC0->LC1 |\n");
-    std::printf("|--------|--------------------|--------------------"
-                "|---------------------------|--------------------|\n");
-    for (size_t i = 0; i < windows.size(); i++) {
-        const Stats ob = leg(tables[i], LATREC_L1_DEQUEUE, LATREC_L3_SEND_DONE);
-        const Stats in = leg(tables[i], LATREC_L4_RECV, LATREC_L6_DISPATCHED);
-        const Stats rq = leg(tables[i], LATREC_L7_REPORT_QUEUED, LATREC_L8_REPORT_DONE);
-        const Stats cn = leg(tables[i], LATREC_LC0_SEND_ENTER, LATREC_LC1_SEND_RETURNED);
-        std::printf("| %-6s | %5.1f %6.1f %6.1f | %5.1f %6.1f %6.1f "
-                    "| %6.1f %7.1f %8.1f | %5.1f %6.1f %6.1f |\n",
-                    windows[i].tier.name,
-                    ob.p50, ob.p99, ob.max, in.p50, in.p99, in.max,
-                    rq.p50, rq.p99, rq.max, cn.p50, cn.p99, cn.max);
+    if (tracing) {
+        bool wrapped = false;
+        const std::vector<latrec_rec> recs = read_ring_dir(trace_dir, &wrapped);
+        std::vector<Table> tables;
+
+        std::printf("\nAchieved throughput per flow, msg/s (latrec-derived, L1_DEQUEUE)\n");
+        std::printf("| tier   | indications      | xApp controls   | dApp reports    | drops |\n");
+        std::printf("|--------|------------------|-----------------|-----------------|-------|\n");
+        for (const auto& w : windows) {
+            const Table t = index_window(recs, w);
+            tables.push_back(t);
+            const double s = static_cast<double>(w.t1 - w.t0) / 1e9;
+            const size_t ind = count_type(t, LATREC_L1_DEQUEUE, PduType::INDICATION_MESSAGE);
+            const size_t ctl = count_type(t, LATREC_L1_DEQUEUE, PduType::XAPP_CONTROL_ACTION);
+            const size_t rep = count_type(t, LATREC_L1_DEQUEUE, PduType::DAPP_REPORT);
+            const size_t drops = count_stage(t, LATREC_L9_DROP);
+            char offered[24];
+            if (w.tier.ind_hz) std::snprintf(offered, sizeof(offered), "%llu",
+                                             static_cast<unsigned long long>(w.tier.ind_hz));
+            else std::snprintf(offered, sizeof(offered), "max");
+            std::printf("| %-6s | %7.0f [%6s] | %6.0f [%6llu] | %6.0f [%6llu] | %5zu |\n",
+                        w.tier.name, static_cast<double>(ind) / s, offered,
+                        static_cast<double>(ctl) / s,
+                        static_cast<unsigned long long>(w.tier.ctrl_hz),
+                        static_cast<double>(rep) / s,
+                        static_cast<unsigned long long>(w.tier.rep_hz), drops);
+        }
+
+        std::printf("\nStage latency, us (p50 / p99 / max)\n");
+        std::printf("| tier   | outbound L1->L3    | inbound L4->L6     "
+                    "| report queue L7->L8       | connector LC0->LC1 |\n");
+        std::printf("|--------|--------------------|--------------------"
+                    "|---------------------------|--------------------|\n");
+        for (size_t i = 0; i < windows.size(); i++) {
+            const Stats ob = leg(tables[i], LATREC_L1_DEQUEUE, LATREC_L3_SEND_DONE);
+            const Stats in = leg(tables[i], LATREC_L4_RECV, LATREC_L6_DISPATCHED);
+            const Stats rq = leg(tables[i], LATREC_L7_REPORT_QUEUED, LATREC_L8_REPORT_DONE);
+            const Stats cn = leg(tables[i], LATREC_LC0_SEND_ENTER, LATREC_LC1_SEND_RETURNED);
+            std::printf("| %-6s | %5.1f %6.1f %6.1f | %5.1f %6.1f %6.1f "
+                        "| %6.1f %7.1f %8.1f | %5.1f %6.1f %6.1f |\n",
+                        windows[i].tier.name,
+                        ob.p50, ob.p99, ob.max, in.p50, in.p99, in.max,
+                        rq.p50, rq.p99, rq.max, cn.p50, cn.p99, cn.max);
+        }
+
+        std::printf("\nDrops by reason\n");
+        for (size_t i = 0; i < windows.size(); i++) {
+            std::printf("  %-6s %s\n", windows[i].tier.name,
+                        drop_breakdown(tables[i]).c_str());
+        }
+
+        std::printf("\n%s\n",
+                    wrapped ? "NOTE: a ring wrapped; the busiest tier is sampled, not complete."
+                            : "No ring wrapped: every stamp in every tier was captured.");
+    } else {
+        std::printf("\nLATREC_DIR was not set: no latrec-derived tables this run "
+                    "(this is the ablation's untraced configuration).\n");
     }
 
-    std::printf("\nDrops by reason\n");
-    for (size_t i = 0; i < windows.size(); i++) {
-        std::printf("  %-6s %s\n", windows[i].tier.name,
-                    drop_breakdown(tables[i]).c_str());
-    }
-
-    std::printf("\n%s\n",
-                wrapped ? "NOTE: a ring wrapped; the busiest tier is sampled, not complete."
-                        : "No ring wrapped: every stamp in every tier was captured.");
-    const std::string rm = "rm -rf '" + trace_dir + "'";
-    if (system(rm.c_str()) != 0) { /* best effort */ }
-    unsetenv("LATREC_DIR");
-    unsetenv("LATREC_ENTRIES_LOG2");
     std::printf("%s\n", ok ? "OK" : "FAILED");
     return ok ? 0 : 1;
 }
