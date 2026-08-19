@@ -514,3 +514,5 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 - The code rationale and architecture is partially insipired by the e2sim and ns-O-RAN projects
 
 This work has been partially supported by OUSD(R&E) through Army Research Laboratory Cooperative Agreement Number W911NF-24-2-0065.
+
+<!-- test comment for CI verification, will be reverted -->
