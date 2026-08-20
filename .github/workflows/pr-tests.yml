@@ -105,7 +105,7 @@ jobs:
           chmod +x ./build_libe3
           ./build_libe3 -I
 
-      - name: Build and test with build_libe3 (${ { matrix.build_type } })
+      - name: Build and test with build_libe3 (${{ matrix.build_type }})
         if: needs.changes.outputs.code == 'true'
         shell: bash
         run: |
