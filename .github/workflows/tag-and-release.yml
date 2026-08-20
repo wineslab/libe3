@@ -14,7 +14,7 @@ jobs:
       tag_created: ${{ steps.set_output.outputs.tag_created }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -56,7 +56,7 @@ jobs:
     if: ${{ needs.create-tag.outputs.tag_created == 'true' }}
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
 
@@ -68,7 +68,7 @@ jobs:
       - name: Cache asn1c build
         # Exact-match only: a hit must imply the pinned commit inside
         # build_libe3 is unchanged. Do not add restore-keys here.
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /opt/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
@@ -109,7 +109,7 @@ jobs:
           ls -l dist/
 
       - name: Upload amd64 .deb artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: libe3-deb-amd64
           path: dist/*.deb
@@ -121,7 +121,7 @@ jobs:
     if: ${{ needs.create-tag.outputs.tag_created == 'true' }}
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
 
@@ -133,7 +133,7 @@ jobs:
       - name: Cache asn1c build
         # Exact-match only: a hit must imply the pinned commit inside
         # build_libe3 is unchanged. Do not add restore-keys here.
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /opt/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
@@ -174,7 +174,7 @@ jobs:
           ls -l dist/
 
       - name: Upload arm64 .deb artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: libe3-deb-arm64
           path: dist/*.deb
@@ -188,7 +188,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
 
@@ -200,7 +200,7 @@ jobs:
       - name: Cache asn1c build
         # Exact-match only: a hit must imply the pinned commit inside
         # build_libe3 is unchanged. Do not add restore-keys here.
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /opt/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
@@ -245,7 +245,7 @@ jobs:
           echo "Documentation packaged as libe3-docs-${version}.zip"
 
       - name: Upload documentation artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: libe3-docs
           path: libe3-docs-${{ needs.create-tag.outputs.version }}.zip
@@ -264,19 +264,19 @@ jobs:
       contents: write
     steps:
       - name: Download amd64 deb artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: libe3-deb-amd64
           path: dist/
 
       - name: Download arm64 deb artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: libe3-deb-arm64
           path: dist/
 
       - name: Download documentation artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: libe3-docs
           path: dist/
@@ -300,13 +300,13 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: true
           fetch-depth: 0
 
       - name: Download documentation artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: libe3-docs
           path: /tmp/docs-artifact/

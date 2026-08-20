@@ -15,7 +15,7 @@ jobs:
     outputs:
       code: ${{ steps.filter.outputs.code }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - id: filter
@@ -50,7 +50,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Prepare /opt/asn1c for caching
         if: needs.changes.outputs.code == 'true'
@@ -62,7 +62,7 @@ jobs:
         # Exact-match only: a hit must imply the pinned commit inside
         # build_libe3 is unchanged. Do not add restore-keys here.
         if: needs.changes.outputs.code == 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /opt/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
@@ -84,7 +84,7 @@ jobs:
         build_type: [Debug, Release]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Prepare /opt/asn1c for caching
         if: needs.changes.outputs.code == 'true'
@@ -94,7 +94,7 @@ jobs:
 
       - name: Cache asn1c build
         if: needs.changes.outputs.code == 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /opt/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
@@ -124,7 +124,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Prepare /opt/asn1c for caching
         if: needs.changes.outputs.code == 'true'
@@ -134,7 +134,7 @@ jobs:
 
       - name: Cache asn1c build
         if: needs.changes.outputs.code == 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /opt/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
@@ -171,7 +171,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Prepare /opt/asn1c for caching
         if: needs.changes.outputs.code == 'true'
@@ -181,7 +181,7 @@ jobs:
 
       - name: Cache asn1c build
         if: needs.changes.outputs.code == 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /opt/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
@@ -215,7 +215,7 @@ jobs:
     needs: [changes, test]
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Prepare /opt/asn1c for caching
         if: needs.changes.outputs.code == 'true'
@@ -225,7 +225,7 @@ jobs:
 
       - name: Cache asn1c build
         if: needs.changes.outputs.code == 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /opt/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
