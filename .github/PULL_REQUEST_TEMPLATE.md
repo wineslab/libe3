@@ -41,8 +41,12 @@ These mirror what CI (`.github/workflows/pr-tests.yml`) enforces. **All boxes mu
 
 ## CI checklist
 
-- [ ] `Unit Tests` workflow is green (Debug + Release matrix on `ubuntu-latest`)
-- [ ] `Commit policy` workflow is green (trailers + linear history + each commit builds/tests independently)
+CI posts a single `CI report` comment on this PR once every workflow has finished; it carries the
+verdict, a per-workflow table and the benchmark/E2E detail. Confirm against that comment:
+
+- [ ] The report's verdict is green for the head commit
+- [ ] `Unit Tests` is green (Debug + Release matrix on `ubuntu-latest`)
+- [ ] `Commit policy` is green (trailers + linear history + each commit builds/tests independently)
 - [ ] `MPMC Queue Benchmark` shows no regression (only runs when `include/libe3/mpmc_queue.hpp` changes)
 
 ## Twin-repo coordination
