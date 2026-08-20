@@ -1,8 +1,9 @@
 name: MPMC Queue Benchmark
 
-# Runs the lock-free MPMC ring-buffer benchmark and posts the results as a PR
-# comment. Gated by `paths`: it only runs when the queue's core file changes
-# (or the workflow itself), so unrelated PRs don't pay the benchmark cost.
+# Runs the lock-free MPMC ring-buffer benchmark and publishes the results for
+# the consolidated CI report. Gated by `paths`: it only runs when the queue's
+# core file changes (or the workflow itself), so unrelated PRs don't pay the
+# benchmark cost.
 # Use the "Run workflow" button (workflow_dispatch) to run it on demand.
 
 on:
@@ -23,7 +24,6 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
-      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -54,42 +54,22 @@ jobs:
       - name: Run MPMC benchmark
         run: ./build/test_bench_mpmc_queue | tee benchmark_results.md
 
-      - name: Post benchmark results as PR comment
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/github-script@v8
+      - name: Assemble report fragment
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        run: |
+          [ -f benchmark_results.md ] || exit 0
+          {
+            echo "### MPMC queue benchmark"
+            echo ""
+            cat benchmark_results.md
+            echo ""
+            echo "_ubuntu-latest, Release build._"
+          } > ci-report-mpmc.md
+
+      - name: Upload report fragment
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v6
         with:
-          script: |
-            const fs = require('fs');
-            const results = fs.readFileSync('benchmark_results.md', 'utf8');
-            const marker = '<!-- mpmc-bench-results -->';
-            const sha = context.payload.pull_request.head.sha.substring(0, 7);
-            const body = [
-              marker,
-              `## 📊 MPMC Queue Benchmark Results (commit \`${sha}\`)`,
-              '',
-              results,
-              `> _Benchmarked on \`ubuntu-latest\`, Release build_`,
-            ].join('\n');
-
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-
-            const existing = comments.find(c => c.body.includes(marker));
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body,
-              });
-            }
+          name: ci-report-mpmc-bench
+          path: ci-report-mpmc.md
+          if-no-files-found: warn

@@ -2,7 +2,7 @@ name: E2E dApp Integration
 
 # Runs example_simple_agent + example_simple_dapp as separate processes for
 # every supported (link, transport) combination, asserts both exit cleanly,
-# and posts a per-combination summary as a PR comment.
+# and publishes a per-combination summary for the consolidated CI report.
 #
 # POSIX/SCTP is excluded because ubuntu-latest runners lack the sctp kernel
 # module. The code path is still built; only the CI matrix excludes it.
@@ -169,92 +169,39 @@ jobs:
           # Success criteria:
           # - dApp exits 0
           # - dApp log contains at least one decoded indication
+          #
+          # Resolved into a verdict first and acted on last, so the report
+          # fragment below is written on the failing path too -- which is
+          # exactly when its numbers are worth reading.
+          IND_COUNT=$(grep -c "Indication #" "$LOG_DAPP" || true)
+          REASON=""
           if [ "$DAPP_EXIT" -ne 0 ]; then
-            echo "DApp exit code: $DAPP_EXIT (expected 0)"
-            exit 1
-          fi
-          if ! grep -q "Decoded indication\|Indication #" "$LOG_DAPP"; then
-            echo "No indications received by dApp"
-            exit 1
+            REASON="dApp exit code $DAPP_EXIT (expected 0)"
+          elif ! grep -q "Decoded indication\|Indication #" "$LOG_DAPP"; then
+            REASON="no indications received by dApp"
           fi
 
-          # Capture summary for PR comment
-          IND_COUNT=$(grep -c "Indication #" "$LOG_DAPP" || true)
           {
-            echo "### ${{ matrix.link }}/${{ matrix.transport }}"
+            if [ -z "$REASON" ]; then
+              echo "### ✅ ${{ matrix.link }}/${{ matrix.transport }}"
+            else
+              echo "### ❌ ${{ matrix.link }}/${{ matrix.transport }} — $REASON"
+            fi
             echo ""
             echo "- dApp exit: \`$DAPP_EXIT\`"
             echo "- Indications received: \`$IND_COUNT\`"
             echo ""
           } > /tmp/summary_${{ matrix.link }}_${{ matrix.transport }}.md
 
-      - name: Upload combination summary
+          if [ -n "$REASON" ]; then
+            echo "$REASON"
+            exit 1
+          fi
+
+      - name: Upload report fragment
+        if: ${{ always() && needs.changes.outputs.code == 'true' }}
         uses: actions/upload-artifact@v6
         with:
-          name: e2e-summary-${{ matrix.link }}-${{ matrix.transport }}
+          name: ci-report-e2e-dapp-${{ matrix.link }}-${{ matrix.transport }}
           path: /tmp/summary_${{ matrix.link }}_${{ matrix.transport }}.md
           if-no-files-found: warn
-
-  comment:
-    name: Post PR comment
-    needs: [changes, e2e]
-    if: ${{ always() && needs.changes.outputs.code == 'true' && github.event_name == 'pull_request' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - uses: actions/download-artifact@v7
-        with:
-          path: /tmp/e2e-summaries
-          pattern: e2e-summary-*
-
-      - name: Aggregate and post
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-            const root = '/tmp/e2e-summaries';
-            let combined = '';
-            try {
-              for (const dir of fs.readdirSync(root)) {
-                for (const f of fs.readdirSync(path.join(root, dir))) {
-                  combined += fs.readFileSync(path.join(root, dir, f), 'utf8') + '\n';
-                }
-              }
-            } catch (e) {
-              combined = '_(no summaries collected — check job logs)_';
-            }
-            const marker = '<!-- e2e-dapp-results -->';
-            const sha = context.payload.pull_request.head.sha.substring(0, 7);
-            const body = [
-              marker,
-              `## 🔄 E2E dApp Integration Results (commit \`${sha}\`)`,
-              '',
-              combined,
-              `> _example_simple_agent + example_simple_dapp on ubuntu-latest, Release build_`,
-            ].join('\n');
-
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-            const existing = comments.find(c => c.body.includes(marker));
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body,
-              });
-            }

@@ -266,74 +266,10 @@ jobs:
 
           exit $fail
 
-      - name: Upload topology summary
-        if: ${{ always() }}
+      - name: Upload report fragment
+        if: ${{ always() && needs.changes.outputs.code == 'true' }}
         uses: actions/upload-artifact@v6
         with:
-          name: topo-summary-${{ matrix.transport }}
+          name: ci-report-e2e-topologies-${{ matrix.transport }}
           path: /tmp/summary_${{ matrix.transport }}.md
           if-no-files-found: warn
-
-  comment:
-    name: Post PR comment
-    needs: [changes, topologies]
-    if: ${{ always() && needs.changes.outputs.code == 'true' && github.event_name == 'pull_request' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - uses: actions/download-artifact@v7
-        with:
-          path: /tmp/topo-summaries
-          pattern: topo-summary-*
-
-      - name: Aggregate and post
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-            const root = '/tmp/topo-summaries';
-            let combined = '';
-            try {
-              for (const dir of fs.readdirSync(root)) {
-                for (const f of fs.readdirSync(path.join(root, dir))) {
-                  combined += fs.readFileSync(path.join(root, dir, f), 'utf8') + '\n';
-                }
-              }
-            } catch (e) {
-              combined = '_(no summaries collected — check job logs)_';
-            }
-            const marker = '<!-- e2e-topologies-results -->';
-            const sha = context.payload.pull_request.head.sha.substring(0, 7);
-            const body = [
-              marker,
-              `## 🔀 E2E Topologies — multi-dApp / multi-RAN (commit \`${sha}\`)`,
-              '',
-              combined,
-              `> _example_simple_agent + example_simple_dapp on ubuntu-latest, Release. Indication age is report-only._`,
-            ].join('\n');
-
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-            const existing = comments.find(c => c.body.includes(marker));
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body,
-              });
-            }

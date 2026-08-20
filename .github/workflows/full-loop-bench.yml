@@ -1,9 +1,9 @@
 name: Full-loop Latency Benchmark
 
 # Runs the full-loop control-loop latency benchmark (tests/integration/
-# bench_full_loop_latency.cpp) on every PR and posts the per-phase
-# markdown table as a PR comment, mirroring the MPMC queue benchmark
-# workflow.
+# bench_full_loop_latency.cpp) on every PR and publishes the per-phase
+# markdown table for the consolidated CI report, mirroring the MPMC queue
+# benchmark workflow.
 
 on:
   pull_request:
@@ -54,7 +54,6 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@v5
 
@@ -95,44 +94,22 @@ jobs:
             | grep -v "^\[20" > bench_results.md
           cat bench_results.md
 
-      - name: Post results as PR comment
-        # bench_results.md only exists when the steps above actually ran --
-        # reading it unconditionally would crash this step (and fail the job)
-        # on a docs-only PR.
-        if: ${{ needs.changes.outputs.code == 'true' && github.event_name == 'pull_request' }}
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const fs = require('fs');
-            const results = fs.readFileSync('bench_results.md', 'utf8');
-            const marker = '<!-- full-loop-latency-results -->';
-            const sha = context.payload.pull_request.head.sha.substring(0, 7);
-            const body = [
-              marker,
-              `## ⏱️ Full-loop Latency Benchmark (commit \`${sha}\`)`,
-              '',
-              results,
-              `> _Benchmarked on \`ubuntu-latest\`, Release build, ZMQ + IPC, ASN.1 APER._`,
-            ].join('\n');
+      - name: Assemble report fragment
+        if: ${{ always() && needs.changes.outputs.code == 'true' }}
+        run: |
+          [ -f bench_results.md ] || exit 0
+          {
+            echo "### Full-loop latency"
+            echo ""
+            cat bench_results.md
+            echo ""
+            echo "_ubuntu-latest, Release build, ZMQ + IPC, ASN.1 APER._"
+          } > ci-report-full-loop.md
 
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-            const existing = comments.find(c => c.body.includes(marker));
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body,
-              });
-            }
+      - name: Upload report fragment
+        if: ${{ always() && needs.changes.outputs.code == 'true' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ci-report-full-loop
+          path: ci-report-full-loop.md
+          if-no-files-found: warn
