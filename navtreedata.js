@@ -79,8 +79,8 @@ var NAVTREEINDEX =
 "classlibe3_1_1Logger.html#a8f40bcd6249ad424b8eb15e60049f65e",
 "classlibe3_1_1py_1_1DAppSession.html#a15e58ad99e35b52d722124953d2dd8f3",
 "namespacelibe3.html#a2ae6d18d3575e3d816ad3dd4a3c8ac86",
-"structlibe3_1_1E3Config.html#abb5028cf948af60a47e76ffdf182c4a3",
-"types_8hpp.html#a675f37e2936d707807212fcd3cfa8185acc618538af7364bd959eab4a6382de1d"
+"structlibe3_1_1E3Config.html#aafe3a17bf8b25e2a1d4c3bf217fa59cb",
+"types_8hpp.html#a675f37e2936d707807212fcd3cfa8185aa787313bc7d58dd3cbf99e30cca65668"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

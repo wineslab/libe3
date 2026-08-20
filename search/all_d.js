@@ -5,5 +5,6 @@ var searchData=
   ['negative_2',['NEGATIVE',['../namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5a50546bf973283065b6ccf09faf7a580a',1,'libe3']]],
   ['none_3',['NONE',['../namespacelibe3.html#a509338e1414d84a610f21816d04940a0ab50339a10e1de285ac99d4c3990b8693',1,'libe3']]],
   ['not_20callbacks_4',['Why batched drain + GIL release (not callbacks)',['../md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md3',1,'']]],
-  ['notify_5fdapp_5fstatus_5fchanged_5',['notify_dapp_status_changed',['../classlibe3_1_1E3Interface.html#a17e0ec39836a9f3e8547143c16df330d',1,'libe3::E3Interface']]]
+  ['notify_5fdapp_5fstatus_5fchanged_5',['notify_dapp_status_changed',['../classlibe3_1_1E3Interface.html#a17e0ec39836a9f3e8547143c16df330d',1,'libe3::E3Interface']]],
+  ['now_5frealtime_5fns_6',['now_realtime_ns',['../namespacelibe3.html#a3fdc0243e9c37ad659d49d137af3ee50',1,'libe3']]]
 ];

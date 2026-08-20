@@ -123,6 +123,7 @@ var namespacelibe3 =
     [ "error_code_to_string", "namespacelibe3.html#aee2a6ca3a33bc7c111aa5256811a61eb", null ],
     [ "ErrorCodeToString", "namespacelibe3.html#a1e67547ed0251e57fee673a53a8e935f", null ],
     [ "link_layer_to_string", "namespacelibe3.html#aa315ed8a2ba72534a600f7d9305b5ff8", null ],
+    [ "now_realtime_ns", "namespacelibe3.html#a3fdc0243e9c37ad659d49d137af3ee50", null ],
     [ "pdu_type_to_string", "namespacelibe3.html#a635f33e375e8c160ecd82d0759742300", null ],
     [ "response_code_to_string", "namespacelibe3.html#a91f7245a15a8f381b892d146355c0429", null ],
     [ "role_to_string", "namespacelibe3.html#a7f2cb4f48ecbef9a7aeb214aaf885202", null ],
