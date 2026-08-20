@@ -1,0 +1,49 @@
+name: CI report
+
+# One consolidated CI report comment per PR (issue #64). Every other workflow
+# publishes its detail as a `ci-report-*` artifact and posts nothing itself;
+# this job waits until they have all finished, then writes a single sticky
+# comment with the verdict, a per-workflow table, that detail, and the
+# fast-forward merge command once the required checks are green.
+#
+# Deliberately NOT a required status check: it waits on the required contexts,
+# so requiring it too would make the ruleset wait on itself.
+
+on:
+  pull_request:
+
+concurrency:
+  group: ci-report-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  report:
+    name: CI report
+    runs-on: ubuntu-latest
+    # Generous: the required `Each commit builds and tests` context rebuilds
+    # every commit in the series, so a long branch keeps this waiting.
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      pull-requests: write
+      actions: read
+      checks: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Wait for CI, then post the consolidated report
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          python3 .github/scripts/ci_report.py \
+            --repo "$REPO" \
+            --pr "$PR_NUMBER" \
+            --sha "$HEAD_SHA" \
+            --branch "$HEAD_REF" \
+            --base-branch "$BASE_REF"
