@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.0.11</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.1.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -142,10 +142,11 @@ Public Attributes</h2></td></tr>
 <ul>
 <li><code>name</code>, <code>version</code> and <code>ran_function_id</code> identify the SM.</li>
 <li><code>telemetry_ids</code> and <code>control_ids</code> point to arrays that will be copied by the implementation; the caller may free them after creating the SM.</li>
+<li><code>ran_function_data</code> is required and is copied by the implementation.</li>
 <li>Callbacks are invoked by the C++ adapter and receive <code>user_data</code>. </li>
 </ul>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00073">73</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00074">74</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a01ec8a4a2c490b6f27fc877d95ac26c3" name="a01ec8a4a2c490b6f27fc877d95ac26c3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a01ec8a4a2c490b6f27fc877d95ac26c3">&#9670;&#160;</a></span>control_ids</h2>
@@ -159,7 +160,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00081">81</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00082">82</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -175,7 +176,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00082">82</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00083">83</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -191,7 +192,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00074">74</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00075">75</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -207,7 +208,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00085">85</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00089">89</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -223,7 +224,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00086">86</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00090">90</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -239,7 +240,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00076">76</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00077">77</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -255,7 +256,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00096">96</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00100">100</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -271,7 +272,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00090">90</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00094">94</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -287,7 +288,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00089">89</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00093">93</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -303,7 +304,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00093">93</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00097">97</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -319,7 +320,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00094">94</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00098">98</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -335,7 +336,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00091">91</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00095">95</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -351,7 +352,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00092">92</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00096">96</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -367,7 +368,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00078">78</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00079">79</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -383,7 +384,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00079">79</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00080">80</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -399,7 +400,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00075">75</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00076">76</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
