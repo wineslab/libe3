@@ -87,6 +87,8 @@ public:
     uint32_t ran_function_id() const override { return id_; }
     std::vector<uint32_t> telemetry_ids() const override { return {1}; }
     std::vector<uint32_t> control_ids() const override { return {10}; }
+    // Non-empty: registration rejects an SM with no ranFunctionData.
+    std::vector<uint8_t> ran_function_data() const override { return {'E', '2', 'E'}; }
     ErrorCode init() override { return ErrorCode::SUCCESS; }
     void destroy() override { running_ = false; }
     ErrorCode start() override { running_ = true; return ErrorCode::SUCCESS; }

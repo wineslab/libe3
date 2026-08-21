@@ -4,6 +4,7 @@
 #include "libe3/sm_interface.hpp"
 #include "libe3/types.hpp"
 #include "libe3/error_codes.h"
+#include "libe3/logger.hpp"
 
 #include <string>
 #include <vector>
@@ -11,6 +12,10 @@
 #include <cstring>
 
 using namespace libe3;
+
+namespace {
+constexpr const char* LOG_TAG = "CApi";
+}
 
 struct e3_agent_handle_s {
     std::unique_ptr<E3Agent> agent;
@@ -220,6 +225,19 @@ void e3_agent_stop(e3_agent_handle_t* agent) {
 
 e3_error_t e3_agent_register_sm(e3_agent_handle_t* agent, e3_service_model_handle_t* sm) {
     if (!agent || !agent->agent || !sm) return static_cast<int>(ErrorCode::INVALID_PARAM);
+
+    // Screen the E3AP ranFunctionData constraint here, before the ownership
+    // transfer below. register_sm() takes the unique_ptr by value, so a
+    // rejection on the far side destroys the object while the caller still
+    // holds the handle; rejecting first is what lets the caller keep it and
+    // call e3_service_model_destroy() as this function documents.
+    const size_t rfd_len = sm->ran_function_data_s.size();
+    if (rfd_len == 0 || rfd_len > MAX_PROTOCOL_DATA_SIZE) {
+        E3_LOG_ERROR(LOG_TAG) << "SM '" << sm->name_s << "' advertises " << rfd_len
+                              << " bytes of ran_function_data; E3AP requires 1.."
+                              << MAX_PROTOCOL_DATA_SIZE;
+        return static_cast<int>(ErrorCode::INVALID_PARAM);
+    }
 
     // Transfer ownership into the agent
     try {

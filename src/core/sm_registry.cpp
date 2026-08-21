@@ -25,6 +25,20 @@ ErrorCode SmRegistry::register_sm(std::unique_ptr<ServiceModel> sm) {
         return ErrorCode::INVALID_PARAM;
     }
 
+    // E3-RanFunctionDefinition.ranFunctionData is a mandatory
+    // OCTET STRING (SIZE (1..32768)): an SM that cannot advertise at least its
+    // own name has nothing to advertise, and the SetupResponse carrying it
+    // would fail to encode for every other registered RAN function too.
+    // Reject here rather than at encode time, where the only options left are
+    // padding the value or dropping the whole response.
+    const size_t rfd_len = sm->ran_function_data().size();
+    if (rfd_len == 0 || rfd_len > MAX_PROTOCOL_DATA_SIZE) {
+        E3_LOG_ERROR(LOG_TAG) << "SM '" << sm->name() << "' advertises "
+                              << rfd_len << " bytes of ran_function_data; E3AP"
+                              << " requires 1.." << MAX_PROTOCOL_DATA_SIZE;
+        return ErrorCode::INVALID_PARAM;
+    }
+
     std::lock_guard lock(mutex_);
 
     uint32_t ran_func = sm->ran_function_id();

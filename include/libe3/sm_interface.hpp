@@ -67,11 +67,19 @@ public:
     virtual std::vector<uint32_t> control_ids() const = 0;
 
     /**
-     * @brief Optional RAN-function-specific opaque data
+     * @brief RAN-function-specific opaque data (required, 1..32768 bytes)
      *
-     * Returns a byte vector that will be included in the SetupResponse
-     * as additional payload (ranFunctionList->ranFunctionData OCTET STRING for ASN).
-     * Default is empty since it is optional.
+     * Returns the byte vector advertised for this RAN function in the
+     * SetupResponse (ranFunctionList->ranFunctionData). E3AP declares the field
+     * mandatory and non-empty -- `OCTET STRING (SIZE (1..32768))` -- so every SM
+     * must override this: even the most minimal SM carries at least its own
+     * name. An SM with nothing to advertise is not advertisable at all, since
+     * ranFunctionList itself is optional but its entries are not.
+     *
+     * Registration fails with ErrorCode::INVALID_PARAM if the returned vector is
+     * empty or longer than MAX_PROTOCOL_DATA_SIZE. The base implementation
+     * returns an empty vector so that failure is a loud diagnostic rather than a
+     * compile error in every existing SM; it is not a usable default.
      */
     virtual std::vector<uint8_t> ran_function_data() const { return {}; }
 

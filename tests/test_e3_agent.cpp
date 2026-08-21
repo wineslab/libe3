@@ -36,7 +36,13 @@ public:
     std::vector<uint32_t> control_ids() const override {
         return {10, 20};  // Example control IDs
     }
-    
+
+    // Non-empty: E3AP mandates ranFunctionData SIZE(1..32768), so an SM that
+    // advertises nothing is rejected at registration.
+    std::vector<uint8_t> ran_function_data() const override {
+        return {'T', 'e', 's', 't', 'S', 'M'};
+    }
+
     ErrorCode init() override { return ErrorCode::SUCCESS; }
     
     void destroy() override {

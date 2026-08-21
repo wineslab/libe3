@@ -68,6 +68,7 @@ e3_error_t e3_agent_set_dapp_status_changed_handler(
  * - `name`, `version` and `ran_function_id` identify the SM.
  * - `telemetry_ids` and `control_ids` point to arrays that will be copied
  *   by the implementation; the caller may free them after creating the SM.
+ * - `ran_function_data` is required and is copied by the implementation.
  * - Callbacks are invoked by the C++ adapter and receive `user_data`.
  */
 typedef struct {
@@ -81,9 +82,12 @@ typedef struct {
     const uint32_t* control_ids;     // Array of supported control IDs (copied by library)
     size_t control_ids_len;          // Number of control IDs
 
-    /* Optional opaque RAN function data (E3SM-encoded, sent in setup response) */
-    const uint8_t* ran_function_data; // Pointer to opaque RAN function data (may be NULL)
-    size_t ran_function_data_len;     // Length of ran_function_data in bytes (0 if none)
+    /* Opaque RAN function data (E3SM-encoded, advertised in the setup response).
+     * Required, not optional: E3AP declares ranFunctionData as a mandatory
+     * OCTET STRING (SIZE (1..32768)), so registration is rejected if these
+     * fields describe an empty or oversized buffer. */
+    const uint8_t* ran_function_data; // Opaque RAN function data (must be non-NULL)
+    size_t ran_function_data_len;     // Length in bytes; must be 1..32768
 
     /* Callbacks */
     e3_sm_init_cb sm_init;                   // Called on SM registration
@@ -411,6 +415,11 @@ size_t e3_agent_subscription_count(e3_agent_handle_t* agent);
  * Ownership of `sm` is transferred to the agent on success and callers
  * must not free the handle after a successful call. On failure the caller
  * retains ownership and should call `e3_service_model_destroy`.
+ *
+ * Fails with `E3_INVALID_PARAM` if the descriptor the handle was built
+ * from carried no `ran_function_data`, or more than 32768 bytes of it, and with
+ * `E3_SM_ALREADY_REGISTERED` if another SM already holds the same RAN
+ * function id.
  *
  * @return e3_error_t ErrorCode value (0 == success)
  */
