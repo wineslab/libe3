@@ -37,6 +37,7 @@
 #include <zmq.h>
 
 #include <atomic>
+#include <memory>
 #include <chrono>
 #include <cstdint>
 #include <cstring>
@@ -232,6 +233,117 @@ TEST(SetupChannel_outOfRangeRequestId_substitutedAndAnswered) {
     agent.stop();
 }
 #endif  // LIBE3_ENABLE_JSON
+
+#if defined(LIBE3_ENABLE_ASN1)
+namespace {
+/**
+ * SM that advertises valid ranFunctionData at registration and nothing
+ * afterwards. Registration-time validation cannot prevent this: the value is a
+ * virtual, recomputed on every SetupRequest, and a real SM re-encodes it there
+ * (returning {} if that encode fails).
+ */
+class VanishingDataSM : public ServiceModel {
+public:
+    std::string name() const override { return "VanishingDataSM"; }
+    uint32_t version() const override { return 1; }
+    uint32_t ran_function_id() const override { return 5; }
+    std::vector<uint32_t> telemetry_ids() const override { return {1}; }
+    std::vector<uint32_t> control_ids() const override { return {1}; }
+    std::vector<uint8_t> ran_function_data() const override {
+        if (vanished_.load()) return {};
+        return {'V', 'A', 'N', 'I', 'S', 'H'};
+    }
+    ErrorCode init() override { return ErrorCode::SUCCESS; }
+    void destroy() override { running_ = false; }
+    ErrorCode start() override { running_ = true; return ErrorCode::SUCCESS; }
+    void stop() override { running_ = false; }
+    bool is_running() const override { return running_; }
+    ErrorCode handle_control_action(uint32_t, const DAppControlAction&) override {
+        return ErrorCode::SUCCESS;
+    }
+    static std::atomic<bool> vanished_;
+
+private:
+    bool running_ = false;
+};
+std::atomic<bool> VanishingDataSM::vanished_{false};
+}  // namespace
+
+/**
+ * A RAN function whose ranFunctionData has become unencodable must be omitted
+ * from the SetupResponse, not abort the agent. APER enforces
+ * SIZE(1..32768) on the field, so an empty entry fails the encode of the whole
+ * response -- which used to reach std::abort() and take the process down for
+ * every dApp, on every setup.
+ *
+ * ASN.1-only: JSON and Protobuf carry no such size constraint, so the
+ * unencodable case only exists on the APER channel.
+ */
+TEST(SetupChannel_unencodableRanFunctionData_omittedNotAborted) {
+    const std::string setup_ep = unique_ipc("setup_rfd");
+    const std::string sub_ep   = unique_ipc("inbound_rfd");
+    const std::string pub_ep   = unique_ipc("outbound_rfd");
+
+    E3Config cfg;
+    cfg.role             = E3Role::RAN;
+    cfg.link_layer       = E3LinkLayer::ZMQ;
+    cfg.transport_layer  = E3TransportLayer::IPC;
+    cfg.setup_endpoint   = setup_ep;
+    cfg.subscriber_endpoint = sub_ep;
+    cfg.publisher_endpoint  = pub_ep;
+    cfg.encoding         = EncodingFormat::ASN1;
+    cfg.log_level        = 0;
+    cfg.ran_identifier   = "rfd-test";
+
+    VanishingDataSM::vanished_.store(false);
+
+    E3Agent agent(std::move(cfg));
+    ASSERT_EQ(error_to_int(agent.register_sm(std::make_unique<VanishingDataSM>())),
+              error_to_int(ErrorCode::SUCCESS));
+    ASSERT_EQ(error_to_int(agent.start()), error_to_int(ErrorCode::SUCCESS));
+
+    std::this_thread::sleep_for(100ms);
+
+    // Only now does the SM stop being able to describe itself.
+    VanishingDataSM::vanished_.store(true);
+
+    void* ctx = zmq_ctx_new();
+    ASSERT_TRUE(ctx != nullptr);
+    void* req = zmq_socket(ctx, ZMQ_REQ);
+    ASSERT_TRUE(req != nullptr);
+    int recv_timeout = 5000;
+    zmq_setsockopt(req, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+    int linger = 0;
+    zmq_setsockopt(req, ZMQ_LINGER, &linger, sizeof(linger));
+    ASSERT_EQ(zmq_connect(req, setup_ep.c_str()), 0);
+
+    auto encoder = create_encoder(EncodingFormat::ASN1);
+    ASSERT_TRUE(encoder != nullptr);
+
+    auto setup = encoder->encode_setup_request(
+        7, "1.0.0", "rfd-dapp", "0.0.1", "test-vendor");
+    ASSERT_TRUE(setup.has_value());
+    ASSERT_GE(zmq_send(req, setup->buffer.data(), setup->buffer.size(), 0), 0);
+
+    uint8_t buf[4096];
+    int n = zmq_recv(req, buf, sizeof(buf), 0);
+    ASSERT_GT(n, 0);
+    auto decoded = encoder->decode(buf, static_cast<size_t>(n));
+    ASSERT_TRUE(decoded.has_value());
+    auto* resp = std::get_if<SetupResponse>(&decoded->choice);
+    ASSERT_TRUE(resp != nullptr);
+    ASSERT_EQ(static_cast<int>(resp->response_code),
+              static_cast<int>(ResponseCode::POSITIVE));
+    ASSERT_EQ(resp->request_id, 7u);
+    // The one registered RAN function could not describe itself, so it is
+    // absent -- ranFunctionList is OPTIONAL and this is what that is for.
+    ASSERT_TRUE(resp->ran_function_list.empty());
+
+    zmq_close(req);
+    zmq_ctx_destroy(ctx);
+    agent.stop();
+}
+#endif  // LIBE3_ENABLE_ASN1
 
 // ---------------------------------------------------------------------------
 

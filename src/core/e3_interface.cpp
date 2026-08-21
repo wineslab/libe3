@@ -584,8 +584,22 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
         if (sm) {
             func.telemetry_identifier_list = sm->telemetry_ids();
             func.control_identifier_list = sm->control_ids();
-            // Include optional RAN-function-specific opaque data provided by the SM
             func.ran_function_data = sm->ran_function_data();
+        }
+        // ranFunctionData is mandatory SIZE(1..32768) per entry, and the value
+        // is recomputed on every SetupRequest, so registration cannot vouch for
+        // what we get here. An entry that cannot be encoded would fail the whole
+        // response -- every other RAN function with it -- so omit it instead:
+        // ranFunctionList itself is OPTIONAL, which is how E3AP spells "nothing
+        // to advertise".
+        if (func.ran_function_data.empty()
+            || func.ran_function_data.size() > MAX_PROTOCOL_DATA_SIZE) {
+            E3_LOG_ERROR(LOG_TAG) << "Omitting RAN function " << id
+                                  << " from the setup response: "
+                                  << func.ran_function_data.size()
+                                  << " bytes of ran_function_data (need 1.."
+                                  << MAX_PROTOCOL_DATA_SIZE << ")";
+            continue;
         }
         ran_function_list.push_back(func);
     }
