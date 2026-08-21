@@ -99,6 +99,20 @@ uint32_t E3Interface::generate_message_id() {
     return static_cast<uint32_t>(next_message_id_.fetch_add(1, std::memory_order_relaxed) % 1000) + 1;
 }
 
+void E3Interface::remember_subscription_op(uint32_t request_id,
+                                          uint32_t ran_function_id,
+                                          bool is_delete) {
+    std::lock_guard<std::mutex> lk(pending_subscriptions_mutex_);
+    // E3-MessageID wraps at 1000, so an id can be reused while an older request
+    // is still unanswered. The newer request is the live one: overwrite.
+    pending_subscriptions_[request_id] = PendingSubscriptionOp{ran_function_id, is_delete};
+}
+
+void E3Interface::forget_subscription_op(uint32_t request_id) {
+    std::lock_guard<std::mutex> lk(pending_subscriptions_mutex_);
+    pending_subscriptions_.erase(request_id);
+}
+
 uint32_t E3Interface::sanitize_request_message_id(uint32_t request_id) {
     if (request_id >= 1 && request_id <= 1000) {
         return request_id;
@@ -1019,15 +1033,31 @@ void E3Interface::handle_subscription_response(const SubscriptionResponse& resp)
     E3_LOG_INFO(LOG_TAG) << "Handling SubscriptionResponse for request "
                          << resp.request_id << " rc="
                          << response_code_to_string(resp.response_code);
-    if (dapp_state_ && resp.response_code == ResponseCode::POSITIVE
-        && resp.subscription_id.has_value()) {
-        // We need the RAN function id; find it via the request_id mapping.
-        // Since we don't separately track requested rf_id at this layer yet,
-        // the SubscriptionResponse currently doesn't echo it. The dApp-facing
-        // layer (E3Agent::subscribe) is responsible for resolving rf_id and
-        // calling record_subscription if needed via handlers.
-        // For now we just record the sub_id without an rf_id mapping if
-        // we can't determine it; the user's handler can supplement.
+    // Attribute the response to the request that caused it. The RAN function id
+    // is not on the wire (E3-SubscriptionResponse has no ranFunctionIdentifier),
+    // so it comes from the pending-op record keyed by the id we sent.
+    std::optional<PendingSubscriptionOp> pending;
+    {
+        std::lock_guard<std::mutex> lk(pending_subscriptions_mutex_);
+        auto it = pending_subscriptions_.find(resp.request_id);
+        if (it != pending_subscriptions_.end()) {
+            pending = it->second;
+            pending_subscriptions_.erase(it);
+        }
+    }
+    if (dapp_state_ && pending && resp.response_code == ResponseCode::POSITIVE) {
+        // Not under dapp_state_->mu: these helpers take it themselves.
+        if (pending->is_delete) {
+            dapp_state_->remove_subscription_by_rf(pending->ran_function_id);
+            E3_LOG_INFO(LOG_TAG) << "Subscription to RAN function "
+                                 << pending->ran_function_id << " released";
+        } else if (resp.subscription_id.has_value()) {
+            dapp_state_->record_subscription(pending->ran_function_id,
+                                             *resp.subscription_id);
+            E3_LOG_INFO(LOG_TAG) << "Subscription " << *resp.subscription_id
+                                 << " granted for RAN function "
+                                 << pending->ran_function_id;
+        }
     }
     if (subscription_response_handler_) {
         subscription_response_handler_(resp);
@@ -1119,8 +1149,16 @@ ErrorCode E3Interface::queue_subscription_request(
     pdu.choice = std::move(req);
     const uint32_t mid = generate_message_id();
     pdu.message_id = mid;
+    // Recorded before the send, not after: the response can only be attributed
+    // to a RAN function through this entry, and the inbound thread may see it
+    // before this call returns.
+    remember_subscription_op(mid, ran_function_id, /*is_delete=*/false);
     ErrorCode rc = queue_outbound(std::move(pdu));
-    if (rc == ErrorCode::SUCCESS && out_request_id) {
+    if (rc != ErrorCode::SUCCESS) {
+        forget_subscription_op(mid);
+        return rc;
+    }
+    if (out_request_id) {
         *out_request_id = mid;
     }
     return rc;
@@ -1138,8 +1176,16 @@ ErrorCode E3Interface::queue_subscription_delete(uint32_t ran_function_id) {
     del.dapp_identifier = *id;
     del.subscription_id = *sub_id;
     pdu.choice = del;
-    pdu.message_id = generate_message_id();
-    return queue_outbound(std::move(pdu));
+    const uint32_t mid = generate_message_id();
+    pdu.message_id = mid;
+    // The RAN answers a delete with a SubscriptionResponse too, so both
+    // directions land in handle_subscription_response and are told apart here.
+    remember_subscription_op(mid, ran_function_id, /*is_delete=*/true);
+    ErrorCode rc = queue_outbound(std::move(pdu));
+    if (rc != ErrorCode::SUCCESS) {
+        forget_subscription_op(mid);
+    }
+    return rc;
 }
 
 ErrorCode E3Interface::queue_dapp_control_action(

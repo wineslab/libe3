@@ -27,6 +27,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
+#include <unordered_map>
 
 namespace libe3 {
 
@@ -222,6 +223,18 @@ private:
     std::unique_ptr<SubscriptionManager> subscription_manager_;
     // dApp-only state (nullptr when role==RAN).
     std::unique_ptr<DAppSubscriptionState> dapp_state_;
+
+    // dApp-only: subscription requests awaiting their SubscriptionResponse.
+    // E3-SubscriptionResponse echoes requestId but not ranFunctionIdentifier,
+    // so the RAN function a granted subscription belongs to is only knowable
+    // from the request that asked for it. Keyed by the E3-MessageID we sent;
+    // entries are erased when the response arrives.
+    struct PendingSubscriptionOp {
+        uint32_t ran_function_id{0};
+        bool is_delete{false};
+    };
+    std::mutex pending_subscriptions_mutex_;
+    std::unordered_map<uint32_t, PendingSubscriptionOp> pending_subscriptions_;
     std::unique_ptr<LockFreeQueue<Pdu>> response_queue_;
 
     // dApp-report queue: subscriber/inbound thread hands reports off to the
@@ -346,6 +359,19 @@ private:
      * @brief Callback for SM lifecycle changes
      */
     void on_sm_lifecycle_change(uint32_t ran_function_id, bool should_start);
+
+    /**
+     * @brief Record a subscribe/unsubscribe request awaiting its response.
+     *
+     * @param request_id      E3-MessageID the request was sent with
+     * @param ran_function_id RAN function the request concerns
+     * @param is_delete       true for a SubscriptionDelete, false for a request
+     */
+    void remember_subscription_op(uint32_t request_id, uint32_t ran_function_id,
+                                  bool is_delete);
+
+    /// Drop a pending record, e.g. when the request could not be queued.
+    void forget_subscription_op(uint32_t request_id);
 
 public:
     /**

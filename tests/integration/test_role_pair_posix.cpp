@@ -14,6 +14,7 @@
 #include "sm_simple/e3sm_simple_wrapper.hpp"
 
 #include <atomic>
+#include <vector>
 #include <chrono>
 #include <condition_variable>
 #include <cstdlib>
@@ -161,6 +162,29 @@ void run_pair(E3TransportLayer transport, uint16_t base_port,
         std::unique_lock<std::mutex> lk(mu);
         ASSERT_TRUE(cv.wait_for(lk, 5s, [&]() { return indications >= 2; }));
     }
+
+    // A granted subscription must be visible to the dApp that holds it: the
+    // response carries no ranFunctionIdentifier, so this only works if the
+    // request that asked for it was recorded (issue #66).
+    ASSERT_TRUE(dapp.subscribed_ran_functions() == std::vector<uint32_t>{1});
+    ASSERT_EQ(dapp.active_subscription_ids().size(), size_t{1});
+
+    // ... and can therefore be released without ending the session.
+    ASSERT_TRUE(dapp.unsubscribe(1) == ErrorCode::SUCCESS);
+    {
+        // The release is confirmed by a SubscriptionResponse too; wait for the
+        // local state to reflect it rather than sleeping a fixed interval.
+        const auto deadline = std::chrono::steady_clock::now() + 5s;
+        while (!dapp.subscribed_ran_functions().empty()
+               && std::chrono::steady_clock::now() < deadline) {
+            std::this_thread::sleep_for(20ms);
+        }
+    }
+    ASSERT_TRUE(dapp.subscribed_ran_functions().empty());
+    ASSERT_TRUE(dapp.active_subscription_ids().empty());
+
+    // Releasing it twice is a miss, not a second release.
+    ASSERT_TRUE(dapp.unsubscribe(1) == ErrorCode::SUBSCRIPTION_NOT_FOUND);
 
     dapp.stop();
     ran.stop();
