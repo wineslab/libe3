@@ -21,8 +21,16 @@ target_include_directories(libe3
 target_link_libraries(libe3
     PUBLIC
         Threads::Threads
-        tl::expected
-        
+        # tl::expected is header-only and IS part of the public interface
+        # (e3_encoder.hpp exposes tl::expected<T, ErrorCode>), but it arrives via
+        # FetchContent, so it is not an imported target a consumer can resolve:
+        # naming it in the installed interface made every
+        # find_package(libe3 CONFIG) fail on a missing tl::expected. Scope the
+        # target to the build tree and install the header instead (see
+        # libe3Install.cmake), so <tl/expected.hpp> still resolves through
+        # ${includedir} on both the CMake and the pkg-config route.
+        $<BUILD_INTERFACE:tl::expected>
+
     PRIVATE
         libe3_warnings
         libe3_sanitizers
@@ -86,7 +94,8 @@ target_include_directories(libe3_shared
 target_link_libraries(libe3_shared
     PUBLIC
         Threads::Threads
-        tl::expected
+        # Build-interface only; see the static libe3 target above.
+        $<BUILD_INTERFACE:tl::expected>
     PRIVATE
         libe3_warnings
         libe3_sanitizers

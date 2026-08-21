@@ -265,6 +265,38 @@ jobs:
           test -f "$smdir/sm_simple/e3sm_simple.asn"
           test -f "$smdir/sm_simple/e3sm_simple.proto"
 
+      # Everything else here builds in-tree, which is how a .pc with no feature
+      # macros and an exported target pointing at an uninstalled tl::expected
+      # both went unnoticed. This builds a standalone project against the
+      # staged install, the way a real consumer does, on both routes.
+      - name: Consume the installed package out of tree
+        if: needs.changes.outputs.code == 'true'
+        run: |
+          set -euo pipefail
+
+          # Route 1: the CMake package. Fails outright if the exported target
+          # set references anything that was not installed.
+          cmake -S tests/consume -B build-consume-cmake \
+            -DCMAKE_PREFIX_PATH="$PWD/stage" \
+            -DLIBE3_CONSUME_MODE=cmake
+          cmake --build build-consume-cmake -j $(nproc)
+          ./build-consume-cmake/consume
+
+          # Route 2: pkg-config. main.cpp #errors if the encoding/ZMQ macros are
+          # missing, so a .pc that under-specifies them fails the compile here
+          # instead of silently changing the shape of the headers.
+          cflags=$(PKG_CONFIG_PATH="$PWD/stage/lib/pkgconfig" pkg-config --cflags libe3)
+          echo "pkg-config --cflags libe3: $cflags"
+          # This job configures with the default encodings (ASN.1 on, JSON off)
+          # and ZMQ on, so those exact macros must be advertised.
+          grep -q -- '-DLIBE3_ENABLE_ASN1' <<<"$cflags"
+          grep -q -- '-DLIBE3_HAS_ZMQ=1' <<<"$cflags"
+          ! grep -q -- '-DLIBE3_ENABLE_JSON' <<<"$cflags"
+          PKG_CONFIG_PATH="$PWD/stage/lib/pkgconfig" cmake -S tests/consume \
+            -B build-consume-pkgconfig -DLIBE3_CONSUME_MODE=pkgconfig
+          cmake --build build-consume-pkgconfig -j $(nproc)
+          ./build-consume-pkgconfig/consume
+
   # NOTE: the MPMC Queue Benchmark moved to .github/workflows/mpmc-bench.yml,
   # where it is gated on changes to include/libe3/mpmc_queue.hpp so it only
   # runs when the queue's core file changes. It isn't in the required-checks

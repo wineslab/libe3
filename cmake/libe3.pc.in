@@ -12,4 +12,4 @@ Name: libe3
 Description: @PROJECT_DESCRIPTION@
 Version: @PROJECT_VERSION@
 Libs: -L${libdir} -l@LIBE3_PC_LIB_NAME@
-Cflags: -I${includedir}
+Cflags: -I${includedir}@LIBE3_PC_CFLAGS@
