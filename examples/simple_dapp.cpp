@@ -16,7 +16,7 @@
  * message is unambiguous when several RANs are connected at once.
  *
  * Pairs with examples/simple_agent.cpp and is wire-compatible with the
- * Python spear-dApp/src/simple/simple_dapp.py.
+ * Python dApp library's own simple dApp example.
  *
  * SPDX-License-Identifier: Apache-2.0
  */

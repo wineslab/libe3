@@ -4,9 +4,12 @@
  *
  * Drives N round-trip iterations of the Simple service-model control loop
  * through a colocated RAN + dApp E3Agent pair (over ZMQ IPC, single process)
- * and captures per-phase wall-clock timings. The result is a markdown table
+ * and reports per-phase timings read back from latrec, so this benchmark
+ * measures libE3's and the benchDApp's actual instrumented internals rather
+ * than a separate, ad hoc timing mechanism. The result is a markdown table
  * suitable for posting as a PR comment, mirroring the existing MPMC queue
- * benchmark in tests/bench_mpmc_queue.cpp.
+ * benchmark in tests/bench_mpmc_queue.cpp. Requires a LIBE3_ENABLE_LATREC
+ * build (see cmake/libe3Tests.cmake, which skips this target otherwise).
  *
  * This benchmark drives the shipped Simple SM (examples/sm_simple), not a
  * stripped-down copy, so the indication carries a live wall-clock timestamp
@@ -15,39 +18,55 @@
  * to earlier runs that used the old inline benchmark SM and must be treated as
  * a fresh baseline.
  *
- * Phases captured (all on the same monotonic clock):
- *   1. Collect indication data   — SM worker wake -> just before encode
+ * Phases captured (all read from latrec's CLOCK_MONOTONIC records). "SM" is
+ * the shipped reference Service Model's own worker ring (sm_simple.<tid>);
+ * "dApp" is this benchmark's handler, which runs on libe3's inbound thread
+ * (libe3.inbound.<tid>); "libe3" is the library's own delivery stamp.
+ *   1. Collect indication data    — SM RECORD_BEGIN -> SM ENCODE_E3SM_BEGIN
  *      (includes the SM's live-timestamp clock read; see note above)
- *   2. Create & encode indication — encode call -> bytes ready
- *   3. Deliver indication         — RAN connector send -> dApp handler entry
- *   4. Decode indication          — handler entry -> SM-specific decode done
- *   5. Process data               — decode done -> control encode start
- *   6. Create & encode control    — encode start -> bytes ready
- *   7. Deliver control            — dApp send -> RAN SM handler entry
- *   8. Decode & return control    — RAN SM handler entry -> handler return
+ *   2. Create & encode indication — SM ENCODE_E3SM_BEGIN -> SM ENCODE_E3SM_DONE
+ *   3. Deliver indication         — SM ENCODE_E3SM_DONE -> libe3 DELIVER_BEGIN
+ *   4. Decode indication          — libe3 DELIVER_BEGIN -> dApp DECODE_E3SM_DONE
+ *   5. Process data               — dApp DECODE_E3SM_DONE -> dApp ENCODE_E3SM_BEGIN
+ *   6. Create & encode control    — dApp ENCODE_E3SM_BEGIN -> dApp ENCODE_E3SM_DONE
+ *   7. Deliver control            — dApp ENCODE_E3SM_DONE -> SM DECODE_E3SM_BEGIN
+ *   8. Decode & return control    — SM DECODE_E3SM_BEGIN -> SM DECODE_E3SM_DONE
  *
- * Phases 1, 2, 6 are local to one process side; phases 3, 4, 7, 8 cross the
- * IPC boundary but both sides run in the same OS process for this benchmark
- * so the steady_clock readings are coherent.
+ * The Service Model's stamps are built into examples/sm_simple; the dApp-side
+ * ones are this benchmark's own, standing in for a real dApp's
+ * decode/process/encode-control work. Both use the same catalog identifiers,
+ * because they are the same operations -- which side performed one is read off
+ * the ring, not the stage id.
+ *
+ * Both round-trip legs cross libE3's own instrumented outbound/inbound chain
+ * (EMIT_ENTER, ENQUEUE..DECODE_E3AP_DONE) in between, which this benchmark
+ * does not need to inspect to reconstruct the 8 phases: PingPong pacing keeps
+ * exactly one round trip in flight at a time, so the Service Model and dApp
+ * stamps (keyed on the SM's own business seq) and DELIVER_BEGIN (keyed on
+ * libE3's own inbound seq, with no shared key across the wire) can be paired
+ * by position -- the i-th DELIVER_BEGIN chronologically belongs to the i-th
+ * round trip -- rather than by bridging through libE3's message_id, which
+ * wraps at 1000 well before this benchmark's iteration count.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 #include <libe3/libe3.hpp>
+#include <libe3/latrec.h>
 #include "sm_simple/e3sm_simple_wrapper.hpp"
 #include "sm_simple/simple_service_model.hpp"
+#include "latrec_ring_reader.hpp"
 
 #include <algorithm>
 #include <atomic>
 #include <chrono>
-#include <condition_variable>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <getopt.h>
 #include <iostream>
+#include <map>
 #include <memory>
-#include <mutex>
 #include <string>
 #include <sys/stat.h>
 #include <thread>
@@ -65,34 +84,10 @@ constexpr int kWarmupIterations = 50;
 constexpr uint32_t kRanFunctionId = 1;
 constexpr uint32_t kControlId = 1;
 
-// One trace record per round-trip. Timestamps are in steady_clock nanoseconds.
-struct Trace {
-    uint32_t seq = 0;
-    int64_t t1_collect_begin = 0;
-    int64_t t2_encode_begin = 0;
-    int64_t t3_send_indication = 0;
-    int64_t t4_recv_indication = 0;
-    int64_t t5_decode_done = 0;
-    int64_t t6_control_encode_begin = 0;
-    int64_t t7_send_control = 0;
-    int64_t t8_recv_control = 0;
-    int64_t t9_control_handler_done = 0;
-    bool complete = false;
-};
-
-inline int64_t now_ns() {
-    return duration_cast<nanoseconds>(clk::now().time_since_epoch()).count();
-}
-
-// Shared trace buffer between RAN-side SM and dApp-side handlers. The SM
-// thread emits indications and the control_action handler is on the RAN
-// inbound thread; the dApp's indication_handler is on the dApp inbound
-// thread. All access is guarded by mu.
-struct SharedTraces {
-    std::mutex mu;
-    std::vector<Trace> traces;
-    Trace current;  // in-flight trace being filled
-    int completed = 0;
+// The 9 timestamps of one round trip, resolved from latrec records.
+struct RoundTrip {
+    uint64_t seq = 0;
+    uint64_t t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 0, t8 = 0, t9 = 0;
 };
 
 std::string make_ipc_dir() {
@@ -100,6 +95,13 @@ std::string make_ipc_dir() {
     char* d = mkdtemp(tmpl);
     if (!d) throw std::runtime_error("mkdtemp failed");
     chmod(d, 0777);
+    return std::string(d);
+}
+
+std::string make_trace_dir() {
+    char tmpl[] = "/tmp/libe3_bench_full_loop_trace_XXXXXX";
+    char* d = mkdtemp(tmpl);
+    if (!d) throw std::runtime_error("mkdtemp failed");
     return std::string(d);
 }
 
@@ -149,6 +151,91 @@ double mean(const std::vector<double>& v) {
     return sum / static_cast<double>(v.size());
 }
 
+// Reconstructs every complete round trip from the rings under `dir`.
+//
+// The stage catalog names operations, not components, so both ends of a round
+// trip stamp the same ENCODE_E3SM / DECODE_E3SM identifiers against the same
+// business seq. What separates them is aux2, which carries the PduType of the
+// payload being coded -- exactly as the catalog documents. The RAN-side
+// Service Model encodes an INDICATION_MESSAGE and decodes a
+// DAPP_CONTROL_ACTION; the dApp-side handler does the mirror image. Ring names
+// cannot do this job here: the SM's control handler and the dApp's indication
+// handler both run on a libe3 inbound thread, so both write a "libe3.inbound"
+// ring, differing only in tid.
+//
+// See the file header comment for why DELIVER_BEGIN is paired positionally
+// rather than by key.
+std::vector<RoundTrip> reconstruct(const std::string& dir) {
+    bool wrapped = false;
+    const std::vector<latrec_rec> recs = latrec_test::read_ring_dir(dir, &wrapped);
+    if (wrapped) {
+        std::fprintf(stderr,
+                      "WARNING: a latrec ring wrapped; some records were lost\n");
+    }
+
+    constexpr uint64_t kInd  = static_cast<uint64_t>(PduType::INDICATION_MESSAGE);
+    constexpr uint64_t kCtrl = static_cast<uint64_t>(PduType::DAPP_CONTROL_ACTION);
+
+    // (stage, aux2) -> t_ns, per business seq.
+    std::map<uint64_t, std::map<std::pair<uint8_t, uint64_t>, uint64_t>> by_seq;
+    std::vector<uint64_t> deliver_times;
+    for (const auto& r : recs) {
+        const uint8_t stage = latrec_test::stage_of(r);
+        switch (stage) {
+            case LATREC_RECORD_BEGIN:
+            case LATREC_ENCODE_E3SM_BEGIN:
+            case LATREC_ENCODE_E3SM_DONE:
+            case LATREC_DECODE_E3SM_BEGIN:
+            case LATREC_DECODE_E3SM_DONE:
+                by_seq[latrec_test::seq_of(r)][{stage, r.aux2}] = r.t_ns;
+                break;
+            case LATREC_DELIVER_BEGIN:
+                deliver_times.push_back(r.t_ns);
+                break;
+            default:
+                break;
+        }
+    }
+    std::sort(deliver_times.begin(), deliver_times.end());
+
+    std::vector<RoundTrip> out;
+    size_t deliver_idx = 0;
+    // std::map iterates in ascending key order, i.e. ascending business seq,
+    // i.e. emission order -- the same order PingPong pacing guarantees the
+    // DELIVER_BEGIN times were recorded in, since round trips never overlap.
+    for (const auto& [seq, st] : by_seq) {
+        auto at = [&](uint8_t stage, uint64_t pdu) -> const uint64_t* {
+            auto it = st.find({stage, pdu});
+            return it == st.end() ? nullptr : &it->second;
+        };
+        const uint64_t* t1 = at(LATREC_RECORD_BEGIN, 0);
+        const uint64_t* t2 = at(LATREC_ENCODE_E3SM_BEGIN, kInd);
+        const uint64_t* t3 = at(LATREC_ENCODE_E3SM_DONE, kInd);
+        const uint64_t* t5 = at(LATREC_DECODE_E3SM_DONE, kInd);
+        const uint64_t* t6 = at(LATREC_ENCODE_E3SM_BEGIN, kCtrl);
+        const uint64_t* t7 = at(LATREC_ENCODE_E3SM_DONE, kCtrl);
+        const uint64_t* t8 = at(LATREC_DECODE_E3SM_BEGIN, kCtrl);
+        const uint64_t* t9 = at(LATREC_DECODE_E3SM_DONE, kCtrl);
+        if (!(t1 && t2 && t3 && t5 && t6 && t7 && t8 && t9)) {
+            continue;  // incomplete tail: the run stopped mid round-trip
+        }
+        if (deliver_idx >= deliver_times.size()) break;
+        RoundTrip rt;
+        rt.seq = seq;
+        rt.t1 = *t1;
+        rt.t2 = *t2;
+        rt.t3 = *t3;
+        rt.t4 = deliver_times[deliver_idx++];
+        rt.t5 = *t5;
+        rt.t6 = *t6;
+        rt.t7 = *t7;
+        rt.t8 = *t8;
+        rt.t9 = *t9;
+        out.push_back(rt);
+    }
+    return out;
+}
+
 }  // namespace
 
 int main(int argc, char* argv[]) {
@@ -180,6 +267,16 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // Own capture directory: this benchmark's whole purpose is to read its own
+    // trace back, and a shared default directory would mix it with any other
+    // run's rings. Safe to set here because no thread has opened a ring yet --
+    // nothing has called any latrec_* function before this point. A small ring
+    // is plenty: at most a few thousand records per thread for this iteration
+    // count, against the default 4M-record capacity.
+    const std::string trace_dir = make_trace_dir();
+    latrec_set_output_dir(trace_dir.c_str());
+    setenv("LATREC_ENTRIES_LOG2", "16", 1);
+
     E3Config ran_cfg;
     ran_cfg.role = E3Role::RAN;
     ran_cfg.ran_identifier = "bench-ran";
@@ -206,42 +303,15 @@ int main(int argc, char* argv[]) {
     // For TCP/SCTP the dApp connects to localhost on the default ports,
     // which is correct since both sides run in the same process.
 
-    SharedTraces shared;
     E3Agent ran(ran_cfg);
     // Drive the shipped Simple SM in PingPong mode (one indication in flight,
-    // next emit gated on the control round trip) and capture the RAN-side phase
-    // boundaries through its trace hook. The dApp-side phases (t4..t7) are still
-    // captured in the indication handler below. period_us=0 makes the SM quiet,
-    // so stdout carries only the markdown table this benchmark prints.
+    // next emit gated on the control round trip); its RAN-side stamps are
+    // built into the SM itself. period_us=0 makes
+    // the SM quiet, so stdout carries only the markdown table this benchmark
+    // prints.
     auto sm = std::make_unique<libe3_examples::SimpleServiceModel>(
         /*period_us=*/0, encoding,
         libe3_examples::SimpleServiceModel::PacingMode::PingPong);
-    using TP = libe3_examples::SimpleServiceModel::TracePhase;
-    sm->set_trace_hook([&shared](uint32_t seq, TP phase, int64_t ts) {
-        std::lock_guard<std::mutex> lk(shared.mu);
-        switch (phase) {
-            case TP::CollectBegin:
-                shared.current = Trace{};
-                shared.current.seq = seq;
-                shared.current.t1_collect_begin = ts;
-                break;
-            case TP::EncodeBegin:
-                shared.current.t2_encode_begin = ts;
-                break;
-            case TP::SendIndication:
-                shared.current.t3_send_indication = ts;
-                break;
-            case TP::ControlRecv:
-                shared.current.t8_recv_control = ts;
-                break;
-            case TP::ControlDone:
-                shared.current.t9_control_handler_done = ts;
-                shared.current.complete = true;
-                shared.traces.push_back(shared.current);
-                ++shared.completed;
-                break;
-        }
-    });
     if (ran.register_sm(std::move(sm)) != ErrorCode::SUCCESS) {
         std::cerr << "register_sm failed\n";
         return 1;
@@ -252,27 +322,27 @@ int main(int argc, char* argv[]) {
     }
 
     E3Agent dapp(dapp_cfg);
+    std::atomic<int> handled{0};
     dapp.set_indication_handler([&](const IndicationMessage& msg) {
-        int64_t t4 = now_ns();
         libe3_examples::SimpleIndication si;
         if (!libe3_examples::decode_simple_indication(msg.protocol_data, si, encoding)) return;
-        int64_t t5 = now_ns();
+        const uint32_t seq = si.data1;
+        latrec_tstamp(seq, LATREC_DECODE_E3SM_DONE, 0,
+                      static_cast<uint64_t>(PduType::INDICATION_MESSAGE));
 
-        int64_t t6 = now_ns();
+        latrec_tstamp(seq, LATREC_ENCODE_E3SM_BEGIN, 0,
+                      static_cast<uint64_t>(PduType::DAPP_CONTROL_ACTION));
         std::vector<uint8_t> ctrl;
         if (!libe3_examples::encode_simple_control(static_cast<int>(si.data1 % 101), ctrl, encoding)) return;
-        int64_t t7 = now_ns();
+        latrec_tstamp(seq, LATREC_ENCODE_E3SM_DONE, 0,
+                      static_cast<uint64_t>(PduType::DAPP_CONTROL_ACTION));
 
-        {
-            std::lock_guard<std::mutex> lk(shared.mu);
-            if (shared.current.seq == si.data1) {
-                shared.current.t4_recv_indication = t4;
-                shared.current.t5_decode_done = t5;
-                shared.current.t6_control_encode_begin = t6;
-                shared.current.t7_send_control = t7;
-            }
-        }
+        // Bridges this handler's business seq to libe3's Pdu::enqueue_seq for
+        // the control leg, the same way the SM does for the indication leg.
+        latrec_ctx_set(seq);
         (void)dapp.send_control(kRanFunctionId, kControlId, ctrl);
+
+        handled.fetch_add(1, std::memory_order_relaxed);
     });
 
     if (dapp.start() != ErrorCode::SUCCESS) {
@@ -290,17 +360,22 @@ int main(int argc, char* argv[]) {
     }
 
     // Drive ITERATIONS round-trips. The SM is paced to emit one indication per
-    // received control ack, so we just wait for `shared.completed` to reach
-    // the target.
+    // received control ack, so we just wait for the dApp to have handled the
+    // target count, then stop immediately: nothing else gates the SM from
+    // emitting further indications once the next control ack lands, so any
+    // pause here just lets more round trips run rather than settling the
+    // last one. handled increments once the dApp has decoded, encoded and
+    // sent the control -- before that control's own EX3/EX4 are necessarily
+    // stamped on the RAN side -- so the very last round trip's record may be
+    // an incomplete tail; reconstruct() below drops it rather than treat it
+    // as a real sample, which costs at most one sample out of the total.
     const int total = kIterations + kWarmupIterations;
     auto deadline = clk::now() + std::chrono::seconds(60);
     while (true) {
-        std::unique_lock<std::mutex> lk(shared.mu);
-        if (shared.completed >= total) break;
-        lk.unlock();
+        if (handled.load(std::memory_order_relaxed) >= total) break;
         if (clk::now() > deadline) {
-            std::cerr << "bench deadline exceeded; completed="
-                      << shared.completed << "/" << total << "\n";
+            std::cerr << "bench deadline exceeded; handled="
+                      << handled.load() << "/" << total << "\n";
             break;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
@@ -308,6 +383,8 @@ int main(int argc, char* argv[]) {
 
     dapp.stop();
     ran.stop();
+    latrec_set_output_dir(nullptr);
+    unsetenv("LATREC_ENTRIES_LOG2");
     if (!ipc_dir.empty()) {
         // Remove the IPC socket files created by the benchmark.
         for (const char* name : {"setup", "dapp_socket", "e3_socket"}) {
@@ -317,27 +394,29 @@ int main(int argc, char* argv[]) {
         ::rmdir(ipc_dir.c_str());
     }
 
+    const std::vector<RoundTrip> round_trips = reconstruct(trace_dir);
+    {
+        const std::string rm = "rm -rf '" + trace_dir + "'";
+        if (std::system(rm.c_str()) != 0) { /* best effort */ }
+    }
+
     // Compute per-phase deltas (fractional microseconds, dropping warmup).
     // Several phases are sub-microsecond; integer us would truncate them to 0.
     std::vector<double> p1, p2, p3, p4, p5, p6, p7, p8, total_us;
-    {
-        std::lock_guard<std::mutex> lk(shared.mu);
-        for (const auto& t : shared.traces) {
-            if (!t.complete) continue;
-            if (t.seq < static_cast<uint32_t>(kWarmupIterations)) continue;
-            auto us = [](int64_t a, int64_t b) {
-                return static_cast<double>(b - a) / 1000.0;
-            };
-            p1.push_back(us(t.t1_collect_begin, t.t2_encode_begin));
-            p2.push_back(us(t.t2_encode_begin, t.t3_send_indication));
-            p3.push_back(us(t.t3_send_indication, t.t4_recv_indication));
-            p4.push_back(us(t.t4_recv_indication, t.t5_decode_done));
-            p5.push_back(us(t.t5_decode_done, t.t6_control_encode_begin));
-            p6.push_back(us(t.t6_control_encode_begin, t.t7_send_control));
-            p7.push_back(us(t.t7_send_control, t.t8_recv_control));
-            p8.push_back(us(t.t8_recv_control, t.t9_control_handler_done));
-            total_us.push_back(us(t.t1_collect_begin, t.t9_control_handler_done));
-        }
+    for (const auto& t : round_trips) {
+        if (t.seq < static_cast<uint64_t>(kWarmupIterations)) continue;
+        auto us = [](uint64_t a, uint64_t b) {
+            return static_cast<double>(b - a) / 1000.0;
+        };
+        p1.push_back(us(t.t1, t.t2));
+        p2.push_back(us(t.t2, t.t3));
+        p3.push_back(us(t.t3, t.t4));
+        p4.push_back(us(t.t4, t.t5));
+        p5.push_back(us(t.t5, t.t6));
+        p6.push_back(us(t.t6, t.t7));
+        p7.push_back(us(t.t7, t.t8));
+        p8.push_back(us(t.t8, t.t9));
+        total_us.push_back(us(t.t1, t.t9));
     }
 
     // Emit markdown (fractional us, two decimals).
@@ -371,5 +450,5 @@ int main(int argc, char* argv[]) {
     emit_row("8. Decode & handle control",          p8);
     emit_row("**Total round-trip**",                total_us);
     std::printf("\n");
-    return 0;
+    return p1.empty() ? 1 : 0;
 }

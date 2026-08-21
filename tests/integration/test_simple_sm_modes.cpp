@@ -20,13 +20,19 @@
 
 #include "test_framework.hpp"
 #include <libe3/libe3.hpp>
+#include <libe3/latrec.h>
 #include "sm_simple/e3sm_simple_wrapper.hpp"
 #include "sm_simple/simple_service_model.hpp"
+#include "latrec_ring_reader.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <condition_variable>
+#include <cstdlib>
 #include <mutex>
+#include <string>
 #include <thread>
+#include <unistd.h>
 #include <utility>
 #include <vector>
 
@@ -236,20 +242,25 @@ TEST(control_decode_failure_yields_negative_ack) {
 }
 
 TEST(trace_hook_phase_order) {
-    // The trace hook must fire the RAN-side phases in order: CollectBegin,
-    // EncodeBegin, SendIndication (worker), then ControlRecv, ControlDone
-    // (control handler), with monotonic non-decreasing timestamps.
-    using TP = SimpleServiceModel::TracePhase;
-    std::mutex mu;
-    std::vector<std::pair<TP, int64_t>> events;
+    // The RAN-side phases must occur in order: CollectBegin, EncodeBegin,
+    // SendIndication (worker thread), then ControlRecv, ControlDone (control
+    // handler), with monotonic non-decreasing timestamps. Reads the
+    // the SM's own stamps back from latrec instead of the retired ad hoc trace
+    // hook -- this is only meaningful in a LIBE3_ENABLE_LATREC build, which
+    // is why this whole test is skipped (see cmake/libe3Tests.cmake) when
+    // that flag is off.
+    char tmpl[] = "/tmp/libe3_test_sm_trace_XXXXXX";
+    char* dir = mkdtemp(tmpl);
+    ASSERT_TRUE(dir != nullptr);
+    latrec_set_output_dir(dir);
+    // handle_control_action below runs synchronously on this thread (there is
+    // no real E3Interface inbound thread in this harness to have opened a
+    // ring for it already), so its EX3/EX4 stamps need one opened here.
+    latrec_tls_open_as("test.main");
 
     EmitterCounts c;
     Harness sm(/*period_us=*/0, EncodingFormat::ASN1,
                SimpleServiceModel::PacingMode::PingPong);
-    sm.set_trace_hook([&](uint32_t, TP ph, int64_t ts) {
-        std::lock_guard<std::mutex> lk(mu);
-        events.emplace_back(ph, ts);
-    });
     wire(sm, c);
     sm.start();
 
@@ -260,18 +271,37 @@ TEST(trace_hook_phase_order) {
     ASSERT_TRUE(feed_control(sm) == ErrorCode::SUCCESS);  // fires the two control phases
     sm.stop();
 
-    std::lock_guard<std::mutex> lk(mu);
+    latrec_set_output_dir(nullptr);
+
+    bool wrapped = false;
+    std::vector<latrec_rec> recs = latrec_test::read_ring_dir(dir, &wrapped);
+    std::vector<std::pair<uint8_t, uint64_t>> events;
+    for (const auto& r : recs) {
+        const uint8_t s = latrec_test::stage_of(r);
+        if (s == LATREC_RECORD_BEGIN || s == LATREC_ENCODE_E3SM_BEGIN ||
+            s == LATREC_ENCODE_E3SM_DONE || s == LATREC_DECODE_E3SM_BEGIN ||
+            s == LATREC_DECODE_E3SM_DONE) {
+            events.emplace_back(s, r.t_ns);
+        }
+    }
+    // Rings are read back one at a time (read_ring_dir merges them in
+    // directory order, not time order): the worker thread's record/encode
+    // stamps and this thread's control-decode stamps land in two different
+    // rings, so this must be sorted by timestamp before order is checked.
+    std::sort(events.begin(), events.end(),
+              [](const auto& a, const auto& b) { return a.second < b.second; });
+
     // The bootstrap indication always produces the first three events in order.
     ASSERT_GE(events.size(), 5u);
-    ASSERT_TRUE(events[0].first == TP::CollectBegin);
-    ASSERT_TRUE(events[1].first == TP::EncodeBegin);
-    ASSERT_TRUE(events[2].first == TP::SendIndication);
+    ASSERT_TRUE(events[0].first == LATREC_RECORD_BEGIN);
+    ASSERT_TRUE(events[1].first == LATREC_ENCODE_E3SM_BEGIN);
+    ASSERT_TRUE(events[2].first == LATREC_ENCODE_E3SM_DONE);
     // Locate the control round (the 50 ms fallback may inject worker triples
     // ahead of it, so search rather than assume a fixed index).
     bool found = false;
     for (size_t i = 3; i + 1 < events.size(); ++i) {
-        if (events[i].first == TP::ControlRecv) {
-            ASSERT_TRUE(events[i + 1].first == TP::ControlDone);
+        if (events[i].first == LATREC_DECODE_E3SM_BEGIN) {
+            ASSERT_TRUE(events[i + 1].first == LATREC_DECODE_E3SM_DONE);
             found = true;
             break;
         }
@@ -280,6 +310,9 @@ TEST(trace_hook_phase_order) {
     for (size_t i = 1; i < events.size(); ++i) {
         ASSERT_GE(events[i].second, events[i - 1].second);
     }
+
+    const std::string rm = "rm -rf '" + std::string(dir) + "'";
+    if (std::system(rm.c_str()) != 0) { /* best effort */ }
 }
 
 int main() {
