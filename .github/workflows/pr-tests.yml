@@ -209,6 +209,21 @@ jobs:
         if: needs.changes.outputs.code == 'true'
         run: cd build-all && ctest --output-on-failure
 
+      # Also the off-by-default transport combination, which nothing else
+      # covered: connector_factory.cpp instantiated ZmqE3Connector
+      # unconditionally while zmq_connector.cpp is only compiled when the option
+      # is on, so LIBE3_ENABLE_ZMQ=OFF produced a library with an unresolvable
+      # symbol. Lives in this job (rather than its own) so the required-status
+      # ruleset does not have to change to gate on it.
+      - name: Configure, build and test with ZeroMQ disabled
+        if: needs.changes.outputs.code == 'true'
+        run: |
+          cmake -S . -B build-nozmq \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLIBE3_ENABLE_ZMQ=OFF
+          cmake --build build-nozmq -j $(nproc)
+          cd build-nozmq && ctest --output-on-failure
+
   swig:
     name: SWIG Python Bindings
     runs-on: ubuntu-latest

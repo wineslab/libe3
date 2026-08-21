@@ -387,7 +387,15 @@ struct E3Config {
     std::string e3ap_version{"1.0.0"};  ///< E3AP protocol version advertised during setup
 
     // Transport configuration
+#if defined(LIBE3_HAS_ZMQ) && !LIBE3_HAS_ZMQ
+    // A build without ZeroMQ has no ZMQ connector to create, so defaulting to
+    // it would make every default-constructed config fail to initialise. The
+    // POSIX connector accepts the same ZMQ-style endpoint URIs (it strips the
+    // scheme), so the endpoint defaults below need no counterpart.
+    E3LinkLayer link_layer{E3LinkLayer::POSIX};            ///< Link-layer transport (ZMQ or POSIX)
+#else
     E3LinkLayer link_layer{E3LinkLayer::ZMQ};             ///< Link-layer transport (ZMQ or POSIX)
+#endif
     E3TransportLayer transport_layer{E3TransportLayer::IPC}; ///< Transport-layer protocol (SCTP, TCP, IPC)
     
     // Ports

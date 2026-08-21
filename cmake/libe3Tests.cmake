@@ -26,6 +26,15 @@ set(LIBE3_ASN1_ONLY_TESTS
     e2e_report_path
 )
 
+# Tests that drive a raw ZMQ peer against the agent: they include <zmq.h> and
+# link libzmq directly, so with LIBE3_ENABLE_ZMQ=OFF there is nothing for them
+# to link against. Same treatment as the ASN.1-only list above.
+set(LIBE3_ZMQ_ONLY_TESTS
+    e2e_report_path
+    role_aware_connector_zmq
+    setup_bad_request
+)
+
 foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
     # Derive a target name from the source file name: tests/test_foo.cpp -> test_foo
     get_filename_component(test_name ${test_src} NAME_WE)
@@ -43,6 +52,10 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
     endif()
     if(NOT LIBE3_ENABLE_ASN1 AND simple_name IN_LIST LIBE3_ASN1_ONLY_TESTS)
         message(STATUS "Skipping test_${simple_name}: ASN.1 support disabled")
+        continue()
+    endif()
+    if(NOT LIBE3_ENABLE_ZMQ AND simple_name IN_LIST LIBE3_ZMQ_ONLY_TESTS)
+        message(STATUS "Skipping test_${simple_name}: ZeroMQ support disabled")
         continue()
     endif()
 

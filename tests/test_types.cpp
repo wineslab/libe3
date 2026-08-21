@@ -144,7 +144,13 @@ TEST(E3Config_defaults) {
     E3Config config;
     config.ran_identifier = "test";
     
+    // Link layer default follows build-time selection too: a build without
+    // ZeroMQ has no ZMQ connector to hand out.
+#if defined(LIBE3_HAS_ZMQ) && !LIBE3_HAS_ZMQ
+    ASSERT_TRUE(config.link_layer == E3LinkLayer::POSIX);
+#else
     ASSERT_TRUE(config.link_layer == E3LinkLayer::ZMQ);
+#endif
     ASSERT_TRUE(config.transport_layer == E3TransportLayer::IPC);
     // Encoding default follows build-time selection. Mirror the precedence in
     // E3Config (types.hpp): ASN.1 wins when both encoders are compiled in.
