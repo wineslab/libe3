@@ -150,7 +150,8 @@ jobs:
         run: |
           cmake -S . -B build \
             -DCMAKE_BUILD_TYPE=Release \
-            -DLIBE3_BUILD_INTEGRATION_TESTS=ON
+            -DLIBE3_BUILD_INTEGRATION_TESTS=ON \
+            -DLIBE3_ENABLE_LATREC=ON
 
       - name: Build
         if: needs.changes.outputs.code == 'true'
