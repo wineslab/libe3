@@ -8,6 +8,7 @@
  */
 
 #include "posix_connector.hpp"
+#include "libe3/latrec.h"
 #include "libe3/logger.hpp"
 #include <sys/socket.h>
 #include <sys/uio.h>
@@ -606,6 +607,17 @@ ErrorCode PosixE3Connector::setup_outbound_connection() {
 }
 
 ErrorCode PosixE3Connector::send(const std::vector<uint8_t>& data) {
+    // Checked first, same as the recv() paths: shutdown() only calls
+    // ::shutdown(SHUT_RDWR) on the socket (the fd itself stays valid until
+    // dispose() closes it), so a send racing a concurrent shutdown() would
+    // otherwise hit a real EPIPE/ECONNRESET and be indistinguishable from a
+    // genuine transport failure. Narrows, but does not eliminate, that race:
+    // this check and the syscall below are not atomic with shutdown_requested_
+    // being set.
+    if (shutdown_requested_.load()) {
+        return ErrorCode::CANCELLED;
+    }
+
     // dApp role sends to RAN's receive() which uses raw recv. Use a raw
     // send to match. The dApp keeps its original single-socket path.
     if (role_ == E3Role::DAPP) {

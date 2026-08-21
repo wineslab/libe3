@@ -249,6 +249,12 @@ private:
     std::unique_ptr<std::thread> inbound_thread_;
     std::unique_ptr<std::thread> outbound_thread_;
     std::unique_ptr<std::thread> report_worker_thread_;
+#ifdef LIBE3_ENABLE_LATREC
+    // ~1 Hz slow-lane sampler stamping LATREC_CONTEXT (involuntary context
+    // switches, current CPU frequency), to explain p99 tails. Exists only in
+    // a latrec-enabled build: a normal build spawns no such thread at all.
+    std::unique_ptr<std::thread> context_thread_;
+#endif
 
     // RAN-side handlers
     DAppReportHandler dapp_report_handler_;
@@ -311,6 +317,13 @@ private:
      */
     void report_worker_loop();
 
+#ifdef LIBE3_ENABLE_LATREC
+    /**
+     * @brief ~1 Hz slow-lane sampler stamping LATREC_CONTEXT.
+     */
+    void context_monitor_loop();
+#endif
+
     // =========================================================================
     // Message Handlers
     // =========================================================================
@@ -319,7 +332,8 @@ private:
     void handle_setup_request(const SetupRequest& request, uint32_t request_message_id);
     void handle_subscription_request(const SubscriptionRequest& request, uint32_t request_message_id);
     void handle_subscription_delete(const SubscriptionDelete& del, uint32_t request_message_id);
-    void handle_control_action(const DAppControlAction& action, uint32_t request_message_id);
+    void handle_control_action(const DAppControlAction& action, uint32_t request_message_id,
+                               uint64_t latrec_seq);
     void handle_dapp_report(const DAppReport& report);
     void handle_release_message(const ReleaseMessage &release);
     void handle_dapp_disconnection(uint32_t dapp_id);
@@ -347,8 +361,8 @@ private:
     // dApp-role handlers
     void handle_setup_response(const SetupResponse& response);
     void handle_subscription_response(const SubscriptionResponse& response);
-    void handle_indication(const IndicationMessage& msg);
-    void handle_xapp_control_action(const XAppControlAction& action);
+    void handle_indication(const IndicationMessage& msg, uint64_t latrec_seq);
+    void handle_xapp_control_action(const XAppControlAction& action, uint64_t latrec_seq);
     void handle_message_ack(const MessageAck& ack);
 
     // =========================================================================

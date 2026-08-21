@@ -290,6 +290,7 @@ struct DAppReport {
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0};
     std::vector<uint8_t> report_data;
+    uint64_t recv_seq{0};          ///< Set by the inbound loop; keys the [latrec] L-stage records
 };
 
 /**
@@ -332,6 +333,7 @@ struct Pdu {
     PduType type{PduType::SETUP_REQUEST};
     PduChoice choice;
     uint32_t message_id{0};        ///< Unique message identifier
+    uint64_t enqueue_seq{0};       ///< Set by queue_outbound; keys the [latrec] L-stage records
 
     /**
      * @brief Producer timestamp, in nanoseconds since the Unix epoch.

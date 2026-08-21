@@ -7,6 +7,7 @@
  */
 
 #include "zmq_connector.hpp"
+#include "libe3/latrec.h"
 #include "libe3/logger.hpp"
 #include <zmq.h>
 #include <cstring>
@@ -272,6 +273,11 @@ ErrorCode ZmqE3Connector::setup_outbound_connection() {
 }
 
 ErrorCode ZmqE3Connector::send(const std::vector<uint8_t>& data) {
+    // Checked first, same reasoning as PosixE3Connector::send(): narrows,
+    // but does not eliminate, a send racing a concurrent shutdown().
+    if (shutdown_requested_.load()) {
+        return ErrorCode::CANCELLED;
+    }
     if (!outbound_socket_) {
         return ErrorCode::NOT_CONNECTED;
     }
@@ -281,7 +287,7 @@ ErrorCode ZmqE3Connector::send(const std::vector<uint8_t>& data) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to send: " << zmq_strerror(errno);
         return ErrorCode::TRANSPORT_ERROR;
     }
-    
+
     E3_LOG_TRACE(LOG_TAG) << "Sent: " << data.size() << " bytes";
     return ErrorCode::SUCCESS;
 }
@@ -486,7 +492,7 @@ void ZmqE3Connector::dispose() {
 void ZmqE3Connector::shutdown() {
     // ZMQ uses ZMQ_RCVTIMEO for timeout-based shutdown.
     // The receive loops will wake up periodically and check should_stop_.
-    // No additional action needed here.
+    shutdown_requested_.store(true);
     E3_LOG_DEBUG(LOG_TAG) << "ZMQ connector shutdown requested";
 }
 

@@ -9,6 +9,7 @@
 #define LIBE3_ZMQ_CONNECTOR_HPP
 
 #include "libe3/e3_connector.hpp"
+#include <atomic>
 #include <memory>
 
 namespace libe3 {
@@ -77,7 +78,13 @@ private:
     void* outbound_socket_{nullptr};
     
     bool connected_{false};
-    
+
+    // Set by shutdown(). shutdown() itself does not touch outbound_socket_
+    // (only recv timeouts matter there), so send() cannot tell a genuine
+    // transport failure apart from one racing a concurrent shutdown()
+    // without this -- see the equivalent check in PosixE3Connector::send().
+    std::atomic<bool> shutdown_requested_{false};
+
     void setup_ipc_permissions(const std::string& path);
     bool reset_setup_socket();
 };

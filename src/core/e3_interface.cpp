@@ -9,8 +9,10 @@
 
 #include "libe3/e3_interface.hpp"
 #include "libe3/logger.hpp"
+#include "libe3/latrec.h"
 #include <cctype>
 #include <chrono>
+#include <cstdio>
 #include <cstdlib>
 #include <signal.h>
 #include <string>
@@ -28,15 +30,6 @@ namespace libe3 {
 namespace {
 constexpr const char* LOG_TAG = "E3Iface";
 
-/**
- * @brief Apply CPU-affinity and niceness to the calling thread.
- *
- * Invoked at the very start of each I/O thread so that the settings take
- * effect before any real work begins.
- *
- * @param affinity  Logical CPU core to pin to, or -1 to skip pinning.
- * @param niceness  Nice value in [-20, 19], or 0 to skip.
- */
 /**
  * @brief Build the default log-file path for a given role/identifier.
  *
@@ -68,7 +61,18 @@ std::string default_log_path(E3Role role, const std::string& id) {
     return path;
 }
 
-void apply_thread_config(int affinity, int niceness) noexcept {
+/**
+ * @brief Apply CPU-affinity and niceness to the calling thread, then open its
+ *        latrec ring.
+ *
+ * Invoked at the very start of each I/O thread so that the settings take
+ * effect before any real work begins.
+ *
+ * @param affinity  Logical CPU core to pin to, or -1 to skip pinning.
+ * @param niceness  Nice value in [-20, 19], or 0 to skip.
+ * @param role      latrec ring name for this thread (see LATREC_ROLE_* below).
+ */
+void apply_thread_config(int affinity, int niceness, const char* role) noexcept {
 #ifdef __linux__
     if (affinity >= 0) {
         cpu_set_t cpuset;
@@ -90,7 +94,22 @@ void apply_thread_config(int affinity, int niceness) noexcept {
     (void)affinity;
     (void)niceness;
 #endif
+    // Open this thread's latrec ring up front: the stamp path never opens one,
+    // and doing it after pinning faults the mapping on the local NUMA node.
+    latrec_tls_open_as(role);
 }
+
+/* latrec ring names for the threads libe3 starts; an unnamed ring falls back to
+ * the program name, which is the same for all of them. They also select the
+ * per-role LATREC_ENTRIES_LOG2_<ROLE> sizing override. The RAN and dApp roles
+ * run in separate processes, so the two sides reuse one name per function. */
+constexpr const char* LATREC_ROLE_OUTBOUND = "libe3.outbound";
+constexpr const char* LATREC_ROLE_INBOUND  = "libe3.inbound";
+constexpr const char* LATREC_ROLE_REPORT   = "libe3.report";
+constexpr const char* LATREC_ROLE_SETUP    = "libe3.setup";
+#ifdef LIBE3_ENABLE_LATREC
+constexpr const char* LATREC_ROLE_CONTEXT  = "libe3.context";
+#endif
 } // anonymous namespace
 
 uint32_t E3Interface::generate_message_id() {
@@ -242,6 +261,10 @@ ErrorCode E3Interface::start() {
         outbound_thread_ = std::make_unique<std::thread>(&E3Interface::outbound_loop_dapp, this);
     }
 
+#ifdef LIBE3_ENABLE_LATREC
+    context_thread_ = std::make_unique<std::thread>(&E3Interface::context_monitor_loop, this);
+#endif
+
     state_.store(AgentState::RUNNING);
     E3_LOG_INFO(LOG_TAG) << "E3Interface started successfully";
 
@@ -286,6 +309,11 @@ void E3Interface::stop() {
     if (report_worker_thread_ && report_worker_thread_->joinable()) {
         report_worker_thread_->join();
     }
+#ifdef LIBE3_ENABLE_LATREC
+    if (context_thread_ && context_thread_->joinable()) {
+        context_thread_->join();
+    }
+#endif
 
     // Wake up anyone blocked in wait_for_setup so they don't hang.
     {
@@ -316,7 +344,29 @@ ErrorCode E3Interface::queue_outbound(Pdu pdu) {
     if (!response_queue_) {
         return ErrorCode::NOT_INITIALIZED;
     }
-    return response_queue_->push(std::move(pdu));
+    // Per-thread ring: open the producer thread's outbound ring so the L0 stamp
+    // below is recorded (idempotent; no-op with tracing off).
+    latrec_tls_open_as(LATREC_ROLE_OUTBOUND);
+    // enqueue_seq identifies this PDU across the latrec stage records. An emit
+    // path that already stamped LATREC_EMIT_ENTER allocated it there, so
+    // that record and these share one key; everything else allocates here.
+    if (pdu.enqueue_seq == 0)
+        pdu.enqueue_seq = latrec_seq_next();
+    const uint64_t seq = pdu.enqueue_seq;
+    latrec_tstamp(seq, LATREC_ENQUEUE, 0, static_cast<uint64_t>(pdu.type));
+    const ErrorCode rc = response_queue_->push(std::move(pdu));
+    if (rc != ErrorCode::SUCCESS) {
+        // NOT_INITIALIZED means shutdown() had already been called on this
+        // queue (e.g. a registered SM's own producer thread, not one of
+        // E3Interface's own, still emitting in the window between
+        // response_queue_->shutdown() and that thread being joined via
+        // SmRegistry::clear() in stop()) -- distinct from the queue actually
+        // being full.
+        const uint64_t reason = (rc == ErrorCode::NOT_INITIALIZED)
+            ? LATREC_DROP_SHUTDOWN : LATREC_DROP_QUEUE_PUSH;
+        latrec_tstamp(seq, LATREC_DROP, 0, reason);
+    }
+    return rc;
 }
 
 std::vector<uint32_t> E3Interface::get_available_ran_functions() const {
@@ -334,10 +384,22 @@ ErrorCode E3Interface::register_sm(std::unique_ptr<ServiceModel> sm) {
         }
         return subscription_manager_->get_subscribed_dapps(ran_function_id);
     });
-    sm->set_outbound_emitter([this](Pdu&& pdu) {
+    sm->set_outbound_emitter([this, ran_function_id](Pdu&& pdu) {
         if (pdu.message_id == 0) {
             pdu.message_id = generate_message_id();
         }
+        // Mirrors E3Agent::send_indication / e3_service_model_emit_indication:
+        // this is an emit path, so it stamps EMIT_ENTER itself rather than
+        // leaving it to queue_outbound, which only allocates enqueue_seq for a
+        // Pdu that arrives with none (its own comment says as much -- this was
+        // "everything else", the one emit path that hadn't followed it). A
+        // Service Model that has opened its own ring and called
+        // latrec_ctx_set() before this point -- the documented pattern every
+        // producer follows -- gets a real join to the outbound leg; one that
+        // hasn't gets an EMIT_ENTER with aux 0, same as an unset context
+        // anywhere else.
+        pdu.enqueue_seq = latrec_seq_next();
+        latrec_tstamp(pdu.enqueue_seq, LATREC_EMIT_ENTER, latrec_ctx(), ran_function_id);
         return queue_outbound(std::move(pdu));
     });
     return SmRegistry::instance().register_sm(std::move(sm));
@@ -354,6 +416,8 @@ void E3Interface::notify_dapp_status_changed() {
 // =========================================================================
 
 void E3Interface::setup_loop_ran() {
+    // This thread takes no affinity/niceness config, so open its ring here.
+    latrec_tls_open_as(LATREC_ROLE_SETUP);
     E3_LOG_INFO(LOG_TAG) << "Setup loop (RAN) started";
     
     auto available_ran_functions = SmRegistry::instance().get_available_ran_functions();
@@ -402,7 +466,7 @@ void E3Interface::setup_loop_ran() {
 }
 
 void E3Interface::inbound_loop_ran() {
-    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness);
+    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness, LATREC_ROLE_INBOUND);
     E3_LOG_INFO(LOG_TAG) << "Inbound loop (RAN) started";
 
     ErrorCode result = connector_->setup_inbound_connection();
@@ -421,13 +485,20 @@ void E3Interface::inbound_loop_ran() {
             continue;
         }
         
+        // seq comes from the process-wide counter, so an inbound message never
+        // shares a key with an outbound one.
+        const uint64_t seq = latrec_seq_next();
+        latrec_tstamp(seq, LATREC_RECV, static_cast<uint64_t>(ret), 0);
+
         auto decode_result = encoder_->decode(buffer.data(), static_cast<size_t>(ret));
         if (!decode_result) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to decode PDU in subscriber";
+            latrec_tstamp(seq, LATREC_DROP, 0, LATREC_DROP_DECODE);
             continue;
         }
         
         Pdu& pdu = *decode_result;
+        latrec_tstamp(seq, LATREC_DECODE_E3AP_DONE, pdu.message_id, static_cast<uint64_t>(pdu.type));
         
         switch (pdu.type) {
             case PduType::SUBSCRIPTION_REQUEST: {
@@ -449,7 +520,7 @@ void E3Interface::inbound_loop_ran() {
             case PduType::DAPP_CONTROL_ACTION: {
                 auto* action = std::get_if<DAppControlAction>(&pdu.choice);
                 if (action) {
-                    handle_control_action(*action, pdu.message_id);
+                    handle_control_action(*action, pdu.message_id, seq);
                 }
                 break;
             }
@@ -461,8 +532,25 @@ void E3Interface::inbound_loop_ran() {
                         // Hand off to the report worker so downstream work
                         // never blocks the inbound read path. The queue logs
                         // on overflow; surface it here as an error too.
-                        if (report_queue_->push(std::move(*report)) != ErrorCode::SUCCESS) {
+                        report->recv_seq = seq;
+                        // Timestamped before the push, not after: the worker
+                        // is already blocked on pop(), so it can drain, run
+                        // the handler and stamp REPORT_DONE inside the window
+                        // between the push returning and this thread issuing
+                        // its own stamp. Stamping afterwards puts the queue
+                        // entry after the queue exit whenever that happens.
+                        const uint64_t t_queued = latrec_tnow();
+                        const ErrorCode report_rc = report_queue_->push(std::move(*report));
+                        if (report_rc != ErrorCode::SUCCESS) {
                             E3_LOG_ERROR(LOG_TAG) << "Report queue full — dropping dApp report";
+                            // See queue_outbound: NOT_INITIALIZED means
+                            // shutdown() already ran, not that this queue was
+                            // actually full.
+                            const uint64_t reason = (report_rc == ErrorCode::NOT_INITIALIZED)
+                                ? LATREC_DROP_SHUTDOWN : LATREC_DROP_REPORT_QUEUE;
+                            latrec_tstamp(seq, LATREC_DROP, 0, reason);
+                        } else {
+                            latrec_tstamp_at(seq, LATREC_REPORT_QUEUED, 0, 0, t_queued);
                         }
                     }
                 }
@@ -478,8 +566,9 @@ void E3Interface::inbound_loop_ran() {
             }
 
             default:
-                E3_LOG_WARN(LOG_TAG) << "Received unexpected PDU type: " 
+                E3_LOG_WARN(LOG_TAG) << "Received unexpected PDU type: "
                                      << pdu_type_to_string(pdu.type);
+                latrec_tstamp(seq, LATREC_DROP, 0, LATREC_DROP_NO_HANDLER);
                 break;
         }
     }
@@ -488,7 +577,7 @@ void E3Interface::inbound_loop_ran() {
 }
 
 void E3Interface::outbound_loop_ran() {
-    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness);
+    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness, LATREC_ROLE_OUTBOUND);
     E3_LOG_INFO(LOG_TAG) << "Outbound loop (RAN) started";
 
     // Ignore SIGPIPE to handle closed connections gracefully
@@ -520,19 +609,29 @@ void E3Interface::outbound_loop_ran() {
         if (!pdu_opt) {
             continue;
         }
+        latrec_tstamp(pdu_opt->enqueue_seq, LATREC_DEQUEUE, 0, static_cast<uint64_t>(pdu_opt->type));
         
         // Encode and send
         auto encode_result = encoder_->encode(*pdu_opt);
         if (!encode_result) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to encode PDU for sending";
+            latrec_tstamp(pdu_opt->enqueue_seq, LATREC_DROP, 0, LATREC_DROP_ENCODE);
             continue;
         }
+        latrec_tstamp(pdu_opt->enqueue_seq, LATREC_ENCODE_E3AP_DONE, encode_result->buffer.size(), 0);
         
+        latrec_ctx_set(pdu_opt->enqueue_seq);   // for the connector's LC stamps
         ErrorCode send_result = connector_->send(encode_result->buffer);
         if (send_result != ErrorCode::SUCCESS) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to send PDU";
+            // CANCELLED means the connector's shutdown() had already run,
+            // distinct from a genuine transport failure.
+            const uint64_t reason = (send_result == ErrorCode::CANCELLED)
+                ? LATREC_DROP_SHUTDOWN : LATREC_DROP_SEND;
+            latrec_tstamp(pdu_opt->enqueue_seq, LATREC_DROP, 0, reason);
         } else {
             E3_LOG_DEBUG(LOG_TAG) << "Sent PDU: " << pdu_type_to_string(pdu_opt->type);
+            latrec_tstamp(pdu_opt->enqueue_seq, LATREC_SEND_DONE, pdu_opt->message_id, 0);
         }
     }
     
@@ -540,7 +639,7 @@ void E3Interface::outbound_loop_ran() {
 }
 
 void E3Interface::report_worker_loop() {
-    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness);
+    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness, LATREC_ROLE_REPORT);
     E3_LOG_INFO(LOG_TAG) << "Report worker loop started";
 
     while (!should_stop_.load()) {
@@ -549,6 +648,7 @@ void E3Interface::report_worker_loop() {
         auto report_opt = report_queue_->pop(std::chrono::milliseconds(10));
         if (report_opt) {
             handle_dapp_report(*report_opt);
+            latrec_tstamp(report_opt->recv_seq, LATREC_REPORT_DONE, 0, 0);
         }
     }
 
@@ -560,12 +660,64 @@ void E3Interface::report_worker_loop() {
     E3_LOG_INFO(LOG_TAG) << "Report worker loop stopped";
 }
 
+#ifdef LIBE3_ENABLE_LATREC
+void E3Interface::context_monitor_loop() {
+    latrec_tls_open_as(LATREC_ROLE_CONTEXT);
+
+#ifdef __linux__
+    long prev_nivcsw = 0;
+    {
+        struct rusage ru {};
+        if (getrusage(RUSAGE_SELF, &ru) == 0) {
+            prev_nivcsw = ru.ru_nivcsw;
+        }
+    }
+#endif
+
+    while (!should_stop_.load()) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        if (should_stop_.load()) {
+            break;
+        }
+
+        uint64_t nivcsw_delta = 0;
+        uint64_t cur_freq_khz = 0;
+#ifdef __linux__
+        struct rusage ru {};
+        if (getrusage(RUSAGE_SELF, &ru) == 0) {
+            nivcsw_delta = static_cast<uint64_t>(ru.ru_nivcsw - prev_nivcsw);
+            prev_nivcsw = ru.ru_nivcsw;
+        }
+
+        // Best-effort: absent under most VMs/containers and some CI runners,
+        // in which case this stays 0 rather than failing the sample.
+        const int cpu = sched_getcpu();
+        if (cpu >= 0) {
+            char path[128];
+            std::snprintf(path, sizeof(path),
+                          "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_cur_freq", cpu);
+            if (FILE* f = std::fopen(path, "r")) {
+                long khz = 0;
+                if (std::fscanf(f, "%ld", &khz) == 1) {
+                    cur_freq_khz = static_cast<uint64_t>(khz);
+                }
+                std::fclose(f);
+            }
+        }
+#endif
+        // seq = 0: a 1 Hz slow-lane record carries no per-message key.
+        latrec_tstamp(0, LATREC_CONTEXT, nivcsw_delta, cur_freq_khz);
+    }
+}
+#endif  // LIBE3_ENABLE_LATREC
+
 // =========================================================================
 // Message Handlers
 // =========================================================================
 
 void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t request_message_id) {
     request_message_id = sanitize_request_message_id(request_message_id);
+    latrec_tstamp(request_message_id, LATREC_SETUP_BEGIN, 0, 0);
     E3_LOG_INFO(LOG_TAG) << "Handling setup request from dApp '" << request.dapp_name 
                          << "' (version=" << request.dapp_version 
                          << ", vendor=" << request.vendor 
@@ -654,6 +806,8 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
     } else {
         E3_LOG_INFO(LOG_TAG) << "Sent setup response for request id " << request_message_id;
     }
+    latrec_tstamp(request_message_id, LATREC_SETUP_DONE, 0,
+                  send_result == ErrorCode::SUCCESS ? 1 : 0);
 }
 
 void E3Interface::send_negative_setup_reply(uint32_t request_id) {
@@ -688,12 +842,14 @@ void E3Interface::send_negative_setup_reply(uint32_t request_id) {
         E3_LOG_WARN(LOG_TAG) << "Failed to send negative setup response for request id "
                              << request_id << "; error=" << error_code_to_string(send_result);
     }
+    latrec_tstamp(request_id, LATREC_SETUP_DONE, 0, 0 /* rejected */);
 }
 
 void E3Interface::handle_subscription_request(const SubscriptionRequest& request, uint32_t request_message_id) {
+    latrec_tstamp(request_message_id, LATREC_SUB_BEGIN, 0, 0);
     E3_LOG_INFO(LOG_TAG) << "Handling subscription request from dApp " << request.dapp_identifier
                          << " for RAN function " << request.ran_function_identifier;
-    
+
     ResponseCode response_code = ResponseCode::NEGATIVE;
     uint32_t subscription_id = 1;
     
@@ -736,7 +892,9 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
         resp.subscription_id = subscription_id;
     }
     response_pdu.choice = resp;
-    
+
+    latrec_tstamp(request_message_id, LATREC_SUB_DONE, 0,
+                  response_code == ResponseCode::POSITIVE ? 1 : 0);
     queue_outbound(std::move(response_pdu));
 }
 
@@ -775,7 +933,8 @@ void E3Interface::handle_subscription_delete(const SubscriptionDelete& del, uint
     queue_outbound(std::move(response_pdu));
 }
 
-void E3Interface::handle_control_action(const DAppControlAction& action, uint32_t request_message_id) {
+void E3Interface::handle_control_action(const DAppControlAction& action, uint32_t request_message_id,
+                                        uint64_t latrec_seq) {
     E3_LOG_INFO(LOG_TAG) << "Handling control action from dApp " << action.dapp_identifier
                          << " for RAN function " << action.ran_function_identifier
                          << " control " << action.control_identifier
@@ -784,6 +943,14 @@ void E3Interface::handle_control_action(const DAppControlAction& action, uint32_
     ServiceModel* sm = SmRegistry::instance().get_by_ran_function(action.ran_function_identifier);
 
     if (sm && sm->is_running()) {
+        // The SM's own DECODE_E3SM_BEGIN/DONE already marks the library-to-SM
+        // boundary, keyed on the SM's own inflight counter -- that pair needs
+        // no bridge. What has none is whatever the SM emits in response
+        // (typically a MessageAck): its EMIT_ENTER has nothing to read unless
+        // this inbound leg's key is published first, the same bridge
+        // handle_indication and handle_xapp_control_action publish on the
+        // dApp role.
+        latrec_ctx_set(latrec_seq);
         ErrorCode result = sm->handle_control_action(request_message_id, action);
         if (result != ErrorCode::SUCCESS) {
             E3_LOG_ERROR(LOG_TAG) << "SM failed to process control action: "
@@ -842,6 +1009,10 @@ void E3Interface::handle_dapp_disconnection(uint32_t dapp_id) {
 // ===========================================================================
 
 void E3Interface::setup_loop_dapp() {
+    // As in setup_loop_ran: this thread takes no affinity/niceness config, so
+    // its ring is opened here. It enqueues the setup response, which the dApp
+    // session ring picks up.
+    latrec_tls_open_as(LATREC_ROLE_SETUP);
     E3_LOG_INFO(LOG_TAG) << "Setup loop (dApp) started";
 
     // Encode the SetupRequest from config_'s dApp identification fields.
@@ -918,7 +1089,7 @@ void E3Interface::setup_loop_dapp() {
 }
 
 void E3Interface::inbound_loop_dapp() {
-    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness);
+    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness, LATREC_ROLE_INBOUND);
     E3_LOG_INFO(LOG_TAG) << "Inbound loop (dApp) started";
 
     ErrorCode result = connector_->setup_inbound_connection_client();
@@ -935,12 +1106,16 @@ void E3Interface::inbound_loop_dapp() {
             if (should_stop_.load()) break;
             continue;
         }
+        const uint64_t seq = latrec_seq_next();
+        latrec_tstamp(seq, LATREC_RECV, static_cast<uint64_t>(ret), 0);
         auto decoded = encoder_->decode(buffer.data(), static_cast<size_t>(ret));
         if (!decoded) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to decode PDU in dApp inbound";
+            latrec_tstamp(seq, LATREC_DROP, 0, LATREC_DROP_DECODE);
             continue;
         }
         Pdu& pdu = *decoded;
+        latrec_tstamp(seq, LATREC_DECODE_E3AP_DONE, pdu.message_id, static_cast<uint64_t>(pdu.type));
         switch (pdu.type) {
             case PduType::SUBSCRIPTION_RESPONSE: {
                 auto* r = std::get_if<SubscriptionResponse>(&pdu.choice);
@@ -949,12 +1124,12 @@ void E3Interface::inbound_loop_dapp() {
             }
             case PduType::INDICATION_MESSAGE: {
                 auto* m = std::get_if<IndicationMessage>(&pdu.choice);
-                if (m) handle_indication(*m);
+                if (m) handle_indication(*m, seq);
                 break;
             }
             case PduType::XAPP_CONTROL_ACTION: {
                 auto* a = std::get_if<XAppControlAction>(&pdu.choice);
-                if (a) handle_xapp_control_action(*a);
+                if (a) handle_xapp_control_action(*a, seq);
                 break;
             }
             case PduType::MESSAGE_ACK: {
@@ -965,6 +1140,7 @@ void E3Interface::inbound_loop_dapp() {
             default:
                 E3_LOG_WARN(LOG_TAG) << "dApp received unexpected PDU type: "
                                      << pdu_type_to_string(pdu.type);
+                latrec_tstamp(seq, LATREC_DROP, 0, LATREC_DROP_NO_HANDLER);
                 break;
         }
     }
@@ -973,7 +1149,7 @@ void E3Interface::inbound_loop_dapp() {
 }
 
 void E3Interface::outbound_loop_dapp() {
-    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness);
+    apply_thread_config(config_.io_thread_affinity, config_.io_thread_niceness, LATREC_ROLE_OUTBOUND);
     E3_LOG_INFO(LOG_TAG) << "Outbound loop (dApp) started";
 
     signal(SIGPIPE, SIG_IGN);
@@ -988,18 +1164,26 @@ void E3Interface::outbound_loop_dapp() {
     while (!should_stop_.load()) {
         auto pdu_opt = response_queue_->pop(std::chrono::milliseconds(10));
         if (!pdu_opt) continue;
+        latrec_tstamp(pdu_opt->enqueue_seq, LATREC_DEQUEUE, 0, static_cast<uint64_t>(pdu_opt->type));
 
         auto enc = encoder_->encode(*pdu_opt);
         if (!enc) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to encode dApp outbound PDU";
+            latrec_tstamp(pdu_opt->enqueue_seq, LATREC_DROP, 0, LATREC_DROP_ENCODE);
             continue;
         }
+        latrec_tstamp(pdu_opt->enqueue_seq, LATREC_ENCODE_E3AP_DONE, enc->buffer.size(), 0);
+        latrec_ctx_set(pdu_opt->enqueue_seq);   // for the connector's LC stamps
         ErrorCode rc = connector_->send(enc->buffer);
         if (rc != ErrorCode::SUCCESS) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to send dApp outbound PDU";
+            const uint64_t reason = (rc == ErrorCode::CANCELLED)
+                ? LATREC_DROP_SHUTDOWN : LATREC_DROP_SEND;
+            latrec_tstamp(pdu_opt->enqueue_seq, LATREC_DROP, 0, reason);
         } else {
             E3_LOG_DEBUG(LOG_TAG) << "Sent dApp outbound PDU: "
                                   << pdu_type_to_string(pdu_opt->type);
+            latrec_tstamp(pdu_opt->enqueue_seq, LATREC_SEND_DONE, pdu_opt->message_id, 0);
         }
     }
 
@@ -1023,6 +1207,7 @@ void E3Interface::handle_setup_response(const SetupResponse& resp) {
 }
 
 void E3Interface::handle_subscription_response(const SubscriptionResponse& resp) {
+    latrec_tstamp(resp.request_id, LATREC_SUB_BEGIN, 0, 0);
     if (dapp_state_) {
         std::lock_guard<std::mutex> lk(dapp_state_->mu);
         if (!dapp_state_->assigned_dapp_id.has_value() ||
@@ -1064,7 +1249,7 @@ void E3Interface::handle_subscription_response(const SubscriptionResponse& resp)
     }
 }
 
-void E3Interface::handle_indication(const IndicationMessage& msg) {
+void E3Interface::handle_indication(const IndicationMessage& msg, uint64_t latrec_seq) {
     // ZMQ PUB broadcasts to every connected SUB, so a dApp instance will
     // receive indications addressed to other dApps connected to the same RAN.
     // Filter: an indication is only for us if its dApp identifier matches
@@ -1073,25 +1258,38 @@ void E3Interface::handle_indication(const IndicationMessage& msg) {
         std::lock_guard<std::mutex> lk(dapp_state_->mu);
         if (!dapp_state_->assigned_dapp_id.has_value() ||
             *dapp_state_->assigned_dapp_id != msg.dapp_identifier) {
+            latrec_tstamp(latrec_seq, LATREC_DROP, 0, LATREC_DROP_FILTERED);
             return;  // not for us
         }
     }
+    latrec_tstamp(latrec_seq, LATREC_DELIVER_BEGIN, 0, 0);
+    // The application's own stages key on this: it is handed the message, not
+    // the seq, so publish it the way the outbound direction already does for
+    // EMIT_ENTER. Without this a dApp's A9..A12 can only be paired with this
+    // leg positionally, on the strength of sharing a thread.
+    latrec_ctx_set(latrec_seq);
     if (indication_handler_) {
         indication_handler_(msg);
     }
+    latrec_tstamp(latrec_seq, LATREC_DELIVER_DONE, 0, 0);
 }
 
-void E3Interface::handle_xapp_control_action(const XAppControlAction& action) {
+void E3Interface::handle_xapp_control_action(const XAppControlAction& action,
+                                             uint64_t latrec_seq) {
     if (dapp_state_) {
         std::lock_guard<std::mutex> lk(dapp_state_->mu);
         if (!dapp_state_->assigned_dapp_id.has_value() ||
             *dapp_state_->assigned_dapp_id != action.dapp_identifier) {
+            latrec_tstamp(latrec_seq, LATREC_DROP, 0, LATREC_DROP_FILTERED);
             return;
         }
     }
+    latrec_tstamp(latrec_seq, LATREC_DELIVER_BEGIN, 0, 0);
+    latrec_ctx_set(latrec_seq);
     if (xapp_control_handler_) {
         xapp_control_handler_(action);
     }
+    latrec_tstamp(latrec_seq, LATREC_DELIVER_DONE, 0, 0);
 }
 
 void E3Interface::handle_message_ack(const MessageAck& ack) {
