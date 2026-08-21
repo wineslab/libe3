@@ -69,6 +69,18 @@ else()
     target_compile_definitions(libe3 PUBLIC LIBE3_HAS_ZMQ=0)
 endif()
 
+if(LIBE3_ENABLE_LATREC)
+    # PUBLIC: any consumer building against this target (OAI, flexric) must
+    # see the same define, or its own latrec_* calls silently resolve to the
+    # no-op stubs while linking against a libe3 that actually has the ring
+    # registry compiled in, or vice versa.
+    target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_LATREC)
+    if(LATREC_DEFAULT_DIR)
+        target_compile_definitions(libe3
+            PUBLIC LATREC_DEFAULT_DIR=\"${LATREC_DEFAULT_DIR}\")
+    endif()
+endif()
+
 set_target_properties(libe3 PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR}
@@ -125,6 +137,14 @@ if(LIBE3_ENABLE_ZMQ)
     target_link_libraries(libe3_shared PRIVATE PkgConfig::ZMQ)
 else()
     target_compile_definitions(libe3_shared PUBLIC LIBE3_HAS_ZMQ=0)
+endif()
+
+if(LIBE3_ENABLE_LATREC)
+    target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_LATREC)
+    if(LATREC_DEFAULT_DIR)
+        target_compile_definitions(libe3_shared
+            PUBLIC LATREC_DEFAULT_DIR=\"${LATREC_DEFAULT_DIR}\")
+    endif()
 endif()
 
 set_target_properties(libe3_shared PROPERTIES

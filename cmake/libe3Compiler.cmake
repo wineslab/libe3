@@ -14,12 +14,15 @@ target_compile_options(libe3_warnings INTERFACE
         -Wshadow
         -Wconversion
         -Wsign-conversion
-        -Wnon-virtual-dtor
-        -Woverloaded-virtual
-        -Wold-style-cast
         -Wcast-qual
         -Wformat=2
         -Werror=return-type
+    >
+    # C++-only warnings: the target also compiles C sources.
+    $<$<AND:$<CXX_COMPILER_ID:GNU,Clang,AppleClang>,$<COMPILE_LANGUAGE:CXX>>:
+        -Wnon-virtual-dtor
+        -Woverloaded-virtual
+        -Wold-style-cast
     >
     $<$<CXX_COMPILER_ID:MSVC>:
         /W4

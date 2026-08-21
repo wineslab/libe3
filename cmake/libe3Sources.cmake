@@ -16,6 +16,13 @@ set(LIBE3_PUBLIC_HEADERS
     include/libe3/libe3.hpp
     include/libe3/c_api.h
     include/libe3/error_codes.h
+    include/libe3/latrec.h
+)
+
+# Tooling for the ring format, installed alongside latrec.h. See docs/latrec.md.
+set(LIBE3_TOOLS
+    tools/latrec_reader.py
+    tools/latrec2csv.py
 )
 
 set(LIBE3_SOURCES
@@ -24,11 +31,11 @@ set(LIBE3_SOURCES
     src/core/e3_interface.cpp
     src/core/subscription_manager.cpp
     src/core/sm_registry.cpp
-    
+
     # Encoder
     src/encoder/e3_encoder.cpp
     src/encoder/encoder_factory.cpp
-    
+
     # Connector
     src/connector/connector_factory.cpp
     src/connector/posix_connector.cpp
@@ -38,6 +45,12 @@ set(LIBE3_SOURCES
 # Conditionally add ZMQ connector
 if(LIBE3_ENABLE_ZMQ)
     list(APPEND LIBE3_SOURCES src/connector/zmq_connector.cpp)
+endif()
+
+# Backs latrec.h's TLS convenience API; excluded when the recorder is off, where
+# latrec.h falls back to inline no-op stubs. See docs/latrec.md.
+if(LIBE3_ENABLE_LATREC)
+    list(APPEND LIBE3_SOURCES src/core/latrec.c)
 endif()
 
 # Conditionally include encoder implementations
