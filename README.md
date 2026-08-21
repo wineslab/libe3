@@ -453,7 +453,7 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ## Documentation
 
-The full API reference is automatically generated with [Doxygen](https://www.doxygen.nl/) and published to GitHub Pages on every release.
+The full API reference is automatically generated with [Doxygen](https://www.doxygen.nl/) and published to GitHub Pages on every release. See [docs/latrec.md](docs/latrec.md) for the latency-recording (`latrec`) guide: the mechanism, the clock model, ring naming/sizing, the stage catalog, and the capture-to-CSV workflow. The two loops the stage catalog measures are described in [docs/path-a-e3-loop.md](docs/path-a-e3-loop.md) (E3 only) and [docs/path-b-e2-e3-loop.md](docs/path-b-e2-e3-loop.md) (the full E2-E3 loop).
 
 🔗 **[https://wineslab.github.io/libe3/](https://wineslab.github.io/libe3/)**
 
