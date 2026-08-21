@@ -21,6 +21,7 @@
 %module(threads="1") libe3py
 
 %{
+#include "libe3/latrec.h"
 #include "libe3/types.hpp"
 #include "libe3/e3_agent.hpp"
 #include "libe3/version.hpp"
@@ -146,3 +147,14 @@ namespace std {
 namespace std {
     %template(E3EventVec) vector<libe3::py::E3Event>;
 }
+
+/* Ring placement for a Python process. Only present when the library was built
+ * with -DLIBE3_ENABLE_LATREC=ON; a no-op stub otherwise, so a caller does not
+ * have to branch on the build. It chooses *where* the rings go, never whether
+ * they are written: an enabled build records either way. Call it before the
+ * first DAppSession, since a thread's ring is opened once. */
+%inline %{
+static void latrec_set_output_dir_py(const char* dir) {
+    latrec_set_output_dir(dir);
+}
+%}
