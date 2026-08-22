@@ -83,6 +83,7 @@ DAppSession::DAppSession(libe3::E3Config config, std::size_t queue_capacity) {
         ev.dapp_id = a.dapp_identifier;
         ev.ran_function_id = a.ran_function_identifier;
         ev.payload = a.xapp_control_data;
+        ev.request_id = a.message_id;
         impl->enqueue(std::move(ev));
     });
 
@@ -217,13 +218,26 @@ int DAppSession::unsubscribe(uint32_t ran_function_id) {
 
 int DAppSession::send_control(uint32_t ran_function_id, uint32_t control_id,
                               std::vector<uint8_t> action_data) {
-    return static_cast<int>(
-        impl_->agent->send_control(ran_function_id, control_id, std::move(action_data)));
+    uint32_t message_id = 0;
+    ErrorCode rc = impl_->agent->send_control(
+        ran_function_id, control_id, std::move(action_data), &message_id);
+    // On success return the assigned message id (positive, 1..1000) so Python
+    // can correlate a later ack/response by id; on failure return the
+    // ErrorCode (all error codes are negative, SUCCESS is 0).
+    if (rc == ErrorCode::SUCCESS) {
+        return static_cast<int>(message_id);
+    }
+    return static_cast<int>(rc);
 }
 
 int DAppSession::send_report(uint32_t ran_function_id, std::vector<uint8_t> report_data) {
-    return static_cast<int>(
-        impl_->agent->send_report(ran_function_id, std::move(report_data)));
+    uint32_t message_id = 0;
+    ErrorCode rc = impl_->agent->send_report(ran_function_id, std::move(report_data), &message_id);
+    // Same success/failure encoding as send_control() above.
+    if (rc == ErrorCode::SUCCESS) {
+        return static_cast<int>(message_id);
+    }
+    return static_cast<int>(rc);
 }
 
 int DAppSession::send_message_ack(uint32_t request_id, int response_code) {

@@ -105,6 +105,7 @@ public:
         ++control_count;
         last_control_id = action.control_identifier;
         last_action_size = action.action_data.size();
+        last_request_message_id = request_message_id;
         Pdu ack = make_message_ack_pdu(request_message_id, ResponseCode::POSITIVE);
         return emit_outbound(std::move(ack));
     }
@@ -112,6 +113,7 @@ public:
     std::atomic<int> control_count{0};
     std::atomic<uint32_t> last_control_id{0};
     std::atomic<size_t> last_action_size{0};
+    std::atomic<uint32_t> last_request_message_id{0};
 
 private:
     std::atomic<bool> running_{false};
@@ -157,6 +159,7 @@ TEST(role_pair_full_handshake_indication_control_report_release) {
     std::condition_variable cv;
     int indications = 0;
     bool sub_resp_ok = false;
+    std::vector<uint32_t> xapp_control_message_ids;
 
     E3Agent dapp(make_dapp_config(ep));
     dapp.set_indication_handler([&](const IndicationMessage& msg) {
@@ -170,6 +173,13 @@ TEST(role_pair_full_handshake_indication_control_report_release) {
     dapp.set_subscription_response_handler([&](const SubscriptionResponse& r) {
         std::lock_guard<std::mutex> lk(mu);
         sub_resp_ok = (r.response_code == ResponseCode::POSITIVE);
+        cv.notify_all();
+    });
+    // #68: the E3-PDU's id, decoded into Pdu::message_id, must be forwarded
+    // into XAppControlAction::message_id by the inbound loop.
+    dapp.set_xapp_control_handler([&](const XAppControlAction& a) {
+        std::lock_guard<std::mutex> lk(mu);
+        xapp_control_message_ids.push_back(a.message_id);
         cv.notify_all();
     });
 
@@ -209,7 +219,11 @@ TEST(role_pair_full_handshake_indication_control_report_release) {
     // Send a control action and verify the SM saw it
     std::vector<uint8_t> ctrl;
     ASSERT_TRUE(libe3_examples::encode_simple_control(42, ctrl));
-    ASSERT_TRUE(dapp.send_control(1, 1, ctrl) == ErrorCode::SUCCESS);
+    // #67: send_control's out_message_id must be the same id the RAN sees as
+    // request_message_id in handle_control_action.
+    uint32_t sent_message_id = 0;
+    ASSERT_TRUE(dapp.send_control(1, 1, ctrl, &sent_message_id) == ErrorCode::SUCCESS);
+    ASSERT_TRUE(sent_message_id != 0);
 
     // Allow the SM up to 2s to receive and ack the control
     for (int i = 0; i < 40 && sm_ptr->control_count.load() == 0; ++i) {
@@ -217,6 +231,21 @@ TEST(role_pair_full_handshake_indication_control_report_release) {
     }
     ASSERT_GE(sm_ptr->control_count.load(), 1);
     ASSERT_EQ(sm_ptr->last_control_id.load(), 1u);
+    ASSERT_EQ(sm_ptr->last_request_message_id.load(), sent_message_id);
+
+    // #68: two RAN -> dApp xApp control relays must each carry a distinct,
+    // nonzero message id through to the dApp's registered handler.
+    auto dapp_id = dapp.dapp_id();
+    ASSERT_TRUE(dapp_id.has_value());
+    ASSERT_TRUE(ran.send_xapp_control(*dapp_id, TestSimpleSM::RAN_FUNCTION_ID, ctrl) == ErrorCode::SUCCESS);
+    ASSERT_TRUE(ran.send_xapp_control(*dapp_id, TestSimpleSM::RAN_FUNCTION_ID, ctrl) == ErrorCode::SUCCESS);
+    {
+        std::unique_lock<std::mutex> lk(mu);
+        ASSERT_TRUE(cv.wait_for(lk, 3s, [&]() { return xapp_control_message_ids.size() >= 2; }));
+    }
+    ASSERT_TRUE(xapp_control_message_ids[0] != 0);
+    ASSERT_TRUE(xapp_control_message_ids[1] != 0);
+    ASSERT_TRUE(xapp_control_message_ids[0] != xapp_control_message_ids[1]);
 
     // Release + stop
     ASSERT_TRUE(dapp.release() == ErrorCode::SUCCESS);

@@ -77,7 +77,7 @@ struct E3Event {
     uint32_t dapp_id{0};            ///< dApp identifier the message targets
     uint32_t ran_function_id{0};    ///< RAN function (indication / xApp control)
     uint32_t subscription_id{0};    ///< subscription id (subscription response)
-    uint32_t request_id{0};         ///< request id (subscription response / ack)
+    uint32_t request_id{0};         ///< request/message id (subscription response / ack / xApp control)
     int response_code{-1};          ///< 0=positive, 1=negative, -1=n/a
     std::vector<uint8_t> payload;   ///< opaque E3SM bytes (indication / xApp control)
     uint64_t trace_seq{0};          ///< set when queued; keys the [latrec] LQ-stage records
@@ -156,10 +156,20 @@ public:
     /** @brief Delete a previously created subscription. @return ErrorCode as int. */
     int unsubscribe(uint32_t ran_function_id);
 
-    /** @brief Send a dApp control action to the RAN. @return ErrorCode as int. */
+    /**
+     * @brief Send a dApp control action to the RAN.
+     * @return the assigned message id (positive, 1..1000) on success, so the
+     *         caller can correlate a later ack/response by id; a negative
+     *         ErrorCode on failure.
+     */
     int send_control(uint32_t ran_function_id, uint32_t control_id,
                      std::vector<uint8_t> action_data);
-    /** @brief Send a dApp report to the RAN. @return ErrorCode as int. */
+    /**
+     * @brief Send a dApp report to the RAN.
+     * @return the assigned message id (positive, 1..1000) on success, so the
+     *         caller can correlate a later ack/response by id; a negative
+     *         ErrorCode on failure.
+     */
     int send_report(uint32_t ran_function_id, std::vector<uint8_t> report_data);
     /** @brief Acknowledge a request. @param response_code 0=positive,1=negative. @return ErrorCode as int. */
     int send_message_ack(uint32_t request_id, int response_code);

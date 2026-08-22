@@ -189,11 +189,16 @@ public:
                                          std::optional<uint32_t> periodicity = std::nullopt,
                                          uint32_t* out_request_id = nullptr);
     ErrorCode queue_subscription_delete(uint32_t ran_function_id);
+    // out_message_id, when non-null, receives the assigned E3-MessageID on
+    // success, so the caller can correlate a later ack/response back to this
+    // send.
     ErrorCode queue_dapp_control_action(uint32_t ran_function_id,
                                         uint32_t control_id,
-                                        std::vector<uint8_t> action_data);
+                                        std::vector<uint8_t> action_data,
+                                        uint32_t* out_message_id = nullptr);
     ErrorCode queue_dapp_report(uint32_t ran_function_id,
-                                std::vector<uint8_t> report_data);
+                                std::vector<uint8_t> report_data,
+                                uint32_t* out_message_id = nullptr);
     ErrorCode queue_release_message();
 
     // Block until the setup handshake completes (or times out / fails).

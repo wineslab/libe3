@@ -300,6 +300,9 @@ struct XAppControlAction {
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0};
     std::vector<uint8_t> xapp_control_data;
+    // Set by the inbound loop from the wrapping E3-PDU's id field; not
+    // serialized, so it carries no ASN.1/JSON/Protobuf grammar of its own.
+    uint32_t message_id{0};
 };
 
 /**

@@ -1129,7 +1129,10 @@ void E3Interface::inbound_loop_dapp() {
             }
             case PduType::XAPP_CONTROL_ACTION: {
                 auto* a = std::get_if<XAppControlAction>(&pdu.choice);
-                if (a) handle_xapp_control_action(*a, seq);
+                if (a) {
+                    a->message_id = pdu.message_id;
+                    handle_xapp_control_action(*a, seq);
+                }
                 break;
             }
             case PduType::MESSAGE_ACK: {
@@ -1389,7 +1392,8 @@ ErrorCode E3Interface::queue_subscription_delete(uint32_t ran_function_id) {
 ErrorCode E3Interface::queue_dapp_control_action(
     uint32_t ran_function_id,
     uint32_t control_id,
-    std::vector<uint8_t> action_data
+    std::vector<uint8_t> action_data,
+    uint32_t* out_message_id
 ) {
     if (!dapp_state_) return ErrorCode::STATE_ERROR;
     auto id = dapp_id();
@@ -1402,18 +1406,24 @@ ErrorCode E3Interface::queue_dapp_control_action(
     a.control_identifier = control_id;
     a.action_data = std::move(action_data);
     pdu.choice = std::move(a);
-    pdu.message_id = generate_message_id();
+    const uint32_t mid = generate_message_id();
+    pdu.message_id = mid;
     // Mirrors E3Agent::send_indication: this is an emit path, so it stamps
     // EMIT_ENTER itself rather than leaving it to queue_outbound, which only
     // allocates enqueue_seq for a Pdu that arrives with none.
     pdu.enqueue_seq = latrec_seq_next();
     latrec_tstamp(pdu.enqueue_seq, LATREC_EMIT_ENTER, latrec_ctx(), ran_function_id);
-    return queue_outbound(std::move(pdu));
+    ErrorCode rc = queue_outbound(std::move(pdu));
+    if (rc == ErrorCode::SUCCESS && out_message_id) {
+        *out_message_id = mid;
+    }
+    return rc;
 }
 
 ErrorCode E3Interface::queue_dapp_report(
     uint32_t ran_function_id,
-    std::vector<uint8_t> report_data
+    std::vector<uint8_t> report_data,
+    uint32_t* out_message_id
 ) {
     if (!dapp_state_) return ErrorCode::STATE_ERROR;
     auto id = dapp_id();
@@ -1425,8 +1435,13 @@ ErrorCode E3Interface::queue_dapp_report(
     r.ran_function_identifier = ran_function_id;
     r.report_data = std::move(report_data);
     pdu.choice = std::move(r);
-    pdu.message_id = generate_message_id();
-    return queue_outbound(std::move(pdu));
+    const uint32_t mid = generate_message_id();
+    pdu.message_id = mid;
+    ErrorCode rc = queue_outbound(std::move(pdu));
+    if (rc == ErrorCode::SUCCESS && out_message_id) {
+        *out_message_id = mid;
+    }
+    return rc;
 }
 
 ErrorCode E3Interface::queue_release_message() {
