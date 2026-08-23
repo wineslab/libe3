@@ -158,3 +158,92 @@ static void latrec_set_output_dir_py(const char* dir) {
     latrec_set_output_dir(dir);
 }
 %}
+
+/* Stage catalog: bring in the enums (the stage identifiers themselves, plus
+ * the D5/W6.S8/L9 reason codes carried in aux2) so a Python caller stamps
+ * against the same constants tools/latrec_reader.py mirrors, rather than a
+ * third hand-copied table -- exactly the drift this repo already guards
+ * against for the C header and the Python reader. Skip everything else in
+ * the file: the ring/header structs, the low-level explicit-ring API, the
+ * always-on latrec_stamp(_at) and the raw __thread pointer are either
+ * meaningless across the Python/C++ boundary or superseded by the curated
+ * wrappers below. */
+%ignore latrec_rec;
+%ignore latrec_hdr;
+%ignore latrec_t;
+%ignore latrec_now_ns;
+%ignore latrec_real_ns;
+%ignore latrec_refresh_cpu;
+%ignore latrec_measure_clock_ns;
+%ignore latrec_open;
+%ignore latrec_open_in;
+%ignore latrec_stamp;
+%ignore latrec_stamp_at;
+%ignore latrec_heartbeat;
+%ignore latrec_close;
+%ignore latrec_tls;
+%ignore latrec_set_output_dir;
+%ignore latrec_tls_open_as;
+%ignore latrec_tls_open;
+%ignore latrec_seq_next;
+%ignore latrec_tstamp_at;
+%ignore latrec_tstamp;
+%ignore latrec_tnow;
+%ignore latrec_ctx_set;
+%ignore latrec_ctx;
+/* Portability/format internals, not stage identifiers -- carry the LATREC_
+ * prefix but describe the build or the ring file, not something a stamp
+ * carries. */
+%ignore LATREC_HAVE_GETCPU;
+%ignore LATREC_CPUID_ON_STAMP;
+%ignore LATREC_MAGIC;
+%ignore LATREC_VERSION;
+%ignore LATREC_HDR_LEN;
+%ignore LATREC_CLOCK_SLOW_NS;
+%ignore LATREC_DEFAULT_DIR;
+%include "libe3/latrec.h"
+
+/* The TLS convenience layer, for a Python caller stamping its own
+ * application-level boxes through the same rings libe3 writes to -- rather
+ * than a second, hand-rolled ring writer in Python. Every one of these is a
+ * no-op (not a branch: latrec.h compiles them to true no-op inline stubs)
+ * when the library was built without -DLIBE3_ENABLE_LATREC, so a Python
+ * caller never has to know which build it is linked against.
+ *
+ * latrec_tls_open_as_py returns nothing: the ring pointer it opens is an
+ * implementation detail SWIG has no reason to expose, and every other call
+ * here reads the calling thread's ring implicitly, the same as the C API. */
+%inline %{
+static void latrec_tls_open_as_py(const char* role) {
+    latrec_tls_open_as(role);
+}
+
+static uint64_t latrec_seq_next_py() {
+    return latrec_seq_next();
+}
+
+static void latrec_tstamp_py(uint64_t seq, uint8_t stage, uint64_t aux, uint64_t aux2) {
+    latrec_tstamp(seq, stage, aux, aux2);
+}
+
+/* Pairs with latrec_tnow_py() for the same reason libe3's own queue handoffs
+ * do: a stage that records "handed off to something else" has to read the
+ * clock before the handoff, not after, or a consumer that runs first can
+ * stamp its own completion before the producer reaches this call. */
+static void latrec_tstamp_at_py(uint64_t seq, uint8_t stage, uint64_t aux, uint64_t aux2,
+                                uint64_t t_ns) {
+    latrec_tstamp_at(seq, stage, aux, aux2, t_ns);
+}
+
+static uint64_t latrec_tnow_py() {
+    return latrec_tnow();
+}
+
+static void latrec_ctx_set_py(uint64_t seq) {
+    latrec_ctx_set(seq);
+}
+
+static uint64_t latrec_ctx_py() {
+    return latrec_ctx();
+}
+%}

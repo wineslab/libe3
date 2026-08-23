@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """latrec coverage for the Python binding's session ring.
 
-The LQ stages live in swig/e3_dapp_session.cpp and are only reachable through
-libe3py: the C++ tests cannot touch them. That ring sits between libe3's
-callbacks and the Python consumer and was, in a live capture, the slowest seam
-in libe3 (~51 us p50), so it is worth holding to the same standard as the rest.
+The SESSION_QUEUED/SESSION_POLLED stages live in swig/e3_dapp_session.cpp and
+are only reachable through libe3py: the C++ tests cannot touch them. That ring
+sits between libe3's callbacks and the Python consumer and was, in a live
+capture, the slowest seam in libe3 (~51 us p50), so it is worth holding to the
+same standard as the rest.
 
 Checks, against a real RAN peer driven by the simple agent example:
-  - LQ0_QUEUED / LQ1_POLLED are stamped, once each per event, in that order
+  - SESSION_QUEUED / SESSION_POLLED are stamped, once each per event, in order
   - the batch position recorded in aux is consistent with the batch size
   - poll_events opens a ring for the calling thread (it is not one libe3 starts)
 
@@ -15,21 +16,25 @@ A real RAN peer is required for anything to be queued, so the test spawns the
 shipped example agent (build/example_simple_agent) on a private IPC directory
 and subscribes to it.
 
+Reads rings through tools/latrec_reader.py rather than re-decoding the format
+here, and reads the stage/reason identifiers off the libe3py module rather
+than a second hand-copied table -- this file itself once drifted exactly that
+way (it hard-coded the pre-rework stage ids, silently never matching a real
+record again once the catalog was renumbered).
+
 Run: PYTHONPATH=build/swig python3 tests/test_swig_latrec.py
 """
 import os
 import shutil
-import struct
 import subprocess
 import sys
 import tempfile
 import time
 
-HDR_LEN = 4096
-MAGIC = 0x31524C41
-LQ0_QUEUED, LQ1_POLLED = 0x3C, 0x3D
-L9_DROP = 0x39
-DROP_SESSION_QUEUE = 7
+sys.dont_write_bytecode = True
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "..", "tools"))
+import latrec_reader as lr  # noqa: E402
 
 _fail = []
 
@@ -46,15 +51,12 @@ def read_rings(d):
     for name in os.listdir(d):
         if not name.endswith(".latrec"):
             continue
-        with open(os.path.join(d, name), "rb") as f:
-            hdr = f.read(HDR_LEN)
-            if len(hdr) < HDR_LEN or struct.unpack_from("<I", hdr, 0)[0] != MAGIC:
-                continue
-            body = f.read()
-        for i in range(len(body) // 32):
-            sc, t, aux, aux2 = struct.unpack_from("<QQQQ", body, i * 32)
-            if t:
-                out.append((sc & 0xFFFFFFFFFFFF, (sc >> 56) & 0xFF, t, aux, aux2))
+        try:
+            ring = lr.read_ring(os.path.join(d, name))
+        except lr.BadRing:
+            continue  # not a ring this run wrote, or caught mid-write
+        for r in ring.records:
+            out.append((r.seq, r.stage, r.t_ns, r.aux, r.aux2))
     return out
 
 
@@ -69,6 +71,10 @@ def main():
     # Ring placement, not a capture gate: an enabled build records either way.
     # Must precede the first session, since a thread's ring is opened once.
     libe3py.latrec_set_output_dir_py(trace)
+    LQ0_QUEUED = libe3py.LATREC_SESSION_QUEUED
+    LQ1_POLLED = libe3py.LATREC_SESSION_POLLED
+    L9_DROP = libe3py.LATREC_DROP
+    DROP_SESSION_QUEUE = libe3py.LATREC_DROP_SESSION_QUEUE
 
     ipc = tempfile.mkdtemp(prefix="latrec_swig_ipc_")
     agent = None

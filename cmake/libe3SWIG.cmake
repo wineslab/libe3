@@ -34,7 +34,15 @@ set_property(SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/swig/libe3.i" PROPERTY
 set_property(SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/swig/libe3.i" PROPERTY
     SWIG_FLAGS
         "-I${CMAKE_CURRENT_SOURCE_DIR}/include"
-        "-I${CMAKE_CURRENT_SOURCE_DIR}/swig")
+        "-I${CMAKE_CURRENT_SOURCE_DIR}/swig"
+        # latrec.h refuses to compile without CLOCK_MONOTONIC declared (see
+        # its own #error), which SWIG's preprocessor never sees for real: it
+        # does not walk glibc's actual <time.h>/<bits/time.h> chain the way
+        # the real compiler does afterwards on the generated wrapper. The
+        # numeric value is never evaluated by SWIG, only its definedness, so
+        # a placeholder satisfies the check without SWIG needing to resolve
+        # the real one.
+        "-DCLOCK_MONOTONIC=1")
 
 swig_add_library(libe3py
     TYPE SHARED
@@ -83,6 +91,22 @@ if(LIBE3_BUILD_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_swig_smo
         COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_swig_smoke.py"
     )
     set_tests_properties(test_swig_smoke PROPERTIES
+        ENVIRONMENT "PYTHONPATH=${LIBE3_SWIG_OUTPUT_DIR}"
+        LABELS "swig"
+    )
+endif()
+
+# The latrec TLS stamping API, bound alongside the rest of libe3py: a Python
+# caller records its own stages through the same rings libe3 writes to. No RAN
+# peer needed (unlike tests/test_swig_latrec.py's session-ring coverage), so
+# it runs in the same lightweight tier as test_swig_smoke rather than needing
+# the integration harness's opt-in.
+if(LIBE3_BUILD_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_swig_latrec_stamp.py")
+    add_test(
+        NAME test_swig_latrec_stamp
+        COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_swig_latrec_stamp.py"
+    )
+    set_tests_properties(test_swig_latrec_stamp PROPERTIES
         ENVIRONMENT "PYTHONPATH=${LIBE3_SWIG_OUTPUT_DIR}"
         LABELS "swig"
     )

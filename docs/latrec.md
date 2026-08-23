@@ -49,6 +49,31 @@ libe3 built *without* it will not link: the two branches in
 [latrec.h](@ref latrec.h) declare the same functions with real bodies and
 with stub bodies respectively.
 
+### Python (libe3py)
+
+The TLS convenience layer is bound through SWIG (`swig/libe3.i`) as
+`latrec_tls_open_as_py`, `latrec_seq_next_py`, `latrec_tstamp_py`,
+`latrec_tstamp_at_py`, `latrec_tnow_py`, `latrec_ctx_set_py`, `latrec_ctx_py`,
+alongside the full stage catalog and the aux2 reason enums as module-level
+constants (`libe3py.LATREC_RECORD_BEGIN`, and so on) — parsed directly out of
+`latrec.h` rather than hand-copied, so a downstream package never carries its
+own stage table to drift out of sync with the one here. This is what lets a
+Python consumer (a Python dApp, an xApp framework) record its own
+application-level stages into the same rings libe3 itself writes to, instead
+of hand-rolling a second ring writer. Every one of these calls is the same
+no-op it is in C++ when the library was built without `LIBE3_ENABLE_LATREC`
+— nothing for a Python caller to branch on either.
+
+Measured cost through the binding: **~0.6 µs/stamp** (`latrec_tstamp_py`
+alone, seq pre-fetched; three runs of 300k calls, 580-620 ns each). A
+hand-rolled pure-Python ring writer measured separately in this effort came
+to ~3.0 µs/stamp — this binding is roughly 5x that, which is the case for
+routing a Python consumer through it rather than reimplementing the writer in
+Python. Both numbers are well above the native C stamp cost (tens of ns,
+see [CI overhead gate](#ci-overhead-gate)) — the CPython call boundary
+dominates either way, so treat this as "cheap enough to use," not as evidence
+the binding approaches native cost.
+
 ### Where the rings go
 
 Three levels, most specific first:
