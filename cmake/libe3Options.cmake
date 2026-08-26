@@ -9,6 +9,15 @@ option(LIBE3_BUILD_INTEGRATION_TESTS
 option(LIBE3_ENABLE_SWIG
     "Build the SWIG Python bindings" OFF)
 option(LIBE3_ENABLE_ZMQ "Enable ZeroMQ transport" ON)
+# SCTP is an optional POSIX transport. OFF by default because it is the only
+# dependency that needs a kernel module plus a distro -dev package (libsctp-dev /
+# lksctp-tools-devel) for a single system header, while deployments typically run
+# the E3 link over IPC or TCP and never reach for it. The E3TransportLayer::SCTP
+# enumerator exists either way -- it is part of the ABI and of the wire-facing
+# value that the C API and the Python bindings mirror -- but requesting it from a
+# build with this OFF fails at socket creation with a clear message rather than
+# silently doing something else.
+option(LIBE3_ENABLE_SCTP "Enable the SCTP POSIX transport (needs libsctp-dev)" OFF)
 option(LIBE3_ENABLE_ASN1 "Enable ASN.1 encoding support" ON)
 option(LIBE3_ENABLE_JSON "Enable JSON encoding support" OFF)
 option(LIBE3_ENABLE_PROTOBUF "Enable Protocol Buffers encoding support" OFF)

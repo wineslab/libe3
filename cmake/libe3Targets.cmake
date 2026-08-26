@@ -69,6 +69,12 @@ else()
     target_compile_definitions(libe3 PUBLIC LIBE3_HAS_ZMQ=0)
 endif()
 
+if(LIBE3_ENABLE_SCTP)
+    # PUBLIC so it reaches libe3.pc: a consumer can then tell whether requesting
+    # E3TransportLayer::SCTP will work, instead of finding out at socket().
+    target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_SCTP)
+endif()
+
 if(LIBE3_ENABLE_LATREC)
     # PUBLIC: any consumer building against this target (OAI, flexric) must
     # see the same define, or its own latrec_* calls silently resolve to the
@@ -137,6 +143,10 @@ if(LIBE3_ENABLE_ZMQ)
     target_link_libraries(libe3_shared PRIVATE PkgConfig::ZMQ)
 else()
     target_compile_definitions(libe3_shared PUBLIC LIBE3_HAS_ZMQ=0)
+endif()
+
+if(LIBE3_ENABLE_SCTP)
+    target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_SCTP)
 endif()
 
 if(LIBE3_ENABLE_LATREC)

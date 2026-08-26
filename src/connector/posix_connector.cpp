@@ -16,7 +16,9 @@
 #include <sys/stat.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#ifdef LIBE3_ENABLE_SCTP
 #include <netinet/sctp.h>
+#endif
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <grp.h>
@@ -62,13 +64,43 @@ int wait_for_socket(int sockfd, int timeout_ms) {
  * every accepted and connected TCP/SCTP data socket (Linux does not reliably
  * inherit it from the listener). No-op for UNIX-domain (IPC) sockets.
  */
+/**
+ * @brief Create the AF_INET stream socket for an SCTP endpoint.
+ *
+ * SCTP is optional at build time (LIBE3_ENABLE_SCTP, off by default): it is the
+ * only transport needing a kernel module and a distro -dev package for one
+ * header, and the deployed E3 links are IPC or TCP. The enumerator stays in the
+ * ABI either way, so a caller can still ask for SCTP against a build without it
+ * -- that has to fail loudly here rather than quietly fall through to TCP, which
+ * would look like it worked while putting traffic on the wrong protocol.
+ *
+ * Returns -1 with errno set, matching socket(), so every existing caller's error
+ * path already handles it.
+ */
+int sctp_stream_socket() {
+#ifdef LIBE3_ENABLE_SCTP
+    return socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+#else
+    E3_LOG_ERROR(LOG_TAG) << "SCTP transport requested but libe3 was built without it. "
+                             "Rebuild with -DLIBE3_ENABLE_SCTP=ON (needs libsctp-dev), "
+                             "or use the TCP or IPC transport.";
+    errno = EPROTONOSUPPORT;
+    return -1;
+#endif
+}
+
 void set_nodelay(int sockfd, E3TransportLayer transport) {
     int one = 1;
     int ret = 0;
     if (transport == E3TransportLayer::TCP) {
         ret = setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
     } else if (transport == E3TransportLayer::SCTP) {
+#ifdef LIBE3_ENABLE_SCTP
         ret = setsockopt(sockfd, IPPROTO_SCTP, SCTP_NODELAY, &one, sizeof(one));
+#else
+        // Unreachable: sctp_stream_socket() already failed for this transport.
+        (void)one;
+#endif
     }
     if (ret != 0) {
         E3_LOG_WARN(LOG_TAG) << "Failed to set NODELAY: " << strerror(errno);
@@ -223,7 +255,7 @@ ErrorCode PosixE3Connector::setup_initial_connection() {
     }
     
     if (transport_layer_ == E3TransportLayer::SCTP) {
-        sock = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+        sock = sctp_stream_socket();
         int reuse = 1;
         setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
         struct sockaddr_in addr{};
@@ -370,7 +402,7 @@ ErrorCode PosixE3Connector::setup_inbound_connection() {
     }
     
     if (transport_layer_ == E3TransportLayer::SCTP) {
-        sock = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+        sock = sctp_stream_socket();
         int reuse = 1;
         setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
         struct sockaddr_in addr{};
@@ -554,7 +586,7 @@ ErrorCode PosixE3Connector::setup_outbound_connection() {
     }
     
     if (transport_layer_ == E3TransportLayer::SCTP) {
-        sock = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+        sock = sctp_stream_socket();
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
         addr.sin_port = htons(outbound_port_);
@@ -697,7 +729,7 @@ int posix_connect_for(E3TransportLayer transport,
     }
     int sock;
     if (transport == E3TransportLayer::SCTP) {
-        sock = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+        sock = sctp_stream_socket();
     } else {
         sock = socket(AF_INET, SOCK_STREAM, 0);
     }

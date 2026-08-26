@@ -79,7 +79,7 @@
 - `nlohmann-json3-dev` — Header-only JSON library; CMake expects the `nlohmann_json` target
 - `protobuf-compiler` + `libprotobuf-dev` — `protoc` and the Protocol Buffers runtime (only when `LIBE3_ENABLE_PROTOBUF=ON`)
 - `libzmq3-dev` for ZMQ transport
-- `libsctp-dev` — SCTP development headers/libraries for POSIX/SCTP transport
+- `libsctp-dev` — SCTP headers for the POSIX/SCTP transport (only when `LIBE3_ENABLE_SCTP=ON`; **not installed by `./build_libe3 -I`**)
 
 ### Install Dependencies
 
@@ -91,7 +91,7 @@ Install all required packages using the project's installer (recommended) or man
 
 # Manual (Debian/Ubuntu)
 sudo apt update
-sudo apt install -y build-essential cmake pkg-config libzmq3-dev ninja-build git asn1c nlohmann-json3-dev protobuf-compiler libprotobuf-dev libsctp-dev dpkg-dev debhelper fakeroot
+sudo apt install -y build-essential cmake pkg-config libzmq3-dev ninja-build git asn1c nlohmann-json3-dev protobuf-compiler libprotobuf-dev dpkg-dev debhelper fakeroot
 ```
 
 The packaging tools (`dpkg-dev`, `debhelper`, `fakeroot`) are only needed by `scripts/create_deb.sh`.
@@ -145,6 +145,20 @@ make -j$(nproc)
 | `LIBE3_ENABLE_ASAN` | OFF | Enable AddressSanitizer |
 | `LIBE3_ENABLE_TSAN` | OFF | Enable ThreadSanitizer |
 | `LIBE3_ENABLE_SWIG` | OFF | Build the SWIG-generated Python bindings (`_libe3py.so` + `libe3py.py`) |
+| `LIBE3_ENABLE_SCTP` | OFF | Enable the SCTP POSIX transport (needs `libsctp-dev`) |
+
+> **Note on SCTP:** the transport is **off by default**. It is the only dependency that needs a
+> kernel module plus a distro `-dev` package for a single system header, and the deployed E3 links
+> are IPC or TCP, so `./build_libe3 -I` no longer installs it. `E3TransportLayer::SCTP` still exists
+> in the ABI, and in the C API and Python bindings that mirror its value, whichever way the flag is
+> set — but asking a build without it for the SCTP transport fails at socket creation with a message
+> telling you to rebuild, rather than silently falling back to another protocol. Configuring with
+> `-DLIBE3_ENABLE_SCTP=ON` and no headers installed fails at configure time, naming the package.
+>
+> ```bash
+> sudo apt install -y libsctp-dev          # lksctp-tools-devel on Fedora/RHEL, lksctp-tools on Arch
+> ./build_libe3 --enable-sctp
+> ```
 
 > **Note on encoding selection:** `LIBE3_ENABLE_ASN1`, `LIBE3_ENABLE_JSON`, and
 > `LIBE3_ENABLE_PROTOBUF` are independent compile-time inclusion flags — any combination can be

@@ -49,6 +49,23 @@ message(STATUS "tl::expected: Fetched from GitHub")
 # Optional Dependencies
 # ============================================================================
 
+# Optional: SCTP. Header-only from libe3's point of view -- the connector uses
+# IPPROTO_SCTP and SCTP_NODELAY from <netinet/sctp.h> and calls no libsctp
+# function, so there is nothing to link. Checked here so -DLIBE3_ENABLE_SCTP=ON
+# without the -dev package fails at configure time with the package name, rather
+# than partway through the build with a bare "netinet/sctp.h: No such file".
+if(LIBE3_ENABLE_SCTP)
+    include(CheckIncludeFile)
+    check_include_file("netinet/sctp.h" LIBE3_HAVE_SCTP_H)
+    if(NOT LIBE3_HAVE_SCTP_H)
+        message(FATAL_ERROR
+            "LIBE3_ENABLE_SCTP=ON but <netinet/sctp.h> was not found. Install the "
+            "SCTP headers (Debian/Ubuntu: libsctp-dev, Fedora/RHEL: "
+            "lksctp-tools-devel, Arch: lksctp-tools), or configure with "
+            "-DLIBE3_ENABLE_SCTP=OFF (the default).")
+    endif()
+endif()
+
 # Optional: Google Benchmark for the integration micro-benchmarks
 # (dev-only; never linked into the shipped library)
 if(LIBE3_BUILD_INTEGRATION_TESTS)
