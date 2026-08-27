@@ -54,6 +54,41 @@ std::string make_tmpdir() {
     return std::string(d);
 }
 
+// A literal base port collides across concurrent CTest runs on a shared,
+// multi-session machine (this repo's normal state). LIBE3_TEST_PORT_OFFSET
+// lets a CI runner assign each parallel job a disjoint range explicitly;
+// absent that, spread by pid so co-resident local runs don't collide either.
+// *3 keeps one process's whole triple (base, base+1, base+2) from
+// overlapping another process's triple.
+uint16_t unique_base_port(uint16_t default_base) {
+    if (const char* env = std::getenv("LIBE3_TEST_PORT_OFFSET")) {
+        return static_cast<uint16_t>(default_base + std::atoi(env));
+    }
+    return static_cast<uint16_t>(default_base + (static_cast<unsigned>(getpid()) % 1000) * 3);
+}
+
+// Connects to 127.0.0.1:port, retrying with a short bounded backoff. Needed
+// because a completed wait_for_setup() only confirms the SETUP handshake
+// socket -- a raw connect() to a different socket (e.g. the RAN's publisher
+// port) can still race its listener actually being bound.
+int connect_with_retry(uint16_t port, std::chrono::milliseconds timeout) {
+    struct sockaddr_in addr{};
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
+    while (true) {
+        int fd = socket(AF_INET, SOCK_STREAM, 0);
+        if (fd < 0) return -1;
+        if (connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) == 0) {
+            return fd;
+        }
+        close(fd);
+        if (std::chrono::steady_clock::now() >= deadline) return -1;
+        std::this_thread::sleep_for(20ms);
+    }
+}
+
 struct Endpoints {
     std::string setup, subscriber, publisher;
 };
@@ -339,9 +374,10 @@ TEST(multi_peer_two_dapps_distinct_rfs_no_crosstalk_posix_ipc) {
 
 TEST(multi_peer_two_dapps_distinct_rfs_no_crosstalk_posix_tcp) {
     // Unique port triple: 23990-23992 and 24990-24992 are used by other POSIX
-    // tests; 25990-25992 is free.
+    // tests; 25990-25992 is free. unique_base_port() also keeps it distinct
+    // across concurrent runs on a shared machine.
     run_multi_peer_two_dapps(E3LinkLayer::POSIX, E3TransportLayer::TCP,
-                             /*base_port=*/25990);
+                             /*base_port=*/unique_base_port(25990));
 }
 
 // Regression test for the multi-peer broadcast blocker: a dApp that connects
@@ -350,7 +386,9 @@ TEST(multi_peer_two_dapps_distinct_rfs_no_crosstalk_posix_tcp) {
 // RAN's outbound thread blocked forever in send() once the stalled peer's TCP
 // buffer filled, starving every other peer and wedging stop().
 TEST(multi_peer_slow_peer_does_not_stall_others_posix_tcp) {
-    const uint16_t base = 26990;  // distinct from the port triples above
+    // distinct from the port triples above; unique_base_port() also keeps it
+    // distinct across concurrent runs on a shared machine.
+    const uint16_t base = unique_base_port(26990);
 
     E3Config ran_cfg;
     ran_cfg.role = E3Role::RAN;
@@ -381,16 +419,12 @@ TEST(multi_peer_slow_peer_does_not_stall_others_posix_tcp) {
 
     // A raw "stalled" peer: connect to the RAN's indication (publisher) port,
     // shrink its receive buffer, and never read. The RAN broadcasts to it too.
-    int stalled = socket(AF_INET, SOCK_STREAM, 0);
+    // Retried: wait_for_setup() above only confirms the SETUP socket, not
+    // this one, so the publisher's listener may not be bound yet.
+    int stalled = connect_with_retry(static_cast<uint16_t>(base + 2), 2s);
     ASSERT_TRUE(stalled >= 0);
     int rcvbuf = 2048;
     setsockopt(stalled, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
-    struct sockaddr_in addr{};
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(static_cast<uint16_t>(base + 2));
-    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    ASSERT_TRUE(connect(stalled, reinterpret_cast<struct sockaddr*>(&addr),
-                        sizeof(addr)) == 0);
 
     // Subscribe so the SM starts broadcasting; the RAN accepts both the good
     // dApp and the stalled raw peer on its next send().
