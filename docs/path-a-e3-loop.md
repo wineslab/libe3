@@ -97,6 +97,7 @@ performed; which component performed it is read off the ring that recorded it.
 | — | **E3 wire** | — | `SEND_DONE` (RAN) to `RECV` (dApp) |
 | A7 | Recv | **libe3** (dApp role) | `RECV` |
 | A8 | **Decode E3AP** | **libe3** | `RECV` to `DECODE_E3AP_DONE` |
+| — | libe3 dispatch | **libe3** (dApp role) | `DECODE_E3AP_DONE` to `DELIVER_BEGIN` |
 | A9 | **Decode E3SM** | dApp application | `DELIVER_BEGIN` to `DECODE_E3SM_DONE` |
 | A10 | Process | dApp application | `DECODE_E3SM_DONE` to `PROCESS_DONE` |
 
@@ -124,6 +125,7 @@ connectors, and any comparison between the two must say so.
 | — | **E3 wire** | — | `SEND_DONE` (dApp) to `RECV` (RAN) |
 | A16 | Recv | **libe3** (RAN role) | `RECV` |
 | A17 | **Decode E3AP** | **libe3** | `RECV` to `DECODE_E3AP_DONE` |
+| — | libe3 dispatch | **libe3** (RAN role) | `DECODE_E3AP_DONE` to `DECODE_E3SM_BEGIN` |
 | A18 | **Decode E3SM** | RAN Service Model | `DECODE_E3SM_BEGIN` to `DECODE_E3SM_DONE` |
 | A19a | Apply control | the RAN stack | `DECODE_E3SM_DONE` to `APPLY_CONTROL_DONE`, then `LIVE_ON_AIR` |
 | A19b | Queue report | **libe3** report worker | `REPORT_QUEUED` to `REPORT_DONE` |
