@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.1.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.1.1</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -125,6 +125,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a8ff1b9dde582b8f8ca87d7cd025507fe" id="r_a8ff1b9dde582b8f8ca87d7cd025507fe"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1py_1_1E3Event.html#a8ff1b9dde582b8f8ca87d7cd025507fe">payload</a></td></tr>
 <tr class="memdesc:a8ff1b9dde582b8f8ca87d7cd025507fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">opaque E3SM bytes (indication / xApp control)  <br /></td></tr>
 <tr class="separator:a8ff1b9dde582b8f8ca87d7cd025507fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c72effea95dc0ded26037bfa6b734e2" id="r_a8c72effea95dc0ded26037bfa6b734e2"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1py_1_1E3Event.html#a8c72effea95dc0ded26037bfa6b734e2">trace_seq</a> {0}</td></tr>
+<tr class="memdesc:a8c72effea95dc0ded26037bfa6b734e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">set when queued; keys the [latrec] LQ-stage records  <br /></td></tr>
+<tr class="separator:a8c72effea95dc0ded26037bfa6b734e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>One inbound E3AP event, POD-flat for a clean SWIG crossing. </p>
@@ -255,6 +258,24 @@ Public Attributes</h2></td></tr>
 <p>subscription id (subscription response) </p>
 
 <p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00079">79</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a8c72effea95dc0ded26037bfa6b734e2" name="a8c72effea95dc0ded26037bfa6b734e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c72effea95dc0ded26037bfa6b734e2">&#9670;&#160;</a></span>trace_seq</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t libe3::py::E3Event::trace_seq {0}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>set when queued; keys the [latrec] LQ-stage records </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00083">83</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>

@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['wait_5ffor_5fsetup_0',['wait_for_setup',['../classlibe3_1_1E3Agent.html#a24c6437c7fa13f08506207c22713e99f',1,'libe3::E3Agent::wait_for_setup()'],['../classlibe3_1_1E3Interface.html#a94329838748dfc298bc7032abc3687f0',1,'libe3::E3Interface::wait_for_setup()'],['../classlibe3_1_1py_1_1DAppSession.html#abcf67a5c3a939b525a723db9a756370b',1,'libe3::py::DAppSession::wait_for_setup()']]],
-  ['warn_1',['WARN',['../namespacelibe3.html#a509338e1414d84a610f21816d04940a0a32bd8a1db2275458673903bdb84cb277',1,'libe3']]],
-  ['why_20batched_20drain_20gil_20release_20not_20callbacks_2',['Why batched drain + GIL release (not callbacks)',['../md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md3',1,'']]],
-  ['why_20this_20class_20exists_3',['Why this class exists',['../e3__dapp__session_8hpp.html#why',1,'']]]
+  ['variants_0',['Deployment variants',['../path_a_e3_loop.html#autotoc_md28',1,'']]],
+  ['vendor_1',['vendor',['../structlibe3_1_1SetupRequest.html#a5f9b64febc7f338303eaa2182b155359',1,'libe3::SetupRequest::vendor'],['../structlibe3_1_1E3Config.html#af7cca75f0e517f5a8d3143d7d407b156',1,'libe3::E3Config::vendor']]],
+  ['version_2',['version',['../structe3__c__service__model__desc__t.html#a07b97ac1d5e8d9d71142ab1748603f1f',1,'e3_c_service_model_desc_t::version'],['../structlatrec__hdr.html#ac7c9597fde7b6ffc1417d313a3946a44',1,'latrec_hdr::version'],['../classlibe3_1_1ServiceModel.html#a2d17ab4667c5ccfff19d5079a47f7677',1,'libe3::ServiceModel::version()'],['../structe3__service__model__handle__s.html#ab4e885a71302bfdce43f7c4a3dcbb431',1,'e3_service_model_handle_s::version()'],['../namespacelibe3.html#a85c33a76111e517c006df1b1fc0411bc',1,'libe3::version() noexcept'],['../namespacelibe3.html#acf6808999eb4ab8698c77b30b933b284',1,'libe3::version(int &amp;major, int &amp;minor, int &amp;patch) noexcept']]],
+  ['version_5fs_3',['version_s',['../structe3__service__model__handle__s.html#ac03969c8ed0d1c1dea54fe4ef4556d7d',1,'e3_service_model_handle_s']]]
 ];

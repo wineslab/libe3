@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.1.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.1.1</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -181,7 +181,7 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p>dApp-role E3AP session with a batched, lock-free inbound ring. </p>
 <p>Thread model: two producers push into the ring — the setup-response handler (<a class="el" href="namespacelibe3.html">libe3</a> setup thread) and the other handlers (<a class="el" href="namespacelibe3.html">libe3</a> inbound thread), which run concurrently at startup; the Python drainer thread is the single consumer via <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#a3401f5d4e563d6518ec7d97b92f864a7">poll_events</a>. The ring is MPMC, so this is safe (do not "optimize" it to SPSC). All outbound verbs are thread-safe (delegated to <a class="el" href="classlibe3_1_1E3Agent.html">libe3::E3Agent</a>). </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00097">97</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00098">98</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aed26a08d5bdd61f7f21a15cc6fc52654" name="aed26a08d5bdd61f7f21a15cc6fc52654"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aed26a08d5bdd61f7f21a15cc6fc52654">&#9670;&#160;</a></span>DAppSession() <span class="overload">[1/2]</span></h2>
@@ -226,7 +226,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00054">54</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00065">65</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -245,7 +245,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00111">111</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00122">122</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -293,7 +293,7 @@ Public Member Functions</h2></td></tr>
 
 <p>dApp id assigned at setup, or -1 if not yet assigned. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00140">140</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00151">151</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -314,7 +314,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Total inbound events dropped due to ring overflow (backpressure). </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00246">246</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00265">265</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -373,7 +373,7 @@ Public Member Functions</h2></td></tr>
 <p>Drain up to <code>max_batch</code> inbound events, waiting up to <code>timeout_ms</code> for the first. </p>
 <p>Blocks on the ring for the first event (latency ≈ ring wakeup), then sweeps up any further already-queued events without blocking. <code>timeout_ms</code> &lt;= 0 polls non-blocking (does not busy-wait). Returns an empty vector on a quiet tick or after <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#a6ec5957dc209b80e7157c17e61bfd144">stop</a>. The SWIG wrapper releases the GIL for the whole call so <a class="el" href="namespacelibe3.html">libe3</a>'s threads run freely while Python waits. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00223">223</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00234">234</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -394,7 +394,7 @@ Public Member Functions</h2></td></tr>
 
 <p>RAN identifier from the <a class="el" href="structlibe3_1_1SetupResponse.html" title="E3AP Setup Response structure.">SetupResponse</a>, or "" if none. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00145">145</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00156">156</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -416,7 +416,7 @@ Public Member Functions</h2></td></tr>
 <p>Send a <a class="el" href="structlibe3_1_1ReleaseMessage.html" title="E3AP Release Message structure.">ReleaseMessage</a> (session keeps running until <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#a6ec5957dc209b80e7157c17e61bfd144">stop</a>). </p>
 <dl class="section return"><dt>Returns</dt><dd>ErrorCode as int. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00131">131</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00142">142</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -455,7 +455,7 @@ Public Member Functions</h2></td></tr>
 <p>Send a dApp control action to the RAN. </p>
 <dl class="section return"><dt>Returns</dt><dd>ErrorCode as int. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00207">207</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00218">218</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -494,7 +494,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>ErrorCode as int. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00218">218</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00229">229</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -527,7 +527,7 @@ Public Member Functions</h2></td></tr>
 <p>Send a dApp report to the RAN. </p>
 <dl class="section return"><dt>Returns</dt><dd>ErrorCode as int. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00213">213</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00224">224</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -549,7 +549,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Control ids of advertised entry <code>i</code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00173">173</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00184">184</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -570,7 +570,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Number of RAN functions advertised in the <a class="el" href="structlibe3_1_1SetupResponse.html" title="E3AP Setup Response structure.">SetupResponse</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00156">156</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00167">167</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -592,7 +592,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Opaque ranFunctionData bytes of advertised entry <code>i</code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00179">179</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00190">190</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -614,7 +614,7 @@ Public Member Functions</h2></td></tr>
 
 <p>RAN function id of advertised entry <code>i</code> (0 if out of range). </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00161">161</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00172">172</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -636,7 +636,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Telemetry ids of advertised entry <code>i</code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00167">167</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00178">178</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -657,7 +657,7 @@ Public Member Functions</h2></td></tr>
 
 <p><a class="el" href="structlibe3_1_1SetupResponse.html" title="E3AP Setup Response structure.">SetupResponse</a> code: 0=positive, 1=negative, -1=not received. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00150">150</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00161">161</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -679,7 +679,7 @@ Public Member Functions</h2></td></tr>
 <p>Start the agent, re-arming the inbound ring so a <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#a6ec5957dc209b80e7157c17e61bfd144" title="Stop the agent and shut down the ring so a blocked poll_events returns an empty batch (i....">stop()</a>-&gt;<a class="el" href="classlibe3_1_1py_1_1DAppSession.html#ab5954d7cd100c8f3f26c89c59ec06305" title="Start the agent, re-arming the inbound ring so a stop()-&gt;start() cycle works again.">start()</a> cycle works again. </p>
 <dl class="section return"><dt>Returns</dt><dd>ErrorCode as int. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00118">118</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00129">129</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -700,7 +700,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Stop the agent and shut down the ring so a blocked <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#a3401f5d4e563d6518ec7d97b92f864a7">poll_events</a> returns an empty batch (i.e. empty-after-stop means "done"). Restartable via <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#ab5954d7cd100c8f3f26c89c59ec06305">start</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00135">135</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00146">146</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -758,7 +758,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the assigned request id (positive, 1..1000) on success, so the caller can correlate the <a class="el" href="structlibe3_1_1SubscriptionResponse.html" title="E3AP Subscription Response structure.">SubscriptionResponse</a> by its request_id; a negative ErrorCode on failure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00185">185</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00196">196</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -781,7 +781,7 @@ Public Member Functions</h2></td></tr>
 <p>Delete a previously created subscription. </p>
 <dl class="section return"><dt>Returns</dt><dd>ErrorCode as int. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00203">203</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00214">214</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -804,7 +804,7 @@ Public Member Functions</h2></td></tr>
 <p>Block until the setup handshake completes. </p>
 <dl class="section return"><dt>Returns</dt><dd>ErrorCode as int. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00126">126</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00137">137</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>

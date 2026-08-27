@@ -7,6 +7,7 @@ var dir_135843e1f81d3caf7eeb1d08d96592ba =
     [ "e3_encoder.hpp", "e3__encoder_8hpp.html", "e3__encoder_8hpp" ],
     [ "e3_interface.hpp", "e3__interface_8hpp.html", "e3__interface_8hpp" ],
     [ "error_codes.h", "error__codes_8h.html", "error__codes_8h" ],
+    [ "latrec.h", "latrec_8h.html", "latrec_8h" ],
     [ "libe3.hpp", "libe3_2libe3_8hpp.html", "libe3_2libe3_8hpp" ],
     [ "lockfree_queue.hpp", "lockfree__queue_8hpp.html", "lockfree__queue_8hpp" ],
     [ "logger.hpp", "logger_8hpp.html", "logger_8hpp" ],

@@ -34,6 +34,52 @@ var NAVTREE =
       [ "Build & install", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md6", null ],
       [ "Service-model definitions", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md7", null ]
     ] ],
+    [ "Latency recording (latrec)", "latrec_guide.html", [
+      [ "Latency recording (latrec)", "latrec_guide.html#autotoc_md8", [
+        [ "Why a ring, and why one gate", "latrec_guide.html#autotoc_md9", [
+          [ "Matching the flag downstream", "latrec_guide.html#autotoc_md10", null ],
+          [ "Python (libe3py)", "latrec_guide.html#autotoc_md11", null ],
+          [ "Where the rings go", "latrec_guide.html#autotoc_md12", null ]
+        ] ],
+        [ "Clock model", "latrec_guide.html#autotoc_md13", null ],
+        [ "Ring naming and sizing", "latrec_guide.html#autotoc_md14", null ],
+        [ "Stage catalog", "latrec_guide.html#autotoc_md15", [
+          [ "Attribution, and where the ring name stops being enough", "latrec_guide.html#autotoc_md16", [
+            [ "Possible follow-up: tier-aware attribution", "latrec_guide.html#autotoc_md17", null ]
+          ] ],
+          [ "Granularity, and adding an identifier", "latrec_guide.html#autotoc_md18", null ]
+        ] ],
+        [ "Capture → CSV workflow", "latrec_guide.html#autotoc_md19", null ],
+        [ "CI overhead gate", "latrec_guide.html#autotoc_md20", null ]
+      ] ]
+    ] ],
+    [ "The E3-only end-to-end loop (Path A)", "path_a_e3_loop.html", [
+      [ "Path A — the E3-only end-to-end loop", "path_a_e3_loop.html#autotoc_md21", [
+        [ "Box order", "path_a_e3_loop.html#autotoc_md22", null ],
+        [ "Forward leg: RAN to dApp (<tt>leg=ind_up</tt>)", "path_a_e3_loop.html#autotoc_md23", [
+          [ "Caveat on A6 and the wire", "path_a_e3_loop.html#autotoc_md24", null ]
+        ] ],
+        [ "Return leg: dApp to RAN (<tt>leg=ctrl_down</tt> for control, <tt>report_up</tt> for reports)", "path_a_e3_loop.html#autotoc_md25", [
+          [ "Two distinct terminations", "path_a_e3_loop.html#autotoc_md26", null ]
+        ] ],
+        [ "Aggregates", "path_a_e3_loop.html#autotoc_md27", null ],
+        [ "Deployment variants", "path_a_e3_loop.html#autotoc_md28", [
+          [ "Comparing against a hand-rolled integration", "path_a_e3_loop.html#autotoc_md29", null ]
+        ] ],
+        [ "Not yet instrumented", "path_a_e3_loop.html#autotoc_md30", null ]
+      ] ]
+    ] ],
+    [ "The full E2-E3 loop (Path B)", "path_b_e2_e3_loop.html", [
+      [ "Path B — the full E2-E3 loop", "path_b_e2_e3_loop.html#autotoc_md31", [
+        [ "Box order", "path_b_e2_e3_loop.html#autotoc_md32", null ],
+        [ "The two RIC profiles", "path_b_e2_e3_loop.html#autotoc_md33", null ],
+        [ "Report-up leg (<tt>leg=report_up</tt>)", "path_b_e2_e3_loop.html#autotoc_md34", null ],
+        [ "Policy-down leg (<tt>leg=policy_down</tt>)", "path_b_e2_e3_loop.html#autotoc_md35", null ],
+        [ "Aggregates", "path_b_e2_e3_loop.html#autotoc_md36", null ],
+        [ "Joining caveat", "path_b_e2_e3_loop.html#autotoc_md37", null ],
+        [ "Not yet instrumented", "path_b_e2_e3_loop.html#autotoc_md38", null ]
+      ] ]
+    ] ],
     [ "Topics", "topics.html", "topics" ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
@@ -60,7 +106,7 @@ var NAVTREE =
     [ "Files", "files.html", [
       [ "File List", "files.html", "files_dup" ],
       [ "File Members", "globals.html", [
-        [ "All", "globals.html", null ],
+        [ "All", "globals.html", "globals_dup" ],
         [ "Functions", "globals_func.html", null ],
         [ "Variables", "globals_vars.html", null ],
         [ "Typedefs", "globals_type.html", null ],
@@ -78,9 +124,9 @@ var NAVTREEINDEX =
 "classlibe3_1_1E3Connector.html",
 "classlibe3_1_1Logger.html#a8f40bcd6249ad424b8eb15e60049f65e",
 "classlibe3_1_1py_1_1DAppSession.html#a15e58ad99e35b52d722124953d2dd8f3",
-"namespacelibe3.html#a2ae6d18d3575e3d816ad3dd4a3c8ac86",
-"structlibe3_1_1E3Config.html#aafe3a17bf8b25e2a1d4c3bf217fa59cb",
-"types_8hpp.html#a675f37e2936d707807212fcd3cfa8185aa787313bc7d58dd3cbf99e30cca65668"
+"latrec_8h.html#a588269eb211c77b050ab91ea4f8bc66c",
+"structe3__service__model__handle__s.html#a008f7405128869d262be36a866fb4049",
+"structlibe3_1_1SetupResponse.html#a90c0f5bae5dbc4e6013203797739bd85"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

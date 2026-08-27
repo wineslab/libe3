@@ -45,5 +45,8 @@ var annotated_dup =
     [ "e3_agent_handle_s", "structe3__agent__handle__s.html", "structe3__agent__handle__s" ],
     [ "e3_c_service_model_desc_t", "structe3__c__service__model__desc__t.html", "structe3__c__service__model__desc__t" ],
     [ "e3_config_t", "structe3__config__t.html", "structe3__config__t" ],
-    [ "e3_service_model_handle_s", "structe3__service__model__handle__s.html", "structe3__service__model__handle__s" ]
+    [ "e3_service_model_handle_s", "structe3__service__model__handle__s.html", "structe3__service__model__handle__s" ],
+    [ "latrec_hdr", "structlatrec__hdr.html", "structlatrec__hdr" ],
+    [ "latrec_rec", "structlatrec__rec.html", "structlatrec__rec" ],
+    [ "latrec_t", "structlatrec__t.html", "structlatrec__t" ]
 ];
