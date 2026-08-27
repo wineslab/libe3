@@ -310,6 +310,7 @@ std::vector<RoundTrip> reconstruct(const std::string& dir) {
               });
 
     std::vector<RoundTrip> out;
+    size_t skipped_misaligned = 0;
     size_t ind_inbound_idx = 0, ctrl_inbound_idx = 0;
     // std::map iterates in ascending key order, i.e. ascending business seq,
     // i.e. emission order -- the same order PingPong pacing guarantees the
@@ -338,6 +339,29 @@ std::vector<RoundTrip> reconstruct(const std::string& dir) {
         if (ind_inbound_idx >= ind_inbound.size()) break;
         if (ctrl_inbound_idx >= ctrl_inbound.size()) break;
 
+        const Libe3Times& io = ind_out_it->second;
+        const Libe3Times& co = ctrl_out_it->second;
+        const InboundTriple& ii = ind_inbound[ind_inbound_idx++];
+        const InboundPair& ci = ctrl_inbound[ctrl_inbound_idx++];
+
+        // ind_outbound/ctrl_outbound are joined to this round trip by exact
+        // key (EMIT_ENTER.aux == business seq); ii/ci are joined by
+        // chronological position instead, since the inbound side has no such
+        // key (see file header). Position-based pairing silently drifts by
+        // one for every round trip whose own inbound triple/pair didn't fully
+        // land (most commonly right at shutdown, when the SM can emit one
+        // more indication than the harness waits for a control reply to).
+        // Once drifted, ii/ci belong to some *other* round trip, not this
+        // one -- checking that the two joins agree on basic time ordering
+        // catches that and drops just the affected round trip, the same
+        // tolerance this file already extends to an incomplete tail.
+        const bool ind_ok = io.send_done <= ii.recv && ii.deliver_begin <= *t5;
+        const bool ctrl_ok = co.send_done <= ci.recv && ci.decode_e3ap_done <= *t8;
+        if (!ind_ok || !ctrl_ok) {
+            ++skipped_misaligned;
+            continue;
+        }
+
         RoundTrip rt;
         rt.seq = seq;
         rt.t1 = *t1;
@@ -349,30 +373,30 @@ std::vector<RoundTrip> reconstruct(const std::string& dir) {
         rt.t8 = *t8;
         rt.t9 = *t9;
 
-        const Libe3Times& io = ind_out_it->second;
         rt.t_ind_emit_enter = io.emit_enter;
         rt.t_ind_enqueue = io.enqueue;
         rt.t_ind_dequeue = io.dequeue;
         rt.t_ind_encode_e3ap_done = io.encode_e3ap_done;
         rt.t_ind_send_done = io.send_done;
-
-        const InboundTriple& ii = ind_inbound[ind_inbound_idx++];
         rt.t4 = ii.deliver_begin;
         rt.t_ind_recv = ii.recv;
         rt.t_ind_decode_e3ap_done = ii.decode_e3ap_done;
 
-        const Libe3Times& co = ctrl_out_it->second;
         rt.t_ctrl_emit_enter = co.emit_enter;
         rt.t_ctrl_enqueue = co.enqueue;
         rt.t_ctrl_dequeue = co.dequeue;
         rt.t_ctrl_encode_e3ap_done = co.encode_e3ap_done;
         rt.t_ctrl_send_done = co.send_done;
-
-        const InboundPair& ci = ctrl_inbound[ctrl_inbound_idx++];
         rt.t_ctrl_recv = ci.recv;
         rt.t_ctrl_decode_e3ap_done = ci.decode_e3ap_done;
 
         out.push_back(rt);
+    }
+    if (skipped_misaligned > 0) {
+        std::fprintf(stderr,
+                      "WARNING: dropped %zu round trip(s) with a misaligned "
+                      "inbound position (see reconstruct()'s comment)\n",
+                      skipped_misaligned);
     }
     return out;
 }
