@@ -102,9 +102,11 @@ jobs:
           {
             echo "### Full-loop latency"
             echo ""
-            cat bench_results.md
+            sed 's/(us)/(\&mu;s)/' bench_results.md
             echo ""
             echo "_ubuntu-latest, Release build, ZMQ + IPC, ASN.1 APER._"
+            echo ""
+            echo "_These numbers are measured inside a GitHub Actions container and should be treated as an upper bound on E3AP's and the library's own latency, not a representative deployment measurement._"
           } > ci-report-full-loop.md
 
       - name: Upload report fragment
