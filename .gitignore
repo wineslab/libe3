@@ -78,6 +78,10 @@ conan/
 docs/_build/
 doxygen/
 
+# Python
+__pycache__/
+*.pyc
+
 # Temporary files
 *.tmp
 *.temp
