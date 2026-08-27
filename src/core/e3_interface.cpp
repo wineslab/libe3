@@ -1403,6 +1403,11 @@ ErrorCode E3Interface::queue_dapp_control_action(
     a.action_data = std::move(action_data);
     pdu.choice = std::move(a);
     pdu.message_id = generate_message_id();
+    // Mirrors E3Agent::send_indication: this is an emit path, so it stamps
+    // EMIT_ENTER itself rather than leaving it to queue_outbound, which only
+    // allocates enqueue_seq for a Pdu that arrives with none.
+    pdu.enqueue_seq = latrec_seq_next();
+    latrec_tstamp(pdu.enqueue_seq, LATREC_EMIT_ENTER, latrec_ctx(), ran_function_id);
     return queue_outbound(std::move(pdu));
 }
 
