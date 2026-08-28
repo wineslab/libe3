@@ -40,6 +40,50 @@ if(LIBE3_PUBLIC_DEFS)
     endforeach()
 endif()
 
+# Make libe3.pc relocatable. CMAKE_INSTALL_PREFIX is a configure-time value, so
+# baking it in makes the file describe where the build *expected* to be installed
+# rather than where it ended up: `cmake --install --prefix <other>`, and any
+# packaging step that stages into a different root, moves every file but cannot
+# rewrite the .pc. The result points a consumer's -I/-L and `smdir` at a prefix
+# that may contain no libe3 at all -- and pkg-config reports success while doing
+# it, so the failure surfaces later as a missing header. pkg-config expands
+# ${pcfiledir} to the directory holding the .pc, so deriving the prefix from that
+# describes wherever the file actually is. The CMake package config is already
+# relocatable through @PACKAGE_INIT@; this makes the pkg-config path agree.
+#
+# GNUInstallDirs allows any component directory to be absolute, in which case it
+# is not under the prefix and there is nothing relative to derive -- those keep
+# their absolute value, and an absolute libdir also leaves the prefix itself with
+# no relative form, since that is where the .pc lands.
+if(IS_ABSOLUTE "${CMAKE_INSTALL_LIBDIR}")
+    set(LIBE3_PC_PREFIX "${CMAKE_INSTALL_PREFIX}")
+else()
+    file(RELATIVE_PATH _libe3_pc_to_prefix
+        "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+        "${CMAKE_INSTALL_PREFIX}")
+    string(REGEX REPLACE "/+$" "" _libe3_pc_to_prefix "${_libe3_pc_to_prefix}")
+    if(_libe3_pc_to_prefix STREQUAL "")
+        set(LIBE3_PC_PREFIX "\${pcfiledir}")
+    else()
+        set(LIBE3_PC_PREFIX "\${pcfiledir}/${_libe3_pc_to_prefix}")
+    endif()
+endif()
+
+# CMAKE_INSTALL_DATADIR is empty in the cache until GNUInstallDirs derives it
+# from DATAROOTDIR, so read the derived value rather than the cache entry.
+foreach(_pair "LIBDIR:${CMAKE_INSTALL_LIBDIR}"
+              "INCLUDEDIR:${CMAKE_INSTALL_INCLUDEDIR}"
+              "DATAROOTDIR:${CMAKE_INSTALL_DATAROOTDIR}")
+    string(REPLACE ":" ";" _pair "${_pair}")
+    list(GET _pair 0 _name)
+    list(GET _pair 1 _dir)
+    if(IS_ABSOLUTE "${_dir}")
+        set(LIBE3_PC_${_name} "${_dir}")
+    else()
+        set(LIBE3_PC_${_name} "\${prefix}/${_dir}")
+    endif()
+endforeach()
+
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/libe3.pc.in"
     "${CMAKE_CURRENT_BINARY_DIR}/libe3.pc"
