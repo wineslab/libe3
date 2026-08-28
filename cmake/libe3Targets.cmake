@@ -82,8 +82,17 @@ if(LIBE3_ENABLE_LATREC)
     # registry compiled in, or vice versa.
     target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_LATREC)
     if(LATREC_DEFAULT_DIR)
+        # PRIVATE, unlike the flag above. latrec_open_in() applies this fallback
+        # from src/core/latrec.c -- libe3's own translation unit -- so every
+        # caller of latrec_tls_open_as() inherits it without needing the macro
+        # itself. Exporting it would put a quoted string macro in libe3.pc,
+        # where pkg-config's tokenizer strips the quotes and the bare path then
+        # fails to lex ("expected expression before '/'"). Escaping as \\" keeps
+        # CMake consumers working but breaks `cc $(pkg-config --cflags libe3)`
+        # with an unterminated string, so there is no form that is safe for
+        # both. It is also a build-tree path, meaningless once installed.
         target_compile_definitions(libe3
-            PUBLIC LATREC_DEFAULT_DIR=\"${LATREC_DEFAULT_DIR}\")
+            PRIVATE LATREC_DEFAULT_DIR=\"${LATREC_DEFAULT_DIR}\")
     endif()
 endif()
 
@@ -152,8 +161,9 @@ endif()
 if(LIBE3_ENABLE_LATREC)
     target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_LATREC)
     if(LATREC_DEFAULT_DIR)
+        # PRIVATE for the same reason as the static target above.
         target_compile_definitions(libe3_shared
-            PUBLIC LATREC_DEFAULT_DIR=\"${LATREC_DEFAULT_DIR}\")
+            PRIVATE LATREC_DEFAULT_DIR=\"${LATREC_DEFAULT_DIR}\")
     endif()
 endif()
 

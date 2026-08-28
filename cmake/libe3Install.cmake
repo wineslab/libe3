@@ -24,6 +24,18 @@ if(LIBE3_PUBLIC_DEFS)
                 "libe3: PUBLIC compile definition '${_def}' is a generator "
                 "expression and cannot be exported through libe3.pc")
         endif()
+        if(_def MATCHES "\"")
+            # pkg-config's Cflags tokenizer strips unescaped quotes, so a string
+            # macro exported this way reaches the compiler as a bare token and
+            # fails to lex. Escaping as \\" survives pkg-config and works for
+            # CMake consumers, but then breaks `cc $(pkg-config --cflags libe3)`
+            # with an unterminated string -- no single form is safe for both
+            # consumption styles. Keep string-valued macros PRIVATE and give the
+            # header an #ifndef fallback instead (see LATREC_DEFAULT_DIR).
+            message(FATAL_ERROR
+                "libe3: PUBLIC compile definition '${_def}' has a quoted value "
+                "and cannot be exported through libe3.pc -- make it PRIVATE")
+        endif()
         string(APPEND LIBE3_PC_CFLAGS " -D${_def}")
     endforeach()
 endif()
