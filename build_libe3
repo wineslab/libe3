@@ -2,6 +2,7 @@
 #
 # libe3 - Vendor-Neutral E3AP C++ Library
 #
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 # SPDX-License-Identifier: Apache-2.0
 #
 # Build script for libe3 library
@@ -78,7 +79,7 @@ echo_error() {
 print_help() {
     cat << EOF
 libe3 - A Vendor-Neutral E3AP C++ Library, v${LIBE3_VERSION}
-Copyright (c) 2026 Andrea Lacava <thecave003@gmail.com> and contributors.
+Copyright (c) 2026 Northeastern University.
 ==================
 
 This script builds the libe3 E3AP library and its documentation.
