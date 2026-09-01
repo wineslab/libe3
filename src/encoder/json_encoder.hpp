@@ -2,6 +2,7 @@
  * @file json_encoder.hpp
  * @brief JSON Encoder for E3AP PDUs
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

@@ -21,6 +21,7 @@
  * shuts response_queue_/report_queue_ down before joining a registered SM's
  * own producer thread, so a straggling push from that window is expected.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

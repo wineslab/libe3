@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 """Round-trips a ring written by the C writer through tools/latrec_reader.py,
 and checks the reader's stage table against the catalog in latrec.h.
 

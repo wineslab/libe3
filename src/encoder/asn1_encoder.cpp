@@ -4,6 +4,7 @@
  *
  * Ported from the original C implementation's e3ap_handler.c ASN.1 functions.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

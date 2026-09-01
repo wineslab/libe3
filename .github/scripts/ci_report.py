@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 # SPDX-License-Identifier: Apache-2.0
 """Post one consolidated CI report comment on a pull request (see issue #64).
 

@@ -25,6 +25,7 @@
  * The test uses whichever encoding the build provides (JSON preferred) so
  * it runs on JSON-only, ASN.1-only, and dual-encoder builds.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

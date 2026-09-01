@@ -10,6 +10,7 @@ compiles and exports the surface that a Python dApp will consume. The full
 indication-handler bridge (Python callable -> C++ std::function) is a
 separate work item in the Python-consumer adoption follow-up.
 
+SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 SPDX-License-Identifier: Apache-2.0
 """
 

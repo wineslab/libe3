@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 name: Bug report
 description: Report a defect in libe3. Use this when something does not behave as documented.
 title: "[Bug]: "

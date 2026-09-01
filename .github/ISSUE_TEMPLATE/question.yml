@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 name: Question / Support
 description: Ask a usage question or request guidance. For confirmed bugs use the bug report template instead.
 title: "[Question]: "

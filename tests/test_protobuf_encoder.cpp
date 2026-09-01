@@ -2,6 +2,7 @@
  * @file test_protobuf_encoder.cpp
  * @brief Unit tests for the Protocol Buffers encoder
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

@@ -8,6 +8,7 @@
  * the sctp kernel module; the SCTP code path is exercised on hosts that
  * support it.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

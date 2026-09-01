@@ -2,6 +2,9 @@
  * built with JSON or protobuf support, JSON text payloads or the generated
  * Simple SM protobuf types). These are compiled only into the examples binary
  * and are not part of the main libe3 public API.
+ *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #include "e3sm_simple_wrapper.hpp"

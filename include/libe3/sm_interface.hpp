@@ -6,6 +6,7 @@
  * with the E3 agent. E3SM logic is treated as opaque to E3AP - this
  * interface provides extension points without embedding SM-specific logic.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

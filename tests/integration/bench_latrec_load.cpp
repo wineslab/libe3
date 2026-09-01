@@ -29,6 +29,7 @@
  * Usage: bench_latrec_load [ring-directory]. Without an argument an ON build
  * creates a temporary directory and removes it at exit.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

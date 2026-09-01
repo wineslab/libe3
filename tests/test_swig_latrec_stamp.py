@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 """Smoke test for the latrec TLS stamping API bound through libe3py.
 
 Exercises latrec_tls_open_as_py, latrec_seq_next_py, latrec_tstamp_py,

@@ -2,6 +2,7 @@
  * @file test_types.cpp
  * @brief Unit tests for libe3 types and PDU handling
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

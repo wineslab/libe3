@@ -8,6 +8,7 @@
  * side of a call changes the order without changing the record count, so the
  * per-message ordering is what is asserted rather than the totals.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

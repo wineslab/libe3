@@ -1,6 +1,8 @@
 -- Simple Service Model ASN.1 Definitions
 -- This service model extends E3 messages for the example application
 --
+-- SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+-- SPDX-License-Identifier: Apache-2.0
 
 SIMPLE-SM DEFINITIONS AUTOMATIC TAGS ::= BEGIN
 

@@ -6,6 +6,7 @@
  * X-macro list. Both the C API (@ref e3_error_code_e) and the C++ API
  * (@ref libe3::ErrorCode) are generated from this list.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 // Shared X-macro list of libe3 error codes and C helpers

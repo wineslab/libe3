@@ -2,6 +2,7 @@
  * @file test_json_encoder.cpp
  * @brief Unit tests for JSON encoder
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

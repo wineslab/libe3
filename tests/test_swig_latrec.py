@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 """latrec coverage for the Python binding's session ring.
 
 The SESSION_QUEUED/SESSION_POLLED stages live in swig/e3_dapp_session.cpp and

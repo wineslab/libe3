@@ -2,6 +2,7 @@
  * @file test_mpmc_queue.cpp
  * @brief Unit tests for the lock-free MpmcQueue ring buffer
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

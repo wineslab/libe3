@@ -5,6 +5,7 @@
 // action_data, xapp_control_data, report_data) when the Simple SM example runs
 // with protobuf encoding.
 //
+// SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 // SPDX-License-Identifier: Apache-2.0
 
 syntax = "proto3";

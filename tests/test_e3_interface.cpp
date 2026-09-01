@@ -10,6 +10,7 @@
  * E3Interface code paths (set_dapp_status_changed_handler wiring,
  * notify_dapp_status_changed dispatch, and subscription_manager integration).
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

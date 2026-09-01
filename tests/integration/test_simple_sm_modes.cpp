@@ -15,6 +15,7 @@
  *   - an undecodable control payload is acked NEGATIVE (decode-failure branch),
  *   - the trace hook fires the RAN-side phases in order for a round trip.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 name: Full-loop Latency Benchmark
 
 # Runs the full-loop control-loop latency benchmark (tests/integration/

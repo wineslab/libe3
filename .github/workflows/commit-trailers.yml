@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 name: Commit policy
 
 # Enforce the contribution policy documented in CONTRIBUTING.md:

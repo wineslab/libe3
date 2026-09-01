@@ -2,6 +2,7 @@
  * @file protobuf_encoder.cpp
  * @brief Protocol Buffers encoder for E3AP PDUs
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

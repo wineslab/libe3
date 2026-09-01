@@ -7,6 +7,7 @@
  * absorb the variance of a shared runner, so they detect a change in kind -- a
  * syscall, a lock or an allocation added to the hot path -- rather than drift.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

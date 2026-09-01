@@ -9,6 +9,7 @@
  * so SWIG can parse simple declarations without needing C++-aware
  * type recovery.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

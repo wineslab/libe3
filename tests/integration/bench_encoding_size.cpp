@@ -43,6 +43,7 @@
  * numbers reflect realistic in-field usage without being dominated by
  * the payload itself.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

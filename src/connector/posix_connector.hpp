@@ -2,6 +2,7 @@
  * @file posix_connector.hpp
  * @brief POSIX socket-based E3 Connector
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

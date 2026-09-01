@@ -13,6 +13,7 @@
  *  - Capacity is rounded up to the nearest power of two for cheap masking
  *  - Provides try_push / try_pop (non-blocking) used by LockFreeQueue
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

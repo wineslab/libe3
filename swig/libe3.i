@@ -15,6 +15,7 @@
  * no wrapped C++ path calls back into Python (the inbound path is a lock-free
  * ring drained by poll_events, not a Python callback).
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

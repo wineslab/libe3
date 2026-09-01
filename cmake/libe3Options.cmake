@@ -1,5 +1,6 @@
 # libe3 Build Options
 #
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 # SPDX-License-Identifier: Apache-2.0
 
 option(LIBE3_BUILD_TESTS "Build unit tests" ON)

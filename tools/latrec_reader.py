@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 """Reader for the latrec ring format written by include/libe3/latrec.h.
 
 The format is a cross-repo contract: libe3, the C++ and Python dApps and flexric

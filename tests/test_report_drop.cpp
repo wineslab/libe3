@@ -22,6 +22,7 @@
  * and capacity used by E3Interface::report_queue_, so any future change to
  * that production value is reflected here.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

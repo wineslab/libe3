@@ -5,6 +5,7 @@
  * Demonstrates basic usage of libe3 to create an E3 agent
  * that can communicate with dApps.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

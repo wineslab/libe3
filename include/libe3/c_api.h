@@ -1,6 +1,9 @@
 /*
  * C API for libe3
  * Minimal C-compatible wrappers to create an E3Agent and ServiceModel from C
+ *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+ * SPDX-License-Identifier: Apache-2.0
  */
 #ifndef LIBE3_C_API_H
 #define LIBE3_C_API_H

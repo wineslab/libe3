@@ -2,6 +2,7 @@
  * @file encoder_factory.cpp
  * @brief Factory for creating encoder instances
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

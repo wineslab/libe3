@@ -15,6 +15,7 @@
  * strictly RAN-side. Exactly one of `subscription_manager_` / `dapp_state_`
  * is non-null on a given E3Interface instance.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

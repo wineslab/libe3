@@ -4,6 +4,7 @@
  *
  * Include this single header to get access to all libe3 functionality.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

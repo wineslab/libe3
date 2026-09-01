@@ -6,6 +6,7 @@
  * the libe3 library. These types are designed to be RAN-agnostic and can be
  * used by any RAN vendor integrating with the E3AP protocol.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

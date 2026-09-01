@@ -18,6 +18,7 @@
  * Pairs with examples/simple_agent.cpp and is wire-compatible with the
  * Python dApp library's own simple dApp example.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

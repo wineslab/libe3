@@ -6,6 +6,7 @@
  * the E3Agent facade and the protocol handling components. It is
  * NOT exposed to library users directly.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

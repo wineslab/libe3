@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 prefix=@LIBE3_PC_PREFIX@
 exec_prefix=${prefix}
 libdir=@LIBE3_PC_LIBDIR@

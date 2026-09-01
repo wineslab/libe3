@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 name: Documentation issue
 description: Report missing, wrong, or unclear documentation (README, Doxygen comments, examples).
 title: "[Docs]: "

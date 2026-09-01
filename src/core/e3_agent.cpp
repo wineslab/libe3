@@ -2,6 +2,7 @@
  * @file e3_agent.cpp
  * @brief E3Agent façade implementation
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

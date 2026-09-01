@@ -2,6 +2,7 @@
  * @file test_error_codes.cpp
  * @brief Unit tests for shared error code mappings
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

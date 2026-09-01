@@ -2,6 +2,7 @@
  * @file test_e3_agent.cpp
  * @brief Integration tests for E3Agent
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

@@ -1,5 +1,6 @@
 # libe3 - Vendor-Neutral E3AP C++ Library
 #
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 # SPDX-License-Identifier: Apache-2.0
 #
 # Modern CMake (3.16+) configuration for building libe3

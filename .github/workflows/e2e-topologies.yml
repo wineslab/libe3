@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 name: E2E Topologies (multi-dApp / multi-RAN)
 
 # Process-level end-to-end tests that validate the multi-peer capabilities of

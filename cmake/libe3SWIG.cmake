@@ -12,6 +12,7 @@
 # can simply `import libe3py`. Activate the target venv before installing so the
 # module lands in the environment that will import it.
 #
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 # SPDX-License-Identifier: Apache-2.0
 
 if(NOT LIBE3_ENABLE_SWIG)

@@ -1,5 +1,6 @@
 # libe3 Version Configuration
 #
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 # SPDX-License-Identifier: Apache-2.0
 #
 # Read version from VERSION file (inspired by Python's hatchling approach)

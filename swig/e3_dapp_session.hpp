@@ -36,6 +36,7 @@
  *   caps throughput; batching is strictly better with no added latency (the
  *   ring still wakes on the first event).
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

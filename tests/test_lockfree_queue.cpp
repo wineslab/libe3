@@ -2,6 +2,7 @@
  * @file test_lockfree_queue.cpp
  * @brief Unit tests for LockFreeQueue<T>
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

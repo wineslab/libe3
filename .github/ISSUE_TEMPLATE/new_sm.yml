@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 name: New Service Model (SM) request
 description: Propose a new E3 Service Model. Service Models always require coordinated changes in both libe3 and dapps — please describe both sides.
 title: "[New SM]: "

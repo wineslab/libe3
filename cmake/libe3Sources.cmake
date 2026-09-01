@@ -1,5 +1,6 @@
 # libe3 Source Files
 #
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 # SPDX-License-Identifier: Apache-2.0
 
 set(LIBE3_PUBLIC_HEADERS

@@ -2,6 +2,7 @@
  * @file e3_dapp_session.cpp
  * @brief Implementation of the batched dApp Python seam. See e3_dapp_session.hpp.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

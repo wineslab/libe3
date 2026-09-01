@@ -2,6 +2,7 @@
  * @file asn1_encoder.hpp
  * @brief ASN.1 APER Encoder for E3AP PDUs
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

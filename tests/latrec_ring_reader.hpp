@@ -6,6 +6,7 @@
  * place. The header is read through the frozen v1 byte offsets rather than by
  * casting to latrec_hdr, which is how an external reader sees the file.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 #ifndef LIBE3_TESTS_LATREC_RING_READER_HPP

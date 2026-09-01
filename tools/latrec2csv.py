@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 """Convert a directory of .latrec rings into CSV. Requires numpy.
 
 Runs entirely out of process: the rings are mmap'd read-only and the traced

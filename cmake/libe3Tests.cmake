@@ -1,5 +1,6 @@
 # libe3 Unit Tests
 #
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 # SPDX-License-Identifier: Apache-2.0
 
 if(NOT LIBE3_BUILD_TESTS)

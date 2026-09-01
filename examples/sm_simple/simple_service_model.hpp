@@ -26,6 +26,7 @@
  * built with -DLIBE3_ENABLE_LATREC=ON, so this costs nothing in a normal
  * build.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 #pragma once

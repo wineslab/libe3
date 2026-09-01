@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 name: MPMC Queue Benchmark
 
 # Runs the lock-free MPMC ring-buffer benchmark and publishes the results for

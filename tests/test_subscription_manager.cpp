@@ -2,6 +2,7 @@
  * @file test_subscription_manager.cpp
  * @brief Unit tests for SubscriptionManager
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

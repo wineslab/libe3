@@ -15,6 +15,7 @@
  * "seq stage aux aux2" lines so the reader's view can be compared field by
  * field, without the test having to hardcode the same table twice.)
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "libe3/latrec.h"

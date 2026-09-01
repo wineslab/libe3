@@ -5,6 +5,7 @@
  * Defines the abstract interface for encoding and decoding E3AP PDUs.
  * Ported from the original C implementation's e3ap_handler functions.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

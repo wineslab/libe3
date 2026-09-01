@@ -2,6 +2,7 @@
  * @file test_framework.hpp
  * @brief Lightweight test framework for libe3 unit tests
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

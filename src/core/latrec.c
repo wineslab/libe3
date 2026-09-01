@@ -8,6 +8,7 @@
  * counter. Keeping the storage in one translation unit gives a single ring per
  * thread rather than one per includer.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

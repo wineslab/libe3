@@ -7,6 +7,7 @@
  * once after to produce the two halves of a before/after comparison table
  * (not a permanently-shipped dual code path).
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

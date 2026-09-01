@@ -6,6 +6,7 @@
  * per-thread rings and their lifetime, and the accuracy of what is recorded:
  * a known delay injected between two stamps must read back as that delay.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

@@ -4,6 +4,7 @@
  *
  * Ported from the original C implementation's posix_* functions in e3_connector.c
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

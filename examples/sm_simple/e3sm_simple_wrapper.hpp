@@ -8,6 +8,9 @@
  * (envelope and SM payload). The JSON and protobuf branches are only
  * available when libe3 was built with LIBE3_ENABLE_JSON /
  * LIBE3_ENABLE_PROTOBUF respectively; otherwise these helpers use ASN.1 APER.
+ *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+ * SPDX-License-Identifier: Apache-2.0
  */
 #pragma once
 

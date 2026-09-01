@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 # SPDX-License-Identifier: Apache-2.0
 """Enforce libe3's AI-assistant commit-trailer policy (see CONTRIBUTING.md).
 

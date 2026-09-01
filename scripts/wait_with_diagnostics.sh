@@ -7,6 +7,9 @@
 # `kill -INT` and then `wait`ed with no bound at all. If it ignores the signal
 # or is genuinely deadlocked, that wait blocks until the job-level timeout,
 # which is exactly the intermittent E2E/Topologies hang described in issue #60.
+#
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
 
 # wait_with_diagnostics <pid> <timeout_seconds> [<label>]
 #

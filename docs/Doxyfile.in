@@ -1,4 +1,8 @@
 # Doxyfile.in - Doxygen configuration for libe3
+#
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 PROJECT_NAME           = "@PROJECT_NAME@"
 PROJECT_NUMBER         = "@PROJECT_VERSION@"
 PROJECT_BRIEF          = "C++ library for E3AP RAN vendor integration"

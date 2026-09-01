@@ -31,6 +31,7 @@
  * still holds exactly; the payload just has to be valid JSON. Every other
  * octet-string payload is hex-encoded and takes arbitrary bytes.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

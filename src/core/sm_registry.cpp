@@ -2,6 +2,7 @@
  * @file sm_registry.cpp
  * @brief Service Model Registry implementation
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

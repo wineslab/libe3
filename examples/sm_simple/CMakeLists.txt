@@ -3,6 +3,9 @@
 # `LIBE3_BUILD_EXAMPLES` is enabled. It generates the ASN.1 C sources into
 # the messages binary directory and exports the generated file lists to the
 # parent scope.
+#
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
 
 if(NOT LIBE3_BUILD_EXAMPLES)
     return()

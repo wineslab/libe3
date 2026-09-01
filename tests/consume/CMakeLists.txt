@@ -9,6 +9,7 @@
 #   cmake      -- find_package(libe3 CONFIG REQUIRED), the target route
 #   pkgconfig  -- pkg_check_modules(IMPORTED_TARGET libe3), the flags route
 #
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 # SPDX-License-Identifier: Apache-2.0
 
 cmake_minimum_required(VERSION 3.16)

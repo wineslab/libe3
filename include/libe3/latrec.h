@@ -40,6 +40,7 @@
  *      \ref path_b_e2_e3_loop "docs/path-b-e2-e3-loop.md" for the loop boxes
  *      the stage catalog names.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 #ifndef LIBE3_LATREC_H

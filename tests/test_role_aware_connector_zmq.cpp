@@ -9,6 +9,7 @@
  * to the same endpoints) over IPC, then check ZMQ_TYPE matches expectations
  * and that the client side actually managed to connect.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

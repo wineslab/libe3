@@ -18,6 +18,7 @@
  * POSIX (multi-peer accept loops + broadcast fan-out), which must deliver
  * the same no-crosstalk semantics.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

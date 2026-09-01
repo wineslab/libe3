@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 name: CI report
 
 # One consolidated CI report comment per PR (issue #64). Every other workflow

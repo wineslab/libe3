@@ -33,6 +33,7 @@
  *       every message still reaches the handler (the inbound pipeline
  *       does not silently drop messages while the handler is busy).
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

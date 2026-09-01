@@ -1,0 +1,19 @@
+version = 1
+
+# Files that carry no in-file SPDX header on purpose: prose, plain-data files,
+# and the license/notice texts themselves. Everything else in the tree has the
+# two-line header inline (enforced by `reuse lint` in the Commit policy
+# workflow), so this list should stay short.
+[[annotations]]
+path = [
+    "**/*.md",
+    "CITATION.cff",
+    "CONTRIBUTORS",
+    "LICENSE",
+    "NOTICE",
+    "VERSION",
+    ".gitignore",
+    ".github/CODEOWNERS",
+]
+SPDX-FileCopyrightText = "Copyright (c) 2026 Northeastern University"
+SPDX-License-Identifier = "Apache-2.0"

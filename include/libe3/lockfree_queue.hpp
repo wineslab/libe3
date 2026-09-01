@@ -13,6 +13,7 @@
  *  - LockFreeQueue<DAppReport> — inbound dApp reports handed from the RAN
  *                                inbound thread to the report worker thread.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

@@ -1,5 +1,6 @@
 # E3AP Messages Library
 #
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 # SPDX-License-Identifier: Apache-2.0
 #
 # Generates the E3AP message code for the enabled encodings:

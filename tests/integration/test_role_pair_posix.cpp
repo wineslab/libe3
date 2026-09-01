@@ -6,6 +6,7 @@
  * connector. SCTP is not exercised (CI runners lack the sctp kernel
  * module).
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

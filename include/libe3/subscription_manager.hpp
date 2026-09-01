@@ -5,6 +5,7 @@
  * This module manages the associations between dApps and RAN functions.
  * Ported from the original C implementation's e3_subscription_manager.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

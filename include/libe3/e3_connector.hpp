@@ -5,6 +5,7 @@
  * Defines the abstract interface that all transport connectors must implement.
  * Ported from the original C implementation's E3Connector structure.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

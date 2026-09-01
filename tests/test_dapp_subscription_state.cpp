@@ -4,6 +4,7 @@
  *
  * Part of issue #15: extend libe3 to support both RAN and dApp roles.
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

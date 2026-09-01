@@ -1,6 +1,9 @@
 # libe3 Documentation support
 #
 # Adds a `docs` target when LIBE3_BUILD_DOCS is ON and Doxygen is available.
+#
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
 
 if(NOT DEFINED LIBE3_BUILD_DOCS)
     set(LIBE3_BUILD_DOCS OFF)

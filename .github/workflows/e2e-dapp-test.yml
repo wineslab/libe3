@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 name: E2E dApp Integration
 
 # Runs example_simple_agent + example_simple_dapp as separate processes for

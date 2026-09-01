@@ -6,6 +6,7 @@
  * a clean, stable public API while hiding all internal implementation
  * details (connectors, encoders, threads, state machines).
  *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 

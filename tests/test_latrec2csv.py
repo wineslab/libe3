@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 """Tests for latrec2csv.py, driven by synthetic rings with known ground truth.
 
 Each ring is written by hand with delays chosen in advance, so the CSVs can be
