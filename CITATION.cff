@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+title: libe3
+message: >-
+  If you use libe3, or derive a protocol definition or an
+  implementation from it, please cite it as below.
+type: software
+authors:
+  - name: Northeastern University
+    website: https://www.northeastern.edu
+  - given-names: Andrea
+    family-names: Lacava
+    affiliation: Northeastern University
+    email: a.lacava@northeastern.edu
+repository-code: https://github.com/wineslab/libe3
+abstract: >-
+  A vendor-neutral C++ library implementing E3AP, the application
+  protocol between a RAN node and a dApp.
+license: Apache-2.0
+version: 0.1.3
+# preferred-citation:
+#   type: article
+#   title: <paper title>
+#   authors: []
+#   year: 2026
+#   doi: <doi>

@@ -1,4 +1,7 @@
 #!/bin/bash
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
 set -euo pipefail
 
 # Helper to produce .deb packages for specified architectures.
@@ -146,6 +149,15 @@ Maintainer: Northeastern University <thecave003@gmail.com>
 Depends: libstdc++6
 Description: libe3 - Vendor-neutral E3AP C++ library
 EOF
+
+    # Debian policy 12.5: every binary package ships
+    # /usr/share/doc/<pkg>/copyright. `cmake --install` places LICENSE and
+    # NOTICE under /usr/share/doc/libe3; a variant package has a different
+    # name, so write the policy-mandated file under the actual package name.
+    echo "Adding copyright file for $ARCH..."
+    DOC_DIR="$PKG_ROOT/usr/share/doc/${pkg_name}"
+    mkdir -p "$DOC_DIR"
+    { cat "$ROOT_DIR/NOTICE"; echo; cat "$ROOT_DIR/LICENSE"; } >"$DOC_DIR/copyright"
 
     echo "Fixing permissions for $ARCH..."
     find "$PKG_ROOT" -type f -exec chmod 644 {} \;

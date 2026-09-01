@@ -519,7 +519,14 @@ for the documented API.
 
 ## License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details,
+and [NOTICE](NOTICE) for the attribution that redistributors are required to carry.
+
+## Citing libe3
+
+If you use libe3, or derive a protocol definition or an implementation from it, please cite it.
+See [CITATION.cff](CITATION.cff), or use the "Cite this repository" button on GitHub. The paper
+reference will be added here once it is published. This is a request, not a condition of the license.
 
 ## Acknowledgments
 

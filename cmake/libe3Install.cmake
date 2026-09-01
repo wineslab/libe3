@@ -1,5 +1,6 @@
 # libe3 Installation
 #
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 # SPDX-License-Identifier: Apache-2.0
 
 include(GNUInstallDirs)
@@ -92,6 +93,16 @@ configure_file(
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libe3.pc"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+)
+
+# Apache-2.0 section 4(a) obliges anyone who redistributes the work to hand the
+# recipient a copy of the License, and 4(d) does the same for NOTICE. Neither
+# reached an installed tree before, so a consumer building against an installed
+# libe3 had no license text at all.
+install(FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE"
+    "${CMAKE_CURRENT_SOURCE_DIR}/NOTICE"
+    DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/doc/libe3"
 )
 
 # Install libraries

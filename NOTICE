@@ -1,0 +1,15 @@
+libe3
+
+Copyright (c) 2026 Northeastern University
+
+This product includes software developed at the Institute for Intelligent
+Networked Systems, Northeastern University.
+
+Use, modification and redistribution are permitted under the Apache License,
+Version 2.0 (see LICENSE), including the E3AP protocol definition in
+messages/asn1/V1/e3ap-1.0.0.asn1. If you use libe3, or derive a protocol
+definition or an implementation from it, we ask that you cite the work:
+
+  [citation to be added on publication]
+
+That citation is a request, not an additional condition on the license.
