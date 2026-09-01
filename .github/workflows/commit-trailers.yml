@@ -7,7 +7,9 @@ name: Commit policy
 #   - AI agents must not add Co-authored-by/Signed-off-by; AI assistance is disclosed
 #     via an `Assisted-by:` trailer whose value is free-form (any non-empty descriptor);
 #   - the PR branch is a linear, fast-forward-able descendant of `main` (no merge commits);
-#   - every commit in the PR builds and passes tests on its own (atomic commits).
+#   - every commit in the PR builds and passes tests on its own (atomic commits);
+#   - every file carries an SPDX copyright + license header, or is annotated in
+#     REUSE.toml (see `reuse lint` below and CONTRIBUTING.md).
 #
 # The fast-forward merge command is no longer posted here: it is a section of the
 # consolidated CI report (.github/workflows/ci-report.yml), which already waits
@@ -43,6 +45,19 @@ jobs:
             head="${{ github.sha }}"
           fi
           python3 scripts/check_commit_trailers.py --base "$base" --head "$head"
+
+  license-headers:
+    name: SPDX / REUSE compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install reuse
+        run: pipx install reuse
+
+      - name: Check SPDX headers
+        run: reuse lint
 
   linear-history:
     name: Fast-forward / linear history

@@ -61,7 +61,7 @@ The following are **mandatory** for every contribution. PRs that do not meet the
 - All PRs must use `.github/PULL_REQUEST_TEMPLATE.md` and complete every checklist item.
 - The following CI workflows must be green on the latest commit before review:
   - **`Unit Tests`** (`.github/workflows/pr-tests.yml`) — builds and runs `ctest --output-on-failure` for both `Debug` and `Release` on `ubuntu-latest`, plus the integration, all-encodings, and SWIG jobs.
-  - **`Commit policy`** (`.github/workflows/commit-trailers.yml`) — validates the AI-assistant trailer policy on every commit (see [AI assistants](#ai-assistants)), that the branch is a linear, fast-forward-able descendant of `main` (no merge commits), and that every commit builds and passes tests on its own.
+  - **`Commit policy`** (`.github/workflows/commit-trailers.yml`) — validates the AI-assistant trailer policy on every commit (see [AI assistants](#ai-assistants)), that the branch is a linear, fast-forward-able descendant of `main` (no merge commits), that every commit builds and passes tests on its own, and that every file carries an SPDX header (`reuse lint`, see [Licensing headers](#licensing-headers)).
 - Build and test workflows do not run on documentation- or CI-only PRs; a `Detect code changes` job gates them so they run only when a PR changes code (the trailer and linear-history checks still run on every PR).
 - CI posts exactly **one** comment per PR, from **`CI report`** (`.github/workflows/ci-report.yml`). It waits until every workflow above has finished for the head commit, then writes a verdict, a per-workflow table (including which workflows a `paths` filter or the `Detect code changes` gate kept from doing work), the benchmark and E2E detail those workflows published, and the fast-forward merge command once the required checks are green. Pushing to the branch rewrites that comment in place rather than adding another. Individual workflows no longer comment on their own.
 - The following local checks must be reported in the PR description as run by the contributor (mirroring CI):
@@ -72,6 +72,29 @@ The following are **mandatory** for every contribution. PRs that do not meet the
   - `VERSION` bumped per [SemVer](https://semver.org/) when public API or ABI changes.
   - `./build_libe3 --docs` renders without new Doxygen warnings if public headers under `include/` were modified.
   - `README.md` and/or `CONTRIBUTING.md` updated when contributor- or user-facing behavior changes.
+
+### Licensing headers
+
+Every file in the tree carries two lines, in the comment syntax of its language:
+
+```
+SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+SPDX-License-Identifier: Apache-2.0
+```
+
+New files must carry them too. Prose and plain-data files (`*.md`, `VERSION`,
+`CONTRIBUTORS`, `CITATION.cff`, `.gitignore`, `.github/CODEOWNERS`) are covered in bulk
+by [`REUSE.toml`](REUSE.toml) instead of an inline header; add a path there rather than
+a header if your new file is one of those. `LICENSES/Apache-2.0.txt` holds the license
+text for the [REUSE](https://reuse.software) tooling, and the root `LICENSE` stays as it
+is for GitHub's license detection.
+
+The `SPDX / REUSE compliance` job in the `Commit policy` workflow runs `reuse lint` and
+fails the PR if anything is unmarked. Run it locally with:
+
+```bash
+pipx install reuse && reuse lint
+```
 
 ### AI assistants
 
@@ -85,7 +108,7 @@ Contributions developed with the help of AI tools (LLM coding assistants, agents
   Assisted-by: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
   Assisted-by: Genesis agents based on Claude:claude-opus-4-8
   ```
-- The human submitter bears full responsibility for reviewing AI-generated code, for its correctness, and for its compatibility with this project's Apache-2.0 license (retain the SPDX identifiers already present in the sources).
+- The human submitter bears full responsibility for reviewing AI-generated code, for its correctness, and for its compatibility with this project's Apache-2.0 license (retain the SPDX headers already present in the sources, and add them to any new file: see [Licensing headers](#licensing-headers)).
 
 These rules are enforced by the `Commit policy` workflow (`.github/workflows/commit-trailers.yml`), which fails any commit that attributes an AI agent through `Co-authored-by`/`Signed-off-by` or that carries an empty `Assisted-by` trailer. You can run the same check locally with `python3 scripts/check_commit_trailers.py --base origin/main --head HEAD`.
 
