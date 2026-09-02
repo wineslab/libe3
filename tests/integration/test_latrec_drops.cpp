@@ -172,7 +172,7 @@ int main() {
     std::atomic<bool> stop{false};
     std::thread flood([&] {
         latrec_tls_open_as("drops.flood");
-        while (!stop.load()) dapp.send_report(1, std::vector<uint8_t>(32, 0xAB));
+        while (!stop.load()) dapp.send_report(1, std::vector<uint8_t>(32, 0xAB), /*sequence_id=*/1);
     });
     std::this_thread::sleep_for(std::chrono::seconds(3));
     stop.store(true);

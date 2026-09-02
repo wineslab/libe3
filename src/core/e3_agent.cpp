@@ -226,7 +226,8 @@ ErrorCode E3Agent::send_indication(
 ErrorCode E3Agent::send_xapp_control(
     uint32_t dapp_id,
     uint32_t ran_function_id,
-    const std::vector<uint8_t>& control_data
+    const std::vector<uint8_t>& control_data,
+    uint32_t sequence_id
 ) {
     if (impl_->config.role != E3Role::RAN) {
         return ErrorCode::STATE_ERROR;
@@ -240,6 +241,7 @@ ErrorCode E3Agent::send_xapp_control(
     action.dapp_identifier = dapp_id;
     action.ran_function_identifier = ran_function_id;
     action.xapp_control_data = control_data;
+    action.sequence_id = sequence_id;
     pdu.choice = action;
     return impl_->interface->queue_outbound(std::move(pdu));
 }
@@ -428,19 +430,22 @@ ErrorCode E3Agent::unsubscribe(uint32_t ran_function_id) {
 ErrorCode E3Agent::send_control(uint32_t ran_function_id,
                                 uint32_t control_id,
                                 std::vector<uint8_t> action_data,
+                                uint32_t sequence_id,
                                 uint32_t* out_message_id) {
     if (impl_->config.role != E3Role::DAPP) return ErrorCode::STATE_ERROR;
     if (!impl_->interface || !impl_->interface->is_running()) return ErrorCode::NOT_INITIALIZED;
     return impl_->interface->queue_dapp_control_action(
-        ran_function_id, control_id, std::move(action_data), out_message_id);
+        ran_function_id, control_id, std::move(action_data), sequence_id, out_message_id);
 }
 
 ErrorCode E3Agent::send_report(uint32_t ran_function_id,
                                std::vector<uint8_t> report_data,
+                               uint32_t sequence_id,
                                uint32_t* out_message_id) {
     if (impl_->config.role != E3Role::DAPP) return ErrorCode::STATE_ERROR;
     if (!impl_->interface || !impl_->interface->is_running()) return ErrorCode::NOT_INITIALIZED;
-    return impl_->interface->queue_dapp_report(ran_function_id, std::move(report_data), out_message_id);
+    return impl_->interface->queue_dapp_report(
+        ran_function_id, std::move(report_data), sequence_id, out_message_id);
 }
 
 ErrorCode E3Agent::release() {

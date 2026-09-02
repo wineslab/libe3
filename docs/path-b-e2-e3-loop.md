@@ -104,6 +104,39 @@ however many places call that codec, and the ring says which side called it.
 `BRIDGE_IN`/`BRIDGE_OUT` serve both B9 here and A20 in Path A, with `aux2`
 carrying the direction.
 
+## Mitigation leg (`leg=mitigation`)
+
+For a dApp whose "apply policy" means re-issuing the control to the RAN — the
+spectrum case, where the xApp names PRBs and only the gNB can block them — B15
+is not the end of the procedure. The policy is not in effect until the RAN has
+installed it, and the xApp is not told until then.
+
+| # | Box | Owner | Segment |
+|---|---|---|---|
+| B16 | Re-issue as a dApp control | dApp application | `APPLY_POLICY_DONE` to `CREATE_OUTPUT`, carrying B15's `sequenceId` |
+| — | **Path A return leg** | — | A12-A18: the re-issued control travels dApp to RAN exactly as any dApp control does |
+| B17 | Apply control | the RAN stack | `DECODE_E3SM_DONE` to `APPLY_CONTROL_DONE` — the mask is in the MAC |
+| B18 | Live on air | the RAN's MAC | `APPLY_CONTROL_DONE` to `LIVE_ON_AIR` — the first scheduler tick that put it on air |
+| B19 | Acknowledge | the RAN | two independent acks: `ACK_SENT` on E3 to the dApp, and the deferred E2 control acknowledge to the xApp |
+
+The two acks at B19 carry **different** content and are not two views of one
+message. The dApp gets `E3-MessageAck`, which is a delivery receipt: request id
+and a response code, nothing more. The xApp gets the E2SM-DAPP control outcome,
+which carries the procedure's `sequence-id` and the Service-Model-owned apply
+outcome — for the spectrum SM, the realtime timestamps at B17 and B18.
+
+Those timestamps are **payload** fields on the realtime clock, deliberately not
+latrec records: the xApp differences them against the dApp's own report
+timestamp, and [latrec.md](latrec.md)'s clock rule forbids mixing a payload
+timestamp with a monotonic `t_ns`. latrec measures the same interval
+independently, which makes the two a cross-check on each other rather than a
+single number derived twice.
+
+The E2 acknowledge is deferred: it is sent at B19, not when the RAN received the
+control request at B7. An acknowledge sent at B7 says only that the request was
+forwarded — it is emitted before the dApp has seen it and long before any mask
+exists, so it cannot be read as completion.
+
 ## Aggregates
 
 | Key | Span | Meaning |
@@ -112,33 +145,52 @@ carrying the direction.
 | `total_policy_down` | `B4` to `B15` | xApp decision issued to policy applied in the dApp |
 | `total_e2_leg` | `B1` to `B9` | everything outside libE3 and outside the applications |
 | `total_libe3_down` | `B10` to `B13` | the library's share of the down leg |
-| `total_loop` | `A1` to `B15` | the full input-to-policy loop, subject to the joining caveat below |
+| `total_loop` | `A1` to `B15` | the full input-to-policy loop |
+| `total_mitigation` | `A1` to `B18` | detection to the mask being on air — the number the xApp records online |
 
-## Joining caveat
+## Joining: the `sequenceId`
 
-The report leg and the policy leg carry **no shared origin identifier**: the E2
-envelope is handed no id it could propagate across the RIC and the xApp. Each
-side keys on a counter of its own, so `total_loop` is composed by
-**nearest-in-time pairing** across the two legs.
+The two legs share one identifier, `E3-SequenceID`, carried by the E3AP envelope
+and mapped onto E2SM-DAPP's `sequence-id`. `total_loop` is a **per-message
+join**, not a nearest-in-time pairing.
 
-That is reliable only under **sparse send-on-change control**, where few control
-messages are in flight at a time. It is not a per-message join, and it must not
-be reported as one. Under periodic or bursty control the composition is not
-valid and only the two legs, measured separately, are trustworthy.
+| Message | Field | Obligation | Assigned by |
+|---|---|---|---|
+| `E3-DAppReport` | `sequenceId` | mandatory | the dApp, per detection |
+| `E3-XAppControlAction` | `sequenceId` | mandatory | the RAN bridge, copied from E2SM-DAPP `sequence-id` |
+| `E3-DAppControlAction` | `sequenceId` | optional | the dApp, only when re-issuing an xApp control |
 
-The per-leg numbers do not suffer from this: within a leg, the E2 stages and
-the libE3 stages each carry their own keys.
+The chain is: the dApp assigns an id to a report; the RAN copies it into the
+E2SM-DAPP indication header, so the xApp receives it; the xApp echoes it on its
+control header; the bridge copies it back onto the relayed
+`E3-XAppControlAction`; the dApp carries it on the control it re-issues; and the
+RAN reports it on the control outcome that acknowledges the whole procedure.
 
-This limitation must appear wherever `total_loop` is reported.
+An `E3-DAppControlAction` with no `sequenceId` is a control the dApp decided on
+its own — there is no xApp procedure behind it and nothing to join it to. That
+is a normal message, not a malformed one.
+
+The id is `INTEGER (1..4294967295)`, the same range as `E3-MessageID`, and
+neither wraps within a run. A message id still identifies one *hop*; the
+sequenceId identifies the whole *procedure* across every hop.
+
+### Where it shows up in the rings
+
+The rings themselves are not keyed on the sequenceId — each leg keeps its own
+ring-local counter, because `latrec_ctx_set()`'s cross-thread bridge depends on
+it (see [latrec.md](latrec.md)). The id appears instead as the `aux` payload on
+the records where the loop crosses a component boundary:
+
+- `DELIVER_BEGIN` / `DELIVER_DONE` on the dApp's relayed xApp control
+- `BRIDGE_IN` / `BRIDGE_OUT` on the RAN, in both directions
+
+Those are the records a reader joins on to stitch the E2 rings to the E3 rings.
 
 ## Not yet instrumented
 
 1. xApp frameworks and the xApps themselves have identifiers available
    (`DECODE_E2SM_*`, `XAPP_PROCESS_DONE`, `ENCODE_E2SM_*`) but no stamps in
    their own code yet, so `B3`, `B4` and `B5` are one opaque interval.
-2. No origin identifier crosses the RIC (see the joining caveat). Adding one
-   is out of scope for this decomposition, but it is the correct long-term
-   fix.
-3. On an opaque RIC the RIC contributes an unattributable interval whose size
+2. On an opaque RIC the RIC contributes an unattributable interval whose size
    is unknown. Reporting an instrumentable-RIC profile alongside it is the
    only way to bound it.

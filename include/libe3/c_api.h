@@ -36,7 +36,10 @@ typedef e3_error_t (*e3_sm_process_control_cb)(
     uint32_t ran_function_id,
     uint32_t control_id,
     const uint8_t* data,
-    size_t data_len
+    size_t data_len,
+    /* Correlation id of the xApp procedure this control re-issues; 0 when the
+       dApp decided on its own and there is no procedure to report back to. */
+    uint32_t sequence_id
 );
 
 /* Callback for incoming dApp reports (dApp -> RAN). */
@@ -377,6 +380,9 @@ e3_error_t e3_agent_send_indication(
  * @param ran_function_id RAN function identifier
  * @param control_data Pointer to E3SM-encoded control payload (may be NULL if data_len is 0)
  * @param control_data_len Length of payload in bytes
+ * @param sequence_id Correlation id from the E2SM-DAPP control header; the dApp
+ *        carries it back on the control it re-issues, which is how the RAN
+ *        matches the applied control to the xApp procedure that asked for it.
  * @return \ref e3_error_t (see \ref libe3::ErrorCode; 0 == SUCCESS)
  */
 e3_error_t e3_agent_send_xapp_control(
@@ -384,7 +390,8 @@ e3_error_t e3_agent_send_xapp_control(
     uint32_t dapp_id,
     uint32_t ran_function_id,
     const uint8_t* control_data,
-    size_t control_data_len
+    size_t control_data_len,
+    uint32_t sequence_id
 );
 
 /**

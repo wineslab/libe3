@@ -206,12 +206,15 @@ public:
      * @param dapp_id Target dApp identifier
      * @param ran_function_id RAN function identifier
      * @param control_data E3SM-encoded control payload
+     * @param sequence_id Correlation id from the E2SM-DAPP control header, so
+     *        the dApp can carry it back on the control it re-issues.
      * @return ErrorCode::SUCCESS on success
      */
     ErrorCode send_xapp_control(
         uint32_t dapp_id,
         uint32_t ran_function_id,
-        const std::vector<uint8_t>& control_data
+        const std::vector<uint8_t>& control_data,
+        uint32_t sequence_id
     );
 
     /**
@@ -281,6 +284,8 @@ public:
     /**
      * @brief Send a dApp control action to the RAN.
      *
+     * @param sequence_id correlation id of the xApp procedure this control
+     *        re-issues; leave 0 for a control the dApp decided on its own.
      * @param out_message_id when non-null, receives the assigned E3-MessageID on
      *        success, so the caller can correlate a later ack/response back to
      *        this send.
@@ -288,17 +293,21 @@ public:
     ErrorCode send_control(uint32_t ran_function_id,
                            uint32_t control_id,
                            std::vector<uint8_t> action_data,
+                           uint32_t sequence_id = 0,
                            uint32_t* out_message_id = nullptr);
 
     /**
      * @brief Send a dApp report to the RAN.
      *
+     * @param sequence_id correlation id the dApp assigns to this detection. It
+     *        is the head of the loop's chain and is mandatory on the wire.
      * @param out_message_id when non-null, receives the assigned E3-MessageID on
      *        success, so the caller can correlate a later ack/response back to
      *        this send.
      */
     ErrorCode send_report(uint32_t ran_function_id,
                           std::vector<uint8_t> report_data,
+                          uint32_t sequence_id,
                           uint32_t* out_message_id = nullptr);
 
     /** Send a ReleaseMessage. The dApp stays running until stop() is called. */

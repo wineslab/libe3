@@ -378,7 +378,19 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             asn1_pdu->msg.choice.dAppControlAction->dAppIdentifier = action->dapp_identifier;
             asn1_pdu->msg.choice.dAppControlAction->ranFunctionIdentifier = action->ran_function_identifier;
             asn1_pdu->msg.choice.dAppControlAction->controlIdentifier = action->control_identifier;
-            
+
+            // sequenceId is OPTIONAL here: present only when this control
+            // re-issues an xApp one. Zero is the absent sentinel, same
+            // convention as the envelope timestamp above.
+            if (action->sequence_id != 0) {
+                asn1_pdu->msg.choice.dAppControlAction->sequenceId =
+                    static_cast<E3_SequenceID_t*>(calloc(1, sizeof(E3_SequenceID_t)));
+                if (asn1_pdu->msg.choice.dAppControlAction->sequenceId) {
+                    *asn1_pdu->msg.choice.dAppControlAction->sequenceId =
+                        static_cast<E3_SequenceID_t>(action->sequence_id);
+                }
+            }
+
             OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.dAppControlAction->actionData,
                 reinterpret_cast<const char*>(action->action_data.data()),
                 static_cast<int>(action->action_data.size()));
@@ -396,7 +408,9 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             
             asn1_pdu->msg.choice.dAppReport->dAppIdentifier = report->dapp_identifier;
             asn1_pdu->msg.choice.dAppReport->ranFunctionIdentifier = report->ran_function_identifier;
-            
+            asn1_pdu->msg.choice.dAppReport->sequenceId =
+                static_cast<E3_SequenceID_t>(report->sequence_id);
+
             OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.dAppReport->reportData,
                 reinterpret_cast<const char*>(report->report_data.data()),
                 static_cast<int>(report->report_data.size()));
@@ -414,7 +428,9 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             
             asn1_pdu->msg.choice.xAppControlAction->dAppIdentifier = action->dapp_identifier;
             asn1_pdu->msg.choice.xAppControlAction->ranFunctionIdentifier = action->ran_function_identifier;
-            
+            asn1_pdu->msg.choice.xAppControlAction->sequenceId =
+                static_cast<E3_SequenceID_t>(action->sequence_id);
+
             OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.xAppControlAction->xAppControlData,
                 reinterpret_cast<const char*>(action->xapp_control_data.data()),
                 static_cast<int>(action->xapp_control_data.size()));
@@ -646,7 +662,10 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             action.dapp_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppControlAction->dAppIdentifier);
             action.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppControlAction->ranFunctionIdentifier);
             action.control_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppControlAction->controlIdentifier);
-            
+            action.sequence_id = asn1_pdu->msg.choice.dAppControlAction->sequenceId
+                                     ? static_cast<uint32_t>(*asn1_pdu->msg.choice.dAppControlAction->sequenceId)
+                                     : 0;
+
             const OCTET_STRING_t* data = &asn1_pdu->msg.choice.dAppControlAction->actionData;
             action.action_data.assign(data->buf, data->buf + data->size);
             
@@ -660,7 +679,8 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             DAppReport report;
             report.dapp_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppReport->dAppIdentifier);
             report.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppReport->ranFunctionIdentifier);
-            
+            report.sequence_id = static_cast<uint32_t>(asn1_pdu->msg.choice.dAppReport->sequenceId);
+
             const OCTET_STRING_t* data = &asn1_pdu->msg.choice.dAppReport->reportData;
             report.report_data.assign(data->buf, data->buf + data->size);
             
@@ -674,7 +694,8 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             XAppControlAction action;
             action.dapp_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.xAppControlAction->dAppIdentifier);
             action.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.xAppControlAction->ranFunctionIdentifier);
-            
+            action.sequence_id = static_cast<uint32_t>(asn1_pdu->msg.choice.xAppControlAction->sequenceId);
+
             const OCTET_STRING_t* data = &asn1_pdu->msg.choice.xAppControlAction->xAppControlData;
             action.xapp_control_data.assign(data->buf, data->buf + data->size);
             

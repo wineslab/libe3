@@ -163,6 +163,21 @@ That is why `tools/latrec2csv.py` keys its per-component tables off the ring's
 role (`RING_COMPONENTS`) and its legs off the stage chain (`LEGS`), rather
 than mapping stage-id ranges to repositories.
 
+### Joining across components
+
+A `seq` is meaningful only inside the ring that wrote it: each component
+numbers with a counter of its own, and `latrec_ctx_set()` bridges that counter
+across a synchronous callback within one process. Nothing about it crosses a
+wire.
+
+What crosses the wire is the E3AP `sequenceId`, which identifies one
+detection-to-mitigation procedure across every component that touches it (see
+[path-b-e2-e3-loop.md](path-b-e2-e3-loop.md)). It is not used as a ring `seq` —
+that would break the `ctx_set` bridge — but it is stamped as the `aux` payload
+on the records where the loop crosses a component boundary: `DELIVER_BEGIN` /
+`DELIVER_DONE` for a relayed xApp control, and `BRIDGE_IN` / `BRIDGE_OUT` in
+both directions. Join two components' rings through those records.
+
 The identifiers name the boxes of the two documented loops:
 
 | Group | Operations | Boxes |

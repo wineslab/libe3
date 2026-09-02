@@ -112,7 +112,8 @@ struct e3_service_model_handle_s : public ServiceModel {
             action.ran_function_identifier,
             action.control_identifier,
             action.action_data.empty() ? nullptr : action.action_data.data(),
-            action.action_data.size()
+            action.action_data.size(),
+            action.sequence_id
         ));
     }
 
@@ -390,12 +391,14 @@ e3_error_t e3_agent_set_dapp_report_handler(
         uint32_t dapp_id,
         uint32_t ran_function_id,
         const uint8_t* control_data,
-        size_t control_data_len
+        size_t control_data_len,
+        uint32_t sequence_id
     ) {
         if (!agent || !agent->agent) return static_cast<int>(ErrorCode::INVALID_PARAM);
         std::vector<uint8_t> buf;
         if (control_data && control_data_len) buf.assign(control_data, control_data + control_data_len);
-        return static_cast<int>(agent->agent->send_xapp_control(dapp_id, ran_function_id, buf));
+        return static_cast<int>(
+            agent->agent->send_xapp_control(dapp_id, ran_function_id, buf, sequence_id));
     }
 
     e3_error_t e3_agent_send_message_ack(

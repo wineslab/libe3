@@ -82,6 +82,10 @@ message DAppControlAction {
   uint32 ran_function_identifier = 2;
   uint32 control_identifier = 3;
   bytes action_data = 4;
+  // Set only when re-issuing a control received as an XAppControlAction; zero
+  // (absent, under proto3 implicit presence) on a control the dApp decided on
+  // its own. Matches the ASN.1 field's OPTIONAL.
+  uint32 sequence_id = 5;
 }
 
 // dApp Report (dApp -> RAN). report_data is Service Model opaque.
@@ -89,6 +93,10 @@ message DAppReport {
   uint32 dapp_identifier = 1;
   uint32 ran_function_identifier = 2;
   bytes report_data = 3;
+  // Assigned by the dApp; the head of the E2-E3 loop's correlation chain.
+  // Mandatory in the ASN.1 grammar, so a zero here is an encoder bug, not an
+  // absent field.
+  uint32 sequence_id = 4;
 }
 
 // xApp Control Action (xApp -> dApp via RAN). xapp_control_data is opaque.
@@ -96,6 +104,9 @@ message XAppControlAction {
   uint32 dapp_identifier = 1;
   uint32 ran_function_identifier = 2;
   bytes xapp_control_data = 3;
+  // Copied by the RAN's E2-E3 bridge from the E2SM-DAPP control header's
+  // sequence-id. Mandatory in the ASN.1 grammar.
+  uint32 sequence_id = 4;
 }
 
 // Release Message (dApp -> RAN).

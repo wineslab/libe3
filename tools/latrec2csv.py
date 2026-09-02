@@ -114,24 +114,26 @@ LEGS = [
     ("consume",   [0x1A, 0x1B, 0x40, 0x41], [0x43],
      "the decoded message's own key"),
     ("apply_ctrl", [0x48, 0x49], [],
-     "E3 message_id of the control being applied (NOT globally unique)"),
+     "E3 message_id of the control being applied"),
     ("apply_pol", [0x42], [], "request_id (== E3 message_id)"),
     ("ack",       [0x4A, 0x4B], [], "the acknowledged message's id"),
-    # Bootstrap. These seqs are E3 request message ids: they restart per agent
-    # and are confined to a small range, so rows from several peers or several
-    # runs in one capture can share a seq.
+    # Bootstrap. These seqs are E3 request message ids. They no longer wrap, but
+    # they still restart per agent, so rows from several peers or several runs in
+    # one capture can share a seq.
     ("setup",     [0x30, 0x31], [],
-     "SetupRequest message_id (NOT globally unique)"),
+     "SetupRequest message_id (unique per agent, not across agents)"),
     ("subscribe", [0x32, 0x33], [],
-     "SubscriptionRequest/Response message id (NOT globally unique)"),
+     "SubscriptionRequest/Response message id (unique per agent, not across agents)"),
     ("sm_start",  [0x34], [], "process-wide counter"),
     ("sm_stop",   [0x35], [], "process-wide counter"),
     ("sm_status", [0x36, 0x37], [], "process-wide counter"),
-    # E2-E3 bridge. Handed no id it could share with either side, so it numbers
-    # locally and pairs with the E2 and E3 legs by time.
-    ("bridge",    [0x50, 0x51], [], "process-wide counter"),
+    # E2-E3 bridge. The seq is still a bridge-local counter, but aux now carries
+    # the procedure's E3AP sequenceId, which IS shared with both sides -- join on
+    # that to stitch an E2 leg to an E3 leg per message rather than by time.
+    ("bridge",    [0x50, 0x51], [], "process-wide counter (aux = sequenceId)"),
     # E2 legs. The xApp and the agent number independently, so an outbound leg
-    # pairs with the peer's inbound leg by time, not by seq.
+    # pairs with the peer's inbound leg by time; to pair it per message instead,
+    # join through the bridge rows' aux (the sequenceId).
     ("e2ap_out",  [0x58, 0x59], [], "the stamping side's own counter"),
     ("e2ap_in",   [0x5A, 0x5B], [], "the stamping side's own counter"),
     ("e2sm_in",   [0x60, 0x61, 0x62], [], "the stamping side's own counter"),

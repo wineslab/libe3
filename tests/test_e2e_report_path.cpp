@@ -163,10 +163,11 @@ public:
     bool send_report(uint32_t seq, uint32_t dapp_id, uint32_t ran_function_id,
                      size_t payload_bytes = 70) {
         Pdu pdu(PduType::DAPP_REPORT);
-        pdu.message_id = (seq % 1000u) + 1u;   // E3-MessageID is INTEGER (1..1000)
+        pdu.message_id = seq + 1u;             // E3-MessageID is INTEGER (1..4294967295)
         DAppReport rep;
         rep.dapp_identifier = dapp_id;
         rep.ran_function_identifier = ran_function_id;
+        rep.sequence_id = seq + 1u;            // mandatory; 0 is out of range
         rep.report_data = tagged_payload(seq, payload_bytes);
         pdu.choice = rep;
 

@@ -23,9 +23,9 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
 
     E3-SubscriptionRequest ::= SEQUENCE {
         dAppIdentifier          E3-DAppID,
-        ranFunctionIdentifier   INTEGER (1..100),
-        telemetryIdentifierList SEQUENCE (SIZE (0..100)) OF INTEGER (1..100),
-        controlIdentifierList   SEQUENCE (SIZE (0..100)) OF INTEGER (1..100),
+        ranFunctionIdentifier   INTEGER (1..65535),
+        telemetryIdentifierList SEQUENCE (SIZE (0..1000)) OF INTEGER (1..65535),
+        controlIdentifierList   SEQUENCE (SIZE (0..1000)) OF INTEGER (1..65535),
         subscriptionTime        INTEGER (0..3600) OPTIONAL,
         periodicity             INTEGER (0..1000) OPTIONAL,
         ...
@@ -33,7 +33,7 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
 
     E3-SubscriptionDelete ::= SEQUENCE {
         dAppIdentifier        E3-DAppID,
-        subscriptionId        INTEGER (1..100),
+        subscriptionId        INTEGER (1..65535),
         ...
     }
 
@@ -41,45 +41,59 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         requestId            E3-MessageID,
         dAppIdentifier       E3-DAppID,
         responseCode         E3-ResponseCode,
-        subscriptionId       INTEGER (1..100) OPTIONAL,
-        telemetryIdentifierList SEQUENCE (SIZE (0..100)) OF INTEGER (1..100) OPTIONAL,
-        controlIdentifierList   SEQUENCE (SIZE (0..100)) OF INTEGER (1..100) OPTIONAL,
+        subscriptionId       INTEGER (1..65535) OPTIONAL,
+        telemetryIdentifierList SEQUENCE (SIZE (0..1000)) OF INTEGER (1..65535) OPTIONAL,
+        controlIdentifierList   SEQUENCE (SIZE (0..1000)) OF INTEGER (1..65535) OPTIONAL,
         ...
     }
 
     E3-RanFunctionDefinition ::= SEQUENCE {
-        ranFunctionIdentifier   INTEGER (1..100),
-        telemetryIdentifierList SEQUENCE (SIZE (0..100)) OF INTEGER (1..100),
-        controlIdentifierList   SEQUENCE (SIZE (0..100)) OF INTEGER (1..100),
+        ranFunctionIdentifier   INTEGER (1..65535),
+        telemetryIdentifierList SEQUENCE (SIZE (0..1000)) OF INTEGER (1..65535),
+        controlIdentifierList   SEQUENCE (SIZE (0..1000)) OF INTEGER (1..65535),
         ranFunctionData         OCTET STRING (SIZE (1..32768)),
         ...
     }
 
     E3-IndicationMessage ::= SEQUENCE {
         dAppIdentifier          E3-DAppID,
-        ranFunctionIdentifier   INTEGER (1..100),
+        ranFunctionIdentifier   INTEGER (1..65535),
         protocolData            OCTET STRING (SIZE (1..32768)),
         ...
     }
 
     E3-DAppControlAction ::= SEQUENCE {
         dAppIdentifier          E3-DAppID,
-        ranFunctionIdentifier   INTEGER (1..100),
-        controlIdentifier       INTEGER (1..100),
+        ranFunctionIdentifier   INTEGER (1..65535),
+        controlIdentifier       INTEGER (1..65535),
+        -- Present only when the dApp is re-issuing a control it received as an
+        -- E3-XAppControlAction, carrying that action's sequenceId back down so the
+        -- RAN can match the applied control to the xApp procedure that asked for
+        -- it. Absent on a control the dApp decided on its own.
+        sequenceId              E3-SequenceID OPTIONAL,
         actionData              OCTET STRING (SIZE (1..32768)),
         ...
     }
 
     E3-DAppReport ::= SEQUENCE {
         dAppIdentifier          E3-DAppID,
-        ranFunctionIdentifier   INTEGER (1..100),
+        ranFunctionIdentifier   INTEGER (1..65535),
+        -- Assigned by the dApp. A report is the head of the E2-E3 loop, so this is
+        -- the identifier every later message in that procedure carries: the RAN
+        -- copies it into the E2SM-DAPP indication header as sequence-id, and an
+        -- xApp reacting to this report echoes it on its control.
+        sequenceId              E3-SequenceID,
         reportData              OCTET STRING (SIZE (1..32768)),
         ...
     }
 
     E3-XAppControlAction ::= SEQUENCE {
         dAppIdentifier          E3-DAppID,
-        ranFunctionIdentifier   INTEGER (1..100),
+        ranFunctionIdentifier   INTEGER (1..65535),
+        -- Copied by the RAN's E2-E3 bridge from the E2SM-DAPP control header's
+        -- sequence-id. Mandatory: a relayed xApp control that carried no id could
+        -- never be matched to the control acknowledge the RAN owes the xApp.
+        sequenceId              E3-SequenceID,
         xAppControlData         OCTET STRING (SIZE (1..32768)),
         ...
     }
@@ -95,8 +109,19 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         ...
     }
 
-    E3-DAppID ::= INTEGER (1..100)
-    E3-MessageID ::= INTEGER (1..1000)
+    -- Correlation identifier for one detection-to-mitigation procedure, assigned
+    -- by whichever component originates it and propagated unchanged by everyone
+    -- downstream. It is what crosses into E2SM-DAPP as sequence-id, so the E2 and
+    -- E3 legs of a loop join per message instead of by nearest-in-time pairing.
+    --
+    -- Same range as E3-MessageID deliberately: both are producer-assigned counters
+    -- with the same lifetime, and a shared range means neither can silently
+    -- truncate when one is stored in a field sized for the other. Unlike a message
+    -- id it is not reassigned per hop.
+    E3-SequenceID ::= INTEGER (1..4294967295)
+
+    E3-DAppID ::= INTEGER (1..65535)
+    E3-MessageID ::= INTEGER (1..4294967295)
     E3-Version ::= UTF8String (SIZE (1..11))
     -- Deliberately not extensible. An extensible ENUMERATED makes asn1c pass
     -- unknown values through as bare integers, which would turn every

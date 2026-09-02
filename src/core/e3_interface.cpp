@@ -114,17 +114,18 @@ constexpr const char* LATREC_ROLE_CONTEXT  = "libe3.context";
 } // anonymous namespace
 
 uint32_t E3Interface::generate_message_id() {
-    // Monotonic, wrapping into the ASN.1 E3-MessageID (1..1000) range. Unique
-    // across the in-flight window so responses can be correlated by id.
-    return static_cast<uint32_t>(next_message_id_.fetch_add(1, std::memory_order_relaxed) % 1000) + 1;
+    // Monotonic over the ASN.1 E3-MessageID (1..4294967295) range, skipping 0
+    // (the grammar's lower bound is 1). A 32-bit counter does not wrap within
+    // any realistic run, so an id identifies a request uniquely rather than
+    // only across the in-flight window.
+    const uint64_t n = next_message_id_.fetch_add(1, std::memory_order_relaxed);
+    return static_cast<uint32_t>(n % 0xFFFFFFFFull) + 1;
 }
 
 void E3Interface::remember_subscription_op(uint32_t request_id,
                                           uint32_t ran_function_id,
                                           bool is_delete) {
     std::lock_guard<std::mutex> lk(pending_subscriptions_mutex_);
-    // E3-MessageID wraps at 1000, so an id can be reused while an older request
-    // is still unanswered. The newer request is the live one: overwrite.
     pending_subscriptions_[request_id] = PendingSubscriptionOp{ran_function_id, is_delete};
 }
 
@@ -1288,15 +1289,25 @@ void E3Interface::handle_xapp_control_action(const XAppControlAction& action,
             return;
         }
     }
-    latrec_tstamp(latrec_seq, LATREC_DELIVER_BEGIN, 0, 0);
+    // aux carries the loop's sequenceId. The ring's own seq stays the inbound
+    // counter (the ctx_set bridge below depends on it), so this is what lets a
+    // reader join this dApp-side leg to the RAN's BRIDGE_IN/OUT records for the
+    // same procedure -- the two rings share no counter, only this id.
+    latrec_tstamp(latrec_seq, LATREC_DELIVER_BEGIN, action.sequence_id, 0);
     latrec_ctx_set(latrec_seq);
     if (xapp_control_handler_) {
         xapp_control_handler_(action);
     }
-    latrec_tstamp(latrec_seq, LATREC_DELIVER_DONE, 0, 0);
+    latrec_tstamp(latrec_seq, LATREC_DELIVER_DONE, action.sequence_id, 0);
 }
 
 void E3Interface::handle_message_ack(const MessageAck& ack) {
+    // Closes the acknowledgment tail. Keyed on the acknowledged message's id,
+    // matching the LATREC_ACK_SENT the RAN-side Service Model stamps, so the
+    // leg joins on a libe3 build the way it already did on backends that
+    // stamped this themselves.
+    latrec_tstamp(ack.request_id, LATREC_ACK_RECV,
+                  static_cast<uint64_t>(ack.response_code), 0);
     if (message_ack_handler_) {
         message_ack_handler_(ack);
     }
@@ -1394,6 +1405,7 @@ ErrorCode E3Interface::queue_dapp_control_action(
     uint32_t ran_function_id,
     uint32_t control_id,
     std::vector<uint8_t> action_data,
+    uint32_t sequence_id,
     uint32_t* out_message_id
 ) {
     if (!dapp_state_) return ErrorCode::STATE_ERROR;
@@ -1405,6 +1417,7 @@ ErrorCode E3Interface::queue_dapp_control_action(
     a.dapp_identifier = *id;
     a.ran_function_identifier = ran_function_id;
     a.control_identifier = control_id;
+    a.sequence_id = sequence_id;
     a.action_data = std::move(action_data);
     pdu.choice = std::move(a);
     const uint32_t mid = generate_message_id();
@@ -1424,6 +1437,7 @@ ErrorCode E3Interface::queue_dapp_control_action(
 ErrorCode E3Interface::queue_dapp_report(
     uint32_t ran_function_id,
     std::vector<uint8_t> report_data,
+    uint32_t sequence_id,
     uint32_t* out_message_id
 ) {
     if (!dapp_state_) return ErrorCode::STATE_ERROR;
@@ -1434,6 +1448,7 @@ ErrorCode E3Interface::queue_dapp_report(
     DAppReport r;
     r.dapp_identifier = *id;
     r.ran_function_identifier = ran_function_id;
+    r.sequence_id = sequence_id;
     r.report_data = std::move(report_data);
     pdu.choice = std::move(r);
     const uint32_t mid = generate_message_id();

@@ -223,7 +223,7 @@ TEST(role_pair_full_handshake_indication_control_report_release) {
     // #67: send_control's out_message_id must be the same id the RAN sees as
     // request_message_id in handle_control_action.
     uint32_t sent_message_id = 0;
-    ASSERT_TRUE(dapp.send_control(1, 1, ctrl, &sent_message_id) == ErrorCode::SUCCESS);
+    ASSERT_TRUE(dapp.send_control(1, 1, ctrl, /*sequence_id=*/0, &sent_message_id) == ErrorCode::SUCCESS);
     ASSERT_TRUE(sent_message_id != 0);
 
     // Allow the SM up to 2s to receive and ack the control
@@ -238,8 +238,8 @@ TEST(role_pair_full_handshake_indication_control_report_release) {
     // nonzero message id through to the dApp's registered handler.
     auto dapp_id = dapp.dapp_id();
     ASSERT_TRUE(dapp_id.has_value());
-    ASSERT_TRUE(ran.send_xapp_control(*dapp_id, TestSimpleSM::RAN_FUNCTION_ID, ctrl) == ErrorCode::SUCCESS);
-    ASSERT_TRUE(ran.send_xapp_control(*dapp_id, TestSimpleSM::RAN_FUNCTION_ID, ctrl) == ErrorCode::SUCCESS);
+    ASSERT_TRUE(ran.send_xapp_control(*dapp_id, TestSimpleSM::RAN_FUNCTION_ID, ctrl, /*sequence_id=*/1) == ErrorCode::SUCCESS);
+    ASSERT_TRUE(ran.send_xapp_control(*dapp_id, TestSimpleSM::RAN_FUNCTION_ID, ctrl, /*sequence_id=*/1) == ErrorCode::SUCCESS);
     {
         std::unique_lock<std::mutex> lk(mu);
         ASSERT_TRUE(cv.wait_for(lk, 3s, [&]() { return xapp_control_message_ids.size() >= 2; }));

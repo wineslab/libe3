@@ -97,6 +97,7 @@ TEST(Asn1Size_DAppReport_smallPayload) {
     DAppReport rep;
     rep.dapp_identifier = 1;
     rep.ran_function_identifier = 1;
+    rep.sequence_id = 1;
     rep.report_data = payload;
     pdu.choice = rep;
 
@@ -121,6 +122,7 @@ TEST(Asn1Size_XAppControlAction_mediumPayload) {
     XAppControlAction action;
     action.dapp_identifier = 1;
     action.ran_function_identifier = 1;
+    action.sequence_id = 1;
     action.xapp_control_data = payload;
     pdu.choice = action;
 
@@ -169,6 +171,7 @@ TEST(Asn1Size_DAppReport_roundTrip_preservesPayload) {
     DAppReport rep;
     rep.dapp_identifier = 3;
     rep.ran_function_identifier = 1;
+    rep.sequence_id = 1;
     rep.report_data = payload;
     pdu.choice = rep;
 
@@ -239,6 +242,7 @@ TEST(Asn1Size_growsLinearlyWithPayload) {
         DAppReport rep;
         rep.dapp_identifier = 1;
         rep.ran_function_identifier = 1;
+        rep.sequence_id = 1;
         rep.report_data = make_payload(n);
         pdu.choice = rep;
         auto r = enc->encode(pdu);
