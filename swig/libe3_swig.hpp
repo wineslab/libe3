@@ -48,11 +48,17 @@ public:
 
     // dApp-side verbs.
     ErrorCode unsubscribe(uint32_t ran_function_id);
+    // sequence_id correlates a message with the procedure it belongs to:
+    // mandatory on a report, which starts one, and left 0 on a control the dApp
+    // decided on its own. out_message_id is not mirrored -- an out-pointer is
+    // not worth wrapping, and DAppSession returns the id directly.
     ErrorCode send_control(uint32_t ran_function_id,
                            uint32_t control_id,
-                           std::vector<uint8_t> action_data);
+                           std::vector<uint8_t> action_data,
+                           uint32_t sequence_id = 0);
     ErrorCode send_report(uint32_t ran_function_id,
-                          std::vector<uint8_t> report_data);
+                          std::vector<uint8_t> report_data,
+                          uint32_t sequence_id);
     ErrorCode release();
     std::vector<uint32_t> subscribed_ran_functions() const;
     std::vector<uint32_t> active_subscription_ids() const;
