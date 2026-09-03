@@ -196,9 +196,11 @@ public:
     ErrorCode queue_dapp_control_action(uint32_t ran_function_id,
                                         uint32_t control_id,
                                         std::vector<uint8_t> action_data,
+                                        uint32_t sequence_id = 0,
                                         uint32_t* out_message_id = nullptr);
     ErrorCode queue_dapp_report(uint32_t ran_function_id,
                                 std::vector<uint8_t> report_data,
+                                uint32_t sequence_id,
                                 uint32_t* out_message_id = nullptr);
     ErrorCode queue_release_message();
 

@@ -363,7 +363,7 @@ bool run_combo(const Combo& c, const std::string& trace_dir) {
             ran.send_indication(1, /*ran_function_id=*/1, payload);
         }
         while (!stop.load()) {
-            dapp.send_report(1, std::vector<uint8_t>(32, 0xAB));
+            dapp.send_report(1, std::vector<uint8_t>(32, 0xAB), /*sequence_id=*/1);
             dapp.send_control(1, 1, std::vector<uint8_t>(16, 0xCD));
             std::this_thread::sleep_for(std::chrono::milliseconds(20));
         }

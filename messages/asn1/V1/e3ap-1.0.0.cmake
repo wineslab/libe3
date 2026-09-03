@@ -118,6 +118,7 @@ set(e3ap_source
     E3-RanFunctionDefinition.c
     E3-ReleaseMessage.c
     E3-ResponseCode.c
+    E3-SequenceID.c
     E3-SetupRequest.c
     E3-SetupResponse.c
     E3-SubscriptionDelete.c
@@ -188,6 +189,7 @@ set(e3ap_headers
     E3-RanFunctionDefinition.h
     E3-ReleaseMessage.h
     E3-ResponseCode.h
+    E3-SequenceID.h
     E3-SetupRequest.h
     E3-SetupResponse.h
     E3-SubscriptionDelete.h

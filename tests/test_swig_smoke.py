@@ -115,7 +115,7 @@ def main() -> int:
     try:
         agent.send_indication(1, 1, payload)          # const-ref in-typemap
         session.send_control(1, 1, payload)           # by-value in-typemap
-        session.send_report(1, payload)
+        session.send_report(1, payload, 1)            # sequence_id is mandatory here
     except TypeError as e:
         print(f"FAIL: bytes typemap rejected a bytes argument: {e}", file=sys.stderr)
         return 1

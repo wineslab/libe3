@@ -274,6 +274,9 @@ struct DAppControlAction {
     uint32_t ran_function_identifier{0};
     uint32_t control_identifier{0};      ///< Control identifier
     std::vector<uint8_t> action_data;
+    /// Correlation id of the xApp procedure this control re-issues; 0 when the
+    /// dApp decided on its own. Optional on the wire, absent when 0.
+    uint32_t sequence_id{0};
 };
 
 /**
@@ -291,6 +294,9 @@ struct DAppReport {
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0};
     std::vector<uint8_t> report_data;
+    /// Correlation id assigned by the dApp; the head of the loop's chain.
+    /// Mandatory on the wire.
+    uint32_t sequence_id{0};
     uint64_t recv_seq{0};          ///< Set by the inbound loop; keys the [latrec] L-stage records
 };
 
@@ -301,6 +307,9 @@ struct XAppControlAction {
     uint32_t dapp_identifier{0};
     uint32_t ran_function_identifier{0};
     std::vector<uint8_t> xapp_control_data;
+    /// Correlation id copied by the RAN bridge from the E2SM-DAPP control
+    /// header's sequence-id. Mandatory on the wire.
+    uint32_t sequence_id{0};
     // Set by the inbound loop from the wrapping E3-PDU's id field; not
     // serialized, so it carries no ASN.1/JSON/Protobuf grammar of its own.
     uint32_t message_id{0};

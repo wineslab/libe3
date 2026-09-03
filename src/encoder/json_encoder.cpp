@@ -313,6 +313,8 @@ nlohmann::json JsonE3Encoder::encode_dapp_control_action(const DAppControlAction
     j["dAppIdentifier"] = action.dapp_identifier;
     j["ranFunctionIdentifier"] = action.ran_function_identifier;
     j["controlIdentifier"] = action.control_identifier;
+    // OPTIONAL: omitted entirely when unset, mirroring the ASN.1 absent field.
+    if (action.sequence_id != 0) j["sequenceId"] = action.sequence_id;
     j["actionData"] = binary_to_hex(action.action_data);
     return j;
 }
@@ -321,6 +323,7 @@ nlohmann::json JsonE3Encoder::encode_dapp_report(const DAppReport& report) const
     nlohmann::json j;
     j["dAppIdentifier"] = report.dapp_identifier;
     j["ranFunctionIdentifier"] = report.ran_function_identifier;
+    j["sequenceId"] = report.sequence_id;
     j["reportData"] = binary_to_hex(report.report_data);
     return j;
 }
@@ -329,6 +332,7 @@ nlohmann::json JsonE3Encoder::encode_xapp_control_action(const XAppControlAction
     nlohmann::json j;
     j["dAppIdentifier"] = action.dapp_identifier;
     j["ranFunctionIdentifier"] = action.ran_function_identifier;
+    j["sequenceId"] = action.sequence_id;
     j["xAppControlData"] = binary_to_hex(action.xapp_control_data);
     return j;
 }
@@ -446,6 +450,7 @@ DAppControlAction JsonE3Encoder::decode_dapp_control_action(const nlohmann::json
     action.dapp_identifier = j.value("dAppIdentifier", 0u);
     action.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
     action.control_identifier = j.value("controlIdentifier", 0u);
+    action.sequence_id = j.value("sequenceId", 0u);
     action.action_data = hex_to_binary(j.value("actionData", ""));
     return action;
 }
@@ -454,6 +459,7 @@ DAppReport JsonE3Encoder::decode_dapp_report(const nlohmann::json& j) const {
     DAppReport report;
     report.dapp_identifier = j.value("dAppIdentifier", 0u);
     report.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
+    report.sequence_id = j.value("sequenceId", 0u);
     report.report_data = hex_to_binary(j.value("reportData", ""));
     return report;
 }
@@ -462,6 +468,7 @@ XAppControlAction JsonE3Encoder::decode_xapp_control_action(const nlohmann::json
     XAppControlAction action;
     action.dapp_identifier = j.value("dAppIdentifier", 0u);
     action.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
+    action.sequence_id = j.value("sequenceId", 0u);
     action.xapp_control_data = hex_to_binary(j.value("xAppControlData", ""));
     return action;
 }

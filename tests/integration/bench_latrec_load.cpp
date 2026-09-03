@@ -279,10 +279,10 @@ int main(int argc, char** argv) {
 
             std::atomic<bool> stop{false};
             std::thread ctrl = spawn_driver("mix.ctrl", tier.ctrl_hz, stop, [&ran] {
-                ran.send_xapp_control(1, 1, std::vector<uint8_t>(16, 0xC0));
+                ran.send_xapp_control(1, 1, std::vector<uint8_t>(16, 0xC0), /*sequence_id=*/1);
             });
             std::thread rep = spawn_driver("mix.report", tier.rep_hz, stop, [&dapp] {
-                dapp.send_report(1, std::vector<uint8_t>(32, 0xAB));
+                dapp.send_report(1, std::vector<uint8_t>(32, 0xAB), /*sequence_id=*/1);
             });
 
             const uint64_t t0 = latrec_now_ns();

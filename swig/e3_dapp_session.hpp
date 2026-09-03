@@ -79,6 +79,7 @@ struct E3Event {
     uint32_t ran_function_id{0};    ///< RAN function (indication / xApp control)
     uint32_t subscription_id{0};    ///< subscription id (subscription response)
     uint32_t request_id{0};         ///< request/message id (subscription response / ack / xApp control)
+    uint32_t sequence_id{0};        ///< loop correlation id (xApp control); echo it on the control you re-issue
     int response_code{-1};          ///< 0=positive, 1=negative, -1=n/a
     std::vector<uint8_t> payload;   ///< opaque E3SM bytes (indication / xApp control)
     uint64_t trace_seq{0};          ///< set when queued; keys the [latrec] LQ-stage records
@@ -159,19 +160,27 @@ public:
 
     /**
      * @brief Send a dApp control action to the RAN.
-     * @return the assigned message id (positive, 1..1000) on success, so the
-     *         caller can correlate a later ack/response by id; a negative
-     *         ErrorCode on failure.
+     * @param sequence_id correlation id of the xApp procedure this control
+     *        re-issues; 0 when the dApp decided on its own.
+     * @return the assigned message id (positive, 1..4294967295) on success, so
+     *         the caller can correlate a later ack/response by id; a negative
+     *         ErrorCode on failure. Returned as int64_t because a message id
+     *         now spans the full uint32 range and would alias onto the negative
+     *         error codes if narrowed to int.
      */
-    int send_control(uint32_t ran_function_id, uint32_t control_id,
-                     std::vector<uint8_t> action_data);
+    int64_t send_control(uint32_t ran_function_id, uint32_t control_id,
+                         std::vector<uint8_t> action_data,
+                         uint32_t sequence_id = 0);
     /**
      * @brief Send a dApp report to the RAN.
-     * @return the assigned message id (positive, 1..1000) on success, so the
-     *         caller can correlate a later ack/response by id; a negative
+     * @param sequence_id correlation id this dApp assigns to the detection;
+     *        mandatory on the wire.
+     * @return the assigned message id (positive, 1..4294967295) on success, so
+     *         the caller can correlate a later ack/response by id; a negative
      *         ErrorCode on failure.
      */
-    int send_report(uint32_t ran_function_id, std::vector<uint8_t> report_data);
+    int64_t send_report(uint32_t ran_function_id, std::vector<uint8_t> report_data,
+                        uint32_t sequence_id);
     /** @brief Acknowledge a request. @param response_code 0=positive,1=negative. @return ErrorCode as int. */
     int send_message_ack(uint32_t request_id, int response_code);
 

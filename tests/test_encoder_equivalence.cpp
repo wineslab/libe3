@@ -147,18 +147,21 @@ static bool equals(const DAppControlAction& a, const DAppControlAction& b) {
     return a.dapp_identifier == b.dapp_identifier
         && a.ran_function_identifier == b.ran_function_identifier
         && a.control_identifier == b.control_identifier
+        && a.sequence_id == b.sequence_id
         && a.action_data == b.action_data;
 }
 
 static bool equals(const DAppReport& a, const DAppReport& b) {
     return a.dapp_identifier == b.dapp_identifier
         && a.ran_function_identifier == b.ran_function_identifier
+        && a.sequence_id == b.sequence_id
         && a.report_data == b.report_data;
 }
 
 static bool equals(const XAppControlAction& a, const XAppControlAction& b) {
     return a.dapp_identifier == b.dapp_identifier
         && a.ran_function_identifier == b.ran_function_identifier
+        && a.sequence_id == b.sequence_id
         && a.xapp_control_data == b.xapp_control_data;
 }
 
@@ -279,18 +282,21 @@ static std::vector<Sample> sample_pdus() {
     control.dapp_identifier = 42;
     control.ran_function_identifier = 5;
     control.control_identifier = 9;
+    control.sequence_id = 77;   // set: exercises the OPTIONAL-present branch
     control.action_data = {0x01, 0x02, 0x03, 0xFF, 0x00, 0x80};
     add("DAppControlAction", PduType::DAPP_CONTROL_ACTION, control);
 
     DAppReport report;
     report.dapp_identifier = 42;
     report.ran_function_identifier = 5;
+    report.sequence_id = 77;
     report.report_data = {0xAA, 0xBB, 0xCC, 0x00, 0x11};
     add("DAppReport", PduType::DAPP_REPORT, report);
 
     XAppControlAction xapp;
     xapp.dapp_identifier = 42;
     xapp.ran_function_identifier = 5;
+    xapp.sequence_id = 77;
     xapp.xapp_control_data = {0x7F, 0x80, 0x00, 0x01};
     add("XAppControlAction", PduType::XAPP_CONTROL_ACTION, xapp);
 

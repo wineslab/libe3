@@ -114,6 +114,7 @@ bool ProtobufE3Encoder::pdu_to_proto(const Pdu& pdu, pb::E3Pdu& out) const {
             m->set_dapp_identifier(s->dapp_identifier);
             m->set_ran_function_identifier(s->ran_function_identifier);
             m->set_control_identifier(s->control_identifier);
+            m->set_sequence_id(s->sequence_id);
             m->set_action_data(s->action_data.data(), s->action_data.size());
             return true;
         }
@@ -123,6 +124,7 @@ bool ProtobufE3Encoder::pdu_to_proto(const Pdu& pdu, pb::E3Pdu& out) const {
             auto* m = out.mutable_dapp_report();
             m->set_dapp_identifier(s->dapp_identifier);
             m->set_ran_function_identifier(s->ran_function_identifier);
+            m->set_sequence_id(s->sequence_id);
             m->set_report_data(s->report_data.data(), s->report_data.size());
             return true;
         }
@@ -132,6 +134,7 @@ bool ProtobufE3Encoder::pdu_to_proto(const Pdu& pdu, pb::E3Pdu& out) const {
             auto* m = out.mutable_xapp_control_action();
             m->set_dapp_identifier(s->dapp_identifier);
             m->set_ran_function_identifier(s->ran_function_identifier);
+            m->set_sequence_id(s->sequence_id);
             m->set_xapp_control_data(s->xapp_control_data.data(), s->xapp_control_data.size());
             return true;
         }
@@ -245,6 +248,7 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
             s.dapp_identifier = m.dapp_identifier();
             s.ran_function_identifier = m.ran_function_identifier();
             s.control_identifier = m.control_identifier();
+            s.sequence_id = m.sequence_id();
             s.action_data = to_bytes(m.action_data());
             pdu.type = PduType::DAPP_CONTROL_ACTION;
             pdu.choice = std::move(s);
@@ -255,6 +259,7 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
             DAppReport s;
             s.dapp_identifier = m.dapp_identifier();
             s.ran_function_identifier = m.ran_function_identifier();
+            s.sequence_id = m.sequence_id();
             s.report_data = to_bytes(m.report_data());
             pdu.type = PduType::DAPP_REPORT;
             pdu.choice = std::move(s);
@@ -265,6 +270,7 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
             XAppControlAction s;
             s.dapp_identifier = m.dapp_identifier();
             s.ran_function_identifier = m.ran_function_identifier();
+            s.sequence_id = m.sequence_id();
             s.xapp_control_data = to_bytes(m.xapp_control_data());
             pdu.type = PduType::XAPP_CONTROL_ACTION;
             pdu.choice = std::move(s);

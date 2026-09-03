@@ -137,6 +137,14 @@ Service Model payload is the same operation whichever direction it travels in,
 and `aux2` carries the PDU type that separates an indication from a control or
 a report.
 
+At A11 a **report** is also assigned its `E3-SequenceID`, which is mandatory on
+`E3-DAppReport`. On a deployment with no xApp it is simply carried and ignored;
+where an xApp exists it becomes the identifier for the whole procedure that
+follows, so a Path A report is where a Path B loop's chain begins — see
+[path-b-e2-e3-loop.md](path-b-e2-e3-loop.md). A **control** the dApp decided on
+its own carries no sequenceId; one re-issued on an xApp's behalf carries that
+procedure's.
+
 ### Two distinct terminations
 
 `A19a` (apply control) and `A19b` (queue report) are alternative endings, not a
