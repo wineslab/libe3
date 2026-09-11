@@ -23,7 +23,7 @@ var c__api_8cpp =
     [ "e3_agent_register_sm", "c__api_8cpp.html#a05537e2fef7d530691dcd5457aed6e5d", null ],
     [ "e3_agent_send_indication", "c__api_8cpp.html#a9ec8f68d8c97d5c64e275c354c4820c0", null ],
     [ "e3_agent_send_message_ack", "c__api_8cpp.html#a5239a5675c6fde681d7618f6d42e0b68", null ],
-    [ "e3_agent_send_xapp_control", "c__api_8cpp.html#a9ec08be79cc68692073458b5628ae9b5", null ],
+    [ "e3_agent_send_xapp_control", "c__api_8cpp.html#ae9efec754e7a7f3a6ed55f46419e4998", null ],
     [ "e3_agent_set_dapp_report_handler", "c__api_8cpp.html#a3986384fd2df720f2ebccaba5567fc59", null ],
     [ "e3_agent_set_dapp_status_changed_handler", "c__api_8cpp.html#af9b1a07dd947ba33b779ea4403e9e605", null ],
     [ "e3_agent_start", "c__api_8cpp.html#a799cc0e6e8653202eefaf7d6055d9ec7", null ],

@@ -3,5 +3,6 @@ var structlibe3_1_1XAppControlAction =
     [ "dapp_identifier", "structlibe3_1_1XAppControlAction.html#a7eb8d89a9c820a03d2dfa929d4fb3915", null ],
     [ "message_id", "structlibe3_1_1XAppControlAction.html#a59024a36d00aa7ae6a123ed0871b6758", null ],
     [ "ran_function_identifier", "structlibe3_1_1XAppControlAction.html#ac51ad2b0656b86a90b1e90b814caab5e", null ],
+    [ "sequence_id", "structlibe3_1_1XAppControlAction.html#acf39ad557d60200caf39eee371254fb5", null ],
     [ "xapp_control_data", "structlibe3_1_1XAppControlAction.html#a22a1da95bc57e9f8773b36c63fb2316c", null ]
 ];

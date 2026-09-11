@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.1.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -93,11 +93,11 @@ $(document).ready(function(){initNavTree('path_a_e3_loop.html',''); initResizabl
   <div class="headertitle"><div class="title">The E3-only end-to-end loop (Path A)</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md21"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md22"></a>
 Path A — the E3-only end-to-end loop</h1>
 <p>The dApp control loop as it runs over the E3 interface alone, with no RIC and no E2 involvement.</p>
 <p>Read <a class="el" href="latrec_8md.html">latrec.md</a> first for the recorder, the clock model, and the stage-catalog conventions.</p>
-<h2><a class="anchor" id="autotoc_md22"></a>
+<h2><a class="anchor" id="autotoc_md23"></a>
 Box order</h2>
 <div class="fragment"><div class="line">flowchart LR</div>
 <div class="line">    subgraph RAN_fwd[&quot;RAN&quot;]</div>
@@ -152,7 +152,7 @@ Box order</h2>
 <p><b>E3SM and E3AP are always separate boxes.</b> The Service Model codec runs in the RAN stack or in the dApp; the E3AP codec runs inside libE3. They are never collapsed into one "encode" stage, on either leg, in either direction. Keeping them apart is what makes the library's own cost separable from the integration's.</p>
 <p><b>A1 is not IQ-specific.</b> "E3 data recording" is whatever raw input a Service Model captures — IQ samples for a spectrum-sensing SM, but equally cell load, mobility statistics, or anything else an SM chooses to report.</p>
 <p>The report branch terminates at the E2-E3 bridge, which is where <a class="el" href="path-b-e2-e3-loop_8md.html">Path B</a> begins.</p>
-<h2><a class="anchor" id="autotoc_md23"></a>
+<h2><a class="anchor" id="autotoc_md24"></a>
 Forward leg: RAN to dApp (&lt;tt&gt;leg=ind_up&lt;/tt&gt;)</h2>
 <p>Segments name identifiers from the stage catalog in <a href="../include/libe3/latrec.h"><code>include/libe3/latrec.h</code></a>. The catalog names <em>operations</em>, so the same identifier appears wherever that operation is performed; which component performed it is read off the ring that recorded it.</p>
 <table class="markdownTable">
@@ -184,10 +184,10 @@ Forward leg: RAN to dApp (&lt;tt&gt;leg=ind_up&lt;/tt&gt;)</h2>
 <td class="markdownTableBodyNone">A10   </td><td class="markdownTableBodyNone">Process   </td><td class="markdownTableBodyNone">dApp application   </td><td class="markdownTableBodyNone"><code>DECODE_E3SM_DONE</code> to <code>PROCESS_DONE</code>   </td></tr>
 </table>
 <p><code>DELIVER_BEGIN</code> and <code>DELIVER_DONE</code> bracket A9 and A10 together as <a class="el" href="namespacelibe3.html">libe3</a> sees them: the library's inbound filter passed, and the application's handler returned.</p>
-<h3><a class="anchor" id="autotoc_md24"></a>
+<h3><a class="anchor" id="autotoc_md25"></a>
 Caveat on A6 and the wire</h3>
 <p><code>SEND_DONE</code> marks the return of the connector's <code>send()</code>. Over ZeroMQ PUB that is a copy into ZeroMQ's own queue, not a socket write: the wire transfer happens later on ZeroMQ's internal I/O thread. The <code>SEND_DONE</code> to <code>RECV</code> segment therefore contains that hop for ZeroMQ but not for the POSIX connectors, and any comparison between the two must say so.</p>
-<h2><a class="anchor" id="autotoc_md25"></a>
+<h2><a class="anchor" id="autotoc_md26"></a>
 Return leg: dApp to RAN (&lt;tt&gt;leg=ctrl_down&lt;/tt&gt; for control, &lt;tt&gt;report_up&lt;/tt&gt; for reports)</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -222,11 +222,12 @@ Return leg: dApp to RAN (&lt;tt&gt;leg=ctrl_down&lt;/tt&gt; for control, &lt;tt&
 <td class="markdownTableBodyNone">—   </td><td class="markdownTableBodyNone">Acknowledgment tail   </td><td class="markdownTableBodyNone">RAN and dApp   </td><td class="markdownTableBodyNone"><code>ACK_SENT</code> to <code>ACK_RECV</code>   </td></tr>
 </table>
 <p>A12 and A3 share one identifier pair, and A18 and A9 share another: encoding a Service Model payload is the same operation whichever direction it travels in, and <code>aux2</code> carries the PDU type that separates an indication from a control or a report.</p>
-<h3><a class="anchor" id="autotoc_md26"></a>
+<p>At A11 a <b>report</b> is also assigned its <code>E3-SequenceID</code>, which is mandatory on <code>E3-DAppReport</code>. On a deployment with no xApp it is simply carried and ignored; where an xApp exists it becomes the identifier for the whole procedure that follows, so a Path A report is where a Path B loop's chain begins — see <a class="el" href="path-b-e2-e3-loop_8md.html">path-b-e2-e3-loop.md</a>. A <b>control</b> the dApp decided on its own carries no sequenceId; one re-issued on an xApp's behalf carries that procedure's.</p>
+<h3><a class="anchor" id="autotoc_md27"></a>
 Two distinct terminations</h3>
 <p><code>A19a</code> (apply control) and <code>A19b</code> (queue report) are alternative endings, not a sequence. A control action terminates on the air at <code>LIVE_ON_AIR</code>; a dApp report terminates by being queued for the report worker and, if the deployment has an xApp, handed to the E2-E3 bridge at <code>A20</code>. The two must be reported as separate legs and never summed.</p>
 <p><code>APPLY_CONTROL_DONE</code> and <code>LIVE_ON_AIR</code> are also distinct: the first is the control handler installing the change, the second is the first scheduler tick that actually put it on air. They run on different threads, and a tick can land between them.</p>
-<h2><a class="anchor" id="autotoc_md27"></a>
+<h2><a class="anchor" id="autotoc_md28"></a>
 Aggregates</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -245,7 +246,7 @@ Aggregates</h2>
 <td class="markdownTableBodyNone"><code>total_e2e</code>   </td><td class="markdownTableBodyNone"><code>A1</code> to <code>A19a</code>   </td><td class="markdownTableBodyNone">the headline number: input to control on the air   </td></tr>
 </table>
 <p><code>total_libe3_up</code> and <code>total_libe3_down</code> are the two spans that are a property of libE3 itself rather than of the integrating stack.</p>
-<h2><a class="anchor" id="autotoc_md28"></a>
+<h2><a class="anchor" id="autotoc_md29"></a>
 Deployment variants</h2>
 <p>The loop shape is fixed; who owns each box is not. Some illustrative deployments:</p>
 <table class="markdownTable">
@@ -260,10 +261,10 @@ Deployment variants</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Accelerated L1   </td><td class="markdownTableBodyNone">an L1 data lake feeding an accelerated dApp's E3 manager   </td><td class="markdownTableBodyNone">accelerated CPU and GPU dApps   </td><td class="markdownTableBodyNone">not necessarily wired   </td><td class="markdownTableBodyNone">Can be measured with and without libE3 framing to compare the library against a hand-rolled integration over the same stage set.   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md29"></a>
+<h3><a class="anchor" id="autotoc_md30"></a>
 Comparing against a hand-rolled integration</h3>
 <p>Where a dApp already frames E3AP by hand, the libE3-backed path can be built as a <em>second backend</em> selected at build time, so the same binary shape is measurable both ways over the same stage set. Comparing the two at <code>A4</code> to <code>A8</code> and <code>A13</code> to <code>A17</code> measures directly what the library costs relative to the hand-rolled version.</p>
-<h2><a class="anchor" id="autotoc_md30"></a>
+<h2><a class="anchor" id="autotoc_md31"></a>
 Not yet instrumented</h2>
 <ol type="1">
 <li>Split capture pipelines and accelerated L1 sources have identifiers available (<code>RECORD_BEGIN</code>, <code>PROCESS_BEGIN</code>) but no stamps in their own code yet, so <code>A1</code> and <code>A2</code> are unattributable on those deployments.</li>

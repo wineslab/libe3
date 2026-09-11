@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.1.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -119,6 +119,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a5b3211fec7235552b8167b576722c0c8" id="r_a5b3211fec7235552b8167b576722c0c8"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1py_1_1E3Event.html#a5b3211fec7235552b8167b576722c0c8">request_id</a> {0}</td></tr>
 <tr class="memdesc:a5b3211fec7235552b8167b576722c0c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">request/message id (subscription response / ack / xApp control)  <br /></td></tr>
 <tr class="separator:a5b3211fec7235552b8167b576722c0c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a288cb26fca5af14c083ec7e3c80d3843" id="r_a288cb26fca5af14c083ec7e3c80d3843"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1py_1_1E3Event.html#a288cb26fca5af14c083ec7e3c80d3843">sequence_id</a> {0}</td></tr>
+<tr class="memdesc:a288cb26fca5af14c083ec7e3c80d3843"><td class="mdescLeft">&#160;</td><td class="mdescRight">loop correlation id (xApp control); echo it on the control you re-issue  <br /></td></tr>
+<tr class="separator:a288cb26fca5af14c083ec7e3c80d3843"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7071a62be00d55a5b3473de7004e8cdb" id="r_a7071a62be00d55a5b3473de7004e8cdb"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1py_1_1E3Event.html#a7071a62be00d55a5b3473de7004e8cdb">response_code</a> {-1}</td></tr>
 <tr class="memdesc:a7071a62be00d55a5b3473de7004e8cdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">0=positive, 1=negative, -1=n/a  <br /></td></tr>
 <tr class="separator:a7071a62be00d55a5b3473de7004e8cdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -133,7 +136,7 @@ Public Attributes</h2></td></tr>
 <div class="textblock"><p>One inbound E3AP event, POD-flat for a clean SWIG crossing. </p>
 <p><code>payload</code> carries the opaque E3SM bytes for indications (protocol_data) and xApp controls (xapp_control_data); it is empty for subscription/setup responses and acks. Fields not relevant to a given <code>kind</code> are left zero. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00075">75</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00076">76</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a3289640b851ae9089cc92acc0f436f65" name="a3289640b851ae9089cc92acc0f436f65"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3289640b851ae9089cc92acc0f436f65">&#9670;&#160;</a></span>dapp_id</h2>
@@ -149,7 +152,7 @@ Public Attributes</h2></td></tr>
 
 <p>dApp identifier the message targets </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00077">77</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00078">78</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -167,7 +170,7 @@ Public Attributes</h2></td></tr>
 
 <p>one of <a class="el" href="namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917">E3EventKind</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00076">76</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00077">77</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -185,7 +188,7 @@ Public Attributes</h2></td></tr>
 
 <p>opaque E3SM bytes (indication / xApp control) </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00082">82</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00084">84</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -203,7 +206,7 @@ Public Attributes</h2></td></tr>
 
 <p>RAN function (indication / xApp control) </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00078">78</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00079">79</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -221,7 +224,7 @@ Public Attributes</h2></td></tr>
 
 <p>request/message id (subscription response / ack / xApp control) </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00080">80</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00081">81</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -239,7 +242,25 @@ Public Attributes</h2></td></tr>
 
 <p>0=positive, 1=negative, -1=n/a </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00081">81</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00083">83</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a288cb26fca5af14c083ec7e3c80d3843" name="a288cb26fca5af14c083ec7e3c80d3843"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a288cb26fca5af14c083ec7e3c80d3843">&#9670;&#160;</a></span>sequence_id</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t libe3::py::E3Event::sequence_id {0}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>loop correlation id (xApp control); echo it on the control you re-issue </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00082">82</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -257,7 +278,7 @@ Public Attributes</h2></td></tr>
 
 <p>subscription id (subscription response) </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00079">79</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00080">80</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -275,7 +296,7 @@ Public Attributes</h2></td></tr>
 
 <p>set when queued; keys the [latrec] LQ-stage records </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00083">83</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00085">85</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>

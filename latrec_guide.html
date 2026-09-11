@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.1.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -138,6 +138,10 @@ Ring naming and sizing</h2>
 Stage catalog</h2>
 <p>The stage catalog in <a class="el" href="latrec_8h.html">latrec.h</a> names <b>operations on the E3AP / E3SM / E2SM-DAPP path</b> — not components, and not positions in a particular loop. Several components perform the same operation: an indication is encoded by whichever Service Model produced it, and E3AP framing is the same <a class="el" href="namespacelibe3.html">libe3</a> call whether the RAN or the dApp made it. They share the identifier. Which component wrote a given record comes from its <b>ring name</b>, and which concrete message it carried from the <code>aux</code> payloads, so a component prefix on the stage id would only duplicate what the reader already knows.</p>
 <p>That is why <code>tools/latrec2csv.py</code> keys its per-component tables off the ring's role (<code>RING_COMPONENTS</code>) and its legs off the stage chain (<code>LEGS</code>), rather than mapping stage-id ranges to repositories.</p>
+<h3><a class="anchor" id="autotoc_md16"></a>
+Joining across components</h3>
+<p>A <code>seq</code> is meaningful only inside the ring that wrote it: each component numbers with a counter of its own, and <code><a class="el" href="latrec_8h.html#a1cf8c3111daf8d291d07bd4b4f71a879">latrec_ctx_set()</a></code> bridges that counter across a synchronous callback within one process. Nothing about it crosses a wire.</p>
+<p>What crosses the wire is the E3AP <code>sequenceId</code>, which identifies one detection-to-mitigation procedure across every component that touches it (see <a class="el" href="path-b-e2-e3-loop_8md.html">path-b-e2-e3-loop.md</a>). It is not used as a ring <code>seq</code> — that would break the <code>ctx_set</code> bridge — but it is stamped as the <code>aux</code> payload on the records where the loop crosses a component boundary: <code>DELIVER_BEGIN</code> / <code>DELIVER_DONE</code> for a relayed xApp control, and <code>BRIDGE_IN</code> / <code>BRIDGE_OUT</code> in both directions. Join two components' rings through those records.</p>
 <p>The identifiers name the boxes of the two documented loops:</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -166,7 +170,7 @@ Stage catalog</h2>
 <td class="markdownTableBodyNone">Off-path   </td><td class="markdownTableBodyNone"><code>WAIT_ENTER</code>, <code>SKIPPED</code>, <code>CONTEXT</code>   </td><td class="markdownTableBodyNone">not boxes   </td></tr>
 </table>
 <p>See <a class="el" href="path-a-e3-loop_8md.html">path-a-e3-loop.md</a> and <a class="el" href="path-b-e2-e3-loop_8md.html">path-b-e2-e3-loop.md</a> for the box definitions, the per-box segments, and the aggregates built on them.</p>
-<h3><a class="anchor" id="autotoc_md16"></a>
+<h3><a class="anchor" id="autotoc_md17"></a>
 Attribution, and where the ring name stops being enough</h3>
 <p>"Which component wrote a record comes from its ring name" holds for a thread that component owns. It does not hold for a <b>synchronous callback</b>, because a stamp lands in the ring of the thread that executes it, not the ring of the code that wrote it.</p>
 <p><a class="el" href="namespacelibe3.html">libe3</a> delivers an indication or a relayed xApp control by calling the application's handler inline, on its own inbound thread — the one whose ring is <code>libe3.inbound</code>. So a dApp's <code>PROCESS_DONE</code> and <code>CREATE_OUTPUT</code>, which are the receiving application's operations and not the library's, are written into a <a class="el" href="namespacelibe3.html">libe3</a> ring and filed by <code>tools/latrec2csv.py</code> under the <code><a class="el" href="namespacelibe3.html">libe3</a></code> component. The same applies to a RAN-side <code>APPLY_CONTROL_DONE</code> reached from a Service Model's control handler.</p>
@@ -175,17 +179,17 @@ Attribution, and where the ring name stops being enough</h3>
 <li>**<code>libe3.csv</code> will contain application processing time.** Summing it as "library overhead" overstates the library. Separate the two by stage identifier — the <em>Receiving application</em> rows in the table above are the embedder's operations; the <em>E3AP codec, queue, transport</em> row is <a class="el" href="namespacelibe3.html">libe3</a>'s.</li>
 <li><b>An embedder whose application also runs on its own threads elsewhere will see its operations split across two components</b>, depending on whether a given stage was reached from a <a class="el" href="namespacelibe3.html">libe3</a> callback or from its own thread. This shows up most sharply when comparing an application running over <a class="el" href="namespacelibe3.html">libe3</a> against the same application over a different transport backend: identical code, different component attribution.</li>
 </ul>
-<h4><a class="anchor" id="autotoc_md17"></a>
+<h4><a class="anchor" id="autotoc_md18"></a>
 Possible follow-up: tier-aware attribution</h4>
 <p>The catalog already distinguishes the two cases — every identifier is either a <b>protocol operation <a class="el" href="namespacelibe3.html">libe3</a> performs itself</b> (<code>ENQUEUE</code>, <code>SEND_DONE</code>, <code>RECV</code>, <code>DECODE_E3AP_DONE</code>, <code>DELIVER_*</code>, ...) or an <b>operation the embedder performs</b> (<code>RECORD_BEGIN</code>, <code>PROCESS_DONE</code>, <code>CREATE_OUTPUT</code>, <code>APPLY_CONTROL_DONE</code>, <code>XAPP_PROCESS_DONE</code>, <code>APPLY_POLICY_DONE</code>, ...). That is one bit per identifier, already implicit in the grouping above, and it is enough for the converter to file an embedder operation under the application even when it was written into a <a class="el" href="namespacelibe3.html">libe3</a> ring.</p>
 <p>Note what this is <em>not</em>: it is a two-way library/embedder split, not a return to mapping stage-id ranges to repositories. The latter is what the operation catalog exists to avoid, and it stays gone — the table does not grow when a new component starts stamping.</p>
 <p>One gap has to be closed for this to work. A ring named <code>libe3.inbound</code> does not say whether the process around it is a dApp or a RAN, so the converter would know a record belongs to <em>the application</em> without knowing <em>which</em>. That needs <a class="el" href="namespacelibe3.html">libe3</a>'s thread roles to carry the deployment, e.g. a prefix supplied by the embedder so a dApp process names its threads <code>dapp.libe3.inbound</code> — new public configuration, and the reason this is recorded as a follow-up rather than done here.</p>
-<h3><a class="anchor" id="autotoc_md18"></a>
+<h3><a class="anchor" id="autotoc_md19"></a>
 Granularity, and adding an identifier</h3>
 <p>One entry and one exit stamp per box. Boxes that hand off inside a single function on a single thread share one boundary stamp rather than carrying a separate exit and entry. Sub-steps <em>within</em> a box are deliberately not in the catalog: a component that wants finer resolution for its own debugging should keep that instrument to itself rather than adding it here.</p>
 <p>Three kinds of record are exempt from the one-per-box rule, because they do not describe where a message is: drop markers (<code>DROP</code>), skip markers (<code>SKIPPED</code>), and load or idle-time samples (<code>WAIT_ENTER</code>, <code>CONTEXT</code>).</p>
 <p>Identifiers are stable: from the current baseline on, <b>only append, never renumber</b>. Add one only for an operation the catalog does not already name, and add it to <code>STAGES</code> in <code>tools/latrec_reader.py</code> in the same commit — <code>tests/test_latrec_reader.py</code> checks the two against each other, and <code>tests/test_latrec.cpp</code> checks that no two identifiers collide.</p>
-<h2><a class="anchor" id="autotoc_md19"></a>
+<h2><a class="anchor" id="autotoc_md20"></a>
 Capture → CSV workflow</h2>
 <div class="fragment"><div class="line"># ... run the process(es); a LIBE3_ENABLE_LATREC=ON build records on its own ...</div>
 <div class="line"> </div>
@@ -200,7 +204,7 @@ Capture → CSV workflow</h2>
 <li><code>&lt;component&gt;.csv</code> — one wide table per component, identified by the role of the ring that wrote each record (<code><a class="el" href="namespacelibe3.html">libe3</a></code>, <code>oai</code>, <code>dapp</code>, <code>xapp</code>, <code>flexric</code>, <code>examples</code>, ...). One row per <code>(leg, seq)</code>, with a column per stage timestamp plus computed hop and total deltas in microseconds. Because a component is a ring property, the same operation id can appear in more than one of these tables — both ends of a round trip encode a Service Model payload — and each table holds only what its own rings recorded.</li>
 </ul>
 <p><code>--wall</code> remaps <code>CLOCK_MONOTONIC</code> to <code>CLOCK_REALTIME</code> per ring, needed only when joining a multi-host capture (pass every host's run directory).</p>
-<h2><a class="anchor" id="autotoc_md20"></a>
+<h2><a class="anchor" id="autotoc_md21"></a>
 CI overhead gate</h2>
 <p><code>tests/bench_latrec.cpp</code> asserts a ceiling on the recorder's own cost: <b>≤400 ns per stamp into an open ring, ≤10 ns on a thread that has no ring</b> (measured over 2,000,000 iterations). It builds and runs as part of the normal CTest suite whenever <code>LIBE3_ENABLE_LATREC=ON</code>, so it re-checks on every change to the recorder itself.</p>
 <p>For the end-to-end cost, <code>tests/integration/bench_latrec_load.cpp</code> is the ablation vehicle: build it twice, <code>-DLIBE3_ENABLE_LATREC=OFF</code> and <code>ON</code>, and compare the independent atomic counters it keeps in its receiving handlers. Those counters are latrec-free by construction, so they are comparable across the two builds; the latrec-derived tables only exist in the <code>ON</code> build. There is no third "compiled in but idle" configuration to measure. </p>

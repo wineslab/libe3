@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.1.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -93,11 +93,11 @@ $(document).ready(function(){initNavTree('path_b_e2_e3_loop.html',''); initResiz
   <div class="headertitle"><div class="title">The full E2-E3 loop (Path B)</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md31"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md32"></a>
 Path B — the full E2-E3 loop</h1>
 <p>The dApp-xApp coordination loop: a dApp report travels up through the E2-E3 bridge, across E2 to the RIC and the xApp, and the xApp's decision comes back down through E2, through the bridge, and over E3 to the dApp.</p>
 <p>Read <a class="el" href="latrec_8md.html">latrec.md</a> first for the recorder, the clock model, and the stage-catalog conventions. Path B continues from <a class="el" href="path-a-e3-loop_8md.html">Path A</a> box <code>A20</code>.</p>
-<h2><a class="anchor" id="autotoc_md32"></a>
+<h2><a class="anchor" id="autotoc_md33"></a>
 Box order</h2>
 <div class="fragment"><div class="line">flowchart LR</div>
 <div class="line">    subgraph RAN1[&quot;RAN (from A20)&quot;]</div>
@@ -134,7 +134,7 @@ Box order</h2>
 <div class="line">    B6 -.-&gt;|E2 wire| B7</div>
 <div class="line">    B11 -.-&gt;|E3 wire| B12</div>
 </div><!-- fragment --><p>As in Path A, <b>E2SM and E2AP are separate boxes</b>, and so are <b>E3SM and E3AP</b>. The Service Model codecs and the application-protocol codecs are owned by different components and are never collapsed.</p>
-<h2><a class="anchor" id="autotoc_md33"></a>
+<h2><a class="anchor" id="autotoc_md34"></a>
 The two RIC profiles</h2>
 <p>Which boxes are observable depends on the near-RT RIC the deployment runs. Every Path B run should record its profile in the <code>ric_profile</code> column.</p>
 <table class="markdownTable">
@@ -146,7 +146,7 @@ The two RIC profiles</h2>
 <td class="markdownTableBodyNone">opaque RIC   </td><td class="markdownTableBodyNone">Neither the RIC's E2AP termination nor its internal routing can be stamped. <code>B2</code> and the routing hop collapse into the <code>e2_wire_up</code> segment.   </td></tr>
 </table>
 <p>A collector must accept a run in which <code>B2</code> is absent and fold it into the wire segment, rather than discarding the event. A figure that mixes the two profiles without labelling them is wrong, because <code>e2_wire_up</code> means a different thing in each.</p>
-<h2><a class="anchor" id="autotoc_md34"></a>
+<h2><a class="anchor" id="autotoc_md35"></a>
 Report-up leg (&lt;tt&gt;leg=report_up&lt;/tt&gt;)</h2>
 <p>Segments name identifiers from the stage catalog in <a href="../include/libe3/latrec.h"><code>include/libe3/latrec.h</code></a>. As in Path A, the catalog names operations: <code>ENCODE_E2AP</code>/<code>DECODE_E2AP</code> is one identifier pair however many places call that codec, and the ring says which side called it.</p>
 <table class="markdownTable">
@@ -167,7 +167,7 @@ Report-up leg (&lt;tt&gt;leg=report_up&lt;/tt&gt;)</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">B6   </td><td class="markdownTableBodyNone">E2AP encode and send   </td><td class="markdownTableBodyNone">the xApp side of the E2 stack   </td><td class="markdownTableBodyNone"><code>ENCODE_E2AP_BEGIN</code> to <code>ENCODE_E2AP_DONE</code>   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md35"></a>
+<h2><a class="anchor" id="autotoc_md36"></a>
 Policy-down leg (&lt;tt&gt;leg=policy_down&lt;/tt&gt;)</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -196,7 +196,27 @@ Policy-down leg (&lt;tt&gt;leg=policy_down&lt;/tt&gt;)</h2>
 <td class="markdownTableBodyNone">B15   </td><td class="markdownTableBodyNone">Apply policy   </td><td class="markdownTableBodyNone">dApp application   </td><td class="markdownTableBodyNone"><code>DECODE_E3SM_DONE</code> to <code>APPLY_POLICY_DONE</code>, then <code>ACK_SENT</code>   </td></tr>
 </table>
 <p><code>BRIDGE_IN</code>/<code>BRIDGE_OUT</code> serve both B9 here and A20 in Path A, with <code>aux2</code> carrying the direction.</p>
-<h2><a class="anchor" id="autotoc_md36"></a>
+<h2><a class="anchor" id="autotoc_md37"></a>
+Mitigation leg (&lt;tt&gt;leg=mitigation&lt;/tt&gt;)</h2>
+<p>For a dApp whose "apply policy" means re-issuing the control to the RAN — the spectrum case, where the xApp names PRBs and only the gNB can block them — B15 is not the end of the procedure. The policy is not in effect until the RAN has installed it, and the xApp is not told until then.</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">#   </th><th class="markdownTableHeadNone">Box   </th><th class="markdownTableHeadNone">Owner   </th><th class="markdownTableHeadNone">Segment    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">B16   </td><td class="markdownTableBodyNone">Re-issue as a dApp control   </td><td class="markdownTableBodyNone">dApp application   </td><td class="markdownTableBodyNone"><code>APPLY_POLICY_DONE</code> to <code>CREATE_OUTPUT</code>, carrying B15's <code>sequenceId</code>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">—   </td><td class="markdownTableBodyNone"><b>Path A return leg</b>   </td><td class="markdownTableBodyNone">—   </td><td class="markdownTableBodyNone">A12-A18: the re-issued control travels dApp to RAN exactly as any dApp control does    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">B17   </td><td class="markdownTableBodyNone">Apply control   </td><td class="markdownTableBodyNone">the RAN stack   </td><td class="markdownTableBodyNone"><code>DECODE_E3SM_DONE</code> to <code>APPLY_CONTROL_DONE</code> — the mask is in the MAC    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">B18   </td><td class="markdownTableBodyNone">Live on air   </td><td class="markdownTableBodyNone">the RAN's MAC   </td><td class="markdownTableBodyNone"><code>APPLY_CONTROL_DONE</code> to <code>LIVE_ON_AIR</code> — the first scheduler tick that put it on air    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">B19   </td><td class="markdownTableBodyNone">Acknowledge   </td><td class="markdownTableBodyNone">the RAN   </td><td class="markdownTableBodyNone">two independent acks: <code>ACK_SENT</code> on E3 to the dApp, and the deferred E2 control acknowledge to the xApp   </td></tr>
+</table>
+<p>The two acks at B19 carry <b>different</b> content and are not two views of one message. The dApp gets <code>E3-MessageAck</code>, which is a delivery receipt: request id and a response code, nothing more. The xApp gets the E2SM-DAPP control outcome, which carries the procedure's <code>sequence-id</code> and the Service-Model-owned apply outcome — for the spectrum SM, the realtime timestamps at B17 and B18.</p>
+<p>Those timestamps are <b>payload</b> fields on the realtime clock, deliberately not latrec records: the xApp differences them against the dApp's own report timestamp, and <a class="el" href="latrec_8md.html">latrec.md</a>'s clock rule forbids mixing a payload timestamp with a monotonic <code>t_ns</code>. latrec measures the same interval independently, which makes the two a cross-check on each other rather than a single number derived twice.</p>
+<p>The E2 acknowledge is deferred: it is sent at B19, not when the RAN received the control request at B7. An acknowledge sent at B7 says only that the request was forwarded — it is emitted before the dApp has seen it and long before any mask exists, so it cannot be read as completion.</p>
+<h2><a class="anchor" id="autotoc_md38"></a>
 Aggregates</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -210,19 +230,38 @@ Aggregates</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>total_libe3_down</code>   </td><td class="markdownTableBodyNone"><code>B10</code> to <code>B13</code>   </td><td class="markdownTableBodyNone">the library's share of the down leg    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>total_loop</code>   </td><td class="markdownTableBodyNone"><code>A1</code> to <code>B15</code>   </td><td class="markdownTableBodyNone">the full input-to-policy loop, subject to the joining caveat below   </td></tr>
+<td class="markdownTableBodyNone"><code>total_loop</code>   </td><td class="markdownTableBodyNone"><code>A1</code> to <code>B15</code>   </td><td class="markdownTableBodyNone">the full input-to-policy loop    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>total_mitigation</code>   </td><td class="markdownTableBodyNone"><code>A1</code> to <code>B18</code>   </td><td class="markdownTableBodyNone">detection to the mask being on air — the number the xApp records online   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md37"></a>
-Joining caveat</h2>
-<p>The report leg and the policy leg carry <b>no shared origin identifier</b>: the E2 envelope is handed no id it could propagate across the RIC and the xApp. Each side keys on a counter of its own, so <code>total_loop</code> is composed by <b>nearest-in-time pairing</b> across the two legs.</p>
-<p>That is reliable only under <b>sparse send-on-change control</b>, where few control messages are in flight at a time. It is not a per-message join, and it must not be reported as one. Under periodic or bursty control the composition is not valid and only the two legs, measured separately, are trustworthy.</p>
-<p>The per-leg numbers do not suffer from this: within a leg, the E2 stages and the libE3 stages each carry their own keys.</p>
-<p>This limitation must appear wherever <code>total_loop</code> is reported.</p>
-<h2><a class="anchor" id="autotoc_md38"></a>
+<h2><a class="anchor" id="autotoc_md39"></a>
+Joining: the &lt;tt&gt;sequenceId&lt;/tt&gt;</h2>
+<p>The two legs share one identifier, <code>E3-SequenceID</code>, carried by the E3AP envelope and mapped onto E2SM-DAPP's <code>sequence-id</code>. <code>total_loop</code> is a <b>per-message join</b>, not a nearest-in-time pairing.</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Message   </th><th class="markdownTableHeadNone">Field   </th><th class="markdownTableHeadNone">Obligation   </th><th class="markdownTableHeadNone">Assigned by    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>E3-DAppReport</code>   </td><td class="markdownTableBodyNone"><code>sequenceId</code>   </td><td class="markdownTableBodyNone">mandatory   </td><td class="markdownTableBodyNone">the dApp, per detection    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>E3-XAppControlAction</code>   </td><td class="markdownTableBodyNone"><code>sequenceId</code>   </td><td class="markdownTableBodyNone">mandatory   </td><td class="markdownTableBodyNone">the RAN bridge, copied from E2SM-DAPP <code>sequence-id</code>    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>E3-DAppControlAction</code>   </td><td class="markdownTableBodyNone"><code>sequenceId</code>   </td><td class="markdownTableBodyNone">optional   </td><td class="markdownTableBodyNone">the dApp, only when re-issuing an xApp control   </td></tr>
+</table>
+<p>The chain is: the dApp assigns an id to a report; the RAN copies it into the E2SM-DAPP indication header, so the xApp receives it; the xApp echoes it on its control header; the bridge copies it back onto the relayed <code>E3-XAppControlAction</code>; the dApp carries it on the control it re-issues; and the RAN reports it on the control outcome that acknowledges the whole procedure.</p>
+<p>An <code>E3-DAppControlAction</code> with no <code>sequenceId</code> is a control the dApp decided on its own — there is no xApp procedure behind it and nothing to join it to. That is a normal message, not a malformed one.</p>
+<p>The id is <code>INTEGER (1..4294967295)</code>, the same range as <code>E3-MessageID</code>, and neither wraps within a run. A message id still identifies one <em>hop</em>; the sequenceId identifies the whole <em>procedure</em> across every hop.</p>
+<h3><a class="anchor" id="autotoc_md40"></a>
+Where it shows up in the rings</h3>
+<p>The rings themselves are not keyed on the sequenceId — each leg keeps its own ring-local counter, because <code><a class="el" href="latrec_8h.html#a1cf8c3111daf8d291d07bd4b4f71a879">latrec_ctx_set()</a></code>'s cross-thread bridge depends on it (see <a class="el" href="latrec_8md.html">latrec.md</a>). The id appears instead as the <code>aux</code> payload on the records where the loop crosses a component boundary:</p>
+<ul>
+<li><code>DELIVER_BEGIN</code> / <code>DELIVER_DONE</code> on the dApp's relayed xApp control</li>
+<li><code>BRIDGE_IN</code> / <code>BRIDGE_OUT</code> on the RAN, in both directions</li>
+</ul>
+<p>Those are the records a reader joins on to stitch the E2 rings to the E3 rings.</p>
+<h2><a class="anchor" id="autotoc_md41"></a>
 Not yet instrumented</h2>
 <ol type="1">
 <li>xApp frameworks and the xApps themselves have identifiers available (<code>DECODE_E2SM_*</code>, <code>XAPP_PROCESS_DONE</code>, <code>ENCODE_E2SM_*</code>) but no stamps in their own code yet, so <code>B3</code>, <code>B4</code> and <code>B5</code> are one opaque interval.</li>
-<li>No origin identifier crosses the RIC (see the joining caveat). Adding one is out of scope for this decomposition, but it is the correct long-term fix.</li>
 <li>On an opaque RIC the RIC contributes an unattributable interval whose size is unknown. Reporting an instrumentable-RIC profile alongside it is the only way to bound it. </li>
 </ol>
 </div></div><!-- contents -->

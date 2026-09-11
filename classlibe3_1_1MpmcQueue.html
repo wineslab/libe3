@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.1.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -152,9 +152,9 @@ class libe3::MpmcQueue&lt; T &gt;</div><p>Lock-free bounded MPMC ring buffer. </
 <div class="line"><span class="comment">// consumer:</span></div>
 <div class="line">MyMsg out;</div>
 <div class="line"><span class="keywordflow">if</span> (q.try_pop(out)) { <span class="comment">// use out }</span></div>
-<div class="ttc" id="aclasslibe3_1_1MpmcQueue_html"><div class="ttname"><a href="classlibe3_1_1MpmcQueue.html">libe3::MpmcQueue</a></div><div class="ttdoc">Lock-free bounded MPMC ring buffer.</div><div class="ttdef"><b>Definition</b> <a href="mpmc__queue_8hpp_source.html#l00047">mpmc_queue.hpp:47</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1MpmcQueue_html"><div class="ttname"><a href="classlibe3_1_1MpmcQueue.html">libe3::MpmcQueue</a></div><div class="ttdoc">Lock-free bounded MPMC ring buffer.</div><div class="ttdef"><b>Definition</b> <a href="mpmc__queue_8hpp_source.html#l00048">mpmc_queue.hpp:48</a></div></div>
 </div><!-- fragment --> 
-<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00047">47</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00048">48</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="af91f986684fb4873f8888e7e365c56a5" name="af91f986684fb4873f8888e7e365c56a5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af91f986684fb4873f8888e7e365c56a5">&#9670;&#160;</a></span>MpmcQueue() <span class="overload">[1/3]</span></h2>
@@ -190,7 +190,7 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00055">55</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00056">56</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
 
 </div>
 </div>
@@ -219,7 +219,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00076">76</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00077">77</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
 
 </div>
 </div>
@@ -307,7 +307,7 @@ template&lt;typename T &gt; </div>
 
 <p>Actual slot capacity (always a power of two). </p>
 
-<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00177">177</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00178">178</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
 
 </div>
 </div>
@@ -338,7 +338,7 @@ template&lt;typename T &gt; </div>
 
 <p>Return true if the queue appears empty (approximate). </p>
 
-<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00174">174</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00175">175</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
 
 </div>
 </div>
@@ -426,7 +426,7 @@ template&lt;typename T &gt; </div>
 <p>Approximate number of items currently in the queue. </p>
 <p>Due to concurrent modifications this value may be slightly stale, but is always in [0, <a class="el" href="classlibe3_1_1MpmcQueue.html#af689ea5a3abe41e8456422d0e0991440" title="Actual slot capacity (always a power of two).">capacity()</a>]. </p>
 
-<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00167">167</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00168">168</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
 
 </div>
 </div>
@@ -465,7 +465,7 @@ template&lt;typename T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true on success; false if the queue is empty. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00133">133</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00134">134</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
 
 </div>
 </div>
@@ -497,7 +497,7 @@ template&lt;typename T &gt; </div>
 
 <p>Try to enqueue an item (copy overload). </p>
 
-<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00123">123</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00124">124</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
 
 </div>
 </div>
@@ -530,7 +530,7 @@ template&lt;typename T &gt; </div>
 <p>Try to enqueue an item (non-blocking, move semantics). </p>
 <dl class="section return"><dt>Returns</dt><dd>true on success; false if the queue is full. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00093">93</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mpmc__queue_8hpp_source.html#l00094">94</a> of file <a class="el" href="mpmc__queue_8hpp_source.html">mpmc_queue.hpp</a>.</p>
 
 </div>
 </div>

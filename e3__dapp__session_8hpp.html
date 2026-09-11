@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.1.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -155,7 +155,7 @@ Rejected alternatives (auditable)</h1>
 <li>SWIG directors: run the Python callback on <a class="el" href="namespacelibe3.html">libe3</a>'s inbound thread under the GIL — serialises dispatch, deadlock-prone if Python re-enters <a class="el" href="namespacelibe3.html">libe3</a>.</li>
 <li>per-message poll: one GIL round-trip + one boundary crossing per message caps throughput; batching is strictly better with no added latency (the ring still wakes on the first event).</li>
 </ul>
-<p>SPDX-License-Identifier: Apache-2.0 </p>
+<p>SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University SPDX-License-Identifier: Apache-2.0 </p>
 
 <p class="definition">Definition in file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 </div></div><!-- contents -->

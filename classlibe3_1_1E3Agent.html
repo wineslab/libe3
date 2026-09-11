@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.1.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -155,9 +155,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac68e6181237ec35133f4df1d667f23cd" id="r_ac68e6181237ec35133f4df1d667f23cd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#ac68e6181237ec35133f4df1d667f23cd">send_indication</a> (uint32_t <a class="el" href="classlibe3_1_1E3Agent.html#a3ced5792a47e610a82fc6f94cc066178">dapp_id</a>, uint32_t ran_function_id, const std::vector&lt; uint8_t &gt; &amp;data)</td></tr>
 <tr class="memdesc:ac68e6181237ec35133f4df1d667f23cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send an indication message to a specific dApp.  <br /></td></tr>
 <tr class="separator:ac68e6181237ec35133f4df1d667f23cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1df065d88aa49336ddf4ef501fbb92a8" id="r_a1df065d88aa49336ddf4ef501fbb92a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a1df065d88aa49336ddf4ef501fbb92a8">send_xapp_control</a> (uint32_t <a class="el" href="classlibe3_1_1E3Agent.html#a3ced5792a47e610a82fc6f94cc066178">dapp_id</a>, uint32_t ran_function_id, const std::vector&lt; uint8_t &gt; &amp;control_data)</td></tr>
-<tr class="memdesc:a1df065d88aa49336ddf4ef501fbb92a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send an xApp control action to a specific dApp coming from the E2SM-DAPP.  <br /></td></tr>
-<tr class="separator:a1df065d88aa49336ddf4ef501fbb92a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8de55be7199ba82dfe24253e478dec9" id="r_ac8de55be7199ba82dfe24253e478dec9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#ac8de55be7199ba82dfe24253e478dec9">send_xapp_control</a> (uint32_t <a class="el" href="classlibe3_1_1E3Agent.html#a3ced5792a47e610a82fc6f94cc066178">dapp_id</a>, uint32_t ran_function_id, const std::vector&lt; uint8_t &gt; &amp;control_data, uint32_t sequence_id)</td></tr>
+<tr class="memdesc:ac8de55be7199ba82dfe24253e478dec9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send an xApp control action to a specific dApp coming from the E2SM-DAPP.  <br /></td></tr>
+<tr class="separator:ac8de55be7199ba82dfe24253e478dec9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af9b008d96e5a347271f943cea69ef36e" id="r_af9b008d96e5a347271f943cea69ef36e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#af9b008d96e5a347271f943cea69ef36e">send_message_ack</a> (uint32_t request_id, <a class="el" href="namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5">ResponseCode</a> response_code)</td></tr>
 <tr class="memdesc:af9b008d96e5a347271f943cea69ef36e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a message acknowledgment (e.g. ack a control/request from dApp).  <br /></td></tr>
 <tr class="separator:af9b008d96e5a347271f943cea69ef36e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -186,12 +186,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a19f94a7eaa807bf4defd45b444583a1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c24b5b987280d40ce95661c83a04bb9" id="r_a6c24b5b987280d40ce95661c83a04bb9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a6c24b5b987280d40ce95661c83a04bb9">unsubscribe</a> (uint32_t ran_function_id)</td></tr>
 <tr class="separator:a6c24b5b987280d40ce95661c83a04bb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af8e5cf3769b00dc2eb5eb3785a51d232" id="r_af8e5cf3769b00dc2eb5eb3785a51d232"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#af8e5cf3769b00dc2eb5eb3785a51d232">send_control</a> (uint32_t ran_function_id, uint32_t control_id, std::vector&lt; uint8_t &gt; action_data, uint32_t *out_message_id=nullptr)</td></tr>
-<tr class="memdesc:af8e5cf3769b00dc2eb5eb3785a51d232"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a dApp control action to the RAN.  <br /></td></tr>
-<tr class="separator:af8e5cf3769b00dc2eb5eb3785a51d232"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba733a02e75b5b9b795efa9d1de48138" id="r_aba733a02e75b5b9b795efa9d1de48138"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#aba733a02e75b5b9b795efa9d1de48138">send_report</a> (uint32_t ran_function_id, std::vector&lt; uint8_t &gt; report_data, uint32_t *out_message_id=nullptr)</td></tr>
-<tr class="memdesc:aba733a02e75b5b9b795efa9d1de48138"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a dApp report to the RAN.  <br /></td></tr>
-<tr class="separator:aba733a02e75b5b9b795efa9d1de48138"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9dfb5265453521be2a59697a647a2f1" id="r_ad9dfb5265453521be2a59697a647a2f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#ad9dfb5265453521be2a59697a647a2f1">send_control</a> (uint32_t ran_function_id, uint32_t control_id, std::vector&lt; uint8_t &gt; action_data, uint32_t sequence_id=0, uint32_t *out_message_id=nullptr)</td></tr>
+<tr class="memdesc:ad9dfb5265453521be2a59697a647a2f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a dApp control action to the RAN.  <br /></td></tr>
+<tr class="separator:ad9dfb5265453521be2a59697a647a2f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98d30f06be83074cde713efa9d7ed74b" id="r_a98d30f06be83074cde713efa9d7ed74b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a98d30f06be83074cde713efa9d7ed74b">send_report</a> (uint32_t ran_function_id, std::vector&lt; uint8_t &gt; report_data, uint32_t sequence_id, uint32_t *out_message_id=nullptr)</td></tr>
+<tr class="memdesc:a98d30f06be83074cde713efa9d7ed74b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a dApp report to the RAN.  <br /></td></tr>
+<tr class="separator:a98d30f06be83074cde713efa9d7ed74b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b04362dec761d580f7fd743ec0d35fa" id="r_a4b04362dec761d580f7fd743ec0d35fa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a4b04362dec761d580f7fd743ec0d35fa">release</a> ()</td></tr>
 <tr class="separator:a4b04362dec761d580f7fd743ec0d35fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a016a0efdb7a2f6b37e163c6549f2c269" id="r_a016a0efdb7a2f6b37e163c6549f2c269"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a016a0efdb7a2f6b37e163c6549f2c269">get_registered_dapps</a> () const</td></tr>
@@ -244,10 +244,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:af9b008d96e5a347271f943cea69ef36e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c24b5b987280d40ce95661c83a04bb9" id="r_a6c24b5b987280d40ce95661c83a04bb9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a6c24b5b987280d40ce95661c83a04bb9">unsubscribe</a> (uint32_t ran_function_id)</td></tr>
 <tr class="separator:a6c24b5b987280d40ce95661c83a04bb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5c44d22ac933a40fba7b75714315e530" id="r_a5c44d22ac933a40fba7b75714315e530"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a5c44d22ac933a40fba7b75714315e530">send_control</a> (uint32_t ran_function_id, uint32_t control_id, std::vector&lt; uint8_t &gt; action_data)</td></tr>
-<tr class="separator:a5c44d22ac933a40fba7b75714315e530"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a436c85cea0a5fff2c6a2a20e08437656" id="r_a436c85cea0a5fff2c6a2a20e08437656"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a436c85cea0a5fff2c6a2a20e08437656">send_report</a> (uint32_t ran_function_id, std::vector&lt; uint8_t &gt; report_data)</td></tr>
-<tr class="separator:a436c85cea0a5fff2c6a2a20e08437656"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a938b77f2919e1ba9c4db086c8505f664" id="r_a938b77f2919e1ba9c4db086c8505f664"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a938b77f2919e1ba9c4db086c8505f664">send_control</a> (uint32_t ran_function_id, uint32_t control_id, std::vector&lt; uint8_t &gt; action_data, uint32_t sequence_id=0)</td></tr>
+<tr class="separator:a938b77f2919e1ba9c4db086c8505f664"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f75fcb4304b82b4f5c481d8f0908be1" id="r_a8f75fcb4304b82b4f5c481d8f0908be1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a8f75fcb4304b82b4f5c481d8f0908be1">send_report</a> (uint32_t ran_function_id, std::vector&lt; uint8_t &gt; report_data, uint32_t sequence_id)</td></tr>
+<tr class="separator:a8f75fcb4304b82b4f5c481d8f0908be1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b04362dec761d580f7fd743ec0d35fa" id="r_a4b04362dec761d580f7fd743ec0d35fa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a4b04362dec761d580f7fd743ec0d35fa">release</a> ()</td></tr>
 <tr class="separator:a4b04362dec761d580f7fd743ec0d35fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a32d1bb62376110871d076698c40473c4" id="r_a32d1bb62376110871d076698c40473c4"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html#a32d1bb62376110871d076698c40473c4">subscribed_ran_functions</a> () const</td></tr>
@@ -294,21 +294,21 @@ Public Member Functions</h2></td></tr>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Shutdown</span></div>
 <div class="line">agent.stop();</div>
-<div class="ttc" id="aclasslibe3_1_1E3Agent_html"><div class="ttname"><a href="classlibe3_1_1E3Agent.html">libe3::E3Agent</a></div><div class="ttdoc">E3Agent - Main façade for RAN vendor integration.</div><div class="ttdef"><b>Definition</b> <a href="e3__agent_8hpp_source.html#l00084">e3_agent.hpp:84</a></div></div>
-<div class="ttc" id="aclasslibe3_1_1E3Agent_html_a94e98e9001263ed16d869dce6d647abc"><div class="ttname"><a href="classlibe3_1_1E3Agent.html#a94e98e9001263ed16d869dce6d647abc">libe3::E3Agent::config</a></div><div class="ttdeci">const E3Config &amp; config() const noexcept</div><div class="ttdoc">Get current configuration.</div><div class="ttdef"><b>Definition</b> <a href="e3__agent_8cpp_source.html#l00318">e3_agent.cpp:318</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1E3Agent_html"><div class="ttname"><a href="classlibe3_1_1E3Agent.html">libe3::E3Agent</a></div><div class="ttdoc">E3Agent - Main façade for RAN vendor integration.</div><div class="ttdef"><b>Definition</b> <a href="e3__agent_8hpp_source.html#l00085">e3_agent.hpp:85</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1E3Agent_html_a94e98e9001263ed16d869dce6d647abc"><div class="ttname"><a href="classlibe3_1_1E3Agent.html#a94e98e9001263ed16d869dce6d647abc">libe3::E3Agent::config</a></div><div class="ttdeci">const E3Config &amp; config() const noexcept</div><div class="ttdoc">Get current configuration.</div><div class="ttdef"><b>Definition</b> <a href="e3__agent_8cpp_source.html#l00321">e3_agent.cpp:321</a></div></div>
 <div class="ttc" id="anamespacelibe3_html_a24bf966c6225dc47ac47d7a8a1986c40ac8660c6d72e7323867ec800d6bb953df"><div class="ttname"><a href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40ac8660c6d72e7323867ec800d6bb953df">libe3::E3TransportLayer::IPC</a></div><div class="ttdeci">@ IPC</div><div class="ttdoc">Unix Domain Sockets / IPC.</div></div>
 <div class="ttc" id="anamespacelibe3_html_a6cf81048dab516aa29417bb0dc741d0ea38cf8f016825407fb4e79e319d87bd5e"><div class="ttname"><a href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea38cf8f016825407fb4e79e319d87bd5e">libe3::E3LinkLayer::ZMQ</a></div><div class="ttdeci">@ ZMQ</div><div class="ttdoc">ZeroMQ-based transport.</div></div>
 <div class="ttc" id="anamespacelibe3_html_a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8"><div class="ttname"><a href="namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8">libe3::EncodingFormat::JSON</a></div><div class="ttdeci">@ JSON</div><div class="ttdoc">JSON encoding (for development/debugging)</div></div>
-<div class="ttc" id="astructlibe3_1_1E3Config_html"><div class="ttname"><a href="structlibe3_1_1E3Config.html">libe3::E3Config</a></div><div class="ttdoc">Configuration for E3Agent.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00380">types.hpp:380</a></div></div>
-<div class="ttc" id="astructlibe3_1_1E3Config_html_a3fc9dc881ea37e50dcd917eb51e251ab"><div class="ttname"><a href="structlibe3_1_1E3Config.html#a3fc9dc881ea37e50dcd917eb51e251ab">libe3::E3Config::setup_port</a></div><div class="ttdeci">uint16_t setup_port</div><div class="ttdoc">Port used for E3AP setup channel.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00407">types.hpp:407</a></div></div>
-<div class="ttc" id="astructlibe3_1_1E3Config_html_a7198ffc275e41485cf084b9e20f44c4e"><div class="ttname"><a href="structlibe3_1_1E3Config.html#a7198ffc275e41485cf084b9e20f44c4e">libe3::E3Config::encoding</a></div><div class="ttdeci">EncodingFormat encoding</div><div class="ttdoc">PDU encoding format (ASN.1 PER or JSON)</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00418">types.hpp:418</a></div></div>
-<div class="ttc" id="astructlibe3_1_1E3Config_html_a7b709230e627834bc85cd5cb8749c3fa"><div class="ttname"><a href="structlibe3_1_1E3Config.html#a7b709230e627834bc85cd5cb8749c3fa">libe3::E3Config::link_layer</a></div><div class="ttdeci">E3LinkLayer link_layer</div><div class="ttdoc">Link-layer transport (ZMQ or POSIX)</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00402">types.hpp:402</a></div></div>
-<div class="ttc" id="astructlibe3_1_1E3Config_html_aafe3a17bf8b25e2a1d4c3bf217fa59cb"><div class="ttname"><a href="structlibe3_1_1E3Config.html#aafe3a17bf8b25e2a1d4c3bf217fa59cb">libe3::E3Config::subscriber_port</a></div><div class="ttdeci">uint16_t subscriber_port</div><div class="ttdoc">Port used for inbound control/subscription channel.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00408">types.hpp:408</a></div></div>
-<div class="ttc" id="astructlibe3_1_1E3Config_html_adb8d8ed2e71bcf6289b002c00d83e335"><div class="ttname"><a href="structlibe3_1_1E3Config.html#adb8d8ed2e71bcf6289b002c00d83e335">libe3::E3Config::transport_layer</a></div><div class="ttdeci">E3TransportLayer transport_layer</div><div class="ttdoc">Transport-layer protocol (SCTP, TCP, IPC)</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00404">types.hpp:404</a></div></div>
-<div class="ttc" id="astructlibe3_1_1E3Config_html_af70da70b2892c05d4c85f45f80246df3"><div class="ttname"><a href="structlibe3_1_1E3Config.html#af70da70b2892c05d4c85f45f80246df3">libe3::E3Config::publisher_port</a></div><div class="ttdeci">uint16_t publisher_port</div><div class="ttdoc">Port used for outbound indication/publication channel.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00409">types.hpp:409</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html"><div class="ttname"><a href="structlibe3_1_1E3Config.html">libe3::E3Config</a></div><div class="ttdoc">Configuration for E3Agent.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00390">types.hpp:390</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_a3fc9dc881ea37e50dcd917eb51e251ab"><div class="ttname"><a href="structlibe3_1_1E3Config.html#a3fc9dc881ea37e50dcd917eb51e251ab">libe3::E3Config::setup_port</a></div><div class="ttdeci">uint16_t setup_port</div><div class="ttdoc">Port used for E3AP setup channel.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00417">types.hpp:417</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_a7198ffc275e41485cf084b9e20f44c4e"><div class="ttname"><a href="structlibe3_1_1E3Config.html#a7198ffc275e41485cf084b9e20f44c4e">libe3::E3Config::encoding</a></div><div class="ttdeci">EncodingFormat encoding</div><div class="ttdoc">PDU encoding format (ASN.1 PER or JSON)</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00428">types.hpp:428</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_a7b709230e627834bc85cd5cb8749c3fa"><div class="ttname"><a href="structlibe3_1_1E3Config.html#a7b709230e627834bc85cd5cb8749c3fa">libe3::E3Config::link_layer</a></div><div class="ttdeci">E3LinkLayer link_layer</div><div class="ttdoc">Link-layer transport (ZMQ or POSIX)</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00412">types.hpp:412</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_aafe3a17bf8b25e2a1d4c3bf217fa59cb"><div class="ttname"><a href="structlibe3_1_1E3Config.html#aafe3a17bf8b25e2a1d4c3bf217fa59cb">libe3::E3Config::subscriber_port</a></div><div class="ttdeci">uint16_t subscriber_port</div><div class="ttdoc">Port used for inbound control/subscription channel.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00418">types.hpp:418</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_adb8d8ed2e71bcf6289b002c00d83e335"><div class="ttname"><a href="structlibe3_1_1E3Config.html#adb8d8ed2e71bcf6289b002c00d83e335">libe3::E3Config::transport_layer</a></div><div class="ttdeci">E3TransportLayer transport_layer</div><div class="ttdoc">Transport-layer protocol (SCTP, TCP, IPC)</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00414">types.hpp:414</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_af70da70b2892c05d4c85f45f80246df3"><div class="ttname"><a href="structlibe3_1_1E3Config.html#af70da70b2892c05d4c85f45f80246df3">libe3::E3Config::publisher_port</a></div><div class="ttdeci">uint16_t publisher_port</div><div class="ttdoc">Port used for outbound indication/publication channel.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00419">types.hpp:419</a></div></div>
 </div><!-- fragment --><p><b>Thread Safety:</b> All public methods are thread-safe. The agent manages its own internal threads for protocol handling. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8hpp_source.html#l00084">84</a> of file <a class="el" href="e3__agent_8hpp_source.html">e3_agent.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8hpp_source.html#l00085">85</a> of file <a class="el" href="e3__agent_8hpp_source.html">e3_agent.hpp</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a4a2b12c2b85238dd8edf5d01a1089be5" name="a4a2b12c2b85238dd8edf5d01a1089be5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4a2b12c2b85238dd8edf5d01a1089be5">&#9670;&#160;</a></span>E3Agent() <span class="overload">[1/4]</span></h2>
@@ -342,7 +342,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00040">40</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00041">41</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -363,7 +363,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Destructor - ensures clean shutdown. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00046">46</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00047">47</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -471,7 +471,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Subscription IDs this dApp currently holds. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00397">397</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00400">400</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -517,7 +517,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Get current configuration. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00318">318</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00321">321</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -563,7 +563,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Get number of registered dApps. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00326">326</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00329">329</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -610,7 +610,7 @@ Public Member Functions</h2></td></tr>
 <p>dApp identifier assigned by the RAN in <a class="el" href="structlibe3_1_1SetupResponse.html" title="E3AP Setup Response structure.">SetupResponse</a>. </p>
 <dl class="section return"><dt>Returns</dt><dd>nullopt until setup completes (or on RAN-role agents). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00387">387</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00390">390</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -633,7 +633,7 @@ Public Member Functions</h2></td></tr>
 <p>RAN role only. Unlike <a class="el" href="classlibe3_1_1E3Agent.html#a41bdbca494f861c38458819fd7288209" title="Get available RAN function IDs.">get_available_ran_functions()</a> (which lists every registered Service Model), this returns only the RAN functions a dApp is actively subscribed to.</p>
 <dl class="section return"><dt>Returns</dt><dd>List of RAN function IDs with one or more subscribers </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00280">280</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00283">283</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -655,7 +655,7 @@ Public Member Functions</h2></td></tr>
 <p>Get available RAN function IDs. </p>
 <p>Returns the RAN function IDs from all registered Service Models. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00171">171</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00172">172</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -684,7 +684,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>List of RAN function IDs the dApp is subscribed to </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00266">266</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00269">269</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -713,7 +713,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>List of dApp IDs subscribed to this RAN function </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00273">273</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00276">276</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -734,7 +734,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Get list of registered dApp IDs. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00259">259</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00262">262</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -767,7 +767,7 @@ Public Member Functions</h2></td></tr>
 <p>Get the control IDs a dApp requested for a RAN function. </p>
 <dl class="section return"><dt>Returns</dt><dd>vector of control IDs (empty if none requested or subscription not found) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00305">305</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00308">308</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -800,7 +800,7 @@ Public Member Functions</h2></td></tr>
 <p>Get the reporting periodicity a dApp requested for a RAN function. </p>
 <dl class="section return"><dt>Returns</dt><dd>periodicity in microseconds, 0 if not set or subscription not found </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00287">287</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00290">290</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -833,7 +833,7 @@ Public Member Functions</h2></td></tr>
 <p>Get the telemetry IDs a dApp requested for a RAN function. </p>
 <dl class="section return"><dt>Returns</dt><dd>vector of telemetry IDs (empty if none requested or subscription not found) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00296">296</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00299">299</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -858,7 +858,7 @@ Public Member Functions</h2></td></tr>
 <dd>
 ErrorCode::ALREADY_INITIALIZED if already initialized </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00058">58</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00059">59</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -904,7 +904,7 @@ ErrorCode::ALREADY_INITIALIZED if already initialized </dd></dl>
 
 <p>Check if agent is running. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00143">143</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00144">144</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1015,7 +1015,7 @@ ErrorCode::SM_ALREADY_REGISTERED if RAN function already has SM </dd>
 <dd>
 ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00151">151</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00152">152</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1035,7 +1035,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 </div><div class="memdoc">
 <p>Send a <a class="el" href="structlibe3_1_1ReleaseMessage.html" title="E3AP Release Message structure.">ReleaseMessage</a>. The dApp stays running until <a class="el" href="classlibe3_1_1E3Agent.html#a170f30d908456a6a760ac76e1435e6ac" title="Stop the agent.">stop()</a> is called. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00445">445</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00451">451</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1056,42 +1056,8 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 
 </div>
 </div>
-<a id="a5c44d22ac933a40fba7b75714315e530" name="a5c44d22ac933a40fba7b75714315e530"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5c44d22ac933a40fba7b75714315e530">&#9670;&#160;</a></span>send_control() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> libe3::E3Agent::send_control </td>
-          <td>(</td>
-          <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>ran_function_id</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>control_id</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; uint8_t &gt;&#160;</td>
-          <td class="paramname"><em>action_data</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="af8e5cf3769b00dc2eb5eb3785a51d232" name="af8e5cf3769b00dc2eb5eb3785a51d232"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af8e5cf3769b00dc2eb5eb3785a51d232">&#9670;&#160;</a></span>send_control() <span class="overload">[2/2]</span></h2>
+<a id="a938b77f2919e1ba9c4db086c8505f664" name="a938b77f2919e1ba9c4db086c8505f664"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a938b77f2919e1ba9c4db086c8505f664">&#9670;&#160;</a></span>send_control() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1117,6 +1083,52 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>sequence_id</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad9dfb5265453521be2a59697a647a2f1" name="ad9dfb5265453521be2a59697a647a2f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9dfb5265453521be2a59697a647a2f1">&#9670;&#160;</a></span>send_control() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> libe3::E3Agent::send_control </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>ran_function_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>control_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; uint8_t &gt;&#160;</td>
+          <td class="paramname"><em>action_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>sequence_id</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">uint32_t *&#160;</td>
           <td class="paramname"><em>out_message_id</em> = <code>nullptr</code>&#160;</td>
         </tr>
@@ -1131,12 +1143,13 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 <p>Send a dApp control action to the RAN. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">sequence_id</td><td>correlation id of the xApp procedure this control re-issues; leave 0 for a control the dApp decided on its own. </td></tr>
     <tr><td class="paramname">out_message_id</td><td>when non-null, receives the assigned E3-MessageID on success, so the caller can correlate a later ack/response back to this send. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00427">427</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00430">430</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1183,7 +1196,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00196">196</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00197">197</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1257,7 +1270,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00246">246</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00249">249</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1289,36 +1302,8 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 
 </div>
 </div>
-<a id="a436c85cea0a5fff2c6a2a20e08437656" name="a436c85cea0a5fff2c6a2a20e08437656"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a436c85cea0a5fff2c6a2a20e08437656">&#9670;&#160;</a></span>send_report() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> libe3::E3Agent::send_report </td>
-          <td>(</td>
-          <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>ran_function_id</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; uint8_t &gt;&#160;</td>
-          <td class="paramname"><em>report_data</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="aba733a02e75b5b9b795efa9d1de48138" name="aba733a02e75b5b9b795efa9d1de48138"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aba733a02e75b5b9b795efa9d1de48138">&#9670;&#160;</a></span>send_report() <span class="overload">[2/2]</span></h2>
+<a id="a8f75fcb4304b82b4f5c481d8f0908be1" name="a8f75fcb4304b82b4f5c481d8f0908be1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f75fcb4304b82b4f5c481d8f0908be1">&#9670;&#160;</a></span>send_report() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1338,6 +1323,46 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>sequence_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a98d30f06be83074cde713efa9d7ed74b" name="a98d30f06be83074cde713efa9d7ed74b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98d30f06be83074cde713efa9d7ed74b">&#9670;&#160;</a></span>send_report() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> libe3::E3Agent::send_report </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>ran_function_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; uint8_t &gt;&#160;</td>
+          <td class="paramname"><em>report_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>sequence_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">uint32_t *&#160;</td>
           <td class="paramname"><em>out_message_id</em> = <code>nullptr</code>&#160;</td>
         </tr>
@@ -1352,17 +1377,18 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 <p>Send a dApp report to the RAN. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">sequence_id</td><td>correlation id the dApp assigns to this detection. It is the head of the loop's chain and is mandatory on the wire. </td></tr>
     <tr><td class="paramname">out_message_id</td><td>when non-null, receives the assigned E3-MessageID on success, so the caller can correlate a later ack/response back to this send. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00437">437</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00441">441</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a1df065d88aa49336ddf4ef501fbb92a8" name="a1df065d88aa49336ddf4ef501fbb92a8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1df065d88aa49336ddf4ef501fbb92a8">&#9670;&#160;</a></span>send_xapp_control()</h2>
+<a id="ac8de55be7199ba82dfe24253e478dec9" name="ac8de55be7199ba82dfe24253e478dec9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8de55be7199ba82dfe24253e478dec9">&#9670;&#160;</a></span>send_xapp_control()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1383,7 +1409,13 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const std::vector&lt; uint8_t &gt; &amp;&#160;</td>
-          <td class="paramname"><em>control_data</em>&#160;</td>
+          <td class="paramname"><em>control_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>sequence_id</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1399,12 +1431,13 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
     <tr><td class="paramname">dapp_id</td><td>Target dApp identifier </td></tr>
     <tr><td class="paramname">ran_function_id</td><td>RAN function identifier </td></tr>
     <tr><td class="paramname">control_data</td><td>E3SM-encoded control payload </td></tr>
+    <tr><td class="paramname">sequence_id</td><td>Correlation id from the E2SM-DAPP control header, so the dApp can carry it back on the control it re-issues. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00225">225</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00226">226</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1426,7 +1459,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 
 <p>Set callback for incoming dApp reports (dApp → RAN). Call before <a class="el" href="classlibe3_1_1E3Agent.html#af5f062ab236a0693446a98fad7512dd9" title="Start the agent.">start()</a>. When a dApp sends a DApp report, this callback is invoked. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00178">178</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00179">179</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1448,7 +1481,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 
 <p>Set callback for dApp status changes. Called when a dApp connects, disconnects, subscribes, or unsubscribes. Call before <a class="el" href="classlibe3_1_1E3Agent.html#af5f062ab236a0693446a98fad7512dd9" title="Start the agent.">start()</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00185">185</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00186">186</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1469,7 +1502,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 </div><div class="memdoc">
 <p>Set callback for incoming <a class="el" href="structlibe3_1_1IndicationMessage.html" title="E3AP Indication Message structure.">IndicationMessage</a> (RAN → dApp). </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00366">366</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00369">369</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1490,7 +1523,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 </div><div class="memdoc">
 <p>Set callback for incoming <a class="el" href="structlibe3_1_1MessageAck.html" title="E3AP Message Acknowledgment structure.">MessageAck</a> (RAN → dApp). </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00380">380</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00383">383</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1511,7 +1544,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 </div><div class="memdoc">
 <p>Set callback for incoming <a class="el" href="structlibe3_1_1SetupResponse.html" title="E3AP Setup Response structure.">SetupResponse</a> (RAN → dApp). </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00352">352</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00355">355</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1532,7 +1565,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 </div><div class="memdoc">
 <p>Set callback for incoming <a class="el" href="structlibe3_1_1SubscriptionResponse.html" title="E3AP Subscription Response structure.">SubscriptionResponse</a> (RAN → dApp). </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00359">359</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00362">362</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1553,7 +1586,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 </div><div class="memdoc">
 <p>Set callback for incoming <a class="el" href="structlibe3_1_1XAppControlAction.html" title="E3AP xApp Control Action structure.">XAppControlAction</a> (xApp → dApp via RAN). </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00373">373</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00376">376</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1576,7 +1609,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 <p>Starts the internal processing threads and begins accepting dApp connections. If not already initialized, calls <a class="el" href="classlibe3_1_1E3Agent.html#ae83e11670746c340122772abda980fd1" title="Initialize the agent.">init()</a> first.</p>
 <dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00104">104</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00105">105</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1622,7 +1655,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 
 <p>Get current agent state. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00136">136</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00137">137</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1669,7 +1702,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 <p>Stop the agent. </p>
 <p>Stops all processing threads and closes connections. The agent can be restarted with <a class="el" href="classlibe3_1_1E3Agent.html#af5f062ab236a0693446a98fad7512dd9" title="Start the agent.">start()</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00126">126</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00127">127</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1748,7 +1781,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00408">408</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00411">411</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1768,7 +1801,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 </div><div class="memdoc">
 <p>RAN functions this dApp is currently subscribed to. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00392">392</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00395">395</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1806,7 +1839,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 
 <p>Get total number of active subscriptions. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00338">338</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00341">341</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1844,7 +1877,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 </div><div class="memdoc">
 <p>Send a <a class="el" href="structlibe3_1_1SubscriptionDelete.html" title="E3AP Subscription Delete structure.">SubscriptionDelete</a> for a previously subscribed RAN function. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00421">421</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00424">424</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>
@@ -1885,7 +1918,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 <p>Block until the dApp setup handshake completes. </p>
 <dl class="section return"><dt>Returns</dt><dd>SUCCESS on positive <a class="el" href="structlibe3_1_1SetupResponse.html" title="E3AP Setup Response structure.">SetupResponse</a>, CONNECTION_FAILED on negative, TIMEOUT if the wait elapses, INVALID_PARAM on RAN-role. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00402">402</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00405">405</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
 </div>
 </div>

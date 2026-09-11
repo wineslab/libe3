@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.1.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -113,11 +113,13 @@ Public Attributes</h2></td></tr>
 <tr class="separator:afbbf5fc44f0b37b33bb397394bb396ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a954e13e1fd5b49da55c0385727a76552" id="r_a954e13e1fd5b49da55c0385727a76552"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1DAppControlAction.html#a954e13e1fd5b49da55c0385727a76552">action_data</a></td></tr>
 <tr class="separator:a954e13e1fd5b49da55c0385727a76552"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5297338ef071d07200b9bc667fc26641" id="r_a5297338ef071d07200b9bc667fc26641"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1DAppControlAction.html#a5297338ef071d07200b9bc667fc26641">sequence_id</a> {0}</td></tr>
+<tr class="separator:a5297338ef071d07200b9bc667fc26641"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>E3AP dApp Control Action structure. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00271">271</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00272">272</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a954e13e1fd5b49da55c0385727a76552" name="a954e13e1fd5b49da55c0385727a76552"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a954e13e1fd5b49da55c0385727a76552">&#9670;&#160;</a></span>action_data</h2>
@@ -131,7 +133,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00275">275</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00276">276</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -149,7 +151,7 @@ Public Attributes</h2></td></tr>
 
 <p>Control identifier. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00274">274</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00275">275</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -165,7 +167,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00272">272</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00273">273</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -181,7 +183,24 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00273">273</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00274">274</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a5297338ef071d07200b9bc667fc26641" name="a5297338ef071d07200b9bc667fc26641"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5297338ef071d07200b9bc667fc26641">&#9670;&#160;</a></span>sequence_id</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t libe3::DAppControlAction::sequence_id {0}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Correlation id of the xApp procedure this control re-issues; 0 when the dApp decided on its own. Optional on the wire, absent when 0. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00279">279</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

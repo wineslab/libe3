@@ -18,10 +18,12 @@ var searchData=
   ['messageack_15',['MessageAck',['../structlibe3_1_1MessageAck.html',1,'libe3']]],
   ['messageackhandler_16',['MessageAckHandler',['../namespacelibe3.html#adec1d2fe5180a57e9b2f3ebcd4261630',1,'libe3']]],
   ['minimal_20python_20example_17',['Minimal Python example',['../md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md5',1,'']]],
-  ['model_18',['Clock model',['../latrec_guide.html#autotoc_md13',1,'']]],
-  ['model_20definitions_19',['Service-model definitions',['../md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md7',1,'']]],
-  ['mpmc_5fqueue_2ehpp_20',['mpmc_queue.hpp',['../mpmc__queue_8hpp.html',1,'']]],
-  ['mpmcqueue_21',['mpmcqueue',['../classlibe3_1_1MpmcQueue.html#a518e3b6d33d5f65a94797e7d6c95e65e',1,'libe3::MpmcQueue::MpmcQueue(const MpmcQueue &amp;)=delete'],['../classlibe3_1_1MpmcQueue.html#afcbc42780099c1ec8d171ba58a1e2a60',1,'libe3::MpmcQueue::MpmcQueue(MpmcQueue &amp;&amp;)=delete'],['../classlibe3_1_1MpmcQueue.html#af91f986684fb4873f8888e7e365c56a5',1,'libe3::MpmcQueue::MpmcQueue(size_t min_capacity)'],['../classlibe3_1_1MpmcQueue.html',1,'libe3::MpmcQueue&lt; T &gt;']]],
-  ['mpmcqueue_3c_20libe3_3a_3apy_3a_3ae3event_20_3e_22',['MpmcQueue&lt; libe3::py::E3Event &gt;',['../classlibe3_1_1MpmcQueue.html',1,'libe3']]],
-  ['mu_23',['mu',['../classlibe3_1_1DAppSubscriptionState.html#a68a31bb303c90eb6c8b00f070b3d3371',1,'libe3::DAppSubscriptionState']]]
+  ['mitigation_20leg_20tt_20leg_20mitigation_20tt_18',['Mitigation leg (&lt;tt&gt;leg=mitigation&lt;/tt&gt;)',['../path_b_e2_e3_loop.html#autotoc_md37',1,'']]],
+  ['mitigation_20tt_19',['Mitigation leg (&lt;tt&gt;leg=mitigation&lt;/tt&gt;)',['../path_b_e2_e3_loop.html#autotoc_md37',1,'']]],
+  ['model_20',['Clock model',['../latrec_guide.html#autotoc_md13',1,'']]],
+  ['model_20definitions_21',['Service-model definitions',['../md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md7',1,'']]],
+  ['mpmc_5fqueue_2ehpp_22',['mpmc_queue.hpp',['../mpmc__queue_8hpp.html',1,'']]],
+  ['mpmcqueue_23',['mpmcqueue',['../classlibe3_1_1MpmcQueue.html#afcbc42780099c1ec8d171ba58a1e2a60',1,'libe3::MpmcQueue::MpmcQueue(MpmcQueue &amp;&amp;)=delete'],['../classlibe3_1_1MpmcQueue.html#a518e3b6d33d5f65a94797e7d6c95e65e',1,'libe3::MpmcQueue::MpmcQueue(const MpmcQueue &amp;)=delete'],['../classlibe3_1_1MpmcQueue.html#af91f986684fb4873f8888e7e365c56a5',1,'libe3::MpmcQueue::MpmcQueue(size_t min_capacity)'],['../classlibe3_1_1MpmcQueue.html',1,'libe3::MpmcQueue&lt; T &gt;']]],
+  ['mpmcqueue_3c_20libe3_3a_3apy_3a_3ae3event_20_3e_24',['MpmcQueue&lt; libe3::py::E3Event &gt;',['../classlibe3_1_1MpmcQueue.html',1,'libe3']]],
+  ['mu_25',['mu',['../classlibe3_1_1DAppSubscriptionState.html#a68a31bb303c90eb6c8b00f070b3d3371',1,'libe3::DAppSubscriptionState']]]
 ];
