@@ -291,7 +291,8 @@ e3_error_t e3_agent_set_dapp_report_handler(
                     report.dapp_identifier,
                     report.ran_function_identifier,
                     report_data,
-                    report.report_data.size()
+                    report.report_data.size(),
+                    report.sequence_id
                 );
             }
         );

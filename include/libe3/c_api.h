@@ -47,7 +47,9 @@ typedef void (*e3_dapp_report_cb)(
     uint32_t dapp_id,
     uint32_t ran_function_id,
     const uint8_t* report_data,
-    size_t report_data_len
+    size_t report_data_len,
+    /* Correlation id the dApp assigned to this detection; 0 when unset. */
+    uint32_t sequence_id
 );
 
 /** Callback when dApp status changes (connect, disconnect, subscribe, unsubscribe). */
