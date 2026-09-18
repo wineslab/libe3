@@ -179,6 +179,9 @@ typedef struct {
     size_t io_threads;    /* 0=default */
     int log_level;        /* -1=default */
     const char* log_path; /* NULL=auto (/tmp/e3_<role>[_<id>]_<euid>.log) */
+    /* A flag rather than a sentinel: core 0 is a legitimate target. */
+    int pin_io_threads;      /* 0=no pinning */
+    int io_thread_affinity;  /* logical core; Linux only, best-effort */
 } e3_config_t;
 
 /**

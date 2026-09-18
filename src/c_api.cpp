@@ -207,6 +207,9 @@ e3_agent_handle_t* e3_agent_create_with_config(const e3_config_t* config) {
             if (config->io_threads != 0) cfg.io_threads = config->io_threads;
             if (config->log_level >= 0) cfg.log_level = config->log_level;
             if (config->log_path) cfg.log_path = config->log_path;
+            // Gated by the flag, not a sentinel: core 0 is a real target.
+            if (config->pin_io_threads)
+                cfg.io_thread_affinity = config->io_thread_affinity;
         }
         e3_agent_handle_t* h = new e3_agent_handle_s();
         h->agent = std::make_unique<E3Agent>(std::move(cfg));

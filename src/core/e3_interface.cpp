@@ -12,9 +12,11 @@
 #include "libe3/logger.hpp"
 #include "libe3/latrec.h"
 #include <cctype>
+#include <cerrno>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <signal.h>
 #include <string>
 
@@ -79,9 +81,15 @@ void apply_thread_config(int affinity, int niceness, const char* role) noexcept 
         cpu_set_t cpuset;
         CPU_ZERO(&cpuset);
         CPU_SET(static_cast<size_t>(affinity), &cpuset);
-        // Non-fatal if this fails (e.g. core index out of range).
-        (void)pthread_setaffinity_np(pthread_self(),
-                                     sizeof(cpu_set_t), &cpuset);
+        // Non-fatal, but say so: a silent miss looks identical to a working pin.
+        int rc = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+        if (rc != 0) {
+            E3_LOG_WARN(LOG_TAG) << "Failed to pin " << role << " thread to core "
+                                 << affinity << ": " << std::strerror(rc)
+                                 << " (thread left unpinned)";
+        } else {
+            E3_LOG_INFO(LOG_TAG) << "Pinned " << role << " thread to core " << affinity;
+        }
     }
     if (niceness != 0) {
         // Use the kernel TID so only this thread's scheduling priority changes.
@@ -89,7 +97,10 @@ void apply_thread_config(int affinity, int niceness, const char* role) noexcept 
         // to pid_t first, then to the id_t expected by setpriority(PRIO_PROCESS).
         auto tid = static_cast<id_t>(static_cast<pid_t>(syscall(SYS_gettid)));
         // Non-fatal: negative values require CAP_SYS_NICE.
-        (void)setpriority(PRIO_PROCESS, tid, niceness);
+        if (setpriority(PRIO_PROCESS, tid, niceness) == -1) {
+            E3_LOG_WARN(LOG_TAG) << "Failed to set niceness " << niceness << " on "
+                                 << role << " thread: " << std::strerror(errno);
+        }
     }
 #else
     (void)affinity;
