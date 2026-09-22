@@ -129,8 +129,8 @@ var NAVTREEINDEX =
 "classlibe3_1_1Logger.html#a8f40bcd6249ad424b8eb15e60049f65e",
 "classlibe3_1_1py_1_1DAppSession.html#a1d7471730e97aa1230ce3cfe094078fe",
 "latrec_8h.html#a588269eb211c77b050ab91ea4f8bc66c",
-"structe3__config__t.html#aa557fe2747b281f32da76f48a894291b",
-"structlibe3_1_1SetupResponse.html#a094916c010920b6345574ccae42165c5"
+"structe3__config__t.html#a9875bcc2adc66eb4aa21b8d4d1f95092",
+"structlibe3_1_1SetupResponse.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

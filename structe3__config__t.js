@@ -1,10 +1,12 @@
 var structe3__config__t =
 [
     [ "encoding", "structe3__config__t.html#a1f725c95b3b4ac1a9a415ec53eb0f08c", null ],
+    [ "io_thread_affinity", "structe3__config__t.html#a8775d3b13e77510139eb9caaf1677a20", null ],
     [ "io_threads", "structe3__config__t.html#a68afe4dc7c7b6edaacdb8a5ce4a57b60", null ],
     [ "link_layer", "structe3__config__t.html#a2fa01fda5689c80e7e8cfda843f54203", null ],
     [ "log_level", "structe3__config__t.html#a2535720ff7b2f8c0a1f7e3af8a8b5d4d", null ],
     [ "log_path", "structe3__config__t.html#a537dc596a0dd2bdfb3af8c42384703aa", null ],
+    [ "pin_io_threads", "structe3__config__t.html#a2a715b93d5db667ce28f7150b4dffd61", null ],
     [ "publisher_endpoint", "structe3__config__t.html#acb3565511ce8a820d64c1594bb1ea0a4", null ],
     [ "publisher_port", "structe3__config__t.html#a7b34fbceaf7917bc7348788069028908", null ],
     [ "ran_identifier", "structe3__config__t.html#a9875bcc2adc66eb4aa21b8d4d1f95092", null ],
