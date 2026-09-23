@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
+name: Refresh dependent images
+
+# A downstream repository builds container images that bake this library's
+# source, so a merge here leaves those images stale until they are rebuilt
+# against this commit. Passing the commit matters as much as the trigger: those
+# builds clone by branch when no pin is given, and the layer cache would replay
+# the old clone and republish an unchanged image while reporting success.
+#
+# The downstream repository is named by the DOWNSTREAM_IMAGE_REPO variable
+# rather than inline, since this repository is public.
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+  workflow_dispatch:
+
+# One refresh at a time, and never cancel one halfway: the build it starts
+# writes shared moving tags.
+concurrency:
+  group: refresh-dependent-images
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    # This repository is public, so hosted minutes are free here and it has
+    # never had access to a self-hosted runner.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check the downstream repository is configured
+        env:
+          DOWNSTREAM: ${{ vars.DOWNSTREAM_IMAGE_REPO }}
+        run: |
+          if [ -z "$DOWNSTREAM" ]; then
+            echo "::error::set the DOWNSTREAM_IMAGE_REPO variable to the repository that builds the dependent images"
+            exit 1
+          fi
+
+      - name: Mint a scoped token
+        id: apptoken
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.CI_BOT_APP_ID }}
+          private-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ vars.DOWNSTREAM_IMAGE_REPO }}
+
+      - name: Rebuild the images that bake this commit
+        env:
+          GH_TOKEN: ${{ steps.apptoken.outputs.token }}
+          DOWNSTREAM: ${{ vars.DOWNSTREAM_IMAGE_REPO }}
+          SHA: ${{ github.sha }}
+        run: |
+          gh workflow run publish-on-merge.yml \
+            -R "${{ github.repository_owner }}/${DOWNSTREAM}" \
+            -f image-tag=latest \
+            -f libe3-commit="$SHA"
+          echo "requested a rebuild pinned to $SHA"
