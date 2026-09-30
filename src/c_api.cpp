@@ -453,3 +453,6 @@ e3_error_t e3_agent_set_dapp_status_changed_handler(
 }
 
 } // extern "C"
+
+// Validation-only exported symbol: exercises a compiled dependency change.
+extern "C" int wineslab_pr60_dependency_validation(void) { return 60; }
