@@ -53,7 +53,7 @@ The following are **mandatory** for every contribution. PRs that do not meet the
 
 ### Issues
 
-- All issues must use one of the templates in `.github/ISSUE_TEMPLATE/` (`bug_report`, `feature_request`, `question`, `documentation`, or `new_sm`). Blank issues are disabled.
+- All issues must use one of the templates in `.github/ISSUE_TEMPLATE/` (`bug_report`, `feature_request`, `question`, `documentation`, `new_sm`, or `interop`). Blank issues are disabled.
 - Required fields in the templates must be completed; placeholder text is not acceptable.
 
 ### Pull requests

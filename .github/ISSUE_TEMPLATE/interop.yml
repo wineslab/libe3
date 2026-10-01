@@ -1,0 +1,119 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
+name: Interop difference
+description: Report a difference between libe3 and another E3 implementation (OAI, Aerial, OCUDU, or other).
+title: "[Interop]: "
+labels: ["interop"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for one difference between libe3 and another E3 implementation. File one issue per difference, and add it as a sub-issue of the interop tracker.
+
+        There is one E3AP, and each encoding (ASN.1, JSON, Protobuf) is a binding that should align to it. Say which one has drifted.
+
+        Link evidence to a commit, not a branch. Leave "Proposed alignment" empty unless you have a concrete one.
+
+  - type: checkboxes
+    id: seen_with
+    attributes:
+      label: Seen with
+      description: Tick at least one.
+      options:
+        - label: OAI
+        - label: Aerial
+        - label: OCUDU
+        - label: Other
+
+  - type: input
+    id: other_implementation
+    attributes:
+      label: Other implementation
+      description: Name it if you ticked "Other".
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: role
+    attributes:
+      label: Role
+      options:
+        - label: dapp
+        - label: ran
+
+  - type: checkboxes
+    id: transport
+    attributes:
+      label: Transport
+      options:
+        - label: zmq
+        - label: posix
+        - label: tcp
+        - label: sctp
+        - label: ipc
+
+  - type: checkboxes
+    id: e3ap_encodings
+    attributes:
+      label: E3AP and encodings
+      description: "e3ap is a gap in E3AP itself. asn1, json or protobuf is an encoding that has drifted from it."
+      options:
+        - label: e3ap
+        - label: asn1
+        - label: json
+        - label: protobuf
+
+  - type: dropdown
+    id: direction
+    attributes:
+      label: Direction
+      options:
+        - "libe3 dApp to RAN agent"
+        - "other dApp to libe3 RAN agent"
+        - "both"
+        - "wire format only"
+    validations:
+      required: true
+
+  - type: textarea
+    id: symptom
+    attributes:
+      label: What a user sees
+      description: The symptom in plain words, before any code.
+    validations:
+      required: true
+
+  - type: textarea
+    id: other_evidence
+    attributes:
+      label: Evidence on the other side
+      description: Project, version or commit, file and line, and the constant or key you are quoting.
+    validations:
+      required: true
+
+  - type: textarea
+    id: libe3_evidence
+    attributes:
+      label: libe3
+      description: Version or commit, file and line.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: certainty
+    attributes:
+      label: How sure are we
+      options:
+        - "Confirmed by a test"
+        - "Read from source only"
+    validations:
+      required: true
+
+  - type: textarea
+    id: alignment
+    attributes:
+      label: Proposed alignment
+      description: Optional. Leave empty if the owner has not decided.
+    validations:
+      required: false
