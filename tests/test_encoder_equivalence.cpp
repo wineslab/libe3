@@ -26,10 +26,12 @@
  * three are present at once and the second leg has teeth.
  *
  * One payload constraint, and it comes from JSON: the JSON encoder treats
- * IndicationMessage::protocol_data as a nested JSON value and rejects a
- * payload that does not parse. It preserves the bytes verbatim, so equality
- * still holds exactly; the payload just has to be valid JSON. Every other
- * octet-string payload is hex-encoded and takes arbitrary bytes.
+ * IndicationMessage::protocol_data and RanFunctionDef::ran_function_data as
+ * nested JSON values and rejects a payload that does not parse as an object
+ * or array. protocol_data is preserved verbatim; ran_function_data is
+ * re-serialized, so it is written here in nlohmann's compact, key-sorted
+ * form and equality still holds exactly. Every other octet-string payload
+ * is hex-encoded and takes arbitrary bytes.
  *
  * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
@@ -237,7 +239,8 @@ static std::vector<Sample> sample_pdus() {
     ran_fn.ran_function_identifier = 5;
     ran_fn.telemetry_identifier_list = {1, 2, 3};
     ran_fn.control_identifier_list = {4, 5};
-    ran_fn.ran_function_data = {0xDE, 0xAD, 0xBE, 0xEF};
+    const std::string ran_fn_json = R"({"name":"SIMPLE"})";
+    ran_fn.ran_function_data.assign(ran_fn_json.begin(), ran_fn_json.end());
 
     SetupResponse setup_resp;
     setup_resp.request_id = 917;
