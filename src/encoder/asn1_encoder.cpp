@@ -50,6 +50,27 @@ static_assert(sizeof(E3_Timestamp_t) >= sizeof(uint64_t),
               "E3_Timestamp_t is narrower than Pdu::timestamp; "
               "give E3-Timestamp an explicit upper bound to force INTEGER_t "
               "on this platform");
+
+// asn1c gives each optional id list its own anonymous struct, hence the template.
+template <typename SeqPtr>
+void set_id_list(SeqPtr& dst, const std::vector<uint32_t>& ids) {
+    dst = static_cast<SeqPtr>(calloc(1, sizeof(*dst)));
+    for (uint32_t v : ids) {
+        long* id = static_cast<long*>(malloc(sizeof(long)));
+        *id = v;
+        ASN_SEQUENCE_ADD(&dst->list, id);
+    }
+}
+
+template <typename SeqPtr>
+std::optional<std::vector<uint32_t>> get_id_list(const SeqPtr& src) {
+    if (!src) return std::nullopt;
+    std::vector<uint32_t> ids;
+    for (int i = 0; i < src->list.count; i++) {
+        ids.push_back(static_cast<uint32_t>(*src->list.array[i]));
+    }
+    return ids;
+}
 } // anonymous namespace
 
 // ============================================================================
@@ -344,6 +365,24 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                     static_cast<long*>(malloc(sizeof(long)));
                 *asn1_pdu->msg.choice.subscriptionResponse->subscriptionId = resp->subscription_id.value();
             }
+            if (resp->telemetry_identifier_list.has_value()) {
+                set_id_list(asn1_pdu->msg.choice.subscriptionResponse->telemetryIdentifierList,
+                            *resp->telemetry_identifier_list);
+            }
+            if (resp->control_identifier_list.has_value()) {
+                set_id_list(asn1_pdu->msg.choice.subscriptionResponse->controlIdentifierList,
+                            *resp->control_identifier_list);
+            }
+            if (resp->ran_function_identifier.has_value()) {
+                asn1_pdu->msg.choice.subscriptionResponse->ranFunctionIdentifier =
+                    static_cast<long*>(malloc(sizeof(long)));
+                *asn1_pdu->msg.choice.subscriptionResponse->ranFunctionIdentifier = resp->ran_function_identifier.value();
+            }
+            if (resp->periodicity.has_value()) {
+                asn1_pdu->msg.choice.subscriptionResponse->periodicity =
+                    static_cast<long*>(malloc(sizeof(long)));
+                *asn1_pdu->msg.choice.subscriptionResponse->periodicity = resp->periodicity.value();
+            }
             break;
         }
         
@@ -634,6 +673,18 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             // Decode optional subscriptionId
             if (asn1_pdu->msg.choice.subscriptionResponse->subscriptionId) {
                 resp.subscription_id = *asn1_pdu->msg.choice.subscriptionResponse->subscriptionId;
+            }
+            resp.telemetry_identifier_list =
+                get_id_list(asn1_pdu->msg.choice.subscriptionResponse->telemetryIdentifierList);
+            resp.control_identifier_list =
+                get_id_list(asn1_pdu->msg.choice.subscriptionResponse->controlIdentifierList);
+            if (asn1_pdu->msg.choice.subscriptionResponse->ranFunctionIdentifier) {
+                resp.ran_function_identifier = static_cast<uint32_t>(
+                    *asn1_pdu->msg.choice.subscriptionResponse->ranFunctionIdentifier);
+            }
+            if (asn1_pdu->msg.choice.subscriptionResponse->periodicity) {
+                resp.periodicity = static_cast<uint32_t>(
+                    *asn1_pdu->msg.choice.subscriptionResponse->periodicity);
             }
             
             pdu.choice = resp;

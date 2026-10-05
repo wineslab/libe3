@@ -96,6 +96,16 @@ bool ProtobufE3Encoder::pdu_to_proto(const Pdu& pdu, pb::E3Pdu& out) const {
             m->set_dapp_identifier(s->dapp_identifier);
             m->set_response_code(to_pb_response_code(s->response_code));
             if (s->subscription_id) m->set_subscription_id(*s->subscription_id);
+            if (s->telemetry_identifier_list) {
+                auto* ids = m->mutable_telemetry_identifier_list();
+                for (auto id : *s->telemetry_identifier_list) ids->add_id(id);
+            }
+            if (s->control_identifier_list) {
+                auto* ids = m->mutable_control_identifier_list();
+                for (auto id : *s->control_identifier_list) ids->add_id(id);
+            }
+            if (s->ran_function_identifier) m->set_ran_function_identifier(*s->ran_function_identifier);
+            if (s->periodicity) m->set_periodicity(*s->periodicity);
             return true;
         }
         case PduType::INDICATION_MESSAGE: {
@@ -228,6 +238,16 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
             s.dapp_identifier = m.dapp_identifier();
             s.response_code = from_pb_response_code(m.response_code());
             if (m.has_subscription_id()) s.subscription_id = m.subscription_id();
+            if (m.has_telemetry_identifier_list()) {
+                const auto& ids = m.telemetry_identifier_list().id();
+                s.telemetry_identifier_list = std::vector<uint32_t>(ids.begin(), ids.end());
+            }
+            if (m.has_control_identifier_list()) {
+                const auto& ids = m.control_identifier_list().id();
+                s.control_identifier_list = std::vector<uint32_t>(ids.begin(), ids.end());
+            }
+            if (m.has_ran_function_identifier()) s.ran_function_identifier = m.ran_function_identifier();
+            if (m.has_periodicity()) s.periodicity = m.periodicity();
             pdu.type = PduType::SUBSCRIPTION_RESPONSE;
             pdu.choice = std::move(s);
             break;
