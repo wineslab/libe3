@@ -14,6 +14,7 @@ SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 SPDX-License-Identifier: Apache-2.0
 """
 
+import os
 import sys
 
 
@@ -22,6 +23,15 @@ def main() -> int:
         import libe3py
     except ImportError as e:
         print(f"FAIL: could not import libe3py: {e}", file=sys.stderr)
+        return 1
+
+    # The module carries the version of the library it was built from
+    version_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "VERSION")
+    with open(version_file) as f:
+        expected = f.read().strip()
+    if getattr(libe3py, "__version__", None) != expected:
+        print(f"FAIL: libe3py.__version__ = {getattr(libe3py, '__version__', None)!r}, "
+              f"expected {expected!r}", file=sys.stderr)
         return 1
 
     # E3Role enum is exposed

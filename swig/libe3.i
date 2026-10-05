@@ -248,3 +248,16 @@ static uint64_t latrec_ctx_py() {
     return latrec_ctx();
 }
 %}
+
+/* The library version, from the VERSION file via the generated version.hpp, so
+ * a Python consumer can compare against a minimum instead of probing for a
+ * feature. */
+%inline %{
+static const char *libe3_version() {
+    return LIBE3_VERSION_STRING;
+}
+%}
+
+%pythoncode %{
+__version__ = libe3_version()
+%}
