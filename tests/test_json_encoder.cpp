@@ -84,6 +84,100 @@ TEST(JsonEncoder_encode_setup_response) {
     ASSERT_TRUE(json.find("setupResponse") != std::string::npos);
 }
 
+static Pdu setup_response_with_data(const std::string& data) {
+    Pdu pdu(PduType::SETUP_RESPONSE);
+    SetupResponse resp;
+    resp.request_id = 100;
+    resp.response_code = ResponseCode::POSITIVE;
+    resp.dapp_identifier = 42;
+    resp.ran_identifier = "ran-1";
+    RanFunctionDef func;
+    func.ran_function_identifier = 5;
+    func.telemetry_identifier_list = {1, 2};
+    func.control_identifier_list = {3};
+    func.ran_function_data.assign(data.begin(), data.end());
+    resp.ran_function_list.push_back(func);
+    pdu.choice = resp;
+    return pdu;
+}
+
+TEST(JsonEncoder_setup_response_ran_function_data_is_nested) {
+    auto encoder = create_encoder();
+
+    auto encoded = encoder->encode(setup_response_with_data(R"({"name":"SIMPLE"})"));
+    ASSERT_TRUE(encoded.has_value());
+
+    auto wire = nlohmann::json::parse(encoded->buffer);
+    ASSERT_TRUE(wire["ranFunctionList"][0]["ranFunctionData"].is_object());
+    ASSERT_STREQ(wire["ranFunctionList"][0]["ranFunctionData"]["name"].get<std::string>().c_str(),
+                 "SIMPLE");
+
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+    auto& restored = std::get<SetupResponse>(decoded->choice);
+    ASSERT_EQ(restored.ran_function_list.size(), 1u);
+    auto data = nlohmann::json::parse(restored.ran_function_list[0].ran_function_data);
+    ASSERT_STREQ(data["name"].get<std::string>().c_str(), "SIMPLE");
+}
+
+TEST(JsonEncoder_decode_setup_response_with_stream_descriptor_array) {
+    // The shape an Aerial agent sends: ranFunctionData is an array of stream
+    // descriptors, not a hex string. The dApp must still get its id.
+    const std::string wire = R"JSON({
+        "type": "setupResponse", "id": 1, "timestamp": 0,
+        "requestId": 7, "responseCode": "positive", "dAppIdentifier": 3,
+        "ranIdentifier": "aerial",
+        "ranFunctionList": [{
+            "ranFunctionIdentifier": 1,
+            "telemetryIdentifierList": [1, 4],
+            "controlIdentifierList": [],
+            "ranFunctionData": [
+                {"stream_id": "sfn", "data_type": "uint16", "status": "available"},
+                {"stream_id": "iq_samples", "data_type": "array(int16)", "status": "unavailable"}
+            ]
+        }]
+    })JSON";
+    auto encoder = create_encoder();
+    auto decoded = encoder->decode(reinterpret_cast<const uint8_t*>(wire.data()), wire.size());
+    ASSERT_TRUE(decoded.has_value());
+
+    auto& resp = std::get<SetupResponse>(decoded->choice);
+    ASSERT_TRUE(resp.dapp_identifier.has_value());
+    ASSERT_EQ(*resp.dapp_identifier, 3u);
+    auto data = nlohmann::json::parse(resp.ran_function_list.at(0).ran_function_data);
+    ASSERT_TRUE(data.is_array());
+    ASSERT_EQ(data.size(), 2u);
+    ASSERT_STREQ(data[0]["stream_id"].get<std::string>().c_str(), "sfn");
+}
+
+TEST(JsonEncoder_decode_setup_response_rejects_string_ran_function_data) {
+    const std::string wire = R"({
+        "type": "setupResponse", "id": 1, "timestamp": 0,
+        "requestId": 7, "responseCode": "positive", "dAppIdentifier": 3,
+        "ranIdentifier": "x",
+        "ranFunctionList": [{"ranFunctionIdentifier": 1, "ranFunctionData": "0a0b0c"}]
+    })";
+    auto encoder = create_encoder();
+    auto decoded = encoder->decode(reinterpret_cast<const uint8_t*>(wire.data()), wire.size());
+    ASSERT_FALSE(decoded.has_value());
+}
+
+TEST(JsonEncoder_encode_setup_response_non_json_ran_function_data_fails) {
+    auto encoder = create_encoder();
+
+    Pdu pdu = setup_response_with_data("");
+    auto& func = std::get<SetupResponse>(pdu.choice).ran_function_list[0];
+    func.ran_function_data = {0xDE, 0xAD, 0xBE, 0xEF};
+
+    auto result = encoder->encode(pdu);
+    ASSERT_FALSE(result.has_value());
+    ASSERT_TRUE(result.error() == ErrorCode::ENCODE_FAILED);
+
+    // A bare scalar is valid JSON but would not decode.
+    auto scalar = encoder->encode(setup_response_with_data("\"abcd\""));
+    ASSERT_FALSE(scalar.has_value());
+}
+
 TEST(JsonEncoder_encode_decode_subscription_request) {
     auto encoder = create_encoder();
     
