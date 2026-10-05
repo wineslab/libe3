@@ -903,6 +903,11 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
     resp.response_code = response_code;
     if (response_code == ResponseCode::POSITIVE) {
         resp.subscription_id = subscription_id;
+        // Core grants exactly what was asked; only the SM sets the real rate.
+        resp.telemetry_identifier_list = request.telemetry_identifier_list;
+        resp.control_identifier_list = request.control_identifier_list;
+        resp.ran_function_identifier = request.ran_function_identifier;
+        resp.periodicity = request.periodicity;
     }
     response_pdu.choice = resp;
 
@@ -1235,8 +1240,8 @@ void E3Interface::handle_subscription_response(const SubscriptionResponse& resp)
                          << resp.request_id << " rc="
                          << response_code_to_string(resp.response_code);
     // Attribute the response to the request that caused it. The RAN function id
-    // is not on the wire (E3-SubscriptionResponse has no ranFunctionIdentifier),
-    // so it comes from the pending-op record keyed by the id we sent.
+    // is optional on the wire, so it comes from the pending-op record keyed by
+    // the id we sent.
     std::optional<PendingSubscriptionOp> pending;
     {
         std::lock_guard<std::mutex> lk(pending_subscriptions_mutex_);

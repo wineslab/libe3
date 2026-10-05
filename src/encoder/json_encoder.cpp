@@ -167,6 +167,22 @@ std::optional<std::pair<size_t, size_t>> find_top_level_member_span(
     }
 }
 
+// Decode only takes an object or array, so encode must not write anything else.
+bool is_json_container(const std::vector<uint8_t>& bytes) {
+    size_t i = 0;
+    while (i < bytes.size() && is_json_ws(static_cast<char>(bytes[i]))) ++i;
+    if (i == bytes.size() || (bytes[i] != '{' && bytes[i] != '[')) return false;
+    return nlohmann::json::accept(bytes);
+}
+
+// Throws std::invalid_argument, which encode() reports as ENCODE_FAILED.
+void require_json_container(const std::vector<uint8_t>& bytes, const char* field) {
+    if (!is_json_container(bytes)) {
+        throw std::invalid_argument(std::string(field) + " is not a JSON object or array ("
+                                    + std::to_string(bytes.size()) + " bytes)");
+    }
+}
+
 } // anonymous namespace
 
 
@@ -201,22 +217,31 @@ ErrorCode JsonE3Encoder::string_to_error_code(const std::string& s) const {
 // Binary encoding helpers
 // ============================================================================
 
-std::string JsonE3Encoder::binary_to_hex(const std::vector<uint8_t>& data) {
-    std::ostringstream ss;
-    for (uint8_t b : data) {
-        ss << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(b);
+std::vector<uint8_t> JsonE3Encoder::payload_from_json(const nlohmann::json& value) {
+    if (value.is_object() || value.is_array()) {
+        std::string text = value.dump();
+        return std::vector<uint8_t>(text.begin(), text.end());
     }
-    return ss.str();
+    throw std::invalid_argument("payload is not a JSON object or array");
 }
 
-std::vector<uint8_t> JsonE3Encoder::hex_to_binary(const std::string& hex) {
-    std::vector<uint8_t> result;
-    result.reserve(hex.size() / 2);
-    for (size_t i = 0; i + 1 < hex.size(); i += 2) {
-        result.push_back(static_cast<uint8_t>(
-            std::stoi(hex.substr(i, 2), nullptr, 16)));
+std::vector<uint8_t> JsonE3Encoder::payload_member(const nlohmann::json& j,
+                                                    const std::string& raw_json,
+                                                    const char* key) {
+    auto it = j.find(key);
+    if (it == j.end()) return {};
+    if (it->is_object() || it->is_array()) {
+        size_t obj_start = raw_json.find_first_not_of(" \t\r\n");
+        auto span = (obj_start == std::string::npos)
+            ? std::nullopt
+            : find_top_level_member_span(raw_json, obj_start, key);
+        if (span) {
+            // Verbatim, like protocolData.
+            return std::vector<uint8_t>(raw_json.begin() + static_cast<long>(span->first),
+                                        raw_json.begin() + static_cast<long>(span->second));
+        }
     }
-    return result;
+    return payload_from_json(*it);
 }
 
 // ============================================================================
@@ -251,7 +276,8 @@ nlohmann::json JsonE3Encoder::encode_setup_response(const SetupResponse& resp) c
             func_obj["ranFunctionIdentifier"] = func.ran_function_identifier;
             func_obj["telemetryIdentifierList"] = func.telemetry_identifier_list;
             func_obj["controlIdentifierList"] = func.control_identifier_list;
-            func_obj["ranFunctionData"] = binary_to_hex(func.ran_function_data);
+            require_json_container(func.ran_function_data, "ranFunctionData");
+            func_obj["ranFunctionData"] = nlohmann::json::parse(func.ran_function_data);
             ran_funcs.push_back(func_obj);
         }
         j["ranFunctionList"] = ran_funcs;
@@ -289,6 +315,18 @@ nlohmann::json JsonE3Encoder::encode_subscription_response(const SubscriptionRes
     if (resp.subscription_id.has_value()) {
         j["subscriptionId"] = resp.subscription_id.value();
     }
+    if (resp.telemetry_identifier_list.has_value()) {
+        j["telemetryIdentifierList"] = *resp.telemetry_identifier_list;
+    }
+    if (resp.control_identifier_list.has_value()) {
+        j["controlIdentifierList"] = *resp.control_identifier_list;
+    }
+    if (resp.ran_function_identifier.has_value()) {
+        j["ranFunctionIdentifier"] = *resp.ran_function_identifier;
+    }
+    if (resp.periodicity.has_value()) {
+        j["periodicity"] = *resp.periodicity;
+    }
     return j;
 }
 
@@ -315,7 +353,6 @@ nlohmann::json JsonE3Encoder::encode_dapp_control_action(const DAppControlAction
     j["controlIdentifier"] = action.control_identifier;
     // OPTIONAL: omitted entirely when unset, mirroring the ASN.1 absent field.
     if (action.sequence_id != 0) j["sequenceId"] = action.sequence_id;
-    j["actionData"] = binary_to_hex(action.action_data);
     return j;
 }
 
@@ -324,7 +361,6 @@ nlohmann::json JsonE3Encoder::encode_dapp_report(const DAppReport& report) const
     j["dAppIdentifier"] = report.dapp_identifier;
     j["ranFunctionIdentifier"] = report.ran_function_identifier;
     j["sequenceId"] = report.sequence_id;
-    j["reportData"] = binary_to_hex(report.report_data);
     return j;
 }
 
@@ -333,7 +369,6 @@ nlohmann::json JsonE3Encoder::encode_xapp_control_action(const XAppControlAction
     j["dAppIdentifier"] = action.dapp_identifier;
     j["ranFunctionIdentifier"] = action.ran_function_identifier;
     j["sequenceId"] = action.sequence_id;
-    j["xAppControlData"] = binary_to_hex(action.xapp_control_data);
     return j;
 }
 
@@ -378,7 +413,9 @@ SetupResponse JsonE3Encoder::decode_setup_response(const nlohmann::json& j) cons
             func.ran_function_identifier = func_obj.value("ranFunctionIdentifier", 0u);
             func.telemetry_identifier_list = func_obj.value("telemetryIdentifierList", std::vector<uint32_t>{});
             func.control_identifier_list = func_obj.value("controlIdentifierList", std::vector<uint32_t>{});
-            func.ran_function_data = hex_to_binary(func_obj.value("ranFunctionData", ""));
+            if (auto it = func_obj.find("ranFunctionData"); it != func_obj.end()) {
+                func.ran_function_data = payload_from_json(*it);
+            }
             resp.ran_function_list.push_back(func);
         }
     }
@@ -416,6 +453,21 @@ SubscriptionResponse JsonE3Encoder::decode_subscription_response(const nlohmann:
     if (j.contains("subscriptionId")) {
         resp.subscription_id = j["subscriptionId"].get<uint32_t>();
     }
+    // Aerial writes these as ...GrantedList; accepted for interop only, recheck later.
+    auto read_ids = [&j](const char* name, const char* alias) -> std::optional<std::vector<uint32_t>> {
+        auto it = j.find(name);
+        if (it == j.end()) it = j.find(alias);
+        if (it == j.end()) return std::nullopt;
+        return it->get<std::vector<uint32_t>>();
+    };
+    resp.telemetry_identifier_list = read_ids("telemetryIdentifierList", "telemetryGrantedList");
+    resp.control_identifier_list = read_ids("controlIdentifierList", "controlGrantedList");
+    if (j.contains("ranFunctionIdentifier")) {
+        resp.ran_function_identifier = j["ranFunctionIdentifier"].get<uint32_t>();
+    }
+    if (j.contains("periodicity")) {
+        resp.periodicity = j["periodicity"].get<uint32_t>();
+    }
     return resp;
 }
 
@@ -445,31 +497,34 @@ IndicationMessage JsonE3Encoder::decode_indication_message(const nlohmann::json&
     return msg;
 }
 
-DAppControlAction JsonE3Encoder::decode_dapp_control_action(const nlohmann::json& j) const {
+DAppControlAction JsonE3Encoder::decode_dapp_control_action(const nlohmann::json& j,
+                                                             const std::string& raw_json) const {
     DAppControlAction action;
     action.dapp_identifier = j.value("dAppIdentifier", 0u);
     action.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
     action.control_identifier = j.value("controlIdentifier", 0u);
     action.sequence_id = j.value("sequenceId", 0u);
-    action.action_data = hex_to_binary(j.value("actionData", ""));
+    action.action_data = payload_member(j, raw_json, "actionData");
     return action;
 }
 
-DAppReport JsonE3Encoder::decode_dapp_report(const nlohmann::json& j) const {
+DAppReport JsonE3Encoder::decode_dapp_report(const nlohmann::json& j,
+                                               const std::string& raw_json) const {
     DAppReport report;
     report.dapp_identifier = j.value("dAppIdentifier", 0u);
     report.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
     report.sequence_id = j.value("sequenceId", 0u);
-    report.report_data = hex_to_binary(j.value("reportData", ""));
+    report.report_data = payload_member(j, raw_json, "reportData");
     return report;
 }
 
-XAppControlAction JsonE3Encoder::decode_xapp_control_action(const nlohmann::json& j) const {
+XAppControlAction JsonE3Encoder::decode_xapp_control_action(const nlohmann::json& j,
+                                                             const std::string& raw_json) const {
     XAppControlAction action;
     action.dapp_identifier = j.value("dAppIdentifier", 0u);
     action.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
     action.sequence_id = j.value("sequenceId", 0u);
-    action.xapp_control_data = hex_to_binary(j.value("xAppControlData", ""));
+    action.xapp_control_data = payload_member(j, raw_json, "xAppControlData");
     return action;
 }
 
@@ -511,8 +566,11 @@ EncodeResult<EncodedMessage> JsonE3Encoder::encode(const Pdu& pdu) {
         std::optional<std::string> raw_protocol_data;
         bool indication_payload_invalid = false;
 
+        // Spliced as top-level members so the hot path never parses or re-dumps them.
+        std::vector<std::pair<const char*, std::string>> raw_members;
+
         // Encode payload fields directly into root (flat format)
-        std::visit([this, &root, &raw_protocol_data, &indication_payload_invalid](auto&& arg) {
+        std::visit([this, &root, &raw_protocol_data, &indication_payload_invalid, &raw_members](auto&& arg) {
             using T = std::decay_t<decltype(arg)>;
 
             nlohmann::json fields;
@@ -542,12 +600,22 @@ EncodeResult<EncodedMessage> JsonE3Encoder::encode(const Pdu& pdu) {
             }
             else if constexpr (std::is_same_v<T, DAppControlAction>) {
                 fields = encode_dapp_control_action(arg);
+                require_json_container(arg.action_data, "actionData");
+                raw_members.emplace_back("actionData",
+                                         std::string(arg.action_data.begin(), arg.action_data.end()));
             }
             else if constexpr (std::is_same_v<T, DAppReport>) {
                 fields = encode_dapp_report(arg);
+                require_json_container(arg.report_data, "reportData");
+                raw_members.emplace_back("reportData",
+                                         std::string(arg.report_data.begin(), arg.report_data.end()));
             }
             else if constexpr (std::is_same_v<T, XAppControlAction>) {
                 fields = encode_xapp_control_action(arg);
+                require_json_container(arg.xapp_control_data, "xAppControlData");
+                raw_members.emplace_back("xAppControlData",
+                                         std::string(arg.xapp_control_data.begin(),
+                                                     arg.xapp_control_data.end()));
             }
             else if constexpr (std::is_same_v<T, ReleaseMessage>) {
                 fields = encode_release_message(arg);
@@ -578,6 +646,14 @@ EncodeResult<EncodedMessage> JsonE3Encoder::encode(const Pdu& pdu) {
                 return tl::unexpected(ErrorCode::ENCODE_FAILED);
             }
             json_str.insert(pos, "\"protocolData\":" + *raw_protocol_data + ",");
+        }
+
+        // root always holds type/id/timestamp, so it ends in '}' after a member.
+        for (const auto& [key, raw] : raw_members) {
+            json_str.pop_back();
+            json_str += ",\"";
+            json_str += key;
+            json_str += "\":" + raw + "}";
         }
 
         EncodedMessage msg;
@@ -651,13 +727,13 @@ EncodeResult<Pdu> JsonE3Encoder::decode(const uint8_t* data, size_t size) {
                 pdu.choice = decode_indication_message(root, json_str);
                 break;
             case PduType::DAPP_CONTROL_ACTION:
-                pdu.choice = decode_dapp_control_action(root);
+                pdu.choice = decode_dapp_control_action(root, json_str);
                 break;
             case PduType::DAPP_REPORT:
-                pdu.choice = decode_dapp_report(root);
+                pdu.choice = decode_dapp_report(root, json_str);
                 break;
             case PduType::XAPP_CONTROL_ACTION:
-                pdu.choice = decode_xapp_control_action(root);
+                pdu.choice = decode_xapp_control_action(root, json_str);
                 break;
             case PduType::RELEASE_MESSAGE:
                 pdu.choice = decode_release_message(root);

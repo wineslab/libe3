@@ -160,6 +160,7 @@ TEST(role_pair_full_handshake_indication_control_report_release) {
     std::condition_variable cv;
     int indications = 0;
     bool sub_resp_ok = false;
+    SubscriptionResponse granted;
     std::vector<uint32_t> xapp_control_message_ids;
 
     E3Agent dapp(make_dapp_config(ep));
@@ -173,6 +174,7 @@ TEST(role_pair_full_handshake_indication_control_report_release) {
     });
     dapp.set_subscription_response_handler([&](const SubscriptionResponse& r) {
         std::lock_guard<std::mutex> lk(mu);
+        if (!sub_resp_ok) granted = r;
         sub_resp_ok = (r.response_code == ResponseCode::POSITIVE);
         cv.notify_all();
     });
@@ -209,6 +211,18 @@ TEST(role_pair_full_handshake_indication_control_report_release) {
             lk.lock();
             ASSERT_TRUE(cv.wait_for(lk, 3s, [&]() { return sub_resp_ok; }));
         }
+    }
+
+    // The RAN reports what it granted: here, exactly what was asked for, and
+    // no periodicity because none was requested.
+    {
+        std::lock_guard<std::mutex> lk(mu);
+        ASSERT_TRUE(granted.telemetry_identifier_list
+                    == std::optional<std::vector<uint32_t>>(std::vector<uint32_t>{1}));
+        ASSERT_TRUE(granted.control_identifier_list
+                    == std::optional<std::vector<uint32_t>>(std::vector<uint32_t>{1}));
+        ASSERT_TRUE(granted.ran_function_identifier == std::optional<uint32_t>(1u));
+        ASSERT_FALSE(granted.periodicity.has_value());
     }
 
     // Wait for at least 2 indications

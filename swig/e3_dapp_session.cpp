@@ -96,6 +96,16 @@ DAppSession::DAppSession(libe3::E3Config config, std::size_t queue_capacity) {
         ev.request_id = r.request_id;
         ev.subscription_id = r.subscription_id.value_or(0);
         ev.response_code = static_cast<int>(r.response_code);
+        ev.ran_function_id = r.ran_function_identifier.value_or(0);
+        ev.periodicity = r.periodicity ? static_cast<long>(*r.periodicity) : -1;
+        if (r.telemetry_identifier_list) {
+            ev.has_telemetry_granted = true;
+            ev.telemetry_granted = *r.telemetry_identifier_list;
+        }
+        if (r.control_identifier_list) {
+            ev.has_control_granted = true;
+            ev.control_granted = *r.control_identifier_list;
+        }
         impl->enqueue(std::move(ev));
     });
 

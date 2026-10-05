@@ -137,8 +137,12 @@ namespace std {
  * expose the payload through a by-value method instead — methods use the
  * std::vector<uint8_t> -> bytes `out` typemap above. Python reads ev.get_payload(). */
 %ignore libe3::py::E3Event::payload;
+%ignore libe3::py::E3Event::telemetry_granted;
+%ignore libe3::py::E3Event::control_granted;
 %extend libe3::py::E3Event {
     std::vector<uint8_t> get_payload() const { return $self->payload; }
+    std::vector<uint32_t> get_telemetry_granted() const { return $self->telemetry_granted; }
+    std::vector<uint32_t> get_control_granted() const { return $self->control_granted; }
 }
 
 /* The full dApp seam: DAppSession + E3Event. The batch returned by
