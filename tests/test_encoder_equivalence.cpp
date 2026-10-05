@@ -136,7 +136,11 @@ static bool equals(const SubscriptionResponse& a, const SubscriptionResponse& b)
     return a.request_id == b.request_id
         && a.dapp_identifier == b.dapp_identifier
         && a.response_code == b.response_code
-        && a.subscription_id == b.subscription_id;
+        && a.subscription_id == b.subscription_id
+        && a.telemetry_identifier_list == b.telemetry_identifier_list
+        && a.control_identifier_list == b.control_identifier_list
+        && a.ran_function_identifier == b.ran_function_identifier
+        && a.periodicity == b.periodicity;
 }
 
 static bool equals(const IndicationMessage& a, const IndicationMessage& b) {
@@ -270,6 +274,12 @@ static std::vector<Sample> sample_pdus() {
     sub_resp.dapp_identifier = 42;
     sub_resp.response_code = ResponseCode::POSITIVE;
     sub_resp.subscription_id = 7;
+    // A non-empty telemetry list and an empty control list: "none granted" is
+    // different from "not reported" and has to survive every encoding.
+    sub_resp.telemetry_identifier_list = std::vector<uint32_t>{1, 4, 5};
+    sub_resp.control_identifier_list = std::vector<uint32_t>{};
+    sub_resp.ran_function_identifier = 5;
+    sub_resp.periodicity = 250;
     add("SubscriptionResponse", PduType::SUBSCRIPTION_RESPONSE, sub_resp);
 
     // Valid JSON, because the JSON encoder nests protocolData rather than

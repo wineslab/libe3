@@ -60,12 +60,21 @@ message SubscriptionDelete {
   uint32 subscription_id = 2;
 }
 
+// Wrapper so "not reported" (absent) differs from "none granted" (empty).
+message IdentifierList {
+  repeated uint32 id = 1;
+}
+
 // Subscription Response (RAN -> dApp).
 message SubscriptionResponse {
   uint32 request_id = 1;
   uint32 dapp_identifier = 2;
   ResponseCode response_code = 3;
   optional uint32 subscription_id = 4;
+  IdentifierList telemetry_identifier_list = 5;
+  IdentifierList control_identifier_list = 6;
+  optional uint32 ran_function_identifier = 7;
+  optional uint32 periodicity = 8;
 }
 
 // Indication Message (RAN -> dApp). protocol_data carries the opaque

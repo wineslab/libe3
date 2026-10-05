@@ -129,6 +129,7 @@ void run_pair(E3TransportLayer transport, uint16_t base_port,
     std::condition_variable cv;
     int indications = 0;
     bool sub_resp_ok = false;
+    SubscriptionResponse granted;
 
     E3Agent dapp(dapp_cfg);
     dapp.set_indication_handler([&](const IndicationMessage& msg) {
@@ -141,6 +142,7 @@ void run_pair(E3TransportLayer transport, uint16_t base_port,
     });
     dapp.set_subscription_response_handler([&](const SubscriptionResponse& r) {
         std::lock_guard<std::mutex> lk(mu);
+        if (!sub_resp_ok) granted = r;  // the grant, not the later release
         sub_resp_ok = (r.response_code == ResponseCode::POSITIVE);
         cv.notify_all();
     });
@@ -164,9 +166,18 @@ void run_pair(E3TransportLayer transport, uint16_t base_port,
         ASSERT_TRUE(cv.wait_for(lk, 5s, [&]() { return indications >= 2; }));
     }
 
-    // A granted subscription must be visible to the dApp that holds it: the
-    // response carries no ranFunctionIdentifier, so this only works if the
-    // request that asked for it was recorded (issue #66).
+    // The RAN reports what it granted: here, exactly what was asked for.
+    {
+        std::lock_guard<std::mutex> lk(mu);
+        ASSERT_TRUE(granted.telemetry_identifier_list == std::optional<std::vector<uint32_t>>(std::vector<uint32_t>{1}));
+        ASSERT_TRUE(granted.control_identifier_list == std::optional<std::vector<uint32_t>>(std::vector<uint32_t>{1}));
+        ASSERT_TRUE(granted.ran_function_identifier == std::optional<uint32_t>(1u));
+        ASSERT_FALSE(granted.periodicity.has_value());  // none was asked for
+    }
+
+    // A granted subscription must be visible to the dApp that holds it. Not
+    // every RAN names the function in its response, so this relies on the
+    // request that asked for it having been recorded (issue #66).
     ASSERT_TRUE(dapp.subscribed_ran_functions() == std::vector<uint32_t>{1});
     ASSERT_EQ(dapp.active_subscription_ids().size(), size_t{1});
 
