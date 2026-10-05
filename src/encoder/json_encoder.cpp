@@ -167,6 +167,22 @@ std::optional<std::pair<size_t, size_t>> find_top_level_member_span(
     }
 }
 
+// Decode only takes an object or array, so encode must not write anything else.
+bool is_json_container(const std::vector<uint8_t>& bytes) {
+    size_t i = 0;
+    while (i < bytes.size() && is_json_ws(static_cast<char>(bytes[i]))) ++i;
+    if (i == bytes.size() || (bytes[i] != '{' && bytes[i] != '[')) return false;
+    return nlohmann::json::accept(bytes);
+}
+
+// Throws std::invalid_argument, which encode() reports as ENCODE_FAILED.
+void require_json_container(const std::vector<uint8_t>& bytes, const char* field) {
+    if (!is_json_container(bytes)) {
+        throw std::invalid_argument(std::string(field) + " is not a JSON object or array ("
+                                    + std::to_string(bytes.size()) + " bytes)");
+    }
+}
+
 } // anonymous namespace
 
 
@@ -219,6 +235,14 @@ std::vector<uint8_t> JsonE3Encoder::hex_to_binary(const std::string& hex) {
     return result;
 }
 
+std::vector<uint8_t> JsonE3Encoder::payload_from_json(const nlohmann::json& value) {
+    if (value.is_object() || value.is_array()) {
+        std::string text = value.dump();
+        return std::vector<uint8_t>(text.begin(), text.end());
+    }
+    throw std::invalid_argument("payload is not a JSON object or array");
+}
+
 // ============================================================================
 // Encoding helpers for each PDU type
 // ============================================================================
@@ -251,7 +275,8 @@ nlohmann::json JsonE3Encoder::encode_setup_response(const SetupResponse& resp) c
             func_obj["ranFunctionIdentifier"] = func.ran_function_identifier;
             func_obj["telemetryIdentifierList"] = func.telemetry_identifier_list;
             func_obj["controlIdentifierList"] = func.control_identifier_list;
-            func_obj["ranFunctionData"] = binary_to_hex(func.ran_function_data);
+            require_json_container(func.ran_function_data, "ranFunctionData");
+            func_obj["ranFunctionData"] = nlohmann::json::parse(func.ran_function_data);
             ran_funcs.push_back(func_obj);
         }
         j["ranFunctionList"] = ran_funcs;
@@ -378,7 +403,9 @@ SetupResponse JsonE3Encoder::decode_setup_response(const nlohmann::json& j) cons
             func.ran_function_identifier = func_obj.value("ranFunctionIdentifier", 0u);
             func.telemetry_identifier_list = func_obj.value("telemetryIdentifierList", std::vector<uint32_t>{});
             func.control_identifier_list = func_obj.value("controlIdentifierList", std::vector<uint32_t>{});
-            func.ran_function_data = hex_to_binary(func_obj.value("ranFunctionData", ""));
+            if (auto it = func_obj.find("ranFunctionData"); it != func_obj.end()) {
+                func.ran_function_data = payload_from_json(*it);
+            }
             resp.ran_function_list.push_back(func);
         }
     }

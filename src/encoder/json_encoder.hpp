@@ -66,6 +66,8 @@ private:
     // Binary data encoding helpers (hex string)
     static std::string binary_to_hex(const std::vector<uint8_t>& data);
     static std::vector<uint8_t> hex_to_binary(const std::string& hex);
+    // Opaque payload from a nested object or array, dumped to bytes
+    static std::vector<uint8_t> payload_from_json(const nlohmann::json& value);
 
     // Helper methods for type conversions
     std::optional<PduType> string_to_pdu_type(const std::string& s) const;
