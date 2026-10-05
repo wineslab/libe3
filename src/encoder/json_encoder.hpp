@@ -57,17 +57,17 @@ private:
     SubscriptionDelete decode_subscription_delete(const nlohmann::json& j) const;
     SubscriptionResponse decode_subscription_response(const nlohmann::json& j) const;
     IndicationMessage decode_indication_message(const nlohmann::json& j, const std::string& raw_json) const;
-    DAppControlAction decode_dapp_control_action(const nlohmann::json& j) const;
-    DAppReport decode_dapp_report(const nlohmann::json& j) const;
-    XAppControlAction decode_xapp_control_action(const nlohmann::json& j) const;
+    DAppControlAction decode_dapp_control_action(const nlohmann::json& j, const std::string& raw_json) const;
+    DAppReport decode_dapp_report(const nlohmann::json& j, const std::string& raw_json) const;
+    XAppControlAction decode_xapp_control_action(const nlohmann::json& j, const std::string& raw_json) const;
     ReleaseMessage decode_release_message(const nlohmann::json& j) const;
     MessageAck decode_message_ack(const nlohmann::json& j) const;
 
-    // Binary data encoding helpers (hex string)
-    static std::string binary_to_hex(const std::vector<uint8_t>& data);
-    static std::vector<uint8_t> hex_to_binary(const std::string& hex);
     // Opaque payload from a nested object or array, dumped to bytes
     static std::vector<uint8_t> payload_from_json(const nlohmann::json& value);
+    // Top-level payload member: the sender's bytes verbatim
+    static std::vector<uint8_t> payload_member(const nlohmann::json& j, const std::string& raw_json,
+                                               const char* key);
 
     // Helper methods for type conversions
     std::optional<PduType> string_to_pdu_type(const std::string& s) const;
