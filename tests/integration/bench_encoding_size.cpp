@@ -79,8 +79,8 @@ std::vector<uint8_t> small_payload() {
     return v;
 }
 
-// JSON-formatted payload for IndicationMessage.protocol_data when encoding==JSON.
-// The JSON encoder embeds protocol_data as a nested JSON object (not hex).
+// JSON-formatted payload for every opaque payload field when encoding==JSON.
+// The JSON encoder embeds them as nested JSON objects (not hex).
 // This is the canonical Simple SM indication payload produced by the example
 // wrapper's JSON branch.
 std::vector<uint8_t> json_sm_payload() {
@@ -110,13 +110,12 @@ constexpr size_t kU32 = sizeof(uint32_t);
 constexpr size_t kEnum = 1;  // ResponseCode fits one byte of information
 constexpr size_t kMsgId = kU32;
 
-// Build the 11 sample PDUs. json_indication: when true, use a JSON-formatted
-// indication payload instead of raw bytes (the JSON encoder embeds
-// protocol_data as a nested JSON object).
-std::vector<Sample> make_samples(bool json_indication) {
+// Build the 11 sample PDUs. json_payloads: when true, use a JSON-formatted
+// payload instead of raw bytes for every opaque field (the JSON encoder
+// embeds them as nested JSON objects).
+std::vector<Sample> make_samples(bool json_payloads) {
     std::vector<Sample> samples;
-    auto payload = small_payload();
-    auto ind_payload = json_indication ? json_sm_payload() : payload;
+    auto payload = json_payloads ? json_sm_payload() : small_payload();
 
     // 1. SetupRequest
     {
@@ -210,7 +209,7 @@ std::vector<Sample> make_samples(bool json_indication) {
         IndicationMessage msg;
         msg.dapp_identifier        = 1;
         msg.ran_function_identifier = 1;
-        msg.protocol_data          = ind_payload;
+        msg.protocol_data          = payload;
         s.pdu.choice = msg;
         s.pdu.message_id = 6;
         s.info_bytes = kMsgId + kU32 + kU32 + msg.protocol_data.size();
@@ -376,7 +375,7 @@ int main(int argc, char* argv[]) {
     struct EncoderCase {
         EncodingFormat format;
         const char* name;
-        bool json_indication;
+        bool json_payloads;
     };
     std::vector<EncoderCase> encoder_cases;
 #ifdef LIBE3_ENABLE_ASN1
@@ -397,7 +396,7 @@ int main(int argc, char* argv[]) {
             std::fprintf(stderr, "WARN: no encoder for %s\n", ec.name);
             continue;
         }
-        for (auto& sample : make_samples(ec.json_indication)) {
+        for (auto& sample : make_samples(ec.json_payloads)) {
             auto result = enc->encode(sample.pdu);
             if (!result.has_value()) {
                 std::fprintf(stderr, "WARN: encode failed for %s/%s\n",
