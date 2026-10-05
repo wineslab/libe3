@@ -26,10 +26,9 @@
  * three are present at once and the second leg has teeth.
  *
  * One payload constraint, and it comes from JSON: the JSON encoder carries
- * protocol_data and ran_function_data as nested JSON values, so each must be
- * a JSON object or array. ran_function_data is re-serialized, so it is written
- * in nlohmann's compact, key-sorted form and equality still holds exactly.
- * Every other octet-string payload is hex-encoded and takes arbitrary bytes.
+ * every opaque payload as a nested JSON value, so each must be a JSON object
+ * or array. ran_function_data is re-serialized, so it is written in nlohmann's
+ * compact, key-sorted form and equality still holds exactly.
  *
  * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
@@ -284,21 +283,24 @@ static std::vector<Sample> sample_pdus() {
     control.ran_function_identifier = 5;
     control.control_identifier = 9;
     control.sequence_id = 77;   // set: exercises the OPTIONAL-present branch
-    control.action_data = {0x01, 0x02, 0x03, 0xFF, 0x00, 0x80};
+    const std::string control_json = R"({"mcs":12,"prb":[1,2,3]})";
+    control.action_data.assign(control_json.begin(), control_json.end());
     add("DAppControlAction", PduType::DAPP_CONTROL_ACTION, control);
 
     DAppReport report;
     report.dapp_identifier = 42;
     report.ran_function_identifier = 5;
     report.sequence_id = 77;
-    report.report_data = {0xAA, 0xBB, 0xCC, 0x00, 0x11};
+    const std::string report_json = R"({"detections":[{"snr":7.5}]})";
+    report.report_data.assign(report_json.begin(), report_json.end());
     add("DAppReport", PduType::DAPP_REPORT, report);
 
     XAppControlAction xapp;
     xapp.dapp_identifier = 42;
     xapp.ran_function_identifier = 5;
     xapp.sequence_id = 77;
-    xapp.xapp_control_data = {0x7F, 0x80, 0x00, 0x01};
+    const std::string xapp_json = R"({"policy":"hold"})";
+    xapp.xapp_control_data.assign(xapp_json.begin(), xapp_json.end());
     add("XAppControlAction", PduType::XAPP_CONTROL_ACTION, xapp);
 
     ReleaseMessage release;

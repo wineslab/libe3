@@ -350,8 +350,8 @@ bool run_combo(const Combo& c, const std::string& trace_dir) {
         // has no ring. The context published before each one is what that stage
         // must carry into aux. Kept off the loop below, whose rate is set to
         // fill every leg without provoking a drop.
-        // protocolData has to be valid JSON: the JSON encoder embeds it as a
-        // nested object rather than a string, so it parses what it is given.
+        // Every opaque payload has to be valid JSON: the JSON encoder embeds it
+        // as a nested object rather than a string, so it parses what it is given.
         static const char kPayload[] = "{\"stages\":1}";
         const std::vector<uint8_t> payload(kPayload, kPayload + sizeof(kPayload) - 1);
         // The context encodes which combo produced the record, so a drop can be
@@ -363,8 +363,8 @@ bool run_combo(const Combo& c, const std::string& trace_dir) {
             ran.send_indication(1, /*ran_function_id=*/1, payload);
         }
         while (!stop.load()) {
-            dapp.send_report(1, std::vector<uint8_t>(32, 0xAB), /*sequence_id=*/1);
-            dapp.send_control(1, 1, std::vector<uint8_t>(16, 0xCD));
+            dapp.send_report(1, payload, /*sequence_id=*/1);
+            dapp.send_control(1, 1, payload);
             std::this_thread::sleep_for(std::chrono::milliseconds(20));
         }
     });
