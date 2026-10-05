@@ -240,6 +240,78 @@ TEST(JsonEncoder_encode_decode_subscription_response) {
     ASSERT_EQ(restored.request_id, 55u);
 }
 
+TEST(JsonEncoder_subscription_response_grants_roundtrip) {
+    auto encoder = create_encoder();
+
+    Pdu original(PduType::SUBSCRIPTION_RESPONSE);
+    SubscriptionResponse resp;
+    resp.request_id = 3;
+    resp.dapp_identifier = 42;
+    resp.response_code = ResponseCode::POSITIVE;
+    resp.subscription_id = 5;
+    resp.telemetry_identifier_list = std::vector<uint32_t>{1, 4, 5};
+    resp.control_identifier_list = std::vector<uint32_t>{};  // present, none granted
+    resp.ran_function_identifier = 9;
+    resp.periodicity = 250;
+    original.choice = resp;
+
+    auto encoded = encoder->encode(original);
+    ASSERT_TRUE(encoded.has_value());
+
+    // Written under the ASN.1 field names.
+    auto wire = nlohmann::json::parse(encoded->buffer);
+    ASSERT_EQ(wire["telemetryIdentifierList"].size(), 3u);
+    ASSERT_TRUE(wire["controlIdentifierList"].is_array());
+    ASSERT_FALSE(wire.contains("telemetryGrantedList"));
+
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+    auto& r = std::get<SubscriptionResponse>(decoded->choice);
+    ASSERT_TRUE(*r.telemetry_identifier_list == (std::vector<uint32_t>{1, 4, 5}));
+    ASSERT_TRUE(r.control_identifier_list.has_value());
+    ASSERT_TRUE(r.control_identifier_list->empty());
+    ASSERT_EQ(*r.ran_function_identifier, 9u);
+    ASSERT_EQ(*r.periodicity, 250u);
+}
+
+TEST(JsonEncoder_decode_aerial_subscription_response_grants) {
+    // The shape an Aerial agent sends: the lists are named ...GrantedList.
+    const std::string wire = R"({
+        "type": "subscriptionResponse", "id": 4, "timestamp": 0,
+        "requestId": 3, "dAppIdentifier": 42, "responseCode": "positive",
+        "subscriptionId": 5, "ranFunctionIdentifier": 1,
+        "telemetryGrantedList": [1, 4, 5, 6], "controlGrantedList": [],
+        "periodicity": 100000
+    })";
+    auto encoder = create_encoder();
+    auto decoded = encoder->decode(reinterpret_cast<const uint8_t*>(wire.data()), wire.size());
+    ASSERT_TRUE(decoded.has_value());
+
+    auto& r = std::get<SubscriptionResponse>(decoded->choice);
+    ASSERT_TRUE(*r.telemetry_identifier_list == (std::vector<uint32_t>{1, 4, 5, 6}));
+    ASSERT_TRUE(r.control_identifier_list.has_value());
+    ASSERT_TRUE(r.control_identifier_list->empty());
+    ASSERT_EQ(*r.ran_function_identifier, 1u);
+    ASSERT_EQ(*r.periodicity, 100000u);
+}
+
+TEST(JsonEncoder_decode_subscription_response_without_grants) {
+    // Not reported must stay distinct from none granted.
+    const std::string wire = R"({
+        "type": "subscriptionResponse", "id": 4, "timestamp": 0,
+        "requestId": 3, "dAppIdentifier": 42, "responseCode": "positive", "subscriptionId": 5
+    })";
+    auto encoder = create_encoder();
+    auto decoded = encoder->decode(reinterpret_cast<const uint8_t*>(wire.data()), wire.size());
+    ASSERT_TRUE(decoded.has_value());
+
+    auto& r = std::get<SubscriptionResponse>(decoded->choice);
+    ASSERT_FALSE(r.telemetry_identifier_list.has_value());
+    ASSERT_FALSE(r.control_identifier_list.has_value());
+    ASSERT_FALSE(r.ran_function_identifier.has_value());
+    ASSERT_FALSE(r.periodicity.has_value());
+}
+
 TEST(JsonEncoder_encode_decode_indication_message) {
     auto encoder = create_encoder();
     

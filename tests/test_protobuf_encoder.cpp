@@ -208,6 +208,50 @@ TEST(ProtobufEncoder_subscription_response_roundtrip) {
     ASSERT_EQ(*r.subscription_id, 5u);
 }
 
+TEST(ProtobufEncoder_subscription_response_grants_roundtrip) {
+    auto encoder = make_encoder();
+    Pdu original(PduType::SUBSCRIPTION_RESPONSE);
+    SubscriptionResponse resp;
+    resp.request_id = 3;
+    resp.dapp_identifier = 42;
+    resp.response_code = ResponseCode::POSITIVE;
+    resp.subscription_id = 5;
+    resp.telemetry_identifier_list = std::vector<uint32_t>{1, 4, 5};
+    resp.control_identifier_list = std::vector<uint32_t>{};  // present, none granted
+    resp.ran_function_identifier = 9;
+    resp.periodicity = 250;
+    original.choice = resp;
+
+    auto encoded = encoder->encode(original);
+    ASSERT_TRUE(encoded.has_value());
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+
+    auto& r = std::get<SubscriptionResponse>(decoded->choice);
+    ASSERT_TRUE(r.telemetry_identifier_list.has_value());
+    ASSERT_TRUE(*r.telemetry_identifier_list == (std::vector<uint32_t>{1, 4, 5}));
+    ASSERT_TRUE(r.control_identifier_list.has_value());
+    ASSERT_TRUE(r.control_identifier_list->empty());
+    ASSERT_EQ(*r.ran_function_identifier, 9u);
+    ASSERT_EQ(*r.periodicity, 250u);
+}
+
+TEST(ProtobufEncoder_subscription_response_grants_absent_stay_absent) {
+    auto encoder = make_encoder();
+    Pdu original(PduType::SUBSCRIPTION_RESPONSE);
+    SubscriptionResponse resp;
+    resp.response_code = ResponseCode::POSITIVE;
+    original.choice = resp;
+
+    auto decoded = encoder->decode(*encoder->encode(original));
+    ASSERT_TRUE(decoded.has_value());
+    auto& r = std::get<SubscriptionResponse>(decoded->choice);
+    ASSERT_FALSE(r.telemetry_identifier_list.has_value());
+    ASSERT_FALSE(r.control_identifier_list.has_value());
+    ASSERT_FALSE(r.ran_function_identifier.has_value());
+    ASSERT_FALSE(r.periodicity.has_value());
+}
+
 TEST(ProtobufEncoder_indication_roundtrip_binary) {
     auto encoder = make_encoder();
     Pdu original(PduType::INDICATION_MESSAGE);

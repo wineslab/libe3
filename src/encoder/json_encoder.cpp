@@ -315,6 +315,18 @@ nlohmann::json JsonE3Encoder::encode_subscription_response(const SubscriptionRes
     if (resp.subscription_id.has_value()) {
         j["subscriptionId"] = resp.subscription_id.value();
     }
+    if (resp.telemetry_identifier_list.has_value()) {
+        j["telemetryIdentifierList"] = *resp.telemetry_identifier_list;
+    }
+    if (resp.control_identifier_list.has_value()) {
+        j["controlIdentifierList"] = *resp.control_identifier_list;
+    }
+    if (resp.ran_function_identifier.has_value()) {
+        j["ranFunctionIdentifier"] = *resp.ran_function_identifier;
+    }
+    if (resp.periodicity.has_value()) {
+        j["periodicity"] = *resp.periodicity;
+    }
     return j;
 }
 
@@ -440,6 +452,21 @@ SubscriptionResponse JsonE3Encoder::decode_subscription_response(const nlohmann:
     resp.response_code = (response_code_str == "positive") ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
     if (j.contains("subscriptionId")) {
         resp.subscription_id = j["subscriptionId"].get<uint32_t>();
+    }
+    // Aerial writes these as ...GrantedList; accepted for interop only, recheck later.
+    auto read_ids = [&j](const char* name, const char* alias) -> std::optional<std::vector<uint32_t>> {
+        auto it = j.find(name);
+        if (it == j.end()) it = j.find(alias);
+        if (it == j.end()) return std::nullopt;
+        return it->get<std::vector<uint32_t>>();
+    };
+    resp.telemetry_identifier_list = read_ids("telemetryIdentifierList", "telemetryGrantedList");
+    resp.control_identifier_list = read_ids("controlIdentifierList", "controlGrantedList");
+    if (j.contains("ranFunctionIdentifier")) {
+        resp.ran_function_identifier = j["ranFunctionIdentifier"].get<uint32_t>();
+    }
+    if (j.contains("periodicity")) {
+        resp.periodicity = j["periodicity"].get<uint32_t>();
     }
     return resp;
 }

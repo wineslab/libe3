@@ -166,6 +166,10 @@ make -j$(nproc)
 > **selected at runtime** via the `encoding` field of `e3_config_t` (0 = ASN1, 1 = JSON,
 > 2 = PROTOBUF) when calling `e3_agent_create_with_config()`.
 
+> **Note on JSON payloads:** the opaque payloads (`protocolData`, `ranFunctionData`,
+> `actionData`, `reportData`, `xAppControlData`) travel as nested JSON, so over JSON each must
+> be a JSON object or array; anything else fails to encode with `ENCODE_FAILED`.
+
 ### Running Tests
 
 ```bash
