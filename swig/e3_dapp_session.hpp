@@ -71,21 +71,30 @@ enum E3EventKind {
  * `payload` carries the opaque E3SM bytes for indications
  * (protocol_data) and xApp controls (xapp_control_data); it is empty for
  * subscription/setup responses and acks. Fields not relevant to a given
- * `kind` are left zero.
+ * `kind` are left zero, except where noted.
+ *
+ * A subscription response also carries the grant: `ran_function_id` (0 = not
+ * reported), `periodicity`, and the id lists, valid only when their has_* flag is set.
  */
 struct E3Event {
     int kind{E3_EVENT_NONE};        ///< one of @ref E3EventKind
     uint32_t dapp_id{0};            ///< dApp identifier the message targets
-    uint32_t ran_function_id{0};    ///< RAN function (indication / xApp control)
+    uint32_t ran_function_id{0};    ///< RAN function (indication / xApp control / subscription response)
     uint32_t subscription_id{0};    ///< subscription id (subscription response)
     uint32_t request_id{0};         ///< request/message id (subscription response / ack / xApp control)
     uint32_t sequence_id{0};        ///< loop correlation id (xApp control); echo it on the control you re-issue
     int response_code{-1};          ///< 0=positive, 1=negative, -1=n/a
     std::vector<uint8_t> payload;   ///< opaque E3SM bytes (indication / xApp control)
+    long periodicity{-1};           ///< granted interval in microseconds (subscription response), -1 = not reported
+    bool has_telemetry_granted{false};          ///< telemetry_granted was reported
+    bool has_control_granted{false};            ///< control_granted was reported
+    std::vector<uint32_t> telemetry_granted;    ///< granted telemetry ids
+    std::vector<uint32_t> control_granted;      ///< granted control ids
     uint64_t trace_seq{0};          ///< set when queued; keys the [latrec] LQ-stage records
     // NOTE: in Python (libe3py) the payload is read via ev.get_payload(), which
     // returns native `bytes`. SWIG member getters return a wrapped vector, so the
-    // binding exposes the payload as a by-value method instead (see swig/libe3.i).
+    // binding exposes the payload as a by-value method instead (see swig/libe3.i);
+    // likewise the granted lists, via get_telemetry_granted() / get_control_granted().
 };
 
 /**

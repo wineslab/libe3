@@ -134,6 +134,21 @@ def main() -> int:
         print("FAIL: setup_ran_function_data did not return bytes", file=sys.stderr)
         return 1
 
+    # Subscription-response grants: a fresh event reports "not reported", and the
+    # list getters cross as vectors, not wrapped members.
+    ev = libe3py.E3Event()
+    if ev.periodicity != -1 or ev.ran_function_id != 0:
+        print("FAIL: fresh E3Event should report no granted periodicity / function id",
+              file=sys.stderr)
+        return 1
+    if ev.has_telemetry_granted or ev.has_control_granted:
+        print("FAIL: fresh E3Event should not claim granted lists", file=sys.stderr)
+        return 1
+    for getter in ("get_telemetry_granted", "get_control_granted"):
+        if len(getattr(ev, getter)()) != 0:
+            print(f"FAIL: fresh E3Event.{getter}() should be empty", file=sys.stderr)
+            return 1
+
     # GIL release: while poll_events blocks, a second Python thread must keep
     # running. A threads="1" regression would freeze the counter.
     import threading
