@@ -261,7 +261,7 @@ static std::vector<Sample> sample_pdus() {
     sub_req.telemetry_identifier_list = {1, 2, 3};
     sub_req.control_identifier_list = {4, 5};
     sub_req.subscription_time = 600;
-    sub_req.periodicity = 250;
+    sub_req.periodicity = 100000;
     add("SubscriptionRequest", PduType::SUBSCRIPTION_REQUEST, sub_req);
 
     SubscriptionDelete sub_del;
@@ -279,7 +279,7 @@ static std::vector<Sample> sample_pdus() {
     sub_resp.telemetry_identifier_list = std::vector<uint32_t>{1, 4, 5};
     sub_resp.control_identifier_list = std::vector<uint32_t>{};
     sub_resp.ran_function_identifier = 5;
-    sub_resp.periodicity = 250;
+    sub_resp.periodicity = 100000;
     add("SubscriptionResponse", PduType::SUBSCRIPTION_RESPONSE, sub_resp);
 
     // Valid JSON, because the JSON encoder nests protocolData rather than

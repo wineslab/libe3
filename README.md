@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://isocpp.org/)
-[![Version](https://img.shields.io/badge/version-0.0.4-green.svg)](VERSION)
+[![Version](https://img.shields.io/github/v/release/wineslab/libe3?color=green)](https://github.com/wineslab/libe3/releases)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://wineslab.github.io/libe3/)
 
 **libe3** is a standalone, vendor-neutral C++ library for implementing the E3AP (E3 Application Protocol) on **both sides of the protocol** — RAN functions (DU, CU-CP, CU-UP) and dApp clients. It provides a clean object-oriented API for both roles while hiding transport, encoding, and protocol complexity.
@@ -471,7 +471,7 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ## Documentation
 
-The full API reference is automatically generated with [Doxygen](https://www.doxygen.nl/) and published to GitHub Pages on every release. See [docs/latrec.md](docs/latrec.md) for the latency-recording (`latrec`) guide: the mechanism, the clock model, ring naming/sizing, the stage catalog, and the capture-to-CSV workflow. The two loops the stage catalog measures are described in [docs/path-a-e3-loop.md](docs/path-a-e3-loop.md) (E3 only) and [docs/path-b-e2-e3-loop.md](docs/path-b-e2-e3-loop.md) (the full E2-E3 loop).
+The full API reference is automatically generated with [Doxygen](https://www.doxygen.nl/) and published to GitHub Pages on every release. See [docs/latrec.md](docs/latrec.md) for the latency-recording (`latrec`) guide: the mechanism, the clock model, ring naming/sizing, the stage catalog, and the capture-to-CSV workflow. The two loops the stage catalog measures are described in [docs/path-a-e3-loop.md](docs/path-a-e3-loop.md) (E3 only) and [docs/path-b-e2-e3-loop.md](docs/path-b-e2-e3-loop.md) (the full E2-E3 loop). See [docs/interop.md](docs/interop.md) for what pairs with OAI, Aerial and OCUDU, the JSON libe3 speaks, the field contracts where peers differ (the `periodicity` unit, for one), and the change ledger.
 
 🔗 **[https://wineslab.github.io/libe3/](https://wineslab.github.io/libe3/)**
 

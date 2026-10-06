@@ -54,6 +54,7 @@ verdict, a per-workflow table and the benchmark/E2E detail. Confirm against that
 libe3 is paired with [`dapps`](https://github.com/wineslab/dApp-library) and [`dApp-openairinterface5g`](https://github.com/wineslab/dApp-openairinterface5g). **We do not accept patches that break or reduce compatibility with the twin repositories.**
 
 - [ ] This PR does not change the E3 wire protocol or public ABI, OR a paired PR exists in each affected twin repo (link below).
+- [ ] This PR does not change the wire format or a behavior a peer (OAI, Aerial, OCUDU) can observe, OR I added a row to the change ledger in [`docs/interop.md`](https://github.com/wineslab/libe3/blob/main/docs/interop.md).
 
 Paired PR(s):
 
