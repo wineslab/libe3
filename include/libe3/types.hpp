@@ -244,7 +244,7 @@ struct SubscriptionRequest {
     std::vector<uint32_t> telemetry_identifier_list; ///< List of telemetry identifiers
     std::vector<uint32_t> control_identifier_list;   ///< List of control identifiers
     std::optional<uint32_t> subscription_time;       ///< How long to keep the subscription (0-3600 sec)
-    std::optional<uint32_t> periodicity;             ///< Periodicity of data delivery (0-10000 microseconds)
+    std::optional<uint32_t> periodicity;             ///< Microseconds between indications, 0 = every event (ASN.1: 0 to 60000000)
 };
 
 /**
@@ -267,7 +267,7 @@ struct SubscriptionResponse {
     std::optional<std::vector<uint32_t>> telemetry_identifier_list;
     std::optional<std::vector<uint32_t>> control_identifier_list;
     std::optional<uint32_t> ran_function_identifier;  ///< RAN function the grant is for
-    std::optional<uint32_t> periodicity;              ///< Granted delivery interval (microseconds)
+    std::optional<uint32_t> periodicity;              ///< Granted interval, same unit and range as the request
 };
 
 /**

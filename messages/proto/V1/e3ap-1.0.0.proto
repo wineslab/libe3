@@ -51,6 +51,7 @@ message SubscriptionRequest {
   repeated uint32 telemetry_identifier_list = 3;
   repeated uint32 control_identifier_list = 4;
   optional uint32 subscription_time = 5;
+  // Microseconds between indications, 0 = every event. ASN.1 limits it to 0..60000000.
   optional uint32 periodicity = 6;
 }
 
@@ -74,6 +75,7 @@ message SubscriptionResponse {
   IdentifierList telemetry_identifier_list = 5;
   IdentifierList control_identifier_list = 6;
   optional uint32 ran_function_identifier = 7;
+  // Granted interval, same unit as the request.
   optional uint32 periodicity = 8;
 }
 
