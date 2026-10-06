@@ -54,8 +54,8 @@
  * (EMIT_ENTER, ENQUEUE..DECODE_E3AP_DONE, DELIVER_BEGIN). Every one of those
  * stamps shares a single value drawn from latrec_seq_next(), a process-wide
  * monotonic counter -- verified at every call site in src/core/e3_interface.cpp
- * -- distinct from Pdu::message_id, which is ASN.1-range-limited to 1..1000
- * and does wrap within this benchmark's iteration count. That means every
+ * -- distinct from Pdu::message_id, which is a per-E3Interface counter that
+ * restarts at 1. That means every
  * outbound leg-instance's quintuple (EMIT_ENTER..SEND_DONE) and every inbound
  * leg-instance's group (RECV, DECODE_E3AP_DONE, and DELIVER_BEGIN where
  * present) can be grouped by this seq with no collision risk at this

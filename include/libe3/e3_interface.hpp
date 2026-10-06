@@ -224,10 +224,8 @@ private:
     std::atomic<bool> should_stop_{false};
     bool started_before_{false};
 
-    // Monotonic source for E3-MessageID (1..1000). A wrapping counter gives
-    // unique ids across the small window of in-flight requests, unlike the
-    // former random draw which could collide (birthday hazard) and defeat
-    // request/response correlation.
+    // Monotonic source for E3-MessageID (1..2^32-1); unlike a random draw it
+    // cannot collide, so a response correlates by the id it was assigned.
     std::atomic<uint32_t> next_message_id_{0};
 
     // Core components
@@ -415,9 +413,9 @@ private:
 
 public:
     /**
-     * @brief Generate the next message ID, monotonic within 1..1000.
+     * @brief Generate the next message ID, monotonic within 1..2^32-1.
      *
-     * Wraps a lock-free counter into the ASN.1 E3-MessageID (1..1000) range.
+     * Wraps a lock-free counter into the ASN.1 E3-MessageID range.
      * Monotonic (not random) so an id is unique across the in-flight window,
      * letting a caller correlate a response by the id it was assigned.
      */
@@ -427,10 +425,10 @@ public:
      * @brief Return a request id that can be echoed into a response.
      *
      * The decoders do not enforce integer range constraints, so a
-     * peer-supplied message id outside E3-MessageID's 1..1000 can reach
-     * the handlers; echoing it into a response would fail the encode.
-     * In-range ids pass through, anything else is replaced with a fresh
-     * generated id (dApps do not correlate setup replies by ID).
+     * peer-supplied message id of 0, outside E3-MessageID's 1..2^32-1,
+     * can reach the handlers; echoing it into a response would fail the
+     * encode. Any other id passes through, 0 is replaced with a fresh
+     * generated id.
      */
     uint32_t sanitize_request_message_id(uint32_t request_id);
 };

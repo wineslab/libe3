@@ -129,8 +129,8 @@ uint32_t E3Interface::generate_message_id() {
     // (the grammar's lower bound is 1). A 32-bit counter does not wrap within
     // any realistic run, so an id identifies a request uniquely rather than
     // only across the in-flight window.
-    const uint64_t n = next_message_id_.fetch_add(1, std::memory_order_relaxed);
-    return static_cast<uint32_t>(n % 0xFFFFFFFFull) + 1;
+    const uint32_t n = next_message_id_.fetch_add(1, std::memory_order_relaxed);
+    return n % 0xFFFFFFFFu + 1;
 }
 
 void E3Interface::remember_subscription_op(uint32_t request_id,
@@ -146,10 +146,8 @@ void E3Interface::forget_subscription_op(uint32_t request_id) {
 }
 
 uint32_t E3Interface::sanitize_request_message_id(uint32_t request_id) {
-    if (request_id >= 1 && request_id <= 1000) {
-        return request_id;
-    }
-    return generate_message_id();
+    // E3-MessageID is 1..4294967295, so 0 is the only value that cannot be echoed.
+    return request_id != 0 ? request_id : generate_message_id();
 }
 
 E3Interface::E3Interface(const E3Config& config)
@@ -828,7 +826,7 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
         response_code,
         config_.e3ap_version,
         // A failed registration assigns no id; engaging the optional with 0
-        // would violate E3-DAppID (1..100) at encode.
+        // would violate E3-DAppID (1..65535) at encode.
         response_code == ResponseCode::POSITIVE
             ? std::optional<uint32_t>(assigned_dapp_id)
             : std::nullopt,
@@ -860,8 +858,8 @@ void E3Interface::send_negative_setup_reply(uint32_t request_id) {
     // (ranFunctionList included), so with the fixed, mutually known
     // encoding it always encodes. The mandatory fields have to satisfy
     // their schema constraints, though: requestId is E3-MessageID
-    // INTEGER (1..1000) — an id that cannot be echoed (0 from undecodable
-    // bytes, or out of range from a peer the decoder did not constrain) is
+    // INTEGER (1..4294967295) — an id that cannot be echoed (0, from
+    // undecodable bytes or a peer the decoder did not constrain) is
     // replaced with a freshly generated one — and ranIdentifier is
     // SIZE (1..64), hence the placeholder when the config left it empty.
     uint32_t message_id = generate_message_id();

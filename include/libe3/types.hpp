@@ -507,7 +507,7 @@ using Timestamp = std::chrono::time_point<std::chrono::steady_clock>;
  * @brief dApp registration entry
  */
 struct DAppEntry {
-    uint32_t dapp_identifier{0};  ///< Assigned dApp identifier (1–100)
+    uint32_t dapp_identifier{0};  ///< Assigned dApp identifier (1..65535)
     Timestamp registered_time;     ///< Monotonic timestamp of when the dApp registered
 };
 

@@ -159,15 +159,17 @@ public:
      * @param periodicity microseconds between indications, 0 = every event, or -1 for
      *        unset. Over ASN.1 the range is 0 to 60000000. An OCUDU RAN reads the
      *        same number as milliseconds.
-     * @return the assigned request id (positive, 1..1000) on success, so the
-     *         caller can correlate the SubscriptionResponse by its request_id;
-     *         a negative ErrorCode on failure.
+     * @return the assigned request id (positive, 1..4294967295) on success, so
+     *         the caller can correlate the SubscriptionResponse by its
+     *         request_id; a negative ErrorCode on failure. Returned as int64_t
+     *         because a message id spans the full uint32 range and would alias
+     *         onto the negative error codes if narrowed to int.
      */
-    int subscribe(uint32_t ran_function_id,
-                  std::vector<uint32_t> telemetry_ids,
-                  std::vector<uint32_t> control_ids,
-                  int sub_time_ms,
-                  int periodicity);
+    int64_t subscribe(uint32_t ran_function_id,
+                      std::vector<uint32_t> telemetry_ids,
+                      std::vector<uint32_t> control_ids,
+                      int sub_time_ms,
+                      int periodicity);
     /** @brief Delete a previously created subscription. @return ErrorCode as int. */
     int unsubscribe(uint32_t ran_function_id);
 

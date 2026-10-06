@@ -190,8 +190,8 @@ TEST(report_queue_stages_are_ordered) {
 
 TEST(setup_handshake_is_stamped) {
     // On this leg seq is the E3 request message_id, not the process-wide
-    // counter: it restarts per E3Interface and is confined to the ASN.1 range
-    // 1..1000, so several agents reuse the same value. The handshakes are
+    // counter: it restarts per E3Interface, so several agents reuse the
+    // same value. The handshakes are
     // serialised, so the records are paired in time order instead.
     std::vector<uint64_t> recv, sent;
     for (const auto& r : g_recs) {

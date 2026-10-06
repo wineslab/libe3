@@ -164,19 +164,18 @@ TEST(SetupChannel_garbageRequest_repliesAndChannelSurvives) {
 
 #if defined(LIBE3_ENABLE_JSON)
 /**
- * A well-formed SetupRequest whose message id lies outside E3-MessageID's
- * 1..1000 must still receive a decodable positive SetupResponse: the agent
- * substitutes an in-range id instead of failing the response encode.
+ * Sends a well-formed JSON SetupRequest carrying `request_id` to a fresh RAN
+ * agent and returns the positive SetupResponse it answers with.
  *
  * JSON-only: the JSON codec is the one that lets an out-of-range id through
  * to the handler (the APER encoder rejects it on the sender side, but the
  * APER decoder does not range-check either, so the substitution protects
  * both encodings).
  */
-TEST(SetupChannel_outOfRangeRequestId_substitutedAndAnswered) {
-    const std::string setup_ep = unique_ipc("setup_oor");
-    const std::string sub_ep   = unique_ipc("inbound_oor");
-    const std::string pub_ep   = unique_ipc("outbound_oor");
+static SetupResponse answer_json_setup(const char* tag, uint32_t request_id) {
+    const std::string setup_ep = unique_ipc((std::string("setup_") + tag).c_str());
+    const std::string sub_ep   = unique_ipc((std::string("inbound_") + tag).c_str());
+    const std::string pub_ep   = unique_ipc((std::string("outbound_") + tag).c_str());
 
     E3Config cfg;
     cfg.role             = E3Role::RAN;
@@ -209,7 +208,7 @@ TEST(SetupChannel_outOfRangeRequestId_substitutedAndAnswered) {
     ASSERT_TRUE(encoder != nullptr);
 
     auto setup = encoder->encode_setup_request(
-        4096, "1.0.0", "badsetup-dapp", "0.0.1", "test-vendor");
+        request_id, "1.0.0", "badsetup-dapp", "0.0.1", "test-vendor");
     ASSERT_TRUE(setup.has_value());
     ASSERT_GE(zmq_send(req, setup->buffer.data(), setup->buffer.size(), 0), 0);
 
@@ -225,13 +224,28 @@ TEST(SetupChannel_outOfRangeRequestId_substitutedAndAnswered) {
     ASSERT_EQ(static_cast<int>(resp->response_code),
               static_cast<int>(ResponseCode::POSITIVE));
     ASSERT_TRUE(resp->dapp_identifier.has_value());
-    // The unencodable id was substituted with one inside E3-MessageID.
-    ASSERT_GE(resp->request_id, 1u);
-    ASSERT_LE(resp->request_id, 1000u);
+    SetupResponse out = *resp;
 
     zmq_close(req);
     zmq_ctx_destroy(ctx);
     agent.stop();
+    return out;
+}
+
+/**
+ * A request id of 0 is outside E3-MessageID (1..4294967295) and cannot be
+ * echoed into the response: the agent substitutes a valid id instead of
+ * failing the response encode.
+ */
+TEST(SetupChannel_zeroRequestId_substitutedAndAnswered) {
+    const SetupResponse resp = answer_json_setup("zero", 0);
+    ASSERT_GE(resp.request_id, 1u);
+}
+
+/// Any other id, including ones above the old 1..1000 limit, is echoed unchanged.
+TEST(SetupChannel_largeRequestId_echoed) {
+    ASSERT_EQ(answer_json_setup("large", 4096).request_id, 4096u);
+    ASSERT_EQ(answer_json_setup("max", 4294967295u).request_id, 4294967295u);
 }
 #endif  // LIBE3_ENABLE_JSON
 

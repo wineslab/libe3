@@ -143,7 +143,7 @@ TEST(Asn1Size_IndicationMessage_largePayload) {
     auto payload = make_payload(8192);
 
     Pdu pdu(PduType::INDICATION_MESSAGE);
-    pdu.message_id = 234;   // E3-MessageID is constrained to INTEGER (1..1000)
+    pdu.message_id = 234;   // E3-MessageID is INTEGER (1..4294967295)
     IndicationMessage msg;
     msg.dapp_identifier = 1;
     msg.ran_function_identifier = 1;
