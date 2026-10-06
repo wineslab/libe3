@@ -78,10 +78,10 @@ public:
     /**
      * @brief Create and encode a Setup Request PDU
      * @param message_id Unique message ID
-     * @param e3ap_protocol_version E3AP protocol version string (e.g., "0.0.0")
-     * @param dapp_name Name of the dApp
-     * @param dapp_version Version of the dApp (e.g., "0.0.0")
-     * @param vendor Vendor name (max 30 chars)
+     * @param e3ap_protocol_version E3AP protocol version string (e.g., "0.0.0"; 1..32 bytes over ASN.1)
+     * @param dapp_name Name of the dApp (1..64 bytes over ASN.1)
+     * @param dapp_version Version of the dApp (e.g., "0.0.0"; 1..32 bytes over ASN.1)
+     * @param vendor Vendor name (1..64 bytes over ASN.1)
      */
     EncodeResult<EncodedMessage> encode_setup_request(
         uint32_t message_id,
