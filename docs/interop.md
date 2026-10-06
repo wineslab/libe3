@@ -1,5 +1,21 @@
 # Interoperability
 
+libe3 aims to steer the development of E3AP and to keep the RAN stacks aligned with each other, not
+only with libe3. In practice:
+
+- The grammar in this repository (`messages/asn1/V1/e3ap-1.0.0.asn1`) is the reference. JSON and
+  Protobuf follow it.
+- A change to the wire, or to anything a peer can observe, gets a row in the ledger below and a test
+  or fixture, in the same PR.
+- Where Aerial and OCUDU pull in different directions, libe3 says here which way it goes and why.
+  Where libe3 differs from both, it says so too.
+- A wire that OAI already runs is not changed without a ledger row that says who has to rebuild.
+
+So far libe3 has moved toward its peers on identifier ranges, setup strings, size bounds, the
+`periodicity` range and JSON nesting (see the ledger). It holds two things where OCUDU differs, and
+gives the reasons below: the timestamp stays in the root of the envelope, and `E3-ResponseCode` stays
+closed. The sections Aerial and OCUDU say what each stack should change to meet libe3 and the other.
+
 What a libe3 program can expect from other E3 implementations, and a ledger of every change that
 touched the wire or a peer-visible behavior. This page is the place to look first when libe3 and
 another stack disagree.
@@ -138,8 +154,44 @@ event when the RAN then closes.
 ## Known differences
 
 All open ones are sub-issues of [#84](https://github.com/wineslab/libe3/issues/84), which also holds
-the table of places where Aerial and OCUDU pull in different directions. Read that before choosing a
-side on any field.
+the table of places where Aerial and OCUDU pull in different directions. Read that for the evidence;
+the next two sections say which way libe3 goes.
+
+## Aerial: what to change to align
+
+Every statement about Aerial is *Source* (dapps v1.1.0 `99b10eb`, agent `4f65f97`), and the rows are
+asks, not claims about what Aerial will do. The conformance test decodes Aerial's own examples, so
+the differences in the first two rows are pinned.
+
+| Where Aerial differs | What to change | Why |
+|---|---|---|
+| The granted lists in a subscription response are `telemetryGrantedList` and `controlGrantedList` | Use `telemetryIdentifierList` and `controlIdentifierList` | libe3 and OCUDU's grammar use those names; libe3 reads Aerial's as aliases only |
+| No `timestamp` in the schema; `message` text on a negative reply; `subscriptionId` on an indication and `dAppIdentifier` on a message ack, which neither libe3 nor OCUDU has | Add the optional `timestamp`. Send the reason as OCUDU's `detail`, with its `cause` code, once libe3 and OCUDU agree the shape ([#100](https://github.com/wineslab/libe3/issues/100)). Drop the two extra keys, or propose them for E3AP here | One schema that all three read without special cases |
+| Accepts exactly the version `1.0.0` ([#89](https://github.com/wineslab/libe3/issues/89)) | Accept any `1.` prefix, as OCUDU does | A version string can then flag a wire change without failing Aerial |
+| No `dAppReport` or `xAppControlAction`, and no `sequenceId` ([#116](https://github.com/wineslab/libe3/issues/116)) | Add both messages with the mandatory `sequenceId` libe3 0.2.0 uses | The E2-E3 loop needs them; OCUDU has the messages and lacks the id |
+| Subscribing twice to one RAN function is refused ([#97](https://github.com/wineslab/libe3/issues/97)) | Return the existing subscription, as libe3 does | libe3 proposes the idempotent form; OCUDU's new subscription per repeat should change too |
+| Keeps a quiet subscribed dApp alive and sends a `releaseMessage` when it drops one ([#90](https://github.com/wineslab/libe3/issues/90), [#91](https://github.com/wineslab/libe3/issues/91), [#93](https://github.com/wineslab/libe3/issues/93)) | Agree one idle rule with OCUDU. libe3 proposes that a RAN always sends a `releaseMessage` before dropping a dApp | A dApp that only watches for a release never notices OCUDU closing the association |
+| ZMQ and JSON only ([#85](https://github.com/wineslab/libe3/issues/85)) | Nothing now. libe3's one-agent-one-link limit is libe3's to fix | One libe3 RAN cannot serve Aerial and OCUDU at once |
+
+## OCUDU: what to change to align
+
+Every statement about OCUDU is *Source* (dApp platform `38fc00bb526c`), and the rows are asks. The
+libe3-compatible mode is the part that has to follow libe3's grammar; OCUDU's native module can keep
+what it has where the row says so.
+
+| Where OCUDU differs | What to change | Why |
+|---|---|---|
+| `periodicity` is milliseconds, `0..60000` ([#98](https://github.com/wineslab/libe3/issues/98)) | Read microseconds, `0..60000000`, as libe3 and Aerial do | One field cannot have two units; decided on #98 |
+| dApp ids `1..100` are reserved for libe3-compatible peers, handed out by adapters ([#99](https://github.com/wineslab/libe3/issues/99)) | Accept `1..65535` from libe3-compatible peers and drop the partition and the adapters | libe3 now hands out ids up to 65535, lowest free first, and echoes any non-zero message id |
+| The libe3-compatible mode keeps libe3's `UTF8String` setup strings and clamps `subscriptionTime` to 3600 ([#108](https://github.com/wineslab/libe3/issues/108), [#113](https://github.com/wineslab/libe3/issues/113)) | Adopt `OCTET STRING` names and versions and the new bounds; the clamp goes | libe3 now has OCUDU's own types and bounds, so the two grammars agree on these fields |
+| The native module puts the timestamp after the extension marker, `{ id, msg, ..., timestamp }` ([#114](https://github.com/wineslab/libe3/issues/114)) | Put it in the root, `{ id, timestamp OPTIONAL, msg }`, as libe3 and its own libe3-compatible codec do | That is the layout OAI already runs. Measured on a stamped PDU in a Release build, the extension placement adds 2 bytes (14 to 16 for a `releaseMessage`, 274 to 276 for a 256 byte indication) and about 70 ns to encode and 50 ns to decode, which is small, so the reason is the deployed layout, not speed |
+| `E3-ResponseCode` is extensible, `{ positive, negative, ... }` ([#115](https://github.com/wineslab/libe3/issues/115)) | Close it, as libe3 and Aerial's schema have it. If a third code is ever needed, agree it on this page first | With asn1c an unknown extension value decodes as `positive`, so a peer that does not know a new code would read a refusal as success. Neither side has a third code today |
+| The wire guide describes libe3's `E3-PDU` with the timestamp before `msg` and its `E3-ResponseCode` as "deliberately closed", and libe3's limits as 0.1.3's | Update the libe3 rows to 0.2.x | It is the reference an implementer reads |
+| Compiles libe3's grammar with a different asn1c, so Setup encodes differently and the two cannot share a process ([#109](https://github.com/wineslab/libe3/issues/109)) | Build libe3's grammar with the asn1c commit `build_libe3` pins, then compare Setup again. With `OCTET STRING` setup strings the `UTF8String` part of the difference should be gone | Same bytes from the same grammar |
+| One SCTP association per dApp, one PDU per SCTP message; payload protocol id, streams and buffers differ ([#104](https://github.com/wineslab/libe3/issues/104) to [#107](https://github.com/wineslab/libe3/issues/107)) | Open. libe3 uses three associations and a length-prefixed stream, and will propose one mapping on those issues | No change to either side is made here |
+| Fragments payloads up to 16 MiB ([#110](https://github.com/wineslab/libe3/issues/110)), answers a control with an `E3-ControlResponse` ([#111](https://github.com/wineslab/libe3/issues/111)), has bulk-data and instance fields ([#112](https://github.com/wineslab/libe3/issues/112)), and has no `sequenceId` ([#116](https://github.com/wineslab/libe3/issues/116)) | Add the mandatory `sequenceId` to the loop messages. Keep the others optional and negotiated at setup, so a peer without them still interoperates | Aerial and libe3 send none of these and must not fail on their absence |
+| Closes the association after 30 s idle and never sends a `releaseMessage` to a dApp ([#90](https://github.com/wineslab/libe3/issues/90), [#93](https://github.com/wineslab/libe3/issues/93)) | Send a `releaseMessage` before closing | A libe3 dApp then reports `RELEASED_BY_RAN`, not `CONNECTION_LOST`, as it does with Aerial |
+| Rejects an unknown function or id with a `cause` ([#96](https://github.com/wineslab/libe3/issues/96)), and adds a new subscription for every repeat ([#97](https://github.com/wineslab/libe3/issues/97)) | Keep the rejection, and return the existing subscription on a repeat | libe3's RAN accepts unknown ids today and owes the same rejection |
 
 ## Change ledger
 
