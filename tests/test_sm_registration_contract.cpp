@@ -3,7 +3,8 @@
  * @brief Registration-time enforcement of the E3AP ranFunctionData contract.
  *
  * E3-RanFunctionDefinition.ranFunctionData is a mandatory
- * OCTET STRING (SIZE (1..32768)). An SM that advertises nothing (or too much)
+ * OCTET STRING (SIZE (1..262144)), of which libe3 carries 1..32768. An SM that
+ * advertises nothing (or too much)
  * cannot be encoded into a SetupResponse, and the failure would take every
  * other registered RAN function down with it, so registration rejects it.
  *
@@ -60,6 +61,24 @@ public:
     std::vector<uint8_t> ran_function_data() const override {
         return ServiceModel::ran_function_data();
     }
+};
+
+/// SM that lists a given number of telemetry and control ids.
+class ManyIdsSM : public SizedDataSM {
+public:
+    ManyIdsSM(uint32_t id, size_t telemetry, size_t control)
+        : SizedDataSM(id, 4), telemetry_(telemetry), control_(control) {}
+    std::vector<uint32_t> telemetry_ids() const override { return ids(telemetry_); }
+    std::vector<uint32_t> control_ids() const override { return ids(control_); }
+
+private:
+    static std::vector<uint32_t> ids(size_t count) {
+        std::vector<uint32_t> out(count);
+        for (size_t i = 0; i < count; ++i) out[i] = static_cast<uint32_t>(i + 1);
+        return out;
+    }
+    size_t telemetry_;
+    size_t control_;
 };
 
 E3Config ran_config(const char* id) {
@@ -144,6 +163,41 @@ TEST(SmRegistration_c_api_rejects_zero_length) {
 TEST(SmRegistration_c_api_accepts_non_empty_data) {
     const uint8_t data[] = {'C', 'S', 'M'};
     ASSERT_EQ(register_c_sm(data, sizeof(data)), 0);
+}
+
+TEST(SmRegistration_identifier_lists_hold_up_to_256) {
+    SmRegistry::instance().clear();
+    ASSERT_EQ(error_to_int(SmRegistry::instance().register_sm(
+                  std::make_unique<ManyIdsSM>(20, 256, 256))),
+              error_to_int(ErrorCode::SUCCESS));
+    ASSERT_EQ(error_to_int(SmRegistry::instance().register_sm(
+                  std::make_unique<ManyIdsSM>(21, 257, 1))),
+              error_to_int(ErrorCode::INVALID_PARAM));
+    ASSERT_EQ(error_to_int(SmRegistry::instance().register_sm(
+                  std::make_unique<ManyIdsSM>(22, 1, 257))),
+              error_to_int(ErrorCode::INVALID_PARAM));
+    SmRegistry::instance().clear();
+}
+
+TEST(SmRegistration_holds_at_most_64_ran_functions) {
+    auto& registry = SmRegistry::instance();
+    registry.clear();
+    for (uint32_t id = 1; id <= MAX_RAN_FUNCTIONS; ++id) {
+        ASSERT_EQ(error_to_int(registry.register_sm(std::make_unique<SizedDataSM>(id, 4))),
+                  error_to_int(ErrorCode::SUCCESS));
+    }
+    ASSERT_EQ(error_to_int(registry.register_sm(std::make_unique<SizedDataSM>(100, 4))),
+              error_to_int(ErrorCode::INVALID_PARAM));
+    ASSERT_EQ(error_to_int(registry.register_sm_factory(101, [] {
+                  return std::make_unique<SizedDataSM>(101, 4);
+              })),
+              error_to_int(ErrorCode::INVALID_PARAM));
+
+    // A freed slot is usable again.
+    ASSERT_EQ(error_to_int(registry.unregister_sm(5)), error_to_int(ErrorCode::SUCCESS));
+    ASSERT_EQ(error_to_int(registry.register_sm(std::make_unique<SizedDataSM>(100, 4))),
+              error_to_int(ErrorCode::SUCCESS));
+    registry.clear();
 }
 
 int main() {

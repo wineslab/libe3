@@ -169,7 +169,8 @@ constexpr size_t MAX_PROTOCOL_DATA_SIZE = 32768;
 constexpr size_t MAX_ACTION_DATA_SIZE = 32768;
 constexpr size_t MAX_DAPP_REPORT_DATA_SIZE = 32768;
 constexpr size_t MAX_XAPP_CTRL_DATA_SIZE = 32768;
-constexpr size_t MAX_RAN_FUNCTIONS = 255;
+constexpr size_t MAX_RAN_FUNCTIONS = 64;           // ranFunctionList SIZE (0..64)
+constexpr size_t MAX_IDENTIFIER_LIST_SIZE = 256;   // telemetry and control lists SIZE (0..256)
 constexpr size_t DEFAULT_BUFFER_SIZE = 60000;
 
 // Protocol version
@@ -243,7 +244,7 @@ struct SubscriptionRequest {
     uint32_t ran_function_identifier{0};             ///< RAN function to subscribe to
     std::vector<uint32_t> telemetry_identifier_list; ///< List of telemetry identifiers
     std::vector<uint32_t> control_identifier_list;   ///< List of control identifiers
-    std::optional<uint32_t> subscription_time;       ///< How long to keep the subscription (0-3600 sec)
+    std::optional<uint32_t> subscription_time;       ///< How long to keep the subscription (0-86400 sec)
     std::optional<uint32_t> periodicity;             ///< Microseconds between indications, 0 = every event (ASN.1: 0 to 60000000)
 };
 

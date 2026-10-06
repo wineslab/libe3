@@ -89,7 +89,7 @@ std::vector<Golden> goldens() {
     function.control_identifier_list = {1};
     function.ran_function_data = {0xde, 0xad};
     setup_response.ran_function_list = {function};
-    out.push_back({"SetupResponse", make(PduType::SETUP_RESPONSE, setup_response), "4029081861684accc3cd150b802912766563746f722d72616e20312e302e30000601000000000200000001000100000001dead"});
+    out.push_back({"SetupResponse", make(PduType::SETUP_RESPONSE, setup_response), "4029081861684accc3cd150b802912766563746f722d72616e20312e302e3000060200000002000000010001000002dead"});
 
     SubscriptionRequest subscription_request;
     subscription_request.dapp_identifier = 7;

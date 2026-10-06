@@ -27,7 +27,7 @@ ErrorCode SmRegistry::register_sm(std::unique_ptr<ServiceModel> sm) {
     }
 
     // E3-RanFunctionDefinition.ranFunctionData is a mandatory
-    // OCTET STRING (SIZE (1..32768)): an SM that cannot advertise at least its
+    // OCTET STRING (SIZE (1..262144), of which libe3 carries 1..32768): an SM that cannot advertise at least its
     // own name has nothing to advertise, and the SetupResponse carrying it
     // would fail to encode for every other registered RAN function too.
     // Reject here rather than at encode time, where the only options left are
@@ -40,7 +40,21 @@ ErrorCode SmRegistry::register_sm(std::unique_ptr<ServiceModel> sm) {
         return ErrorCode::INVALID_PARAM;
     }
 
+    // The SetupResponse lists must also fit SIZE (0..256), or its encode fails.
+    if (sm->telemetry_ids().size() > MAX_IDENTIFIER_LIST_SIZE
+        || sm->control_ids().size() > MAX_IDENTIFIER_LIST_SIZE) {
+        E3_LOG_ERROR(LOG_TAG) << "SM '" << sm->name() << "' lists more than "
+                              << MAX_IDENTIFIER_LIST_SIZE << " telemetry or control ids";
+        return ErrorCode::INVALID_PARAM;
+    }
+
     std::lock_guard lock(mutex_);
+
+    if (sms_.size() + factories_.size() >= MAX_RAN_FUNCTIONS) {
+        E3_LOG_ERROR(LOG_TAG) << "Cannot register SM '" << sm->name() << "': "
+                              << MAX_RAN_FUNCTIONS << " RAN functions already registered";
+        return ErrorCode::INVALID_PARAM;
+    }
 
     uint32_t ran_func = sm->ran_function_id();
     
@@ -76,6 +90,11 @@ ErrorCode SmRegistry::register_sm_factory(uint32_t ran_function_id, SmFactory fa
         E3_LOG_ERROR(LOG_TAG) << "SM or factory already registered for RAN function " 
                               << ran_function_id;
         return ErrorCode::SM_ALREADY_REGISTERED;
+    }
+    if (sms_.size() + factories_.size() >= MAX_RAN_FUNCTIONS) {
+        E3_LOG_ERROR(LOG_TAG) << "Cannot register a factory for RAN function " << ran_function_id
+                              << ": " << MAX_RAN_FUNCTIONS << " RAN functions already registered";
+        return ErrorCode::INVALID_PARAM;
     }
 
     factories_[ran_function_id] = std::move(factory);

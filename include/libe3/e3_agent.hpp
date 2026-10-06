@@ -274,6 +274,7 @@ public:
     /**
      * @brief Subscribe to a RAN function. Must be called after a positive setup.
      *
+     * @param sub_time seconds to keep the subscription. Over ASN.1 the range is 0 to 86400.
      * @param periodicity microseconds between indications, 0 = every event.
      *        Over ASN.1 the range is 0 to 60000000. An OCUDU RAN reads the
      *        same number as milliseconds, so pass it what it expects.

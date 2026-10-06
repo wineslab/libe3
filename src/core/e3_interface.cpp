@@ -831,7 +831,7 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
             func.control_identifier_list = sm->control_ids();
             func.ran_function_data = sm->ran_function_data();
         }
-        // ranFunctionData is mandatory SIZE(1..32768) per entry, and the value
+        // ranFunctionData is mandatory SIZE(1..262144) per entry (libe3 carries 1..32768), and the value
         // is recomputed on every SetupRequest, so registration cannot vouch for
         // what we get here. An entry that cannot be encoded would fail the whole
         // response -- every other RAN function with it -- so omit it instead:
@@ -844,6 +844,19 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
                                   << func.ran_function_data.size()
                                   << " bytes of ran_function_data (need 1.."
                                   << MAX_PROTOCOL_DATA_SIZE << ")";
+            continue;
+        }
+        if (func.telemetry_identifier_list.size() > MAX_IDENTIFIER_LIST_SIZE
+            || func.control_identifier_list.size() > MAX_IDENTIFIER_LIST_SIZE) {
+            E3_LOG_ERROR(LOG_TAG) << "Omitting RAN function " << id
+                                  << " from the setup response: more than "
+                                  << MAX_IDENTIFIER_LIST_SIZE << " telemetry or control ids";
+            continue;
+        }
+        if (ran_function_list.size() >= MAX_RAN_FUNCTIONS) {
+            E3_LOG_ERROR(LOG_TAG) << "Omitting RAN function " << id
+                                  << " from the setup response: it lists at most "
+                                  << MAX_RAN_FUNCTIONS;
             continue;
         }
         ran_function_list.push_back(func);
