@@ -120,7 +120,7 @@ public:
      * @param ran_function_identifier RAN function to subscribe to
      * @param telemetry_identifier_list List of telemetry identifiers
      * @param control_identifier_list List of control identifiers
-     * @param subscription_time How long to keep the subscription (0-3600 sec, optional)
+     * @param subscription_time How long to keep the subscription (0-86400 sec, optional)
      */
     EncodeResult<EncodedMessage> encode_subscription_request(
         uint32_t message_id,
