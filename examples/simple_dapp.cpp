@@ -25,6 +25,7 @@
 #include <libe3/libe3.hpp>
 #include "sm_simple/e3sm_simple_wrapper.hpp"
 
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <csignal>
@@ -73,6 +74,7 @@ struct Peer {
     std::string ran_id;                 // filled from SetupResponse
     std::optional<uint32_t> sub_id;     // filled from SubscriptionResponse
     std::atomic<uint32_t> count{0};     // indications received from this RAN
+    std::atomic<bool> ran_gone{false};  // released by the RAN, or the connection was lost
     // Queueing-time accounting (test-only; written solely by this peer's
     // inbound thread, read after stop()). age = recv_ms - send_ms.
     uint64_t age_sum_ms{0};
@@ -333,6 +335,15 @@ int main(int argc, char* argv[]) {
             std::cout << "[ACK] peer=" << p->label << " request_id=" << ack.request_id
                       << " rc=" << libe3::response_code_to_string(ack.response_code) << "\n";
         });
+
+        // The session is over: dApp id and subscriptions are already cleared. A
+        // real dApp would stop() then start() to register again; this one stops.
+        p->agent->set_disconnect_handler([p](libe3::DisconnectReason reason) {
+            std::cout << "[DISCONNECT] peer=" << p->label << " reason="
+                      << (reason == libe3::DisconnectReason::RELEASED_BY_RAN
+                              ? "released_by_ran" : "connection_lost") << "\n";
+            p->ran_gone = true;
+        });
     }
 
     // Start, complete setup, and subscribe each peer.
@@ -372,6 +383,12 @@ int main(int argc, char* argv[]) {
     const auto start = std::chrono::steady_clock::now();
     while (g_running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        const bool all_gone = std::all_of(peers.begin(), peers.end(),
+            [](const std::unique_ptr<Peer>& pp) { return pp->ran_gone.load(); });
+        if (all_gone) {
+            std::cout << "Every RAN is gone, stopping\n";
+            break;
+        }
         if (timed_seconds > 0) {
             auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
                 std::chrono::steady_clock::now() - start).count();
