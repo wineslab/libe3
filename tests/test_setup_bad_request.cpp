@@ -358,6 +358,66 @@ TEST(SetupChannel_unencodableRanFunctionData_omittedNotAborted) {
     zmq_ctx_destroy(ctx);
     agent.stop();
 }
+
+/**
+ * A RAN whose config leaves ranIdentifier unset (the default) must still answer
+ * a setup request over ASN.1. E3-Name refuses an empty string, and the encode
+ * failure on the positive response reaches std::abort(), so the agent sends a
+ * placeholder instead.
+ */
+TEST(SetupChannel_unsetRanIdentifier_answeredWithPlaceholder) {
+    const std::string setup_ep = unique_ipc("setup_noid");
+    const std::string sub_ep   = unique_ipc("inbound_noid");
+    const std::string pub_ep   = unique_ipc("outbound_noid");
+
+    E3Config cfg;
+    cfg.role             = E3Role::RAN;
+    cfg.link_layer       = E3LinkLayer::ZMQ;
+    cfg.transport_layer  = E3TransportLayer::IPC;
+    cfg.setup_endpoint   = setup_ep;
+    cfg.subscriber_endpoint = sub_ep;
+    cfg.publisher_endpoint  = pub_ep;
+    cfg.encoding         = EncodingFormat::ASN1;
+    cfg.log_level        = 0;
+
+    E3Agent agent(std::move(cfg));
+    ASSERT_EQ(error_to_int(agent.start()), error_to_int(ErrorCode::SUCCESS));
+
+    std::this_thread::sleep_for(100ms);
+
+    void* ctx = zmq_ctx_new();
+    ASSERT_TRUE(ctx != nullptr);
+    void* req = zmq_socket(ctx, ZMQ_REQ);
+    ASSERT_TRUE(req != nullptr);
+    int recv_timeout = 5000;
+    zmq_setsockopt(req, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+    int linger = 0;
+    zmq_setsockopt(req, ZMQ_LINGER, &linger, sizeof(linger));
+    ASSERT_EQ(zmq_connect(req, setup_ep.c_str()), 0);
+
+    auto encoder = create_encoder(EncodingFormat::ASN1);
+    ASSERT_TRUE(encoder != nullptr);
+
+    auto setup = encoder->encode_setup_request(
+        7, "1.0.0", "noid-dapp", "0.0.1", "test-vendor");
+    ASSERT_TRUE(setup.has_value());
+    ASSERT_GE(zmq_send(req, setup->buffer.data(), setup->buffer.size(), 0), 0);
+
+    uint8_t buf[4096];
+    int n = zmq_recv(req, buf, sizeof(buf), 0);
+    ASSERT_GT(n, 0);
+    auto decoded = encoder->decode(buf, static_cast<size_t>(n));
+    ASSERT_TRUE(decoded.has_value());
+    auto* resp = std::get_if<SetupResponse>(&decoded->choice);
+    ASSERT_TRUE(resp != nullptr);
+    ASSERT_EQ(static_cast<int>(resp->response_code),
+              static_cast<int>(ResponseCode::POSITIVE));
+    ASSERT_TRUE(resp->ran_identifier == "unknown");
+
+    zmq_close(req);
+    zmq_ctx_destroy(ctx);
+    agent.stop();
+}
 #endif  // LIBE3_ENABLE_ASN1
 
 // ---------------------------------------------------------------------------

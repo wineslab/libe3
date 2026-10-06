@@ -122,6 +122,29 @@ constexpr const char* LATREC_ROLE_SETUP    = "libe3.setup";
 #ifdef LIBE3_ENABLE_LATREC
 constexpr const char* LATREC_ROLE_CONTEXT  = "libe3.context";
 #endif
+
+// Byte limits of E3-Name and E3-Version in e3ap-1.0.0.asn1.
+constexpr size_t MAX_NAME_BYTES = 64;
+constexpr size_t MAX_VERSION_BYTES = 32;
+
+// OCTET STRING (SIZE (1..n)) refuses an empty string, so a name the config
+// left unset goes out as a placeholder on every encoding.
+std::string name_or_unknown(const std::string& name) {
+    return name.empty() ? "unknown" : name;
+}
+
+// Over ASN.1 an out-of-range string fails the setup encode, which aborts a RAN
+// answering its first dApp. Refuse the config up front instead.
+bool wire_text_fits(const char* field, const std::string& value, size_t max_bytes,
+                    bool may_be_empty) {
+    if (value.size() > max_bytes || (value.empty() && !may_be_empty)) {
+        E3_LOG_ERROR(LOG_TAG) << "Config " << field << " is " << value.size()
+                              << " bytes; ASN.1 allows "
+                              << (may_be_empty ? 0 : 1) << ".." << max_bytes;
+        return false;
+    }
+    return true;
+}
 } // anonymous namespace
 
 uint32_t E3Interface::generate_message_id() {
@@ -191,6 +214,19 @@ ErrorCode E3Interface::init() {
         return ErrorCode::INTERNAL_ERROR;
     }
     
+    if (config_.encoding == EncodingFormat::ASN1) {
+        const bool fits =
+            wire_text_fits("e3ap_version", config_.e3ap_version, MAX_VERSION_BYTES, false) &&
+            (config_.role == E3Role::RAN
+                 ? wire_text_fits("ran_identifier", config_.ran_identifier, MAX_NAME_BYTES, true)
+                 : wire_text_fits("dapp_name", config_.dapp_name, MAX_NAME_BYTES, false) &&
+                   wire_text_fits("dapp_version", config_.dapp_version, MAX_VERSION_BYTES, false) &&
+                   wire_text_fits("vendor", config_.vendor, MAX_NAME_BYTES, true));
+        if (!fits) {
+            return ErrorCode::INVALID_PARAM;
+        }
+    }
+
     // Allocate role-specific state. Exactly one is non-null.
     if (config_.role == E3Role::RAN) {
         subscription_manager_ = std::make_unique<SubscriptionManager>();
@@ -830,7 +866,7 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
         response_code == ResponseCode::POSITIVE
             ? std::optional<uint32_t>(assigned_dapp_id)
             : std::nullopt,
-        config_.ran_identifier,  // ran_identifier
+        name_or_unknown(config_.ran_identifier),
         ran_function_list
     );
 
@@ -870,7 +906,7 @@ void E3Interface::send_negative_setup_reply(uint32_t request_id) {
         ResponseCode::NEGATIVE,
         config_.e3ap_version,
         std::nullopt,  // no dApp identifier assigned
-        config_.ran_identifier.empty() ? "unknown" : config_.ran_identifier,
+        name_or_unknown(config_.ran_identifier),
         std::nullopt   // no RAN functions advertised
     );
 
@@ -1069,7 +1105,7 @@ void E3Interface::setup_loop_dapp() {
         config_.e3ap_version,
         config_.dapp_name,
         config_.dapp_version,
-        config_.vendor
+        name_or_unknown(config_.vendor)
     );
     if (!enc) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to encode SetupRequest";
