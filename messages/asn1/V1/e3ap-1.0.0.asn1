@@ -27,7 +27,8 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         telemetryIdentifierList SEQUENCE (SIZE (0..1000)) OF INTEGER (1..65535),
         controlIdentifierList   SEQUENCE (SIZE (0..1000)) OF INTEGER (1..65535),
         subscriptionTime        INTEGER (0..3600) OPTIONAL,
-        periodicity             INTEGER (0..1000) OPTIONAL,
+        -- Microseconds between indications, 0 = every event.
+        periodicity             INTEGER (0..60000000) OPTIONAL,
         ...
     }
 
@@ -47,7 +48,8 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         ...,
         -- Extension additions: decoders from before them skip both.
         ranFunctionIdentifier   INTEGER (1..65535) OPTIONAL,
-        periodicity             INTEGER (0..1000) OPTIONAL
+        -- Granted interval, same unit and range as the request.
+        periodicity             INTEGER (0..60000000) OPTIONAL
     }
 
     E3-RanFunctionDefinition ::= SEQUENCE {
