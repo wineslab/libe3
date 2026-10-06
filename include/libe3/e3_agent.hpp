@@ -274,6 +274,9 @@ public:
     /**
      * @brief Subscribe to a RAN function. Must be called after a positive setup.
      *
+     * @param periodicity microseconds between indications, 0 = every event.
+     *        Over ASN.1 the range is 0 to 60000000. An OCUDU RAN reads the
+     *        same number as milliseconds, so pass it what it expects.
      * @param out_request_id when non-null, receives the assigned E3-MessageID on
      *        success, so the caller can correlate the SubscriptionResponse
      *        (which echoes request_id) back to this subscribe call.

@@ -156,7 +156,9 @@ public:
     /**
      * @brief Subscribe to a RAN function (after a positive setup).
      * @param sub_time_ms subscription time, or -1 for unset.
-     * @param periodicity delivery periodicity (µs), or -1 for unset.
+     * @param periodicity microseconds between indications, 0 = every event, or -1 for
+     *        unset. Over ASN.1 the range is 0 to 60000000. An OCUDU RAN reads the
+     *        same number as milliseconds.
      * @return the assigned request id (positive, 1..1000) on success, so the
      *         caller can correlate the SubscriptionResponse by its request_id;
      *         a negative ErrorCode on failure.
