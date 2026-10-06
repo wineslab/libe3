@@ -26,6 +26,7 @@
 #include "libe3/e3_encoder.hpp"
 #include "libe3/types.hpp"
 
+#include <optional>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -474,6 +475,114 @@ TEST(Asn1Size_SetupRequest_strings_wireBytesArePinned) {
     auto encoded = enc->encode(pdu);
     ASSERT_TRUE(encoded.has_value());
     ASSERT_STREQ(to_hex(encoded->buffer).c_str(), "4029081861684accc3cd150080312e302e3028766563746f722d6461707020302e312e331c77696e65736c6162");
+}
+
+// ---------------------------------------------------------------------------
+// Bounds shared with OCUDU's grammar: identifier lists 0..256 entries, at most
+// 64 RAN functions, ranFunctionData 1..262144 bytes, subscriptionTime 0..86400.
+// ---------------------------------------------------------------------------
+
+static std::vector<uint32_t> id_list(size_t count) {
+    std::vector<uint32_t> out(count);
+    for (size_t i = 0; i < count; ++i) out[i] = static_cast<uint32_t>(i + 1);
+    return out;
+}
+
+static bool encodes(const Pdu& pdu) {
+    return make_encoder()->encode(pdu).has_value();
+}
+
+static Pdu subscription_request(std::vector<uint32_t> telemetry, std::vector<uint32_t> control,
+                                std::optional<uint32_t> subscription_time = std::nullopt) {
+    Pdu pdu(PduType::SUBSCRIPTION_REQUEST);
+    pdu.message_id = 7;
+    SubscriptionRequest req;
+    req.dapp_identifier = 3;
+    req.ran_function_identifier = 2;
+    req.telemetry_identifier_list = std::move(telemetry);
+    req.control_identifier_list = std::move(control);
+    req.subscription_time = subscription_time;
+    pdu.choice = req;
+    return pdu;
+}
+
+TEST(Asn1Size_identifierLists_holdUpTo256Entries) {
+    auto enc = make_encoder();
+
+    auto at_bound = enc->encode(subscription_request(id_list(256), id_list(256)));
+    ASSERT_TRUE(at_bound.has_value());
+    auto decoded = enc->decode(at_bound->buffer.data(), at_bound->buffer.size());
+    ASSERT_TRUE(decoded.has_value());
+    auto* req = std::get_if<SubscriptionRequest>(&decoded->choice);
+    ASSERT_TRUE(req != nullptr);
+    ASSERT_EQ(req->telemetry_identifier_list.size(), 256u);
+    ASSERT_EQ(req->control_identifier_list.size(), 256u);
+
+    ASSERT_FALSE(encodes(subscription_request(id_list(257), {})));
+    ASSERT_FALSE(encodes(subscription_request({}, id_list(257))));
+
+    for (size_t count : {size_t{256}, size_t{257}}) {
+        Pdu pdu(PduType::SUBSCRIPTION_RESPONSE);
+        pdu.message_id = 8;
+        SubscriptionResponse resp;
+        resp.request_id = 7;
+        resp.dapp_identifier = 3;
+        resp.response_code = ResponseCode::POSITIVE;
+        resp.telemetry_identifier_list = id_list(count);
+        resp.control_identifier_list = id_list(count);
+        pdu.choice = resp;
+        ASSERT_EQ(encodes(pdu), count == 256);
+    }
+}
+
+TEST(Asn1Size_subscriptionTime_allowsUpTo86400) {
+    ASSERT_TRUE(encodes(subscription_request({1}, {}, 86400u)));
+    ASSERT_TRUE(encodes(subscription_request({1}, {}, 7200u)));
+    ASSERT_FALSE(encodes(subscription_request({1}, {}, 86401u)));
+}
+
+static EncodeResult<EncodedMessage> encode_functions(std::vector<RanFunctionDef> functions) {
+    return make_encoder()->encode_setup_response(
+        9, 7, ResponseCode::POSITIVE, std::string("1.0.0"), 3u, "ran", functions);
+}
+
+static RanFunctionDef function_def(uint32_t id, size_t data_len, size_t ids) {
+    RanFunctionDef def;
+    def.ran_function_identifier = id;
+    def.telemetry_identifier_list = id_list(ids);
+    def.control_identifier_list = id_list(ids);
+    def.ran_function_data.assign(data_len, 0xAB);
+    return def;
+}
+
+TEST(Asn1Size_ranFunctionList_holdsUpTo64Functions) {
+    std::vector<RanFunctionDef> functions;
+    for (uint32_t id = 1; id <= 64; ++id) functions.push_back(function_def(id, 4, 1));
+    ASSERT_TRUE(encode_functions(functions).has_value());
+
+    functions.push_back(function_def(65, 4, 1));
+    auto too_many = encode_functions(functions);
+    ASSERT_FALSE(too_many.has_value());
+    ASSERT_EQ(static_cast<int>(too_many.error()), static_cast<int>(ErrorCode::ENCODE_FAILED));
+}
+
+TEST(Asn1Size_ranFunctionDefinition_listsAndDataBounds) {
+    ASSERT_TRUE(encode_functions({function_def(1, 4, 256)}).has_value());
+    ASSERT_FALSE(encode_functions({function_def(1, 4, 257)}).has_value());
+
+    // Above the old 32768 bound. Only the grammar allows 262144: the encoder's
+    // 64 KiB buffer, not the grammar, is what stops a larger value here. At this
+    // range APER no longer enforces the 1-byte minimum, so libe3 checks it itself.
+    auto enc = make_encoder();
+    auto large = encode_functions({function_def(1, 40000, 1)});
+    ASSERT_TRUE(large.has_value());
+    auto decoded = enc->decode(large->buffer.data(), large->buffer.size());
+    ASSERT_TRUE(decoded.has_value());
+    auto* resp = std::get_if<SetupResponse>(&decoded->choice);
+    ASSERT_TRUE(resp != nullptr);
+    ASSERT_EQ(resp->ran_function_list.size(), 1u);
+    ASSERT_EQ(resp->ran_function_list[0].ran_function_data.size(), 40000u);
+
 }
 
 int main() {
