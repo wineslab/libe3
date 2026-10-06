@@ -62,7 +62,8 @@ enum E3EventKind {
     E3_EVENT_XAPP_CONTROL = 2,          ///< xApp → dApp XAppControlAction
     E3_EVENT_SUBSCRIPTION_RESPONSE = 3, ///< RAN → dApp SubscriptionResponse
     E3_EVENT_SETUP_RESPONSE = 4,        ///< RAN → dApp SetupResponse
-    E3_EVENT_MESSAGE_ACK = 5            ///< RAN → dApp MessageAck
+    E3_EVENT_MESSAGE_ACK = 5,           ///< RAN → dApp MessageAck
+    E3_EVENT_DISCONNECT = 6             ///< the RAN is gone; see E3Event::disconnect_reason
 };
 
 /**
@@ -84,6 +85,7 @@ struct E3Event {
     uint32_t request_id{0};         ///< request/message id (subscription response / ack / xApp control)
     uint32_t sequence_id{0};        ///< loop correlation id (xApp control); echo it on the control you re-issue
     int response_code{-1};          ///< 0=positive, 1=negative, -1=n/a
+    int disconnect_reason{-1};      ///< disconnect: 0=released by RAN, 1=connection lost, -1=n/a
     std::vector<uint8_t> payload;   ///< opaque E3SM bytes (indication / xApp control)
     long periodicity{-1};           ///< granted interval in microseconds (subscription response), -1 = not reported
     bool has_telemetry_granted{false};          ///< telemetry_granted was reported
