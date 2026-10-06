@@ -31,6 +31,7 @@ set(LIBE3_ASN1_ONLY_TESTS
 # link libzmq directly, so with LIBE3_ENABLE_ZMQ=OFF there is nothing for them
 # to link against. Same treatment as the ASN.1-only list above.
 set(LIBE3_ZMQ_ONLY_TESTS
+    dapp_setup_retry_zmq
     e2e_report_path
     role_aware_connector_zmq
     setup_bad_request

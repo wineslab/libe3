@@ -88,6 +88,7 @@ private:
 
     void setup_ipc_permissions(const std::string& path);
     bool reset_setup_socket();
+    ErrorCode open_setup_req_socket();
 };
 
 } // namespace libe3
