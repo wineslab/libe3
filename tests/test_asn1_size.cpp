@@ -229,6 +229,76 @@ TEST(Asn1Size_SubscriptionRequest_roundTrip_preservesOptionals) {
 }
 
 /**
+ * periodicity is microseconds, 0..60000000. Aerial's default (100000) and the
+ * ceiling must round-trip on the request and on the granted value in the
+ * response; one past the ceiling must not encode.
+ */
+TEST(Asn1Size_SubscriptionRequest_roundTrip_periodicityRange) {
+    auto enc = make_encoder();
+
+    for (uint32_t value : {0u, 100000u, 60000000u}) {
+        Pdu pdu(PduType::SUBSCRIPTION_REQUEST);
+        pdu.message_id = 7;
+        SubscriptionRequest req;
+        req.dapp_identifier = 42;
+        req.ran_function_identifier = 2;
+        req.periodicity = value;
+        pdu.choice = req;
+
+        auto encoded = enc->encode(pdu);
+        ASSERT_TRUE(encoded.has_value());
+        auto decoded = enc->decode(encoded->buffer.data(), encoded->buffer.size());
+        ASSERT_TRUE(decoded.has_value());
+        auto* out = std::get_if<SubscriptionRequest>(&decoded->choice);
+        ASSERT_TRUE(out != nullptr);
+        ASSERT_TRUE(out->periodicity.has_value());
+        ASSERT_EQ(out->periodicity.value(), value);
+    }
+}
+
+TEST(Asn1Size_SubscriptionResponse_roundTrip_periodicityRange) {
+    auto enc = make_encoder();
+
+    for (uint32_t value : {0u, 100000u, 60000000u}) {
+        Pdu pdu(PduType::SUBSCRIPTION_RESPONSE);
+        pdu.message_id = 8;
+        SubscriptionResponse resp;
+        resp.request_id = 7;
+        resp.dapp_identifier = 42;
+        resp.response_code = ResponseCode::POSITIVE;
+        resp.subscription_id = 1;
+        resp.periodicity = value;
+        pdu.choice = resp;
+
+        auto encoded = enc->encode(pdu);
+        ASSERT_TRUE(encoded.has_value());
+        auto decoded = enc->decode(encoded->buffer.data(), encoded->buffer.size());
+        ASSERT_TRUE(decoded.has_value());
+        auto* out = std::get_if<SubscriptionResponse>(&decoded->choice);
+        ASSERT_TRUE(out != nullptr);
+        ASSERT_TRUE(out->periodicity.has_value());
+        ASSERT_EQ(out->periodicity.value(), value);
+    }
+}
+
+TEST(Asn1Size_SubscriptionRequest_encode_rejectsPeriodicityAboveRange) {
+    auto enc = make_encoder();
+
+    Pdu pdu(PduType::SUBSCRIPTION_REQUEST);
+    pdu.message_id = 7;
+    SubscriptionRequest req;
+    req.dapp_identifier = 42;
+    req.ran_function_identifier = 2;
+    req.periodicity = 60000001u;
+    pdu.choice = req;
+
+    auto encoded = enc->encode(pdu);
+    ASSERT_FALSE(encoded.has_value());
+    ASSERT_EQ(static_cast<int>(encoded.error()),
+              static_cast<int>(ErrorCode::ENCODE_FAILED));
+}
+
+/**
  * Encoded size grows linearly with payload size: the delta between
  * small-payload and large-payload encodings tracks the payload delta
  * plus the fixed envelope.

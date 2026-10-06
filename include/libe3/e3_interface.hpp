@@ -185,9 +185,19 @@ public:
     std::vector<RanFunctionDef> remote_ran_functions() const;
 
     // dApp-side outbound helpers (queue PDUs that the outbound loop will encode + send)
-    // out_request_id, when non-null, receives the assigned E3-MessageID on
-    // success, so the caller can correlate the eventual SubscriptionResponse
-    // (which echoes request_id) back to this request.
+    /**
+     * @brief Queue a SubscriptionRequest for the outbound loop to send.
+     * @param ran_function_id RAN function to subscribe to
+     * @param telemetry_ids telemetry identifiers requested
+     * @param control_ids control identifiers requested
+     * @param sub_time how long to keep the subscription, in seconds; unset leaves it to the RAN
+     * @param periodicity microseconds between indications, 0 = every event
+     * @param out_request_id when non-null, receives the assigned E3-MessageID on
+     *        success, so the caller can correlate the eventual SubscriptionResponse
+     *        (which echoes request_id) back to this request.
+     * @return SUCCESS once queued; STATE_ERROR on a RAN-role agent; NOT_INITIALIZED
+     *         before setup has assigned a dApp id; otherwise the queueing error.
+     */
     ErrorCode queue_subscription_request(uint32_t ran_function_id,
                                          std::vector<uint32_t> telemetry_ids,
                                          std::vector<uint32_t> control_ids,
