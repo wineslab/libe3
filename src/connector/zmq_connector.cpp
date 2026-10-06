@@ -331,6 +331,18 @@ ErrorCode ZmqE3Connector::setup_initial_connection_client() {
     }
 
     // REQ socket — the dApp INITIATES setup
+    ErrorCode rc = open_setup_req_socket();
+    if (rc != ErrorCode::SUCCESS) return rc;
+    connected_ = true;
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode ZmqE3Connector::open_setup_req_socket() {
+    if (setup_socket_) {
+        zmq_close(setup_socket_);
+        setup_socket_ = nullptr;
+    }
+
     setup_socket_ = zmq_socket(context_, ZMQ_REQ);
     if (!setup_socket_) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to create REQ setup socket: " << zmq_strerror(errno);
@@ -348,12 +360,14 @@ ErrorCode ZmqE3Connector::setup_initial_connection_client() {
         return ErrorCode::CONNECTION_FAILED;
     }
     E3_LOG_INFO(LOG_TAG) << "Setup REQ socket connected to " << setup_cep;
-    connected_ = true;
     return ErrorCode::SUCCESS;
 }
 
 ErrorCode ZmqE3Connector::send_setup_request_client(const std::vector<uint8_t>& data) {
     if (!setup_socket_) return ErrorCode::NOT_CONNECTED;
+    // A REQ socket still awaiting a reply refuses a second send, so every attempt gets a fresh one.
+    ErrorCode rc = open_setup_req_socket();
+    if (rc != ErrorCode::SUCCESS) return rc;
     int ret = zmq_send(setup_socket_, data.data(), data.size(), 0);
     if (ret < 0) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to send setup request: " << zmq_strerror(errno);
