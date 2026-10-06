@@ -277,7 +277,7 @@ public:
      * @param ran_function_id RAN function to subscribe to
      * @param telemetry_ids telemetry identifiers requested
      * @param control_ids control identifiers requested
-     * @param sub_time how long to keep the subscription, in seconds; unset leaves it to the RAN
+     * @param sub_time seconds to keep the subscription. Over ASN.1 the range is 0 to 86400.
      * @param periodicity microseconds between indications, 0 = every event.
      *        Over ASN.1 the range is 0 to 60000000. An OCUDU RAN reads the
      *        same number as milliseconds, so pass it what it expects.

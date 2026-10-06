@@ -117,6 +117,48 @@ TEST(E3Agent_init_already_initialized) {
     ASSERT_EQ(error_to_int(result), error_to_int(ErrorCode::ALREADY_INITIALIZED));
 }
 
+#if defined(LIBE3_ENABLE_ASN1)
+// Over ASN.1 a setup name is 1..64 bytes and a version 1..32. A config outside
+// that would abort a RAN on its first setup, so init() refuses it.
+TEST(E3Agent_init_rejectsOutOfRangeSetupStringsOnAsn1) {
+    const auto init_with = [](auto&& adjust) {
+        E3Config config;
+        config.encoding = EncodingFormat::ASN1;
+        config.ran_identifier = "ran";
+        adjust(config);
+        E3Agent agent(std::move(config));
+        return error_to_int(agent.init());
+    };
+    const int ok = error_to_int(ErrorCode::SUCCESS);
+    const int bad = error_to_int(ErrorCode::INVALID_PARAM);
+
+    ASSERT_EQ(init_with([](E3Config& c) { c.ran_identifier = std::string(64, 'r'); }), ok);
+    ASSERT_EQ(init_with([](E3Config& c) { c.ran_identifier = std::string(65, 'r'); }), bad);
+    // An unset ranIdentifier is fine: a placeholder goes out instead.
+    ASSERT_EQ(init_with([](E3Config& c) { c.ran_identifier.clear(); }), ok);
+    ASSERT_EQ(init_with([](E3Config& c) { c.e3ap_version = std::string(33, '1'); }), bad);
+    ASSERT_EQ(init_with([](E3Config& c) { c.e3ap_version.clear(); }), bad);
+
+    const auto dapp = [](E3Config& c) { c.role = E3Role::DAPP; };
+    ASSERT_EQ(init_with([&](E3Config& c) { dapp(c); c.vendor.clear(); }), ok);
+    ASSERT_EQ(init_with([&](E3Config& c) { dapp(c); c.vendor = std::string(65, 'v'); }), bad);
+    ASSERT_EQ(init_with([&](E3Config& c) { dapp(c); c.dapp_name.clear(); }), bad);
+    ASSERT_EQ(init_with([&](E3Config& c) { dapp(c); c.dapp_name = std::string(65, 'n'); }), bad);
+    ASSERT_EQ(init_with([&](E3Config& c) { dapp(c); c.dapp_version = std::string(33, '1'); }), bad);
+}
+#endif
+
+#if defined(LIBE3_ENABLE_JSON)
+// JSON and Protobuf carry no such limit, so the same config is accepted.
+TEST(E3Agent_init_acceptsLongSetupStringsOnJson) {
+    E3Config config;
+    config.encoding = EncodingFormat::JSON;
+    config.ran_identifier = std::string(200, 'r');
+    E3Agent agent(std::move(config));
+    ASSERT_EQ(error_to_int(agent.init()), error_to_int(ErrorCode::SUCCESS));
+}
+#endif
+
 TEST(E3Agent_register_sm) {
     E3Config config;
     config.ran_identifier = "sm-test";
