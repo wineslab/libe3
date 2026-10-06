@@ -962,11 +962,12 @@ int PosixE3Connector::recv_with_size(int sockfd, std::vector<uint8_t>& buffer) {
                              sizeof(network_order_size) - header_received, 0);
         if (ret <= 0) {
             if (ret == 0) {
+                // 0 would read as a timeout and spin on the closed socket.
                 E3_LOG_DEBUG(LOG_TAG) << "Connection closed while reading size header";
-            } else {
-                E3_LOG_ERROR(LOG_TAG) << "Failed to receive size header: " << strerror(errno);
+                return static_cast<int>(ErrorCode::NOT_CONNECTED);
             }
-            return ret == 0 ? 0 : static_cast<int>(ErrorCode::TRANSPORT_ERROR);
+            E3_LOG_ERROR(LOG_TAG) << "Failed to receive size header: " << strerror(errno);
+            return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
         }
         header_received += static_cast<size_t>(ret);
     }

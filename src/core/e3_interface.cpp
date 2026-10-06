@@ -211,7 +211,18 @@ ErrorCode E3Interface::init() {
     // Create dApp-report queue (RAN side drains it via the report worker)
     report_queue_ = std::make_unique<LockFreeQueue<DAppReport>>(1024);
 
-    // Create connector
+    ErrorCode conn_rc = create_connector_from_config();
+    if (conn_rc != ErrorCode::SUCCESS) {
+        return conn_rc;
+    }
+
+    state_.store(AgentState::INITIALIZED);
+    E3_LOG_INFO(LOG_TAG) << "E3Interface initialized successfully";
+    
+    return ErrorCode::SUCCESS;
+}
+
+ErrorCode E3Interface::create_connector_from_config() {
     connector_ = create_connector(
         config_.link_layer,
         config_.transport_layer,
@@ -224,15 +235,11 @@ ErrorCode E3Interface::init() {
         config_.io_threads,
         config_.role
     );
-    
+
     if (!connector_) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to create connector";
         return ErrorCode::INTERNAL_ERROR;
     }
-    
-    state_.store(AgentState::INITIALIZED);
-    E3_LOG_INFO(LOG_TAG) << "E3Interface initialized successfully";
-    
     return ErrorCode::SUCCESS;
 }
 
@@ -246,6 +253,31 @@ ErrorCode E3Interface::start() {
     
     E3_LOG_INFO(LOG_TAG) << "Starting E3Interface (role=" << role_to_string(config_.role) << ")";
     should_stop_.store(false);
+
+    // A restart after stop(): the connector was disposed and its shutdown flag
+    // is set, and stop() shut the queues down.
+    if (started_before_) {
+        ErrorCode conn_rc = create_connector_from_config();
+        if (conn_rc != ErrorCode::SUCCESS) {
+            state_.store(AgentState::ERROR);
+            return conn_rc;
+        }
+        response_queue_->rearm();
+        report_queue_->rearm();
+    }
+    started_before_ = true;
+    if (dapp_state_) {
+        dapp_state_->clear_session();
+        std::lock_guard<std::mutex> lk(pending_subscriptions_mutex_);
+        pending_subscriptions_.clear();
+    }
+    ran_gone_.store(false);
+    release_sent_.store(false);
+    {
+        std::lock_guard<std::mutex> lk(setup_complete_mu_);
+        setup_complete_ = false;
+        setup_succeeded_ = false;
+    }
 
     // Set up the setup channel. RAN binds; dApp connects.
     ErrorCode conn_result = (config_.role == E3Role::RAN)
@@ -1122,6 +1154,11 @@ void E3Interface::inbound_loop_dapp() {
         int ret = connector_->receive(buffer);
         if (ret <= 0) {
             if (should_stop_.load()) break;
+            if (ret < 0) {
+                // 0 is a timeout; a negative is a closed peer or a failed link.
+                on_ran_gone(DisconnectReason::CONNECTION_LOST);
+                break;
+            }
             continue;
         }
         const uint64_t seq = latrec_seq_next();
@@ -1214,6 +1251,27 @@ void E3Interface::outbound_loop_dapp() {
 // ===========================================================================
 // dApp-role message handlers
 // ===========================================================================
+
+void E3Interface::on_ran_gone(DisconnectReason reason) {
+    if (!dapp_state_ || ran_gone_.exchange(true)) return;
+    E3_LOG_WARN(LOG_TAG) << "RAN is gone ("
+                         << (reason == DisconnectReason::RELEASED_BY_RAN
+                                 ? "released by RAN" : "connection lost") << ")";
+    dapp_state_->clear_session();
+    {
+        std::lock_guard<std::mutex> lk(pending_subscriptions_mutex_);
+        pending_subscriptions_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lk(setup_complete_mu_);
+        setup_succeeded_ = false;
+    }
+    // The application asked for this end when it released, so it needs no event.
+    if (release_sent_.load()) return;
+    if (disconnect_handler_) {
+        disconnect_handler_(reason);
+    }
+}
 
 void E3Interface::handle_setup_response(const SetupResponse& resp) {
     E3_LOG_INFO(LOG_TAG) << "Handling SetupResponse rc="
@@ -1486,7 +1544,10 @@ ErrorCode E3Interface::queue_release_message() {
     rel.dapp_identifier = *id;
     pdu.choice = rel;
     pdu.message_id = generate_message_id();
-    return queue_outbound(std::move(pdu));
+    release_sent_.store(true);
+    ErrorCode rc = queue_outbound(std::move(pdu));
+    if (rc != ErrorCode::SUCCESS) release_sent_.store(false);
+    return rc;
 }
 
 ErrorCode E3Interface::wait_for_setup(std::chrono::milliseconds timeout) {
