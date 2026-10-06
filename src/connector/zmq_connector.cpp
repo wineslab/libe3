@@ -11,6 +11,7 @@
 #include "libe3/latrec.h"
 #include "libe3/logger.hpp"
 #include <zmq.h>
+#include <cstdint>
 #include <cstring>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -26,6 +27,8 @@ constexpr const char* LOG_TAG = "ZmqConn";
 constexpr const char* IPC_BASE_DIR = "/tmp/dapps";
 constexpr int RECV_TIMEOUT_MS = 500;  // Timeout for graceful shutdown
 constexpr int PUB_CONNECT_SETTLE_MS = 200;  // PUB/SUB slow-joiner settle (client outbound)
+constexpr int HEARTBEAT_IVL_MS = 1000;      // dApp SUB pings an idle RAN this often
+constexpr int HEARTBEAT_TIMEOUT_MS = 3000;  // ... and drops the link after this much silence
 
 // Every socket gets ZMQ_LINGER = 0: the default (-1) makes zmq_ctx_destroy
 // block until all queued messages are flushed, so a RAN with undelivered
@@ -235,7 +238,14 @@ int ZmqE3Connector::receive(std::vector<uint8_t>& buffer) {
     int ret = zmq_recv(inbound_socket_, buffer.data(), buffer.size(), 0);
     if (ret < 0) {
         if (errno == EAGAIN) {
+            // ZMQ reconnects silently, so a RAN that went away is only seen here.
+            if (inbound_peer_disconnected()) {
+                return static_cast<int>(ErrorCode::NOT_CONNECTED);
+            }
             // Timeout - return 0 to indicate no data (allows shutdown check)
+            return 0;
+        }
+        if (errno == EINTR) {
             return 0;
         }
         E3_LOG_ERROR(LOG_TAG) << "Failed to receive: " << zmq_strerror(errno);
@@ -391,6 +401,47 @@ int ZmqE3Connector::recv_setup_response_client(std::vector<uint8_t>& buffer) {
     return ret;
 }
 
+void ZmqE3Connector::open_inbound_monitor() {
+    const std::string ep = "inproc://libe3-monitor-" +
+                           std::to_string(reinterpret_cast<uintptr_t>(this));
+    if (zmq_socket_monitor(inbound_socket_, ep.c_str(), ZMQ_EVENT_DISCONNECTED) != 0) {
+        E3_LOG_WARN(LOG_TAG) << "No disconnect monitor: " << zmq_strerror(errno);
+        return;
+    }
+    monitor_socket_ = zmq_socket(context_, ZMQ_PAIR);
+    if (monitor_socket_) set_linger0(monitor_socket_);
+    if (monitor_socket_ && zmq_connect(monitor_socket_, ep.c_str()) != 0) {
+        zmq_close(monitor_socket_);
+        monitor_socket_ = nullptr;
+    }
+}
+
+bool ZmqE3Connector::inbound_peer_disconnected() {
+    if (!monitor_socket_) return false;
+    bool disconnected = false;
+    // Each event is two frames: a packed uint16 event id + uint32 value, then the address.
+    for (;;) {
+        uint8_t frame[16];
+        int n = zmq_recv(monitor_socket_, frame, sizeof(frame), ZMQ_DONTWAIT);
+        if (n < 0) break;
+        uint16_t event = 0;
+        if (n >= static_cast<int>(sizeof(event))) std::memcpy(&event, frame, sizeof(event));
+        int more = 0;
+        size_t more_len = sizeof(more);
+        zmq_getsockopt(monitor_socket_, ZMQ_RCVMORE, &more, &more_len);
+        while (more) {
+            uint8_t addr[256];
+            zmq_recv(monitor_socket_, addr, sizeof(addr), 0);
+            zmq_getsockopt(monitor_socket_, ZMQ_RCVMORE, &more, &more_len);
+        }
+        if (event == ZMQ_EVENT_DISCONNECTED) disconnected = true;
+    }
+    if (disconnected) {
+        E3_LOG_WARN(LOG_TAG) << "Inbound SUB lost its peer";
+    }
+    return disconnected;
+}
+
 ErrorCode ZmqE3Connector::setup_inbound_connection_client() {
     if (!context_) return ErrorCode::NOT_INITIALIZED;
 
@@ -406,6 +457,14 @@ ErrorCode ZmqE3Connector::setup_inbound_connection_client() {
     int recv_timeout = RECV_TIMEOUT_MS;
     zmq_setsockopt(inbound_socket_, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
     set_linger0(inbound_socket_);
+#ifdef ZMQ_HEARTBEAT_IVL
+    // A RAN that dies without closing the connection still drops the link.
+    int hb_ivl = HEARTBEAT_IVL_MS;
+    int hb_timeout = HEARTBEAT_TIMEOUT_MS;
+    zmq_setsockopt(inbound_socket_, ZMQ_HEARTBEAT_IVL, &hb_ivl, sizeof(hb_ivl));
+    zmq_setsockopt(inbound_socket_, ZMQ_HEARTBEAT_TIMEOUT, &hb_timeout, sizeof(hb_timeout));
+#endif
+    open_inbound_monitor();
 
     const std::string inbound_cep = to_connect_endpoint(outbound_endpoint_);
     int ret = zmq_connect(inbound_socket_, inbound_cep.c_str());
@@ -455,6 +514,11 @@ void ZmqE3Connector::dispose() {
         setup_socket_ = nullptr;
     }
     
+    if (monitor_socket_) {
+        zmq_close(monitor_socket_);
+        monitor_socket_ = nullptr;
+    }
+
     if (inbound_socket_) {
         zmq_close(inbound_socket_);
         inbound_socket_ = nullptr;

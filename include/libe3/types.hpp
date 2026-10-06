@@ -104,6 +104,14 @@ enum class ResponseCode : uint8_t {
 };
 
 /**
+ * @brief Why a dApp's session with the RAN ended (see DisconnectHandler)
+ */
+enum class DisconnectReason : uint8_t {
+    RELEASED_BY_RAN = 0,  ///< The RAN sent a ReleaseMessage for this dApp
+    CONNECTION_LOST = 1   ///< The peer closed the connection or the link failed
+};
+
+/**
  * @brief E3AP PDU types
  */
 enum class PduType : uint8_t {
