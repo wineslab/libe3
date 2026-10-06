@@ -122,6 +122,29 @@ constexpr const char* LATREC_ROLE_SETUP    = "libe3.setup";
 #ifdef LIBE3_ENABLE_LATREC
 constexpr const char* LATREC_ROLE_CONTEXT  = "libe3.context";
 #endif
+
+// Byte limits of E3-Name and E3-Version in e3ap-1.0.0.asn1.
+constexpr size_t MAX_NAME_BYTES = 64;
+constexpr size_t MAX_VERSION_BYTES = 32;
+
+// OCTET STRING (SIZE (1..n)) refuses an empty string, so a name the config
+// left unset goes out as a placeholder on every encoding.
+std::string name_or_unknown(const std::string& name) {
+    return name.empty() ? "unknown" : name;
+}
+
+// Over ASN.1 an out-of-range string fails the setup encode, which aborts a RAN
+// answering its first dApp. Refuse the config up front instead.
+bool wire_text_fits(const char* field, const std::string& value, size_t max_bytes,
+                    bool may_be_empty) {
+    if (value.size() > max_bytes || (value.empty() && !may_be_empty)) {
+        E3_LOG_ERROR(LOG_TAG) << "Config " << field << " is " << value.size()
+                              << " bytes; ASN.1 allows "
+                              << (may_be_empty ? 0 : 1) << ".." << max_bytes;
+        return false;
+    }
+    return true;
+}
 } // anonymous namespace
 
 uint32_t E3Interface::generate_message_id() {
@@ -129,8 +152,8 @@ uint32_t E3Interface::generate_message_id() {
     // (the grammar's lower bound is 1). A 32-bit counter does not wrap within
     // any realistic run, so an id identifies a request uniquely rather than
     // only across the in-flight window.
-    const uint64_t n = next_message_id_.fetch_add(1, std::memory_order_relaxed);
-    return static_cast<uint32_t>(n % 0xFFFFFFFFull) + 1;
+    const uint32_t n = next_message_id_.fetch_add(1, std::memory_order_relaxed);
+    return n % 0xFFFFFFFFu + 1;
 }
 
 void E3Interface::remember_subscription_op(uint32_t request_id,
@@ -146,10 +169,8 @@ void E3Interface::forget_subscription_op(uint32_t request_id) {
 }
 
 uint32_t E3Interface::sanitize_request_message_id(uint32_t request_id) {
-    if (request_id >= 1 && request_id <= 1000) {
-        return request_id;
-    }
-    return generate_message_id();
+    // E3-MessageID is 1..4294967295, so 0 is the only value that cannot be echoed.
+    return request_id != 0 ? request_id : generate_message_id();
 }
 
 E3Interface::E3Interface(const E3Config& config)
@@ -193,6 +214,19 @@ ErrorCode E3Interface::init() {
         return ErrorCode::INTERNAL_ERROR;
     }
     
+    if (config_.encoding == EncodingFormat::ASN1) {
+        const bool fits =
+            wire_text_fits("e3ap_version", config_.e3ap_version, MAX_VERSION_BYTES, false) &&
+            (config_.role == E3Role::RAN
+                 ? wire_text_fits("ran_identifier", config_.ran_identifier, MAX_NAME_BYTES, true)
+                 : wire_text_fits("dapp_name", config_.dapp_name, MAX_NAME_BYTES, false) &&
+                   wire_text_fits("dapp_version", config_.dapp_version, MAX_VERSION_BYTES, false) &&
+                   wire_text_fits("vendor", config_.vendor, MAX_NAME_BYTES, true));
+        if (!fits) {
+            return ErrorCode::INVALID_PARAM;
+        }
+    }
+
     // Allocate role-specific state. Exactly one is non-null.
     if (config_.role == E3Role::RAN) {
         subscription_manager_ = std::make_unique<SubscriptionManager>();
@@ -797,7 +831,7 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
             func.control_identifier_list = sm->control_ids();
             func.ran_function_data = sm->ran_function_data();
         }
-        // ranFunctionData is mandatory SIZE(1..32768) per entry, and the value
+        // ranFunctionData is mandatory SIZE(1..262144) per entry (libe3 carries 1..32768), and the value
         // is recomputed on every SetupRequest, so registration cannot vouch for
         // what we get here. An entry that cannot be encoded would fail the whole
         // response -- every other RAN function with it -- so omit it instead:
@@ -810,6 +844,19 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
                                   << func.ran_function_data.size()
                                   << " bytes of ran_function_data (need 1.."
                                   << MAX_PROTOCOL_DATA_SIZE << ")";
+            continue;
+        }
+        if (func.telemetry_identifier_list.size() > MAX_IDENTIFIER_LIST_SIZE
+            || func.control_identifier_list.size() > MAX_IDENTIFIER_LIST_SIZE) {
+            E3_LOG_ERROR(LOG_TAG) << "Omitting RAN function " << id
+                                  << " from the setup response: more than "
+                                  << MAX_IDENTIFIER_LIST_SIZE << " telemetry or control ids";
+            continue;
+        }
+        if (ran_function_list.size() >= MAX_RAN_FUNCTIONS) {
+            E3_LOG_ERROR(LOG_TAG) << "Omitting RAN function " << id
+                                  << " from the setup response: it lists at most "
+                                  << MAX_RAN_FUNCTIONS;
             continue;
         }
         ran_function_list.push_back(func);
@@ -828,11 +875,11 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
         response_code,
         config_.e3ap_version,
         // A failed registration assigns no id; engaging the optional with 0
-        // would violate E3-DAppID (1..100) at encode.
+        // would violate E3-DAppID (1..65535) at encode.
         response_code == ResponseCode::POSITIVE
             ? std::optional<uint32_t>(assigned_dapp_id)
             : std::nullopt,
-        config_.ran_identifier,  // ran_identifier
+        name_or_unknown(config_.ran_identifier),
         ran_function_list
     );
 
@@ -860,8 +907,8 @@ void E3Interface::send_negative_setup_reply(uint32_t request_id) {
     // (ranFunctionList included), so with the fixed, mutually known
     // encoding it always encodes. The mandatory fields have to satisfy
     // their schema constraints, though: requestId is E3-MessageID
-    // INTEGER (1..1000) — an id that cannot be echoed (0 from undecodable
-    // bytes, or out of range from a peer the decoder did not constrain) is
+    // INTEGER (1..4294967295) — an id that cannot be echoed (0, from
+    // undecodable bytes or a peer the decoder did not constrain) is
     // replaced with a freshly generated one — and ranIdentifier is
     // SIZE (1..64), hence the placeholder when the config left it empty.
     uint32_t message_id = generate_message_id();
@@ -872,7 +919,7 @@ void E3Interface::send_negative_setup_reply(uint32_t request_id) {
         ResponseCode::NEGATIVE,
         config_.e3ap_version,
         std::nullopt,  // no dApp identifier assigned
-        config_.ran_identifier.empty() ? "unknown" : config_.ran_identifier,
+        name_or_unknown(config_.ran_identifier),
         std::nullopt   // no RAN functions advertised
     );
 
@@ -1071,7 +1118,7 @@ void E3Interface::setup_loop_dapp() {
         config_.e3ap_version,
         config_.dapp_name,
         config_.dapp_version,
-        config_.vendor
+        name_or_unknown(config_.vendor)
     );
     if (!enc) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to encode SetupRequest";

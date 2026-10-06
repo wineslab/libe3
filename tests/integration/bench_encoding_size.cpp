@@ -24,13 +24,9 @@
  * as the framing overhead of each encoding relative to a fixed-width binary
  * copy of the values. Bit-packed binary encodings can legitimately land
  * BELOW this baseline: ASN.1 APER encodes the E3AP integers, which are all
- * range-constrained in the ASN.1 module (e.g. INTEGER (1..100) -> 7 bits;
- * the message id INTEGER (1..1000), whose range exceeds 255, -> 2 aligned
- * bytes (16 bits), since APER byte-aligns a constrained integer once its
- * range passes 255; the 11-way PDU CHOICE index -> 4 bits), in their minimal
- * width with no per-field tags, so e.g. SubscriptionDelete measures 5 wire
- * bytes against 12 info bytes (16 + 4 + 7 + 7 = 34 bits = 5 bytes). Text
- * encodings sit far above the baseline because field names and punctuation
+ * range-constrained in the ASN.1 module (e.g. INTEGER (1..65535) -> 16
+ * bits; the 11-way PDU CHOICE index -> 4 bits), in their minimal width with
+ * no per-field tags. Text encodings sit far above the baseline because field names and punctuation
  * travel on the wire as text.
  *
  * Usage:

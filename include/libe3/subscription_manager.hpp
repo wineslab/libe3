@@ -86,12 +86,13 @@ public:
     /**
      * @brief Register a dApp from E3 Setup Request
      *
-     * The SubscriptionManager assigns a unique dApp ID automatically.
+     * The SubscriptionManager assigns a unique dApp ID automatically: the
+     * lowest free one in 1..65535.
      *
      * @return std::pair containing:
      *         - ErrorCode::SUCCESS on success, or error code on failure
      *         - The assigned dApp ID (valid only if ErrorCode::SUCCESS)
-     * @return ErrorCode::INTERNAL_ERROR if no IDs available (max 101 dApps)
+     * @return ErrorCode::INTERNAL_ERROR if no IDs available (65535 dApps registered)
      */
     std::pair<ErrorCode, uint32_t> register_dapp();
 
@@ -125,7 +126,7 @@ public:
      * @brief Add a subscription between dApp and RAN function
      *
      * @param dapp_id dApp identifier
-     * @param ran_function_id RAN function identifier (0-255)
+     * @param ran_function_id RAN function identifier (1..65535)
      * @param telemetry_ids Telemetry IDs the dApp wants
      * @param control_ids Control IDs the dApp wants
      * @param periodicity_us Reporting periodicity in microseconds (0 = SM default)
@@ -134,6 +135,7 @@ public:
      *         - The assigned subscription ID (valid only if ErrorCode::SUCCESS)
      * @return ErrorCode::DAPP_NOT_REGISTERED if dApp not registered
      * @return ErrorCode::SUBSCRIPTION_EXISTS if already subscribed
+     * @return ErrorCode::INTERNAL_ERROR if no subscription IDs are free (65535 live)
      */
     std::pair<ErrorCode, uint32_t> add_subscription(
         uint32_t dapp_id,
@@ -247,11 +249,14 @@ private:
     // Callback for SM lifecycle events
     SmLifecycleCallback sm_lifecycle_callback_;
     
-    // Next dApp ID to assign (1-100 per spec)
-    uint32_t next_dapp_id_{1};
-    
-    // Next subscription ID to assign
-    uint32_t next_subscription_id_{1};
+    // Every dApp id below this is in use; allocation scans up from here.
+    uint32_t lowest_free_dapp_id_{1};
+
+    // Same for subscription ids.
+    uint32_t lowest_free_subscription_id_{1};
+
+    // Frees a subscription id for reuse. Caller holds the lock.
+    void release_subscription_id(uint32_t subscription_id);
     
     // Helper to create composite key for subscription
     static uint64_t make_sub_key(uint32_t dapp_id, uint32_t ran_func_id) {

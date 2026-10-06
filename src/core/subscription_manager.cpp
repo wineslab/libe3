@@ -11,12 +11,31 @@
 #include "libe3/subscription_manager.hpp"
 #include "libe3/logger.hpp"
 
+#include <algorithm>
+
 namespace libe3 {
 
 namespace {
 constexpr const char* LOG_TAG = "SubMgr";
-constexpr uint32_t MAX_DAPP_ID = 100; 
+// E3-DAppID and the E3AP subscription id are both INTEGER (1..65535).
+constexpr uint32_t MAX_DAPP_ID = 65535;
 constexpr uint32_t MIN_DAPP_ID = 1;
+constexpr uint32_t MAX_SUBSCRIPTION_ID = 65535;
+constexpr uint32_t MIN_SUBSCRIPTION_ID = 1;
+
+// Lowest id in [hint, max] absent from `used`; `hint` is below every free id.
+template <typename Map>
+bool take_lowest_free(const Map& used, uint32_t& hint, uint32_t max, uint32_t& out) {
+    for (uint32_t id = hint; id <= max; ++id) {
+        if (used.count(id) == 0) {
+            out = id;
+            hint = id + 1;
+            return true;
+        }
+    }
+    hint = max + 1;
+    return false;
+}
 }
 
 SubscriptionManager::SubscriptionManager() {
@@ -45,20 +64,8 @@ void SubscriptionManager::set_sm_lifecycle_callback(SmLifecycleCallback callback
 std::pair<ErrorCode, uint32_t> SubscriptionManager::register_dapp() {
     std::unique_lock lock(mutex_);
 
-    // Find the next available dApp ID
-    uint32_t assigned_id = next_dapp_id_;
-    uint32_t attempts = 0;
-    
-    // Search for an available ID (handle wrap-around and gaps from unregistered dApps)
-    while (registered_dapps_.count(assigned_id) > 0 && attempts <= MAX_DAPP_ID) {
-        assigned_id++;
-        if (assigned_id > MAX_DAPP_ID) {
-            assigned_id = MIN_DAPP_ID;
-        }
-        attempts++;
-    }
-    
-    if (attempts > MAX_DAPP_ID) {
+    uint32_t assigned_id = 0;
+    if (!take_lowest_free(registered_dapps_, lowest_free_dapp_id_, MAX_DAPP_ID, assigned_id)) {
         E3_LOG_ERROR(LOG_TAG) << "No available dApp IDs (range " << MIN_DAPP_ID
                               << ".." << MAX_DAPP_ID << ")";
         return {ErrorCode::INTERNAL_ERROR, 0};
@@ -71,12 +78,6 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::register_dapp() {
 
     // Initialize empty subscription set for this dApp
     dapp_subscriptions_[assigned_id] = {};
-    
-    // Update next_dapp_id_ for the next registration
-    next_dapp_id_ = assigned_id + 1;
-    if (next_dapp_id_ > MAX_DAPP_ID) {
-        next_dapp_id_ = MIN_DAPP_ID;
-    }
 
     E3_LOG_INFO(LOG_TAG) << "dApp registered successfully with ID " << assigned_id;
     return {ErrorCode::SUCCESS, assigned_id};
@@ -114,7 +115,7 @@ ErrorCode SubscriptionManager::unregister_dapp(uint32_t dapp_id) {
             uint64_t sub_key = make_sub_key(dapp_id, ran_func);
             auto sub_id_it = subscription_id_reverse_.find(sub_key);
             if (sub_id_it != subscription_id_reverse_.end()) {
-                subscription_ids_.erase(sub_id_it->second);
+                release_subscription_id(sub_id_it->second);
                 subscription_id_reverse_.erase(sub_id_it);
             }
             subscription_details_.erase(sub_key);
@@ -124,6 +125,7 @@ ErrorCode SubscriptionManager::unregister_dapp(uint32_t dapp_id) {
 
     // Remove the dApp registration
     registered_dapps_.erase(it);
+    lowest_free_dapp_id_ = std::min(lowest_free_dapp_id_, dapp_id);
 
     size_t subscriptions_removed = affected_ran_functions.size();
     E3_LOG_INFO(LOG_TAG) << "dApp " << dapp_id << " unregistered, " 
@@ -186,11 +188,14 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::add_subscription(
     bool had_subscribers = !ran_function_subscribers_[ran_function_id].empty();
 
     // Assign subscription ID
-    uint32_t subscription_id = next_subscription_id_++;
-    if (next_subscription_id_ > 100) {
-        next_subscription_id_ = 1; // Wrap around per spec (0-100 range)
+    uint32_t subscription_id = 0;
+    if (!take_lowest_free(subscription_ids_, lowest_free_subscription_id_,
+                          MAX_SUBSCRIPTION_ID, subscription_id)) {
+        E3_LOG_ERROR(LOG_TAG) << "No available subscription IDs (range " << MIN_SUBSCRIPTION_ID
+                              << ".." << MAX_SUBSCRIPTION_ID << ")";
+        return {ErrorCode::INTERNAL_ERROR, 0};
     }
-    
+
     // Add subscription
     dapp_subs.insert(ran_function_id);
     ran_function_subscribers_[ran_function_id].insert(dapp_id);
@@ -248,7 +253,7 @@ ErrorCode SubscriptionManager::remove_subscription(uint32_t dapp_id, uint32_t ra
     uint64_t sub_key = make_sub_key(dapp_id, ran_function_id);
     auto sub_id_it = subscription_id_reverse_.find(sub_key);
     if (sub_id_it != subscription_id_reverse_.end()) {
-        subscription_ids_.erase(sub_id_it->second);
+        release_subscription_id(sub_id_it->second);
         subscription_id_reverse_.erase(sub_id_it);
     }
     subscription_details_.erase(sub_key);
@@ -299,7 +304,7 @@ ErrorCode SubscriptionManager::remove_subscription_by_id(uint32_t dapp_id, uint3
     // Remove subscription ID mappings and details
     uint64_t sub_key = make_sub_key(dapp_id, ran_function_id);
     subscription_id_reverse_.erase(sub_key);
-    subscription_ids_.erase(sub_it);
+    release_subscription_id(subscription_id);
     subscription_details_.erase(sub_key);
     
     E3_LOG_INFO(LOG_TAG) << "Subscription " << subscription_id << " removed: dApp " << dapp_id 
@@ -407,6 +412,11 @@ size_t SubscriptionManager::subscription_count() const {
     return count;
 }
 
+void SubscriptionManager::release_subscription_id(uint32_t subscription_id) {
+    subscription_ids_.erase(subscription_id);
+    lowest_free_subscription_id_ = std::min(lowest_free_subscription_id_, subscription_id);
+}
+
 void SubscriptionManager::clear() {
     std::unique_lock lock(mutex_);
     registered_dapps_.clear();
@@ -415,6 +425,8 @@ void SubscriptionManager::clear() {
     subscription_ids_.clear();
     subscription_id_reverse_.clear();
     subscription_details_.clear();
+    lowest_free_dapp_id_ = MIN_DAPP_ID;
+    lowest_free_subscription_id_ = MIN_SUBSCRIPTION_ID;
     E3_LOG_INFO(LOG_TAG) << "All registrations and subscriptions cleared";
 }
 

@@ -23,8 +23,15 @@ file(GLOB LIBE3_TEST_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "tests/*.cpp")
 # LIBE3_ENABLE_ASN1=OFF the encoder factory cannot create an ASN.1 encoder,
 # so these tests can only fail; exclude them instead of weakening them.
 set(LIBE3_ASN1_ONLY_TESTS
+    asn1_golden
     asn1_size
     e2e_report_path
+)
+
+# Tests that parse JSON with nlohmann: skipped when LIBE3_ENABLE_JSON=OFF.
+set(LIBE3_JSON_ONLY_TESTS
+    interop_aerial
+    json_encoder
 )
 
 # Tests that drive a raw ZMQ peer against the agent: they include <zmq.h> and
@@ -44,8 +51,8 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
     string(REGEX REPLACE "^test_" "" simple_name ${test_name})
     set(target_name "test_${simple_name}")
     # Skip tests that require optional components when those components are disabled
-    if(NOT LIBE3_ENABLE_JSON AND simple_name STREQUAL "json_encoder")
-        message(STATUS "Skipping test_json_encoder: JSON support disabled")
+    if(NOT LIBE3_ENABLE_JSON AND simple_name IN_LIST LIBE3_JSON_ONLY_TESTS)
+        message(STATUS "Skipping test_${simple_name}: JSON support disabled")
         continue()
     endif()
     if(NOT LIBE3_ENABLE_PROTOBUF AND simple_name STREQUAL "protobuf_encoder")
@@ -81,7 +88,13 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
     if(LIBE3_ENABLE_ZMQ AND TARGET PkgConfig::ZMQ)
         target_link_libraries(${target_name} PRIVATE PkgConfig::ZMQ)
     endif()
-    
+
+    # Where the vendored peer messages live (tests/fixtures/README.md).
+    if(simple_name STREQUAL "interop_aerial")
+        target_compile_definitions(${target_name} PRIVATE
+            LIBE3_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures")
+    endif()
+
     add_test(NAME ${target_name} COMMAND ${target_name})
 endforeach()
 

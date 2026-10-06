@@ -92,7 +92,7 @@ typedef struct {
 
     /* Opaque RAN function data (E3SM-encoded, advertised in the setup response).
      * Required, not optional: E3AP declares ranFunctionData as a mandatory
-     * OCTET STRING (SIZE (1..32768)), so registration is rejected if these
+     * OCTET STRING (SIZE (1..262144)) and libe3 carries up to 32768, so registration is rejected if these
      * fields describe an empty or oversized buffer. */
     const uint8_t* ran_function_data; // Opaque RAN function data (must be non-NULL)
     size_t ran_function_data_len;     // Length in bytes; must be 1..32768
@@ -434,7 +434,8 @@ size_t e3_agent_subscription_count(e3_agent_handle_t* agent);
  * Fails with `E3_INVALID_PARAM` if the descriptor the handle was built
  * from carried no `ran_function_data`, or more than 32768 bytes of it, and with
  * `E3_SM_ALREADY_REGISTERED` if another SM already holds the same RAN
- * function id.
+ * function id. It also fails with `E3_INVALID_PARAM` if the SM lists more than
+ * 256 telemetry or control ids, or 64 RAN functions are already registered.
  *
  * @return e3_error_t ErrorCode value (0 == success)
  */

@@ -338,6 +338,113 @@ TEST(SubscriptionManager_subscription_details_removed_on_unregister) {
     ASSERT_TRUE(details == nullptr);
 }
 
+TEST(SubscriptionManager_dapp_ids_are_lowest_free) {
+    SubscriptionManager mgr;
+    auto [r1, id1] = mgr.register_dapp();
+    auto [r2, id2] = mgr.register_dapp();
+    auto [r3, id3] = mgr.register_dapp();
+    ASSERT_EQ(id1, 1u);
+    ASSERT_EQ(id2, 2u);
+    ASSERT_EQ(id3, 3u);
+
+    // A freed id is handed out again before any higher one.
+    ASSERT_TRUE(mgr.unregister_dapp(id2) == ErrorCode::SUCCESS);
+    auto [r4, id4] = mgr.register_dapp();
+    ASSERT_EQ(id4, 2u);
+    auto [r5, id5] = mgr.register_dapp();
+    ASSERT_EQ(id5, 4u);
+}
+
+TEST(SubscriptionManager_dapp_ids_do_not_climb_with_reconnects) {
+    SubscriptionManager mgr;
+    // OCUDU's libe3-compatible peers only accept 1..100, so churn alone must
+    // not push ids past it.
+    for (int i = 0; i < 500; ++i) {
+        auto [rc, id] = mgr.register_dapp();
+        ASSERT_TRUE(rc == ErrorCode::SUCCESS);
+        ASSERT_EQ(id, 1u);
+        ASSERT_TRUE(mgr.unregister_dapp(id) == ErrorCode::SUCCESS);
+    }
+}
+
+TEST(SubscriptionManager_dapp_ids_go_past_100_and_run_out_at_65535) {
+    SubscriptionManager mgr;
+    for (uint32_t expected = 1; expected <= 65535; ++expected) {
+        auto [rc, id] = mgr.register_dapp();
+        ASSERT_TRUE(rc == ErrorCode::SUCCESS);
+        ASSERT_EQ(id, expected);
+    }
+    ASSERT_EQ(mgr.dapp_count(), 65535u);
+
+    auto [rc, id] = mgr.register_dapp();
+    ASSERT_TRUE(rc == ErrorCode::INTERNAL_ERROR);
+    ASSERT_EQ(mgr.dapp_count(), 65535u);
+
+    // Exhaustion clears as soon as one id is freed.
+    ASSERT_TRUE(mgr.unregister_dapp(4242) == ErrorCode::SUCCESS);
+    auto [rc2, id2] = mgr.register_dapp();
+    ASSERT_TRUE(rc2 == ErrorCode::SUCCESS);
+    ASSERT_EQ(id2, 4242u);
+}
+
+TEST(SubscriptionManager_subscription_ids_are_lowest_free_and_not_capped_at_100) {
+    SubscriptionManager mgr;
+    auto [reg, dapp_id] = mgr.register_dapp();
+
+    for (uint32_t ran_function = 1; ran_function <= 150; ++ran_function) {
+        auto [rc, sub_id] = mgr.add_subscription(dapp_id, ran_function, {1}, {}, 0);
+        ASSERT_TRUE(rc == ErrorCode::SUCCESS);
+        ASSERT_EQ(sub_id, ran_function);
+    }
+
+    // The freed id is reused, and nothing live is overwritten.
+    ASSERT_TRUE(mgr.remove_subscription(dapp_id, 7) == ErrorCode::SUCCESS);
+    auto [rc, sub_id] = mgr.add_subscription(dapp_id, 1000, {1}, {}, 0);
+    ASSERT_TRUE(rc == ErrorCode::SUCCESS);
+    ASSERT_EQ(sub_id, 7u);
+    ASSERT_TRUE(mgr.is_subscribed(dapp_id, 1));
+    ASSERT_TRUE(mgr.is_subscribed(dapp_id, 150));
+    ASSERT_EQ(mgr.subscription_count(), 150u);
+}
+
+TEST(SubscriptionManager_subscription_ids_run_out_without_overwriting) {
+    SubscriptionManager mgr;
+    auto [reg, dapp_id] = mgr.register_dapp();
+
+    for (uint32_t ran_function = 1; ran_function <= 65535; ++ran_function) {
+        auto [rc, sub_id] = mgr.add_subscription(dapp_id, ran_function, {1}, {}, 0);
+        ASSERT_TRUE(rc == ErrorCode::SUCCESS);
+        ASSERT_EQ(sub_id, ran_function);
+    }
+    ASSERT_EQ(mgr.subscription_count(), 65535u);
+
+    // The 65536th gets no id and leaves every live subscription as it was.
+    auto [rc, sub_id] = mgr.add_subscription(dapp_id, 70000, {1}, {}, 0);
+    ASSERT_TRUE(rc == ErrorCode::INTERNAL_ERROR);
+    ASSERT_FALSE(mgr.is_subscribed(dapp_id, 70000));
+    ASSERT_EQ(mgr.subscription_count(), 65535u);
+    ASSERT_TRUE(mgr.is_subscribed(dapp_id, 1));
+
+    // Removing by id frees exactly that id.
+    ASSERT_TRUE(mgr.remove_subscription_by_id(dapp_id, 65535) == ErrorCode::SUCCESS);
+    auto [rc2, sub_id2] = mgr.add_subscription(dapp_id, 70000, {1}, {}, 0);
+    ASSERT_TRUE(rc2 == ErrorCode::SUCCESS);
+    ASSERT_EQ(sub_id2, 65535u);
+}
+
+TEST(SubscriptionManager_unregister_frees_subscription_ids) {
+    SubscriptionManager mgr;
+    auto [reg1, dapp1] = mgr.register_dapp();
+    auto [reg2, dapp2] = mgr.register_dapp();
+    mgr.add_subscription(dapp1, 10, {1}, {}, 0);
+    mgr.add_subscription(dapp1, 11, {1}, {}, 0);
+
+    mgr.unregister_dapp(dapp1);
+    auto [rc, sub_id] = mgr.add_subscription(dapp2, 12, {1}, {}, 0);
+    ASSERT_TRUE(rc == ErrorCode::SUCCESS);
+    ASSERT_EQ(sub_id, 1u);
+}
+
 int main() {
     return RUN_ALL_TESTS();
 }

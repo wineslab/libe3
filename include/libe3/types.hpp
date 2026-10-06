@@ -169,7 +169,8 @@ constexpr size_t MAX_PROTOCOL_DATA_SIZE = 32768;
 constexpr size_t MAX_ACTION_DATA_SIZE = 32768;
 constexpr size_t MAX_DAPP_REPORT_DATA_SIZE = 32768;
 constexpr size_t MAX_XAPP_CTRL_DATA_SIZE = 32768;
-constexpr size_t MAX_RAN_FUNCTIONS = 255;
+constexpr size_t MAX_RAN_FUNCTIONS = 64;           // ranFunctionList SIZE (0..64)
+constexpr size_t MAX_IDENTIFIER_LIST_SIZE = 256;   // telemetry and control lists SIZE (0..256)
 constexpr size_t DEFAULT_BUFFER_SIZE = 60000;
 
 // Protocol version
@@ -207,10 +208,10 @@ struct RanFunctionDefinition {
  * @brief E3AP Setup Request structure
  */
 struct SetupRequest {
-    std::string e3ap_protocol_version;  ///< E3AP protocol version (e.g., "0.0.0")
-    std::string dapp_name;               ///< Name of the dApp
-    std::string dapp_version;            ///< Version of the dApp (e.g., "0.0.0")
-    std::string vendor;                  ///< Vendor name (max 30 chars)
+    std::string e3ap_protocol_version;  ///< E3AP protocol version (e.g., "0.0.0"); 1..32 bytes over ASN.1
+    std::string dapp_name;               ///< Name of the dApp; 1..64 bytes over ASN.1
+    std::string dapp_version;            ///< Version of the dApp (e.g., "0.0.0"); 1..32 bytes over ASN.1
+    std::string vendor;                  ///< Vendor name; 1..64 bytes over ASN.1
 };
 
 /**
@@ -231,7 +232,7 @@ struct SetupResponse {
     ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
     std::optional<std::string> e3ap_protocol_version;   ///< E3AP protocol version (optional)
     std::optional<uint32_t> dapp_identifier;            ///< Assigned dApp identifier (optional)
-    std::string ran_identifier;                         ///< RAN identifier (mandatory)
+    std::string ran_identifier;                         ///< RAN identifier (mandatory); 1..64 bytes over ASN.1
     std::vector<RanFunctionDef> ran_function_list;      ///< List of available RAN functions (optional)
 };
 
@@ -243,7 +244,7 @@ struct SubscriptionRequest {
     uint32_t ran_function_identifier{0};             ///< RAN function to subscribe to
     std::vector<uint32_t> telemetry_identifier_list; ///< List of telemetry identifiers
     std::vector<uint32_t> control_identifier_list;   ///< List of control identifiers
-    std::optional<uint32_t> subscription_time;       ///< How long to keep the subscription (0-3600 sec)
+    std::optional<uint32_t> subscription_time;       ///< How long to keep the subscription (0-86400 sec)
     std::optional<uint32_t> periodicity;             ///< Microseconds between indications, 0 = every event (ASN.1: 0 to 60000000)
 };
 
@@ -507,7 +508,7 @@ using Timestamp = std::chrono::time_point<std::chrono::steady_clock>;
  * @brief dApp registration entry
  */
 struct DAppEntry {
-    uint32_t dapp_identifier{0};  ///< Assigned dApp identifier (1–100)
+    uint32_t dapp_identifier{0};  ///< Assigned dApp identifier (1..65535)
     Timestamp registered_time;     ///< Monotonic timestamp of when the dApp registered
 };
 

@@ -164,19 +164,18 @@ TEST(SetupChannel_garbageRequest_repliesAndChannelSurvives) {
 
 #if defined(LIBE3_ENABLE_JSON)
 /**
- * A well-formed SetupRequest whose message id lies outside E3-MessageID's
- * 1..1000 must still receive a decodable positive SetupResponse: the agent
- * substitutes an in-range id instead of failing the response encode.
+ * Sends a well-formed JSON SetupRequest carrying `request_id` to a fresh RAN
+ * agent and returns the positive SetupResponse it answers with.
  *
  * JSON-only: the JSON codec is the one that lets an out-of-range id through
  * to the handler (the APER encoder rejects it on the sender side, but the
  * APER decoder does not range-check either, so the substitution protects
  * both encodings).
  */
-TEST(SetupChannel_outOfRangeRequestId_substitutedAndAnswered) {
-    const std::string setup_ep = unique_ipc("setup_oor");
-    const std::string sub_ep   = unique_ipc("inbound_oor");
-    const std::string pub_ep   = unique_ipc("outbound_oor");
+static SetupResponse answer_json_setup(const char* tag, uint32_t request_id) {
+    const std::string setup_ep = unique_ipc((std::string("setup_") + tag).c_str());
+    const std::string sub_ep   = unique_ipc((std::string("inbound_") + tag).c_str());
+    const std::string pub_ep   = unique_ipc((std::string("outbound_") + tag).c_str());
 
     E3Config cfg;
     cfg.role             = E3Role::RAN;
@@ -209,7 +208,7 @@ TEST(SetupChannel_outOfRangeRequestId_substitutedAndAnswered) {
     ASSERT_TRUE(encoder != nullptr);
 
     auto setup = encoder->encode_setup_request(
-        4096, "1.0.0", "badsetup-dapp", "0.0.1", "test-vendor");
+        request_id, "1.0.0", "badsetup-dapp", "0.0.1", "test-vendor");
     ASSERT_TRUE(setup.has_value());
     ASSERT_GE(zmq_send(req, setup->buffer.data(), setup->buffer.size(), 0), 0);
 
@@ -225,13 +224,28 @@ TEST(SetupChannel_outOfRangeRequestId_substitutedAndAnswered) {
     ASSERT_EQ(static_cast<int>(resp->response_code),
               static_cast<int>(ResponseCode::POSITIVE));
     ASSERT_TRUE(resp->dapp_identifier.has_value());
-    // The unencodable id was substituted with one inside E3-MessageID.
-    ASSERT_GE(resp->request_id, 1u);
-    ASSERT_LE(resp->request_id, 1000u);
+    SetupResponse out = *resp;
 
     zmq_close(req);
     zmq_ctx_destroy(ctx);
     agent.stop();
+    return out;
+}
+
+/**
+ * A request id of 0 is outside E3-MessageID (1..4294967295) and cannot be
+ * echoed into the response: the agent substitutes a valid id instead of
+ * failing the response encode.
+ */
+TEST(SetupChannel_zeroRequestId_substitutedAndAnswered) {
+    const SetupResponse resp = answer_json_setup("zero", 0);
+    ASSERT_GE(resp.request_id, 1u);
+}
+
+/// Any other id, including ones above the old 1..1000 limit, is echoed unchanged.
+TEST(SetupChannel_largeRequestId_echoed) {
+    ASSERT_EQ(answer_json_setup("large", 4096).request_id, 4096u);
+    ASSERT_EQ(answer_json_setup("max", 4294967295u).request_id, 4294967295u);
 }
 #endif  // LIBE3_ENABLE_JSON
 
@@ -338,6 +352,153 @@ TEST(SetupChannel_unencodableRanFunctionData_omittedNotAborted) {
     ASSERT_EQ(resp->request_id, 7u);
     // The one registered RAN function could not describe itself, so it is
     // absent -- ranFunctionList is OPTIONAL and this is what that is for.
+    ASSERT_TRUE(resp->ran_function_list.empty());
+
+    zmq_close(req);
+    zmq_ctx_destroy(ctx);
+    agent.stop();
+}
+
+/**
+ * A RAN whose config leaves ranIdentifier unset (the default) must still answer
+ * a setup request over ASN.1. E3-Name refuses an empty string, and the encode
+ * failure on the positive response reaches std::abort(), so the agent sends a
+ * placeholder instead.
+ */
+TEST(SetupChannel_unsetRanIdentifier_answeredWithPlaceholder) {
+    const std::string setup_ep = unique_ipc("setup_noid");
+    const std::string sub_ep   = unique_ipc("inbound_noid");
+    const std::string pub_ep   = unique_ipc("outbound_noid");
+
+    E3Config cfg;
+    cfg.role             = E3Role::RAN;
+    cfg.link_layer       = E3LinkLayer::ZMQ;
+    cfg.transport_layer  = E3TransportLayer::IPC;
+    cfg.setup_endpoint   = setup_ep;
+    cfg.subscriber_endpoint = sub_ep;
+    cfg.publisher_endpoint  = pub_ep;
+    cfg.encoding         = EncodingFormat::ASN1;
+    cfg.log_level        = 0;
+
+    E3Agent agent(std::move(cfg));
+    ASSERT_EQ(error_to_int(agent.start()), error_to_int(ErrorCode::SUCCESS));
+
+    std::this_thread::sleep_for(100ms);
+
+    void* ctx = zmq_ctx_new();
+    ASSERT_TRUE(ctx != nullptr);
+    void* req = zmq_socket(ctx, ZMQ_REQ);
+    ASSERT_TRUE(req != nullptr);
+    int recv_timeout = 5000;
+    zmq_setsockopt(req, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+    int linger = 0;
+    zmq_setsockopt(req, ZMQ_LINGER, &linger, sizeof(linger));
+    ASSERT_EQ(zmq_connect(req, setup_ep.c_str()), 0);
+
+    auto encoder = create_encoder(EncodingFormat::ASN1);
+    ASSERT_TRUE(encoder != nullptr);
+
+    auto setup = encoder->encode_setup_request(
+        7, "1.0.0", "noid-dapp", "0.0.1", "test-vendor");
+    ASSERT_TRUE(setup.has_value());
+    ASSERT_GE(zmq_send(req, setup->buffer.data(), setup->buffer.size(), 0), 0);
+
+    uint8_t buf[4096];
+    int n = zmq_recv(req, buf, sizeof(buf), 0);
+    ASSERT_GT(n, 0);
+    auto decoded = encoder->decode(buf, static_cast<size_t>(n));
+    ASSERT_TRUE(decoded.has_value());
+    auto* resp = std::get_if<SetupResponse>(&decoded->choice);
+    ASSERT_TRUE(resp != nullptr);
+    ASSERT_EQ(static_cast<int>(resp->response_code),
+              static_cast<int>(ResponseCode::POSITIVE));
+    ASSERT_TRUE(resp->ran_identifier == "unknown");
+
+    zmq_close(req);
+    zmq_ctx_destroy(ctx);
+    agent.stop();
+}
+
+namespace {
+/// SM that lists more telemetry ids than E3-RanFunctionDefinition holds.
+class TooManyIdsSM : public ServiceModel {
+public:
+    std::string name() const override { return "TooManyIdsSM"; }
+    uint32_t version() const override { return 1; }
+    uint32_t ran_function_id() const override { return 6; }
+    std::vector<uint32_t> telemetry_ids() const override {
+        std::vector<uint32_t> ids(257);
+        for (size_t i = 0; i < ids.size(); ++i) ids[i] = static_cast<uint32_t>(i + 1);
+        return ids;
+    }
+    std::vector<uint32_t> control_ids() const override { return {1}; }
+    std::vector<uint8_t> ran_function_data() const override { return {'T', 'M', 'I'}; }
+    ErrorCode init() override { return ErrorCode::SUCCESS; }
+    void destroy() override {}
+    ErrorCode start() override { return ErrorCode::SUCCESS; }
+    void stop() override {}
+    bool is_running() const override { return false; }
+    ErrorCode handle_control_action(uint32_t, const DAppControlAction&) override {
+        return ErrorCode::SUCCESS;
+    }
+};
+}  // namespace
+
+/**
+ * A factory SM skips the registration-time list check, so the setup response
+ * has to drop an entry with over 256 ids itself. Encoding it would fail
+ * SIZE (0..256) and reach std::abort() for every dApp.
+ */
+TEST(SetupChannel_oversizedIdentifierList_omittedNotAborted) {
+    const std::string setup_ep = unique_ipc("setup_ids");
+    const std::string sub_ep   = unique_ipc("inbound_ids");
+    const std::string pub_ep   = unique_ipc("outbound_ids");
+
+    E3Config cfg;
+    cfg.role             = E3Role::RAN;
+    cfg.link_layer       = E3LinkLayer::ZMQ;
+    cfg.transport_layer  = E3TransportLayer::IPC;
+    cfg.setup_endpoint   = setup_ep;
+    cfg.subscriber_endpoint = sub_ep;
+    cfg.publisher_endpoint  = pub_ep;
+    cfg.encoding         = EncodingFormat::ASN1;
+    cfg.log_level        = 0;
+    cfg.ran_identifier   = "ids-test";
+
+    E3Agent agent(std::move(cfg));
+    ASSERT_EQ(error_to_int(SmRegistry::instance().register_sm_factory(
+                  6, [] { return std::make_unique<TooManyIdsSM>(); })),
+              error_to_int(ErrorCode::SUCCESS));
+    ASSERT_EQ(error_to_int(agent.start()), error_to_int(ErrorCode::SUCCESS));
+
+    std::this_thread::sleep_for(100ms);
+
+    void* ctx = zmq_ctx_new();
+    ASSERT_TRUE(ctx != nullptr);
+    void* req = zmq_socket(ctx, ZMQ_REQ);
+    ASSERT_TRUE(req != nullptr);
+    int recv_timeout = 5000;
+    zmq_setsockopt(req, ZMQ_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+    int linger = 0;
+    zmq_setsockopt(req, ZMQ_LINGER, &linger, sizeof(linger));
+    ASSERT_EQ(zmq_connect(req, setup_ep.c_str()), 0);
+
+    auto encoder = create_encoder(EncodingFormat::ASN1);
+    ASSERT_TRUE(encoder != nullptr);
+    auto setup = encoder->encode_setup_request(
+        7, "1.0.0", "ids-dapp", "0.0.1", "test-vendor");
+    ASSERT_TRUE(setup.has_value());
+    ASSERT_GE(zmq_send(req, setup->buffer.data(), setup->buffer.size(), 0), 0);
+
+    uint8_t buf[4096];
+    int n = zmq_recv(req, buf, sizeof(buf), 0);
+    ASSERT_GT(n, 0);
+    auto decoded = encoder->decode(buf, static_cast<size_t>(n));
+    ASSERT_TRUE(decoded.has_value());
+    auto* resp = std::get_if<SetupResponse>(&decoded->choice);
+    ASSERT_TRUE(resp != nullptr);
+    ASSERT_EQ(static_cast<int>(resp->response_code),
+              static_cast<int>(ResponseCode::POSITIVE));
     ASSERT_TRUE(resp->ran_function_list.empty());
 
     zmq_close(req);

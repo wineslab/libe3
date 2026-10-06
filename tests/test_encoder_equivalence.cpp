@@ -219,8 +219,8 @@ struct Sample {
 
 /// Every field set to a value distinguishable from its default, and every
 /// value inside the ASN.1 constraints: E3-DAppID and the RAN-function and
-/// control identifiers are 1..100, E3-MessageID is 1..1000, E3-Version is at
-/// most 11 characters, octet strings are 1..32768 bytes.
+/// control identifiers are 1..65535, E3-MessageID is 1..4294967295,
+/// E3-Version is at most 11 characters, octet strings are 1..32768 bytes.
 static std::vector<Sample> sample_pdus() {
     std::vector<Sample> samples;
 
