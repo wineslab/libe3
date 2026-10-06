@@ -146,7 +146,7 @@ EncodeResult<Pdu> Asn1E3Encoder::decode(const uint8_t* data, size_t size) {
         if (asn1_pdu) {
             ASN_STRUCT_FREE(asn_DEF_E3_PDU, asn1_pdu);
         }
-        return tl::unexpected(ErrorCode::ENCODE_FAILED);
+        return tl::unexpected(ErrorCode::DECODE_FAILED);
     }
     
     // Convert to generic PDU
