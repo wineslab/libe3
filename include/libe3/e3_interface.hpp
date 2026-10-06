@@ -382,6 +382,7 @@ private:
     void handle_indication(const IndicationMessage& msg, uint64_t latrec_seq);
     void handle_xapp_control_action(const XAppControlAction& action, uint64_t latrec_seq);
     void handle_message_ack(const MessageAck& ack);
+    void handle_release_from_ran(const ReleaseMessage& release);
 
     /// End the dApp session: clear its state and tell the application, once.
     void on_ran_gone(DisconnectReason reason);
