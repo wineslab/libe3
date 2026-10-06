@@ -38,6 +38,7 @@ using SubscriptionResponseHandler = std::function<void(const SubscriptionRespons
 using IndicationHandler = std::function<void(const IndicationMessage&)>;
 using XAppControlHandler = std::function<void(const XAppControlAction&)>;
 using MessageAckHandler = std::function<void(const MessageAck&)>;
+using DisconnectHandler = std::function<void(DisconnectReason)>;
 
 /**
  * @brief E3Agent - Main façade for RAN vendor integration
@@ -244,6 +245,12 @@ public:
     void set_xapp_control_handler(XAppControlHandler handler);
     /** Set callback for incoming MessageAck (RAN → dApp). */
     void set_message_ack_handler(MessageAckHandler handler);
+    /**
+     * Set callback for the end of the dApp's session with the RAN: a release for
+     * this dApp, or a closed or failed connection. Fires once, after dapp_id()
+     * has been cleared. The dApp does not reconnect; call stop() then start().
+     */
+    void set_disconnect_handler(DisconnectHandler handler);
 
     /**
      * @brief dApp identifier assigned by the RAN in SetupResponse.

@@ -123,6 +123,13 @@ DAppSession::DAppSession(libe3::E3Config config, std::size_t queue_capacity) {
         impl->enqueue(std::move(ev));
     });
 
+    agent.set_disconnect_handler([impl](libe3::DisconnectReason reason) {
+        E3Event ev;
+        ev.kind = E3_EVENT_DISCONNECT;
+        ev.disconnect_reason = static_cast<int>(reason);
+        impl->enqueue(std::move(ev));
+    });
+
     agent.set_message_ack_handler([impl](const libe3::MessageAck& ack) {
         E3Event ev;
         ev.kind = E3_EVENT_MESSAGE_ACK;

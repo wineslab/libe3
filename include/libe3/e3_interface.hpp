@@ -49,6 +49,7 @@ using SubscriptionResponseHandler = std::function<void(const SubscriptionRespons
 using IndicationHandler = std::function<void(const IndicationMessage&)>;
 using XAppControlHandler = std::function<void(const XAppControlAction&)>;
 using MessageAckHandler = std::function<void(const MessageAck&)>;
+using DisconnectHandler = std::function<void(DisconnectReason)>;
 
 /**
  * @brief E3Interface - Internal protocol coordination
@@ -172,6 +173,9 @@ public:
     void set_message_ack_handler(MessageAckHandler handler) {
         message_ack_handler_ = std::move(handler);
     }
+    void set_disconnect_handler(DisconnectHandler handler) {
+        disconnect_handler_ = std::move(handler);
+    }
 
     // dApp-side accessors
     std::optional<uint32_t> dapp_id() const noexcept;
@@ -217,6 +221,7 @@ private:
     // State
     std::atomic<AgentState> state_{AgentState::UNINITIALIZED};
     std::atomic<bool> should_stop_{false};
+    bool started_before_{false};
 
     // Monotonic source for E3-MessageID (1..1000). A wrapping counter gives
     // unique ids across the small window of in-flight requests, unlike the
@@ -274,6 +279,11 @@ private:
     IndicationHandler indication_handler_;
     XAppControlHandler xapp_control_handler_;
     MessageAckHandler message_ack_handler_;
+    DisconnectHandler disconnect_handler_;
+
+    // dApp-only: the RAN is gone (set once per session) / we sent our own release.
+    std::atomic<bool> ran_gone_{false};
+    std::atomic<bool> release_sent_{false};
 
     // dApp-side setup-complete signal (notified by setup_loop_dapp)
     mutable std::mutex setup_complete_mu_;
@@ -372,6 +382,13 @@ private:
     void handle_indication(const IndicationMessage& msg, uint64_t latrec_seq);
     void handle_xapp_control_action(const XAppControlAction& action, uint64_t latrec_seq);
     void handle_message_ack(const MessageAck& ack);
+    void handle_release_from_ran(const ReleaseMessage& release);
+
+    /// End the dApp session: clear its state and tell the application, once.
+    void on_ran_gone(DisconnectReason reason);
+
+    /// Build the transport connector from config_ (init, and again on restart).
+    ErrorCode create_connector_from_config();
 
     // =========================================================================
     // SM Lifecycle Management

@@ -86,7 +86,7 @@ def main() -> int:
     # ------------------------------------------------------------------
     for k in ("E3_EVENT_NONE", "E3_EVENT_INDICATION", "E3_EVENT_XAPP_CONTROL",
               "E3_EVENT_SUBSCRIPTION_RESPONSE", "E3_EVENT_SETUP_RESPONSE",
-              "E3_EVENT_MESSAGE_ACK"):
+              "E3_EVENT_MESSAGE_ACK", "E3_EVENT_DISCONNECT"):
         if not hasattr(libe3py, k):
             print(f"FAIL: libe3py.{k} event kind not exposed", file=sys.stderr)
             return 1
@@ -143,6 +143,9 @@ def main() -> int:
         return 1
     if ev.has_telemetry_granted or ev.has_control_granted:
         print("FAIL: fresh E3Event should not claim granted lists", file=sys.stderr)
+        return 1
+    if ev.disconnect_reason != -1:
+        print("FAIL: fresh E3Event should report no disconnect reason", file=sys.stderr)
         return 1
     for getter in ("get_telemetry_granted", "get_control_granted"):
         if len(getattr(ev, getter)()) != 0:

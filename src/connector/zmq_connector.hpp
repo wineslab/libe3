@@ -77,6 +77,8 @@ private:
     void* setup_socket_{nullptr};
     void* inbound_socket_{nullptr};
     void* outbound_socket_{nullptr};
+    // dApp role: PAIR socket fed by zmq_socket_monitor on inbound_socket_.
+    void* monitor_socket_{nullptr};
     
     bool connected_{false};
 
@@ -88,6 +90,9 @@ private:
 
     void setup_ipc_permissions(const std::string& path);
     bool reset_setup_socket();
+    ErrorCode open_setup_req_socket();
+    bool inbound_peer_disconnected();
+    void open_inbound_monitor();
 };
 
 } // namespace libe3

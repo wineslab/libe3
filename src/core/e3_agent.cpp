@@ -34,6 +34,7 @@ struct E3Agent::Impl {
     IndicationHandler indication_handler;
     XAppControlHandler xapp_control_handler;
     MessageAckHandler message_ack_handler;
+    DisconnectHandler disconnect_handler;
 
     explicit Impl(E3Config cfg) : config(std::move(cfg)) {}
 };
@@ -96,6 +97,9 @@ ErrorCode E3Agent::init() {
     }
     if (impl_->message_ack_handler) {
         impl_->interface->set_message_ack_handler(impl_->message_ack_handler);
+    }
+    if (impl_->disconnect_handler) {
+        impl_->interface->set_disconnect_handler(impl_->disconnect_handler);
     }
 
     E3_LOG_INFO(LOG_TAG) << "E3Agent initialized successfully";
@@ -384,6 +388,13 @@ void E3Agent::set_message_ack_handler(MessageAckHandler handler) {
     impl_->message_ack_handler = std::move(handler);
     if (impl_->interface && impl_->message_ack_handler) {
         impl_->interface->set_message_ack_handler(impl_->message_ack_handler);
+    }
+}
+
+void E3Agent::set_disconnect_handler(DisconnectHandler handler) {
+    impl_->disconnect_handler = std::move(handler);
+    if (impl_->interface && impl_->disconnect_handler) {
+        impl_->interface->set_disconnect_handler(impl_->disconnect_handler);
     }
 }
 
