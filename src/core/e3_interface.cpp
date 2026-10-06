@@ -1195,6 +1195,11 @@ void E3Interface::inbound_loop_dapp() {
                 if (a) handle_message_ack(*a);
                 break;
             }
+            case PduType::RELEASE_MESSAGE: {
+                auto* r = std::get_if<ReleaseMessage>(&pdu.choice);
+                if (r) handle_release_from_ran(*r);
+                break;
+            }
             default:
                 E3_LOG_WARN(LOG_TAG) << "dApp received unexpected PDU type: "
                                      << pdu_type_to_string(pdu.type);
@@ -1271,6 +1276,19 @@ void E3Interface::on_ran_gone(DisconnectReason reason) {
     if (disconnect_handler_) {
         disconnect_handler_(reason);
     }
+}
+
+void E3Interface::handle_release_from_ran(const ReleaseMessage& release) {
+    // The RAN's PUB reaches every dApp, so a release for another dApp is not ours.
+    {
+        std::lock_guard<std::mutex> lk(dapp_state_->mu);
+        if (!dapp_state_->assigned_dapp_id.has_value() ||
+            *dapp_state_->assigned_dapp_id != release.dapp_identifier) {
+            return;
+        }
+    }
+    E3_LOG_INFO(LOG_TAG) << "RAN released dApp " << release.dapp_identifier;
+    on_ran_gone(DisconnectReason::RELEASED_BY_RAN);
 }
 
 void E3Interface::handle_setup_response(const SetupResponse& resp) {
