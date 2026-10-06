@@ -26,6 +26,8 @@
 #include "libe3/e3_encoder.hpp"
 #include "libe3/types.hpp"
 
+#include <string>
+#include <tuple>
 #include <vector>
 #include <cstdint>
 
@@ -337,6 +339,142 @@ TEST(Asn1Size_growsLinearlyWithPayload) {
 }
 
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Setup strings. dAppName, vendor and ranIdentifier are OCTET STRING (SIZE
+// (1..64)) and the version fields OCTET STRING (SIZE (1..32)); sizes count
+// bytes, not characters.
+// ---------------------------------------------------------------------------
+
+static std::string repeat(const std::string& unit, size_t times) {
+    std::string out;
+    for (size_t i = 0; i < times; ++i) out += unit;
+    return out;
+}
+
+static EncodeResult<EncodedMessage> encode_setup_request_strings(
+        const std::string& version, const std::string& name,
+        const std::string& dapp_version, const std::string& vendor) {
+    auto enc = make_encoder();
+    return enc->encode_setup_request(42, version, name, dapp_version, vendor);
+}
+
+static EncodeResult<EncodedMessage> encode_setup_response_strings(
+        const std::string& version, const std::string& ran_identifier) {
+    auto enc = make_encoder();
+    return enc->encode_setup_response(
+        42, 7, ResponseCode::POSITIVE, version, 3u, ran_identifier);
+}
+
+TEST(Asn1Size_SetupRequest_strings_roundTripAtBounds) {
+    auto enc = make_encoder();
+    const std::string name64 = repeat("n", 64);
+    const std::string vendor64 = repeat("v", 64);
+    const std::string version32 = repeat("1", 32);
+
+    for (const auto& [name, vendor, version] : {
+             std::tuple<std::string, std::string, std::string>{"a", "b", "c"},
+             {name64, vendor64, version32}}) {
+        auto encoded = encode_setup_request_strings(version, name, version, vendor);
+        ASSERT_TRUE(encoded.has_value());
+        auto decoded = enc->decode(encoded->buffer.data(), encoded->buffer.size());
+        ASSERT_TRUE(decoded.has_value());
+        auto* out = std::get_if<SetupRequest>(&decoded->choice);
+        ASSERT_TRUE(out != nullptr);
+        ASSERT_TRUE(out->dapp_name == name);
+        ASSERT_TRUE(out->vendor == vendor);
+        ASSERT_TRUE(out->e3ap_protocol_version == version);
+        ASSERT_TRUE(out->dapp_version == version);
+    }
+}
+
+TEST(Asn1Size_SetupRequest_strings_outOfRangeFailToEncode) {
+    const std::string ok = "x";
+    const int failed = static_cast<int>(ErrorCode::ENCODE_FAILED);
+
+    auto r = encode_setup_request_strings(ok, "", ok, ok);
+    ASSERT_FALSE(r.has_value());
+    ASSERT_EQ(static_cast<int>(r.error()), failed);
+    r = encode_setup_request_strings(ok, repeat("n", 65), ok, ok);
+    ASSERT_FALSE(r.has_value());
+    ASSERT_EQ(static_cast<int>(r.error()), failed);
+    r = encode_setup_request_strings(ok, ok, ok, "");
+    ASSERT_FALSE(r.has_value());
+    r = encode_setup_request_strings(ok, ok, ok, repeat("v", 65));
+    ASSERT_FALSE(r.has_value());
+    r = encode_setup_request_strings("", ok, ok, ok);
+    ASSERT_FALSE(r.has_value());
+    r = encode_setup_request_strings(repeat("1", 33), ok, ok, ok);
+    ASSERT_FALSE(r.has_value());
+    r = encode_setup_request_strings(ok, ok, repeat("1", 33), ok);
+    ASSERT_FALSE(r.has_value());
+}
+
+TEST(Asn1Size_SetupRequest_strings_countBytesNotCharacters) {
+    auto enc = make_encoder();
+    // U+00E9 is two bytes in UTF-8: 32 of them are 64 bytes, 33 are 66.
+    const std::string e_acute = "\xC3\xA9";
+
+    auto encoded = encode_setup_request_strings("1.0.0", repeat(e_acute, 32), "1.0.0", "v");
+    ASSERT_TRUE(encoded.has_value());
+    auto decoded = enc->decode(encoded->buffer.data(), encoded->buffer.size());
+    ASSERT_TRUE(decoded.has_value());
+    auto* out = std::get_if<SetupRequest>(&decoded->choice);
+    ASSERT_TRUE(out != nullptr);
+    ASSERT_TRUE(out->dapp_name == repeat(e_acute, 32));
+
+    ASSERT_FALSE(encode_setup_request_strings("1.0.0", repeat(e_acute, 33), "1.0.0", "v").has_value());
+}
+
+TEST(Asn1Size_SetupResponse_strings_roundTripAndRejectOutOfRange) {
+    auto enc = make_encoder();
+    const std::string ran64 = repeat("r", 64);
+    const std::string version32 = repeat("2", 32);
+
+    auto encoded = encode_setup_response_strings(version32, ran64);
+    ASSERT_TRUE(encoded.has_value());
+    auto decoded = enc->decode(encoded->buffer.data(), encoded->buffer.size());
+    ASSERT_TRUE(decoded.has_value());
+    auto* out = std::get_if<SetupResponse>(&decoded->choice);
+    ASSERT_TRUE(out != nullptr);
+    ASSERT_TRUE(out->ran_identifier == ran64);
+    ASSERT_TRUE(out->e3ap_protocol_version.has_value());
+    ASSERT_TRUE(*out->e3ap_protocol_version == version32);
+
+    ASSERT_FALSE(encode_setup_response_strings("1.0.0", "").has_value());
+    ASSERT_FALSE(encode_setup_response_strings("1.0.0", repeat("r", 65)).has_value());
+    ASSERT_FALSE(encode_setup_response_strings(repeat("2", 33), "ran").has_value());
+}
+
+static std::string to_hex(const std::vector<uint8_t>& bytes) {
+    static const char* digits = "0123456789abcdef";
+    std::string out;
+    for (uint8_t b : bytes) {
+        out += digits[b >> 4];
+        out += digits[b & 0xF];
+    }
+    return out;
+}
+
+/// Pins the APER bytes of one SetupRequest. A string occupies a 6-bit length
+/// (SIZE (1..64) holds 64 values) before its octets, a version a 5-bit one
+/// (SIZE (1..32)); a different grammar or compiler shows up here first.
+TEST(Asn1Size_SetupRequest_strings_wireBytesArePinned) {
+    auto enc = make_encoder();
+    Pdu pdu(PduType::SETUP_REQUEST);
+    pdu.message_id = 42;
+    pdu.timestamp = 1756800000123456789ull;
+    SetupRequest req;
+    req.e3ap_protocol_version = "1.0.0";
+    req.dapp_name = "vector-dapp";
+    req.dapp_version = "0.1.3";
+    req.vendor = "wineslab";
+    pdu.choice = req;
+
+    auto encoded = enc->encode(pdu);
+    ASSERT_TRUE(encoded.has_value());
+    ASSERT_STREQ(to_hex(encoded->buffer).c_str(), "4029081861684accc3cd150080312e302e3028766563746f722d6461707020302e312e331c77696e65736c6162");
+}
 
 int main() {
     return RUN_ALL_TESTS();

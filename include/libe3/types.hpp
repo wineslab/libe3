@@ -207,10 +207,10 @@ struct RanFunctionDefinition {
  * @brief E3AP Setup Request structure
  */
 struct SetupRequest {
-    std::string e3ap_protocol_version;  ///< E3AP protocol version (e.g., "0.0.0")
-    std::string dapp_name;               ///< Name of the dApp
-    std::string dapp_version;            ///< Version of the dApp (e.g., "0.0.0")
-    std::string vendor;                  ///< Vendor name (max 30 chars)
+    std::string e3ap_protocol_version;  ///< E3AP protocol version (e.g., "0.0.0"); 1..32 bytes over ASN.1
+    std::string dapp_name;               ///< Name of the dApp; 1..64 bytes over ASN.1
+    std::string dapp_version;            ///< Version of the dApp (e.g., "0.0.0"); 1..32 bytes over ASN.1
+    std::string vendor;                  ///< Vendor name; 1..64 bytes over ASN.1
 };
 
 /**
@@ -231,7 +231,7 @@ struct SetupResponse {
     ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
     std::optional<std::string> e3ap_protocol_version;   ///< E3AP protocol version (optional)
     std::optional<uint32_t> dapp_identifier;            ///< Assigned dApp identifier (optional)
-    std::string ran_identifier;                         ///< RAN identifier (mandatory)
+    std::string ran_identifier;                         ///< RAN identifier (mandatory); 1..64 bytes over ASN.1
     std::vector<RanFunctionDef> ran_function_list;      ///< List of available RAN functions (optional)
 };
 
