@@ -95,6 +95,19 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libe3.pc"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
 )
 
+# The E2SM-DAPP codec is a separate library (it does not need libe3), so it gets
+# its own .pc rather than a line in libe3.pc.
+if(LIBE3_ENABLE_E2SM_DAPP)
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/libe3_e2sm_dapp.pc.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/libe3_e2sm_dapp.pc"
+        @ONLY
+    )
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libe3_e2sm_dapp.pc"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+    )
+endif()
+
 # Apache-2.0 section 4(a) obliges anyone who redistributes the work to hand the
 # recipient a copy of the License, and 4(d) does the same for NOTICE. Neither
 # reached an installed tree before, so a consumer building against an installed
@@ -116,6 +129,12 @@ if(LIBE3_ENABLE_PROTOBUF)
     list(APPEND LIBE3_INSTALL_TARGETS pb_e3ap)
 endif()
 
+# The E2SM-DAPP codec libraries embed their asn1c objects (asn1_e2sm_dapp is an
+# OBJECT library), so these two are the whole install.
+if(LIBE3_ENABLE_E2SM_DAPP)
+    list(APPEND LIBE3_INSTALL_TARGETS libe3_e2sm_dapp libe3_e2sm_dapp_shared)
+endif()
+
 install(TARGETS ${LIBE3_INSTALL_TARGETS}
     EXPORT libe3Targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -124,11 +143,24 @@ install(TARGETS ${LIBE3_INSTALL_TARGETS}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libe3
 )
 
-# Install headers
+# Install headers. The E2SM-DAPP header belongs to the optional codec libraries
+# and goes in with them below, so a build without them does not install a header
+# whose symbols are not there.
 install(DIRECTORY include/libe3
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     FILES_MATCHING PATTERN "*.hpp"
+    PATTERN "e2sm_dapp.hpp" EXCLUDE
 )
+
+if(LIBE3_ENABLE_E2SM_DAPP)
+    install(FILES ${LIBE3_E2SM_DAPP_PUBLIC_HEADERS}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libe3
+    )
+    # The grammar, for tools and stacks that generate their own codec from it.
+    install(FILES "${LIBE3_E2SM_DAPP_GRAMMAR_FILE}"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/libe3/e2sm_dapp"
+    )
+endif()
 
 # tl/expected.hpp travels with us: e3_encoder.hpp includes it and returns
 # tl::expected<T, ErrorCode>, so a consumer of the installed headers needs it on
@@ -159,6 +191,7 @@ if(LIBE3_ENABLE_ASN1)
     install(DIRECTORY ${ASN1_GENERATED_DIR}/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libe3/asn1
         FILES_MATCHING PATTERN "*.h"
+        PATTERN "CMakeFiles" EXCLUDE
     )
 endif()
 
