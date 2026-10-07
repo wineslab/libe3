@@ -24,7 +24,7 @@ static void emit(const char* name, byte_array_t ba)
 {
   assert(ba.buf != NULL && ba.len > 0);
   if (ba.len > 512) {
-    uint64_t h = 1469598103934665603ULL;
+    uint64_t h = 14695981039346656037ULL;
     for (size_t i = 0; i < ba.len; ++i) {
       h ^= ba.buf[i];
       h *= 1099511628211ULL;
