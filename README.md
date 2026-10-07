@@ -140,6 +140,7 @@ make -j$(nproc)
 | `LIBE3_BUILD_INTEGRATION_TESTS` | OFF | Build the integration test suite (multi-role end-to-end tests + full-loop benchmark) |
 | `LIBE3_ENABLE_ZMQ` | ON | Enable ZeroMQ transport |
 | `LIBE3_ENABLE_ASN1` | ON | Enable ASN.1 encoding |
+| `LIBE3_ENABLE_E2SM_DAPP` | ON | Build the E2SM-DAPP codec libraries (needs `LIBE3_ENABLE_ASN1`, see [docs/e2sm-dapp](docs/e2sm-dapp/README.md)) |
 | `LIBE3_ENABLE_JSON` | OFF | Enable JSON encoding support |
 | `LIBE3_ENABLE_PROTOBUF` | OFF | Enable Protocol Buffers encoding support |
 | `LIBE3_ENABLE_ASAN` | OFF | Enable AddressSanitizer |
