@@ -122,6 +122,21 @@ flexric and OAI pair, read in the code:
 | 5.23 | Where it is enabled | DU-high only, by `e2sm_dapp_enabled` | n/a |
 | 5.24 | An unknown report style | not admitted in the RIC Subscription Response | aborts (3.5) |
 
+### 5.2 OCUDU runtime helpers the port works around
+
+These are limits of OCUDU's shared ASN.1 helpers (`include/ocudu/asn1/asn1_utils.h`),
+found while hand-porting the grammar. They affect any other generated E2SM there, so
+they are listed for whoever maintains that runtime. The DAPP codec does not depend on
+them.
+
+| # | Helper | Problem | What the DAPP codec does |
+|---|---|---|---|
+| 5.25 | `pack_unconstrained_integer` | Mis-sizes the values `2^(8k-1)`: `128` goes out as the single octet `0x80`, which a conforming peer reads as `-128`. Decode zero-extends, so negative values come back wrong | A local two's-complement encoder and decoder. `128` encodes as `02 00 80` |
+| 5.26 | `pack_integer<uint8_t>` with upper bound 255 | Treats the field as unbounded and writes nothing | `node-type` is held in a `uint16_t` while packing |
+| 5.27 | `unpack_integer`, extension path | Can reach `ocudu_assert` on a long length read from the wire | Out-of-root values are rejected before that path |
+| 5.28 | `asn_string::unpack` | Ignores the result of its length decode, so an out-of-range length is accepted, and there is no alphabet check | A wrapper checks the size on decode, and the size and the PrintableString alphabet on encode |
+| 5.29 | `unbounded_octstring`, `pack_length` / `unpack_length` | Cannot produce or parse OCTET STRINGs of 16384 octets or more | The codec refuses to emit such payloads (see 5.22) |
+
 ## 6. What the golden vectors prove and what they do not
 
 * They prove that libe3 and OCUDU **encode** every listed input to flexric's exact
