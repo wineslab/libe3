@@ -61,7 +61,7 @@ inline std::string to_hex(const std::vector<uint8_t>& v) {
 }
 
 inline uint64_t fnv1a64(const std::vector<uint8_t>& v) {
-    uint64_t h = 1469598103934665603ULL;
+    uint64_t h = 14695981039346656037ULL;
     for (uint8_t b : v) {
         h ^= b;
         h *= 1099511628211ULL;

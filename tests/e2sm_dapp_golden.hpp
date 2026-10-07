@@ -58,10 +58,10 @@ struct golden_hash {
 
 // Too large to inline: the encoded length and its FNV-1a 64-bit hash.
 inline constexpr golden_hash golden_hashes[] = {
-    {"im1_max", 32773, 0xda4394fdb13a151fULL},
-    {"im2_255", 1464, 0x29433f4cd15a9ac8ULL},
-    {"im2_256", 1473, 0x96ae6815bae834d2ULL},
-    {"cm1_large", 16005, 0x4f33dde7dcecb124ULL},
+    {"im1_max", 32773, 0xf1a4af710fb93cc5ULL},
+    {"im2_255", 1464, 0x19011514fbcfc2deULL},
+    {"im2_256", 1473, 0x74d95212a317dbb8ULL},
+    {"cm1_large", 16005, 0x5250310ee619ccfeULL},
 };
 
 } // namespace libe3_e2sm_dapp_test

@@ -393,18 +393,18 @@ hash instead (the offset basis is `14695981039346656037`, the prime is
 | `ih2_min` | indication header 2 | no optional fields | 7 |
 | `im1_small` | indication message 1 | 4 octets of payload | 9 |
 | `im1_one` | indication message 1 | 1 octet of payload | 6 |
-| `im1_max` | indication message 1 | 32768 octets (pattern `i*7+3`) | 32773, hash `0xda4394fdb13a151f` |
+| `im1_max` | indication message 1 | 32768 octets (pattern `i*7+3`) | 32773, hash `0xf1a4af710fb93cc5` |
 | `im2_empty` | indication message 2 | empty list | 3 |
 | `im2_one` | indication message 2 | one dApp, one function | 8 |
 | `im2_multi` | indication message 2 | two dApps, three and two functions, ids at 0 and 4294967295 | 25 |
-| `im2_255` | indication message 2 | 255 dApps, first one with 63 functions | 1464, hash `0x29433f4cd15a9ac8` |
-| `im2_256` | indication message 2 | 256 dApps, first one with 64 functions | 1473, hash `0x96ae6815bae834d2` |
+| `im2_255` | indication message 2 | 255 dApps, first one with 63 functions | 1464, hash `0x19011514fbcfc2de` |
+| `im2_256` | indication message 2 | 256 dApps, first one with 64 functions | 1473, hash `0x74d95212a317dbb8` |
 | `ch1_full` | control header | all optional fields | 15 |
 | `ch1_min` | control header | no optional fields | 4 |
 | `ch1_bounds` | control header | `ran-function-id` 4294967295, `dapp-id` 0, timestamp and sequence-id `INT64_MAX` | 25 |
 | `cm1_small` | control message | 3 octets of payload | 8 |
 | `cm1_one` | control message | 1 octet of payload | 6 |
-| `cm1_large` | control message | 16000 octets (pattern `i*13+5`) | 16005, hash `0x4f33dde7dcecb124` |
+| `cm1_large` | control message | 16000 octets (pattern `i*13+5`) | 16005, hash `0x5250310ee619ccfe` |
 | `co1_full` | control outcome | timestamp, sequence-id, 10-octet payload | 23 |
 | `co1_min` | control outcome | nothing | 1 |
 | `co1_tsseq` | control outcome | timestamp and sequence-id | 12 |
