@@ -435,9 +435,12 @@ libe3/
 │       ├── e3_agent.hpp     # Main facade
 │       ├── e3_connector.hpp # Transport interface
 │       ├── e3_encoder.hpp   # Encoder interface
+│       ├── e2sm_dapp*.h*    # E2SM-DAPP codec (C++ and C APIs)
 │       └── ...
+├── docs/e2sm-dapp/          # E2SM-DAPP specification
 ├── messages/
 │   ├── asn1/                # ASN.1 definitions
+│   │   └── e2sm_dapp/       # E2SM-DAPP grammar
 │   └── CMakeLists.txt       # ASN.1 build config
 ├── src/
 │   ├── core/                # Core implementations
@@ -467,7 +470,7 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ## Documentation
 
-The full API reference is automatically generated with [Doxygen](https://www.doxygen.nl/) and published to GitHub Pages on every release. See [docs/latrec.md](docs/latrec.md) for the latency-recording (`latrec`) guide: the mechanism, the clock model, ring naming/sizing, the stage catalog, and the capture-to-CSV workflow. The two loops the stage catalog measures are described in [docs/path-a-e3-loop.md](docs/path-a-e3-loop.md) (E3 only) and [docs/path-b-e2-e3-loop.md](docs/path-b-e2-e3-loop.md) (the full E2-E3 loop).
+The full API reference is automatically generated with [Doxygen](https://www.doxygen.nl/) and published to GitHub Pages on every release. See [docs/latrec.md](docs/latrec.md) for the latency-recording (`latrec`) guide: the mechanism, the clock model, ring naming/sizing, the stage catalog, and the capture-to-CSV workflow. The two loops the stage catalog measures are described in [docs/path-a-e3-loop.md](docs/path-a-e3-loop.md) (E3 only) and [docs/path-b-e2-e3-loop.md](docs/path-b-e2-e3-loop.md) (the full E2-E3 loop). The E2SM-DAPP service model, which carries that loop over E2, is specified in [docs/e2sm-dapp/README.md](docs/e2sm-dapp/README.md).
 
 🔗 **[https://wineslab.github.io/libe3/](https://wineslab.github.io/libe3/)**
 
