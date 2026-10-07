@@ -1,0 +1,315 @@
+E2SM-DAPP-IEs {iso(1) identified-organization(3) dod(6) internet(1) private(4) enterprise(1) oran(53148) e2(1) version1(1) e2sm(255) e2sm-DAPP-IEs (3)}
+
+DEFINITIONS AUTOMATIC TAGS ::=
+BEGIN
+
+-- **************************************************************
+-- E2SM Common IEs
+-- **************************************************************
+Bool-Type ::=											    BOOLEAN
+
+RIC-Format-Type ::= 										INTEGER
+RIC-Style-Type ::= 											INTEGER
+RIC-Style-Name ::= 											PrintableString(SIZE(1..150,...))
+
+-- Nanoseconds since the Unix epoch, from the realtime clock (time_now_ns).
+-- OPTIONAL: absent means "no producer reference", not a malformed message. A peer
+-- that does not stamp is not an error and the codec must not reject it. Same
+-- convention as the E3AP envelope timestamp in libe3.
+Timestamp ::= 													INTEGER
+
+-- The correlation id of one detection-to-mitigation procedure. Same identifier
+-- as libe3's E3-SequenceID: a dApp assigns it on the report, the RAN relays it
+-- here, the xApp echoes it on its control, and the RAN reports it back on the
+-- control outcome. Named to match, because they are the same value.
+-- OPTIONAL, same convention as Timestamp above: absent (no value encoded) means
+-- no producer reference, not a malformed message. 0 is never assigned by any
+-- producer in this codebase, so it is safe to use as the IR struct's own
+-- "absent" sentinel alongside the OPTIONAL ASN.1 encoding.
+SequenceId ::= 													INTEGER
+
+RANfunction-Name ::= 										SEQUENCE{
+    															ranFunction-ShortName						PrintableString(SIZE(1..150,...)),
+    															ranFunction-E2SM-OID						PrintableString(SIZE(1..1000,...)),
+    															ranFunction-Description						PrintableString(SIZE(1..150,...)),
+    															ranFunction-Instance						INTEGER															OPTIONAL,
+    															...
+}
+
+
+
+
+-- **************************************************************
+-- CONSTANTS
+-- **************************************************************
+
+maxE2SMDAPPIndMsgSize                                       INTEGER ::= 32768
+maxE2SMDAPPCtrlMsgSize                                      INTEGER ::= 32768
+maxnoofDApps                                                INTEGER ::= 256
+maxnoofSubscribedE3RANFunctions                             INTEGER ::= 64
+maxnoofDAPPReportStyles                                     INTEGER ::= 2
+maxnoofDAPPControlStyles                                    INTEGER ::= 1
+
+-- **************************************************************
+-- Event Trigger OCTET STRING contents
+-- **************************************************************
+
+E2SM-DAPP-EventTrigger ::= 									SEQUENCE {
+																ric-eventTrigger-formats CHOICE {
+																	eventTrigger-Format1					E2SM-DAPP-EventTrigger-Format1,
+																	...
+																},
+																...
+}
+
+E2SM-DAPP-EventTrigger-Format1 ::= 							SEQUENCE {
+
+}
+
+
+-- **************************************************************
+-- Action Definition OCTET STRING contents
+-- **************************************************************
+
+E2SM-DAPP-ActionDefinition ::=                              SEQUENCE {
+                                                                ric-Style-Type                              RIC-Style-Type,
+                                                                actionDefinition-formats CHOICE {
+                                                                    actionDefinition-Format1                E2SM-DAPP-ActionDefinition-Format1,
+                                                                    ...
+                                                                },
+                                                                ...
+}
+
+E2SM-DAPP-ActionDefinition-Format1 ::=                      SEQUENCE {
+
+}
+
+
+
+-- **************************************************************
+-- IEs
+-- **************************************************************
+
+RANFunctionDefinition-Report-Item ::= 						SEQUENCE {
+																ric-ReportStyle-Type                 		RIC-Style-Type,
+																ric-ReportStyle-Name                 		RIC-Style-Name,
+																ric-IndicationHeaderFormat-Type      		RIC-Format-Type,
+																ric-IndicationMessageFormat-Type     		RIC-Format-Type,
+																dappE3Subscriptions                         DAppE3Subscription-List                           				OPTIONAL,
+																...
+}
+
+RANFunctionDefinition-Control-Item ::= 						SEQUENCE {
+																ric-ControlStyle-Type         				RIC-Style-Type,
+																ric-ControlStyle-Name         				RIC-Style-Name,
+																ric-ControlHeaderFormat-Type  				RIC-Format-Type,
+																ric-ControlMessageFormat-Type 				RIC-Format-Type,
+																ric-ControlOutcomeFormat-Type 				RIC-Format-Type,
+																dappE3Subscriptions                         DAppE3Subscription-List                           				OPTIONAL,
+																...
+}
+
+
+
+
+-- **************************************************************
+-- Indication Header OCTET STRING contents
+-- **************************************************************
+
+E2SM-DAPP-IndicationHeader ::= 								SEQUENCE {
+																ric-indicationHeader-formats CHOICE {
+																		indicationHeader-Format1			E2SM-DAPP-IndicationHeader-Format1,
+																		indicationHeader-Format2			E2SM-DAPP-IndicationHeader-Format2,
+																		...
+																	},
+																	...
+}
+
+E2SM-DAPP-IndicationHeader-Format1 ::=                      SEQUENCE {
+                                                                ran-function-id      						INTEGER (0..4294967295, ...),
+                                                                dapp-id              						INTEGER (0..4294967295, ...),
+																node-type            						INTEGER (0..255, ...),
+																node-plmn-id         						OCTET STRING (SIZE(3)),
+																node-nb-id           						INTEGER (0..4294967295, ...),
+																node-cu-du-id        						INTEGER (0..4294967295, ...) 									OPTIONAL,
+																timestamp            						Timestamp OPTIONAL,
+															sequence-id          						SequenceId OPTIONAL,
+                                                                ...
+}
+
+E2SM-DAPP-IndicationHeader-Format2 ::=                      SEQUENCE {
+																node-type            						INTEGER (0..255, ...),
+																node-plmn-id         						OCTET STRING (SIZE(3)),
+																node-nb-id           						INTEGER (0..4294967295, ...),
+																node-cu-du-id        						INTEGER (0..4294967295, ...) 									OPTIONAL,
+																timestamp            						Timestamp OPTIONAL,
+															sequence-id          						SequenceId OPTIONAL,
+                                                                ...
+}
+
+
+
+
+-- **************************************************************
+-- Indication Message OCTET STRING contents
+-- **************************************************************
+
+E2SM-DAPP-IndicationMessage ::= 							SEQUENCE {
+																ric-indicationMessage-formats CHOICE {
+																	indicationMessage-Format1				E2SM-DAPP-IndicationMessage-Format1,
+																	indicationMessage-Format2				E2SM-DAPP-IndicationMessage-Format2,
+																	...
+																},
+																...
+}
+
+E2SM-DAPP-IndicationMessage-Format1 ::=                     SEQUENCE {
+                                                                data-size   								INTEGER (0..maxE2SMDAPPIndMsgSize),
+                                                                data        								OCTET STRING (SIZE(1..maxE2SMDAPPIndMsgSize)),
+                                                                ...
+}
+
+E2SM-DAPP-IndicationMessage-Format2 ::=                     SEQUENCE {
+                                                                dappE3Subscriptions     					DAppE3Subscription-List,
+                                                                ...
+}
+
+
+
+
+-- **************************************************************
+-- Control Header OCTET STRING contents
+-- **************************************************************
+
+E2SM-DAPP-ControlHeader ::= 								SEQUENCE {
+																ric-controlHeader-formats CHOICE {
+																	controlHeader-Format1					E2SM-DAPP-ControlHeader-Format1,
+																	...
+																},
+																...
+}
+
+E2SM-DAPP-ControlHeader-Format1 ::= 						SEQUENCE {
+	                                                            ran-function-id      						INTEGER (0..4294967295, ...),
+                                                                dapp-id              						INTEGER (0..4294967295, ...),
+																timestamp            						Timestamp OPTIONAL,
+															sequence-id          						SequenceId OPTIONAL,
+                                                                ...
+}
+
+
+
+
+-- **************************************************************
+-- Control Message OCTET STRING contents
+-- **************************************************************
+
+E2SM-DAPP-ControlMessage ::= 								SEQUENCE {
+																ric-controlMessage-formats CHOICE {
+																	controlMessage-Format1					E2SM-DAPP-ControlMessage-Format1,
+																	...
+																},
+																...
+}
+
+E2SM-DAPP-ControlMessage-Format1 ::= 						SEQUENCE {
+                                                                data-size   								INTEGER (0..maxE2SMDAPPCtrlMsgSize),
+                                                                data        								OCTET STRING (SIZE(1..maxE2SMDAPPCtrlMsgSize)),
+                                                                ...
+}
+
+
+
+
+-- **************************************************************
+-- Control Outcome OCTET STRING contents
+-- **************************************************************
+
+E2SM-DAPP-ControlOutcome ::= 								SEQUENCE {
+																ric-controlOutcome-formats CHOICE {
+																	controlOutcome-Format1					E2SM-DAPP-ControlOutcome-Format1,
+																	...
+																},
+																...
+}
+
+-- e3-control-outcome carries the Service Model's own account of what applying
+-- the control did, encoded by the SM named by the control's ran-function-id and
+-- opaque here. It is the same tunnelling that
+-- E2SM-DAPP-ControlMessage-Format1 already does for the control itself.
+-- "Applied" means something different for every SM, so this layer defines the
+-- envelope and not the meaning.
+-- OPTIONAL: an outcome that only acknowledges, with nothing to report about the
+-- application, omits it.
+E2SM-DAPP-ControlOutcome-Format1 ::= 						SEQUENCE {
+																timestamp            						Timestamp OPTIONAL,
+															sequence-id          						SequenceId OPTIONAL,
+																e3-control-outcome					OCTET STRING OPTIONAL,
+																...
+}
+
+
+-- **************************************************************
+-- dApp E3 Subscription Info
+-- **************************************************************
+SubscribedE3RANFunction-ID ::=                              INTEGER 										(0..4294967295, ...)
+
+DAppE3Subscription-Item ::=                                 SEQUENCE {
+                                                                dapp-id                 					INTEGER (0..4294967295, ...),
+                                                                subscribed-e3-ran-functions 				SEQUENCE (SIZE(1..maxnoofSubscribedE3RANFunctions)) OF SubscribedE3RANFunction-ID,
+                                                                ...
+}
+
+DAppE3Subscription-List ::=                                   SEQUENCE 										(SIZE(0..maxnoofDApps)) OF DAppE3Subscription-Item
+
+-- **************************************************************
+-- RAN Function Definition IEs
+-- **************************************************************
+
+E2SM-DAPP-RANFunctionDefinition ::= 						SEQUENCE{
+																ranFunction-Name							RANfunction-Name,
+																ranFunctionDefinition-EventTrigger			RANFunctionDefinition-EventTrigger								OPTIONAL,
+																ranFunctionDefinition-Report				RANFunctionDefinition-Report									OPTIONAL,
+																ranFunctionDefinition-Control				RANFunctionDefinition-Control									OPTIONAL,
+																...
+}
+
+
+
+
+-- **************************************************************
+-- Event Trigger
+-- **************************************************************
+
+RANFunctionDefinition-EventTrigger ::= 						SEQUENCE {
+																...
+}
+
+
+
+
+-- **************************************************************
+-- Report
+-- **************************************************************
+
+RANFunctionDefinition-Report ::= 							SEQUENCE {
+    															ric-ReportStyle-List 						SEQUENCE (SIZE(1..maxnoofDAPPReportStyles)) OF RANFunctionDefinition-Report-Item,
+    															...
+}
+
+
+
+
+-- **************************************************************
+-- Control
+-- **************************************************************
+
+RANFunctionDefinition-Control ::= 							SEQUENCE {
+    															ric-ControlStyle-List 						SEQUENCE (SIZE(1..maxnoofDAPPControlStyles)) OF RANFunctionDefinition-Control-Item,
+    															...
+}
+
+
+
+
+END
