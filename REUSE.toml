@@ -17,3 +17,10 @@ path = [
 ]
 SPDX-FileCopyrightText = "Copyright (c) 2026 Northeastern University"
 SPDX-License-Identifier = "Apache-2.0"
+
+# The E2SM-DAPP grammar is a byte-identical copy of flexric's, so that the two
+# can be compared with cmp; it therefore cannot carry an inline header.
+[[annotations]]
+path = "messages/asn1/e2sm_dapp/V1/e2sm_dapp-1.0.0.asn"
+SPDX-FileCopyrightText = "Copyright (c) 2026 Northeastern University"
+SPDX-License-Identifier = "Apache-2.0"
