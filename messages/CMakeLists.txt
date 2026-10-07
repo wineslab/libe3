@@ -6,6 +6,8 @@
 # Generates the E3AP message code for the enabled encodings:
 #   - ASN.1  -> asn1_e3ap (C, via asn1c)
 #   - Protobuf -> pb_e3ap (C++, via protoc)
+# and, with LIBE3_ENABLE_E2SM_DAPP, the E2SM-DAPP codec sources:
+#   - ASN.1  -> asn1_e2sm_dapp (C objects, via asn1c, with a runtime copy of its own)
 
 set(E3AP_VERSION 1 0 0)
 string(REPLACE ";" "." E3AP_RELEASE "${E3AP_VERSION}")
@@ -67,6 +69,42 @@ if(LIBE3_ENABLE_ASN1)
     set(ASN1_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}" PARENT_SCOPE)
 
     message(STATUS "ASN.1 encoding support enabled")
+endif()
+
+# ============================================================================
+# E2SM-DAPP ASN.1 objects (asn1_e2sm_dapp)
+# ============================================================================
+# A second, independent asn1c run: its own output directory, its own copy of the
+# asn1c runtime, and nothing shared with asn1_e3ap, so that the E2SM-DAPP codec
+# (libe3::e2sm_dapp) can be used without the E3 agent, ZeroMQ or the E3AP grammar.
+# An OBJECT library, so the codec libraries embed the objects and no separate
+# asn1_e2sm_dapp archive has to be installed. The runtime symbols are hidden: a
+# consumer that links its own asn1c (flexric does) must not see or clash with ours.
+if(LIBE3_ENABLE_E2SM_DAPP)
+    # Outside this directory's own binary dir: libe3Install.cmake installs every
+    # generated E3AP header found there, and these are private.
+    set(E2SM_DAPP_GENERATED_DIR "${PROJECT_BINARY_DIR}/generated/e2sm_dapp")
+    include(asn1/e2sm_dapp/V1/e2sm_dapp-1.0.0.cmake)
+
+    add_custom_command(OUTPUT ${e2sm_dapp_source} ${e2sm_dapp_headers}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${E2SM_DAPP_GENERATED_DIR}
+        COMMAND ${ASN1C_EXEC} -pdu=all -gen-APER -gen-UPER -no-gen-JER -no-gen-BER -no-gen-OER -fno-include-deps -fcompound-names -findirect-choice -no-gen-example -D ${E2SM_DAPP_GENERATED_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${E2SM_DAPP_GRAMMAR}
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${E2SM_DAPP_GRAMMAR}
+        COMMENT "Generating E2SM-DAPP ASN.1 source files from ${CMAKE_CURRENT_SOURCE_DIR}/${E2SM_DAPP_GRAMMAR}"
+    )
+
+    add_library(asn1_e2sm_dapp OBJECT ${e2sm_dapp_source})
+    set_target_properties(asn1_e2sm_dapp PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+        C_VISIBILITY_PRESET hidden
+    )
+    target_include_directories(asn1_e2sm_dapp PRIVATE ${E2SM_DAPP_GENERATED_DIR})
+    target_compile_options(asn1_e2sm_dapp PRIVATE -DASN_DISABLE_OER_SUPPORT -w)
+
+    # Export the generated directory for parent to use
+    set(E2SM_DAPP_GENERATED_DIR "${E2SM_DAPP_GENERATED_DIR}" PARENT_SCOPE)
+
+    message(STATUS "E2SM-DAPP codec enabled")
 endif()
 
 # ============================================================================
