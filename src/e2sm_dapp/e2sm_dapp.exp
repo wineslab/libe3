@@ -1,0 +1,9 @@
+# Export list of libe3_e2sm_dapp_shared on macOS (ld -exported_symbols_list).
+# Only the public C++ API (libe3::e2sm_dapp) and C API (libe3_e2sm_dapp_*) leave
+# the library; the asn1c runtime inside it stays private.
+#
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+__ZN5libe39e2sm_dapp*
+__ZNK5libe39e2sm_dapp*
+_libe3_e2sm_dapp_*

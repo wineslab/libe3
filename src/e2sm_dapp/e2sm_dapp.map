@@ -1,0 +1,17 @@
+/*
+ * Export list of libe3_e2sm_dapp_shared (GNU ld / lld version script).
+ * Only the public C++ API (libe3::e2sm_dapp) and C API (libe3_e2sm_dapp_*) leave
+ * the library; the asn1c runtime inside it stays private.
+ *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+ * SPDX-License-Identifier: Apache-2.0
+ */
+{
+    global:
+        extern "C++" {
+            libe3::e2sm_dapp::*;
+        };
+        libe3_e2sm_dapp_*;
+    local:
+        *;
+};

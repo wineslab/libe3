@@ -27,4 +27,29 @@ endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/libe3Targets.cmake")
 
+# Optional components. `find_package(libe3 REQUIRED COMPONENTS e2sm_dapp)` finds
+# the E2SM-DAPP codec (libe3::e2sm_dapp, libe3::e2sm_dapp_shared); it is "found"
+# exactly when this install was built with LIBE3_ENABLE_E2SM_DAPP. Without
+# COMPONENTS, nothing changes. A required component that is missing fails the
+# find_package with the reason spelled out.
+set(libe3_e2sm_dapp_FOUND FALSE)
+if(TARGET libe3::e2sm_dapp AND TARGET libe3::e2sm_dapp_shared)
+    set(libe3_e2sm_dapp_FOUND TRUE)
+endif()
+
+foreach(_libe3_comp IN LISTS libe3_FIND_COMPONENTS)
+    if(libe3_${_libe3_comp}_FOUND OR NOT libe3_FIND_REQUIRED_${_libe3_comp})
+        continue()
+    endif()
+    set(libe3_FOUND FALSE)
+    if(_libe3_comp STREQUAL "e2sm_dapp")
+        set(libe3_NOT_FOUND_MESSAGE
+            "libe3 component 'e2sm_dapp' is missing: this libe3 was built without the E2SM-DAPP codec (LIBE3_ENABLE_E2SM_DAPP=OFF, or LIBE3_ENABLE_ASN1=OFF). Rebuild libe3 with both ON.")
+    else()
+        set(libe3_NOT_FOUND_MESSAGE
+            "libe3 has no component '${_libe3_comp}' (the only component is: e2sm_dapp)")
+    endif()
+    return()
+endforeach()
+
 check_required_components(libe3)
