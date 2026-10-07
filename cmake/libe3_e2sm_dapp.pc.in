@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
+prefix=@LIBE3_PC_PREFIX@
+exec_prefix=${prefix}
+libdir=@LIBE3_PC_LIBDIR@
+includedir=@LIBE3_PC_INCLUDEDIR@
+datarootdir=@LIBE3_PC_DATAROOTDIR@
+# The E2SM-DAPP grammar, for tools that generate their own codec from it.
+# Query with: pkg-config --variable=asndir libe3_e2sm_dapp
+asndir=${datarootdir}/libe3/e2sm_dapp
+
+Name: libe3_e2sm_dapp
+Description: E2SM-DAPP APER codec (C++ and C APIs), standalone from libe3
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -llibe3_e2sm_dapp
+Cflags: -I${includedir} -DLIBE3_ENABLE_E2SM_DAPP
