@@ -131,6 +131,28 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j$(nproc)
 ```
 
+### Installing libe3
+
+This is the recipe the OAI E3 agent and the dApp library point to. It installs libe3 like any other
+library, once and with `sudo`, into `/usr/local`; after that nothing that builds against it needs `sudo`
+or extra environment variables. Every wire encoding is built, since a gNB has to serve whichever one its
+dApp uses:
+
+```bash
+git clone --branch <version> https://github.com/wineslab/libe3 && cd libe3
+./build_libe3 -I                          # build dependencies (sudo), once
+./build_libe3 --all-encodings --install   # -> /usr/local, asks for sudo, refreshes the linker cache
+pkg-config --modversion libe3
+```
+
+- C and C++ projects (the OAI gNB) find it through `pkg-config` or `find_package(libe3)`, with no setup.
+- The Python binding is a separate package, `libe3py`, installed with pip into any virtual environment,
+  without root: `pip install libe3py==<version>` (or `pip install .` from this checkout). It is built
+  against the installed libe3 and must be the same version; the dApp library depends on it, so
+  `pip install dapps` brings it in.
+- To install somewhere else, `--prefix DIR` (no `sudo` if `DIR` is yours); then `PKG_CONFIG_PATH` has to
+  include `DIR/lib/pkgconfig`, and pip needs `--config-settings=cmake.define.CMAKE_PREFIX_PATH=DIR`.
+
 ### Build Options
 
 | Option | Default | Description |
@@ -492,10 +514,9 @@ libe3 ships an optional SWIG-generated Python binding so the same C++ library ca
 # Install SWIG and Python development headers (Ubuntu)
 sudo apt-get install -y swig python3-dev
 
-# Build + install into the active interpreter's site-packages (activate your venv first)
-./build_libe3 --install --enable-swig \
-  --cmake-opt "-DLIBE3_ENABLE_ASN1=ON -DLIBE3_ENABLE_JSON=ON"
-python3 -c "import libe3py; print('libe3py OK')"
+# Install libe3 first (see "Installing libe3"), then the binding, in a virtual environment
+pip install libe3py            # or, from this checkout: pip install .
+python3 -c "import libe3py; print('libe3py OK', libe3py.__version__)"
 
 # Or, build only (no install) and run the smoke test (CTest label "swig")
 cmake -S . -B build -DLIBE3_ENABLE_SWIG=ON
@@ -510,8 +531,8 @@ the full **`DAppSession`** dApp seam — a complete lifecycle (`start` /
 timeout_ms)`, designed for the sub-millisecond / high-throughput E3AP path
 (GIL released during blocking calls). SM payloads cross as native `bytes`;
 per-SM encoding stays in Python so existing Python SM implementations work
-unchanged. `build_libe3 --install --enable-swig` installs `_libe3py.so` +
-`libe3py.py` into `Python3_SITEARCH`.
+unchanged. The binding is built by pip against the installed libe3 (`python/CMakeLists.txt`), links it
+statically, and refuses an installed libe3 of another version.
 
 See **[`swig/README.md`](swig/README.md)** for the architecture, rationale, and a
 full Python usage example, and [`swig/e3_dapp_session.hpp`](swig/e3_dapp_session.hpp)

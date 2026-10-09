@@ -103,19 +103,22 @@ while True:
 
 ## Build & install
 
-The module is opt-in (`LIBE3_ENABLE_SWIG=OFF` by default). Build and install it
-into the **active interpreter's** site-packages (activate your venv first):
+Install libe3 once (`./build_libe3 --all-encodings --install`, see the main README), then the binding
+with pip, in any virtual environment:
 
 ```bash
-./build_libe3 --install --enable-swig \
-  --cmake-opt "-DLIBE3_ENABLE_ASN1=ON -DLIBE3_ENABLE_JSON=ON"
-python3 -c "import libe3py; print('libe3py OK')"
+pip install libe3py            # or, from the libe3 checkout: pip install .
+python -c "import libe3py; print('libe3py OK', libe3py.__version__)"
 ```
 
-Requires `swig >= 4.0` and Python development headers. The install drops
-`_libe3py.so` + `libe3py.py` into `Python3_SITEARCH` — note that this is an
-absolute path, so `--prefix` does **not** relocate the Python module; override
-`-DLIBE3_PYTHON_INSTALL_DIR=<dir>` to stage it elsewhere.
+pip builds the module from these sources against the installed libe3 (`python/CMakeLists.txt`); it
+needs `swig >= 4.0`, the Python headers and a C++17 compiler (`./build_libe3 -I` installs them), and it
+stops with an error if the installed libe3 is not the same version. For a libe3 outside `/usr` and
+`/usr/local`: `pip install libe3py --config-settings=cmake.define.CMAKE_PREFIX_PATH=<prefix>`.
+
+For development, `./build_libe3 --enable-swig` builds the module in `build/swig` (run the smoke test with
+`PYTHONPATH=build/swig python3 tests/test_swig_smoke.py`); `cmake --install` installs it only if
+`-DLIBE3_PYTHON_INSTALL_DIR=<dir>` is given.
 
 ## Service-model definitions
 

@@ -111,6 +111,8 @@ Features:
   --enable-json           Enable JSON encoding support (default: ON)
   --disable-json          Disable JSON encoding
   --enable-protobuf       Enable Protocol Buffers encoding support (default: OFF)
+  --all-encodings         Enable ASN.1, JSON and Protocol Buffers (what a gNB that has to serve
+                          any dApp needs; same as the three --enable-* options)
   --disable-protobuf      Disable Protocol Buffers encoding
   --enable-sctp           Enable the SCTP POSIX transport (default: OFF).
                           Needs the SCTP headers: libsctp-dev (Debian/Ubuntu),
@@ -118,9 +120,10 @@ Features:
                           --install-deps does NOT install them; SCTP is optional
                           and the deployed E3 links are IPC or TCP.
   --disable-sctp          Disable the SCTP transport
-  --enable-swig           Build + install the Python (SWIG) bindings, libe3py
-                          (default: OFF). With --install, installs libe3py into
-                          the active interpreter's site-packages.
+  --enable-swig           Build the Python (SWIG) binding, libe3py, in build/swig to develop and
+                          test it (default: OFF). It is not installed with the library: install
+                          it with pip (pip install libe3py, or pip install . in this checkout)
+                          after installing libe3.
   --disable-swig          Disable the Python (SWIG) bindings
   --enable-tests          Build unit tests (default: ON)
   --disable-tests         Disable unit tests
@@ -139,9 +142,11 @@ Sanitizers:
 Installation:
 -------------
   -I, --install-deps      Install required dependencies (requires sudo)
-  --install               Install library after building
+  --install               Install library after building (uses sudo only if the prefix is not
+                          writable by you, then refreshes the linker cache with ldconfig)
   --uninstall             Uninstall library using install manifest
-  --prefix DIR            Installation prefix (default: /usr/local)
+  --prefix DIR            Installation prefix (default: /usr/local). A prefix in your home, such as
+                          ~/.local/libe3, needs no sudo; put its lib/pkgconfig on PKG_CONFIG_PATH.
 
 Testing:
 --------
@@ -488,11 +493,41 @@ run_tests() {
 install_library() {
     local build_path="$SCRIPT_DIR/$BUILD_DIR"
     cd "$build_path"
-    
-    echo_info "Installing libe3..."
-    sudo cmake --install .
-    
+
+    local prefix
+    prefix="$(sed -n 's/^CMAKE_INSTALL_PREFIX:PATH=//p' CMakeCache.txt | head -n1)"
+    prefix="${prefix:-/usr/local}"
+
+    # sudo only when the prefix (or the closest existing parent) is not writable by this user
+    local probe="$prefix"
+    while [ ! -e "$probe" ] && [ "$probe" != "/" ]; do probe="$(dirname "$probe")"; done
+    local runner=()
+    if [ ! -w "$probe" ]; then
+        runner=(sudo)
+    fi
+
+    echo_info "Installing libe3 into $prefix${runner:+ (with sudo)}..."
+    "${runner[@]}" cmake --install .
+
+    # A library in a directory the dynamic linker searches (/usr/local/lib) is only found at run
+    # time after the linker cache is refreshed.
+    if [ "$(uname -s)" = "Linux" ] && command -v ldconfig >/dev/null 2>&1 \
+        && { [ "$prefix" = "/usr" ] || [ "$prefix" = "/usr/local" ]; }; then
+        "${runner[@]}" ldconfig || echo_warning "ldconfig failed; run it once by hand (sudo ldconfig)"
+    fi
+
     echo_success "Installation completed!"
+    case "$prefix" in
+        /usr|/usr/local) ;;
+        *)
+            echo_info "libe3 is not in a system path. Before building something against it, run:"
+            echo "    export PKG_CONFIG_PATH=$prefix/lib/pkgconfig:\$PKG_CONFIG_PATH"
+            ;;
+    esac
+    if [ "$ENABLE_SWIG" -eq 1 ]; then
+        echo_info "The Python binding is not installed with the library. In your virtual environment run:"
+        echo "    pip install libe3py==$(cat "$SCRIPT_DIR/VERSION")    # or: pip install $SCRIPT_DIR"
+    fi
 }
 
 uninstall_library() {
@@ -676,6 +711,12 @@ main() {
                 ENABLE_PROTOBUF=1
                 shift
                 ;;
+            --all-encodings)
+                ENABLE_ASN1=1
+                ENABLE_JSON=1
+                ENABLE_PROTOBUF=1
+                shift
+                ;;
             --enable-sctp)
                 ENABLE_SCTP=1
                 shift
@@ -823,12 +864,6 @@ main() {
         esac
     fi
     
-    # Check for required tools
-    if ! check_command cmake; then
-        echo_error "CMake is required but not found. Install with: --install-deps"
-        exit 1
-    fi
-    
     # Install dependencies if requested
     if [ $INSTALL_DEPS -eq 1 ]; then
         install_dependencies
@@ -837,6 +872,12 @@ main() {
         # CI pipelines call it for dependency setup before running the actual build.
         echo_info "Dependencies installed. Please try to build libe3."
         exit 0
+    fi
+
+    # Checked after --install-deps, which is what installs it on a fresh machine
+    if ! check_command cmake; then
+        echo_error "CMake is required but not found. Install with: --install-deps"
+        exit 1
     fi
     
     # Clean if requested

@@ -75,12 +75,15 @@ include(libe3Targets)
 include(libe3Tests)
 include(libe3Examples)
 include(libe3Docs)
-include(libe3SWIG)
 
 # ============================================================================
 # Installation
 # ============================================================================
 include(libe3Install)
+
+# After libe3Install on purpose: install rules run in the order they are defined, so a failure
+# to write the Python module must not stop the library and libe3.pc from being installed.
+include(libe3SWIG)
 
 # ============================================================================
 # Summary
