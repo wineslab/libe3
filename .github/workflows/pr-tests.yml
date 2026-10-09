@@ -316,6 +316,19 @@ jobs:
           cmake --build build-consume-pkgconfig -j $(nproc)
           ./build-consume-pkgconfig/consume
 
+      # The way users get the binding: the sdist that the release publishes,
+      # built by pip against the installed library.
+      - name: pip-install the libe3py sdist against the installed library
+        if: needs.changes.outputs.code == 'true'
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install build
+          "$RUNNER_TEMP/venv/bin/python" -m build --sdist -o "$RUNNER_TEMP/dist" .
+          "$RUNNER_TEMP/venv/bin/pip" install "$RUNNER_TEMP"/dist/libe3py-*.tar.gz \
+            --config-settings=cmake.define.CMAKE_PREFIX_PATH="$PWD/stage"
+          "$RUNNER_TEMP/venv/bin/python" tests/test_swig_smoke.py
+
   # NOTE: the MPMC Queue Benchmark moved to .github/workflows/mpmc-bench.yml,
   # where it is gated on changes to include/libe3/mpmc_queue.hpp so it only
   # runs when the queue's core file changes. It isn't in the required-checks

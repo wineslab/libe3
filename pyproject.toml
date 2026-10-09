@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+#
+# libe3py: the Python binding of libe3, built against the libe3 installed on the
+# machine (see python/CMakeLists.txt). Install libe3 first, then `pip install libe3py`.
+[build-system]
+requires = ["scikit-build-core>=0.8", "swig>=4.0"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "libe3py"
+dynamic = ["version"]
+description = "Python binding of libe3, the O-RAN E3 interface library"
+readme = "python/README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "Northeastern University" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: C++",
+    "Operating System :: POSIX :: Linux",
+]
+
+[project.urls]
+Homepage = "https://github.com/wineslab/libe3"
+Documentation = "https://github.com/wineslab/libe3/blob/main/swig/README.md"
+
+[tool.scikit-build]
+cmake.version = ">=3.18"
+cmake.build-type = "Release"
+cmake.source-dir = "python"
+build-dir = "build/{wheel_tag}"
+wheel.packages = []
+sdist.exclude = ["*"]
+sdist.include = [
+    "VERSION", "LICENSE", "NOTICE", "pyproject.toml",
+    "python/**", "swig/**", "cmake/libe3SwigModule.cmake",
+]
+
+[tool.scikit-build.metadata.version]
+provider = "scikit_build_core.metadata.regex"
+input = "VERSION"
+regex = "^(?P<value>\\d+\\.\\d+\\.\\d+)"
