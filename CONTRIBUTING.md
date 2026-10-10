@@ -58,7 +58,7 @@ The following are **mandatory** for every contribution. PRs that do not meet the
 
 ### Pull requests
 
-- All PRs must use `.github/PULL_REQUEST_TEMPLATE.md` and complete every checklist item.
+- All PRs must use `.github/PULL_REQUEST_TEMPLATE.md` and fill in every section; CI (below) is what checks the build, the tests and the commit policy.
 - The following CI workflows must be green on the latest commit before review:
   - **`Unit Tests`** (`.github/workflows/pr-tests.yml`) — builds and runs `ctest --output-on-failure` for both `Debug` and `Release` on `ubuntu-latest`, plus the integration, all-encodings, and SWIG jobs.
   - **`Commit policy`** (`.github/workflows/commit-trailers.yml`) — validates the AI-assistant trailer policy on every commit (see [AI assistants](#ai-assistants)), that the branch is a linear, fast-forward-able descendant of `main` (no merge commits), that every commit builds and passes tests on its own, and that every file carries an SPDX header (`reuse lint`, see [Licensing headers](#licensing-headers)).

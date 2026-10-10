@@ -1,6 +1,5 @@
 <!--
 Thank you for contributing to libe3. Please fill in every section.
-PRs that leave the mandatory boxes unchecked will not be reviewed.
 -->
 
 ## Summary
@@ -26,29 +25,6 @@ PRs that leave the mandatory boxes unchecked will not be reviewed.
 
 Closes #
 
-## Mandatory test checklist
-
-These mirror what CI (`.github/workflows/pr-tests.yml`) enforces. **All boxes must be ticked before review.**
-
-- [ ] `./build_libe3 -c -d build -j $(nproc) -r -t` passes (Release build + tests)
-- [ ] `./build_libe3 -c -d build -j $(nproc) -g -t` passes (Debug build + tests)
-- [ ] `cd build && ctest --output-on-failure` is clean
-- [ ] MPMC queue benchmark (`./build/test_bench_mpmc_queue`) shows no regression vs `main`
-- [ ] `VERSION` bumped per [SemVer](https://semver.org/) if the public API or ABI changed
-- [ ] If public headers under `include/` were touched, `./build_libe3 --docs` renders without new Doxygen warnings
-- [ ] If new build dependencies were added, they are installed by `./build_libe3 -I` (update the script if needed)
-- [ ] If the `libe3.pc` interface changed, downstream consumers (`dApp-openairinterface5g`) still link cleanly
-
-## CI checklist
-
-CI posts a single `CI report` comment on this PR once every workflow has finished; it carries the
-verdict, a per-workflow table and the benchmark/E2E detail. Confirm against that comment:
-
-- [ ] The report's verdict is green for the head commit
-- [ ] `Unit Tests` is green (Debug + Release matrix on `ubuntu-latest`)
-- [ ] `Commit policy` is green (trailers + linear history + each commit builds/tests independently)
-- [ ] `MPMC Queue Benchmark` shows no regression (only runs when `include/libe3/mpmc_queue.hpp` changes)
-
 ## Twin-repo coordination
 
 libe3 is paired with [`dapps`](https://github.com/wineslab/dApp-library) and [`dApp-openairinterface5g`](https://github.com/wineslab/dApp-openairinterface5g). **We do not accept patches that break or reduce compatibility with the twin repositories.**
@@ -56,9 +32,3 @@ libe3 is paired with [`dapps`](https://github.com/wineslab/dApp-library) and [`d
 - [ ] This PR does not change the E3 wire protocol or public ABI, OR a paired PR exists in each affected twin repo (link below).
 
 Paired PR(s):
-
-## Workflow confirmation
-
-- [ ] My branch is a linear, fast-forward-able descendant of `main` (rebased if `main` moved), with no merge commits. (See `CONTRIBUTING.md` § Pull Request Process.)
-- [ ] Every commit builds and passes tests on its own (atomic, `git bisect`-safe) with a descriptive message.
-- [ ] I have read and followed `CONTRIBUTING.md`.
