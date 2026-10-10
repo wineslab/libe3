@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -166,11 +166,11 @@ Minimal Python example</h1>
 <div class="line">    <span class="comment"># s.send_control(1, 1, sm_encode(...))</span></div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md6"></a>
 Build &amp; install</h1>
-<p>The module is opt-in (<code>LIBE3_ENABLE_SWIG=OFF</code> by default). Build and install it into the <b>active interpreter's</b> site-packages (activate your venv first):</p>
-<div class="fragment"><div class="line">./build_libe3 --install --enable-swig \</div>
-<div class="line">  --cmake-opt &quot;-DLIBE3_ENABLE_ASN1=ON -DLIBE3_ENABLE_JSON=ON&quot;</div>
-<div class="line">python3 -c &quot;import libe3py; print(&#39;libe3py OK&#39;)&quot;</div>
-</div><!-- fragment --><p>Requires <code>swig &gt;= 4.0</code> and Python development headers. The install drops <code>_libe3py.so</code> + <code>libe3py.py</code> into <code>Python3_SITEARCH</code> — note that this is an absolute path, so <code>--prefix</code> does <b>not</b> relocate the Python module; override <code>-DLIBE3_PYTHON_INSTALL_DIR=&lt;dir&gt;</code> to stage it elsewhere.</p>
+<p>Install <a class="el" href="namespacelibe3.html">libe3</a> once (<code>./build_libe3 --all-encodings --install</code>, see the main README), then the binding with pip, in any virtual environment:</p>
+<div class="fragment"><div class="line">pip install libe3py            # or, from the libe3 checkout: pip install .</div>
+<div class="line">python -c &quot;import libe3py; print(&#39;libe3py OK&#39;, libe3py.__version__)&quot;</div>
+</div><!-- fragment --><p>pip builds the module from these sources against the installed <a class="el" href="namespacelibe3.html">libe3</a> (<code>python/CMakeLists.txt</code>); it needs <code>swig &gt;= 4.0</code>, the Python headers and a C++17 compiler (<code>./build_libe3 -I</code> installs them), and it stops with an error if the installed <a class="el" href="namespacelibe3.html">libe3</a> is not the same version. For a <a class="el" href="namespacelibe3.html">libe3</a> outside <code>/usr</code> and <code>/usr/local</code>: <code>pip install libe3py --config-settings=cmake.define.CMAKE_PREFIX_PATH=&lt;prefix&gt;</code>.</p>
+<p>For development, <code>./build_libe3 --enable-swig</code> builds the module in <code>build/swig</code> (run the smoke test with <code>PYTHONPATH=build/swig python3 tests/test_swig_smoke.py</code>); <code>cmake --install</code> installs it only if <code>-DLIBE3_PYTHON_INSTALL_DIR=&lt;dir&gt;</code> is given.</p>
 <h1><a class="anchor" id="autotoc_md7"></a>
 Service-model definitions</h1>
 <p>The Simple SM grammar is installed alongside the library under <code>&lt;datadir&gt;/libe3/sm/sm_simple/</code> — both <code>e3sm_simple.asn</code> (ASN.1) and <code>e3sm_simple.proto</code> (Protobuf) — discoverable via <code>pkg-config --variable=smdir <a class="el" href="namespacelibe3.html">libe3</a></code>, so Python dApps can reuse the exact grammar their C++ counterpart (<code>examples/simple_agent.cpp</code>) uses instead of copying it. </p>
