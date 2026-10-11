@@ -247,12 +247,6 @@ private:
     // Callback for SM lifecycle events
     SmLifecycleCallback sm_lifecycle_callback_;
     
-    // Next dApp ID to assign (1-100 per spec)
-    uint32_t next_dapp_id_{1};
-    
-    // Next subscription ID to assign
-    uint32_t next_subscription_id_{1};
-    
     // Helper to create composite key for subscription
     static uint64_t make_sub_key(uint32_t dapp_id, uint32_t ran_func_id) {
         return (static_cast<uint64_t>(dapp_id) << 32) | ran_func_id;

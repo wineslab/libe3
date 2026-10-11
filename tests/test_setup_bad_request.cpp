@@ -164,19 +164,14 @@ TEST(SetupChannel_garbageRequest_repliesAndChannelSurvives) {
 
 #if defined(LIBE3_ENABLE_JSON)
 /**
- * A well-formed SetupRequest whose message id lies outside E3-MessageID's
- * 1..1000 must still receive a decodable positive SetupResponse: the agent
- * substitutes an in-range id instead of failing the response encode.
- *
- * JSON-only: the JSON codec is the one that lets an out-of-range id through
- * to the handler (the APER encoder rejects it on the sender side, but the
- * APER decoder does not range-check either, so the substitution protects
- * both encodings).
+ * A SetupRequest whose message id is far above 1000 (a peer that counts across
+ * message types, like Aerial, gets there within seconds) must get a positive
+ * SetupResponse that echoes that id unchanged: E3-MessageID is 1..4294967295.
  */
-TEST(SetupChannel_outOfRangeRequestId_substitutedAndAnswered) {
-    const std::string setup_ep = unique_ipc("setup_oor");
-    const std::string sub_ep   = unique_ipc("inbound_oor");
-    const std::string pub_ep   = unique_ipc("outbound_oor");
+TEST(SetupChannel_largeRequestId_isEchoed) {
+    const std::string setup_ep = unique_ipc("setup_big");
+    const std::string sub_ep   = unique_ipc("inbound_big");
+    const std::string pub_ep   = unique_ipc("outbound_big");
 
     E3Config cfg;
     cfg.role             = E3Role::RAN;
@@ -209,7 +204,7 @@ TEST(SetupChannel_outOfRangeRequestId_substitutedAndAnswered) {
     ASSERT_TRUE(encoder != nullptr);
 
     auto setup = encoder->encode_setup_request(
-        4096, "1.0.0", "badsetup-dapp", "0.0.1", "test-vendor");
+        3000000000u, "1.0.0", "badsetup-dapp", "0.0.1", "test-vendor");
     ASSERT_TRUE(setup.has_value());
     ASSERT_GE(zmq_send(req, setup->buffer.data(), setup->buffer.size(), 0), 0);
 
@@ -225,9 +220,7 @@ TEST(SetupChannel_outOfRangeRequestId_substitutedAndAnswered) {
     ASSERT_EQ(static_cast<int>(resp->response_code),
               static_cast<int>(ResponseCode::POSITIVE));
     ASSERT_TRUE(resp->dapp_identifier.has_value());
-    // The unencodable id was substituted with one inside E3-MessageID.
-    ASSERT_GE(resp->request_id, 1u);
-    ASSERT_LE(resp->request_id, 1000u);
+    ASSERT_EQ(resp->request_id, 3000000000u);
 
     zmq_close(req);
     zmq_ctx_destroy(ctx);

@@ -8,6 +8,7 @@
 
 #include "test_framework.hpp"
 #include "libe3/subscription_manager.hpp"
+#include <algorithm>
 #include <thread>
 #include <atomic>
 
@@ -45,6 +46,52 @@ TEST(SubscriptionManager_register_multiple_dapps_assigns_unique_ids) {
     ASSERT_NE(id1, id2);
     ASSERT_NE(id2, id3);
     ASSERT_NE(id1, id3);
+}
+
+TEST(SubscriptionManager_dapp_ids_are_the_lowest_free_ones) {
+    SubscriptionManager mgr;
+    auto [r1, id1] = mgr.register_dapp();
+    auto [r2, id2] = mgr.register_dapp();
+    auto [r3, id3] = mgr.register_dapp();
+    ASSERT_EQ(id1, 1u);
+    ASSERT_EQ(id2, 2u);
+    ASSERT_EQ(id3, 3u);
+
+    // A dApp that disconnects and reconnects gets its id back, however often it does.
+    for (int i = 0; i < 5; ++i) {
+        ASSERT_TRUE(mgr.unregister_dapp(2) == ErrorCode::SUCCESS);
+        auto [r, id] = mgr.register_dapp();
+        ASSERT_TRUE(r == ErrorCode::SUCCESS);
+        ASSERT_EQ(id, 2u);
+    }
+}
+
+TEST(SubscriptionManager_serves_more_than_100_dapps_with_distinct_ids) {
+    SubscriptionManager mgr;
+    std::unordered_set<uint32_t> dapp_ids, sub_ids;
+    for (int i = 0; i < 300; ++i) {
+        auto [r, dapp_id] = mgr.register_dapp();
+        ASSERT_TRUE(r == ErrorCode::SUCCESS);
+        ASSERT_TRUE(dapp_ids.insert(dapp_id).second);
+        auto [sr, sub_id] = mgr.add_subscription(dapp_id, 1);
+        ASSERT_TRUE(sr == ErrorCode::SUCCESS);
+        ASSERT_TRUE(sub_ids.insert(sub_id).second);   // a live subscription id is never handed out again
+    }
+    ASSERT_EQ(mgr.dapp_count(), 300u);
+    ASSERT_EQ(*std::max_element(dapp_ids.begin(), dapp_ids.end()), 300u);
+    ASSERT_EQ(*std::max_element(sub_ids.begin(), sub_ids.end()), 300u);
+}
+
+TEST(SubscriptionManager_subscription_id_of_a_deleted_subscription_is_reused) {
+    SubscriptionManager mgr;
+    auto [r, dapp_id] = mgr.register_dapp();
+    auto [r1, s1] = mgr.add_subscription(dapp_id, 1);
+    auto [r2, s2] = mgr.add_subscription(dapp_id, 2);
+    ASSERT_EQ(s1, 1u);
+    ASSERT_EQ(s2, 2u);
+    ASSERT_TRUE(mgr.remove_subscription(dapp_id, 1) == ErrorCode::SUCCESS);
+    auto [r3, s3] = mgr.add_subscription(dapp_id, 3);
+    ASSERT_EQ(s3, 1u);
 }
 
 TEST(SubscriptionManager_unregister_dapp) {

@@ -146,11 +146,11 @@ public:
      * @brief Subscribe to a RAN function (after a positive setup).
      * @param sub_time_ms subscription time, or -1 for unset.
      * @param periodicity delivery periodicity (µs), or -1 for unset.
-     * @return the assigned request id (positive, 1..1000) on success, so the
-     *         caller can correlate the SubscriptionResponse by its request_id;
-     *         a negative ErrorCode on failure.
+     * @return the assigned request id (positive, 1..4294967295) on success, so
+     *         the caller can correlate the SubscriptionResponse by its
+     *         request_id; a negative ErrorCode on failure.
      */
-    int subscribe(uint32_t ran_function_id,
+    int64_t subscribe(uint32_t ran_function_id,
                   std::vector<uint32_t> telemetry_ids,
                   std::vector<uint32_t> control_ids,
                   int sub_time_ms,
@@ -174,7 +174,8 @@ public:
     /**
      * @brief Send a dApp report to the RAN.
      * @param sequence_id correlation id this dApp assigns to the detection;
-     *        mandatory on the wire.
+     *        mandatory on the wire, 1..4294967295 (0 is refused with
+     *        INVALID_PARAM).
      * @return the assigned message id (positive, 1..4294967295) on success, so
      *         the caller can correlate a later ack/response by id; a negative
      *         ErrorCode on failure.

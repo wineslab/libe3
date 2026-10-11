@@ -146,7 +146,9 @@ void E3Interface::forget_subscription_op(uint32_t request_id) {
 }
 
 uint32_t E3Interface::sanitize_request_message_id(uint32_t request_id) {
-    if (request_id >= 1 && request_id <= 1000) {
+    // E3-MessageID is 1..4294967295: every non-zero id can be echoed, a peer
+    // that counts across message types (Aerial) passes 1000 within seconds.
+    if (request_id != 0) {
         return request_id;
     }
     return generate_message_id();
@@ -796,7 +798,7 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
         response_code,
         config_.e3ap_version,
         // A failed registration assigns no id; engaging the optional with 0
-        // would violate E3-DAppID (1..100) at encode.
+        // would violate E3-DAppID (1..65535) at encode.
         response_code == ResponseCode::POSITIVE
             ? std::optional<uint32_t>(assigned_dapp_id)
             : std::nullopt,
@@ -828,9 +830,8 @@ void E3Interface::send_negative_setup_reply(uint32_t request_id) {
     // (ranFunctionList included), so with the fixed, mutually known
     // encoding it always encodes. The mandatory fields have to satisfy
     // their schema constraints, though: requestId is E3-MessageID
-    // INTEGER (1..1000) — an id that cannot be echoed (0 from undecodable
-    // bytes, or out of range from a peer the decoder did not constrain) is
-    // replaced with a freshly generated one — and ranIdentifier is
+    // INTEGER (1..4294967295) — an id that cannot be echoed (0, from
+    // undecodable bytes) is replaced with a freshly generated one — and ranIdentifier is
     // SIZE (1..64), hence the placeholder when the config left it empty.
     uint32_t message_id = generate_message_id();
     request_id = sanitize_request_message_id(request_id);
@@ -1451,7 +1452,6 @@ ErrorCode E3Interface::queue_dapp_report(
     uint32_t sequence_id,
     uint32_t* out_message_id
 ) {
-    if (!dapp_state_) return ErrorCode::STATE_ERROR;
     // E3-SequenceID is 1..4294967295 and mandatory on a report: with 0 every
     // encode fails, so refuse it here where the caller sees it.
     if (sequence_id == 0) {
@@ -1459,6 +1459,7 @@ ErrorCode E3Interface::queue_dapp_report(
         return ErrorCode::INVALID_PARAM;
     }
 
+    if (!dapp_state_) return ErrorCode::STATE_ERROR;
     auto id = dapp_id();
     if (!id) return ErrorCode::NOT_INITIALIZED;
 
