@@ -1452,6 +1452,13 @@ ErrorCode E3Interface::queue_dapp_report(
     uint32_t* out_message_id
 ) {
     if (!dapp_state_) return ErrorCode::STATE_ERROR;
+    // E3-SequenceID is 1..4294967295 and mandatory on a report: with 0 every
+    // encode fails, so refuse it here where the caller sees it.
+    if (sequence_id == 0) {
+        E3_LOG_ERROR(LOG_TAG) << "dApp report refused: sequence_id must be non-zero (E3-SequenceID is 1..4294967295)";
+        return ErrorCode::INVALID_PARAM;
+    }
+
     auto id = dapp_id();
     if (!id) return ErrorCode::NOT_INITIALIZED;
 

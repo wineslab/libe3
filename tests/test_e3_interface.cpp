@@ -214,6 +214,22 @@ TEST(DAppStatusChanged_no_spurious_calls) {
     ASSERT_EQ(count, 0);
 }
 
+/**
+ * E3-SequenceID is 1..4294967295 and mandatory on a report; 0 would fail every
+ * encode, so the API refuses it. A control may carry 0 (the field is optional).
+ */
+TEST(DAppReport_sequence_id_zero_is_refused) {
+    E3Config cfg = make_test_config();
+    cfg.role = E3Role::DAPP;
+    E3Interface iface(cfg);
+    ASSERT_EQ(error_to_int(iface.init()), error_to_int(ErrorCode::SUCCESS));
+
+    std::vector<uint8_t> data{1, 2, 3};
+    ASSERT_EQ(error_to_int(iface.queue_dapp_report(1, data, 0)), error_to_int(ErrorCode::INVALID_PARAM));
+    ASSERT_NE(error_to_int(iface.queue_dapp_report(1, data, 1)), error_to_int(ErrorCode::INVALID_PARAM));
+    ASSERT_NE(error_to_int(iface.queue_dapp_control_action(1, 1, data, 0)), error_to_int(ErrorCode::INVALID_PARAM));
+}
+
 int main() {
     return RUN_ALL_TESTS();
 }
