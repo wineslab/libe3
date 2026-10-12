@@ -21,7 +21,7 @@ var classlibe3_1_1py_1_1DAppSession =
     [ "setup_response_code", "classlibe3_1_1py_1_1DAppSession.html#a1d7471730e97aa1230ce3cfe094078fe", null ],
     [ "start", "classlibe3_1_1py_1_1DAppSession.html#ab5954d7cd100c8f3f26c89c59ec06305", null ],
     [ "stop", "classlibe3_1_1py_1_1DAppSession.html#a6ec5957dc209b80e7157c17e61bfd144", null ],
-    [ "subscribe", "classlibe3_1_1py_1_1DAppSession.html#ada1bddd2a8b63544841ed3407ffe2c09", null ],
+    [ "subscribe", "classlibe3_1_1py_1_1DAppSession.html#ae61410ef7c55fcd48334daa1789b7e84", null ],
     [ "unsubscribe", "classlibe3_1_1py_1_1DAppSession.html#a281047a21ea464eaf35816d26b730af1", null ],
     [ "wait_for_setup", "classlibe3_1_1py_1_1DAppSession.html#abcf67a5c3a939b525a723db9a756370b", null ]
 ];

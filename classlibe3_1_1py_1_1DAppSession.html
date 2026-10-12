@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.4</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -155,9 +155,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5118c8e2058cf5ebf0a46e6cfd318298" id="r_a5118c8e2058cf5ebf0a46e6cfd318298"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1py_1_1DAppSession.html#a5118c8e2058cf5ebf0a46e6cfd318298">setup_ran_function_data</a> (std::size_t i) const</td></tr>
 <tr class="memdesc:a5118c8e2058cf5ebf0a46e6cfd318298"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opaque ranFunctionData bytes of advertised entry <code>i</code>.  <br /></td></tr>
 <tr class="separator:a5118c8e2058cf5ebf0a46e6cfd318298"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ada1bddd2a8b63544841ed3407ffe2c09" id="r_ada1bddd2a8b63544841ed3407ffe2c09"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1py_1_1DAppSession.html#ada1bddd2a8b63544841ed3407ffe2c09">subscribe</a> (uint32_t ran_function_id, std::vector&lt; uint32_t &gt; telemetry_ids, std::vector&lt; uint32_t &gt; control_ids, int sub_time_ms, int periodicity)</td></tr>
-<tr class="memdesc:ada1bddd2a8b63544841ed3407ffe2c09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscribe to a RAN function (after a positive setup).  <br /></td></tr>
-<tr class="separator:ada1bddd2a8b63544841ed3407ffe2c09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae61410ef7c55fcd48334daa1789b7e84" id="r_ae61410ef7c55fcd48334daa1789b7e84"><td class="memItemLeft" align="right" valign="top">int64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1py_1_1DAppSession.html#ae61410ef7c55fcd48334daa1789b7e84">subscribe</a> (uint32_t ran_function_id, std::vector&lt; uint32_t &gt; telemetry_ids, std::vector&lt; uint32_t &gt; control_ids, int sub_time_ms, int periodicity)</td></tr>
+<tr class="memdesc:ae61410ef7c55fcd48334daa1789b7e84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscribe to a RAN function (after a positive setup).  <br /></td></tr>
+<tr class="separator:ae61410ef7c55fcd48334daa1789b7e84"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a281047a21ea464eaf35816d26b730af1" id="r_a281047a21ea464eaf35816d26b730af1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1py_1_1DAppSession.html#a281047a21ea464eaf35816d26b730af1">unsubscribe</a> (uint32_t ran_function_id)</td></tr>
 <tr class="memdesc:a281047a21ea464eaf35816d26b730af1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delete a previously created subscription.  <br /></td></tr>
 <tr class="separator:a281047a21ea464eaf35816d26b730af1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -545,7 +545,7 @@ Public Member Functions</h2></td></tr>
 <p>Send a dApp report to the RAN. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">sequence_id</td><td>correlation id this dApp assigns to the detection; mandatory on the wire. </td></tr>
+    <tr><td class="paramname">sequence_id</td><td>correlation id this dApp assigns to the detection; mandatory on the wire, 1..4294967295 (0 is refused with INVALID_PARAM). </td></tr>
   </table>
   </dd>
 </dl>
@@ -728,14 +728,14 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ada1bddd2a8b63544841ed3407ffe2c09" name="ada1bddd2a8b63544841ed3407ffe2c09"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ada1bddd2a8b63544841ed3407ffe2c09">&#9670;&#160;</a></span>subscribe()</h2>
+<a id="ae61410ef7c55fcd48334daa1789b7e84" name="ae61410ef7c55fcd48334daa1789b7e84"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae61410ef7c55fcd48334daa1789b7e84">&#9670;&#160;</a></span>subscribe()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int libe3::py::DAppSession::subscribe </td>
+          <td class="memname">int64_t libe3::py::DAppSession::subscribe </td>
           <td>(</td>
           <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>ran_function_id</em>, </td>
@@ -780,7 +780,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the assigned request id (positive, 1..1000) on success, so the caller can correlate the <a class="el" href="structlibe3_1_1SubscriptionResponse.html" title="E3AP Subscription Response structure.">SubscriptionResponse</a> by its request_id; a negative ErrorCode on failure. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the assigned request id (positive, 1..4294967295) on success, so the caller can correlate the <a class="el" href="structlibe3_1_1SubscriptionResponse.html" title="E3AP Subscription Response structure.">SubscriptionResponse</a> by its request_id; a negative ErrorCode on failure. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00199">199</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
