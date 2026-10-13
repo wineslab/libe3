@@ -267,10 +267,10 @@ jobs:
         with:
           python-version: "3.12"
       - name: Build the sdist
-        # sdist only: the module is compiled on the user's machine against the
-        # libe3 installed there (python/CMakeLists.txt), and a plain
-        # linux_x86_64 wheel would be rejected by PyPI anyway. Building the
-        # sdist compiles nothing.
+        # The sdist is the fallback for platforms without a wheel: it is compiled
+        # on the user's machine against the libe3 installed there
+        # (python/CMakeLists.txt). The wheels are built by build-wheels.yml.
+        # Building the sdist compiles nothing.
         run: |
           python3 -m pip install build
           python3 -m build --sdist
@@ -280,10 +280,17 @@ jobs:
           name: libe3py-sdist
           path: dist/
 
+  build-python-wheels:
+    name: Build the libe3py wheels
+    needs: create-tag
+    if: ${{ needs.create-tag.outputs.tag_created == 'true' && github.repository == 'wineslab/libe3' }}
+    uses: ./.github/workflows/build-wheels.yml
+
   publish-to-pypi:
     name: Publish libe3py to PyPI
     needs:
       - build-python-sdist
+      - build-python-wheels
       - create-tag
     runs-on: ubuntu-latest
     if: ${{ needs.create-tag.outputs.tag_created == 'true' && github.repository == 'wineslab/libe3' }}
@@ -297,12 +304,18 @@ jobs:
         with:
           name: libe3py-sdist
           path: dist/
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: libe3py-wheels-*
+          path: dist/
+          merge-multiple: true
       - uses: pypa/gh-action-pypi-publish@release/v1
 
   publish-to-testpypi:
     name: Publish libe3py to TestPyPI
     needs:
       - publish-to-pypi
+      - build-python-wheels
       - create-tag
     runs-on: ubuntu-latest
     if: ${{ needs.create-tag.outputs.tag_created == 'true' && github.repository == 'wineslab/libe3' }}
@@ -316,17 +329,23 @@ jobs:
         with:
           name: libe3py-sdist
           path: dist/
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: libe3py-wheels-*
+          path: dist/
+          merge-multiple: true
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
 
   github-release:
-    name: Upload Debian packages and the libe3py sdist to GitHub Release
+    name: Upload Debian packages and the libe3py sdist and wheels to GitHub Release
     needs:
       - build-deb-amd64
       - build-deb-arm64
       - build-docs
       - build-python-sdist
+      - build-python-wheels
       - create-tag
     runs-on: ubuntu-latest
     if: ${{ needs.create-tag.outputs.tag_created == 'true' }}
@@ -357,6 +376,13 @@ jobs:
         with:
           name: libe3py-sdist
           path: dist/
+
+      - name: Download the libe3py wheels
+        uses: actions/download-artifact@v7
+        with:
+          pattern: libe3py-wheels-*
+          path: dist/
+          merge-multiple: true
 
       - name: Create GitHub Release and upload assets
         env:

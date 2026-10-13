@@ -1,0 +1,93 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
+# Prebuilt libe3py wheels (manylinux_2_28, x86_64 and aarch64, CPython 3.10 to 3.13), so
+# that `pip install libe3py` needs no libe3, compiler or SWIG on the machine. Built with
+# cibuildwheel (configuration in pyproject.toml), then installed into a bare python
+# image that has no libzmq or libprotobuf, to prove the wheel carries everything.
+#
+# Runs on pull requests that touch the packaging, and is reused by tag-and-release.yml.
+
+name: Build libe3py wheels
+
+on:
+  pull_request:
+    paths:
+      - pyproject.toml
+      - build_libe3
+      - scripts/wheel_deps.sh
+      - cmake/**
+      - swig/**
+      - python/**
+      - src/**
+      - include/**
+      - messages/**
+      - tests/test_swig_smoke.py
+      - .github/workflows/build-wheels.yml
+  workflow_call:
+
+concurrency:
+  group: build-wheels-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  wheels:
+    name: Wheels (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Build the wheels
+        run: |
+          python3 -m pip install cibuildwheel==4.3.1
+          python3 -m cibuildwheel --output-dir wheelhouse
+          ls -l wheelhouse
+      - uses: actions/upload-artifact@v6
+        with:
+          name: libe3py-wheels-${{ matrix.arch }}
+          path: wheelhouse/*.whl
+
+  smoke:
+    name: Install in a bare image (Python ${{ matrix.python }}, ${{ matrix.arch }})
+    needs: wheels
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { python: "3.10", arch: x86_64,  runner: ubuntu-latest }
+          - { python: "3.13", arch: x86_64,  runner: ubuntu-latest }
+          - { python: "3.12", arch: aarch64, runner: ubuntu-24.04-arm }
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v7
+        with:
+          name: libe3py-wheels-${{ matrix.arch }}
+          path: wheelhouse
+      - name: Install the wheel into a python image with no libe3, libzmq, compiler or SWIG, and run the smoke test
+        run: |
+          tag="cp${{ matrix.python }}"; tag="${tag/./}"
+          docker run --rm -v "$PWD/wheelhouse:/w:ro" -v "$PWD:/src:ro" \
+            python:${{ matrix.python }}-slim bash -ec "
+              if command -v cmake || command -v g++ || command -v swig || ldconfig -p | grep -q 'libzmq\|libprotobuf'; then
+                echo 'the image is not bare'; exit 1
+              fi
+              pip install --no-index /w/libe3py-*-${tag}-${tag}-*.whl
+              python /src/tests/test_swig_smoke.py
+              python -c 'import libe3py; print(libe3py.__file__)'"
