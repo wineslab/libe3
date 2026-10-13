@@ -42,3 +42,25 @@ sdist.include = [
 provider = "scikit_build_core.metadata.regex"
 input = "VERSION"
 regex = "^(?P<value>\\d+\\.\\d+\\.\\d+)"
+
+# Prebuilt wheels (manylinux_2_28), built by .github/workflows/build-wheels.yml. Unlike the
+# sdist, a wheel is built from the full checkout and contains libe3 itself (all encodings,
+# and libzmq, protobuf linked statically), so `pip install libe3py`
+# needs no libe3, compiler or SWIG on the machine.
+[tool.cibuildwheel]
+build = "cp310-* cp311-* cp312-* cp313-*"
+skip = "*-musllinux_*"
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+before-all = "bash {project}/scripts/wheel_deps.sh"
+environment = { CMAKE_PREFIX_PATH = "/opt/protobuf", PATH = "/opt/protobuf/bin:$PATH", PKG_CONFIG_PATH = "/opt/zeromq/lib64/pkgconfig:/opt/zeromq/lib/pkgconfig" }
+
+[tool.cibuildwheel.config-settings]
+"cmake.source-dir" = "."
+"cmake.define.LIBE3_ENABLE_SWIG" = "ON"
+"cmake.define.LIBE3_ENABLE_ASN1" = "ON"
+"cmake.define.LIBE3_ENABLE_JSON" = "ON"
+"cmake.define.LIBE3_ENABLE_PROTOBUF" = "ON"
+"cmake.define.LIBE3_BUILD_TESTS" = "OFF"
+"cmake.define.LIBE3_BUILD_EXAMPLES" = "OFF"
+"install.components" = "libe3py"
