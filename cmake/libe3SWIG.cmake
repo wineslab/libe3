@@ -31,9 +31,14 @@ libe3_add_python_module(libe3py
 
 set(LIBE3_PYTHON_INSTALL_DIR "" CACHE PATH
     "Install the libe3py module here with the library (empty: do not; users install it with pip)")
+# A wheel build (pip, scikit-build-core, from the full checkout; see pyproject.toml)
+# installs the module, in its own component, into the wheel.
+if(NOT LIBE3_PYTHON_INSTALL_DIR AND DEFINED SKBUILD_PLATLIB_DIR)
+    set(LIBE3_PYTHON_INSTALL_DIR "${SKBUILD_PLATLIB_DIR}")
+endif()
 if(LIBE3_PYTHON_INSTALL_DIR)
-    install(TARGETS libe3py LIBRARY DESTINATION "${LIBE3_PYTHON_INSTALL_DIR}")
-    install(FILES "${LIBE3_SWIG_OUTPUT_DIR}/libe3py.py" DESTINATION "${LIBE3_PYTHON_INSTALL_DIR}")
+    install(TARGETS libe3py LIBRARY DESTINATION "${LIBE3_PYTHON_INSTALL_DIR}" COMPONENT libe3py)
+    install(FILES "${LIBE3_SWIG_OUTPUT_DIR}/libe3py.py" DESTINATION "${LIBE3_PYTHON_INSTALL_DIR}" COMPONENT libe3py)
     message(STATUS "libe3py will be installed with the library into ${LIBE3_PYTHON_INSTALL_DIR}")
 else()
     message(STATUS "libe3py is built in ${LIBE3_SWIG_OUTPUT_DIR} and not installed; install it with pip (pip install .)")
