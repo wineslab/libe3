@@ -51,6 +51,17 @@ public:
     }
 
     /**
+     * @brief Forget the RAN's assignment and every subscription (session ended).
+     */
+    void clear_session() {
+        std::lock_guard<std::mutex> lock(mu_);
+        assigned_dapp_id.reset();
+        remote_ran_functions.clear();
+        ran_function_to_subscription_id.clear();
+        subscription_id_to_ran_function.clear();
+    }
+
+    /**
      * @brief Record a successful SubscriptionResponse.
      * Idempotent: re-recording the same (rf_id, sub_id) is fine.
      */
