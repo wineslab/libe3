@@ -84,6 +84,100 @@ TEST(JsonEncoder_encode_setup_response) {
     ASSERT_TRUE(json.find("setupResponse") != std::string::npos);
 }
 
+static Pdu setup_response_with_data(const std::string& data) {
+    Pdu pdu(PduType::SETUP_RESPONSE);
+    SetupResponse resp;
+    resp.request_id = 100;
+    resp.response_code = ResponseCode::POSITIVE;
+    resp.dapp_identifier = 42;
+    resp.ran_identifier = "ran-1";
+    RanFunctionDef func;
+    func.ran_function_identifier = 5;
+    func.telemetry_identifier_list = {1, 2};
+    func.control_identifier_list = {3};
+    func.ran_function_data.assign(data.begin(), data.end());
+    resp.ran_function_list.push_back(func);
+    pdu.choice = resp;
+    return pdu;
+}
+
+TEST(JsonEncoder_setup_response_ran_function_data_is_nested) {
+    auto encoder = create_encoder();
+
+    auto encoded = encoder->encode(setup_response_with_data(R"({"name":"SIMPLE"})"));
+    ASSERT_TRUE(encoded.has_value());
+
+    auto wire = nlohmann::json::parse(encoded->buffer);
+    ASSERT_TRUE(wire["ranFunctionList"][0]["ranFunctionData"].is_object());
+    ASSERT_STREQ(wire["ranFunctionList"][0]["ranFunctionData"]["name"].get<std::string>().c_str(),
+                 "SIMPLE");
+
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+    auto& restored = std::get<SetupResponse>(decoded->choice);
+    ASSERT_EQ(restored.ran_function_list.size(), 1u);
+    auto data = nlohmann::json::parse(restored.ran_function_list[0].ran_function_data);
+    ASSERT_STREQ(data["name"].get<std::string>().c_str(), "SIMPLE");
+}
+
+TEST(JsonEncoder_decode_setup_response_with_stream_descriptor_array) {
+    // The shape an Aerial agent sends: ranFunctionData is an array of stream
+    // descriptors. The dApp must still get its id.
+    const std::string wire = R"JSON({
+        "type": "setupResponse", "id": 1, "timestamp": 0,
+        "requestId": 7, "responseCode": "positive", "dAppIdentifier": 3,
+        "ranIdentifier": "aerial",
+        "ranFunctionList": [{
+            "ranFunctionIdentifier": 1,
+            "telemetryIdentifierList": [1, 4],
+            "controlIdentifierList": [],
+            "ranFunctionData": [
+                {"stream_id": "sfn", "data_type": "uint16", "status": "available"},
+                {"stream_id": "iq_samples", "data_type": "array(int16)", "status": "unavailable"}
+            ]
+        }]
+    })JSON";
+    auto encoder = create_encoder();
+    auto decoded = encoder->decode(reinterpret_cast<const uint8_t*>(wire.data()), wire.size());
+    ASSERT_TRUE(decoded.has_value());
+
+    auto& resp = std::get<SetupResponse>(decoded->choice);
+    ASSERT_TRUE(resp.dapp_identifier.has_value());
+    ASSERT_EQ(*resp.dapp_identifier, 3u);
+    auto data = nlohmann::json::parse(resp.ran_function_list.at(0).ran_function_data);
+    ASSERT_TRUE(data.is_array());
+    ASSERT_EQ(data.size(), 2u);
+    ASSERT_STREQ(data[0]["stream_id"].get<std::string>().c_str(), "sfn");
+}
+
+TEST(JsonEncoder_decode_setup_response_rejects_string_ran_function_data) {
+    const std::string wire = R"({
+        "type": "setupResponse", "id": 1, "timestamp": 0,
+        "requestId": 7, "responseCode": "positive", "dAppIdentifier": 3,
+        "ranIdentifier": "x",
+        "ranFunctionList": [{"ranFunctionIdentifier": 1, "ranFunctionData": "0a0b0c"}]
+    })";
+    auto encoder = create_encoder();
+    auto decoded = encoder->decode(reinterpret_cast<const uint8_t*>(wire.data()), wire.size());
+    ASSERT_FALSE(decoded.has_value());
+}
+
+TEST(JsonEncoder_encode_setup_response_non_json_ran_function_data_fails) {
+    auto encoder = create_encoder();
+
+    Pdu pdu = setup_response_with_data("");
+    auto& func = std::get<SetupResponse>(pdu.choice).ran_function_list[0];
+    func.ran_function_data = {0xDE, 0xAD, 0xBE, 0xEF};
+
+    auto result = encoder->encode(pdu);
+    ASSERT_FALSE(result.has_value());
+    ASSERT_TRUE(result.error() == ErrorCode::ENCODE_FAILED);
+
+    // A bare scalar is valid JSON but would not decode.
+    auto scalar = encoder->encode(setup_response_with_data("\"abcd\""));
+    ASSERT_FALSE(scalar.has_value());
+}
+
 TEST(JsonEncoder_encode_decode_subscription_request) {
     auto encoder = create_encoder();
     
@@ -146,6 +240,78 @@ TEST(JsonEncoder_encode_decode_subscription_response) {
     ASSERT_EQ(restored.request_id, 55u);
 }
 
+TEST(JsonEncoder_subscription_response_grants_roundtrip) {
+    auto encoder = create_encoder();
+
+    Pdu original(PduType::SUBSCRIPTION_RESPONSE);
+    SubscriptionResponse resp;
+    resp.request_id = 3;
+    resp.dapp_identifier = 42;
+    resp.response_code = ResponseCode::POSITIVE;
+    resp.subscription_id = 5;
+    resp.telemetry_identifier_list = std::vector<uint32_t>{1, 4, 5};
+    resp.control_identifier_list = std::vector<uint32_t>{};  // present, none granted
+    resp.ran_function_identifier = 9;
+    resp.periodicity = 250;
+    original.choice = resp;
+
+    auto encoded = encoder->encode(original);
+    ASSERT_TRUE(encoded.has_value());
+
+    // Written under the ASN.1 field names.
+    auto wire = nlohmann::json::parse(encoded->buffer);
+    ASSERT_EQ(wire["telemetryIdentifierList"].size(), 3u);
+    ASSERT_TRUE(wire["controlIdentifierList"].is_array());
+    ASSERT_FALSE(wire.contains("telemetryGrantedList"));
+
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+    auto& r = std::get<SubscriptionResponse>(decoded->choice);
+    ASSERT_TRUE(*r.telemetry_identifier_list == (std::vector<uint32_t>{1, 4, 5}));
+    ASSERT_TRUE(r.control_identifier_list.has_value());
+    ASSERT_TRUE(r.control_identifier_list->empty());
+    ASSERT_EQ(*r.ran_function_identifier, 9u);
+    ASSERT_EQ(*r.periodicity, 250u);
+}
+
+TEST(JsonEncoder_decode_aerial_subscription_response_grants) {
+    // The shape an Aerial agent sends: the lists are named ...GrantedList.
+    const std::string wire = R"({
+        "type": "subscriptionResponse", "id": 4, "timestamp": 0,
+        "requestId": 3, "dAppIdentifier": 42, "responseCode": "positive",
+        "subscriptionId": 5, "ranFunctionIdentifier": 1,
+        "telemetryGrantedList": [1, 4, 5, 6], "controlGrantedList": [],
+        "periodicity": 100000
+    })";
+    auto encoder = create_encoder();
+    auto decoded = encoder->decode(reinterpret_cast<const uint8_t*>(wire.data()), wire.size());
+    ASSERT_TRUE(decoded.has_value());
+
+    auto& r = std::get<SubscriptionResponse>(decoded->choice);
+    ASSERT_TRUE(*r.telemetry_identifier_list == (std::vector<uint32_t>{1, 4, 5, 6}));
+    ASSERT_TRUE(r.control_identifier_list.has_value());
+    ASSERT_TRUE(r.control_identifier_list->empty());
+    ASSERT_EQ(*r.ran_function_identifier, 1u);
+    ASSERT_EQ(*r.periodicity, 100000u);
+}
+
+TEST(JsonEncoder_decode_subscription_response_without_grants) {
+    // Not reported must stay distinct from none granted.
+    const std::string wire = R"({
+        "type": "subscriptionResponse", "id": 4, "timestamp": 0,
+        "requestId": 3, "dAppIdentifier": 42, "responseCode": "positive", "subscriptionId": 5
+    })";
+    auto encoder = create_encoder();
+    auto decoded = encoder->decode(reinterpret_cast<const uint8_t*>(wire.data()), wire.size());
+    ASSERT_TRUE(decoded.has_value());
+
+    auto& r = std::get<SubscriptionResponse>(decoded->choice);
+    ASSERT_FALSE(r.telemetry_identifier_list.has_value());
+    ASSERT_FALSE(r.control_identifier_list.has_value());
+    ASSERT_FALSE(r.ran_function_identifier.has_value());
+    ASSERT_FALSE(r.periodicity.has_value());
+}
+
 TEST(JsonEncoder_encode_decode_indication_message) {
     auto encoder = create_encoder();
     
@@ -179,11 +345,17 @@ TEST(JsonEncoder_encode_decode_control_action) {
     action.dapp_identifier = 123;
     action.ran_function_identifier = 456;
     action.control_identifier = 789;
-    action.action_data = {0xDE, 0xAD, 0xBE, 0xEF};
+    const std::string payload = R"({"mcs":12,"prb":[1,2,3]})";
+    action.action_data.assign(payload.begin(), payload.end());
     original.choice = action;
     
     auto encoded = encoder->encode(original);
     ASSERT_TRUE(encoded.has_value());
+
+    // Nested like Aerial's actionData.
+    auto wire = nlohmann::json::parse(encoded->buffer);
+    ASSERT_TRUE(wire["actionData"].is_object());
+    ASSERT_EQ(wire["actionData"]["mcs"].get<int>(), 12);
     
     auto decoded = encoder->decode(*encoded);
     ASSERT_TRUE(decoded.has_value());
@@ -192,7 +364,7 @@ TEST(JsonEncoder_encode_decode_control_action) {
     ASSERT_EQ(restored.dapp_identifier, 123u);
     ASSERT_EQ(restored.ran_function_identifier, 456u);
     ASSERT_EQ(restored.control_identifier, 789u);
-    ASSERT_EQ(restored.action_data.size(), 4u);
+    ASSERT_EQ(std::string(restored.action_data.begin(), restored.action_data.end()), payload);
 }
 
 TEST(JsonEncoder_encode_decode_dapp_report) {
@@ -202,11 +374,13 @@ TEST(JsonEncoder_encode_decode_dapp_report) {
     DAppReport report;
     report.dapp_identifier = 999;
     report.ran_function_identifier = 888;
-    report.report_data = {0x11, 0x22, 0x33};
+    const std::string payload = R"({"detections":[{"snr":7.5}]})";
+    report.report_data.assign(payload.begin(), payload.end());
     original.choice = report;
     
     auto encoded = encoder->encode(original);
     ASSERT_TRUE(encoded.has_value());
+    ASSERT_TRUE(nlohmann::json::parse(encoded->buffer)["reportData"].is_object());
     
     auto decoded = encoder->decode(*encoded);
     ASSERT_TRUE(decoded.has_value());
@@ -214,6 +388,107 @@ TEST(JsonEncoder_encode_decode_dapp_report) {
     auto& restored = std::get<DAppReport>(decoded->choice);
     ASSERT_EQ(restored.dapp_identifier, 999u);
     ASSERT_EQ(restored.ran_function_identifier, 888u);
+    ASSERT_EQ(std::string(restored.report_data.begin(), restored.report_data.end()), payload);
+}
+
+TEST(JsonEncoder_encode_decode_xapp_control_action) {
+    auto encoder = create_encoder();
+
+    Pdu original(PduType::XAPP_CONTROL_ACTION);
+    XAppControlAction action;
+    action.dapp_identifier = 5;
+    action.ran_function_identifier = 6;
+    action.sequence_id = 77;
+    const std::string payload = R"({"policy":"hold"})";
+    action.xapp_control_data.assign(payload.begin(), payload.end());
+    original.choice = action;
+
+    auto encoded = encoder->encode(original);
+    ASSERT_TRUE(encoded.has_value());
+    ASSERT_TRUE(nlohmann::json::parse(encoded->buffer)["xAppControlData"].is_object());
+
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+    auto& restored = std::get<XAppControlAction>(decoded->choice);
+    ASSERT_EQ(restored.sequence_id, 77u);
+    ASSERT_EQ(std::string(restored.xapp_control_data.begin(), restored.xapp_control_data.end()),
+              payload);
+}
+
+TEST(JsonEncoder_payload_roundtrip_preserves_bytes_exactly) {
+    // Keys out of order and whitespace kept: the splice must not reformat.
+    auto encoder = create_encoder();
+
+    Pdu pdu(PduType::DAPP_CONTROL_ACTION);
+    DAppControlAction action;
+    action.control_identifier = 1;
+    const std::string payload = R"({"z": 1,  "a": {"k": [1, 2]}, "s": "}{"})";
+    action.action_data.assign(payload.begin(), payload.end());
+    pdu.choice = action;
+
+    auto encoded = encoder->encode(pdu);
+    ASSERT_TRUE(encoded.has_value());
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+    auto& restored = std::get<DAppControlAction>(decoded->choice);
+    ASSERT_EQ(std::string(restored.action_data.begin(), restored.action_data.end()), payload);
+}
+
+TEST(JsonEncoder_decode_aerial_control_with_nested_action_data) {
+    // The shape an Aerial dApp sends: actionData is an object.
+    const std::string wire = R"({
+        "type": "dAppControlAction", "id": 9, "timestamp": 0,
+        "dAppIdentifier": 3, "ranFunctionIdentifier": 1, "controlIdentifier": 2,
+        "actionData": {"cell": 0, "mask": [1, 0, 1]}
+    })";
+    auto encoder = create_encoder();
+    auto decoded = encoder->decode(reinterpret_cast<const uint8_t*>(wire.data()), wire.size());
+    ASSERT_TRUE(decoded.has_value());
+
+    auto& action = std::get<DAppControlAction>(decoded->choice);
+    auto data = nlohmann::json::parse(action.action_data);
+    ASSERT_EQ(data["cell"].get<int>(), 0);
+    ASSERT_EQ(data["mask"].size(), 3u);
+}
+
+TEST(JsonEncoder_decode_rejects_string_payloads) {
+    auto encoder = create_encoder();
+    auto decode = [&](const std::string& wire) {
+        return encoder->decode(reinterpret_cast<const uint8_t*>(wire.data()), wire.size());
+    };
+    ASSERT_FALSE(decode(R"({"type":"dAppControlAction","id":1,"timestamp":0,"actionData":"deadbeef"})").has_value());
+    ASSERT_FALSE(decode(R"({"type":"dAppReport","id":1,"timestamp":0,"reportData":"deadbeef"})").has_value());
+    ASSERT_FALSE(decode(R"({"type":"xAppControlAction","id":1,"timestamp":0,"xAppControlData":"deadbeef"})").has_value());
+}
+
+TEST(JsonEncoder_encode_non_json_payloads_fail) {
+    auto encoder = create_encoder();
+    const std::vector<uint8_t> binary = {0xDE, 0xAD, 0xBE, 0xEF};
+
+    Pdu control(PduType::DAPP_CONTROL_ACTION);
+    DAppControlAction c;
+    c.action_data = binary;
+    control.choice = c;
+    auto r1 = encoder->encode(control);
+    ASSERT_FALSE(r1.has_value());
+    ASSERT_TRUE(r1.error() == ErrorCode::ENCODE_FAILED);
+
+    Pdu report(PduType::DAPP_REPORT);
+    DAppReport rep;
+    rep.report_data = binary;
+    report.choice = rep;
+    ASSERT_FALSE(encoder->encode(report).has_value());
+
+    Pdu xapp(PduType::XAPP_CONTROL_ACTION);
+    XAppControlAction x;
+    x.xapp_control_data = binary;
+    xapp.choice = x;
+    ASSERT_FALSE(encoder->encode(xapp).has_value());
+
+    // Empty is invalid too: the ASN.1 grammar requires at least one octet.
+    Pdu empty(PduType::DAPP_REPORT);
+    empty.choice = DAppReport{};
+    ASSERT_FALSE(encoder->encode(empty).has_value());
 }
 
 TEST(JsonEncoder_encode_decode_message_ack) {
