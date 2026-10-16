@@ -101,9 +101,6 @@ set(e3ap_source
     uper_encoder.c
     uper_opentype.c
     uper_support.c
-    UTF8String.c
-    UTF8String_print.c
-    UTF8String_rfill.c
     xer_decoder.c
     xer_encoder.c
     xer_support.c
@@ -114,6 +111,7 @@ set(e3ap_source
     E3-IndicationMessage.c
     E3-MessageAck.c
     E3-MessageID.c
+    E3-Name.c
     E3-PDU.c
     E3-RanFunctionDefinition.c
     E3-ReleaseMessage.c
@@ -174,7 +172,6 @@ set(e3ap_headers
     uper_encoder.h
     uper_opentype.h
     uper_support.h
-    UTF8String.h
     xer_decoder.h
     xer_encoder.h
     xer_support.h
@@ -185,6 +182,7 @@ set(e3ap_headers
     E3-IndicationMessage.h
     E3-MessageAck.h
     E3-MessageID.h
+    E3-Name.h
     E3-PDU.h
     E3-RanFunctionDefinition.h
     E3-ReleaseMessage.h

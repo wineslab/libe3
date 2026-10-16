@@ -17,3 +17,11 @@ path = [
 ]
 SPDX-FileCopyrightText = "Copyright (c) 2026 Northeastern University"
 SPDX-License-Identifier = "Apache-2.0"
+
+# Vendored from NVIDIA/aerial-sample-apps, unchanged. The notice is inside a
+# JSON string where reuse cannot read it, so it is restated here.
+[[annotations]]
+path = "tests/fixtures/aerial/e3_message_examples.json"
+precedence = "override"
+SPDX-FileCopyrightText = "Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+SPDX-License-Identifier = "Apache-2.0"

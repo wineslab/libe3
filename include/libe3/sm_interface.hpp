@@ -72,7 +72,8 @@ public:
      *
      * Returns the byte vector advertised for this RAN function in the
      * SetupResponse (ranFunctionList->ranFunctionData). E3AP declares the field
-     * mandatory and non-empty -- `OCTET STRING (SIZE (1..32768))` -- so every SM
+     * mandatory and non-empty -- `OCTET STRING (SIZE (1..262144))`; libe3 carries up to
+     * 32768 bytes -- so every SM
      * must override this: even the most minimal SM carries at least its own
      * name. An SM with nothing to advertise is not advertisable at all, since
      * ranFunctionList itself is optional but its entries are not.
@@ -237,6 +238,8 @@ public:
      * @param sm Service Model to register
      * @return ErrorCode::SUCCESS on success
      * @return ErrorCode::SM_ALREADY_REGISTERED if SM for this RAN function exists
+     * @return ErrorCode::INVALID_PARAM if the SM lists more than 256 telemetry or
+     *         control ids, or 64 RAN functions are already registered
      */
     ErrorCode register_sm(std::unique_ptr<ServiceModel> sm);
 
