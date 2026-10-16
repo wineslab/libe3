@@ -187,6 +187,7 @@ public:
     // out_request_id, when non-null, receives the assigned E3-MessageID on
     // success, so the caller can correlate the eventual SubscriptionResponse
     // (which echoes request_id) back to this request.
+    // periodicity is microseconds between indications, 0 = every event.
     ErrorCode queue_subscription_request(uint32_t ran_function_id,
                                          std::vector<uint32_t> telemetry_ids,
                                          std::vector<uint32_t> control_ids,
