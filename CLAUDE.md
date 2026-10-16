@@ -49,7 +49,7 @@ ctest -LE integration      # only unit tests
 PYTHONPATH=build/swig python3 tests/test_swig_smoke.py   # SWIG bindings smoke test
 ```
 
-**Build options** live in `cmake/libe3Options.cmake`: `LIBE3_BUILD_TESTS` (ON), `LIBE3_BUILD_EXAMPLES` (ON), `LIBE3_BUILD_INTEGRATION_TESTS` (OFF), `LIBE3_ENABLE_SWIG` (OFF), `LIBE3_ENABLE_ZMQ` (ON), `LIBE3_ENABLE_ASN1` (ON), `LIBE3_ENABLE_JSON` (OFF), `LIBE3_ENABLE_PROTOBUF` (OFF), `LIBE3_ENABLE_ASAN`/`LIBE3_ENABLE_TSAN` (OFF), `LIBE3_BUILD_DOCS` (OFF). **At least one of `LIBE3_ENABLE_ASN1` / `LIBE3_ENABLE_JSON` / `LIBE3_ENABLE_PROTOBUF` must be ON**; any combination can be built together and the encoder is chosen at runtime. `build_libe3` has a dedicated `--enable-protobuf` flag; JSON and SWIG use `--cmake-opt`.
+**Build options** live in `cmake/libe3Options.cmake`: `LIBE3_BUILD_TESTS` (ON), `LIBE3_BUILD_EXAMPLES` (ON), `LIBE3_BUILD_INTEGRATION_TESTS` (OFF), `LIBE3_ENABLE_SWIG` (OFF), `LIBE3_ENABLE_ZMQ` (ON), `LIBE3_ENABLE_ASN1` (ON), `LIBE3_ENABLE_E2SM_DAPP` (ON, needs ASN1; builds the E2SM-DAPP codec libraries, see `docs/e2sm-dapp/`), `LIBE3_ENABLE_JSON` (OFF), `LIBE3_ENABLE_PROTOBUF` (OFF), `LIBE3_ENABLE_ASAN`/`LIBE3_ENABLE_TSAN` (OFF), `LIBE3_BUILD_DOCS` (OFF). **At least one of `LIBE3_ENABLE_ASN1` / `LIBE3_ENABLE_JSON` / `LIBE3_ENABLE_PROTOBUF` must be ON**; any combination can be built together and the encoder is chosen at runtime. `build_libe3` has a dedicated `--enable-protobuf` flag; JSON and SWIG use `--cmake-opt`.
 
 ## Architecture (big picture)
 
