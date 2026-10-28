@@ -262,6 +262,9 @@ private:
     std::unique_ptr<std::thread> inbound_thread_;
     std::unique_ptr<std::thread> outbound_thread_;
     std::unique_ptr<std::thread> report_worker_thread_;
+    std::unique_ptr<std::thread> expiry_thread_;
+    std::mutex expiry_mu_;
+    std::condition_variable expiry_cv_;  // woken by stop() so the thread exits at once
 #ifdef LIBE3_ENABLE_LATREC
     // ~1 Hz slow-lane sampler stamping LATREC_CONTEXT (involuntary context
     // switches, current CPU frequency), to explain p99 tails. Exists only in
@@ -334,6 +337,12 @@ private:
      *        are never blocked by downstream (OAI / iApp) work.
      */
     void report_worker_loop();
+
+    /**
+     * @brief RAN-role thread that removes subscriptions whose subscriptionTime
+     *        has run out. The dApp is not told: E3AP has no PDU for it.
+     */
+    void subscription_expiry_loop();
 
 #ifdef LIBE3_ENABLE_LATREC
     /**

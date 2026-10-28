@@ -33,6 +33,11 @@ namespace libe3 {
 namespace {
 constexpr const char* LOG_TAG = "E3Iface";
 
+// How often the RAN looks for subscriptions whose time has run out. Dispatch
+// already skips an expired subscription, so this only bounds how late its SM
+// is stopped and the status handler told.
+constexpr auto EXPIRY_SWEEP_INTERVAL = std::chrono::milliseconds(250);
+
 /**
  * @brief Build the default log-file path for a given role/identifier.
  *
@@ -338,6 +343,7 @@ ErrorCode E3Interface::start() {
         outbound_thread_ = std::make_unique<std::thread>(&E3Interface::outbound_loop_ran, this);
         // RAN receives dApp reports; drain them off the inbound thread.
         report_worker_thread_ = std::make_unique<std::thread>(&E3Interface::report_worker_loop, this);
+        expiry_thread_ = std::make_unique<std::thread>(&E3Interface::subscription_expiry_loop, this);
     } else {
         setup_thread_ = std::make_unique<std::thread>(&E3Interface::setup_loop_dapp, this);
         inbound_thread_ = std::make_unique<std::thread>(&E3Interface::inbound_loop_dapp, this);
@@ -374,6 +380,11 @@ void E3Interface::stop() {
         report_queue_->shutdown();
     }
 
+    {
+        std::lock_guard<std::mutex> lk(expiry_mu_);
+        expiry_cv_.notify_all();
+    }
+
     // Interrupt blocking socket operations
     if (connector_) {
         connector_->shutdown();
@@ -391,6 +402,9 @@ void E3Interface::stop() {
     }
     if (report_worker_thread_ && report_worker_thread_->joinable()) {
         report_worker_thread_->join();
+    }
+    if (expiry_thread_ && expiry_thread_->joinable()) {
+        expiry_thread_->join();
     }
 #ifdef LIBE3_ENABLE_LATREC
     if (context_thread_ && context_thread_->joinable()) {
@@ -743,6 +757,22 @@ void E3Interface::report_worker_loop() {
     E3_LOG_INFO(LOG_TAG) << "Report worker loop stopped";
 }
 
+void E3Interface::subscription_expiry_loop() {
+    E3_LOG_INFO(LOG_TAG) << "Subscription expiry loop started";
+    std::unique_lock<std::mutex> lk(expiry_mu_);
+    while (!should_stop_.load()) {
+        expiry_cv_.wait_for(lk, EXPIRY_SWEEP_INTERVAL);
+        if (should_stop_.load()) {
+            break;
+        }
+        lk.unlock();
+        if (!subscription_manager_->expire_subscriptions().empty()) {
+            notify_dapp_status_changed();
+        }
+        lk.lock();
+    }
+}
+
 #ifdef LIBE3_ENABLE_LATREC
 void E3Interface::context_monitor_loop() {
     latrec_tls_open_as(LATREC_ROLE_CONTEXT);
@@ -953,12 +983,15 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
         E3_LOG_ERROR(LOG_TAG) << "dApp " << request.dapp_identifier << " not registered";
     } else {
         uint32_t period = request.periodicity.value_or(0);
+        // Seconds, absent or 0 = no limit.
+        const uint32_t subscription_time = request.subscription_time.value_or(0);
         auto [result, sub_id] = subscription_manager_->add_subscription(
             request.dapp_identifier,
             request.ran_function_identifier,
             request.telemetry_identifier_list,
             request.control_identifier_list,
-            period
+            period,
+            subscription_time
         );
         subscription_id = sub_id;
         
