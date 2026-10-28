@@ -29,7 +29,8 @@ uint32_t lowest_free_id(const Map& taken) {
 }
 }
 
-SubscriptionManager::SubscriptionManager() {
+SubscriptionManager::SubscriptionManager(SubscriptionClock clock)
+    : clock_(std::move(clock)) {
     E3_LOG_DEBUG(LOG_TAG) << "Subscription manager created";
 }
 
@@ -156,7 +157,8 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::add_subscription(
         uint32_t ran_function_id,
         const std::vector<uint32_t>& telemetry_ids,
         const std::vector<uint32_t>& control_ids,
-        uint32_t periodicity_us) {
+        uint32_t periodicity_us,
+        uint32_t subscription_time_s) {
     std::unique_lock lock(mutex_);
 
     // Check if dApp is registered
@@ -165,12 +167,34 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::add_subscription(
         return {ErrorCode::DAPP_NOT_REGISTERED, 0};
     }
 
+    const auto started = now();
+    const uint64_t sub_key = make_sub_key(dapp_id, ran_function_id);
+    SubscriptionDetails details;
+    details.telemetry_ids = telemetry_ids;
+    details.control_ids = control_ids;
+    details.periodicity_us = periodicity_us;
+    details.subscription_time_s = subscription_time_s;
+    if (subscription_time_s > 0) {
+        details.expires_at = started + std::chrono::seconds(subscription_time_s);
+    }
+
     // Check if subscription already exists
     auto& dapp_subs = dapp_subscriptions_[dapp_id];
     if (dapp_subs.count(ran_function_id) > 0) {
-        // Return existing subscription ID
-        uint64_t sub_key = make_sub_key(dapp_id, ran_function_id);
         uint32_t existing_sub_id = subscription_id_reverse_[sub_key];
+        auto old_details = subscription_details_.find(sub_key);
+        if (old_details != subscription_details_.end() &&
+            is_expired(old_details->second, started)) {
+            // Ran out but not swept yet: start a new one in its place. Handing
+            // the old one back would have the sweep remove it right after.
+            old_details->second = std::move(details);
+            E3_LOG_INFO(LOG_TAG) << "Subscription renewed after expiry: dApp " << dapp_id
+                                 << " -> RAN function " << ran_function_id
+                                 << " (subscription_id=" << existing_sub_id
+                                 << ", subscription_time_s=" << subscription_time_s << ")";
+            return {ErrorCode::SUCCESS, existing_sub_id};
+        }
+        // Return existing subscription ID
         E3_LOG_WARN(LOG_TAG) << "dApp " << dapp_id << " already subscribed to RAN function " 
                              << ran_function_id << " (subscription_id=" << existing_sub_id << ")";
         return {ErrorCode::SUBSCRIPTION_EXISTS, existing_sub_id};
@@ -193,20 +217,16 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::add_subscription(
     
     // Add subscription ID mappings
     subscription_ids_[subscription_id] = {dapp_id, ran_function_id};
-    uint64_t sub_key = make_sub_key(dapp_id, ran_function_id);
     subscription_id_reverse_[sub_key] = subscription_id;
 
     // Store per-subscription metadata
-    SubscriptionDetails details;
-    details.telemetry_ids = telemetry_ids;
-    details.control_ids = control_ids;
-    details.periodicity_us = periodicity_us;
     subscription_details_[sub_key] = std::move(details);
 
     E3_LOG_INFO(LOG_TAG) << "Subscription added: dApp " << dapp_id 
                          << " -> RAN function " << ran_function_id
                          << " (subscription_id=" << subscription_id
                          << ", periodicity_us=" << periodicity_us
+                         << ", subscription_time_s=" << subscription_time_s
                          << ", telemetry_ids=" << telemetry_ids.size()
                          << ", control_ids=" << control_ids.size() << ")";
 
@@ -217,6 +237,52 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::add_subscription(
     }
 
     return {ErrorCode::SUCCESS, subscription_id};
+}
+
+std::vector<ExpiredSubscription> SubscriptionManager::expire_subscriptions() {
+    std::vector<ExpiredSubscription> expired;
+    std::vector<uint32_t> emptied_ran_functions;
+    {
+        std::unique_lock lock(mutex_);
+        const auto at = now();
+        for (auto it = subscription_details_.begin(); it != subscription_details_.end();) {
+            if (!is_expired(it->second, at)) {
+                ++it;
+                continue;
+            }
+            const uint64_t sub_key = it->first;
+            const auto dapp_id = static_cast<uint32_t>(sub_key >> 32);
+            const auto ran_function_id = static_cast<uint32_t>(sub_key & 0xffffffffu);
+
+            uint32_t subscription_id = 0;
+            auto id_it = subscription_id_reverse_.find(sub_key);
+            if (id_it != subscription_id_reverse_.end()) {
+                subscription_id = id_it->second;
+                subscription_ids_.erase(subscription_id);
+                subscription_id_reverse_.erase(id_it);
+            }
+            auto dapp_it = dapp_subscriptions_.find(dapp_id);
+            if (dapp_it != dapp_subscriptions_.end()) {
+                dapp_it->second.erase(ran_function_id);
+            }
+            auto& subscribers = ran_function_subscribers_[ran_function_id];
+            subscribers.erase(dapp_id);
+            if (subscribers.empty()) {
+                emptied_ran_functions.push_back(ran_function_id);
+            }
+            expired.push_back({dapp_id, ran_function_id, subscription_id});
+            E3_LOG_INFO(LOG_TAG) << "Subscription " << subscription_id << " expired after "
+                                 << it->second.subscription_time_s << " s: dApp " << dapp_id
+                                 << " -> RAN function " << ran_function_id;
+            it = subscription_details_.erase(it);
+        }
+    }
+
+    // Outside the lock, as for the other removals.
+    for (uint32_t ran_function_id : emptied_ran_functions) {
+        check_sm_lifecycle(ran_function_id, true); // had_subscribers = true
+    }
+    return expired;
 }
 
 ErrorCode SubscriptionManager::remove_subscription(uint32_t dapp_id, uint32_t ran_function_id) {
@@ -337,18 +403,29 @@ std::vector<uint32_t> SubscriptionManager::get_subscribed_dapps(uint32_t ran_fun
     if (it == ran_function_subscribers_.end()) {
         return {};
     }
-    return std::vector<uint32_t>(it->second.begin(), it->second.end());
+    std::vector<uint32_t> result;
+    result.reserve(it->second.size());
+    std::optional<std::chrono::steady_clock::time_point> at;
+    for (uint32_t dapp_id : it->second) {
+        auto details = subscription_details_.find(make_sub_key(dapp_id, ran_function_id));
+        if (details != subscription_details_.end() && details->second.expires_at) {
+            if (!at) at = now();
+            if (is_expired(details->second, *at)) continue;
+        }
+        result.push_back(dapp_id);
+    }
+    return result;
 }
 
-const SubscriptionDetails* SubscriptionManager::get_subscription_details(
+std::optional<SubscriptionDetails> SubscriptionManager::get_subscription_details(
         uint32_t dapp_id, uint32_t ran_function_id) const {
     std::shared_lock lock(mutex_);
 
     auto it = subscription_details_.find(make_sub_key(dapp_id, ran_function_id));
     if (it == subscription_details_.end()) {
-        return nullptr;
+        return std::nullopt;
     }
-    return &it->second;
+    return it->second;
 }
 
 size_t SubscriptionManager::get_subscriber_count(uint32_t ran_function_id) const {
