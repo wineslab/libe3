@@ -221,9 +221,11 @@ public:
     /**
      * @brief Get subscription details for a specific dApp + RAN function pair
      *
-     * @return nullptr if no such subscription exists
+     * @return A copy taken under the lock, or nullopt if no such subscription
+     *         exists. A copy, not a pointer: the subscription can be removed or
+     *         renewed by another thread (including the expiry sweep) at any time.
      */
-    const SubscriptionDetails* get_subscription_details(uint32_t dapp_id, uint32_t ran_function_id) const;
+    std::optional<SubscriptionDetails> get_subscription_details(uint32_t dapp_id, uint32_t ran_function_id) const;
 
     /**
      * @brief Get count of subscribers for a RAN function

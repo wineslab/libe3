@@ -336,8 +336,8 @@ TEST(SubscriptionManager_subscription_details_stored) {
     auto [result, sub_id] = mgr.add_subscription(dapp_id, 200, tids, cids, 5000);
     ASSERT_TRUE(result == ErrorCode::SUCCESS);
 
-    const auto* details = mgr.get_subscription_details(dapp_id, 200);
-    ASSERT_TRUE(details != nullptr);
+    const auto details = mgr.get_subscription_details(dapp_id, 200);
+    ASSERT_TRUE(details.has_value());
     ASSERT_EQ(details->periodicity_us, 5000u);
     ASSERT_EQ(details->telemetry_ids.size(), 3u);
     ASSERT_EQ(details->telemetry_ids[0], 10u);
@@ -355,8 +355,8 @@ TEST(SubscriptionManager_subscription_details_defaults) {
     auto [result, sub_id] = mgr.add_subscription(dapp_id, 200);
     ASSERT_TRUE(result == ErrorCode::SUCCESS);
 
-    const auto* details = mgr.get_subscription_details(dapp_id, 200);
-    ASSERT_TRUE(details != nullptr);
+    const auto details = mgr.get_subscription_details(dapp_id, 200);
+    ASSERT_TRUE(details.has_value());
     ASSERT_EQ(details->periodicity_us, 0u);
     ASSERT_TRUE(details->telemetry_ids.empty());
     ASSERT_TRUE(details->control_ids.empty());
@@ -370,8 +370,8 @@ TEST(SubscriptionManager_subscription_details_removed_on_delete) {
     mgr.add_subscription(dapp_id, 200, tids, {}, 1000);
     mgr.remove_subscription(dapp_id, 200);
 
-    const auto* details = mgr.get_subscription_details(dapp_id, 200);
-    ASSERT_TRUE(details == nullptr);
+    const auto details = mgr.get_subscription_details(dapp_id, 200);
+    ASSERT_FALSE(details.has_value());
 }
 
 TEST(SubscriptionManager_subscription_details_removed_on_unregister) {
@@ -382,8 +382,8 @@ TEST(SubscriptionManager_subscription_details_removed_on_unregister) {
     mgr.add_subscription(dapp_id, 300, tids, {}, 2000);
     mgr.unregister_dapp(dapp_id);
 
-    const auto* details = mgr.get_subscription_details(dapp_id, 300);
-    ASSERT_TRUE(details == nullptr);
+    const auto details = mgr.get_subscription_details(dapp_id, 300);
+    ASSERT_FALSE(details.has_value());
 }
 
 // =========================================================================
@@ -412,8 +412,8 @@ TEST(SubscriptionManager_time_zero_means_no_limit) {
     auto [reg, dapp] = mgr.register_dapp();
     mgr.add_subscription(dapp, 100, {1}, {}, 0, 0);
 
-    const auto* details = mgr.get_subscription_details(dapp, 100);
-    ASSERT_TRUE(details != nullptr);
+    const auto details = mgr.get_subscription_details(dapp, 100);
+    ASSERT_TRUE(details.has_value());
     ASSERT_EQ(details->subscription_time_s, 0u);
     ASSERT_FALSE(details->expires_at.has_value());
 
@@ -442,10 +442,30 @@ TEST(SubscriptionManager_subscription_ends_when_its_time_is_up) {
     ASSERT_FALSE(mgr.is_subscribed(dapp, 100));
     ASSERT_FALSE(mgr.has_subscribers(100));
     ASSERT_EQ(mgr.subscription_count(), 0u);
-    ASSERT_TRUE(mgr.get_subscription_details(dapp, 100) == nullptr);
+    ASSERT_FALSE(mgr.get_subscription_details(dapp, 100).has_value());
     // Only the subscription goes; the dApp stays registered.
     ASSERT_TRUE(mgr.is_dapp_registered(dapp));
     ASSERT_TRUE(mgr.expire_subscriptions().empty());
+}
+
+TEST(SubscriptionManager_details_taken_before_expiry_stay_readable_after_it) {
+    FakeClock clock;
+    SubscriptionManager mgr(clock.fn());
+    auto [reg, dapp] = mgr.register_dapp();
+    mgr.add_subscription(dapp, 100, {1, 2, 3}, {4}, 500, 60);
+
+    const auto details = mgr.get_subscription_details(dapp, 100);
+    ASSERT_TRUE(details.has_value());
+
+    clock.advance(60s);
+    ASSERT_EQ(mgr.expire_subscriptions().size(), 1u);
+    ASSERT_FALSE(mgr.get_subscription_details(dapp, 100).has_value());
+
+    // The copy is a snapshot: the sweep removing the entry does not touch it.
+    ASSERT_EQ(details->periodicity_us, 500u);
+    ASSERT_EQ(details->telemetry_ids.size(), 3u);
+    ASSERT_EQ(details->control_ids.size(), 1u);
+    ASSERT_EQ(details->subscription_time_s, 60u);
 }
 
 TEST(SubscriptionManager_expired_subscription_gets_no_indications_before_the_sweep) {
@@ -535,8 +555,8 @@ TEST(SubscriptionManager_resubscribe_after_expiry_starts_a_new_subscription) {
 
     ASSERT_TRUE(mgr.expire_subscriptions().empty());
     ASSERT_TRUE(mgr.is_subscribed(dapp, 100));
-    const auto* details = mgr.get_subscription_details(dapp, 100);
-    ASSERT_TRUE(details != nullptr);
+    const auto details = mgr.get_subscription_details(dapp, 100);
+    ASSERT_TRUE(details.has_value());
     ASSERT_EQ(details->subscription_time_s, 30u);
     ASSERT_EQ(details->telemetry_ids.size(), 1u);
     ASSERT_EQ(details->telemetry_ids[0], 2u);
@@ -580,7 +600,8 @@ TEST(SubscriptionManager_expiry_uses_steady_clock_by_default) {
     auto [reg, dapp] = mgr.register_dapp();
     mgr.add_subscription(dapp, 100, {}, {}, 0, 3600);
     ASSERT_TRUE(mgr.expire_subscriptions().empty());
-    const auto* details = mgr.get_subscription_details(dapp, 100);
+    const auto details = mgr.get_subscription_details(dapp, 100);
+    ASSERT_TRUE(details.has_value());
     ASSERT_TRUE(details->expires_at.has_value());
     ASSERT_TRUE(*details->expires_at > std::chrono::steady_clock::now());
 }
