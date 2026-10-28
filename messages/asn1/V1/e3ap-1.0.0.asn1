@@ -5,28 +5,28 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
 
     E3-SetupRequest ::= SEQUENCE {
         e3apProtocolVersion  E3-Version,
-        dAppName             UTF8String (SIZE (1..64)),
+        dAppName             E3-Name,
         dAppVersion          E3-Version,
-        vendor               UTF8String (SIZE (1..64)),
+        vendor               E3-Name,
         ...
     }
 
     E3-SetupResponse ::= SEQUENCE {
         requestId            E3-MessageID,
         responseCode         E3-ResponseCode,
-        ranIdentifier        UTF8String (SIZE (1..64)),
+        ranIdentifier        E3-Name,
         e3apProtocolVersion  E3-Version OPTIONAL,
         dAppIdentifier       E3-DAppID OPTIONAL,
-        ranFunctionList      SEQUENCE OF E3-RanFunctionDefinition OPTIONAL,
+        ranFunctionList      SEQUENCE (SIZE (0..64)) OF E3-RanFunctionDefinition OPTIONAL,
         ...
     }
 
     E3-SubscriptionRequest ::= SEQUENCE {
         dAppIdentifier          E3-DAppID,
         ranFunctionIdentifier   INTEGER (1..65535),
-        telemetryIdentifierList SEQUENCE (SIZE (0..1000)) OF INTEGER (1..65535),
-        controlIdentifierList   SEQUENCE (SIZE (0..1000)) OF INTEGER (1..65535),
-        subscriptionTime        INTEGER (0..3600) OPTIONAL,
+        telemetryIdentifierList SEQUENCE (SIZE (0..256)) OF INTEGER (1..65535),
+        controlIdentifierList   SEQUENCE (SIZE (0..256)) OF INTEGER (1..65535),
+        subscriptionTime        INTEGER (0..86400) OPTIONAL,
         -- Microseconds between indications, 0 = every event.
         periodicity             INTEGER (0..60000000) OPTIONAL,
         ...
@@ -43,8 +43,8 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         dAppIdentifier       E3-DAppID,
         responseCode         E3-ResponseCode,
         subscriptionId       INTEGER (1..65535) OPTIONAL,
-        telemetryIdentifierList SEQUENCE (SIZE (0..1000)) OF INTEGER (1..65535) OPTIONAL,
-        controlIdentifierList   SEQUENCE (SIZE (0..1000)) OF INTEGER (1..65535) OPTIONAL,
+        telemetryIdentifierList SEQUENCE (SIZE (0..256)) OF INTEGER (1..65535) OPTIONAL,
+        controlIdentifierList   SEQUENCE (SIZE (0..256)) OF INTEGER (1..65535) OPTIONAL,
         ...,
         -- Extension additions: decoders from before them skip both.
         ranFunctionIdentifier   INTEGER (1..65535) OPTIONAL,
@@ -54,9 +54,9 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
 
     E3-RanFunctionDefinition ::= SEQUENCE {
         ranFunctionIdentifier   INTEGER (1..65535),
-        telemetryIdentifierList SEQUENCE (SIZE (0..1000)) OF INTEGER (1..65535),
-        controlIdentifierList   SEQUENCE (SIZE (0..1000)) OF INTEGER (1..65535),
-        ranFunctionData         OCTET STRING (SIZE (1..32768)),
+        telemetryIdentifierList SEQUENCE (SIZE (0..256)) OF INTEGER (1..65535),
+        controlIdentifierList   SEQUENCE (SIZE (0..256)) OF INTEGER (1..65535),
+        ranFunctionData         OCTET STRING (SIZE (1..262144)),
         ...
     }
 
@@ -127,7 +127,8 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
 
     E3-DAppID ::= INTEGER (1..65535)
     E3-MessageID ::= INTEGER (1..4294967295)
-    E3-Version ::= UTF8String (SIZE (1..11))
+    E3-Name ::= OCTET STRING (SIZE (1..64))
+    E3-Version ::= OCTET STRING (SIZE (1..32))
     -- Deliberately not extensible. An extensible ENUMERATED makes asn1c pass
     -- unknown values through as bare integers, which would turn every
     -- response-code switch in the encoders into a partial function. Adding a
