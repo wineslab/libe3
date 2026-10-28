@@ -255,6 +255,11 @@ struct SubscriptionResponse {
     uint32_t dapp_identifier{0};                  ///< dApp identifier
     ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
     std::optional<uint32_t> subscription_id;     ///< Subscription ID (optional)
+    /// Granted ids: absent means not reported, empty means none granted.
+    std::optional<std::vector<uint32_t>> telemetry_identifier_list;
+    std::optional<std::vector<uint32_t>> control_identifier_list;
+    std::optional<uint32_t> ran_function_identifier;  ///< RAN function the grant is for
+    std::optional<uint32_t> periodicity;              ///< Granted delivery interval (microseconds)
 };
 
 /**
