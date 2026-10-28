@@ -36,6 +36,25 @@ set(LIBE3_ZMQ_ONLY_TESTS
     setup_bad_request
 )
 
+# E2SM-DAPP codec tests (tests/test_e2sm_dapp_*.cpp). They link libe3::e2sm_dapp
+# alone, which is the point: the codec must work without libe3, so only the
+# link-coexist test also links libe3. Each of encode/decode/roundtrip/c_api is
+# built twice, against the static and against the shared codec library. Skipped
+# when the codec is not built (LIBE3_ENABLE_E2SM_DAPP=OFF, or LIBE3_ENABLE_ASN1=OFF).
+function(libe3_add_e2sm_dapp_test target src)
+    cmake_parse_arguments(ARG "" "CODEC" "EXTRA_LIBS" ${ARGN})
+    add_executable(${target} "${src}")
+    target_link_libraries(${target}
+        PRIVATE
+            ${ARG_CODEC}
+            ${ARG_EXTRA_LIBS}
+            libe3_test_framework
+            libe3_warnings
+            libe3_sanitizers
+    )
+    add_test(NAME ${target} COMMAND ${target})
+endfunction()
+
 foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
     # Derive a target name from the source file name: tests/test_foo.cpp -> test_foo
     get_filename_component(test_name ${test_src} NAME_WE)
@@ -57,6 +76,29 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
     endif()
     if(NOT LIBE3_ENABLE_ZMQ AND simple_name IN_LIST LIBE3_ZMQ_ONLY_TESTS)
         message(STATUS "Skipping test_${simple_name}: ZeroMQ support disabled")
+        continue()
+    endif()
+    if(simple_name MATCHES "^e2sm_dapp_")
+        if(NOT LIBE3_ENABLE_E2SM_DAPP)
+            message(STATUS "Skipping test_${simple_name}: E2SM-DAPP codec not built")
+            continue()
+        endif()
+        set(_e2sm_src "${CMAKE_CURRENT_SOURCE_DIR}/${test_src}")
+        if(simple_name STREQUAL "e2sm_dapp_link_coexist")
+            # Both libraries in one executable, each carrying its own asn1c
+            # runtime: static libe3 + static codec, and shared libe3 + static codec.
+            set(_zmq_libs "")
+            if(LIBE3_ENABLE_ZMQ AND TARGET PkgConfig::ZMQ)
+                set(_zmq_libs PkgConfig::ZMQ)
+            endif()
+            libe3_add_e2sm_dapp_test(${target_name} "${_e2sm_src}"
+                CODEC libe3::e2sm_dapp EXTRA_LIBS libe3::libe3 ${_zmq_libs})
+            libe3_add_e2sm_dapp_test(${target_name}_shared_libe3 "${_e2sm_src}"
+                CODEC libe3::e2sm_dapp EXTRA_LIBS libe3::shared ${_zmq_libs})
+        else()
+            libe3_add_e2sm_dapp_test(${target_name} "${_e2sm_src}" CODEC libe3::e2sm_dapp)
+            libe3_add_e2sm_dapp_test(${target_name}_shared "${_e2sm_src}" CODEC libe3::e2sm_dapp_shared)
+        endif()
         continue()
     endif()
     # test_latrec.cpp exercises latrec.h's TLS convenience layer
