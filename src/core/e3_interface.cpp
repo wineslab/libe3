@@ -33,9 +33,9 @@ namespace libe3 {
 namespace {
 constexpr const char* LOG_TAG = "E3Iface";
 
-// How often the RAN looks for subscriptions whose time has run out. Dispatch
-// already skips an expired subscription, so this only bounds how late its SM
-// is stopped and the status handler told.
+// How often subscriptions whose time has run out are looked for. On the RAN,
+// dispatch already skips an expired subscription, so this only bounds how late
+// its SM is stopped and the status handler told.
 constexpr auto EXPIRY_SWEEP_INTERVAL = std::chrono::milliseconds(250);
 
 /**
@@ -161,11 +161,12 @@ uint32_t E3Interface::generate_message_id() {
     return static_cast<uint32_t>(n % 0xFFFFFFFFull) + 1;
 }
 
-void E3Interface::remember_subscription_op(uint32_t request_id,
-                                          uint32_t ran_function_id,
-                                          bool is_delete) {
+void E3Interface::remember_subscription_op(
+        uint32_t request_id, uint32_t ran_function_id, bool is_delete,
+        std::optional<uint32_t> subscription_time_s) {
     std::lock_guard<std::mutex> lk(pending_subscriptions_mutex_);
-    pending_subscriptions_[request_id] = PendingSubscriptionOp{ran_function_id, is_delete};
+    pending_subscriptions_[request_id] =
+        PendingSubscriptionOp{ran_function_id, is_delete, subscription_time_s};
 }
 
 void E3Interface::forget_subscription_op(uint32_t request_id) {
@@ -343,12 +344,12 @@ ErrorCode E3Interface::start() {
         outbound_thread_ = std::make_unique<std::thread>(&E3Interface::outbound_loop_ran, this);
         // RAN receives dApp reports; drain them off the inbound thread.
         report_worker_thread_ = std::make_unique<std::thread>(&E3Interface::report_worker_loop, this);
-        expiry_thread_ = std::make_unique<std::thread>(&E3Interface::subscription_expiry_loop, this);
     } else {
         setup_thread_ = std::make_unique<std::thread>(&E3Interface::setup_loop_dapp, this);
         inbound_thread_ = std::make_unique<std::thread>(&E3Interface::inbound_loop_dapp, this);
         outbound_thread_ = std::make_unique<std::thread>(&E3Interface::outbound_loop_dapp, this);
     }
+    expiry_thread_ = std::make_unique<std::thread>(&E3Interface::subscription_expiry_loop, this);
 
 #ifdef LIBE3_ENABLE_LATREC
     context_thread_ = std::make_unique<std::thread>(&E3Interface::context_monitor_loop, this);
@@ -766,8 +767,16 @@ void E3Interface::subscription_expiry_loop() {
             break;
         }
         lk.unlock();
-        if (!subscription_manager_->expire_subscriptions().empty()) {
-            notify_dapp_status_changed();
+        if (subscription_manager_) {
+            if (!subscription_manager_->expire_subscriptions().empty()) {
+                notify_dapp_status_changed();
+            }
+        } else if (dapp_state_) {
+            for (uint32_t ran_function_id :
+                 dapp_state_->expire_subscriptions(std::chrono::steady_clock::now())) {
+                E3_LOG_INFO(LOG_TAG) << "Subscription to RAN function " << ran_function_id
+                                     << " ran out of time";
+            }
         }
         lk.lock();
     }
@@ -1417,8 +1426,18 @@ void E3Interface::handle_subscription_response(const SubscriptionResponse& resp)
             E3_LOG_INFO(LOG_TAG) << "Subscription to RAN function "
                                  << pending->ran_function_id << " released";
         } else if (resp.subscription_id.has_value()) {
+            // The RAN started its clock before it sent this response, so a clock
+            // started now ends later than the RAN's. A dApp that renews the
+            // moment its own deadline passes then always reaches the RAN after
+            // the old subscription is gone.
+            std::optional<std::chrono::steady_clock::time_point> expires_at;
+            if (pending->subscription_time_s && *pending->subscription_time_s > 0) {
+                expires_at = std::chrono::steady_clock::now() +
+                             std::chrono::seconds(*pending->subscription_time_s);
+            }
             dapp_state_->record_subscription(pending->ran_function_id,
-                                             *resp.subscription_id);
+                                             *resp.subscription_id,
+                                             expires_at);
             E3_LOG_INFO(LOG_TAG) << "Subscription " << *resp.subscription_id
                                  << " granted for RAN function "
                                  << pending->ran_function_id;
@@ -1540,7 +1559,7 @@ ErrorCode E3Interface::queue_subscription_request(
     // Recorded before the send, not after: the response can only be attributed
     // to a RAN function through this entry, and the inbound thread may see it
     // before this call returns.
-    remember_subscription_op(mid, ran_function_id, /*is_delete=*/false);
+    remember_subscription_op(mid, ran_function_id, /*is_delete=*/false, sub_time);
     ErrorCode rc = queue_outbound(std::move(pdu));
     if (rc != ErrorCode::SUCCESS) {
         forget_subscription_op(mid);

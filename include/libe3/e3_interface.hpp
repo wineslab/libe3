@@ -245,6 +245,9 @@ private:
     struct PendingSubscriptionOp {
         uint32_t ran_function_id{0};
         bool is_delete{false};
+        // subscriptionTime asked for, in seconds. The dApp's deadline starts when
+        // the response arrives, never before the RAN's own.
+        std::optional<uint32_t> subscription_time_s;
     };
     std::mutex pending_subscriptions_mutex_;
     std::unordered_map<uint32_t, PendingSubscriptionOp> pending_subscriptions_;
@@ -339,8 +342,9 @@ private:
     void report_worker_loop();
 
     /**
-     * @brief RAN-role thread that removes subscriptions whose subscriptionTime
-     *        has run out. The dApp is not told: E3AP has no PDU for it.
+     * @brief Thread that ends subscriptions whose subscriptionTime has run out.
+     *        The RAN removes them; the dApp forgets them at the same moment.
+     *        Neither tells the other: E3AP has no PDU for it.
      */
     void subscription_expiry_loop();
 
@@ -414,9 +418,11 @@ private:
      * @param request_id      E3-MessageID the request was sent with
      * @param ran_function_id RAN function the request concerns
      * @param is_delete       true for a SubscriptionDelete, false for a request
+     * @param subscription_time_s subscriptionTime the request asked for, if any
      */
-    void remember_subscription_op(uint32_t request_id, uint32_t ran_function_id,
-                                  bool is_delete);
+    void remember_subscription_op(
+        uint32_t request_id, uint32_t ran_function_id, bool is_delete,
+        std::optional<uint32_t> subscription_time_s = std::nullopt);
 
     /// Drop a pending record, e.g. when the request could not be queued.
     void forget_subscription_op(uint32_t request_id);
