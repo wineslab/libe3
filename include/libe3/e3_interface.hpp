@@ -245,6 +245,9 @@ private:
     struct PendingSubscriptionOp {
         uint32_t ran_function_id{0};
         bool is_delete{false};
+        // subscriptionTime asked for, in seconds. The dApp's deadline starts when
+        // the response arrives, never before the RAN's own.
+        std::optional<uint32_t> subscription_time_s;
     };
     std::mutex pending_subscriptions_mutex_;
     std::unordered_map<uint32_t, PendingSubscriptionOp> pending_subscriptions_;
@@ -262,6 +265,9 @@ private:
     std::unique_ptr<std::thread> inbound_thread_;
     std::unique_ptr<std::thread> outbound_thread_;
     std::unique_ptr<std::thread> report_worker_thread_;
+    std::unique_ptr<std::thread> expiry_thread_;
+    std::mutex expiry_mu_;
+    std::condition_variable expiry_cv_;  // woken by stop() so the thread exits at once
 #ifdef LIBE3_ENABLE_LATREC
     // ~1 Hz slow-lane sampler stamping LATREC_CONTEXT (involuntary context
     // switches, current CPU frequency), to explain p99 tails. Exists only in
@@ -335,6 +341,14 @@ private:
      */
     void report_worker_loop();
 
+    /**
+     * @brief Thread that ends subscriptions whose subscriptionTime has run out.
+     *        The RAN removes them; the dApp forgets them at the same moment.
+     *        Neither tells the other: E3-ReleaseMessage ends the whole dApp
+     *        session, not one subscription.
+     */
+    void subscription_expiry_loop();
+
 #ifdef LIBE3_ENABLE_LATREC
     /**
      * @brief ~1 Hz slow-lane sampler stamping LATREC_CONTEXT.
@@ -405,9 +419,11 @@ private:
      * @param request_id      E3-MessageID the request was sent with
      * @param ran_function_id RAN function the request concerns
      * @param is_delete       true for a SubscriptionDelete, false for a request
+     * @param subscription_time_s subscriptionTime the request asked for, if any
      */
-    void remember_subscription_op(uint32_t request_id, uint32_t ran_function_id,
-                                  bool is_delete);
+    void remember_subscription_op(
+        uint32_t request_id, uint32_t ran_function_id, bool is_delete,
+        std::optional<uint32_t> subscription_time_s = std::nullopt);
 
     /// Drop a pending record, e.g. when the request could not be queued.
     void forget_subscription_op(uint32_t request_id);

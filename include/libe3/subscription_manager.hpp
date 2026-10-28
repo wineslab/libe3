@@ -13,7 +13,9 @@
 #define LIBE3_SUBSCRIPTION_MANAGER_HPP
 
 #include "types.hpp"
+#include <chrono>
 #include <mutex>
+#include <optional>
 #include <shared_mutex>
 #include <utility>
 #include <vector>
@@ -30,7 +32,22 @@ struct SubscriptionDetails {
     std::vector<uint32_t> telemetry_ids;
     std::vector<uint32_t> control_ids;
     uint32_t periodicity_us{0};  ///< 0 = use SM default
+    uint32_t subscription_time_s{0};  ///< How long the subscription lasts, 0 = no limit
+    /// When the subscription ends. Unset when `subscription_time_s` is 0.
+    std::optional<std::chrono::steady_clock::time_point> expires_at;
 };
+
+/**
+ * @brief A subscription ended because its subscriptionTime ran out.
+ */
+struct ExpiredSubscription {
+    uint32_t dapp_id{0};
+    uint32_t ran_function_id{0};
+    uint32_t subscription_id{0};
+};
+
+/// Source of "now" for subscription expiry. Empty means std::chrono::steady_clock.
+using SubscriptionClock = std::function<std::chrono::steady_clock::time_point()>;
 
 /**
  * @brief Callback type for SM lifecycle events
@@ -60,8 +77,11 @@ class SubscriptionManager {
 public:
     /**
      * @brief Construct a new Subscription Manager
+     *
+     * @param clock Source of "now" for subscription expiry, so tests can move
+     *        time without sleeping. Defaults to std::chrono::steady_clock.
      */
-    SubscriptionManager();
+    explicit SubscriptionManager(SubscriptionClock clock = {});
 
     /**
      * @brief Destructor
@@ -129,18 +149,36 @@ public:
      * @param telemetry_ids Telemetry IDs the dApp wants
      * @param control_ids Control IDs the dApp wants
      * @param periodicity_us Reporting periodicity in microseconds (0 = SM default)
+     * @param subscription_time_s Seconds the subscription lasts (0 = no limit).
+     *        When it runs out the subscription is removed as if the dApp had
+     *        deleted it, see expire_subscriptions().
      * @return std::pair containing:
      *         - ErrorCode::SUCCESS on success, or error code on failure
      *         - The assigned subscription ID (valid only if ErrorCode::SUCCESS)
      * @return ErrorCode::DAPP_NOT_REGISTERED if dApp not registered
-     * @return ErrorCode::SUBSCRIPTION_EXISTS if already subscribed
+     * @return ErrorCode::SUBSCRIPTION_EXISTS if already subscribed. A subscription
+     *         that has run out but not yet been removed does not count: the
+     *         request starts a new one under the same subscription ID.
      */
     std::pair<ErrorCode, uint32_t> add_subscription(
         uint32_t dapp_id,
         uint32_t ran_function_id,
         const std::vector<uint32_t>& telemetry_ids = {},
         const std::vector<uint32_t>& control_ids = {},
-        uint32_t periodicity_us = 0);
+        uint32_t periodicity_us = 0,
+        uint32_t subscription_time_s = 0);
+
+    /**
+     * @brief Remove every subscription whose time has run out
+     *
+     * Removal is silent towards the dApp: E3AP has no "subscription expired"
+     * PDU. The SM lifecycle callback fires for a RAN function that loses its
+     * last subscriber. Call this periodically; get_subscribed_dapps() already
+     * leaves out an expired subscription in between.
+     *
+     * @return the subscriptions that were removed
+     */
+    std::vector<ExpiredSubscription> expire_subscriptions();
 
     /**
      * @brief Remove a subscription between dApp and RAN function
@@ -174,15 +212,20 @@ public:
 
     /**
      * @brief Get all dApps subscribed to a RAN function
+     *
+     * Leaves out a dApp whose subscription time has run out, even before
+     * expire_subscriptions() removes it, so no indication goes past the deadline.
      */
     std::vector<uint32_t> get_subscribed_dapps(uint32_t ran_function_id) const;
 
     /**
      * @brief Get subscription details for a specific dApp + RAN function pair
      *
-     * @return nullptr if no such subscription exists
+     * @return A copy taken under the lock, or nullopt if no such subscription
+     *         exists. A copy, not a pointer: the subscription can be removed or
+     *         renewed by another thread (including the expiry sweep) at any time.
      */
-    const SubscriptionDetails* get_subscription_details(uint32_t dapp_id, uint32_t ran_function_id) const;
+    std::optional<SubscriptionDetails> get_subscription_details(uint32_t dapp_id, uint32_t ran_function_id) const;
 
     /**
      * @brief Get count of subscribers for a RAN function
@@ -246,6 +289,17 @@ private:
     
     // Callback for SM lifecycle events
     SmLifecycleCallback sm_lifecycle_callback_;
+
+    SubscriptionClock clock_;
+
+    std::chrono::steady_clock::time_point now() const {
+        return clock_ ? clock_() : std::chrono::steady_clock::now();
+    }
+
+    static bool is_expired(const SubscriptionDetails& details,
+                           std::chrono::steady_clock::time_point at) {
+        return details.expires_at && at >= *details.expires_at;
+    }
     
     // Helper to create composite key for subscription
     static uint64_t make_sub_key(uint32_t dapp_id, uint32_t ran_func_id) {

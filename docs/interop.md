@@ -101,13 +101,29 @@ Where one field means different things to different peers. Add a row when a fiel
 | Telemetry and control id lists | 0..256 entries over ASN.1; any length over JSON and Protobuf | JSON array, no limit | 0..256 entries |
 | `ranFunctionData` | 1..262144 bytes on the wire over ASN.1; libe3 carries 1..32768 | JSON array or object, no limit | 1..262144 bytes |
 | RAN functions in a setup response | 0..64 over ASN.1; the RAN refuses to register a 65th | JSON array, no limit | 0..64 |
-| `subscriptionTime` | 0..86400 seconds over ASN.1; accepted and not acted on | no limit | 0..86400 seconds; decoded and not acted on |
+| `subscriptionTime` | 0..86400 seconds over ASN.1, any `uint32` over JSON and Protobuf; 0 or absent is no limit. The RAN removes the subscription when the time is up and sends nothing; the dApp forgets it too, counted from the response | Seconds, no maximum; 0 is no limit. The agent removes the subscription within a second of its time and sends nothing; the dApp manager forgets it on its own clock | 0..86400 seconds; decoded and not acted on |
 
 Because OCUDU reads the number as milliseconds, a libe3 dApp that asks an OCUDU RAN for 100000
 (100 ms in libe3 and Aerial) asks for 100 s, which is out of OCUDU's range and rejected. libe3 does
 not convert: it passes the number through, and the caller facing OCUDU passes milliseconds. OCUDU's
 libe3-compatible codec does not convert either (it passes the value through and caps it at 1000).
 Converting on the OCUDU side is the agreed direction ([#98](https://github.com/wineslab/libe3/issues/98)).
+
+OCUDU decodes `subscriptionTime` and never acts on it. That is not a conflict with libe3 or Aerial, which
+only differ from it in what happens next, but a dApp must not rely on expiry against an OCUDU RAN: a
+subscription it asked to last 60 s lasts until the dApp deletes it or is released. Until OCUDU
+changes (see its table below), a dApp that needs the subscription to end has to end it itself, and
+one that talks to all three can send the time and also delete the subscription when it is done
+([#95](https://github.com/wineslab/libe3/issues/95)).
+
+Neither libe3 nor Aerial tells the dApp when a subscription runs out. The only message that could,
+`E3-ReleaseMessage`, carries just a `dAppIdentifier`, so it ends the whole session and cannot name one
+subscription; Aerial's agent sends it only to a dApp that has been idle for 1800 s with no subscription.
+A dApp that sent a time knows when the RAN will let go. libe3's dApp keeps its own deadline, counted from
+the response, so it is never earlier than the RAN's and a dApp that renews the moment it passes
+always reaches the RAN after the old subscription is gone. Aerial's manager counts from the request
+instead. A libe3 RAN answers a delete for a subscription that has run out `negative`, as it does
+for any unknown subscription.
 
 ## Conformance fixtures
 
@@ -192,6 +208,7 @@ what it has where the row says so.
 | `E3-DAppReport`, `E3-XAppControlAction` and `E3-DAppControlAction` have no `sequenceId` ([#116](https://github.com/wineslab/libe3/issues/116)) | Add `sequenceId` to the three messages, as libe3 0.2.0 has it: mandatory on the report and the xApp control, optional on the dApp control | It joins a report, the xApp control it provoked and the control the dApp re-issued into one E2-E3 procedure, which is what end-to-end loop tracing needs. Today neither side can decode the other's version of these messages: a libe3 report carries a field OCUDU's grammar does not know, and an OCUDU report lacks one libe3 requires. OCUDU's libe3-compatible mode is the 0.1.3 grammar, which predates the field ([#89](https://github.com/wineslab/libe3/issues/89)) |
 | Fragments payloads up to 16 MiB ([#110](https://github.com/wineslab/libe3/issues/110)), answers a control with an `E3-ControlResponse` ([#111](https://github.com/wineslab/libe3/issues/111)), and has bulk-data and instance fields ([#112](https://github.com/wineslab/libe3/issues/112)) | Keep these optional and negotiated at setup, so a peer without them still interoperates | Aerial and libe3 send none of these and must not fail on their absence |
 | Closes the association after 30 s idle and never sends a `releaseMessage` to a dApp ([#90](https://github.com/wineslab/libe3/issues/90), [#93](https://github.com/wineslab/libe3/issues/93)) | Send a `releaseMessage` before closing | A libe3 dApp then reports `RELEASED_BY_RAN`, not `CONNECTION_LOST`, as it does with Aerial |
+| Decodes `subscriptionTime` and never acts on it ([#95](https://github.com/wineslab/libe3/issues/95)) | End the subscription when the time is up (0 is no limit), without a message to the dApp, as libe3 and Aerial's agent now do | A dApp that sends a time gets the same result from all three RANs and need not delete the subscription itself. Until then it must, against OCUDU |
 | Rejects an unknown function or id with a `cause` ([#96](https://github.com/wineslab/libe3/issues/96)), and adds a new subscription for every repeat ([#97](https://github.com/wineslab/libe3/issues/97)) | Keep the rejection, and return the existing subscription on a repeat | libe3's RAN accepts unknown ids today and owes the same rejection |
 
 ## Change ledger
@@ -204,6 +221,7 @@ the same PR as the change. Newest first.
 
 | Change | PR | Kind | Who has to act | Status |
 |---|---|---|---|---|
+| A libe3 RAN ends a subscription when its `subscriptionTime` runs out, as Aerial's agent does (it decoded the field and dropped it, so a subscription asked for 60 s ran until the dApp deleted it or was released). `0` or no time still means no limit. The RAN sends nothing to the dApp, stops the Service Model if that was its last subscriber and calls the dApp status handler as for a delete; a libe3 dApp forgets it too, counted from the response, so never before the RAN ([#95](https://github.com/wineslab/libe3/issues/95)) | | Behavior | A dApp that relied on a subscription running forever after sending a non-zero `subscriptionTime` will see it end: send 0, or leave the field out, or subscribe again when it ends. Against an OCUDU RAN nothing changes, it still never expires one. Nothing on the wire, on any encoding | unmerged |
 | ASN.1 bounds match OCUDU's: telemetry and control id lists 0..256 entries (were 0..1000), `ranFunctionData` 1..262144 bytes (was 1..32768), at most 64 functions in a setup response (was unbounded), `subscriptionTime` 0..86400 seconds (was 0..3600). A RAN refuses to register a 65th function or one with over 256 ids, and a setup response omits such an entry instead of failing to encode ([#113](https://github.com/wineslab/libe3/issues/113)) | | ASN.1 wire | libe3, OAI's E3 agent and the dApp library rebuilt together, tracked on duranta#495: a different range changes the bits APER uses, so old and new cannot exchange these PDUs. OCUDU's libe3-compatible codec must take the new bounds. libe3 still carries at most 32768 bytes of `ranFunctionData` and about 60 KB per setup response, because the encode buffer, the receive buffers and the POSIX frame cap are unchanged. JSON and Protobuf unchanged | unmerged |
 | Tests pin what peers send and what libe3 writes (Aerial's 17 JSON examples, the ASN.1 bytes of one PDU per type). ASN.1 `decode` reports a malformed PDU as `DECODE_FAILED`; it returned `ENCODE_FAILED` ([#102](https://github.com/wineslab/libe3/issues/102)) | | Behavior | Nothing on the wire. A caller that matched `ENCODE_FAILED` on an ASN.1 decode now sees `DECODE_FAILED`, as JSON and Protobuf already returned; libe3 itself does not distinguish them | unmerged |
 | ASN.1 `dAppName`, `vendor`, `ranIdentifier` and the two version fields change from `UTF8String` to `OCTET STRING`, sizes 1..64 and 1..32 bytes (a version was 1..11 characters). Each string's length was a whole octet and is now 6 bits (names) or 5 bits (versions). An empty name, a name over 64 bytes or a version over 32 bytes now fails to encode, where it went out unchecked before, so over ASN.1 `init()` returns `INVALID_PARAM` for a config string outside those sizes instead of failing the first setup. A dApp with no `vendor` and a RAN with no `ranIdentifier` send `unknown`, on every encoding ([#108](https://github.com/wineslab/libe3/issues/108)) | | ASN.1 wire | libe3, OAI's E3 agent and the dApp library rebuilt together, tracked on duranta#495: old and new cannot exchange `SetupRequest` or `SetupResponse`. OCUDU's libe3-compatible mode must switch to `OCTET STRING`; its native grammar already uses these types and sizes. JSON and Protobuf wire unchanged, apart from `unknown` where the config left a name empty | unmerged |
