@@ -199,6 +199,7 @@ EOF
 # Install ASN.1 compiler from source (used on Debian where package may be outdated)
 install_asn1c_from_source() {
     local pinned_commit="940dd5fa9f3917913fd487b13dfddfacd0ded06e"
+    local build_id="$pinned_commit+nsa"
     local stamp="/opt/asn1c/.installed-commit"
 
     # Already installed for this exact pinned commit (e.g. restored from a CI
@@ -206,7 +207,7 @@ install_asn1c_from_source() {
     # presence, matters for commit-trailers.yml's per-commit-build job: it
     # checks out several commits in the same container, and an earlier commit
     # could pin a different asn1c revision than the one already on disk.
-    if [[ -x /opt/asn1c/bin/asn1c ]] && [[ "$(cat "$stamp" 2>/dev/null)" == "$pinned_commit" ]]; then
+    if [[ -x /opt/asn1c/bin/asn1c ]] && [[ "$(cat "$stamp" 2>/dev/null)" == "$build_id" ]]; then
         echo_info "asn1c already installed at /opt/asn1c for commit $pinned_commit, skipping rebuild"
         return 0
     fi
@@ -229,7 +230,8 @@ install_asn1c_from_source() {
         git checkout "$pinned_commit"
         git log -n1 || true
         autoreconf -iv
-        ./configure --prefix /opt/asn1c/
+        # asn1c breaks C99 aliasing rules; gcc >= 15 at -O2 miscompiles it (vlm/asn1c#509)
+        CFLAGS="-O2 -fno-strict-aliasing" ./configure --prefix /opt/asn1c/
         make -j"$(nproc)"
         sudo make install
     ) > "$asn1_install_log" 2>&1
@@ -243,7 +245,7 @@ install_asn1c_from_source() {
         tail -n 200 "$asn1_install_log"
         return "$status"
     fi
-    echo "$pinned_commit" | sudo tee "$stamp" > /dev/null
+    echo "$build_id" | sudo tee "$stamp" > /dev/null
 }
 
 check_command() {
