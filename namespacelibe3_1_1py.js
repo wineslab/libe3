@@ -1,7 +1,7 @@
 var namespacelibe3_1_1py =
 [
-    [ "DAppSession", "classlibe3_1_1py_1_1DAppSession.html", "classlibe3_1_1py_1_1DAppSession" ],
     [ "E3Event", "structlibe3_1_1py_1_1E3Event.html", "structlibe3_1_1py_1_1E3Event" ],
+    [ "DAppSession", "classlibe3_1_1py_1_1DAppSession.html", "classlibe3_1_1py_1_1DAppSession" ],
     [ "E3EventKind", "namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917", [
       [ "E3_EVENT_NONE", "namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917a083ca2e713f1043b9689be0edbdb143b", null ],
       [ "E3_EVENT_INDICATION", "namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917a5b82a1c0c71918efdfd20f19d800fa47", null ],

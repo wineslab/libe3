@@ -1,7 +1,12 @@
 var searchData=
 [
-  ['the_20e3_20only_20end_20to_20end_20loop_20path_20a_0',['The E3-only end-to-end loop (Path A)',['../path_a_e3_loop.html',1,'']]],
-  ['the_20full_20e2_20e3_20loop_20path_20b_1',['The full E2-E3 loop (Path B)',['../path_b_e2_e3_loop.html',1,'']]],
-  ['to_20end_20loop_20path_20a_2',['The E3-only end-to-end loop (Path A)',['../path_a_e3_loop.html',1,'']]],
-  ['tt_20libe3py_20tt_3',['libe3 Python bindings (&lt;tt&gt;libe3py&lt;/tt&gt;)',['../md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html',1,'']]]
+  ['identifier_0',['Granularity, and adding an identifier',['../latrec_guide.html#autotoc_md19',1,'']]],
+  ['in_20libe3_20e3sm_20in_20python_1',['The split: E3AP in libe3, E3SM in Python',['../dir_921b7fe62329ee5986df8fde73ed97c3.html#autotoc_md1',1,'']]],
+  ['in_20python_2',['The split: E3AP in libe3, E3SM in Python',['../dir_921b7fe62329ee5986df8fde73ed97c3.html#autotoc_md1',1,'']]],
+  ['in_20the_20rings_3',['Where it shows up in the rings',['../path_b_e2_e3_loop.html#autotoc_md40',1,'']]],
+  ['ind_5fup_4',['Forward leg: RAN to dApp (&lt;span class=&quot;tt&quot;&gt;leg=ind_up&lt;/span&gt;)',['../path_a_e3_loop.html#autotoc_md24',1,'']]],
+  ['install_5',['Build &amp;amp; install',['../dir_921b7fe62329ee5986df8fde73ed97c3.html#autotoc_md6',1,'']]],
+  ['instrumented_6',['instrumented',['../path_a_e3_loop.html#autotoc_md31',1,'Not yet instrumented'],['../path_b_e2_e3_loop.html#autotoc_md41',1,'Not yet instrumented']]],
+  ['integration_7',['Comparing against a hand-rolled integration',['../path_a_e3_loop.html#autotoc_md30',1,'']]],
+  ['it_20shows_20up_20in_20the_20rings_8',['Where it shows up in the rings',['../path_b_e2_e3_loop.html#autotoc_md40',1,'']]]
 ];

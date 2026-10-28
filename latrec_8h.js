@@ -18,7 +18,7 @@ var latrec_8h =
     [ "LATREC_STORE_RELEASE", "latrec_8h.html#a696b7ddc69a88e2f609114f4964d37c4", null ],
     [ "LATREC_UNLIKELY", "latrec_8h.html#a941cec219aae9e18895b0cb78982dceb", null ],
     [ "LATREC_VERSION", "latrec_8h.html#a3391867cf3553b865417f58b66c349d7", null ],
-    [ "latrec_static_assert___LINE__", "latrec_8h.html#afb83fc9c54bec3d6d52ed8d9cbe1ad57", null ],
+    [ "latrec_static_assert___LINE__", "latrec_8h.html#a3a5299284d59c3fbf3594540ef136ff2", null ],
     [ "latrec_close", "latrec_8h.html#a596bf9640530307906f9debe7f93d1a6", null ],
     [ "latrec_ctx", "latrec_8h.html#a588269eb211c77b050ab91ea4f8bc66c", null ],
     [ "latrec_ctx_set", "latrec_8h.html#a1cf8c3111daf8d291d07bd4b4f71a879", null ],

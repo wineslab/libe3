@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['recording_20latrec_0',['Latency recording (latrec)',['../latrec_guide.html',1,'']]]
+  ['hand_20rolled_20integration_0',['Comparing against a hand-rolled integration',['../path_a_e3_loop.html#autotoc_md30',1,'']]]
 ];

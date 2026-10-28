@@ -33,5 +33,5 @@ var searchData=
   ['e3_5fsuccess_30',['E3_SUCCESS',['../error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8af824146bac59547151593059b891da98',1,'error_codes.h']]],
   ['e3_5ftimeout_31',['E3_TIMEOUT',['../error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a04994a724db331393908b59ab6ea377b',1,'error_codes.h']]],
   ['e3_5ftransport_5ferror_32',['E3_TRANSPORT_ERROR',['../error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a9afeda0cd7ee0a9a6de0ea175d943b7e',1,'error_codes.h']]],
-  ['error_33',['error',['../namespacelibe3.html#a509338e1414d84a610f21816d04940a0abb1ca97ec761fc37101737ba0aa2e7c5',1,'libe3::ERROR'],['../namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1feabb1ca97ec761fc37101737ba0aa2e7c5',1,'libe3::ERROR']]]
+  ['error_33',['ERROR',['../namespacelibe3.html#a509338e1414d84a610f21816d04940a0abb1ca97ec761fc37101737ba0aa2e7c5',1,'libe3::ERROR'],['../namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1feabb1ca97ec761fc37101737ba0aa2e7c5',1,'libe3::ERROR']]]
 ];

@@ -6,7 +6,7 @@ var searchData=
   ['where_20the_20ring_20name_20stops_20being_20enough_3',['Attribution, and where the ring name stops being enough',['../latrec_guide.html#autotoc_md17',1,'']]],
   ['where_20the_20rings_20go_4',['Where the rings go',['../latrec_guide.html#autotoc_md12',1,'']]],
   ['why_20a_20ring_20and_20why_20one_20gate_5',['Why a ring, and why one gate',['../latrec_guide.html#autotoc_md9',1,'']]],
-  ['why_20batched_20drain_20gil_20release_20not_20callbacks_6',['Why batched drain + GIL release (not callbacks)',['../md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md3',1,'']]],
+  ['why_20batched_20drain_20gil_20release_20not_20callbacks_6',['Why batched drain + GIL release (not callbacks)',['../dir_921b7fe62329ee5986df8fde73ed97c3.html#autotoc_md3',1,'']]],
   ['why_20one_20gate_7',['Why a ring, and why one gate',['../latrec_guide.html#autotoc_md9',1,'']]],
   ['why_20this_20class_20exists_8',['Why this class exists',['../e3__dapp__session_8hpp.html#why',1,'']]],
   ['wire_9',['Caveat on A6 and the wire',['../path_a_e3_loop.html#autotoc_md25',1,'']]],

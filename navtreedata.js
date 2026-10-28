@@ -25,15 +25,6 @@
 var NAVTREE =
 [
   [ "libe3", "index.html", [
-    [ "libe3 Python bindings (<tt>libe3py</tt>)", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html", [
-      [ "The split: E3AP in libe3, E3SM in Python", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md1", null ],
-      [ "Two layers", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md2", null ],
-      [ "Why batched drain + GIL release (not callbacks)", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md3", null ],
-      [ "Lifecycle", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md4", null ],
-      [ "Minimal Python example", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md5", null ],
-      [ "Build & install", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md6", null ],
-      [ "Service-model definitions", "md__2home_2runner_2work_2libe3_2libe3_2swig_2README.html#autotoc_md7", null ]
-    ] ],
     [ "Latency recording (latrec)", "latrec_guide.html", [
       [ "Latency recording (latrec)", "latrec_guide.html#autotoc_md8", [
         [ "Why a ring, and why one gate", "latrec_guide.html#autotoc_md9", [
@@ -57,10 +48,10 @@ var NAVTREE =
     [ "The E3-only end-to-end loop (Path A)", "path_a_e3_loop.html", [
       [ "Path A — the E3-only end-to-end loop", "path_a_e3_loop.html#autotoc_md22", [
         [ "Box order", "path_a_e3_loop.html#autotoc_md23", null ],
-        [ "Forward leg: RAN to dApp (<tt>leg=ind_up</tt>)", "path_a_e3_loop.html#autotoc_md24", [
+        [ "Forward leg: RAN to dApp (<span class=\"tt\">leg=ind_up</span>)", "path_a_e3_loop.html#autotoc_md24", [
           [ "Caveat on A6 and the wire", "path_a_e3_loop.html#autotoc_md25", null ]
         ] ],
-        [ "Return leg: dApp to RAN (<tt>leg=ctrl_down</tt> for control, <tt>report_up</tt> for reports)", "path_a_e3_loop.html#autotoc_md26", [
+        [ "Return leg: dApp to RAN (<span class=\"tt\">leg=ctrl_down</span> for control, <span class=\"tt\">report_up</span> for reports)", "path_a_e3_loop.html#autotoc_md26", [
           [ "Two distinct terminations", "path_a_e3_loop.html#autotoc_md27", null ]
         ] ],
         [ "Aggregates", "path_a_e3_loop.html#autotoc_md28", null ],
@@ -74,11 +65,11 @@ var NAVTREE =
       [ "Path B — the full E2-E3 loop", "path_b_e2_e3_loop.html#autotoc_md32", [
         [ "Box order", "path_b_e2_e3_loop.html#autotoc_md33", null ],
         [ "The two RIC profiles", "path_b_e2_e3_loop.html#autotoc_md34", null ],
-        [ "Report-up leg (<tt>leg=report_up</tt>)", "path_b_e2_e3_loop.html#autotoc_md35", null ],
-        [ "Policy-down leg (<tt>leg=policy_down</tt>)", "path_b_e2_e3_loop.html#autotoc_md36", null ],
-        [ "Mitigation leg (<tt>leg=mitigation</tt>)", "path_b_e2_e3_loop.html#autotoc_md37", null ],
+        [ "Report-up leg (<span class=\"tt\">leg=report_up</span>)", "path_b_e2_e3_loop.html#autotoc_md35", null ],
+        [ "Policy-down leg (<span class=\"tt\">leg=policy_down</span>)", "path_b_e2_e3_loop.html#autotoc_md36", null ],
+        [ "Mitigation leg (<span class=\"tt\">leg=mitigation</span>)", "path_b_e2_e3_loop.html#autotoc_md37", null ],
         [ "Aggregates", "path_b_e2_e3_loop.html#autotoc_md38", null ],
-        [ "Joining: the <tt>sequenceId</tt>", "path_b_e2_e3_loop.html#autotoc_md39", [
+        [ "Joining: the <span class=\"tt\">sequenceId</span>", "path_b_e2_e3_loop.html#autotoc_md39", [
           [ "Where it shows up in the rings", "path_b_e2_e3_loop.html#autotoc_md40", null ]
         ] ],
         [ "Not yet instrumented", "path_b_e2_e3_loop.html#autotoc_md41", null ]
@@ -128,10 +119,11 @@ var NAVTREEINDEX =
 "classlibe3_1_1E3Connector.html",
 "classlibe3_1_1Logger.html#a8f40bcd6249ad424b8eb15e60049f65e",
 "classlibe3_1_1py_1_1DAppSession.html#a1d7471730e97aa1230ce3cfe094078fe",
-"latrec_8h.html#a588269eb211c77b050ab91ea4f8bc66c",
-"structe3__config__t.html#a9875bcc2adc66eb4aa21b8d4d1f95092",
-"structlibe3_1_1SetupResponse.html"
+"latrec_guide.html#autotoc_md12",
+"structlatrec__rec.html#a4650facda3586c172cf7779ae480e62b",
+"structlibe3_1_1SubscriptionRequest.html#ae8ba1185c46760e64db97f510c8b4c0b"
 ];
 
-var SYNCONMSG = 'click to disable panel synchronisation';
-var SYNCOFFMSG = 'click to enable panel synchronisation';
+var SYNCONMSG = 'click to disable panel synchronization';
+var SYNCOFFMSG = 'click to enable panel synchronization';
+var LISTOFALLMEMBERS = 'List of all members';

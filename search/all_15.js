@@ -5,7 +5,7 @@ var searchData=
   ['unregister_5fsm_2',['unregister_sm',['../classlibe3_1_1SmRegistry.html#a457164e750ad3eab42e10d35ee1623d3',1,'libe3::SmRegistry']]],
   ['unsubscribe_3',['unsubscribe',['../classlibe3_1_1E3Agent.html#a6c24b5b987280d40ce95661c83a04bb9',1,'libe3::E3Agent::unsubscribe()'],['../classlibe3_1_1py_1_1DAppSession.html#a281047a21ea464eaf35816d26b730af1',1,'libe3::py::DAppSession::unsubscribe()'],['../classlibe3_1_1E3Agent.html#a6c24b5b987280d40ce95661c83a04bb9',1,'libe3::E3Agent::unsubscribe()']]],
   ['up_20in_20the_20rings_4',['Where it shows up in the rings',['../path_b_e2_e3_loop.html#autotoc_md40',1,'']]],
-  ['up_20leg_20tt_20leg_20report_5fup_20tt_5',['Report-up leg (&lt;tt&gt;leg=report_up&lt;/tt&gt;)',['../path_b_e2_e3_loop.html#autotoc_md35',1,'']]],
+  ['up_20leg_20leg_20report_5fup_5',['Report-up leg (&lt;span class=&quot;tt&quot;&gt;leg=report_up&lt;/span&gt;)',['../path_b_e2_e3_loop.html#autotoc_md35',1,'']]],
   ['up_3a_20tier_20aware_20attribution_6',['Possible follow-up: tier-aware attribution',['../latrec_guide.html#autotoc_md18',1,'']]],
   ['update_7',['UPDATE',['../namespacelibe3.html#ac1c5533fc81586565ca7822bf00eee90a15a8022d0ed9cd9c2a2e756822703eb4',1,'libe3']]]
 ];
