@@ -75,7 +75,9 @@ public:
     /**
      * @brief Receive data from the inbound channel
      * @param buffer Buffer to store received data
-     * @return Number of bytes received, or negative error code
+     * @return Number of bytes received; 0 on timeout (nothing yet);
+     *         ErrorCode::NOT_CONNECTED once the peer has closed (dApp role);
+     *         any other negative ErrorCode on a transport error
      */
     virtual int receive(std::vector<uint8_t>& buffer) = 0;
 
