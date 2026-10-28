@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <thread>
 #include <atomic>
+#include <chrono>
 
 using namespace libe3;
 
@@ -383,6 +384,205 @@ TEST(SubscriptionManager_subscription_details_removed_on_unregister) {
 
     const auto* details = mgr.get_subscription_details(dapp_id, 300);
     ASSERT_TRUE(details == nullptr);
+}
+
+// =========================================================================
+// subscriptionTime
+// =========================================================================
+
+namespace {
+
+// A clock the test moves by hand, so nothing here sleeps.
+struct FakeClock {
+    std::chrono::steady_clock::time_point t{std::chrono::steady_clock::time_point{} +
+                                            std::chrono::hours(1)};
+    SubscriptionClock fn() {
+        return [this] { return t; };
+    }
+    void advance(std::chrono::milliseconds d) { t += d; }
+};
+
+using namespace std::chrono_literals;
+
+}  // namespace
+
+TEST(SubscriptionManager_time_zero_means_no_limit) {
+    FakeClock clock;
+    SubscriptionManager mgr(clock.fn());
+    auto [reg, dapp] = mgr.register_dapp();
+    mgr.add_subscription(dapp, 100, {1}, {}, 0, 0);
+
+    const auto* details = mgr.get_subscription_details(dapp, 100);
+    ASSERT_TRUE(details != nullptr);
+    ASSERT_EQ(details->subscription_time_s, 0u);
+    ASSERT_FALSE(details->expires_at.has_value());
+
+    clock.advance(24h * 365);
+    ASSERT_TRUE(mgr.expire_subscriptions().empty());
+    ASSERT_TRUE(mgr.is_subscribed(dapp, 100));
+}
+
+TEST(SubscriptionManager_subscription_ends_when_its_time_is_up) {
+    FakeClock clock;
+    SubscriptionManager mgr(clock.fn());
+    auto [reg, dapp] = mgr.register_dapp();
+    auto [add, sub_id] = mgr.add_subscription(dapp, 100, {1}, {}, 0, 60);
+
+    clock.advance(59999ms);
+    ASSERT_TRUE(mgr.expire_subscriptions().empty());
+    ASSERT_TRUE(mgr.is_subscribed(dapp, 100));
+
+    clock.advance(1ms);
+    auto expired = mgr.expire_subscriptions();
+    ASSERT_EQ(expired.size(), 1u);
+    ASSERT_EQ(expired[0].dapp_id, dapp);
+    ASSERT_EQ(expired[0].ran_function_id, 100u);
+    ASSERT_EQ(expired[0].subscription_id, sub_id);
+
+    ASSERT_FALSE(mgr.is_subscribed(dapp, 100));
+    ASSERT_FALSE(mgr.has_subscribers(100));
+    ASSERT_EQ(mgr.subscription_count(), 0u);
+    ASSERT_TRUE(mgr.get_subscription_details(dapp, 100) == nullptr);
+    // Only the subscription goes; the dApp stays registered.
+    ASSERT_TRUE(mgr.is_dapp_registered(dapp));
+    ASSERT_TRUE(mgr.expire_subscriptions().empty());
+}
+
+TEST(SubscriptionManager_expired_subscription_gets_no_indications_before_the_sweep) {
+    FakeClock clock;
+    SubscriptionManager mgr(clock.fn());
+    auto [r1, limited] = mgr.register_dapp();
+    auto [r2, unlimited] = mgr.register_dapp();
+    mgr.add_subscription(limited, 100, {1}, {}, 0, 10);
+    mgr.add_subscription(unlimited, 100, {1}, {}, 0, 0);
+    ASSERT_EQ(mgr.get_subscribed_dapps(100).size(), 2u);
+
+    clock.advance(10s);
+    // The sweep has not run, but the dispatch view already leaves the dApp out.
+    auto dapps = mgr.get_subscribed_dapps(100);
+    ASSERT_EQ(dapps.size(), 1u);
+    ASSERT_EQ(dapps[0], unlimited);
+}
+
+TEST(SubscriptionManager_expiry_stops_the_sm_with_its_last_subscriber) {
+    FakeClock clock;
+    SubscriptionManager mgr(clock.fn());
+    int starts = 0, stops = 0;
+    mgr.set_sm_lifecycle_callback([&](uint32_t, bool should_start) {
+        should_start ? ++starts : ++stops;
+    });
+    auto [r1, short_lived] = mgr.register_dapp();
+    auto [r2, long_lived] = mgr.register_dapp();
+    mgr.add_subscription(short_lived, 100, {}, {}, 0, 5);
+    mgr.add_subscription(long_lived, 100, {}, {}, 0, 50);
+    ASSERT_EQ(starts, 1);
+
+    clock.advance(5s);
+    ASSERT_EQ(mgr.expire_subscriptions().size(), 1u);
+    ASSERT_EQ(stops, 0);  // the other dApp still needs the SM
+
+    clock.advance(45s);
+    ASSERT_EQ(mgr.expire_subscriptions().size(), 1u);
+    ASSERT_EQ(stops, 1);
+    ASSERT_EQ(starts, 1);
+}
+
+TEST(SubscriptionManager_expiry_is_per_subscription) {
+    FakeClock clock;
+    SubscriptionManager mgr(clock.fn());
+    auto [reg, dapp] = mgr.register_dapp();
+    mgr.add_subscription(dapp, 100, {}, {}, 0, 5);
+    mgr.add_subscription(dapp, 200, {}, {}, 0, 0);
+    mgr.add_subscription(dapp, 300, {}, {}, 0, 50);
+
+    clock.advance(5s);
+    auto expired = mgr.expire_subscriptions();
+    ASSERT_EQ(expired.size(), 1u);
+    ASSERT_EQ(expired[0].ran_function_id, 100u);
+    ASSERT_FALSE(mgr.is_subscribed(dapp, 100));
+    ASSERT_TRUE(mgr.is_subscribed(dapp, 200));
+    ASSERT_TRUE(mgr.is_subscribed(dapp, 300));
+}
+
+TEST(SubscriptionManager_expired_subscription_id_is_reusable) {
+    FakeClock clock;
+    SubscriptionManager mgr(clock.fn());
+    auto [reg, dapp] = mgr.register_dapp();
+    auto [r1, first] = mgr.add_subscription(dapp, 100, {}, {}, 0, 5);
+    clock.advance(5s);
+    mgr.expire_subscriptions();
+
+    auto [r2, second] = mgr.add_subscription(dapp, 200);
+    ASSERT_EQ(second, first);
+}
+
+TEST(SubscriptionManager_resubscribe_after_expiry_starts_a_new_subscription) {
+    FakeClock clock;
+    SubscriptionManager mgr(clock.fn());
+    int starts = 0, stops = 0;
+    mgr.set_sm_lifecycle_callback([&](uint32_t, bool should_start) {
+        should_start ? ++starts : ++stops;
+    });
+    auto [reg, dapp] = mgr.register_dapp();
+    auto [r1, sub_id] = mgr.add_subscription(dapp, 100, {1}, {}, 0, 5);
+
+    // Time is up but the sweep has not run yet. A second request must not be
+    // answered with the dying subscription.
+    clock.advance(5s);
+    auto [r2, again] = mgr.add_subscription(dapp, 100, {2}, {}, 0, 30);
+    ASSERT_TRUE(r2 == ErrorCode::SUCCESS);
+    ASSERT_EQ(again, sub_id);
+
+    ASSERT_TRUE(mgr.expire_subscriptions().empty());
+    ASSERT_TRUE(mgr.is_subscribed(dapp, 100));
+    const auto* details = mgr.get_subscription_details(dapp, 100);
+    ASSERT_TRUE(details != nullptr);
+    ASSERT_EQ(details->subscription_time_s, 30u);
+    ASSERT_EQ(details->telemetry_ids.size(), 1u);
+    ASSERT_EQ(details->telemetry_ids[0], 2u);
+    // The SM was never without a subscriber.
+    ASSERT_EQ(starts, 1);
+    ASSERT_EQ(stops, 0);
+
+    clock.advance(30s);
+    ASSERT_EQ(mgr.expire_subscriptions().size(), 1u);
+}
+
+TEST(SubscriptionManager_resubscribe_before_expiry_keeps_the_original) {
+    FakeClock clock;
+    SubscriptionManager mgr(clock.fn());
+    auto [reg, dapp] = mgr.register_dapp();
+    auto [r1, sub_id] = mgr.add_subscription(dapp, 100, {}, {}, 0, 60);
+
+    clock.advance(30s);
+    auto [r2, again] = mgr.add_subscription(dapp, 100, {}, {}, 0, 600);
+    ASSERT_TRUE(r2 == ErrorCode::SUBSCRIPTION_EXISTS);
+    ASSERT_EQ(again, sub_id);
+    ASSERT_EQ(mgr.get_subscription_details(dapp, 100)->subscription_time_s, 60u);
+
+    clock.advance(30s);
+    ASSERT_EQ(mgr.expire_subscriptions().size(), 1u);
+}
+
+TEST(SubscriptionManager_deleting_before_expiry_leaves_nothing_to_expire) {
+    FakeClock clock;
+    SubscriptionManager mgr(clock.fn());
+    auto [reg, dapp] = mgr.register_dapp();
+    mgr.add_subscription(dapp, 100, {}, {}, 0, 5);
+    mgr.remove_subscription(dapp, 100);
+
+    clock.advance(1h);
+    ASSERT_TRUE(mgr.expire_subscriptions().empty());
+}
+
+TEST(SubscriptionManager_expiry_uses_steady_clock_by_default) {
+    SubscriptionManager mgr;
+    auto [reg, dapp] = mgr.register_dapp();
+    mgr.add_subscription(dapp, 100, {}, {}, 0, 3600);
+    ASSERT_TRUE(mgr.expire_subscriptions().empty());
+    const auto* details = mgr.get_subscription_details(dapp, 100);
+    ASSERT_TRUE(details->expires_at.has_value());
+    ASSERT_TRUE(*details->expires_at > std::chrono::steady_clock::now());
 }
 
 int main() {
