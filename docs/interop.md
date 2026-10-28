@@ -116,8 +116,10 @@ changes (see its table below), a dApp that needs the subscription to end has to 
 one that talks to all three can send the time and also delete the subscription when it is done
 ([#95](https://github.com/wineslab/libe3/issues/95)).
 
-Neither libe3 nor Aerial tells the dApp when a subscription runs out: E3AP has no PDU for it. A dApp
-that sent a time knows when the RAN will let go. libe3's dApp keeps its own deadline, counted from
+Neither libe3 nor Aerial tells the dApp when a subscription runs out. The only message that could,
+`E3-ReleaseMessage`, carries just a `dAppIdentifier`, so it ends the whole session and cannot name one
+subscription; Aerial's agent sends it only to a dApp that has been idle for 1800 s with no subscription.
+A dApp that sent a time knows when the RAN will let go. libe3's dApp keeps its own deadline, counted from
 the response, so it is never earlier than the RAN's and a dApp that renews the moment it passes
 always reaches the RAN after the old subscription is gone. Aerial's manager counts from the request
 instead. A libe3 RAN answers a delete for a subscription that has run out `negative`, as it does

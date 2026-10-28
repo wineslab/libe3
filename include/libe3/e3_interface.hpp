@@ -344,7 +344,8 @@ private:
     /**
      * @brief Thread that ends subscriptions whose subscriptionTime has run out.
      *        The RAN removes them; the dApp forgets them at the same moment.
-     *        Neither tells the other: E3AP has no PDU for it.
+     *        Neither tells the other: E3-ReleaseMessage ends the whole dApp
+     *        session, not one subscription.
      */
     void subscription_expiry_loop();
 
