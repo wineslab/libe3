@@ -155,7 +155,8 @@ public:
 
     /**
      * @brief Subscribe to a RAN function (after a positive setup).
-     * @param sub_time_ms subscription time, or -1 for unset.
+     * @param sub_time_ms subscription time in seconds (the name is historical), or
+     *        -1 for unset. 0 is no limit. The RAN ends the subscription when it runs out.
      * @param periodicity microseconds between indications, 0 = every event, or -1 for
      *        unset. Over ASN.1 the range is 0 to 60000000. An OCUDU RAN reads the
      *        same number as milliseconds.
