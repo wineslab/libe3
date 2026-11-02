@@ -389,7 +389,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           version=${{ needs.create-tag.outputs.version }}
-          gh release create "$version" --repo ${{ github.repository }} --notes "libe3 release $version" || true
+          # --generate-notes lists the pull requests merged since the previous tag
+          # (grouped as .github/release.yml says), so a release page and the
+          # Changelog link on PyPI show what changed between the two tags.
+          gh release create "$version" --repo ${{ github.repository }} --generate-notes || true
           gh release upload "$version" dist/** --repo ${{ github.repository }} || true
 
   deploy-docs:

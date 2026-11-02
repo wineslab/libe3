@@ -25,6 +25,7 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/wineslab/libe3"
 Documentation = "https://github.com/wineslab/libe3/blob/main/swig/README.md"
+Changelog = "https://github.com/wineslab/libe3/releases"
 
 [tool.scikit-build]
 cmake.version = ">=3.18"

@@ -101,13 +101,7 @@ jobs:
         run: |
           base="${{ github.event.pull_request.base.sha }}"
           head="${{ github.event.pull_request.head.sha }}"
-          echo "Changed files:"; git diff --name-only "$base..$head"
-          noncode='(\.md$)|(^docs/)|(^\.github/)|(^LICENSE$)|(^CONTRIBUTORS$)|(^\.gitignore$)'
-          if git diff --name-only "$base..$head" | grep -qvE "$noncode"; then
-            echo "code=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "code=false" >> "$GITHUB_OUTPUT"
-          fi
+          echo "code=$(bash .github/scripts/detect_code_changes.sh "$base" "$head")" >> "$GITHUB_OUTPUT"
 
   per-commit-build:
     name: Each commit builds and tests

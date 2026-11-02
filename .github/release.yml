@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
+# How GitHub groups the generated release notes (`gh release create
+# --generate-notes` in tag-and-release.yml). A pull request lands in the first
+# category that has one of its labels, so a wire change that also fixes a bug is
+# listed once, under the wire category.
+changelog:
+  categories:
+    - title: Wire format and protocol
+      labels:
+        - e3ap
+        - asn1
+        - json
+        - protobuf
+        - interop
+    - title: Behavior of the dApp and the RAN agent
+      labels:
+        - dapp
+        - ran
+        - zmq
+        - posix
+        - tcp
+        - sctp
+        - ipc
+    - title: Fixes
+      labels:
+        - bug
+    - title: Features
+      labels:
+        - enhancement
+    - title: Tests
+      labels:
+        - tests
+    - title: Documentation
+      labels:
+        - documentation
+    - title: Other changes
+      labels:
+        - "*"
