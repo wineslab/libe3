@@ -216,7 +216,11 @@ protected:
  * @param setup_endpoint Endpoint for setup channel
  * @param inbound_endpoint Endpoint for inbound channel
  * @param outbound_endpoint Endpoint for outbound channel
+ * @param setup_port Port of the setup channel (SCTP and TCP; IPC uses the endpoint path)
+ * @param inbound_port Port of the inbound channel (SCTP and TCP)
+ * @param outbound_port Port of the outbound channel (SCTP and TCP)
  * @param io_threads Number of I/O threads (for ZMQ)
+ * @param role Role of the peer (RAN or dApp)
  * @return Unique pointer to created connector, nullptr on failure
  */
 std::unique_ptr<E3Connector> create_connector(

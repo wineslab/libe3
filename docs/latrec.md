@@ -112,6 +112,7 @@ not gates: they cannot switch recording off.
   own clocks. A payload timestamp and a latrec `t_ns` must not be subtracted
   from each other.
 
+<a id="ring-naming-and-sizing"></a>
 ## Ring naming and sizing
 
 Per-thread rings, opened on first stamp via `latrec_tls_open_as(role)` (or
@@ -299,6 +300,7 @@ Outputs, under `<run>/csv` by default:
 `--wall` remaps `CLOCK_MONOTONIC` to `CLOCK_REALTIME` per ring, needed only
 when joining a multi-host capture (pass every host's run directory).
 
+<a id="ci-overhead-gate"></a>
 ## CI overhead gate
 
 `tests/bench_latrec.cpp` asserts a ceiling on the recorder's own cost:

@@ -274,6 +274,11 @@ public:
     /**
      * @brief Subscribe to a RAN function. Must be called after a positive setup.
      *
+     * @param ran_function_id RAN function to subscribe to
+     * @param telemetry_ids telemetry identifiers requested
+     * @param control_ids control identifiers requested
+     * @param sub_time how long to keep the subscription, in seconds; unset leaves it to the RAN
+     * @param periodicity requested delivery interval, in microseconds; unset leaves it to the RAN
      * @param out_request_id when non-null, receives the assigned E3-MessageID on
      *        success, so the caller can correlate the SubscriptionResponse
      *        (which echoes request_id) back to this subscribe call.
@@ -291,6 +296,9 @@ public:
     /**
      * @brief Send a dApp control action to the RAN.
      *
+     * @param ran_function_id RAN function the control is for
+     * @param control_id control identifier granted by the RAN
+     * @param action_data opaque E3SM control payload
      * @param sequence_id correlation id of the xApp procedure this control
      *        re-issues; leave 0 for a control the dApp decided on its own.
      * @param out_message_id when non-null, receives the assigned E3-MessageID on
@@ -306,6 +314,8 @@ public:
     /**
      * @brief Send a dApp report to the RAN.
      *
+     * @param ran_function_id RAN function the report is for
+     * @param report_data opaque E3SM report payload
      * @param sequence_id correlation id the dApp assigns to this detection. It
      *        is the head of the loop's chain and is mandatory on the wire.
      * @param out_message_id when non-null, receives the assigned E3-MessageID on

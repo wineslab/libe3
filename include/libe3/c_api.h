@@ -294,14 +294,18 @@ uint32_t* e3_agent_get_registered_dapps(e3_agent_handle_t* agent, size_t* out_le
 /**
  * @brief Return a newly-allocated array of RAN function IDs subscribed by a dApp.
  *
+ * @param agent Agent handle
  * @param dapp_id dApp identifier to query
+ * @param out_len receives the number of elements (set to 0 on error/empty)
  */
 uint32_t* e3_agent_get_dapp_subscriptions(e3_agent_handle_t* agent, uint32_t dapp_id, size_t* out_len);
 
 /**
  * @brief Return a newly-allocated array of dApp IDs subscribed to a RAN function.
  *
+ * @param agent Agent handle
  * @param ran_function_id RAN function identifier to query
+ * @param out_len receives the number of elements (set to 0 on error/empty)
  */
 uint32_t* e3_agent_get_ran_function_subscribers(e3_agent_handle_t* agent, uint32_t ran_function_id, size_t* out_len);
 
@@ -329,6 +333,9 @@ uint32_t e3_agent_get_subscription_periodicity(
  *
  * Caller must free the returned array with e3_agent_free_uint32_array().
  *
+ * @param agent Agent handle
+ * @param dapp_id dApp identifier to query
+ * @param ran_function_id RAN function identifier to query
  * @param out_len receives the number of elements (set to 0 on error/empty)
  * @return newly-allocated array, or NULL if empty/error
  */
@@ -344,6 +351,9 @@ uint32_t* e3_agent_get_subscription_telemetry_ids(
  *
  * Caller must free the returned array with e3_agent_free_uint32_array().
  *
+ * @param agent Agent handle
+ * @param dapp_id dApp identifier to query
+ * @param ran_function_id RAN function identifier to query
  * @param out_len receives the number of elements (set to 0 on error/empty)
  * @return newly-allocated array, or NULL if empty/error
  */

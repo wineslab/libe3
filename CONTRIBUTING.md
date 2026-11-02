@@ -73,6 +73,7 @@ The following are **mandatory** for every contribution. PRs that do not meet the
   - `./build_libe3 --docs` renders without new Doxygen warnings if public headers under `include/` were modified.
   - `README.md` and/or `CONTRIBUTING.md` updated when contributor- or user-facing behavior changes.
 
+<a id="licensing-headers"></a>
 ### Licensing headers
 
 Every file in the tree carries two lines, in the comment syntax of its language:
@@ -96,6 +97,7 @@ fails the PR if anything is unmarked. Run it locally with:
 pipx install reuse && reuse lint
 ```
 
+<a id="ai-assistants"></a>
 ### AI assistants
 
 Contributions developed with the help of AI tools (LLM coding assistants, agents, and similar) are welcome, subject to the following **mandatory** rules, adapted from the Linux kernel and OpenAirInterface contribution guidelines.

@@ -145,6 +145,7 @@ follows, so a Path A report is where a Path B loop's chain begins — see
 its own carries no sequenceId; one re-issued on an xApp's behalf carries that
 procedure's.
 
+<a id="two-distinct-terminations"></a>
 ### Two distinct terminations
 
 `A19a` (apply control) and `A19b` (queue report) are alternative endings, not a

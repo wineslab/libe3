@@ -4,7 +4,7 @@
  *
  * latrec.h is usable on its own with an explicitly owned latrec_t. This file
  * backs the convenience API on top of it: one ring per calling thread, opened
- * on first stamp and named <prefix>.<tid>, plus the process-wide sequence
+ * on first stamp and named `<prefix>.<tid>`, plus the process-wide sequence
  * counter. Keeping the storage in one translation unit gives a single ring per
  * thread rather than one per includer.
  *

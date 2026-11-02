@@ -192,6 +192,9 @@ public:
     /**
      * @brief Create and encode a dApp Report PDU
      * @param message_id Unique message ID
+     * @param dapp_identifier dApp identifier
+     * @param ran_function_identifier RAN function identifier
+     * @param report_data Report data
      */
     EncodeResult<EncodedMessage> encode_dapp_report(
         uint32_t message_id,
@@ -203,6 +206,9 @@ public:
     /**
      * @brief Create and encode an xApp Control Action PDU
      * @param message_id Unique message ID
+     * @param dapp_identifier dApp identifier
+     * @param ran_function_identifier RAN function identifier
+     * @param xapp_control_data xApp control data
      */
     EncodeResult<EncodedMessage> encode_xapp_control_action(
         uint32_t message_id,
@@ -214,6 +220,8 @@ public:
     /**
      * @brief Create and encode a Message Acknowledgment PDU
      * @param message_id Unique message ID
+     * @param request_id Message ID of the request being acknowledged
+     * @param response_code Positive or negative
      */
     EncodeResult<EncodedMessage> encode_message_ack(
         uint32_t message_id,

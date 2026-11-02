@@ -14,7 +14,7 @@
  * @ref libe3::py::DAppSession is the answer: it owns an @ref libe3::E3Agent in
  * DAPP role, registers the C++ handlers itself, and funnels every inbound
  * message into a **bounded lock-free ring** (@ref libe3::LockFreeQueue). Python
- * drains that ring in **batches** via @ref poll_events, so one GIL acquire and
+ * drains that ring in **batches** via @ref libe3::py::DAppSession::poll_events "poll_events", so one GIL acquire and
  * one Python↔C++ boundary crossing are amortised across many messages. The
  * SWIG wrapper releases the GIL around the blocking calls (see swig/libe3.i,
  * `%module(threads="1")`), so libe3's C++ threads never stall on Python.
@@ -24,10 +24,10 @@
  * the OAI split where libe3 owns E3AP and the SM owns encode/decode.
  *
  * @section lifecycle Lifecycle
- * ctor (registers handlers) → @ref start → @ref wait_for_setup →
- * (read setup via @ref dapp_id / setup accessors) → @ref subscribe →
- * loop: @ref poll_events + @ref send_control / @ref send_report →
- * @ref release → @ref stop.
+ * ctor (registers handlers) → @ref libe3::py::DAppSession::start "start" → @ref libe3::py::DAppSession::wait_for_setup "wait_for_setup" →
+ * (read setup via @ref libe3::py::DAppSession::dapp_id "dapp_id" / setup accessors) → @ref libe3::py::DAppSession::subscribe "subscribe" →
+ * loop: @ref libe3::py::DAppSession::poll_events "poll_events" + @ref libe3::py::DAppSession::send_control "send_control" / @ref libe3::py::DAppSession::send_report "send_report" →
+ * @ref libe3::py::DAppSession::release "release" → @ref libe3::py::DAppSession::stop "stop".
  *
  * @section rejected Rejected alternatives (auditable)
  * - SWIG directors: run the Python callback on libe3's inbound thread under the
@@ -54,7 +54,7 @@ namespace libe3 {
 namespace py {
 
 /**
- * @brief Discriminator for @ref E3Event.
+ * @brief Discriminator for @ref libe3::py::E3Event.
  */
 enum E3EventKind {
     E3_EVENT_NONE = 0,                  ///< placeholder (never enqueued)
@@ -155,6 +155,9 @@ public:
 
     /**
      * @brief Subscribe to a RAN function (after a positive setup).
+     * @param ran_function_id RAN function to subscribe to
+     * @param telemetry_ids telemetry identifiers requested
+     * @param control_ids control identifiers requested
      * @param sub_time_ms subscription time, or -1 for unset.
      * @param periodicity delivery periodicity (µs), or -1 for unset.
      * @return the assigned request id (positive, 1..4294967295) on success, so
@@ -171,6 +174,9 @@ public:
 
     /**
      * @brief Send a dApp control action to the RAN.
+     * @param ran_function_id RAN function the control is for
+     * @param control_id control identifier granted by the RAN
+     * @param action_data opaque E3SM control payload
      * @param sequence_id correlation id of the xApp procedure this control
      *        re-issues; 0 when the dApp decided on its own.
      * @return the assigned message id (positive, 1..4294967295) on success, so
@@ -184,6 +190,8 @@ public:
                          uint32_t sequence_id = 0);
     /**
      * @brief Send a dApp report to the RAN.
+     * @param ran_function_id RAN function the report is for
+     * @param report_data opaque E3SM report payload
      * @param sequence_id correlation id this dApp assigns to the detection;
      *        mandatory on the wire, 1..4294967295 (0 is refused with
      *        INVALID_PARAM).
@@ -193,7 +201,7 @@ public:
      */
     int64_t send_report(uint32_t ran_function_id, std::vector<uint8_t> report_data,
                         uint32_t sequence_id);
-    /** @brief Acknowledge a request. @param response_code 0=positive,1=negative. @return ErrorCode as int. */
+    /** @brief Acknowledge a request. @param request_id request being acknowledged. @param response_code 0=positive,1=negative. @return ErrorCode as int. */
     int send_message_ack(uint32_t request_id, int response_code);
 
     /**
