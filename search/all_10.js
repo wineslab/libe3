@@ -12,7 +12,7 @@ var searchData=
   ['pdu_5ftype_5fto_5fstring_9',['pdu_type_to_string',['../namespacelibe3.html#a635f33e375e8c160ecd82d0759742300',1,'libe3']]],
   ['pduchoice_10',['PduChoice',['../namespacelibe3.html#a11f15651dcc49a68494f8215477e18fc',1,'libe3']]],
   ['pdutype_11',['PduType',['../namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185',1,'libe3']]],
-  ['periodicity_12',['periodicity',['../structlibe3_1_1SubscriptionRequest.html#a248b1d8955cc1987cee9ca8e6edc2433',1,'libe3::SubscriptionRequest']]],
+  ['periodicity_12',['periodicity',['../structlibe3_1_1SubscriptionRequest.html#a248b1d8955cc1987cee9ca8e6edc2433',1,'libe3::SubscriptionRequest::periodicity'],['../structlibe3_1_1SubscriptionResponse.html#ac590bf9d5b22396af90c5bc4ca266af7',1,'libe3::SubscriptionResponse::periodicity'],['../structlibe3_1_1py_1_1E3Event.html#a65b8808594a54a9d0a41ac0e6b45c3d9',1,'libe3::py::E3Event::periodicity']]],
   ['periodicity_5fus_13',['periodicity_us',['../structlibe3_1_1SubscriptionDetails.html#a04c25aa382a72299918137bb7ae6c541',1,'libe3::SubscriptionDetails']]],
   ['pin_5fio_5fthreads_14',['pin_io_threads',['../structe3__config__t.html#a2a715b93d5db667ce28f7150b4dffd61',1,'e3_config_t']]],
   ['policy_20down_20leg_20leg_20policy_5fdown_15',['Policy-down leg (&lt;span class=&quot;tt&quot;&gt;leg=policy_down&lt;/span&gt;)',['../path_b_e2_e3_loop.html#autotoc_md36',1,'']]],

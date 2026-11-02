@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.5</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.6</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -105,7 +105,7 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a3289640b851ae9089cc92acc0f436f65" id="r_a3289640b851ae9089cc92acc0f436f65"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3289640b851ae9089cc92acc0f436f65">dapp_id</a> {0}</td></tr>
 <tr class="memdesc:a3289640b851ae9089cc92acc0f436f65"><td class="mdescLeft">&#160;</td><td class="mdescRight">dApp identifier the message targets  <br /></td></tr>
 <tr class="memitem:a071306a89dfa8d87ac9d61875ca17463" id="r_a071306a89dfa8d87ac9d61875ca17463"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a071306a89dfa8d87ac9d61875ca17463">ran_function_id</a> {0}</td></tr>
-<tr class="memdesc:a071306a89dfa8d87ac9d61875ca17463"><td class="mdescLeft">&#160;</td><td class="mdescRight">RAN function (indication / xApp control).  <br /></td></tr>
+<tr class="memdesc:a071306a89dfa8d87ac9d61875ca17463"><td class="mdescLeft">&#160;</td><td class="mdescRight">RAN function (indication / xApp control / subscription response).  <br /></td></tr>
 <tr class="memitem:a6e0088c562539584ead98ea5e560db2a" id="r_a6e0088c562539584ead98ea5e560db2a"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6e0088c562539584ead98ea5e560db2a">subscription_id</a> {0}</td></tr>
 <tr class="memdesc:a6e0088c562539584ead98ea5e560db2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">subscription id (subscription response)  <br /></td></tr>
 <tr class="memitem:a5b3211fec7235552b8167b576722c0c8" id="r_a5b3211fec7235552b8167b576722c0c8"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5b3211fec7235552b8167b576722c0c8">request_id</a> {0}</td></tr>
@@ -116,15 +116,44 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a7071a62be00d55a5b3473de7004e8cdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">0=positive, 1=negative, -1=n/a  <br /></td></tr>
 <tr class="memitem:a8ff1b9dde582b8f8ca87d7cd025507fe" id="r_a8ff1b9dde582b8f8ca87d7cd025507fe"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8ff1b9dde582b8f8ca87d7cd025507fe">payload</a></td></tr>
 <tr class="memdesc:a8ff1b9dde582b8f8ca87d7cd025507fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">opaque E3SM bytes (indication / xApp control)  <br /></td></tr>
+<tr class="memitem:a65b8808594a54a9d0a41ac0e6b45c3d9" id="r_a65b8808594a54a9d0a41ac0e6b45c3d9"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a65b8808594a54a9d0a41ac0e6b45c3d9">periodicity</a> {-1}</td></tr>
+<tr class="memdesc:a65b8808594a54a9d0a41ac0e6b45c3d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">granted interval in microseconds (subscription response), -1 = not reported  <br /></td></tr>
+<tr class="memitem:ab2aab3fcd79b103ea8141453bbc71a14" id="r_ab2aab3fcd79b103ea8141453bbc71a14"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab2aab3fcd79b103ea8141453bbc71a14">has_telemetry_granted</a> {false}</td></tr>
+<tr class="memdesc:ab2aab3fcd79b103ea8141453bbc71a14"><td class="mdescLeft">&#160;</td><td class="mdescRight">telemetry_granted was reported  <br /></td></tr>
+<tr class="memitem:a71647ce850dc53f08c86ecfa570be735" id="r_a71647ce850dc53f08c86ecfa570be735"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a71647ce850dc53f08c86ecfa570be735">has_control_granted</a> {false}</td></tr>
+<tr class="memdesc:a71647ce850dc53f08c86ecfa570be735"><td class="mdescLeft">&#160;</td><td class="mdescRight">control_granted was reported  <br /></td></tr>
+<tr class="memitem:a384aa5c6fba78ed062992387ce89c68c" id="r_a384aa5c6fba78ed062992387ce89c68c"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a384aa5c6fba78ed062992387ce89c68c">telemetry_granted</a></td></tr>
+<tr class="memdesc:a384aa5c6fba78ed062992387ce89c68c"><td class="mdescLeft">&#160;</td><td class="mdescRight">granted telemetry ids  <br /></td></tr>
+<tr class="memitem:a36b0e37e84a5b2d9af93d9c5e2f15d1d" id="r_a36b0e37e84a5b2d9af93d9c5e2f15d1d"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a36b0e37e84a5b2d9af93d9c5e2f15d1d">control_granted</a></td></tr>
+<tr class="memdesc:a36b0e37e84a5b2d9af93d9c5e2f15d1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">granted control ids  <br /></td></tr>
 <tr class="memitem:a8c72effea95dc0ded26037bfa6b734e2" id="r_a8c72effea95dc0ded26037bfa6b734e2"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8c72effea95dc0ded26037bfa6b734e2">trace_seq</a> {0}</td></tr>
 <tr class="memdesc:a8c72effea95dc0ded26037bfa6b734e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">set when queued; keys the [latrec] LQ-stage records  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>One inbound E3AP event, POD-flat for a clean SWIG crossing. </p>
-<p><span class="tt"><a class="el" href="#a8ff1b9dde582b8f8ca87d7cd025507fe" title="opaque E3SM bytes (indication / xApp control)">payload</a></span> carries the opaque E3SM bytes for indications (protocol_data) and xApp controls (xapp_control_data); it is empty for subscription/setup responses and acks. Fields not relevant to a given <span class="tt"><a class="el" href="#a32878e95b8bbe48ae73fa982f348ce81" title="one of E3EventKind">kind</a></span> are left zero. </p>
+<p><span class="tt"><a class="el" href="#a8ff1b9dde582b8f8ca87d7cd025507fe" title="opaque E3SM bytes (indication / xApp control)">payload</a></span> carries the opaque E3SM bytes for indications (protocol_data) and xApp controls (xapp_control_data); it is empty for subscription/setup responses and acks. Fields not relevant to a given <span class="tt"><a class="el" href="#a32878e95b8bbe48ae73fa982f348ce81" title="one of E3EventKind">kind</a></span> are left zero, except where noted.</p>
+<p>A subscription response also carries the grant: <span class="tt"><a class="el" href="#a071306a89dfa8d87ac9d61875ca17463" title="RAN function (indication / xApp control / subscription response).">ran_function_id</a></span> (0 = not reported), <span class="tt"><a class="el" href="#a65b8808594a54a9d0a41ac0e6b45c3d9" title="granted interval in microseconds (subscription response), -1 = not reported">periodicity</a></span>, and the id lists, valid only when their has_* flag is set. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00076">76</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00079">79</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a36b0e37e84a5b2d9af93d9c5e2f15d1d" name="a36b0e37e84a5b2d9af93d9c5e2f15d1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36b0e37e84a5b2d9af93d9c5e2f15d1d">&#9670;&#160;</a></span>control_granted</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;uint32_t&gt; libe3::py::E3Event::control_granted</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>granted control ids </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00092">92</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+
+</div>
+</div>
 <a id="a3289640b851ae9089cc92acc0f436f65" name="a3289640b851ae9089cc92acc0f436f65"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3289640b851ae9089cc92acc0f436f65">&#9670;&#160;</a></span>dapp_id</h2>
 
@@ -139,7 +168,43 @@ Public Attributes</h2></td></tr>
 
 <p>dApp identifier the message targets </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00078">78</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00081">81</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a71647ce850dc53f08c86ecfa570be735" name="a71647ce850dc53f08c86ecfa570be735"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71647ce850dc53f08c86ecfa570be735">&#9670;&#160;</a></span>has_control_granted</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool libe3::py::E3Event::has_control_granted {false}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>control_granted was reported </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00090">90</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ab2aab3fcd79b103ea8141453bbc71a14" name="ab2aab3fcd79b103ea8141453bbc71a14"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2aab3fcd79b103ea8141453bbc71a14">&#9670;&#160;</a></span>has_telemetry_granted</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool libe3::py::E3Event::has_telemetry_granted {false}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>telemetry_granted was reported </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00089">89</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -157,7 +222,7 @@ Public Attributes</h2></td></tr>
 
 <p>one of <a class="el" href="namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917">E3EventKind</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00077">77</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00080">80</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -175,7 +240,25 @@ Public Attributes</h2></td></tr>
 
 <p>opaque E3SM bytes (indication / xApp control) </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00084">84</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00087">87</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a65b8808594a54a9d0a41ac0e6b45c3d9" name="a65b8808594a54a9d0a41ac0e6b45c3d9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65b8808594a54a9d0a41ac0e6b45c3d9">&#9670;&#160;</a></span>periodicity</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">long libe3::py::E3Event::periodicity {-1}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>granted interval in microseconds (subscription response), -1 = not reported </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00088">88</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -191,9 +274,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>RAN function (indication / xApp control). </p>
+<p>RAN function (indication / xApp control / subscription response). </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00079">79</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00082">82</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -211,7 +294,7 @@ Public Attributes</h2></td></tr>
 
 <p>request/message id (subscription response / ack / xApp control) </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00081">81</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00084">84</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -229,7 +312,7 @@ Public Attributes</h2></td></tr>
 
 <p>0=positive, 1=negative, -1=n/a </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00083">83</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00086">86</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -247,7 +330,7 @@ Public Attributes</h2></td></tr>
 
 <p>loop correlation id (xApp control); echo it on the control you re-issue </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00082">82</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00085">85</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -265,7 +348,25 @@ Public Attributes</h2></td></tr>
 
 <p>subscription id (subscription response) </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00080">80</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00083">83</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a384aa5c6fba78ed062992387ce89c68c" name="a384aa5c6fba78ed062992387ce89c68c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a384aa5c6fba78ed062992387ce89c68c">&#9670;&#160;</a></span>telemetry_granted</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;uint32_t&gt; libe3::py::E3Event::telemetry_granted</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>granted telemetry ids </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00091">91</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -283,7 +384,7 @@ Public Attributes</h2></td></tr>
 
 <p>set when queued; keys the [latrec] LQ-stage records </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00085">85</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00093">93</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>

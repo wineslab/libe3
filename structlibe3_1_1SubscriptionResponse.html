@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.5</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.6</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -108,12 +108,38 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:aec78b192844ca67399ac8542221ba05f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Response code (positive/negative).  <br /></td></tr>
 <tr class="memitem:a107a62f11ab151d93d2a530ac2b3dff3" id="r_a107a62f11ab151d93d2a530ac2b3dff3"><td class="memItemLeft" align="right" valign="top">std::optional&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a107a62f11ab151d93d2a530ac2b3dff3">subscription_id</a></td></tr>
 <tr class="memdesc:a107a62f11ab151d93d2a530ac2b3dff3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscription ID (optional).  <br /></td></tr>
+<tr class="memitem:a17ad952fb5826f49c38878fff52cf7db" id="r_a17ad952fb5826f49c38878fff52cf7db"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::vector&lt; uint32_t &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a17ad952fb5826f49c38878fff52cf7db">telemetry_identifier_list</a></td></tr>
+<tr class="memdesc:a17ad952fb5826f49c38878fff52cf7db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Granted telemetry ids (absent = not reported, empty = none granted).  <br /></td></tr>
+<tr class="memitem:ac960fcb64d177ea61df38d56aec22e9e" id="r_ac960fcb64d177ea61df38d56aec22e9e"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::vector&lt; uint32_t &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac960fcb64d177ea61df38d56aec22e9e">control_identifier_list</a></td></tr>
+<tr class="memdesc:ac960fcb64d177ea61df38d56aec22e9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Granted control ids (absent = not reported, empty = none granted).  <br /></td></tr>
+<tr class="memitem:a1abb4bea69600906228598c53780c766" id="r_a1abb4bea69600906228598c53780c766"><td class="memItemLeft" align="right" valign="top">std::optional&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1abb4bea69600906228598c53780c766">ran_function_identifier</a></td></tr>
+<tr class="memdesc:a1abb4bea69600906228598c53780c766"><td class="mdescLeft">&#160;</td><td class="mdescRight">RAN function the grant is for.  <br /></td></tr>
+<tr class="memitem:ac590bf9d5b22396af90c5bc4ca266af7" id="r_ac590bf9d5b22396af90c5bc4ca266af7"><td class="memItemLeft" align="right" valign="top">std::optional&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac590bf9d5b22396af90c5bc4ca266af7">periodicity</a></td></tr>
+<tr class="memdesc:ac590bf9d5b22396af90c5bc4ca266af7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Granted delivery interval (microseconds).  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>E3AP Subscription Response structure. </p>
 
 <p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00253">253</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="ac960fcb64d177ea61df38d56aec22e9e" name="ac960fcb64d177ea61df38d56aec22e9e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac960fcb64d177ea61df38d56aec22e9e">&#9670;&#160;</a></span>control_identifier_list</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt;std::vector&lt;uint32_t&gt; &gt; libe3::SubscriptionResponse::control_identifier_list</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Granted control ids (absent = not reported, empty = none granted). </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00259">259</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
 <a id="a8ad2bb904946ec470b6322d4cebadc70" name="a8ad2bb904946ec470b6322d4cebadc70"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8ad2bb904946ec470b6322d4cebadc70">&#9670;&#160;</a></span>dapp_identifier</h2>
 
@@ -129,6 +155,42 @@ Public Attributes</h2></td></tr>
 <p>dApp identifier </p>
 
 <p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00255">255</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ac590bf9d5b22396af90c5bc4ca266af7" name="ac590bf9d5b22396af90c5bc4ca266af7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac590bf9d5b22396af90c5bc4ca266af7">&#9670;&#160;</a></span>periodicity</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt;uint32_t&gt; libe3::SubscriptionResponse::periodicity</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Granted delivery interval (microseconds). </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00261">261</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a1abb4bea69600906228598c53780c766" name="a1abb4bea69600906228598c53780c766"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1abb4bea69600906228598c53780c766">&#9670;&#160;</a></span>ran_function_identifier</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt;uint32_t&gt; libe3::SubscriptionResponse::ran_function_identifier</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>RAN function the grant is for. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00260">260</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -183,6 +245,24 @@ Public Attributes</h2></td></tr>
 <p>Subscription ID (optional). </p>
 
 <p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00257">257</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a17ad952fb5826f49c38878fff52cf7db" name="a17ad952fb5826f49c38878fff52cf7db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17ad952fb5826f49c38878fff52cf7db">&#9670;&#160;</a></span>telemetry_identifier_list</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt;std::vector&lt;uint32_t&gt; &gt; libe3::SubscriptionResponse::telemetry_identifier_list</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Granted telemetry ids (absent = not reported, empty = none granted). </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00258">258</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

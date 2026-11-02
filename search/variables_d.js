@@ -2,7 +2,7 @@ var searchData=
 [
   ['pad_0',['pad',['../structlatrec__hdr.html#a54ad3e378cd92424a2f3f79e384b54d3',1,'latrec_hdr']]],
   ['payload_1',['payload',['../structlibe3_1_1py_1_1E3Event.html#a8ff1b9dde582b8f8ca87d7cd025507fe',1,'libe3::py::E3Event']]],
-  ['periodicity_2',['periodicity',['../structlibe3_1_1SubscriptionRequest.html#a248b1d8955cc1987cee9ca8e6edc2433',1,'libe3::SubscriptionRequest']]],
+  ['periodicity_2',['periodicity',['../structlibe3_1_1SubscriptionRequest.html#a248b1d8955cc1987cee9ca8e6edc2433',1,'libe3::SubscriptionRequest::periodicity'],['../structlibe3_1_1SubscriptionResponse.html#ac590bf9d5b22396af90c5bc4ca266af7',1,'libe3::SubscriptionResponse::periodicity'],['../structlibe3_1_1py_1_1E3Event.html#a65b8808594a54a9d0a41ac0e6b45c3d9',1,'libe3::py::E3Event::periodicity']]],
   ['periodicity_5fus_3',['periodicity_us',['../structlibe3_1_1SubscriptionDetails.html#a04c25aa382a72299918137bb7ae6c541',1,'libe3::SubscriptionDetails']]],
   ['pin_5fio_5fthreads_4',['pin_io_threads',['../structe3__config__t.html#a2a715b93d5db667ce28f7150b4dffd61',1,'e3_config_t']]],
   ['protocol_5fdata_5',['protocol_data',['../structlibe3_1_1IndicationMessage.html#ac2ca7046e45d825dd9aba72d8248c7ca',1,'libe3::IndicationMessage']]],

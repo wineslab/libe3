@@ -94,7 +94,7 @@ var NAVTREE =
       [ "Class Members", "functions.html", [
         [ "All", "functions.html", "functions_dup" ],
         [ "Functions", "functions_func.html", "functions_func" ],
-        [ "Variables", "functions_vars.html", null ],
+        [ "Variables", "functions_vars.html", "functions_vars" ],
         [ "Related Symbols", "functions_rela.html", null ]
       ] ]
     ] ],
@@ -119,9 +119,9 @@ var NAVTREEINDEX =
 "classlibe3_1_1E3Connector.html",
 "classlibe3_1_1Logger.html#a8f40bcd6249ad424b8eb15e60049f65e",
 "classlibe3_1_1py_1_1DAppSession.html#a1d7471730e97aa1230ce3cfe094078fe",
-"latrec_guide.html#autotoc_md12",
-"structlatrec__rec.html#a4650facda3586c172cf7779ae480e62b",
-"structlibe3_1_1SubscriptionRequest.html#ae8ba1185c46760e64db97f510c8b4c0b"
+"latrec_8h.html#a696b7ddc69a88e2f609114f4964d37c4",
+"structe3__service__model__handle__s.html#acc79f3ff9b23c13f2609947b2b653755",
+"structlibe3_1_1SubscriptionDetails.html#ac9885c5fbce281aa314a2ff5e4f1debe"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';
