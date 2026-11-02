@@ -9,6 +9,16 @@ if(NOT DEFINED LIBE3_BUILD_DOCS)
     set(LIBE3_BUILD_DOCS OFF)
 endif()
 
+# EXTRACT_ALL = YES hides Doxygen's "is not documented" checks, so the strict
+# mode turns it off and asks for every @param and @return. Off for the published
+# documentation, which keeps listing undocumented symbols.
+option(LIBE3_DOCS_STRICT "Doxygen: warn on every undocumented member, parameter and return value" OFF)
+if(LIBE3_DOCS_STRICT)
+    set(DOXYGEN_STRICT_OVERRIDES "EXTRACT_ALL             = NO\nWARN_NO_PARAMDOC       = YES\nWARN_IF_INCOMPLETE_DOC = YES")
+else()
+    set(DOXYGEN_STRICT_OVERRIDES "")
+endif()
+
 if(LIBE3_BUILD_DOCS)
     find_package(Doxygen QUIET OPTIONAL_COMPONENTS dot)
 

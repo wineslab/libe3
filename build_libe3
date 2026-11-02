@@ -46,6 +46,7 @@ ARCH_NATIVE=0
 RUN_TESTS=0
 FATAL_ERRORS=0
 BUILD_DOCS=0
+BUILD_DOCS_STRICT=0
 CREATE_DEB=0
 DEB_ARCH=""
 
@@ -130,6 +131,7 @@ Features:
   --enable-examples       Build examples (default: ON)
   --disable-examples      Disable examples
   --docs                  Build documentation (via CMake 'docs' target)
+  --docs-strict           Build documentation, warning on every undocumented member, parameter and return value
 
 Sanitizers:
 -----------
@@ -403,6 +405,7 @@ configure_cmake() {
         "-DLIBE3_ENABLE_TSAN=$([ $ENABLE_TSAN -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_ENABLE_SWIG=$([ $ENABLE_SWIG -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_BUILD_DOCS=$([ $BUILD_DOCS -eq 1 ] && echo ON || echo OFF)"
+        "-DLIBE3_DOCS_STRICT=$([ $BUILD_DOCS_STRICT -eq 1 ] && echo ON || echo OFF)"
     )
     
     # Generator
@@ -778,6 +781,11 @@ main() {
                 ;;
             --docs)
                 BUILD_DOCS=1
+                shift
+                ;;
+            --docs-strict)
+                BUILD_DOCS=1
+                BUILD_DOCS_STRICT=1
                 shift
                 ;;
             -I|--install-deps)

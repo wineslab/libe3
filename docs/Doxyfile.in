@@ -64,3 +64,5 @@ SHOW_USED_FILES        = YES
 SHOW_FILES             = YES
 SHOW_NAMESPACES        = YES
 
+# Later assignments win. Empty unless LIBE3_DOCS_STRICT is ON.
+@DOXYGEN_STRICT_OVERRIDES@

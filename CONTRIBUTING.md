@@ -62,7 +62,7 @@ The following are **mandatory** for every contribution. PRs that do not meet the
 - The following CI workflows must be green on the latest commit before review:
   - **`Unit Tests`** (`.github/workflows/pr-tests.yml`) — builds and runs `ctest --output-on-failure` for both `Debug` and `Release` on `ubuntu-latest`, plus the integration, all-encodings, and SWIG jobs.
   - **`Commit policy`** (`.github/workflows/commit-trailers.yml`) — validates the AI-assistant trailer policy on every commit (see [AI assistants](#ai-assistants)), that the branch is a linear, fast-forward-able descendant of `main` (no merge commits), that every commit builds and passes tests on its own, and that every file carries an SPDX header (`reuse lint`, see [Licensing headers](#licensing-headers)).
-  - **`Docs`** (`.github/workflows/docs.yml`) — builds the Doxygen documentation and fails on any warning. It only does work when a PR changes a documentation input (`include/`, `src/`, `swig/`, `docs/`, `README.md`, `CONTRIBUTING.md`); document every parameter you add, and put an explicit `<a id="..."></a>` before a heading that another page links to.
+  - **`Docs`** (`.github/workflows/docs.yml`) — builds the Doxygen documentation in strict mode and fails on any warning in a file the PR changes: besides the usual ones, a member or class without a description, a function parameter without `@param` and a function without `@return` each count. Gaps in files the PR does not change are listed in the report and do not fail it. It only does work when a PR changes a documentation input (`include/`, `src/`, `swig/`, `docs/`, `README.md`, `CONTRIBUTING.md`); put an explicit `<a id="..."></a>` before a heading that another page links to. Run `./build_libe3 --docs-strict` to see the same warnings locally, and read the full list in the `doxygen-warnings` artifact of a run.
 - Build and test workflows do not run on documentation- or CI-only PRs; a `Detect code changes` job gates them so they run only when a PR changes code (the trailer and linear-history checks still run on every PR).
 - CI posts exactly **one** comment per PR, from **`CI report`** (`.github/workflows/ci-report.yml`). It waits until every workflow above has finished for the head commit, then writes a verdict, a per-workflow table (including which workflows a `paths` filter or the `Detect code changes` gate kept from doing work), the benchmark and E2E detail those workflows published, and the fast-forward merge command once the required checks are green. Pushing to the branch rewrites that comment in place rather than adding another. Individual workflows no longer comment on their own.
 - The following local checks must be reported in the PR description as run by the contributor (mirroring CI):
@@ -71,7 +71,7 @@ The following are **mandatory** for every contribution. PRs that do not meet the
   - `./build_libe3 -c -d build -j $(nproc) -g -t` passes (Debug + tests).
   - The MPMC benchmark (`./build/test_bench_mpmc_queue`) shows no regression vs `main`.
   - `VERSION` bumped per [SemVer](https://semver.org/) when public API or ABI changes.
-  - `./build_libe3 --docs` reports no Doxygen warnings (the `Docs` workflow fails on any).
+  - `./build_libe3 --docs-strict` reports no Doxygen warning in the files you changed (the `Docs` workflow fails on any).
   - `README.md` and/or `CONTRIBUTING.md` updated when contributor- or user-facing behavior changes.
 
 <a id="licensing-headers"></a>

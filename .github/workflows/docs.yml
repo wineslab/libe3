@@ -3,8 +3,10 @@
 
 name: Docs
 
-# Doxygen must report no warnings (issue #132). Builds only the `docs` target, so
-# it does not compile the library, and fails the pull request on any warning.
+# Doxygen must report no warning in a file the pull request changes (issue #132),
+# counting every undocumented member, parameter and return value
+# (LIBE3_DOCS_STRICT). Gaps in files it does not change are listed, not failed on.
+# Builds only the `docs` target, so it does not compile the library.
 #
 # The job always runs and reports success, and only its steps are skipped when no
 # documentation input changed: a job-level `if:` would report the required check
@@ -37,7 +39,7 @@ jobs:
           base="${{ github.event.pull_request.base.sha }}"
           head="${{ github.event.pull_request.head.sha }}"
           # Everything cmake/libe3Docs.cmake feeds Doxygen, plus the config and this check.
-          inputs='^(include/|src/|swig/|docs/|README\.md$|CONTRIBUTING\.md$|cmake/libe3Docs\.cmake$|\.github/workflows/docs\.yml$|\.github/scripts/check_docs_warnings\.sh$)'
+          inputs='^(include/|src/|swig/|docs/|README\.md$|CONTRIBUTING\.md$|cmake/libe3Docs\.cmake$|\.github/workflows/docs\.yml$|\.github/scripts/check_docs_warnings\.py$)'
           if git diff --name-only "$base..$head" | grep -qE "$inputs"; then
               echo "docs=true" >> "$GITHUB_OUTPUT"
           else
@@ -55,14 +57,23 @@ jobs:
         if: steps.filter.outputs.docs == 'true'
         run: |
           cmake -S . -B build \
-            -DLIBE3_BUILD_DOCS=ON \
+            -DLIBE3_BUILD_DOCS=ON -DLIBE3_DOCS_STRICT=ON \
             -DLIBE3_ENABLE_JSON=ON -DLIBE3_ENABLE_ASN1=OFF -DLIBE3_ENABLE_PROTOBUF=OFF -DLIBE3_ENABLE_ZMQ=OFF \
             -DLIBE3_BUILD_TESTS=OFF -DLIBE3_BUILD_EXAMPLES=OFF
           cmake --build build --target docs
 
-      - name: Fail on Doxygen warnings
+      - name: Fail on Doxygen warnings in the changed files
         if: steps.filter.outputs.docs == 'true'
-        run: bash .github/scripts/check_docs_warnings.sh build/docs/doxygen_warnings.txt ci-report-docs.md
+        run: |
+          python3 .github/scripts/check_docs_warnings.py build/docs/doxygen_warnings.txt ci-report-docs.md \
+            --base "${{ github.event.pull_request.base.sha }}" --head "${{ github.event.pull_request.head.sha }}"
+
+      - name: Upload the full warning list
+        if: ${{ always() && hashFiles('build/docs/doxygen_warnings.txt') != '' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: doxygen-warnings
+          path: build/docs/doxygen_warnings.txt
 
       - name: Upload report fragment
         if: ${{ always() && hashFiles('ci-report-docs.md') != '' }}
