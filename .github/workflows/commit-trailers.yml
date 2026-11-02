@@ -150,7 +150,16 @@ jobs:
           base="${{ github.event.pull_request.base.sha }}"
           head="${{ github.event.pull_request.head.sha }}"
           set -e
+          # A commit that changes only documentation cannot break the build, so it
+          # is not built. The script is copied out first: checking out an older
+          # commit would remove it from the work tree.
+          detect="$(mktemp)"
+          cp .github/scripts/detect_code_changes.sh "$detect"
           for sha in $(git rev-list --reverse "$base..$head"); do
+            if [ "$(bash "$detect" "$sha^" "$sha" 2>/dev/null)" = "false" ]; then
+              echo "Skipping commit $sha: it changes no code"
+              continue
+            fi
             echo "::group::Building commit $sha"
             git -c advice.detachedHead=false checkout --quiet --detach "$sha"
             chmod +x ./build_libe3 || true
