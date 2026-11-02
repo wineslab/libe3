@@ -139,6 +139,7 @@ var namespacelibe3 =
     [ "LIBE3_PROTOCOL_VERSION", "namespacelibe3.html#ac69f2e5f639ef2bdb04445cf7ac2b408", null ],
     [ "MAX_ACTION_DATA_SIZE", "namespacelibe3.html#aca224e72d9af7089c4d9c1a150a705db", null ],
     [ "MAX_DAPP_REPORT_DATA_SIZE", "namespacelibe3.html#a1fdb0c4f4c6f3060e3b0448610c7a289", null ],
+    [ "MAX_IDENTIFIER_LIST_SIZE", "namespacelibe3.html#af4b3cf6c64a692090cd6b7d26f62b6bf", null ],
     [ "MAX_PROTOCOL_DATA_SIZE", "namespacelibe3.html#a581a3bc9ba0fad9e97f52c00fdce32b9", null ],
     [ "MAX_RAN_FUNCTIONS", "namespacelibe3.html#aa385e749637e30801ce6405782b0c699", null ],
     [ "MAX_XAPP_CTRL_DATA_SIZE", "namespacelibe3.html#a058435e96914a52e2830d4c403b1d541", null ]

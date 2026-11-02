@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.9</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -304,7 +304,7 @@ Friends</h2></td></tr>
 
 <p>Emit an outbound PDU produced by the SM. </p>
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00178">178</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00182">182</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -333,7 +333,7 @@ Friends</h2></td></tr>
 
 <p>Get currently subscribed dApps for this SM's RAN function. </p>
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00188">188</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00192">192</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -465,7 +465,7 @@ Friends</h2></td></tr>
 <p>Build an <a class="el" href="structlibe3_1_1IndicationMessage.html" title="E3AP Indication Message structure.">IndicationMessage</a> PDU. </p>
 <p>This helper only builds the PDU. Implementations can emit it with <a class="el" href="#a979d55be233ccf00829259a9b276c773" title="Emit an outbound PDU produced by the SM.">emit_outbound()</a> when appropriate. </p>
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00161">161</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00165">165</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -499,7 +499,7 @@ Friends</h2></td></tr>
 <p>Build a <a class="el" href="structlibe3_1_1MessageAck.html" title="E3AP Message Acknowledgment structure.">MessageAck</a> PDU for a control/request message. </p>
 <p>This helper only builds the PDU. Implementations can decide whether to emit it with <a class="el" href="#a979d55be233ccf00829259a9b276c773" title="Emit an outbound PDU produced by the SM.">emit_outbound()</a> or suppress it when protocol semantics allow. </p>
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00143">143</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00147">147</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -556,12 +556,13 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 
 <p>RAN-function-specific opaque data (required, 1..32768 bytes). </p>
-<p>Returns the byte vector advertised for this RAN function in the <a class="el" href="structlibe3_1_1SetupResponse.html" title="E3AP Setup Response structure.">SetupResponse</a> (ranFunctionList-&gt;ranFunctionData). E3AP declares the field mandatory and non-empty &ndash; <span class="tt">OCTET STRING (SIZE (1..32768))</span> &ndash; so every SM must override this: even the most minimal SM carries at least its own name. An SM with nothing to advertise is not advertisable at all, since ranFunctionList itself is optional but its entries are not.</p>
-<p>Registration fails with ErrorCode::INVALID_PARAM if the returned vector is empty or longer than MAX_PROTOCOL_DATA_SIZE. The base implementation returns an empty vector so that failure is a loud diagnostic rather than a compile error in every existing SM; it is not a usable default. </p>
+<p>Returns the byte vector advertised for this RAN function in the <a class="el" href="structlibe3_1_1SetupResponse.html" title="E3AP Setup Response structure.">SetupResponse</a> (ranFunctionList-&gt;ranFunctionData). E3AP declares the field mandatory and non-empty &ndash; <span class="tt">OCTET STRING (SIZE (1..262144))</span>, limited to 32768 bytes &ndash; so every SM must override this: even the most minimal SM carries at least its own name. An SM with nothing to advertise is not advertisable at all, since ranFunctionList itself is optional but its entries are not.</p>
+<p>Registration fails with ErrorCode::INVALID_PARAM if the returned vector is empty or longer than MAX_PROTOCOL_DATA_SIZE. The base implementation returns an empty vector so that failure is a loud diagnostic rather than a compile error in every existing SM; it is not a usable default.</p>
+<dl class="section return"><dt>Returns</dt><dd>The bytes advertised for this RAN function; registration fails if the vector is empty or oversized. </dd></dl>
 
 <p>Reimplemented in <a class="el" href="structe3__service__model__handle__s.html#ad9725ffd222d071abb7a158aade904da">e3_service_model_handle_s</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00085">85</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00089">89</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -619,7 +620,7 @@ Friends</h2></td></tr>
 
 <p>Set the outbound PDU emitter callback (used by <a class="el" href="classlibe3_1_1E3Interface.html" title="E3Interface - Internal protocol coordination.">E3Interface</a>). </p>
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00198">198</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00202">202</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -648,7 +649,7 @@ Friends</h2></td></tr>
 
 <p>Set subscriber provider callback (used by <a class="el" href="classlibe3_1_1E3Interface.html" title="E3Interface - Internal protocol coordination.">E3Interface</a>). </p>
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00205">205</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00209">209</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -791,7 +792,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00213">213</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00217">217</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 
 </div>
 </div>

@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.9</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -587,13 +587,14 @@ Protected Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">message_id</td><td>Unique message ID </td></tr>
-    <tr><td class="paramname">e3ap_protocol_version</td><td>E3AP protocol version string (e.g., "0.0.0") </td></tr>
-    <tr><td class="paramname">dapp_name</td><td>Name of the dApp </td></tr>
-    <tr><td class="paramname">dapp_version</td><td>Version of the dApp (e.g., "0.0.0") </td></tr>
-    <tr><td class="paramname">vendor</td><td>Vendor name (max 30 chars) </td></tr>
+    <tr><td class="paramname">e3ap_protocol_version</td><td>E3AP protocol version string (e.g., "0.0.0"; 1..32 bytes over ASN.1) </td></tr>
+    <tr><td class="paramname">dapp_name</td><td>Name of the dApp (1..64 bytes over ASN.1) </td></tr>
+    <tr><td class="paramname">dapp_version</td><td>Version of the dApp (e.g., "0.0.0"; 1..32 bytes over ASN.1) </td></tr>
+    <tr><td class="paramname">vendor</td><td>Vendor name (1..64 bytes over ASN.1) </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Encoded message on success, error code on failure </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00016">16</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
 
@@ -746,7 +747,7 @@ Protected Member Functions</h2></td></tr>
     <tr><td class="paramname">ran_function_identifier</td><td>RAN function to subscribe to </td></tr>
     <tr><td class="paramname">telemetry_identifier_list</td><td>List of telemetry identifiers </td></tr>
     <tr><td class="paramname">control_identifier_list</td><td>List of control identifiers </td></tr>
-    <tr><td class="paramname">subscription_time</td><td>How long to keep the subscription (0-3600 sec, optional) </td></tr>
+    <tr><td class="paramname">subscription_time</td><td>How long to keep the subscription (0-86400 sec, optional) </td></tr>
   </table>
   </dd>
 </dl>

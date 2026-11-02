@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.9</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -234,7 +234,7 @@ Public Member Functions</h2></td></tr>
 <div class="ttc" id="anamespacelibe3_html_a24bf966c6225dc47ac47d7a8a1986c40ac8660c6d72e7323867ec800d6bb953df"><div class="ttname"><a href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40ac8660c6d72e7323867ec800d6bb953df">libe3::E3TransportLayer::IPC</a></div><div class="ttdeci">@ IPC</div><div class="ttdoc">Unix Domain Sockets / IPC.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00086">types.hpp:86</a></div></div>
 <div class="ttc" id="anamespacelibe3_html_a6cf81048dab516aa29417bb0dc741d0ea38cf8f016825407fb4e79e319d87bd5e"><div class="ttname"><a href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea38cf8f016825407fb4e79e319d87bd5e">libe3::E3LinkLayer::ZMQ</a></div><div class="ttdeci">@ ZMQ</div><div class="ttdoc">ZeroMQ-based transport.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00061">types.hpp:61</a></div></div>
 <div class="ttc" id="anamespacelibe3_html_a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8"><div class="ttname"><a href="namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8">libe3::EncodingFormat::JSON</a></div><div class="ttdeci">@ JSON</div><div class="ttdoc">JSON encoding (for development/debugging).</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00053">types.hpp:53</a></div></div>
-<div class="ttc" id="astructlibe3_1_1E3Config_html"><div class="ttname"><a href="structlibe3_1_1E3Config.html">libe3::E3Config</a></div><div class="ttdoc">Configuration for E3Agent.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00402">types.hpp:402</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html"><div class="ttname"><a href="structlibe3_1_1E3Config.html">libe3::E3Config</a></div><div class="ttdoc">Configuration for E3Agent.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00403">types.hpp:403</a></div></div>
 </div><!-- fragment --><p><b>Thread Safety:</b> All public methods are thread-safe. The agent manages its own internal threads for protocol handling. </p>
 
 <p class="definition">Definition at line <a class="el" href="e3__agent_8hpp_source.html#l00086">86</a> of file <a class="el" href="e3__agent_8hpp_source.html">e3_agent.hpp</a>.</p>
@@ -1610,7 +1610,7 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
     <tr><td class="paramname">ran_function_id</td><td>RAN function to subscribe to </td></tr>
     <tr><td class="paramname">telemetry_ids</td><td>telemetry identifiers requested </td></tr>
     <tr><td class="paramname">control_ids</td><td>control identifiers requested </td></tr>
-    <tr><td class="paramname">sub_time</td><td>how long to keep the subscription, in seconds; unset leaves it to the RAN </td></tr>
+    <tr><td class="paramname">sub_time</td><td>seconds to keep the subscription. Over ASN.1 the range is 0 to 86400. </td></tr>
     <tr><td class="paramname">periodicity</td><td>microseconds between indications, 0 = every event. Over ASN.1 the range is 0 to 60000000. An OCUDU RAN reads the same number as milliseconds, so pass it what it expects. </td></tr>
     <tr><td class="paramname">out_request_id</td><td>when non-null, receives the assigned E3-MessageID on success, so the caller can correlate the <a class="el" href="structlibe3_1_1SubscriptionResponse.html" title="E3AP Subscription Response structure.">SubscriptionResponse</a> (which echoes request_id) back to this subscribe call. </td></tr>
   </table>

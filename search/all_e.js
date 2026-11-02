@@ -2,15 +2,15 @@ var searchData=
 [
   ['n_5fopen_5frings_0',['n_open_rings',['../latrec_8c.html#a929fc968a753e50b7de55e1e040c554a',1,'latrec.c']]],
   ['name_1',['name',['../structe3__c__service__model__desc__t.html#a620c0c7b582ed9338aa5ad98855b3734',1,'e3_c_service_model_desc_t::name'],['../structlatrec__hdr.html#a8a6cda6432d1d17614c7984d4cc8d829',1,'latrec_hdr::name'],['../classlibe3_1_1ServiceModel.html#a003eae4bbac3dadb42613b2c71c21476',1,'libe3::ServiceModel::name()'],['../structe3__service__model__handle__s.html#a9b8e98ddefc317262cf97ea499e5757b',1,'e3_service_model_handle_s::name()']]],
-  ['name_20stops_20being_20enough_2',['Attribution, and where the ring name stops being enough',['../latrec_guide.html#autotoc_md24',1,'']]],
+  ['name_20stops_20being_20enough_2',['Attribution, and where the ring name stops being enough',['../latrec_guide.html#autotoc_md27',1,'']]],
   ['name_5fs_3',['name_s',['../structe3__service__model__handle__s.html#a54c261a3e0b8416ca95e1fc54f1d0b2d',1,'e3_service_model_handle_s']]],
-  ['naming_20and_20sizing_4',['Ring naming and sizing',['../latrec_guide.html#autotoc_md21',1,'']]],
+  ['naming_20and_20sizing_4',['Ring naming and sizing',['../latrec_guide.html#autotoc_md24',1,'']]],
   ['negative_5',['NEGATIVE',['../namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5a50546bf973283065b6ccf09faf7a580a',1,'libe3']]],
   ['neutral_20e3ap_20c_20library_6',['libe3 - Vendor-Neutral E3AP C++ Library',['../index.html',1,'']]],
   ['none_7',['NONE',['../namespacelibe3.html#a509338e1414d84a610f21816d04940a0ab50339a10e1de285ac99d4c3990b8693',1,'libe3']]],
   ['not_20callbacks_8',['Why batched drain + GIL release (not callbacks)',['../dir_921b7fe62329ee5986df8fde73ed97c3.html#autotoc_md3',1,'']]],
-  ['not_20yet_20instrumented_9',['Not yet instrumented',['../path_a_e3_loop.html#autotoc_md38',1,'Not yet instrumented'],['../path_b_e2_e3_loop.html#autotoc_md48',1,'Not yet instrumented']]],
-  ['notes_20on_20simulation_20local_20testing_10',['Notes on Simulation / Local Testing',['../index.html#autotoc_md66',1,'']]],
+  ['not_20yet_20instrumented_9',['Not yet instrumented',['../path_a_e3_loop.html#autotoc_md41',1,'Not yet instrumented'],['../path_b_e2_e3_loop.html#autotoc_md51',1,'Not yet instrumented']]],
+  ['notes_20on_20simulation_20local_20testing_10',['Notes on Simulation / Local Testing',['../index.html#autotoc_md69',1,'']]],
   ['notify_5fdapp_5fstatus_5fchanged_11',['notify_dapp_status_changed',['../classlibe3_1_1E3Interface.html#a17e0ec39836a9f3e8547143c16df330d',1,'libe3::E3Interface']]],
   ['now_5frealtime_5fns_12',['now_realtime_ns',['../namespacelibe3.html#a3fdc0243e9c37ad659d49d137af3ee50',1,'libe3']]]
 ];

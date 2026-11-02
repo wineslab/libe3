@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.9</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -823,7 +823,7 @@ Functions</h2></td></tr>
 
 <p>Register a <span class="tt">ServiceModel</span> implementation with the agent. </p>
 <p>Ownership of <span class="tt">sm</span> is transferred to the agent on success and callers must not free the handle after a successful call. On failure the caller retains ownership and should call <span class="tt"><a class="el" href="#a82d2681971d7244733f568ea830f6a1c" title="Destroy a C-backed ServiceModel handle.">e3_service_model_destroy</a></span>.</p>
-<p>Fails with <span class="tt"><a class="el" href="error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8ae7e2cb456b9f2ab568b681d883d793ba">E3_INVALID_PARAM</a></span> if the descriptor the handle was built from carried no <span class="tt">ran_function_data</span>, or more than 32768 bytes of it, and with <span class="tt"><a class="el" href="error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a7eb44a40220c3645fd20677f4c377dc2">E3_SM_ALREADY_REGISTERED</a></span> if another SM already holds the same RAN function id.</p>
+<p>Fails with <span class="tt"><a class="el" href="error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8ae7e2cb456b9f2ab568b681d883d793ba">E3_INVALID_PARAM</a></span> if the descriptor the handle was built from carried no <span class="tt">ran_function_data</span>, or more than 32768 bytes of it, and with <span class="tt"><a class="el" href="error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a7eb44a40220c3645fd20677f4c377dc2">E3_SM_ALREADY_REGISTERED</a></span> if another SM already holds the same RAN function id. It also fails with <span class="tt"><a class="el" href="error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8ae7e2cb456b9f2ab568b681d883d793ba">E3_INVALID_PARAM</a></span> if the SM lists more than 256 telemetry or control ids, or 64 RAN functions are already registered.</p>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9" title="C error type alias.">e3_error_t</a> ErrorCode value (0 == success) </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00242">242</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>

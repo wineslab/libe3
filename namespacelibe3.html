@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.9</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -318,7 +318,10 @@ Variables</h2></td></tr>
 <tr class="memitem:aca224e72d9af7089c4d9c1a150a705db" id="r_aca224e72d9af7089c4d9c1a150a705db"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca224e72d9af7089c4d9c1a150a705db">MAX_ACTION_DATA_SIZE</a> = 32768</td></tr>
 <tr class="memitem:a1fdb0c4f4c6f3060e3b0448610c7a289" id="r_a1fdb0c4f4c6f3060e3b0448610c7a289"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1fdb0c4f4c6f3060e3b0448610c7a289">MAX_DAPP_REPORT_DATA_SIZE</a> = 32768</td></tr>
 <tr class="memitem:a058435e96914a52e2830d4c403b1d541" id="r_a058435e96914a52e2830d4c403b1d541"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a058435e96914a52e2830d4c403b1d541">MAX_XAPP_CTRL_DATA_SIZE</a> = 32768</td></tr>
-<tr class="memitem:aa385e749637e30801ce6405782b0c699" id="r_aa385e749637e30801ce6405782b0c699"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa385e749637e30801ce6405782b0c699">MAX_RAN_FUNCTIONS</a> = 255</td></tr>
+<tr class="memitem:aa385e749637e30801ce6405782b0c699" id="r_aa385e749637e30801ce6405782b0c699"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa385e749637e30801ce6405782b0c699">MAX_RAN_FUNCTIONS</a> = 64</td></tr>
+<tr class="memdesc:aa385e749637e30801ce6405782b0c699"><td class="mdescLeft">&#160;</td><td class="mdescRight">ranFunctionList SIZE (0..64)  <br /></td></tr>
+<tr class="memitem:af4b3cf6c64a692090cd6b7d26f62b6bf" id="r_af4b3cf6c64a692090cd6b7d26f62b6bf"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af4b3cf6c64a692090cd6b7d26f62b6bf">MAX_IDENTIFIER_LIST_SIZE</a> = 256</td></tr>
+<tr class="memdesc:af4b3cf6c64a692090cd6b7d26f62b6bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">telemetry and control lists SIZE (0..256)  <br /></td></tr>
 <tr class="memitem:a809598c8d63a2bdce0d447411324a2b5" id="r_a809598c8d63a2bdce0d447411324a2b5"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a809598c8d63a2bdce0d447411324a2b5">DEFAULT_BUFFER_SIZE</a> = 60000</td></tr>
 <tr class="memitem:ac69f2e5f639ef2bdb04445cf7ac2b408" id="r_ac69f2e5f639ef2bdb04445cf7ac2b408"><td class="memItemLeft" align="right" valign="top">constexpr uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac69f2e5f639ef2bdb04445cf7ac2b408">LIBE3_PROTOCOL_VERSION</a> = 1</td></tr>
 </table>
@@ -475,21 +478,21 @@ template&lt;typename T&gt; </div>
 <div class="line">    <a class="code hl_struct" href="structlibe3_1_1ReleaseMessage.html">ReleaseMessage</a>,</div>
 <div class="line">    <a class="code hl_struct" href="structlibe3_1_1MessageAck.html">MessageAck</a></div>
 <div class="line">&gt;</div>
-<div class="ttc" id="astructlibe3_1_1DAppControlAction_html"><div class="ttname"><a href="structlibe3_1_1DAppControlAction.html">libe3::DAppControlAction</a></div><div class="ttdoc">E3AP dApp Control Action structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00284">types.hpp:284</a></div></div>
-<div class="ttc" id="astructlibe3_1_1DAppReport_html"><div class="ttname"><a href="structlibe3_1_1DAppReport.html">libe3::DAppReport</a></div><div class="ttdoc">E3AP dApp Report structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00305">types.hpp:305</a></div></div>
-<div class="ttc" id="astructlibe3_1_1IndicationMessage_html"><div class="ttname"><a href="structlibe3_1_1IndicationMessage.html">libe3::IndicationMessage</a></div><div class="ttdoc">E3AP Indication Message structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00275">types.hpp:275</a></div></div>
-<div class="ttc" id="astructlibe3_1_1MessageAck_html"><div class="ttname"><a href="structlibe3_1_1MessageAck.html">libe3::MessageAck</a></div><div class="ttdoc">E3AP Message Acknowledgment structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00297">types.hpp:297</a></div></div>
-<div class="ttc" id="astructlibe3_1_1ReleaseMessage_html"><div class="ttname"><a href="structlibe3_1_1ReleaseMessage.html">libe3::ReleaseMessage</a></div><div class="ttdoc">E3AP Release Message structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00333">types.hpp:333</a></div></div>
-<div class="ttc" id="astructlibe3_1_1SetupRequest_html"><div class="ttname"><a href="structlibe3_1_1SetupRequest.html">libe3::SetupRequest</a></div><div class="ttdoc">E3AP Setup Request structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00209">types.hpp:209</a></div></div>
-<div class="ttc" id="astructlibe3_1_1SetupResponse_html"><div class="ttname"><a href="structlibe3_1_1SetupResponse.html">libe3::SetupResponse</a></div><div class="ttdoc">E3AP Setup Response structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00229">types.hpp:229</a></div></div>
-<div class="ttc" id="astructlibe3_1_1SubscriptionDelete_html"><div class="ttname"><a href="structlibe3_1_1SubscriptionDelete.html">libe3::SubscriptionDelete</a></div><div class="ttdoc">E3AP Subscription Delete structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00253">types.hpp:253</a></div></div>
-<div class="ttc" id="astructlibe3_1_1SubscriptionRequest_html"><div class="ttname"><a href="structlibe3_1_1SubscriptionRequest.html">libe3::SubscriptionRequest</a></div><div class="ttdoc">E3AP Subscription Request structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00241">types.hpp:241</a></div></div>
-<div class="ttc" id="astructlibe3_1_1SubscriptionResponse_html"><div class="ttname"><a href="structlibe3_1_1SubscriptionResponse.html">libe3::SubscriptionResponse</a></div><div class="ttdoc">E3AP Subscription Response structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00261">types.hpp:261</a></div></div>
-<div class="ttc" id="astructlibe3_1_1XAppControlAction_html"><div class="ttname"><a href="structlibe3_1_1XAppControlAction.html">libe3::XAppControlAction</a></div><div class="ttdoc">E3AP xApp Control Action structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00318">types.hpp:318</a></div></div>
+<div class="ttc" id="astructlibe3_1_1DAppControlAction_html"><div class="ttname"><a href="structlibe3_1_1DAppControlAction.html">libe3::DAppControlAction</a></div><div class="ttdoc">E3AP dApp Control Action structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00285">types.hpp:285</a></div></div>
+<div class="ttc" id="astructlibe3_1_1DAppReport_html"><div class="ttname"><a href="structlibe3_1_1DAppReport.html">libe3::DAppReport</a></div><div class="ttdoc">E3AP dApp Report structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00306">types.hpp:306</a></div></div>
+<div class="ttc" id="astructlibe3_1_1IndicationMessage_html"><div class="ttname"><a href="structlibe3_1_1IndicationMessage.html">libe3::IndicationMessage</a></div><div class="ttdoc">E3AP Indication Message structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00276">types.hpp:276</a></div></div>
+<div class="ttc" id="astructlibe3_1_1MessageAck_html"><div class="ttname"><a href="structlibe3_1_1MessageAck.html">libe3::MessageAck</a></div><div class="ttdoc">E3AP Message Acknowledgment structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00298">types.hpp:298</a></div></div>
+<div class="ttc" id="astructlibe3_1_1ReleaseMessage_html"><div class="ttname"><a href="structlibe3_1_1ReleaseMessage.html">libe3::ReleaseMessage</a></div><div class="ttdoc">E3AP Release Message structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00334">types.hpp:334</a></div></div>
+<div class="ttc" id="astructlibe3_1_1SetupRequest_html"><div class="ttname"><a href="structlibe3_1_1SetupRequest.html">libe3::SetupRequest</a></div><div class="ttdoc">E3AP Setup Request structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00210">types.hpp:210</a></div></div>
+<div class="ttc" id="astructlibe3_1_1SetupResponse_html"><div class="ttname"><a href="structlibe3_1_1SetupResponse.html">libe3::SetupResponse</a></div><div class="ttdoc">E3AP Setup Response structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00230">types.hpp:230</a></div></div>
+<div class="ttc" id="astructlibe3_1_1SubscriptionDelete_html"><div class="ttname"><a href="structlibe3_1_1SubscriptionDelete.html">libe3::SubscriptionDelete</a></div><div class="ttdoc">E3AP Subscription Delete structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00254">types.hpp:254</a></div></div>
+<div class="ttc" id="astructlibe3_1_1SubscriptionRequest_html"><div class="ttname"><a href="structlibe3_1_1SubscriptionRequest.html">libe3::SubscriptionRequest</a></div><div class="ttdoc">E3AP Subscription Request structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00242">types.hpp:242</a></div></div>
+<div class="ttc" id="astructlibe3_1_1SubscriptionResponse_html"><div class="ttname"><a href="structlibe3_1_1SubscriptionResponse.html">libe3::SubscriptionResponse</a></div><div class="ttdoc">E3AP Subscription Response structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00262">types.hpp:262</a></div></div>
+<div class="ttc" id="astructlibe3_1_1XAppControlAction_html"><div class="ttname"><a href="structlibe3_1_1XAppControlAction.html">libe3::XAppControlAction</a></div><div class="ttdoc">E3AP xApp Control Action structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00319">types.hpp:319</a></div></div>
 </div><!-- fragment -->
 <p>Generic E3AP PDU using std::variant for type-safe union. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00340">340</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00341">341</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -541,7 +544,7 @@ template&lt;typename T&gt; </div>
 
 <p>Factory function type for creating SM instances. </p>
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00219">219</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00223">223</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -617,7 +620,7 @@ template&lt;typename T&gt; </div>
 
 <p><a class="el" href="#a6dc96978d420b62130fbd1e5c17497aa" title="Timestamp type using steady_clock for monotonic time.">Timestamp</a> type using steady_clock for monotonic time. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00503">503</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00504">504</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1042,7 +1045,7 @@ template&lt;typename T&gt; </div>
 
 <p>Convert <a class="el" href="#ac1c5533fc81586565ca7822bf00eee90" title="E3AP action types for Setup and Subscription requests.">ActionType</a> to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00547">547</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00548">548</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1071,7 +1074,7 @@ template&lt;typename T&gt; </div>
 
 <p>Convert <a class="el" href="#a3a6c3d51b9810b103e12fddf0839e1fe" title="Agent state machine states.">AgentState</a> to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00600">600</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00601">601</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1241,7 +1244,7 @@ template&lt;typename T&gt; </div>
 
 <p>Convert <a class="el" href="#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00570">570</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00571">571</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1299,7 +1302,7 @@ template&lt;typename T&gt; </div>
 
 <p>Convert <a class="el" href="#a6cf81048dab516aa29417bb0dc741d0e" title="Link layer types (matches Python E3LinkLayer).">E3LinkLayer</a> to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00628">628</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00629">629</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1359,7 +1362,7 @@ template&lt;typename T&gt; </div>
 
 <p>Convert <a class="el" href="#a675f37e2936d707807212fcd3cfa8185" title="E3AP PDU types.">PduType</a> to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00527">527</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00528">528</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1388,7 +1391,7 @@ template&lt;typename T&gt; </div>
 
 <p>Convert <a class="el" href="#a53bfd79bd9406bfe120864d4eb83b0d5" title="E3AP response codes.">ResponseCode</a> to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00559">559</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00560">560</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1417,7 +1420,7 @@ template&lt;typename T&gt; </div>
 
 <p>Convert <a class="el" href="#a42d84c47e47cdcae78a4214ab412b2ec" title="Role this E3 endpoint plays in the protocol.">E3Role</a> to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00617">617</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00618">618</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1446,7 +1449,7 @@ template&lt;typename T&gt; </div>
 
 <p>Convert <a class="el" href="#a24bf966c6225dc47ac47d7a8a1986c40" title="Transport layer types (matches Python E3TransportLayer).">E3TransportLayer</a> to string representation. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00639">639</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00640">640</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1574,7 +1577,7 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00173">173</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00174">174</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1598,7 +1601,7 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00176">176</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00177">177</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1650,6 +1653,32 @@ template&lt;typename T&gt; </div>
 
 </div>
 </div>
+<a id="af4b3cf6c64a692090cd6b7d26f62b6bf" name="af4b3cf6c64a692090cd6b7d26f62b6bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4b3cf6c64a692090cd6b7d26f62b6bf">&#9670;&#160;</a></span>MAX_IDENTIFIER_LIST_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t libe3::MAX_IDENTIFIER_LIST_SIZE = 256</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>telemetry and control lists SIZE (0..256) </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00173">173</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
 <a id="a581a3bc9ba0fad9e97f52c00fdce32b9" name="a581a3bc9ba0fad9e97f52c00fdce32b9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a581a3bc9ba0fad9e97f52c00fdce32b9">&#9670;&#160;</a></span>MAX_PROTOCOL_DATA_SIZE</h2>
 
@@ -1684,7 +1713,7 @@ template&lt;typename T&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">size_t libe3::MAX_RAN_FUNCTIONS = 255</td>
+          <td class="memname">size_t libe3::MAX_RAN_FUNCTIONS = 64</td>
         </tr>
       </table>
   </td>
@@ -1693,6 +1722,8 @@ template&lt;typename T&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>ranFunctionList SIZE (0..64) </p>
 
 <p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00172">172</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 

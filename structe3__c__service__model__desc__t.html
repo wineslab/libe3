@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.9</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -108,7 +108,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a01ec8a4a2c490b6f27fc877d95ac26c3" id="r_a01ec8a4a2c490b6f27fc877d95ac26c3"><td class="memItemLeft" align="right" valign="top">const uint32_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a01ec8a4a2c490b6f27fc877d95ac26c3">control_ids</a></td></tr>
 <tr class="memitem:a251ff9cccad6049f569909f4ac8d51ac" id="r_a251ff9cccad6049f569909f4ac8d51ac"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a251ff9cccad6049f569909f4ac8d51ac">control_ids_len</a></td></tr>
 <tr class="memitem:a099fcab416158a4d8b99e949f69738d9" id="r_a099fcab416158a4d8b99e949f69738d9"><td class="memItemLeft" align="right" valign="top">const uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a099fcab416158a4d8b99e949f69738d9">ran_function_data</a></td></tr>
+<tr class="memdesc:a099fcab416158a4d8b99e949f69738d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opaque RAN function data (must be non-NULL).  <br /></td></tr>
 <tr class="memitem:a7f9aab10489de36a7d73a6974500cc3b" id="r_a7f9aab10489de36a7d73a6974500cc3b"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7f9aab10489de36a7d73a6974500cc3b">ran_function_data_len</a></td></tr>
+<tr class="memdesc:a7f9aab10489de36a7d73a6974500cc3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Length in bytes; must be 1..32768.  <br /></td></tr>
 <tr class="memitem:a679dcd5c64d8a76f47811131164dd51d" id="r_a679dcd5c64d8a76f47811131164dd51d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="c__api_8h.html#ad3b117c68d80d452d00867c43e0a1e81">e3_sm_init_cb</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a679dcd5c64d8a76f47811131164dd51d">sm_init</a></td></tr>
 <tr class="memitem:af5b248f186062b7dfbb70e621042fd87" id="r_af5b248f186062b7dfbb70e621042fd87"><td class="memItemLeft" align="right" valign="top"><a class="el" href="c__api_8h.html#a34e4488ba57cd9a216c1ad8e97dbef9c">e3_sm_destroy_cb</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af5b248f186062b7dfbb70e621042fd87">sm_destroy</a></td></tr>
 <tr class="memitem:a6793559dd2e53908991c1603ab1f4717" id="r_a6793559dd2e53908991c1603ab1f4717"><td class="memItemLeft" align="right" valign="top"><a class="el" href="c__api_8h.html#a437fd5b3495cc2ed04a19c2f2a296b2a">e3_sm_start_cb</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6793559dd2e53908991c1603ab1f4717">sm_start</a></td></tr>
@@ -122,7 +124,7 @@ Public Attributes</h2></td></tr>
 <ul>
 <li><span class="tt"><a class="el" href="#a620c0c7b582ed9338aa5ad98855b3734">name</a></span>, <span class="tt"><a class="el" href="#a07b97ac1d5e8d9d71142ab1748603f1f">version</a></span> and <span class="tt"><a class="el" href="#af43557598ca456180c497a8875c4c78f">ran_function_id</a></span> identify the SM.</li>
 <li><span class="tt"><a class="el" href="#a19e54f7034394a1deba662372800ca96">telemetry_ids</a></span> and <span class="tt"><a class="el" href="#a01ec8a4a2c490b6f27fc877d95ac26c3">control_ids</a></span> point to arrays that will be copied by the implementation; the caller may free them after creating the SM.</li>
-<li><span class="tt"><a class="el" href="#a099fcab416158a4d8b99e949f69738d9">ran_function_data</a></span> is required and is copied by the implementation.</li>
+<li><span class="tt"><a class="el" href="#a099fcab416158a4d8b99e949f69738d9" title="Opaque RAN function data (must be non-NULL).">ran_function_data</a></span> is required and is copied by the implementation.</li>
 <li>Callbacks are invoked by the C++ adapter and receive <span class="tt">user_data</span>. </li>
 </ul>
 
@@ -188,6 +190,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Opaque RAN function data (must be non-NULL). </p>
+
 <p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00097">97</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
@@ -203,6 +207,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Length in bytes; must be 1..32768. </p>
 
 <p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00098">98</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 

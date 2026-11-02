@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['up_20in_20the_20rings_0',['Where it shows up in the rings',['../path_b_e2_e3_loop.html#autotoc_md47',1,'']]],
-  ['up_20leg_20leg_20report_5fup_1',['Report-up leg (&lt;span class=&quot;tt&quot;&gt;leg=report_up&lt;/span&gt;)',['../path_b_e2_e3_loop.html#autotoc_md42',1,'']]],
-  ['up_3a_20tier_20aware_20attribution_2',['Possible follow-up: tier-aware attribution',['../latrec_guide.html#autotoc_md25',1,'']]],
-  ['usage_3',['Usage',['../index.html#autotoc_md61',1,'']]]
+  ['up_20in_20the_20rings_0',['Where it shows up in the rings',['../path_b_e2_e3_loop.html#autotoc_md50',1,'']]],
+  ['up_20leg_20leg_20report_5fup_1',['Report-up leg (&lt;span class=&quot;tt&quot;&gt;leg=report_up&lt;/span&gt;)',['../path_b_e2_e3_loop.html#autotoc_md45',1,'']]],
+  ['up_3a_20tier_20aware_20attribution_2',['Possible follow-up: tier-aware attribution',['../latrec_guide.html#autotoc_md28',1,'']]],
+  ['usage_3',['Usage',['../index.html#autotoc_md64',1,'']]]
 ];

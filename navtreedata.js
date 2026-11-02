@@ -30,81 +30,84 @@ var NAVTREE =
       [ "What pairs with what", "md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md9", null ],
       [ "JSON as libe3 speaks it", "md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md10", null ],
       [ "Field contracts", "md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md11", null ],
-      [ "When the RAN goes away", "md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md12", null ],
-      [ "Known differences", "md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md13", null ],
-      [ "Change ledger", "md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md14", null ]
+      [ "Conformance fixtures", "md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md12", null ],
+      [ "When the RAN goes away", "md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md13", null ],
+      [ "Known differences", "md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md14", null ],
+      [ "Aerial: what to change to align", "md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md15", null ],
+      [ "OCUDU: what to change to align", "md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md16", null ],
+      [ "Change ledger", "md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md17", null ]
     ] ],
     [ "Latency recording (latrec)", "latrec_guide.html", [
-      [ "Latency recording (latrec)", "latrec_guide.html#autotoc_md15", [
-        [ "Why a ring, and why one gate", "latrec_guide.html#autotoc_md16", [
-          [ "Matching the flag downstream", "latrec_guide.html#autotoc_md17", null ],
-          [ "Python (libe3py)", "latrec_guide.html#autotoc_md18", null ],
-          [ "Where the rings go", "latrec_guide.html#autotoc_md19", null ]
+      [ "Latency recording (latrec)", "latrec_guide.html#autotoc_md18", [
+        [ "Why a ring, and why one gate", "latrec_guide.html#autotoc_md19", [
+          [ "Matching the flag downstream", "latrec_guide.html#autotoc_md20", null ],
+          [ "Python (libe3py)", "latrec_guide.html#autotoc_md21", null ],
+          [ "Where the rings go", "latrec_guide.html#autotoc_md22", null ]
         ] ],
-        [ "Clock model", "latrec_guide.html#autotoc_md20", null ],
-        [ "Ring naming and sizing", "latrec_guide.html#autotoc_md21", null ],
-        [ "Stage catalog", "latrec_guide.html#autotoc_md22", [
-          [ "Joining across components", "latrec_guide.html#autotoc_md23", null ],
-          [ "Attribution, and where the ring name stops being enough", "latrec_guide.html#autotoc_md24", [
-            [ "Possible follow-up: tier-aware attribution", "latrec_guide.html#autotoc_md25", null ]
+        [ "Clock model", "latrec_guide.html#autotoc_md23", null ],
+        [ "Ring naming and sizing", "latrec_guide.html#autotoc_md24", null ],
+        [ "Stage catalog", "latrec_guide.html#autotoc_md25", [
+          [ "Joining across components", "latrec_guide.html#autotoc_md26", null ],
+          [ "Attribution, and where the ring name stops being enough", "latrec_guide.html#autotoc_md27", [
+            [ "Possible follow-up: tier-aware attribution", "latrec_guide.html#autotoc_md28", null ]
           ] ],
-          [ "Granularity, and adding an identifier", "latrec_guide.html#autotoc_md26", null ]
+          [ "Granularity, and adding an identifier", "latrec_guide.html#autotoc_md29", null ]
         ] ],
-        [ "Capture → CSV workflow", "latrec_guide.html#autotoc_md27", null ],
-        [ "CI overhead gate", "latrec_guide.html#autotoc_md28", null ]
+        [ "Capture → CSV workflow", "latrec_guide.html#autotoc_md30", null ],
+        [ "CI overhead gate", "latrec_guide.html#autotoc_md31", null ]
       ] ]
     ] ],
     [ "The E3-only end-to-end loop (Path A)", "path_a_e3_loop.html", [
-      [ "Path A — the E3-only end-to-end loop", "path_a_e3_loop.html#autotoc_md29", [
-        [ "Box order", "path_a_e3_loop.html#autotoc_md30", null ],
-        [ "Forward leg: RAN to dApp (<span class=\"tt\">leg=ind_up</span>)", "path_a_e3_loop.html#autotoc_md31", [
-          [ "Caveat on A6 and the wire", "path_a_e3_loop.html#autotoc_md32", null ]
+      [ "Path A — the E3-only end-to-end loop", "path_a_e3_loop.html#autotoc_md32", [
+        [ "Box order", "path_a_e3_loop.html#autotoc_md33", null ],
+        [ "Forward leg: RAN to dApp (<span class=\"tt\">leg=ind_up</span>)", "path_a_e3_loop.html#autotoc_md34", [
+          [ "Caveat on A6 and the wire", "path_a_e3_loop.html#autotoc_md35", null ]
         ] ],
-        [ "Return leg: dApp to RAN (<span class=\"tt\">leg=ctrl_down</span> for control, <span class=\"tt\">report_up</span> for reports)", "path_a_e3_loop.html#autotoc_md33", [
-          [ "Two distinct terminations", "path_a_e3_loop.html#autotoc_md34", null ]
+        [ "Return leg: dApp to RAN (<span class=\"tt\">leg=ctrl_down</span> for control, <span class=\"tt\">report_up</span> for reports)", "path_a_e3_loop.html#autotoc_md36", [
+          [ "Two distinct terminations", "path_a_e3_loop.html#autotoc_md37", null ]
         ] ],
-        [ "Aggregates", "path_a_e3_loop.html#autotoc_md35", null ],
-        [ "Deployment variants", "path_a_e3_loop.html#autotoc_md36", [
-          [ "Comparing against a hand-rolled integration", "path_a_e3_loop.html#autotoc_md37", null ]
+        [ "Aggregates", "path_a_e3_loop.html#autotoc_md38", null ],
+        [ "Deployment variants", "path_a_e3_loop.html#autotoc_md39", [
+          [ "Comparing against a hand-rolled integration", "path_a_e3_loop.html#autotoc_md40", null ]
         ] ],
-        [ "Not yet instrumented", "path_a_e3_loop.html#autotoc_md38", null ]
+        [ "Not yet instrumented", "path_a_e3_loop.html#autotoc_md41", null ]
       ] ]
     ] ],
     [ "The full E2-E3 loop (Path B)", "path_b_e2_e3_loop.html", [
-      [ "Path B — the full E2-E3 loop", "path_b_e2_e3_loop.html#autotoc_md39", [
-        [ "Box order", "path_b_e2_e3_loop.html#autotoc_md40", null ],
-        [ "The two RIC profiles", "path_b_e2_e3_loop.html#autotoc_md41", null ],
-        [ "Report-up leg (<span class=\"tt\">leg=report_up</span>)", "path_b_e2_e3_loop.html#autotoc_md42", null ],
-        [ "Policy-down leg (<span class=\"tt\">leg=policy_down</span>)", "path_b_e2_e3_loop.html#autotoc_md43", null ],
-        [ "Mitigation leg (<span class=\"tt\">leg=mitigation</span>)", "path_b_e2_e3_loop.html#autotoc_md44", null ],
-        [ "Aggregates", "path_b_e2_e3_loop.html#autotoc_md45", null ],
-        [ "Joining: the <span class=\"tt\">sequenceId</span>", "path_b_e2_e3_loop.html#autotoc_md46", [
-          [ "Where it shows up in the rings", "path_b_e2_e3_loop.html#autotoc_md47", null ]
+      [ "Path B — the full E2-E3 loop", "path_b_e2_e3_loop.html#autotoc_md42", [
+        [ "Box order", "path_b_e2_e3_loop.html#autotoc_md43", null ],
+        [ "The two RIC profiles", "path_b_e2_e3_loop.html#autotoc_md44", null ],
+        [ "Report-up leg (<span class=\"tt\">leg=report_up</span>)", "path_b_e2_e3_loop.html#autotoc_md45", null ],
+        [ "Policy-down leg (<span class=\"tt\">leg=policy_down</span>)", "path_b_e2_e3_loop.html#autotoc_md46", null ],
+        [ "Mitigation leg (<span class=\"tt\">leg=mitigation</span>)", "path_b_e2_e3_loop.html#autotoc_md47", null ],
+        [ "Aggregates", "path_b_e2_e3_loop.html#autotoc_md48", null ],
+        [ "Joining: the <span class=\"tt\">sequenceId</span>", "path_b_e2_e3_loop.html#autotoc_md49", [
+          [ "Where it shows up in the rings", "path_b_e2_e3_loop.html#autotoc_md50", null ]
         ] ],
-        [ "Not yet instrumented", "path_b_e2_e3_loop.html#autotoc_md48", null ]
+        [ "Not yet instrumented", "path_b_e2_e3_loop.html#autotoc_md51", null ]
       ] ]
     ] ],
     [ "Contributing", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html", [
-      [ "Pull Request Process", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md80", null ],
-      [ "Development Workflow", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md81", [
-        [ "For maintainers and existing collaborators", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md82", null ],
-        [ "For external contributors", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md83", null ],
-        [ "Merging (maintainers)", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md84", null ]
+      [ "Pull Request Process", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md83", null ],
+      [ "Development Workflow", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md84", [
+        [ "For maintainers and existing collaborators", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md85", null ],
+        [ "For external contributors", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md86", null ],
+        [ "Merging (maintainers)", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md87", null ]
       ] ],
-      [ "Mandatory checks", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md85", [
-        [ "Issues", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md86", null ],
-        [ "Pull requests", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md87", null ],
-        [ "Licensing headers", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md88", null ],
-        [ "AI assistants", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md89", null ],
-        [ "Service Models and twin-repo coordination", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md90", null ]
+      [ "Mandatory checks", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md88", [
+        [ "Issues", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md89", null ],
+        [ "Pull requests", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md90", null ],
+        [ "Licensing headers", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md91", null ],
+        [ "AI assistants", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md92", null ],
+        [ "Service Models and twin-repo coordination", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md93", null ]
       ] ],
-      [ "Code of Conduct", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md91", [
-        [ "Our Pledge", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md92", null ],
-        [ "Our Standards", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md93", null ],
-        [ "Our Responsibilities", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md94", null ],
-        [ "Scope", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md95", null ],
-        [ "Enforcement", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md96", null ],
-        [ "Attribution", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md97", null ]
+      [ "Code of Conduct", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md94", [
+        [ "Our Pledge", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md95", null ],
+        [ "Our Standards", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md96", null ],
+        [ "Our Responsibilities", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md97", null ],
+        [ "Scope", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md98", null ],
+        [ "Enforcement", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md99", null ],
+        [ "Attribution", "md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md100", null ]
       ] ]
     ] ],
     [ "Topics", "topics.html", "topics" ],
@@ -152,8 +155,8 @@ var NAVTREEINDEX =
 "classlibe3_1_1Logger.html#a19e2cdcff6374fe88c715b4aafd962a1",
 "classlibe3_1_1ZmqE3Connector.html#af69e028d029428a5790a72d3d751199e",
 "latrec_8c.html#a280c65aaa528a73aaebe586e62568bfb",
-"posix__connector_8hpp_source.html",
-"structlibe3_1_1Pdu.html#aa63b5e5856350ae758107397459251b9"
+"path_b_e2_e3_loop.html#autotoc_md51",
+"structlibe3_1_1Pdu.html#a9a0186208de6dda47e927274127633a9"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';

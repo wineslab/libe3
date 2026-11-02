@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['joining_20across_20components_0',['Joining across components',['../latrec_guide.html#autotoc_md23',1,'']]],
-  ['joining_3a_20the_20sequenceid_1',['Joining: the &lt;span class=&quot;tt&quot;&gt;sequenceId&lt;/span&gt;',['../path_b_e2_e3_loop.html#autotoc_md46',1,'']]],
+  ['joining_20across_20components_0',['Joining across components',['../latrec_guide.html#autotoc_md26',1,'']]],
+  ['joining_3a_20the_20sequenceid_1',['Joining: the &lt;span class=&quot;tt&quot;&gt;sequenceId&lt;/span&gt;',['../path_b_e2_e3_loop.html#autotoc_md49',1,'']]],
   ['json_2',['JSON',['../namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8',1,'libe3']]],
   ['json_20as_20libe3_20speaks_20it_3',['JSON as libe3 speaks it',['../md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md10',1,'']]],
   ['json_5fencoder_2ecpp_4',['json_encoder.cpp',['../json__encoder_8cpp.html',1,'']]],

@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.9</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -444,8 +444,9 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>RAN-function-specific opaque data (required, 1..32768 bytes). </p>
-<p>Returns the byte vector advertised for this RAN function in the <a class="el" href="structlibe3_1_1SetupResponse.html" title="E3AP Setup Response structure.">SetupResponse</a> (ranFunctionList-&gt;ranFunctionData). E3AP declares the field mandatory and non-empty &ndash; <span class="tt">OCTET STRING (SIZE (1..32768))</span> &ndash; so every SM must override this: even the most minimal SM carries at least its own name. An SM with nothing to advertise is not advertisable at all, since ranFunctionList itself is optional but its entries are not.</p>
-<p>Registration fails with ErrorCode::INVALID_PARAM if the returned vector is empty or longer than MAX_PROTOCOL_DATA_SIZE. The base implementation returns an empty vector so that failure is a loud diagnostic rather than a compile error in every existing SM; it is not a usable default. </p>
+<p>Returns the byte vector advertised for this RAN function in the <a class="el" href="structlibe3_1_1SetupResponse.html" title="E3AP Setup Response structure.">SetupResponse</a> (ranFunctionList-&gt;ranFunctionData). E3AP declares the field mandatory and non-empty &ndash; <span class="tt">OCTET STRING (SIZE (1..262144))</span>, limited to 32768 bytes &ndash; so every SM must override this: even the most minimal SM carries at least its own name. An SM with nothing to advertise is not advertisable at all, since ranFunctionList itself is optional but its entries are not.</p>
+<p>Registration fails with ErrorCode::INVALID_PARAM if the returned vector is empty or longer than MAX_PROTOCOL_DATA_SIZE. The base implementation returns an empty vector so that failure is a loud diagnostic rather than a compile error in every existing SM; it is not a usable default.</p>
+<dl class="section return"><dt>Returns</dt><dd>The bytes advertised for this RAN function; registration fails if the vector is empty or oversized. </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1ServiceModel.html#accba27a2f8aafac0209c088d06afbb2d">libe3::ServiceModel</a>.</p>
 
