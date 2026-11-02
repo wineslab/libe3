@@ -1,0 +1,72 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
+name: Docs
+
+# Doxygen must report no warnings (issue #132). Builds only the `docs` target, so
+# it does not compile the library, and fails the pull request on any warning.
+#
+# The job always runs and reports success, and only its steps are skipped when no
+# documentation input changed: a job-level `if:` would report the required check
+# as "skipped", which required status checks do not accept (see pr-tests.yml).
+
+on:
+  pull_request:
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  doxygen:
+    name: Doxygen warnings
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Detect documentation changes
+        id: filter
+        shell: bash
+        run: |
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          # Everything cmake/libe3Docs.cmake feeds Doxygen, plus the config and this check.
+          inputs='^(include/|src/|swig/|docs/|README\.md$|CONTRIBUTING\.md$|cmake/libe3Docs\.cmake$|\.github/workflows/docs\.yml$|\.github/scripts/check_docs_warnings\.sh$)'
+          if git diff --name-only "$base..$head" | grep -qE "$inputs"; then
+              echo "docs=true" >> "$GITHUB_OUTPUT"
+          else
+              echo "docs=false" >> "$GITHUB_OUTPUT"
+              echo "No documentation input changed; skipping."
+          fi
+
+      - name: Install Doxygen and Graphviz
+        if: steps.filter.outputs.docs == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen graphviz
+
+      - name: Build the documentation
+        if: steps.filter.outputs.docs == 'true'
+        run: |
+          cmake -S . -B build \
+            -DLIBE3_BUILD_DOCS=ON \
+            -DLIBE3_ENABLE_JSON=ON -DLIBE3_ENABLE_ASN1=OFF -DLIBE3_ENABLE_PROTOBUF=OFF -DLIBE3_ENABLE_ZMQ=OFF \
+            -DLIBE3_BUILD_TESTS=OFF -DLIBE3_BUILD_EXAMPLES=OFF
+          cmake --build build --target docs
+
+      - name: Fail on Doxygen warnings
+        if: steps.filter.outputs.docs == 'true'
+        run: bash .github/scripts/check_docs_warnings.sh build/docs/doxygen_warnings.txt ci-report-docs.md
+
+      - name: Upload report fragment
+        if: ${{ always() && hashFiles('ci-report-docs.md') != '' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ci-report-docs
+          path: ci-report-docs.md
