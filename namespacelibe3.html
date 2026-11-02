@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.7</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -1173,7 +1173,11 @@ template&lt;typename T&gt; </div>
     <tr><td class="paramname">setup_endpoint</td><td>Endpoint for setup channel </td></tr>
     <tr><td class="paramname">inbound_endpoint</td><td>Endpoint for inbound channel </td></tr>
     <tr><td class="paramname">outbound_endpoint</td><td>Endpoint for outbound channel </td></tr>
+    <tr><td class="paramname">setup_port</td><td>Port of the setup channel (SCTP and TCP; IPC uses the endpoint path) </td></tr>
+    <tr><td class="paramname">inbound_port</td><td>Port of the inbound channel (SCTP and TCP) </td></tr>
+    <tr><td class="paramname">outbound_port</td><td>Port of the outbound channel (SCTP and TCP) </td></tr>
     <tr><td class="paramname">io_threads</td><td>Number of I/O threads (for ZMQ) </td></tr>
+    <tr><td class="paramname">role</td><td>Role of the peer (RAN or dApp) </td></tr>
   </table>
   </dd>
 </dl>

@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.7</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -430,7 +430,9 @@ Functions</h2></td></tr>
 <p>Return a newly-allocated array of RAN function IDs subscribed by a dApp. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">agent</td><td>Agent handle </td></tr>
     <tr><td class="paramname">dapp_id</td><td>dApp identifier to query </td></tr>
+    <tr><td class="paramname">out_len</td><td>receives the number of elements (set to 0 on error/empty) </td></tr>
   </table>
   </dd>
 </dl>
@@ -466,7 +468,9 @@ Functions</h2></td></tr>
 <p>Return a newly-allocated array of dApp IDs subscribed to a RAN function. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">agent</td><td>Agent handle </td></tr>
     <tr><td class="paramname">ran_function_id</td><td>RAN function identifier to query </td></tr>
+    <tr><td class="paramname">out_len</td><td>receives the number of elements (set to 0 on error/empty) </td></tr>
   </table>
   </dd>
 </dl>
@@ -556,6 +560,9 @@ Functions</h2></td></tr>
 <p>Caller must free the returned array with <a class="el" href="c__api_8h.html#a023e8229e71eb379000c3bca1b3337fd" title="Free an array previously returned by the e3_agent_get_* helpers.">e3_agent_free_uint32_array()</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">agent</td><td>Agent handle </td></tr>
+    <tr><td class="paramname">dapp_id</td><td>dApp identifier to query </td></tr>
+    <tr><td class="paramname">ran_function_id</td><td>RAN function identifier to query </td></tr>
     <tr><td class="paramname">out_len</td><td>receives the number of elements (set to 0 on error/empty) </td></tr>
   </table>
   </dd>
@@ -630,6 +637,9 @@ Functions</h2></td></tr>
 <p>Caller must free the returned array with <a class="el" href="c__api_8h.html#a023e8229e71eb379000c3bca1b3337fd" title="Free an array previously returned by the e3_agent_get_* helpers.">e3_agent_free_uint32_array()</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">agent</td><td>Agent handle </td></tr>
+    <tr><td class="paramname">dapp_id</td><td>dApp identifier to query </td></tr>
+    <tr><td class="paramname">ran_function_id</td><td>RAN function identifier to query </td></tr>
     <tr><td class="paramname">out_len</td><td>receives the number of elements (set to 0 on error/empty) </td></tr>
   </table>
   </dd>

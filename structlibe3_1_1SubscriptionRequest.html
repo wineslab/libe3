@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.7</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -111,7 +111,7 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a89ffa0952dd9f6d0995b68dcc77c0a8f" id="r_a89ffa0952dd9f6d0995b68dcc77c0a8f"><td class="memItemLeft" align="right" valign="top">std::optional&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a89ffa0952dd9f6d0995b68dcc77c0a8f">subscription_time</a></td></tr>
 <tr class="memdesc:a89ffa0952dd9f6d0995b68dcc77c0a8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">How long to keep the subscription (0-3600 sec).  <br /></td></tr>
 <tr class="memitem:a248b1d8955cc1987cee9ca8e6edc2433" id="r_a248b1d8955cc1987cee9ca8e6edc2433"><td class="memItemLeft" align="right" valign="top">std::optional&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a248b1d8955cc1987cee9ca8e6edc2433">periodicity</a></td></tr>
-<tr class="memdesc:a248b1d8955cc1987cee9ca8e6edc2433"><td class="mdescLeft">&#160;</td><td class="mdescRight">Periodicity of data delivery (0-10000 microseconds).  <br /></td></tr>
+<tr class="memdesc:a248b1d8955cc1987cee9ca8e6edc2433"><td class="mdescLeft">&#160;</td><td class="mdescRight">Microseconds between indications, 0 = every event (ASN.1: 0 to 60000000).  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>E3AP Subscription Request structure. </p>
@@ -166,7 +166,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Periodicity of data delivery (0-10000 microseconds). </p>
+<p>Microseconds between indications, 0 = every event (ASN.1: 0 to 60000000). </p>
 
 <p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00247">247</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 

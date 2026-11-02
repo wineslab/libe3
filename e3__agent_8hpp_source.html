@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.7</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -369,145 +369,160 @@ $(function(){initNavTree('e3__agent_8hpp_source.html','',''); });
 <div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span><span class="comment">    /**</span></div>
 <div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span><span class="comment">     * @brief Subscribe to a RAN function. Must be called after a positive setup.</span></div>
 <div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span><span class="comment">     *</span></div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span><span class="comment">     * @param out_request_id when non-null, receives the assigned E3-MessageID on</span></div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span><span class="comment">     *        success, so the caller can correlate the SubscriptionResponse</span></div>
-<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span><span class="comment">     *        (which echoes request_id) back to this subscribe call.</span></div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>    <a class="code hl_enumeration" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a19f94a7eaa807bf4defd45b444583a1b">subscribe</a>(uint32_t ran_function_id,</div>
-<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>                        std::vector&lt;uint32_t&gt; telemetry_ids,</div>
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>                        std::vector&lt;uint32_t&gt; control_ids,</div>
-<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>                        std::optional&lt;uint32_t&gt; sub_time = std::nullopt,</div>
-<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>                        std::optional&lt;uint32_t&gt; periodicity = std::nullopt,</div>
-<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>                        uint32_t* out_request_id = <span class="keywordtype">nullptr</span>);</div>
-<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span><span class="comment"></span> </div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span><span class="comment">    /** Send a SubscriptionDelete for a previously subscribed RAN function. */</span></div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>    <a class="code hl_enumeration" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a6c24b5b987280d40ce95661c83a04bb9">unsubscribe</a>(uint32_t ran_function_id);</div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span><span class="comment"></span> </div>
-<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span><span class="comment">     * @brief Send a dApp control action to the RAN.</span></div>
-<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span><span class="comment">     *</span></div>
-<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span><span class="comment">     * @param sequence_id correlation id of the xApp procedure this control</span></div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span><span class="comment">     *        re-issues; leave 0 for a control the dApp decided on its own.</span></div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span><span class="comment">     * @param out_message_id when non-null, receives the assigned E3-MessageID on</span></div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span><span class="comment">     *        success, so the caller can correlate a later ack/response back to</span></div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span><span class="comment">     *        this send.</span></div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>    <a class="code hl_enumeration" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> <a class="code hl_function" href="classlibe3_1_1E3Agent.html#ad9dfb5265453521be2a59697a647a2f1">send_control</a>(uint32_t ran_function_id,</div>
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>                           uint32_t control_id,</div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>                           std::vector&lt;uint8_t&gt; action_data,</div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>                           uint32_t sequence_id = 0,</div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>                           uint32_t* out_message_id = <span class="keywordtype">nullptr</span>);</div>
-<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span><span class="comment"></span> </div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span><span class="comment">     * @brief Send a dApp report to the RAN.</span></div>
-<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span><span class="comment">     *</span></div>
-<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span><span class="comment">     * @param sequence_id correlation id the dApp assigns to this detection. It</span></div>
-<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span><span class="comment">     *        is the head of the loop&#39;s chain and is mandatory on the wire.</span></div>
-<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span><span class="comment">     * @param out_message_id when non-null, receives the assigned E3-MessageID on</span></div>
-<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span><span class="comment">     *        success, so the caller can correlate a later ack/response back to</span></div>
-<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span><span class="comment">     *        this send.</span></div>
-<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>    <a class="code hl_enumeration" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a98d30f06be83074cde713efa9d7ed74b">send_report</a>(uint32_t ran_function_id,</div>
-<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>                          std::vector&lt;uint8_t&gt; report_data,</div>
-<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>                          uint32_t sequence_id,</div>
-<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>                          uint32_t* out_message_id = <span class="keywordtype">nullptr</span>);</div>
-<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span><span class="comment"></span> </div>
-<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span><span class="comment">    /** Send a ReleaseMessage. The dApp stays running until stop() is called. */</span></div>
-<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>    <a class="code hl_enumeration" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a4b04362dec761d580f7fd743ec0d35fa">release</a>();</div>
-<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span><span class="comment"></span> </div>
-<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span><span class="comment">     * @brief Get list of registered dApp IDs</span></div>
-<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>    std::vector&lt;uint32_t&gt; <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a016a0efdb7a2f6b37e163c6549f2c269">get_registered_dapps</a>() const;</div>
-<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span><span class="comment"></span> </div>
-<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span><span class="comment">     * @brief Get subscriptions for a dApp</span></div>
-<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span><span class="comment">     *</span></div>
-<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span><span class="comment">     * @param dapp_id dApp identifier</span></div>
-<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span><span class="comment">     * @return List of RAN function IDs the dApp is subscribed to</span></div>
-<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>    std::vector&lt;uint32_t&gt; <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a4299228f5926a7e9aa142e1fc933685a">get_dapp_subscriptions</a>(uint32_t <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a3ced5792a47e610a82fc6f94cc066178">dapp_id</a>) const;</div>
-<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span><span class="comment"></span> </div>
-<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span><span class="comment">     * @brief Get subscribers for a RAN function</span></div>
-<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span><span class="comment">     *</span></div>
-<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span><span class="comment">     * @param ran_function_id RAN function identifier</span></div>
-<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span><span class="comment">     * @return List of dApp IDs subscribed to this RAN function</span></div>
-<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>    std::vector&lt;uint32_t&gt; <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a5529f15833d60f57ad0ab86b0bbd5ec3">get_ran_function_subscribers</a>(</div>
-<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>        uint32_t ran_function_id</div>
-<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>    ) const;</div>
-<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span><span class="comment"></span> </div>
-<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span><span class="comment">     * @brief Get the RAN functions that currently have at least one subscriber</span></div>
-<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span><span class="comment">     *</span></div>
-<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span><span class="comment">     * RAN role only. Unlike get_available_ran_functions() (which lists every</span></div>
-<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span><span class="comment">     * registered Service Model), this returns only the RAN functions a dApp is</span></div>
-<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span><span class="comment">     * actively subscribed to.</span></div>
-<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span><span class="comment">     *</span></div>
-<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span><span class="comment">     * @return List of RAN function IDs with one or more subscribers</span></div>
-<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>    std::vector&lt;uint32_t&gt; <a class="code hl_function" href="classlibe3_1_1E3Agent.html#ac7ffb4b2aee3dc30f4d6c0b9a5585d0f">get_active_ran_functions</a>() const;</div>
-<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span><span class="comment"></span> </div>
-<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span><span class="comment">     * @brief Get the reporting periodicity a dApp requested for a RAN function</span></div>
-<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span><span class="comment">     *</span></div>
-<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span><span class="comment">     * @return periodicity in microseconds, 0 if not set or subscription not found</span></div>
-<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>    uint32_t <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a5b9b0158cd26e9e3f85b4410b04ed342">get_subscription_periodicity</a>(</div>
-<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>        uint32_t <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a3ced5792a47e610a82fc6f94cc066178">dapp_id</a>, uint32_t ran_function_id</div>
-<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>    ) const;</div>
-<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span><span class="comment"></span> </div>
-<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span><span class="comment">     * @brief Get the telemetry IDs a dApp requested for a RAN function</span></div>
-<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span><span class="comment">     *</span></div>
-<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span><span class="comment">     * @return vector of telemetry IDs (empty if none requested or subscription not found)</span></div>
-<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>    std::vector&lt;uint32_t&gt; <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a1b61ca8643b457c111afcec81cfdc75a">get_subscription_telemetry_ids</a>(</div>
-<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>        uint32_t <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a3ced5792a47e610a82fc6f94cc066178">dapp_id</a>, uint32_t ran_function_id</div>
-<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>    ) const;</div>
-<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span><span class="comment"></span> </div>
-<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span><span class="comment">     * @brief Get the control IDs a dApp requested for a RAN function</span></div>
-<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span><span class="comment">     *</span></div>
-<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span><span class="comment">     * @return vector of control IDs (empty if none requested or subscription not found)</span></div>
-<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>    std::vector&lt;uint32_t&gt; <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a981396ba0e4de0d5f264b806ad2b978f">get_subscription_control_ids</a>(</div>
-<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>        uint32_t <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a3ced5792a47e610a82fc6f94cc066178">dapp_id</a>, uint32_t ran_function_id</div>
-<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>    ) const;</div>
-<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span> </div>
-<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>    <span class="comment">// =========================================================================</span></div>
-<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>    <span class="comment">// Configuration</span></div>
-<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>    <span class="comment">// =========================================================================</span></div>
-<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span><span class="comment"></span> </div>
-<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span><span class="comment">     * @brief Get current configuration</span></div>
-<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>    const <a class="code hl_struct" href="structlibe3_1_1E3Config.html">E3Config</a>&amp; <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a94e98e9001263ed16d869dce6d647abc">config</a>() const noexcept;</div>
-<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span> </div>
-<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>    <span class="comment">// =========================================================================</span></div>
-<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>    <span class="comment">// Statistics</span></div>
-<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>    <span class="comment">// =========================================================================</span></div>
-<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span><span class="comment"></span> </div>
-<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span><span class="comment">     * @brief Get number of registered dApps</span></div>
-<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>    <span class="keywordtype">size_t</span> <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a72c80c0625b1a86e6f68e5e429efa11d">dapp_count</a>() const;</div>
-<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span><span class="comment"></span> </div>
-<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span><span class="comment">     * @brief Get total number of active subscriptions</span></div>
-<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>    <span class="keywordtype">size_t</span> <a class="code hl_function" href="classlibe3_1_1E3Agent.html#af4eeb30804a78f9c0c52f2f7b748c42d">subscription_count</a>() const;</div>
-<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span> </div>
-<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>private:</div>
-<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>    struct <a class="code hl_struct" href="structlibe3_1_1E3Agent_1_1Impl.html">Impl</a>;</div>
-<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>    std::unique_ptr&lt;<a class="code hl_struct" href="structlibe3_1_1E3Agent_1_1Impl.html">Impl</a>&gt; impl_;</div>
-<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>};</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span><span class="comment">     * @param ran_function_id RAN function to subscribe to</span></div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span><span class="comment">     * @param telemetry_ids telemetry identifiers requested</span></div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span><span class="comment">     * @param control_ids control identifiers requested</span></div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span><span class="comment">     * @param sub_time how long to keep the subscription, in seconds; unset leaves it to the RAN</span></div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span><span class="comment">     * @param periodicity microseconds between indications, 0 = every event.</span></div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span><span class="comment">     *        Over ASN.1 the range is 0 to 60000000. An OCUDU RAN reads the</span></div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span><span class="comment">     *        same number as milliseconds, so pass it what it expects.</span></div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span><span class="comment">     * @param out_request_id when non-null, receives the assigned E3-MessageID on</span></div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span><span class="comment">     *        success, so the caller can correlate the SubscriptionResponse</span></div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span><span class="comment">     *        (which echoes request_id) back to this subscribe call.</span></div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span><span class="comment">     * @return SUCCESS once the request is queued; STATE_ERROR on a RAN-role</span></div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span><span class="comment">     *         agent; NOT_INITIALIZED if the agent is not running or setup has</span></div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span><span class="comment">     *         not completed; otherwise the error from queueing the message.</span></div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>    <a class="code hl_enumeration" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a19f94a7eaa807bf4defd45b444583a1b">subscribe</a>(uint32_t ran_function_id,</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>                        std::vector&lt;uint32_t&gt; telemetry_ids,</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>                        std::vector&lt;uint32_t&gt; control_ids,</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>                        std::optional&lt;uint32_t&gt; sub_time = std::nullopt,</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>                        std::optional&lt;uint32_t&gt; periodicity = std::nullopt,</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>                        uint32_t* out_request_id = <span class="keywordtype">nullptr</span>);</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span><span class="comment"></span> </div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span><span class="comment">    /** Send a SubscriptionDelete for a previously subscribed RAN function. */</span></div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>    <a class="code hl_enumeration" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a6c24b5b987280d40ce95661c83a04bb9">unsubscribe</a>(uint32_t ran_function_id);</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span><span class="comment"></span> </div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span><span class="comment">     * @brief Send a dApp control action to the RAN.</span></div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span><span class="comment">     *</span></div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span><span class="comment">     * @param ran_function_id RAN function the control is for</span></div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span><span class="comment">     * @param control_id control identifier granted by the RAN</span></div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span><span class="comment">     * @param action_data opaque E3SM control payload</span></div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span><span class="comment">     * @param sequence_id correlation id of the xApp procedure this control</span></div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span><span class="comment">     *        re-issues; leave 0 for a control the dApp decided on its own.</span></div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span><span class="comment">     * @param out_message_id when non-null, receives the assigned E3-MessageID on</span></div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span><span class="comment">     *        success, so the caller can correlate a later ack/response back to</span></div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span><span class="comment">     *        this send.</span></div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>    <a class="code hl_enumeration" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> <a class="code hl_function" href="classlibe3_1_1E3Agent.html#ad9dfb5265453521be2a59697a647a2f1">send_control</a>(uint32_t ran_function_id,</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>                           uint32_t control_id,</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>                           std::vector&lt;uint8_t&gt; action_data,</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>                           uint32_t sequence_id = 0,</div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>                           uint32_t* out_message_id = <span class="keywordtype">nullptr</span>);</div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span><span class="comment"></span> </div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span><span class="comment">     * @brief Send a dApp report to the RAN.</span></div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span><span class="comment">     *</span></div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span><span class="comment">     * @param ran_function_id RAN function the report is for</span></div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span><span class="comment">     * @param report_data opaque E3SM report payload</span></div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span><span class="comment">     * @param sequence_id correlation id the dApp assigns to this detection. It</span></div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span><span class="comment">     *        is the head of the loop&#39;s chain and is mandatory on the wire.</span></div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span><span class="comment">     * @param out_message_id when non-null, receives the assigned E3-MessageID on</span></div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span><span class="comment">     *        success, so the caller can correlate a later ack/response back to</span></div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span><span class="comment">     *        this send.</span></div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>    <a class="code hl_enumeration" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a98d30f06be83074cde713efa9d7ed74b">send_report</a>(uint32_t ran_function_id,</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>                          std::vector&lt;uint8_t&gt; report_data,</div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>                          uint32_t sequence_id,</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>                          uint32_t* out_message_id = <span class="keywordtype">nullptr</span>);</div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span><span class="comment"></span> </div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span><span class="comment">    /** Send a ReleaseMessage. The dApp stays running until stop() is called. */</span></div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>    <a class="code hl_enumeration" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a4b04362dec761d580f7fd743ec0d35fa">release</a>();</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span><span class="comment"></span> </div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span><span class="comment">     * @brief Get list of registered dApp IDs</span></div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>    std::vector&lt;uint32_t&gt; <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a016a0efdb7a2f6b37e163c6549f2c269">get_registered_dapps</a>() const;</div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span><span class="comment"></span> </div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span><span class="comment">     * @brief Get subscriptions for a dApp</span></div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span><span class="comment">     *</span></div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span><span class="comment">     * @param dapp_id dApp identifier</span></div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span><span class="comment">     * @return List of RAN function IDs the dApp is subscribed to</span></div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>    std::vector&lt;uint32_t&gt; <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a4299228f5926a7e9aa142e1fc933685a">get_dapp_subscriptions</a>(uint32_t <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a3ced5792a47e610a82fc6f94cc066178">dapp_id</a>) const;</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span><span class="comment"></span> </div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span><span class="comment">     * @brief Get subscribers for a RAN function</span></div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span><span class="comment">     *</span></div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span><span class="comment">     * @param ran_function_id RAN function identifier</span></div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span><span class="comment">     * @return List of dApp IDs subscribed to this RAN function</span></div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>    std::vector&lt;uint32_t&gt; <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a5529f15833d60f57ad0ab86b0bbd5ec3">get_ran_function_subscribers</a>(</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>        uint32_t ran_function_id</div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>    ) const;</div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span><span class="comment"></span> </div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span><span class="comment">     * @brief Get the RAN functions that currently have at least one subscriber</span></div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span><span class="comment">     *</span></div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span><span class="comment">     * RAN role only. Unlike get_available_ran_functions() (which lists every</span></div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span><span class="comment">     * registered Service Model), this returns only the RAN functions a dApp is</span></div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span><span class="comment">     * actively subscribed to.</span></div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span><span class="comment">     *</span></div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span><span class="comment">     * @return List of RAN function IDs with one or more subscribers</span></div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>    std::vector&lt;uint32_t&gt; <a class="code hl_function" href="classlibe3_1_1E3Agent.html#ac7ffb4b2aee3dc30f4d6c0b9a5585d0f">get_active_ran_functions</a>() const;</div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span><span class="comment"></span> </div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span><span class="comment">     * @brief Get the reporting periodicity a dApp requested for a RAN function</span></div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span><span class="comment">     *</span></div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span><span class="comment">     * @return periodicity in microseconds, 0 if not set or subscription not found</span></div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>    uint32_t <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a5b9b0158cd26e9e3f85b4410b04ed342">get_subscription_periodicity</a>(</div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>        uint32_t <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a3ced5792a47e610a82fc6f94cc066178">dapp_id</a>, uint32_t ran_function_id</div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>    ) const;</div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span><span class="comment"></span> </div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span><span class="comment">     * @brief Get the telemetry IDs a dApp requested for a RAN function</span></div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span><span class="comment">     *</span></div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span><span class="comment">     * @return vector of telemetry IDs (empty if none requested or subscription not found)</span></div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>    std::vector&lt;uint32_t&gt; <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a1b61ca8643b457c111afcec81cfdc75a">get_subscription_telemetry_ids</a>(</div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>        uint32_t <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a3ced5792a47e610a82fc6f94cc066178">dapp_id</a>, uint32_t ran_function_id</div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>    ) const;</div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span><span class="comment"></span> </div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span><span class="comment">     * @brief Get the control IDs a dApp requested for a RAN function</span></div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span><span class="comment">     *</span></div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span><span class="comment">     * @return vector of control IDs (empty if none requested or subscription not found)</span></div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>    std::vector&lt;uint32_t&gt; <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a981396ba0e4de0d5f264b806ad2b978f">get_subscription_control_ids</a>(</div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>        uint32_t <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a3ced5792a47e610a82fc6f94cc066178">dapp_id</a>, uint32_t ran_function_id</div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>    ) const;</div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span> </div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>    <span class="comment">// =========================================================================</span></div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>    <span class="comment">// Configuration</span></div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>    <span class="comment">// =========================================================================</span></div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span><span class="comment"></span> </div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span><span class="comment">     * @brief Get current configuration</span></div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>    const <a class="code hl_struct" href="structlibe3_1_1E3Config.html">E3Config</a>&amp; <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a94e98e9001263ed16d869dce6d647abc">config</a>() const noexcept;</div>
+<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span> </div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>    <span class="comment">// =========================================================================</span></div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>    <span class="comment">// Statistics</span></div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>    <span class="comment">// =========================================================================</span></div>
+<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span><span class="comment"></span> </div>
+<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span><span class="comment">     * @brief Get number of registered dApps</span></div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>    <span class="keywordtype">size_t</span> <a class="code hl_function" href="classlibe3_1_1E3Agent.html#a72c80c0625b1a86e6f68e5e429efa11d">dapp_count</a>() const;</div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span><span class="comment"></span> </div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span><span class="comment">     * @brief Get total number of active subscriptions</span></div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span>    <span class="keywordtype">size_t</span> <a class="code hl_function" href="classlibe3_1_1E3Agent.html#af4eeb30804a78f9c0c52f2f7b748c42d">subscription_count</a>() const;</div>
+<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span> </div>
+<div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span>private:</div>
+<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span>    struct <a class="code hl_struct" href="structlibe3_1_1E3Agent_1_1Impl.html">Impl</a>;</div>
+<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>    std::unique_ptr&lt;<a class="code hl_struct" href="structlibe3_1_1E3Agent_1_1Impl.html">Impl</a>&gt; impl_;</div>
+<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>};</div>
 </div>
-<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span> </div>
-<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>} <span class="comment">// namespace libe3</span></div>
-<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span> </div>
-<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span><span class="preprocessor">#endif </span><span class="comment">// LIBE3_E3_AGENT_HPP</span></div>
+<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span> </div>
+<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>} <span class="comment">// namespace libe3</span></div>
+<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span> </div>
+<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span><span class="preprocessor">#endif </span><span class="comment">// LIBE3_E3_AGENT_HPP</span></div>
 <div class="ttc" id="aclasslibe3_1_1E3Agent_html_a016a0efdb7a2f6b37e163c6549f2c269"><div class="ttname"><a href="classlibe3_1_1E3Agent.html#a016a0efdb7a2f6b37e163c6549f2c269">libe3::E3Agent::get_registered_dapps</a></div><div class="ttdeci">std::vector&lt; uint32_t &gt; get_registered_dapps() const</div><div class="ttdoc">Get list of registered dApp IDs.</div><div class="ttdef"><b>Definition</b> <a href="e3__agent_8cpp_source.html#l00266">e3_agent.cpp:266</a></div></div>
 <div class="ttc" id="aclasslibe3_1_1E3Agent_html_a0dd44efe331313a0bd492a2bb6d76929"><div class="ttname"><a href="classlibe3_1_1E3Agent.html#a0dd44efe331313a0bd492a2bb6d76929">libe3::E3Agent::E3Agent</a></div><div class="ttdeci">E3Agent(E3Agent &amp;&amp;) noexcept</div></div>
 <div class="ttc" id="aclasslibe3_1_1E3Agent_html_a155b885f689cbbfb889e0e43422756d8"><div class="ttname"><a href="classlibe3_1_1E3Agent.html#a155b885f689cbbfb889e0e43422756d8">libe3::E3Agent::set_disconnect_handler</a></div><div class="ttdeci">void set_disconnect_handler(DisconnectHandler handler)</div><div class="ttdef"><b>Definition</b> <a href="e3__agent_8cpp_source.html#l00394">e3_agent.cpp:394</a></div></div>

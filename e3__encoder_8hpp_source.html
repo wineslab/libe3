@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.7</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -287,53 +287,61 @@ $(function(){initNavTree('e3__encoder_8hpp_source.html','',''); });
 <div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span><span class="comment">    /**</span></div>
 <div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span><span class="comment">     * @brief Create and encode a dApp Report PDU</span></div>
 <div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span><span class="comment">     * @param message_id Unique message ID</span></div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    <a class="code hl_typedef" href="namespacelibe3.html#a9acc43e04a971efeb933961b950d3732">EncodeResult</a>&lt;<a class="code hl_struct" href="structlibe3_1_1EncodedMessage.html">EncodedMessage</a>&gt; <a class="code hl_function" href="classlibe3_1_1E3Encoder.html#afdb3ab69fb4c4de694a5c24de7f4555c">encode_dapp_report</a>(</div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        uint32_t message_id,</div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        uint32_t dapp_identifier,</div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        uint32_t ran_function_identifier,</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        const std::vector&lt;uint8_t&gt;&amp; report_data</div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    );</div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span><span class="comment"></span> </div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span><span class="comment">     * @brief Create and encode an xApp Control Action PDU</span></div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span><span class="comment">     * @param message_id Unique message ID</span></div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>    <a class="code hl_typedef" href="namespacelibe3.html#a9acc43e04a971efeb933961b950d3732">EncodeResult</a>&lt;<a class="code hl_struct" href="structlibe3_1_1EncodedMessage.html">EncodedMessage</a>&gt; <a class="code hl_function" href="classlibe3_1_1E3Encoder.html#aadbb82f01267591bfcc42e05261737d1">encode_xapp_control_action</a>(</div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        uint32_t message_id,</div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>        uint32_t dapp_identifier,</div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>        uint32_t ran_function_identifier,</div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>        const std::vector&lt;uint8_t&gt;&amp; xapp_control_data</div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    );</div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span><span class="comment"></span> </div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span><span class="comment">    /**</span></div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span><span class="comment">     * @brief Create and encode a Message Acknowledgment PDU</span></div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span><span class="comment">     * @param message_id Unique message ID</span></div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span><span class="comment">     */</span></div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>    <a class="code hl_typedef" href="namespacelibe3.html#a9acc43e04a971efeb933961b950d3732">EncodeResult</a>&lt;<a class="code hl_struct" href="structlibe3_1_1EncodedMessage.html">EncodedMessage</a>&gt; <a class="code hl_function" href="classlibe3_1_1E3Encoder.html#ad81880254b369952b95918dbf0f3428e">encode_message_ack</a>(</div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>        uint32_t message_id,</div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>        uint32_t request_id,</div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        <a class="code hl_enumeration" href="namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5">ResponseCode</a> response_code</div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>    );</div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span> </div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>protected:</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno"><a class="line" href="classlibe3_1_1E3Encoder.html#a2cf0fea5e709c85bd9e044fd6fa4c83f">  225</a></span>    <a class="code hl_function" href="classlibe3_1_1E3Encoder.html#a7b6b813b72ecdcfd3f2f4a1b41d6aee0">E3Encoder</a>() = default;</div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>};</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span><span class="comment">     * @param dapp_identifier dApp identifier</span></div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span><span class="comment">     * @param ran_function_identifier RAN function identifier</span></div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span><span class="comment">     * @param report_data Report data</span></div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    <a class="code hl_typedef" href="namespacelibe3.html#a9acc43e04a971efeb933961b950d3732">EncodeResult</a>&lt;<a class="code hl_struct" href="structlibe3_1_1EncodedMessage.html">EncodedMessage</a>&gt; <a class="code hl_function" href="classlibe3_1_1E3Encoder.html#afdb3ab69fb4c4de694a5c24de7f4555c">encode_dapp_report</a>(</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        uint32_t message_id,</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        uint32_t dapp_identifier,</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        uint32_t ran_function_identifier,</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>        const std::vector&lt;uint8_t&gt;&amp; report_data</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>    );</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span><span class="comment"></span> </div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span><span class="comment">     * @brief Create and encode an xApp Control Action PDU</span></div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span><span class="comment">     * @param message_id Unique message ID</span></div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span><span class="comment">     * @param dapp_identifier dApp identifier</span></div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span><span class="comment">     * @param ran_function_identifier RAN function identifier</span></div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span><span class="comment">     * @param xapp_control_data xApp control data</span></div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    <a class="code hl_typedef" href="namespacelibe3.html#a9acc43e04a971efeb933961b950d3732">EncodeResult</a>&lt;<a class="code hl_struct" href="structlibe3_1_1EncodedMessage.html">EncodedMessage</a>&gt; <a class="code hl_function" href="classlibe3_1_1E3Encoder.html#aadbb82f01267591bfcc42e05261737d1">encode_xapp_control_action</a>(</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        uint32_t message_id,</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        uint32_t dapp_identifier,</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        uint32_t ran_function_identifier,</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>        const std::vector&lt;uint8_t&gt;&amp; xapp_control_data</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>    );</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span><span class="comment"></span> </div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span><span class="comment">    /**</span></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span><span class="comment">     * @brief Create and encode a Message Acknowledgment PDU</span></div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span><span class="comment">     * @param message_id Unique message ID</span></div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span><span class="comment">     * @param request_id Message ID of the request being acknowledged</span></div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span><span class="comment">     * @param response_code Positive or negative</span></div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    <a class="code hl_typedef" href="namespacelibe3.html#a9acc43e04a971efeb933961b950d3732">EncodeResult</a>&lt;<a class="code hl_struct" href="structlibe3_1_1EncodedMessage.html">EncodedMessage</a>&gt; <a class="code hl_function" href="classlibe3_1_1E3Encoder.html#ad81880254b369952b95918dbf0f3428e">encode_message_ack</a>(</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        uint32_t message_id,</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        uint32_t request_id,</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        <a class="code hl_enumeration" href="namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5">ResponseCode</a> response_code</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    );</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span> </div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>protected:</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno"><a class="line" href="classlibe3_1_1E3Encoder.html#a2cf0fea5e709c85bd9e044fd6fa4c83f">  233</a></span>    <a class="code hl_function" href="classlibe3_1_1E3Encoder.html#a7b6b813b72ecdcfd3f2f4a1b41d6aee0">E3Encoder</a>() = default;</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>};</div>
 </div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span><span class="comment"></span> </div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span><span class="comment">/**</span></div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span><span class="comment"> * @brief Factory function to create appropriate encoder</span></div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span><span class="comment"> * Creates an encoder instance based on the encoding format specified.</span></div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span><span class="comment"> * @param format Encoding format to use</span></div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span><span class="comment"> * @return Unique pointer to created encoder, nullptr on failure</span></div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>std::unique_ptr&lt;<a class="code hl_function" href="classlibe3_1_1E3Encoder.html#a7b6b813b72ecdcfd3f2f4a1b41d6aee0">E3Encoder</a>&gt; <a class="code hl_function" href="namespacelibe3.html#a3fd9e4c182481cd094c35bab83ede638">create_encoder</a>(<a class="code hl_enumeration" href="namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444">EncodingFormat</a> <a class="code hl_function" href="classlibe3_1_1E3Encoder.html#a9ae1888c12898963998dcdf2b20a4429">format</a>);</div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span> </div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>} <span class="comment">// namespace libe3</span></div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span> </div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span><span class="preprocessor">#endif </span><span class="comment">// LIBE3_E3_ENCODER_HPP</span></div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span><span class="comment"></span> </div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span><span class="comment">/**</span></div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span><span class="comment"> * @brief Factory function to create appropriate encoder</span></div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span><span class="comment"> * Creates an encoder instance based on the encoding format specified.</span></div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span><span class="comment"> * @param format Encoding format to use</span></div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span><span class="comment"> * @return Unique pointer to created encoder, nullptr on failure</span></div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>std::unique_ptr&lt;<a class="code hl_function" href="classlibe3_1_1E3Encoder.html#a7b6b813b72ecdcfd3f2f4a1b41d6aee0">E3Encoder</a>&gt; <a class="code hl_function" href="namespacelibe3.html#a3fd9e4c182481cd094c35bab83ede638">create_encoder</a>(<a class="code hl_enumeration" href="namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444">EncodingFormat</a> <a class="code hl_function" href="classlibe3_1_1E3Encoder.html#a9ae1888c12898963998dcdf2b20a4429">format</a>);</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span> </div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>} <span class="comment">// namespace libe3</span></div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span> </div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span><span class="preprocessor">#endif </span><span class="comment">// LIBE3_E3_ENCODER_HPP</span></div>
 <div class="ttc" id="aclasslibe3_1_1E3Encoder_html_a0be2e52d7e36112106d7016c0d503a7e"><div class="ttname"><a href="classlibe3_1_1E3Encoder.html#a0be2e52d7e36112106d7016c0d503a7e">libe3::E3Encoder::encode_subscription_response</a></div><div class="ttdeci">EncodeResult&lt; EncodedMessage &gt; encode_subscription_response(uint32_t message_id, uint32_t request_id, uint32_t dapp_identifier, ResponseCode response_code, const std::optional&lt; uint32_t &gt; &amp;subscription_id=std::nullopt)</div><div class="ttdoc">Create and encode a Subscription Response PDU.</div><div class="ttdef"><b>Definition</b> <a href="e3__encoder_8cpp_source.html#l00092">e3_encoder.cpp:92</a></div></div>
 <div class="ttc" id="aclasslibe3_1_1E3Encoder_html_a2cb038784c7fcce578252a751d2d2055"><div class="ttname"><a href="classlibe3_1_1E3Encoder.html#a2cb038784c7fcce578252a751d2d2055">libe3::E3Encoder::~E3Encoder</a></div><div class="ttdeci">virtual ~E3Encoder()=default</div></div>
 <div class="ttc" id="aclasslibe3_1_1E3Encoder_html_a3d705ce16bb03bfe4156f9c5f3c10511"><div class="ttname"><a href="classlibe3_1_1E3Encoder.html#a3d705ce16bb03bfe4156f9c5f3c10511">libe3::E3Encoder::encode_setup_request</a></div><div class="ttdeci">EncodeResult&lt; EncodedMessage &gt; encode_setup_request(uint32_t message_id, const std::string &amp;e3ap_protocol_version, const std::string &amp;dapp_name, const std::string &amp;dapp_version, const std::string &amp;vendor)</div><div class="ttdoc">Create and encode a Setup Request PDU.</div><div class="ttdef"><b>Definition</b> <a href="e3__encoder_8cpp_source.html#l00016">e3_encoder.cpp:16</a></div></div>

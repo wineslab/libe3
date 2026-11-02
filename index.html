@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.15.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>libe3: Main Page</title>
+<title>libe3: libe3 - Vendor-Neutral E3AP C++ Library</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.7</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -88,10 +88,571 @@ $(function(){initNavTree('index.html','',''); });
 </div>
 </div>
 
-<div class="header">
-  <div class="headertitle"><div class="title">libe3 Documentation</div></div>
+<div><div class="header">
+  <div class="headertitle"><div class="title"><a class="el" href="namespacelibe3.html">libe3</a> - Vendor-Neutral E3AP C++ Library </div></div>
 </div><!--header-->
 <div class="contents">
+<div class="textblock"><p><a class="anchor" id="md__2home_2runner_2work_2libe3_2libe3_2README"></a></p>
+<p>[<img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License" style="pointer-events: none;" class="inline"/>](LICENSE) <a href="https://isocpp.org/"><img src="https://img.shields.io/badge/C%2B%2B-17-blue.svg" alt="C++17" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/wineslab/libe3/releases"><img src="https://img.shields.io/github/v/release/wineslab/libe3?color=green" alt="Version" class="inline"/></a> <a href="https://wineslab.github.io/libe3/"><img src="https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg" alt="Documentation" style="pointer-events: none;" class="inline"/></a></p>
+<p><b><a class="el" href="namespacelibe3.html">libe3</a></b> is a standalone, vendor-neutral C++ library for implementing the E3AP (E3 Application Protocol) on <b>both sides of the protocol</b> — RAN functions (DU, CU-CP, CU-UP) and dApp clients. It provides a clean object-oriented API for both roles while hiding transport, encoding, and protocol complexity.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md50"></a>
+Features</h1>
+<ul>
+<li><b>Vendor-Neutral API</b>: Clean E3Agent facade that hides implementation details</li>
+<li><b>Both Roles</b>: Single <span class="tt">E3Agent</span> class acts as either <b>RAN</b> (server, binds sockets) or <b>dApp</b> (client, connects to a remote RAN), switched by <span class="tt">E3Config.role</span></li>
+<li><b>Multi-Peer dApps</b>: One dApp process can hold N <span class="tt">E3Agent</span> instances connecting to N different RAN agents (e.g. a DU-HIGH and a DU-LOW)</li>
+<li><b>Multiple Transports</b>: Support for ZeroMQ and POSIX sockets (TCP, SCTP, Unix Domain)</li>
+<li><b>Multiple Encodings</b>: ASN.1 APER (primary), JSON, and Protocol Buffers encoders</li>
+<li><b>Service Model Extensions</b>: Easy-to-implement SM interface for custom functionality</li>
+<li><b>Python Bindings</b>: Optional SWIG bindings (<span class="tt">LIBE3_ENABLE_SWIG=ON</span>) so the same C++ library can back Python dApp clients</li>
+<li><b>Thread-Safe</b>: Proper synchronization for concurrent dApp operations</li>
+<li><b>Modern C++17</b>: Uses std::variant, std::optional, RAII patterns</li>
+<li><b>Lightweight</b>: Minimal external dependencies</li>
+</ul>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md51"></a>
+Architecture</h1>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md52"></a>
+Deployment topology</h2>
+<p><span class="tt">E3Agent</span> serves both sides of the E3 interface — the same class, switched by one config field:</p>
+<div class="fragment"><div class="line">RAN Application                                       dApp Application</div>
+<div class="line">(DU · CU-CP/UP · OAI · OCUDU · Aerial)                  (C++ · Python)                              </div>
+<div class="line">        │                                                    │</div>
+<div class="line">        │  role = RAN                         role = DAPP    │</div>
+<div class="line">        ▼                                                    ▼</div>
+<div class="line">┌───────────────────┐  ◄─── E3AP PDUs ───►       ┌──────────────────────┐</div>
+<div class="line">│     E3Agent       │◄──────────────────────────►│     E3Agent          │</div>
+<div class="line">│                   │  ZMQ / POSIX               │                      │</div>
+<div class="line">│  register_sm(...) │  IPC · TCP · SCTP          │  set_indication_     │</div>
+<div class="line">│  send_indication  │  ASN.1 · JSON · Protobuf   │    handler(fn)       │</div>
+<div class="line">│  send_xapp_ctrl   │                            │  subscribe(rfid, …)  │</div>
+<div class="line">└───────────────────┘                            │  send_control(…)     │</div>
+<div class="line">                                                 │  send_report(…)      │</div>
+<div class="line">                                                 │  wait_for_setup()    │</div>
+<div class="line">                                                 │  release()           │</div>
+<div class="line">                                                 └──────────────────────┘</div>
+<div class="line"> </div>
+<div class="line">One dApp process can connect to N RANs simultaneously by instantiating</div>
+<div class="line">N E3Agent(role=DAPP) objects — each with independent threads and state.</div>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md53"></a>
+E3Agent internals (same on both sides)</h2>
+<div class="fragment"><div class="line">                    ┌────────────────────────────────────────┐</div>
+<div class="line">                    │               E3Agent                  │  ◄── Public API</div>
+<div class="line">                    └──────────────────┬─────────────────────┘</div>
+<div class="line">                                       │</div>
+<div class="line">          ┌────────────────────────────┼─────────────────────────┐</div>
+<div class="line">          │                            │                         │</div>
+<div class="line">┌─────────▼──────────┐     ┌───────────▼──────────┐    ┌─────────▼────────┐</div>
+<div class="line">│   E3Connector      │     │     E3Encoder        │    │   ServiceModel   │</div>
+<div class="line">│   (Transport)      │     │     (Encoding)       │    │   (RAN-side SM   │</div>
+<div class="line">├────────────────────┤     ├──────────────────────┤    │    extension     │</div>
+<div class="line">│  ZmqConnector      │     │  Asn1Encoder         │    │    point)        │</div>
+<div class="line">│  PosixConnector    │     │  JsonEncoder         │    ├──────────────────┤</div>
+<div class="line">└────────────────────┘     └──────────────────────┘    │  SimpleSM        │</div>
+<div class="line">                                                       │  custom SMs …    │</div>
+<div class="line">                                                       └──────────────────┘</div>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md54"></a>
+Quick Start</h1>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md55"></a>
+Prerequisites</h2>
+<ul>
+<li>C++17 compiler (GCC 7+, Clang 5+, MSVC 2017+)</li>
+<li>CMake 3.16+</li>
+<li>pthreads</li>
+<li><span class="tt">asn1c</span> — ASN.1 APER encoder, required by <span class="tt">messages/</span></li>
+<li><span class="tt">nlohmann-json3-dev</span> — Header-only JSON library; CMake expects the <span class="tt">nlohmann_json</span> target</li>
+<li><span class="tt">protobuf-compiler</span> + <span class="tt">libprotobuf-dev</span> — <span class="tt">protoc</span> and the Protocol Buffers runtime (only when <span class="tt">LIBE3_ENABLE_PROTOBUF=ON</span>)</li>
+<li><span class="tt">libzmq3-dev</span> for ZMQ transport</li>
+<li><span class="tt">libsctp-dev</span> — SCTP headers for the POSIX/SCTP transport (only when <span class="tt">LIBE3_ENABLE_SCTP=ON</span>; <b>not installed by <span class="tt">./build_libe3 -I</span></b>)</li>
+</ul>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md56"></a>
+Install Dependencies</h2>
+<p>Install all required packages using the project's installer (recommended) or manually:</p>
+<div class="fragment"><div class="line"># Recommended</div>
+<div class="line">./build_libe3 -I</div>
+<div class="line"> </div>
+<div class="line"># Manual (Debian/Ubuntu)</div>
+<div class="line">sudo apt update</div>
+<div class="line">sudo apt install -y build-essential cmake pkg-config libzmq3-dev ninja-build git asn1c nlohmann-json3-dev protobuf-compiler libprotobuf-dev dpkg-dev debhelper fakeroot</div>
+</div><!-- fragment --><p>The packaging tools (<span class="tt">dpkg-dev</span>, <span class="tt">debhelper</span>, <span class="tt">fakeroot</span>) are only needed by <span class="tt">scripts/create_deb.sh</span>.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md57"></a>
+Building</h2>
+<p>The easiest way to build <a class="el" href="namespacelibe3.html">libe3</a> is using the provided build script:</p>
+<div class="fragment"><div class="line">cd libe3</div>
+<div class="line"> </div>
+<div class="line"># Basic release build</div>
+<div class="line">./build_libe3</div>
+<div class="line"> </div>
+<div class="line"># Debug build with tests</div>
+<div class="line">./build_libe3 -g -t</div>
+<div class="line"> </div>
+<div class="line"># Clean build with Ninja</div>
+<div class="line">./build_libe3 -c --ninja</div>
+<div class="line"> </div>
+<div class="line"># Documentation </div>
+<div class="line">./build_libe3 --docs</div>
+<div class="line"> </div>
+<div class="line"># Install dependencies first (Ubuntu/Fedora/Arch/macOS)</div>
+<div class="line">./build_libe3 -I</div>
+<div class="line"> </div>
+<div class="line"># See all options</div>
+<div class="line">./build_libe3 --help</div>
+</div><!-- fragment --><p>Alternatively, you can use CMake directly:</p>
+<div class="fragment"><div class="line">cd libe3</div>
+<div class="line">mkdir build &amp;&amp; cd build</div>
+<div class="line">cmake .. -DCMAKE_BUILD_TYPE=Release</div>
+<div class="line">make -j$(nproc)</div>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md58"></a>
+Installing libe3</h2>
+<p>This is the recipe the OAI E3 agent and the dApp library point to. It installs <a class="el" href="namespacelibe3.html">libe3</a> like any other library, once and with <span class="tt">sudo</span>, into <span class="tt">/usr/local</span>; after that nothing that builds against it needs <span class="tt">sudo</span> or extra environment variables. Every wire encoding is built, since a gNB has to serve whichever one its dApp uses:</p>
+<div class="fragment"><div class="line">git clone --branch &lt;version&gt; https://github.com/wineslab/libe3 &amp;&amp; cd libe3</div>
+<div class="line">./build_libe3 -I                          # build dependencies (sudo), once</div>
+<div class="line">./build_libe3 --all-encodings --install   # -&gt; /usr/local, asks for sudo, refreshes the linker cache</div>
+<div class="line">pkg-config --modversion libe3</div>
+</div><!-- fragment --><ul>
+<li>C and C++ projects (the OAI gNB) find it through <span class="tt">pkg-config</span> or <span class="tt">find_package(libe3)</span>, with no setup.</li>
+<li>The Python binding is a separate package, <span class="tt">libe3py</span>, installed with pip into any virtual environment, without root: <span class="tt">pip install libe3py</span>. On Linux (x86_64, aarch64) that is a prebuilt wheel that contains <a class="el" href="namespacelibe3.html">libe3</a>, so it needs no <a class="el" href="namespacelibe3.html">libe3</a> on the machine; the dApp library depends on it, so <span class="tt">pip install dapps</span> brings it in. From a checkout (<span class="tt">pip install .</span>) or on another platform it is built against the installed <a class="el" href="namespacelibe3.html">libe3</a> and must be the same version.</li>
+<li>To install somewhere else, <span class="tt">--prefix DIR</span> (no <span class="tt">sudo</span> if <span class="tt">DIR</span> is yours); then <span class="tt">PKG_CONFIG_PATH</span> has to include <span class="tt">DIR/lib/pkgconfig</span>, and pip needs <span class="tt">--config-settings=cmake.define.CMAKE_PREFIX_PATH=DIR</span>.</li>
+</ul>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md59"></a>
+Build Options</h2>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Option  </th><th class="markdownTableHeadNone">Default  </th><th class="markdownTableHeadNone">Description  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">LIBE3_BUILD_TESTS</span>  </td><td class="markdownTableBodyNone">ON  </td><td class="markdownTableBodyNone">Build unit tests  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">LIBE3_BUILD_EXAMPLES</span>  </td><td class="markdownTableBodyNone">ON  </td><td class="markdownTableBodyNone">Build examples  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">LIBE3_BUILD_INTEGRATION_TESTS</span>  </td><td class="markdownTableBodyNone">OFF  </td><td class="markdownTableBodyNone">Build the integration test suite (multi-role end-to-end tests + full-loop benchmark)  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">LIBE3_ENABLE_ZMQ</span>  </td><td class="markdownTableBodyNone">ON  </td><td class="markdownTableBodyNone">Enable ZeroMQ transport  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">LIBE3_ENABLE_ASN1</span>  </td><td class="markdownTableBodyNone">ON  </td><td class="markdownTableBodyNone">Enable ASN.1 encoding  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">LIBE3_ENABLE_JSON</span>  </td><td class="markdownTableBodyNone">OFF  </td><td class="markdownTableBodyNone">Enable JSON encoding support  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">LIBE3_ENABLE_PROTOBUF</span>  </td><td class="markdownTableBodyNone">OFF  </td><td class="markdownTableBodyNone">Enable Protocol Buffers encoding support  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">LIBE3_ENABLE_ASAN</span>  </td><td class="markdownTableBodyNone">OFF  </td><td class="markdownTableBodyNone">Enable AddressSanitizer  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">LIBE3_ENABLE_TSAN</span>  </td><td class="markdownTableBodyNone">OFF  </td><td class="markdownTableBodyNone">Enable ThreadSanitizer  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">LIBE3_ENABLE_SWIG</span>  </td><td class="markdownTableBodyNone">OFF  </td><td class="markdownTableBodyNone">Build the SWIG-generated Python bindings (<span class="tt">_libe3py.so</span> + <span class="tt">libe3py.py</span>)  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">LIBE3_ENABLE_SCTP</span>  </td><td class="markdownTableBodyNone">OFF  </td><td class="markdownTableBodyNone">Enable the SCTP POSIX transport (needs <span class="tt">libsctp-dev</span>)  </td></tr>
+</table>
+<blockquote class="doxtable">
+<p><b>Note on SCTP:</b> the transport is <b>off by default</b>. It is the only dependency that needs a kernel module plus a distro <span class="tt">-dev</span> package for a single system header, and the deployed E3 links are IPC or TCP, so <span class="tt">./build_libe3 -I</span> no longer installs it. <span class="tt">E3TransportLayer::SCTP</span> still exists in the ABI, and in the C API and Python bindings that mirror its value, whichever way the flag is set — but asking a build without it for the SCTP transport fails at socket creation with a message telling you to rebuild, rather than silently falling back to another protocol. Configuring with <span class="tt">-DLIBE3_ENABLE_SCTP=ON</span> and no headers installed fails at configure time, naming the package.</p>
+<div class="fragment"><div class="line">sudo apt install -y libsctp-dev          # lksctp-tools-devel on Fedora/RHEL, lksctp-tools on Arch</div>
+<div class="line">./build_libe3 --enable-sctp</div>
+</div><!-- fragment --> </blockquote>
+<blockquote class="doxtable">
+<p><b>Note on encoding selection:</b> <span class="tt">LIBE3_ENABLE_ASN1</span>, <span class="tt">LIBE3_ENABLE_JSON</span>, and <span class="tt">LIBE3_ENABLE_PROTOBUF</span> are independent compile-time inclusion flags — any combination can be <span class="tt">ON</span> simultaneously to build a library that supports several encodings. The active encoding is <b>selected at runtime</b> via the <span class="tt">encoding</span> field of <span class="tt"><a class="el" href="structe3__config__t.html" title="Configuration for creating an E3Agent from C.">e3_config_t</a></span> (0 = ASN1, 1 = JSON, 2 = PROTOBUF) when calling <span class="tt"><a class="el" href="c__api_8h.html#a8e67f66e5fa7dd18e1df42840fc750f7" title="Create a new E3Agent with the given configuration.">e3_agent_create_with_config()</a></span>. </p>
+</blockquote>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md60"></a>
+Running Tests</h2>
+<div class="fragment"><div class="line"># With build script</div>
+<div class="line">./build_libe3 -t</div>
+<div class="line"> </div>
+<div class="line"># Or manually</div>
+<div class="line">cd build &amp;&amp; ctest --output-on-failure</div>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md61"></a>
+Usage</h1>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md62"></a>
+Basic E3 Agent</h2>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="libe3_2libe3_8hpp.html">libe3/libe3.hpp</a>&gt;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main() {</div>
+<div class="line">    <span class="comment">// Configure the agent</span></div>
+<div class="line">    <a class="code hl_struct" href="structlibe3_1_1E3Config.html">libe3::E3Config</a> config;</div>
+<div class="line">    config.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#ad2753835626e34f72103c1a5f6f2b198">ran_identifier</a> = <span class="stringliteral">&quot;my-ran-001&quot;</span>;</div>
+<div class="line">    config.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#a7b709230e627834bc85cd5cb8749c3fa">link_layer</a> = <a class="code hl_enumvalue" href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea0028405011724c5677faba466637b1e5">libe3::E3LinkLayer::POSIX</a>;</div>
+<div class="line">    config.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#adb8d8ed2e71bcf6289b002c00d83e335">transport_layer</a> = <a class="code hl_enumvalue" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40ac8660c6d72e7323867ec800d6bb953df">libe3::E3TransportLayer::IPC</a>;</div>
+<div class="line">    config.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#a7198ffc275e41485cf084b9e20f44c4e">encoding</a> = <a class="code hl_enumvalue" href="namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8">libe3::EncodingFormat::JSON</a>;</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Create the agent</span></div>
+<div class="line">    <a class="code hl_class" href="classlibe3_1_1E3Agent.html">libe3::E3Agent</a> agent(std::move(config));</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Initialize and start (start() will call init() if needed)</span></div>
+<div class="line">    <span class="keywordflow">if</span> (agent.init() != libe3::ErrorCode::SUCCESS) {</div>
+<div class="line">        <span class="comment">// handle initialization error</span></div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">if</span> (agent.start() != libe3::ErrorCode::SUCCESS) {</div>
+<div class="line">        <span class="comment">// handle start error</span></div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// ... run your application ...</span></div>
+<div class="line"> </div>
+<div class="line">    agent.stop();</div>
+<div class="line">    <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
+<div class="ttc" id="aclasslibe3_1_1E3Agent_html"><div class="ttname"><a href="classlibe3_1_1E3Agent.html">libe3::E3Agent</a></div><div class="ttdoc">E3Agent - Main façade for RAN vendor integration.</div><div class="ttdef"><b>Definition</b> <a href="e3__agent_8hpp_source.html#l00086">e3_agent.hpp:86</a></div></div>
+<div class="ttc" id="alibe3_2libe3_8hpp_html"><div class="ttname"><a href="libe3_2libe3_8hpp.html">libe3.hpp</a></div><div class="ttdoc">libe3 umbrella header - includes all public headers</div></div>
+<div class="ttc" id="anamespacelibe3_html_a24bf966c6225dc47ac47d7a8a1986c40ac8660c6d72e7323867ec800d6bb953df"><div class="ttname"><a href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40ac8660c6d72e7323867ec800d6bb953df">libe3::E3TransportLayer::IPC</a></div><div class="ttdeci">@ IPC</div><div class="ttdoc">Unix Domain Sockets / IPC.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00086">types.hpp:86</a></div></div>
+<div class="ttc" id="anamespacelibe3_html_a6cf81048dab516aa29417bb0dc741d0ea0028405011724c5677faba466637b1e5"><div class="ttname"><a href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea0028405011724c5677faba466637b1e5">libe3::E3LinkLayer::POSIX</a></div><div class="ttdeci">@ POSIX</div><div class="ttdoc">POSIX socket-based transport.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00062">types.hpp:62</a></div></div>
+<div class="ttc" id="anamespacelibe3_html_a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8"><div class="ttname"><a href="namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8">libe3::EncodingFormat::JSON</a></div><div class="ttdeci">@ JSON</div><div class="ttdoc">JSON encoding (for development/debugging).</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00053">types.hpp:53</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html"><div class="ttname"><a href="structlibe3_1_1E3Config.html">libe3::E3Config</a></div><div class="ttdoc">Configuration for E3Agent.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00402">types.hpp:402</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_a7198ffc275e41485cf084b9e20f44c4e"><div class="ttname"><a href="structlibe3_1_1E3Config.html#a7198ffc275e41485cf084b9e20f44c4e">libe3::E3Config::encoding</a></div><div class="ttdeci">EncodingFormat encoding</div><div class="ttdoc">PDU encoding format (ASN.1 PER or JSON).</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00440">types.hpp:440</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_a7b709230e627834bc85cd5cb8749c3fa"><div class="ttname"><a href="structlibe3_1_1E3Config.html#a7b709230e627834bc85cd5cb8749c3fa">libe3::E3Config::link_layer</a></div><div class="ttdeci">E3LinkLayer link_layer</div><div class="ttdoc">Link-layer transport (ZMQ or POSIX).</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00424">types.hpp:424</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_ad2753835626e34f72103c1a5f6f2b198"><div class="ttname"><a href="structlibe3_1_1E3Config.html#ad2753835626e34f72103c1a5f6f2b198">libe3::E3Config::ran_identifier</a></div><div class="ttdeci">std::string ran_identifier</div><div class="ttdoc">Unique identifier for this RAN function (e.g. &quot;DU-1&quot;).</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00407">types.hpp:407</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_adb8d8ed2e71bcf6289b002c00d83e335"><div class="ttname"><a href="structlibe3_1_1E3Config.html#adb8d8ed2e71bcf6289b002c00d83e335">libe3::E3Config::transport_layer</a></div><div class="ttdeci">E3TransportLayer transport_layer</div><div class="ttdoc">Transport-layer protocol (SCTP, TCP, IPC).</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00426">types.hpp:426</a></div></div>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md63"></a>
+dApp Role</h2>
+<p>The same <span class="tt">E3Agent</span> class can act as a dApp client. Set <span class="tt">E3Config.role</span> to <span class="tt">E3Role::DAPP</span> and register handlers for the messages flowing back from the RAN:</p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="libe3_2libe3_8hpp.html">libe3/libe3.hpp</a>&gt;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main() {</div>
+<div class="line">    <a class="code hl_struct" href="structlibe3_1_1E3Config.html">libe3::E3Config</a> config;</div>
+<div class="line">    config.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#a348b15e9a72856994dee4b87e520da01">role</a> = <a class="code hl_enumvalue" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ecaf6d65812e5d7fae71a473c63c22b9d4a">libe3::E3Role::DAPP</a>;</div>
+<div class="line">    config.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#abb5028cf948af60a47e76ffdf182c4a3">dapp_name</a> = <span class="stringliteral">&quot;MyDApp&quot;</span>;</div>
+<div class="line">    config.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#a1597f7d8745dcc5fe99570e9a2f20147">dapp_version</a> = <span class="stringliteral">&quot;1.0.0&quot;</span>;</div>
+<div class="line">    config.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#af7cca75f0e517f5a8d3143d7d407b156">vendor</a> = <span class="stringliteral">&quot;WinesLab&quot;</span>;</div>
+<div class="line">    config.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#a7b709230e627834bc85cd5cb8749c3fa">link_layer</a> = <a class="code hl_enumvalue" href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea38cf8f016825407fb4e79e319d87bd5e">libe3::E3LinkLayer::ZMQ</a>;</div>
+<div class="line">    config.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#adb8d8ed2e71bcf6289b002c00d83e335">transport_layer</a> = <a class="code hl_enumvalue" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40ac8660c6d72e7323867ec800d6bb953df">libe3::E3TransportLayer::IPC</a>;</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_class" href="classlibe3_1_1E3Agent.html">libe3::E3Agent</a> agent(std::move(config));</div>
+<div class="line"> </div>
+<div class="line">    agent.set_indication_handler([](<span class="keyword">const</span> <a class="code hl_struct" href="structlibe3_1_1IndicationMessage.html">libe3::IndicationMessage</a>&amp; msg) {</div>
+<div class="line">        <span class="comment">// Decode msg.protocol_data with your SM-specific encoder.</span></div>
+<div class="line">    });</div>
+<div class="line">    agent.set_subscription_response_handler([](<span class="keyword">const</span> <a class="code hl_struct" href="structlibe3_1_1SubscriptionResponse.html">libe3::SubscriptionResponse</a>&amp; r) {</div>
+<div class="line">        <span class="comment">// Inspect r.subscription_id, r.response_code.</span></div>
+<div class="line">    });</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">if</span> (agent.start() != libe3::ErrorCode::SUCCESS) {</div>
+<div class="line">        <span class="keywordflow">return</span> 1;</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">if</span> (agent.wait_for_setup(std::chrono::seconds(5)) != libe3::ErrorCode::SUCCESS) {</div>
+<div class="line">        <span class="keywordflow">return</span> 1;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    agent.subscribe(<span class="comment">/*ran_function_id=*/</span>1, <span class="comment">/*telemetry_ids=*/</span>{1}, <span class="comment">/*control_ids=*/</span>{1});</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// ... do work; control loop on the application side ...</span></div>
+<div class="line"> </div>
+<div class="line">    agent.release();</div>
+<div class="line">    agent.stop();</div>
+<div class="line">    <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
+<div class="ttc" id="anamespacelibe3_html_a42d84c47e47cdcae78a4214ab412b2ecaf6d65812e5d7fae71a473c63c22b9d4a"><div class="ttname"><a href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ecaf6d65812e5d7fae71a473c63c22b9d4a">libe3::E3Role::DAPP</a></div><div class="ttdeci">@ DAPP</div><div class="ttdoc">dApp (connects to a RAN agent)</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00077">types.hpp:77</a></div></div>
+<div class="ttc" id="anamespacelibe3_html_a6cf81048dab516aa29417bb0dc741d0ea38cf8f016825407fb4e79e319d87bd5e"><div class="ttname"><a href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea38cf8f016825407fb4e79e319d87bd5e">libe3::E3LinkLayer::ZMQ</a></div><div class="ttdeci">@ ZMQ</div><div class="ttdoc">ZeroMQ-based transport.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00061">types.hpp:61</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_a1597f7d8745dcc5fe99570e9a2f20147"><div class="ttname"><a href="structlibe3_1_1E3Config.html#a1597f7d8745dcc5fe99570e9a2f20147">libe3::E3Config::dapp_version</a></div><div class="ttdeci">std::string dapp_version</div><div class="ttdoc">dApp version advertised in SetupRequest</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00411">types.hpp:411</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_a348b15e9a72856994dee4b87e520da01"><div class="ttname"><a href="structlibe3_1_1E3Config.html#a348b15e9a72856994dee4b87e520da01">libe3::E3Config::role</a></div><div class="ttdeci">E3Role role</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00404">types.hpp:404</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_abb5028cf948af60a47e76ffdf182c4a3"><div class="ttname"><a href="structlibe3_1_1E3Config.html#abb5028cf948af60a47e76ffdf182c4a3">libe3::E3Config::dapp_name</a></div><div class="ttdeci">std::string dapp_name</div><div class="ttdoc">dApp name advertised in SetupRequest</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00410">types.hpp:410</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_af7cca75f0e517f5a8d3143d7d407b156"><div class="ttname"><a href="structlibe3_1_1E3Config.html#af7cca75f0e517f5a8d3143d7d407b156">libe3::E3Config::vendor</a></div><div class="ttdeci">std::string vendor</div><div class="ttdoc">Vendor name for SetupRequest (optional).</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00412">types.hpp:412</a></div></div>
+<div class="ttc" id="astructlibe3_1_1IndicationMessage_html"><div class="ttname"><a href="structlibe3_1_1IndicationMessage.html">libe3::IndicationMessage</a></div><div class="ttdoc">E3AP Indication Message structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00275">types.hpp:275</a></div></div>
+<div class="ttc" id="astructlibe3_1_1SubscriptionResponse_html"><div class="ttname"><a href="structlibe3_1_1SubscriptionResponse.html">libe3::SubscriptionResponse</a></div><div class="ttdoc">E3AP Subscription Response structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00261">types.hpp:261</a></div></div>
+</div><!-- fragment --><p>See <span class="tt">examples/simple_dapp.cpp</span> for a complete reference dApp using the Simple service model. It pairs with <span class="tt">examples/simple_agent.cpp</span> and is wire-compatible with Python dApp clients that implement the same Simple SM encoding.</p>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md64"></a>
+Multi-peer dApps</h3>
+<p>A single dApp process can connect to multiple RAN agents simultaneously by instantiating multiple <span class="tt">E3Agent</span> objects, each with its own configuration:</p>
+<div class="fragment"><div class="line"><span class="comment">// Connect one dApp process to a DU-HIGH and a DU-LOW</span></div>
+<div class="line"><a class="code hl_struct" href="structlibe3_1_1E3Config.html">libe3::E3Config</a> cfg_high; cfg_high.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#a348b15e9a72856994dee4b87e520da01">role</a> = <a class="code hl_enumvalue" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ecaf6d65812e5d7fae71a473c63c22b9d4a">libe3::E3Role::DAPP</a>;</div>
+<div class="line">cfg_high.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#aebc866b403f4b53580604449e8723e32">setup_endpoint</a>      = <span class="stringliteral">&quot;ipc:///tmp/dapps_high/setup&quot;</span>;</div>
+<div class="line">cfg_high.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#a30c8f1a31e49813e0859f12f4a783706">subscriber_endpoint</a> = <span class="stringliteral">&quot;ipc:///tmp/dapps_high/dapp_socket&quot;</span>;</div>
+<div class="line">cfg_high.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#aa187882329d11f91fcbfbfcf664e76ec">publisher_endpoint</a>  = <span class="stringliteral">&quot;ipc:///tmp/dapps_high/e3_socket&quot;</span>;</div>
+<div class="line"> </div>
+<div class="line"><a class="code hl_struct" href="structlibe3_1_1E3Config.html">libe3::E3Config</a> cfg_low = cfg_high;</div>
+<div class="line">cfg_low.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#aebc866b403f4b53580604449e8723e32">setup_endpoint</a>      = <span class="stringliteral">&quot;ipc:///tmp/dapps_low/setup&quot;</span>;</div>
+<div class="line">cfg_low.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#a30c8f1a31e49813e0859f12f4a783706">subscriber_endpoint</a> = <span class="stringliteral">&quot;ipc:///tmp/dapps_low/dapp_socket&quot;</span>;</div>
+<div class="line">cfg_low.<a class="code hl_variable" href="structlibe3_1_1E3Config.html#aa187882329d11f91fcbfbfcf664e76ec">publisher_endpoint</a>  = <span class="stringliteral">&quot;ipc:///tmp/dapps_low/e3_socket&quot;</span>;</div>
+<div class="line"> </div>
+<div class="line"><a class="code hl_class" href="classlibe3_1_1E3Agent.html">libe3::E3Agent</a> dapp_to_high(std::move(cfg_high));</div>
+<div class="line"><a class="code hl_class" href="classlibe3_1_1E3Agent.html">libe3::E3Agent</a> dapp_to_low (std::move(cfg_low));</div>
+<div class="line"> </div>
+<div class="line">dapp_to_high.set_indication_handler([&amp;](<span class="keyword">const</span> <a class="code hl_struct" href="structlibe3_1_1IndicationMessage.html">libe3::IndicationMessage</a>&amp; m){ <span class="comment">/* DU-HIGH */</span> });</div>
+<div class="line">dapp_to_low .set_indication_handler([&amp;](<span class="keyword">const</span> <a class="code hl_struct" href="structlibe3_1_1IndicationMessage.html">libe3::IndicationMessage</a>&amp; m){ <span class="comment">/* DU-LOW  */</span> });</div>
+<div class="line"> </div>
+<div class="line">dapp_to_high.start();</div>
+<div class="line">dapp_to_low.start();</div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_a30c8f1a31e49813e0859f12f4a783706"><div class="ttname"><a href="structlibe3_1_1E3Config.html#a30c8f1a31e49813e0859f12f4a783706">libe3::E3Config::subscriber_endpoint</a></div><div class="ttdeci">std::string subscriber_endpoint</div><div class="ttdoc">Endpoint URI for inbound channel.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00435">types.hpp:435</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_aa187882329d11f91fcbfbfcf664e76ec"><div class="ttname"><a href="structlibe3_1_1E3Config.html#aa187882329d11f91fcbfbfcf664e76ec">libe3::E3Config::publisher_endpoint</a></div><div class="ttdeci">std::string publisher_endpoint</div><div class="ttdoc">Endpoint URI for outbound channel.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00436">types.hpp:436</a></div></div>
+<div class="ttc" id="astructlibe3_1_1E3Config_html_aebc866b403f4b53580604449e8723e32"><div class="ttname"><a href="structlibe3_1_1E3Config.html#aebc866b403f4b53580604449e8723e32">libe3::E3Config::setup_endpoint</a></div><div class="ttdeci">std::string setup_endpoint</div><div class="ttdoc">Endpoint URI for setup channel.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00434">types.hpp:434</a></div></div>
+</div><!-- fragment --><p>Each instance has its own threads, connector, encoder, and per-peer <span class="tt">DAppSubscriptionState</span>. The library guarantees that N coexisting <span class="tt">E3Agent</span> instances in one process do not share mutable state.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md65"></a>
+Custom Service Model</h2>
+<p>Service Models implement the <span class="tt"><a class="el" href="classlibe3_1_1ServiceModel.html" title="Abstract Service Model interface.">libe3::ServiceModel</a></span> interface. Control action handlers are registered from the SM implementation via <span class="tt">register_control_callback</span> and the <span class="tt">E3Agent</span> routes incoming control actions to the appropriate SM.</p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="libe3_2libe3_8hpp.html">libe3/libe3.hpp</a>&gt;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">class </span>MyKpmServiceModel : <span class="keyword">public</span> <a class="code hl_class" href="classlibe3_1_1ServiceModel.html">libe3::ServiceModel</a> {</div>
+<div class="line"><span class="keyword">public</span>:</div>
+<div class="line">    std::string <a class="code hl_function" href="classlibe3_1_1ServiceModel.html#a003eae4bbac3dadb42613b2c71c21476">name</a>()<span class="keyword"> const override </span>{ <span class="keywordflow">return</span> <span class="stringliteral">&quot;KPM&quot;</span>; }</div>
+<div class="line">    uint32_t <a class="code hl_function" href="classlibe3_1_1ServiceModel.html#a2d17ab4667c5ccfff19d5079a47f7677">version</a>()<span class="keyword"> const override </span>{ <span class="keywordflow">return</span> 2; }</div>
+<div class="line">    uint32_t <a class="code hl_function" href="classlibe3_1_1ServiceModel.html#a0e5af990ce382e6c1970290d2336631e">ran_function_id</a>()<span class="keyword"> const override </span>{ <span class="keywordflow">return</span> 100; }</div>
+<div class="line"> </div>
+<div class="line">    std::vector&lt;uint32_t&gt; <a class="code hl_function" href="classlibe3_1_1ServiceModel.html#a16412ef9eee5a294e63620b9db5c273f">telemetry_ids</a>()<span class="keyword"> const override </span>{ <span class="keywordflow">return</span> {1}; }</div>
+<div class="line">    std::vector&lt;uint32_t&gt; <a class="code hl_function" href="classlibe3_1_1ServiceModel.html#ad8da981e910f19aa2730c7a40cc74158">control_ids</a>()<span class="keyword"> const override </span>{ <span class="keywordflow">return</span> {1}; }</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_enumeration" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> <a class="code hl_function" href="classlibe3_1_1ServiceModel.html#ae72911e55ced46ac00c628d1696c5a97">init</a>()<span class="keyword"> override </span>{</div>
+<div class="line">        register_control_callback(1, [](<span class="keyword">const</span> std::vector&lt;uint8_t&gt;&amp; data) {</div>
+<div class="line">            <span class="comment">// decode and apply control action</span></div>
+<div class="line">            <span class="keywordflow">return</span> ErrorCode::SUCCESS;</div>
+<div class="line">        });</div>
+<div class="line">        <span class="keywordflow">return</span> ErrorCode::SUCCESS;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordtype">void</span> <a class="code hl_function" href="classlibe3_1_1ServiceModel.html#a509d11a31eaa21d4ecba7c270c288f21">destroy</a>()<span class="keyword"> override </span>{ <a class="code hl_function" href="classlibe3_1_1ServiceModel.html#acbdba718c7d39a05c3a50e316e04604b">stop</a>(); }</div>
+<div class="line">    <a class="code hl_enumeration" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> <a class="code hl_function" href="classlibe3_1_1ServiceModel.html#ab8d84fad0e14000328cccf3ed35aa4bc">start</a>()<span class="keyword"> override </span>{ running_ = <span class="keyword">true</span>; <span class="keywordflow">return</span> ErrorCode::SUCCESS; }</div>
+<div class="line">    <span class="keywordtype">void</span> <a class="code hl_function" href="classlibe3_1_1ServiceModel.html#acbdba718c7d39a05c3a50e316e04604b">stop</a>()<span class="keyword"> override </span>{ running_ = <span class="keyword">false</span>; }</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_function" href="classlibe3_1_1ServiceModel.html#ae10f43ca27d5ae47d93d6fde0c2dd014">is_running</a>()<span class="keyword"> const override </span>{ <span class="keywordflow">return</span> running_; }</div>
+<div class="line">    std::vector&lt;uint8_t&gt; <a class="code hl_function" href="classlibe3_1_1ServiceModel.html#accba27a2f8aafac0209c088d06afbb2d">ran_function_data</a>()<span class="keyword"> const override </span>{ <span class="keywordflow">return</span> {}; }</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">private</span>:</div>
+<div class="line">    std::atomic&lt;bool&gt; running_{<span class="keyword">false</span>};</div>
+<div class="line">};</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Register with agent</span></div>
+<div class="line">agent.register_sm(std::make_unique&lt;MyKpmServiceModel&gt;());</div>
+<div class="ttc" id="aclasslibe3_1_1ServiceModel_html"><div class="ttname"><a href="classlibe3_1_1ServiceModel.html">libe3::ServiceModel</a></div><div class="ttdoc">Abstract Service Model interface.</div><div class="ttdef"><b>Definition</b> <a href="sm__interface_8hpp_source.html#l00041">sm_interface.hpp:41</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1ServiceModel_html_a003eae4bbac3dadb42613b2c71c21476"><div class="ttname"><a href="classlibe3_1_1ServiceModel.html#a003eae4bbac3dadb42613b2c71c21476">libe3::ServiceModel::name</a></div><div class="ttdeci">virtual std::string name() const =0</div><div class="ttdoc">Get SM name.</div></div>
+<div class="ttc" id="aclasslibe3_1_1ServiceModel_html_a0e5af990ce382e6c1970290d2336631e"><div class="ttname"><a href="classlibe3_1_1ServiceModel.html#a0e5af990ce382e6c1970290d2336631e">libe3::ServiceModel::ran_function_id</a></div><div class="ttdeci">virtual uint32_t ran_function_id() const =0</div><div class="ttdoc">Get RAN function ID for this SM.</div></div>
+<div class="ttc" id="aclasslibe3_1_1ServiceModel_html_a16412ef9eee5a294e63620b9db5c273f"><div class="ttname"><a href="classlibe3_1_1ServiceModel.html#a16412ef9eee5a294e63620b9db5c273f">libe3::ServiceModel::telemetry_ids</a></div><div class="ttdeci">virtual std::vector&lt; uint32_t &gt; telemetry_ids() const =0</div><div class="ttdoc">Get telemetry IDs supported by this SM.</div></div>
+<div class="ttc" id="aclasslibe3_1_1ServiceModel_html_a2d17ab4667c5ccfff19d5079a47f7677"><div class="ttname"><a href="classlibe3_1_1ServiceModel.html#a2d17ab4667c5ccfff19d5079a47f7677">libe3::ServiceModel::version</a></div><div class="ttdeci">virtual uint32_t version() const =0</div><div class="ttdoc">Get SM version.</div></div>
+<div class="ttc" id="aclasslibe3_1_1ServiceModel_html_a509d11a31eaa21d4ecba7c270c288f21"><div class="ttname"><a href="classlibe3_1_1ServiceModel.html#a509d11a31eaa21d4ecba7c270c288f21">libe3::ServiceModel::destroy</a></div><div class="ttdeci">virtual void destroy()=0</div><div class="ttdoc">Destroy the SM and release resources.</div></div>
+<div class="ttc" id="aclasslibe3_1_1ServiceModel_html_ab8d84fad0e14000328cccf3ed35aa4bc"><div class="ttname"><a href="classlibe3_1_1ServiceModel.html#ab8d84fad0e14000328cccf3ed35aa4bc">libe3::ServiceModel::start</a></div><div class="ttdeci">virtual ErrorCode start()=0</div><div class="ttdoc">Start the SM processing.</div></div>
+<div class="ttc" id="aclasslibe3_1_1ServiceModel_html_acbdba718c7d39a05c3a50e316e04604b"><div class="ttname"><a href="classlibe3_1_1ServiceModel.html#acbdba718c7d39a05c3a50e316e04604b">libe3::ServiceModel::stop</a></div><div class="ttdeci">virtual void stop()=0</div><div class="ttdoc">Stop the SM processing.</div></div>
+<div class="ttc" id="aclasslibe3_1_1ServiceModel_html_accba27a2f8aafac0209c088d06afbb2d"><div class="ttname"><a href="classlibe3_1_1ServiceModel.html#accba27a2f8aafac0209c088d06afbb2d">libe3::ServiceModel::ran_function_data</a></div><div class="ttdeci">virtual std::vector&lt; uint8_t &gt; ran_function_data() const</div><div class="ttdoc">RAN-function-specific opaque data (required, 1..32768 bytes).</div><div class="ttdef"><b>Definition</b> <a href="sm__interface_8hpp_source.html#l00085">sm_interface.hpp:85</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1ServiceModel_html_ad8da981e910f19aa2730c7a40cc74158"><div class="ttname"><a href="classlibe3_1_1ServiceModel.html#ad8da981e910f19aa2730c7a40cc74158">libe3::ServiceModel::control_ids</a></div><div class="ttdeci">virtual std::vector&lt; uint32_t &gt; control_ids() const =0</div><div class="ttdoc">Get control IDs supported by this SM.</div></div>
+<div class="ttc" id="aclasslibe3_1_1ServiceModel_html_ae10f43ca27d5ae47d93d6fde0c2dd014"><div class="ttname"><a href="classlibe3_1_1ServiceModel.html#ae10f43ca27d5ae47d93d6fde0c2dd014">libe3::ServiceModel::is_running</a></div><div class="ttdeci">virtual bool is_running() const =0</div><div class="ttdoc">Check if SM is currently running.</div></div>
+<div class="ttc" id="aclasslibe3_1_1ServiceModel_html_ae72911e55ced46ac00c628d1696c5a97"><div class="ttname"><a href="classlibe3_1_1ServiceModel.html#ae72911e55ced46ac00c628d1696c5a97">libe3::ServiceModel::init</a></div><div class="ttdeci">virtual ErrorCode init()=0</div><div class="ttdoc">Initialize the SM.</div></div>
+<div class="ttc" id="anamespacelibe3_html_a0f455c3a80f115f8aa8ad664850d6bb3"><div class="ttname"><a href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">libe3::ErrorCode</a></div><div class="ttdeci">ErrorCode</div><div class="ttdoc">Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00149">types.hpp:149</a></div></div>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md66"></a>
+Notes on Simulation / Local Testing</h2>
+<p>The library exposes IPC endpoints by default (see <span class="tt">E3Config</span> defaults) so local testing with dApps on the same host is supported using the IPC transport. There is no dedicated <span class="tt">simulation_mode</span> field in <span class="tt">E3Config</span>; instead adjust endpoints and transport selection to run in isolated/local environments.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md67"></a>
+API Reference</h1>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md68"></a>
+E3Agent</h2>
+<p>The single entry-point class for both roles. Configure <span class="tt">E3Config.role = E3Role::RAN</span> to bind as a RAN function, or <span class="tt">E3Role::DAPP</span> to connect as a dApp client. Methods are annotated <span class="tt">(RAN)</span> or <span class="tt">(dApp)</span> where they apply to only one role; the rest are common.</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Method  </th><th class="markdownTableHeadNone">Description  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">init()</span>  </td><td class="markdownTableBodyNone">Initialize the agent  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">start()</span>  </td><td class="markdownTableBodyNone">Start processing threads  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">stop()</span>  </td><td class="markdownTableBodyNone">Stop the agent  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">state()</span>  </td><td class="markdownTableBodyNone">Get current state  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">is_running()</span>  </td><td class="markdownTableBodyNone">Check if agent is running  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">register_sm(sm)</span>  </td><td class="markdownTableBodyNone">Register a Service Model  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">get_available_ran_functions()</span>  </td><td class="markdownTableBodyNone">Get available RAN function IDs from registered SMs  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">set_dapp_report_handler(handler)</span>  </td><td class="markdownTableBodyNone">Set callback for incoming dApp reports (dApp → RAN)  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">set_dapp_status_changed_handler(handler)</span>  </td><td class="markdownTableBodyNone">Set callback for dApp status changes (connect, disconnect, subscribe, unsubscribe)  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">send_indication(dapp_id, ran_function_id, data)</span>  </td><td class="markdownTableBodyNone">(RAN) Send an indication to a specific dApp  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">send_xapp_control(dapp_id, ran_function_id, data)</span>  </td><td class="markdownTableBodyNone">(RAN) Forward an xApp control action to a specific dApp  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">send_message_ack(request_id, response_code)</span>  </td><td class="markdownTableBodyNone">(RAN) Send a message acknowledgment to a dApp  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">get_registered_dapps()</span>  </td><td class="markdownTableBodyNone">(RAN) Get list of registered dApp IDs  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">get_dapp_subscriptions(dapp_id)</span>  </td><td class="markdownTableBodyNone">(RAN) Get subscriptions for a dApp  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">get_ran_function_subscribers(ran_function_id)</span>  </td><td class="markdownTableBodyNone">(RAN) Get subscribers for a RAN function  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">set_indication_handler(handler)</span>  </td><td class="markdownTableBodyNone">(dApp) Callback for incoming <span class="tt">IndicationMessage</span>  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">set_subscription_response_handler(handler)</span>  </td><td class="markdownTableBodyNone">(dApp) Callback for incoming <span class="tt">SubscriptionResponse</span>  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">set_setup_response_handler(handler)</span>  </td><td class="markdownTableBodyNone">(dApp) Callback for incoming <span class="tt">SetupResponse</span>  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">set_xapp_control_handler(handler)</span>  </td><td class="markdownTableBodyNone">(dApp) Callback for incoming <span class="tt">XAppControlAction</span>  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">set_message_ack_handler(handler)</span>  </td><td class="markdownTableBodyNone">(dApp) Callback for incoming <span class="tt">MessageAck</span>  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">wait_for_setup(timeout)</span>  </td><td class="markdownTableBodyNone">(dApp) Block until setup handshake completes  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">subscribe(ran_function_id, telemetry, control, ...)</span>  </td><td class="markdownTableBodyNone">(dApp) Subscribe to a RAN function  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">unsubscribe(ran_function_id)</span>  </td><td class="markdownTableBodyNone">(dApp) Tear down a subscription  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">send_control(ran_function_id, control_id, data)</span>  </td><td class="markdownTableBodyNone">(dApp) Send a control action to the RAN  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">send_report(ran_function_id, data)</span>  </td><td class="markdownTableBodyNone">(dApp) Send a dApp report to the RAN  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">release()</span>  </td><td class="markdownTableBodyNone">(dApp) Send <span class="tt">ReleaseMessage</span> to the RAN  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">dapp_id()</span>  </td><td class="markdownTableBodyNone">(dApp) Identifier assigned by the RAN in <span class="tt">SetupResponse</span>  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">subscribed_ran_functions()</span> / <span class="tt">active_subscription_ids()</span>  </td><td class="markdownTableBodyNone">(dApp) Per-instance subscription state  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">config()</span>  </td><td class="markdownTableBodyNone">Access current <span class="tt">E3Config</span>  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">dapp_count()</span>  </td><td class="markdownTableBodyNone">(RAN) Number of registered dApps. (dApp) 0/1 based on assignment  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">subscription_count()</span>  </td><td class="markdownTableBodyNone">Number of active subscriptions on this side  </td></tr>
+</table>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md69"></a>
+E3Config</h2>
+<p>The <span class="tt">E3Config</span> structure contains agent configuration and defaults suitable for local development (IPC) or production deployments.</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Field  </th><th class="markdownTableHeadNone">Type  </th><th class="markdownTableHeadNone">Description  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">role</span>  </td><td class="markdownTableBodyNone">E3Role  </td><td class="markdownTableBodyNone"><span class="tt">RAN</span> (default — binds sockets) or <span class="tt">DAPP</span> (connects to a remote RAN)  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">ran_identifier</span>  </td><td class="markdownTableBodyNone">string  </td><td class="markdownTableBodyNone">Unique RAN identifier (used when role=RAN)  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">dapp_name</span>  </td><td class="markdownTableBodyNone">string  </td><td class="markdownTableBodyNone">dApp name advertised in <span class="tt">SetupRequest</span> (used when role=DAPP)  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">dapp_version</span>  </td><td class="markdownTableBodyNone">string  </td><td class="markdownTableBodyNone">dApp version advertised in <span class="tt">SetupRequest</span>  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">vendor</span>  </td><td class="markdownTableBodyNone">string  </td><td class="markdownTableBodyNone">Vendor name for <span class="tt">SetupRequest</span>  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">e3ap_version</span>  </td><td class="markdownTableBodyNone">string  </td><td class="markdownTableBodyNone">E3AP protocol version string  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">link_layer</span>  </td><td class="markdownTableBodyNone">E3LinkLayer  </td><td class="markdownTableBodyNone">ZMQ or POSIX  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">transport_layer</span>  </td><td class="markdownTableBodyNone">E3TransportLayer  </td><td class="markdownTableBodyNone">SCTP, TCP, IPC  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">setup_endpoint</span>  </td><td class="markdownTableBodyNone">string  </td><td class="markdownTableBodyNone">Setup connection endpoint (default: ipc:///tmp/dapps/setup)  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">subscriber_endpoint</span>  </td><td class="markdownTableBodyNone">string  </td><td class="markdownTableBodyNone">Subscriber endpoint (default: ipc:///tmp/dapps/dapp_socket)  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">publisher_endpoint</span>  </td><td class="markdownTableBodyNone">string  </td><td class="markdownTableBodyNone">Publisher endpoint (default: ipc:///tmp/dapps/e3_socket)  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">encoding</span>  </td><td class="markdownTableBodyNone">EncodingFormat  </td><td class="markdownTableBodyNone">ASN1, JSON, or PROTOBUF  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">connect_timeout_ms</span>  </td><td class="markdownTableBodyNone">uint32_t  </td><td class="markdownTableBodyNone">Connect timeout (ms)  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">recv_timeout_ms</span>  </td><td class="markdownTableBodyNone">uint32_t  </td><td class="markdownTableBodyNone">Receive timeout (ms)  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">send_timeout_ms</span>  </td><td class="markdownTableBodyNone">uint32_t  </td><td class="markdownTableBodyNone">Send timeout (ms)  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">receive_buffer_size</span>  </td><td class="markdownTableBodyNone">size_t  </td><td class="markdownTableBodyNone">Receive buffer size (bytes)  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">send_buffer_size</span>  </td><td class="markdownTableBodyNone">size_t  </td><td class="markdownTableBodyNone">Send buffer size (bytes)  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">io_threads</span>  </td><td class="markdownTableBodyNone">size_t  </td><td class="markdownTableBodyNone">Number of I/O threads  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">log_level</span>  </td><td class="markdownTableBodyNone">int  </td><td class="markdownTableBodyNone">Logging level (0=none .. 5=trace)  </td></tr>
+</table>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md70"></a>
+ServiceModel</h2>
+<p>Interface for implementing custom service models.</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Method  </th><th class="markdownTableHeadNone">Description  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">name()</span>  </td><td class="markdownTableBodyNone">SM name (e.g., "KPM")  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">version()</span>  </td><td class="markdownTableBodyNone">SM version number  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">ran_function_id()</span>  </td><td class="markdownTableBodyNone">RAN function ID served by this SM  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">telemetry_ids()</span>  </td><td class="markdownTableBodyNone">Telemetry identifiers provided by the SM  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">control_ids()</span>  </td><td class="markdownTableBodyNone">Control identifiers accepted by the SM  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">ran_function_data()</span>  </td><td class="markdownTableBodyNone">Optional opaque bytes included in SetupResponse  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">init()</span>  </td><td class="markdownTableBodyNone">Initialize the SM (register callbacks)  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">destroy()</span>  </td><td class="markdownTableBodyNone">Destroy the SM and release resources  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">start()</span>  </td><td class="markdownTableBodyNone">Start SM processing (on first subscription)  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">stop()</span>  </td><td class="markdownTableBodyNone">Stop SM processing (on last unsubscription)  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">is_running()</span>  </td><td class="markdownTableBodyNone">Check if SM is currently running  </td></tr>
+</table>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md71"></a>
+Directory Structure</h1>
+<div class="fragment"><div class="line">libe3/</div>
+<div class="line">├── CMakeLists.txt           # Main build configuration</div>
+<div class="line">├── README.md                # This file</div>
+<div class="line">├── LICENSE                  # Apache 2.0 license</div>
+<div class="line">├── VERSION                  # Version file (used by CMake)</div>
+<div class="line">├── build_libe3              # Build script</div>
+<div class="line">├── cmake/</div>
+<div class="line">│   ├── libe3Version.cmake   # Version configuration</div>
+<div class="line">│   ├── libe3_version.hpp.in # Version header template</div>
+<div class="line">│   └── ...                  # Other CMake modules</div>
+<div class="line">├── include/</div>
+<div class="line">│   └── libe3/</div>
+<div class="line">│       ├── libe3.hpp        # Umbrella header</div>
+<div class="line">│       ├── types.hpp        # Type definitions</div>
+<div class="line">│       ├── e3_agent.hpp     # Main facade</div>
+<div class="line">│       ├── e3_connector.hpp # Transport interface</div>
+<div class="line">│       ├── e3_encoder.hpp   # Encoder interface</div>
+<div class="line">│       └── ...</div>
+<div class="line">├── messages/</div>
+<div class="line">│   ├── asn1/                # ASN.1 definitions</div>
+<div class="line">│   └── CMakeLists.txt       # ASN.1 build config</div>
+<div class="line">├── src/</div>
+<div class="line">│   ├── core/                # Core implementations</div>
+<div class="line">│   ├── connector/           # Transport implementations</div>
+<div class="line">│   └── encoder/             # Encoder implementations</div>
+<div class="line">├── tests/                   # Unit tests</div>
+<div class="line">└── examples/                # Example applications</div>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md72"></a>
+Versioning</h1>
+<p>The library version is managed via the <span class="tt">VERSION</span> file in the project root. During compilation, CMake reads this file and generates <span class="tt">libe3/version.hpp</span> with the version macros:</p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="libe3_2libe3_8hpp.html">libe3/libe3.hpp</a>&gt;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Access version information</span></div>
+<div class="line"><span class="keyword">const</span> <span class="keywordtype">char</span>* ver = <a class="code hl_function" href="namespacelibe3.html#a85c33a76111e517c006df1b1fc0411bc">libe3::version</a>();  <span class="comment">// e.g., &quot;0.0.1&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> major, minor, patch;</div>
+<div class="line"><a class="code hl_function" href="namespacelibe3.html#a85c33a76111e517c006df1b1fc0411bc">libe3::version</a>(major, minor, patch);  <span class="comment">// e.g., 0, 0, 1</span></div>
+<div class="ttc" id="anamespacelibe3_html_a85c33a76111e517c006df1b1fc0411bc"><div class="ttname"><a href="namespacelibe3.html#a85c33a76111e517c006df1b1fc0411bc">libe3::version</a></div><div class="ttdeci">const char * version() noexcept</div><div class="ttdoc">Get libe3 version string.</div><div class="ttdef"><b>Definition</b> <a href="libe3_8hpp_source.html#l00034">libe3.hpp:34</a></div></div>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md73"></a>
+Contributing</h1>
+<p>Contributions are welcome! Please see <a class="el" href="md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html">CONTRIBUTING.md</a> for guidelines.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md74"></a>
+Documentation</h1>
+<p>The full API reference is automatically generated with <a href="https://www.doxygen.nl/">Doxygen</a> and published to GitHub Pages on every release. See <a class="el" href="latrec_8md.html">docs/latrec.md</a> for the latency-recording (<span class="tt">latrec</span>) guide: the mechanism, the clock model, ring naming/sizing, the stage catalog, and the capture-to-CSV workflow. The two loops the stage catalog measures are described in <a class="el" href="path-a-e3-loop_8md.html">docs/path-a-e3-loop.md</a> (E3 only) and <a class="el" href="path-b-e2-e3-loop_8md.html">docs/path-b-e2-e3-loop.md</a> (the full E2-E3 loop). See <a class="el" href="md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html">docs/interop.md</a> for what pairs with OAI, Aerial and OCUDU, the JSON <a class="el" href="namespacelibe3.html">libe3</a> speaks, the field contracts where peers differ (the <span class="tt">periodicity</span> unit, for one), and the change ledger.</p>
+<p>🔗 <b><a href="https://wineslab.github.io/libe3/">https://wineslab.github.io/libe3/</a></b></p>
+<p>To build the documentation locally:</p>
+<div class="fragment"><div class="line"># Install Doxygen and Graphviz (Ubuntu)</div>
+<div class="line">sudo apt-get install doxygen graphviz</div>
+<div class="line"> </div>
+<div class="line"># Build docs (output will be in build/docs/html/)</div>
+<div class="line">./build_libe3 --docs</div>
+<div class="line"> </div>
+<div class="line"># Open in browser</div>
+<div class="line">xdg-open build/docs/html/index.html</div>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md75"></a>
+Python Bindings (SWIG)</h1>
+<p><a class="el" href="namespacelibe3.html">libe3</a> ships an optional SWIG-generated Python binding so the same C++ library can back Python dApp clients. It is <b>off by default</b> — enable it with <span class="tt">-DLIBE3_ENABLE_SWIG=ON</span>:</p>
+<div class="fragment"><div class="line"># Install SWIG and Python development headers (Ubuntu)</div>
+<div class="line">sudo apt-get install -y swig python3-dev</div>
+<div class="line"> </div>
+<div class="line"># Install libe3 first (see &quot;Installing libe3&quot;), then the binding, in a virtual environment</div>
+<div class="line">pip install libe3py            # or, from this checkout: pip install .</div>
+<div class="line">python3 -c &quot;import libe3py; print(&#39;libe3py OK&#39;, libe3py.__version__)&quot;</div>
+<div class="line"> </div>
+<div class="line"># Or, build only (no install) and run the smoke test (CTest label &quot;swig&quot;)</div>
+<div class="line">cmake -S . -B build -DLIBE3_ENABLE_SWIG=ON</div>
+<div class="line">cmake --build build --target libe3py -j $(nproc)</div>
+<div class="line">PYTHONPATH=build/swig python3 tests/test_swig_smoke.py</div>
+</div><!-- fragment --><p>The module exposes two layers: a backwards-compatible minimal <span class="tt">E3Agent</span> view, and the full <b><span class="tt">DAppSession</span></b> dApp seam — a complete lifecycle (<span class="tt">start</span> / <span class="tt">wait_for_setup</span> / <span class="tt">subscribe</span> / <span class="tt">send_control</span> / <span class="tt">release</span> / <span class="tt">stop</span>) plus a <b>batched, lock-free inbound queue</b> drained via <span class="tt">poll_events(max_batch,
+timeout_ms)</span>, designed for the sub-millisecond / high-throughput E3AP path (GIL released during blocking calls). SM payloads cross as native <span class="tt">bytes</span>; per-SM encoding stays in Python so existing Python SM implementations work unchanged. The binding is built by pip against the installed <a class="el" href="namespacelibe3.html">libe3</a> (<span class="tt">python/CMakeLists.txt</span>), links it statically, and refuses an installed <a class="el" href="namespacelibe3.html">libe3</a> of another version.</p>
+<p>See <b><a class="el" href="dir_921b7fe62329ee5986df8fde73ed97c3.html"><span class="tt">swig/README.md</span></a></b> for the architecture, rationale, and a full Python usage example, and <a href="swig/e3_dapp_session.hpp"><span class="tt">swig/e3_dapp_session.hpp</span></a> for the documented API.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md76"></a>
+License</h1>
+<p>This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details, and [NOTICE](NOTICE) for the attribution that redistributors are required to carry.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md77"></a>
+Citing libe3</h1>
+<p>If you use <a class="el" href="namespacelibe3.html">libe3</a>, or derive a protocol definition or an implementation from it, please cite it. See <a href="CITATION.cff">CITATION.cff</a>, or use the "Cite this repository" button on GitHub. The paper reference will be added here once it is published. This is a request, not a condition of the license.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md78"></a>
+Acknowledgments</h1>
+<ul>
+<li>Based on the original E3AP implementation in OpenAirInterface by Andrea Lacava - Northeastern University</li>
+<li>The E3AP is a protocol inspired by O-RAN E2AP design patterns with due extensions for dApp-xApp management and synch</li>
+<li>The code rationale and architecture is partially insipired by the e2sim and ns-O-RAN projects</li>
+</ul>
+<p>This work has been partially supported by OUSD(R&amp;E) through Army Research Laboratory Cooperative Agreement Number W911NF-24-2-0065. </p>
+</div></div><!-- PageDoc -->
 <a href="doxygen_crawl.html"></a>
 </div><!-- contents -->
 </div><!-- doc-content -->

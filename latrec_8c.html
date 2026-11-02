@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.7</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -132,7 +132,7 @@ Variables</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Per-thread ring storage and sequence allocator for latrec. </p>
-<p><a class="el" href="latrec_8h.html" title="Lock-free per-thread latency stamp recorder (header-only, C99).">latrec.h</a> is usable on its own with an explicitly owned <a class="el" href="structlatrec__t.html">latrec_t</a>. This file backs the convenience API on top of it: one ring per calling thread, opened on first stamp and named &lt;prefix&gt;.&lt;tid&gt;, plus the process-wide sequence counter. Keeping the storage in one translation unit gives a single ring per thread rather than one per includer.</p>
+<p><a class="el" href="latrec_8h.html" title="Lock-free per-thread latency stamp recorder (header-only, C99).">latrec.h</a> is usable on its own with an explicitly owned <a class="el" href="structlatrec__t.html">latrec_t</a>. This file backs the convenience API on top of it: one ring per calling thread, opened on first stamp and named <span class="tt">&lt;prefix&gt;.&lt;tid&gt;</span>, plus the process-wide sequence counter. Keeping the storage in one translation unit gives a single ring per thread rather than one per includer.</p>
 <p>SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University SPDX-License-Identifier: Apache-2.0 </p>
 
 <p class="definition">Definition in file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>

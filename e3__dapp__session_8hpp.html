@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.7</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -128,18 +128,18 @@ Enumerations</h2></td></tr>
 , <a class="el" href="namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917a63006cca26c089f40fab3d45e3ff9a79">libe3::py::E3_EVENT_DISCONNECT</a> = 6
 <br />
  }</td></tr>
-<tr class="memdesc:a53a0cad66e191bf7ea9824cfc9029917"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discriminator for E3Event.  <a href="namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917">More...</a><br /></td></tr>
+<tr class="memdesc:a53a0cad66e191bf7ea9824cfc9029917"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discriminator for <a class="el" href="structlibe3_1_1py_1_1E3Event.html">libe3::py::E3Event</a>.  <a href="namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917">More...</a><br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Python-facing dApp session over <a class="el" href="namespacelibe3.html">libe3</a> — batched, low-latency seam. </p>
 <h1 class="doxsection"><a class="anchor" id="why"></a>
 Why this class exists</h1>
 <p><a class="el" href="namespacelibe3.html">libe3</a>'s core <a class="el" href="classlibe3_1_1E3Agent.html">libe3::E3Agent</a> drives the dApp role with <span class="tt">std::function</span> handlers (<a class="el" href="classlibe3_1_1E3Agent.html#adeeeba9a7598b2fd67f207bd0b1b1209">libe3::E3Agent::set_indication_handler</a> et al.). SWIG cannot bridge those callbacks to Python across <a class="el" href="namespacelibe3.html">libe3</a>'s inbound worker threads without either running Python under the GIL <em>on the hot thread</em> (directors — deadlock-prone, serialises dispatch) or paying a GIL round-trip per message. Both are unacceptable at the E3AP target rate (real-time, sub-millisecond cadence, very high message throughput).</p>
-<p><a class="el" href="classlibe3_1_1py_1_1DAppSession.html">libe3::py::DAppSession</a> is the answer: it owns an <a class="el" href="classlibe3_1_1E3Agent.html">libe3::E3Agent</a> in DAPP role, registers the C++ handlers itself, and funnels every inbound message into a <b>bounded lock-free ring</b> (<a class="el" href="classlibe3_1_1LockFreeQueue.html">libe3::LockFreeQueue</a>). Python drains that ring in <b>batches</b> via poll_events, so one GIL acquire and one Python↔C++ boundary crossing are amortised across many messages. The SWIG wrapper releases the GIL around the blocking calls (see swig/libe3.i, <span class="tt">module(threads="1")</span>), so <a class="el" href="namespacelibe3.html">libe3</a>'s C++ threads never stall on Python.</p>
+<p><a class="el" href="classlibe3_1_1py_1_1DAppSession.html">libe3::py::DAppSession</a> is the answer: it owns an <a class="el" href="classlibe3_1_1E3Agent.html">libe3::E3Agent</a> in DAPP role, registers the C++ handlers itself, and funnels every inbound message into a <b>bounded lock-free ring</b> (<a class="el" href="classlibe3_1_1LockFreeQueue.html">libe3::LockFreeQueue</a>). Python drains that ring in <b>batches</b> via <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#a3401f5d4e563d6518ec7d97b92f864a7">poll_events</a>, so one GIL acquire and one Python↔C++ boundary crossing are amortised across many messages. The SWIG wrapper releases the GIL around the blocking calls (see swig/libe3.i, <span class="tt">module(threads="1")</span>), so <a class="el" href="namespacelibe3.html">libe3</a>'s C++ threads never stall on Python.</p>
 <p>The E3SM (service-model) payloads stay opaque here (<span class="tt">std::vector&lt;uint8_t&gt;</span>); dApp-library encodes/decodes them in Python. This class is E3AP only, mirroring the OAI split where <a class="el" href="namespacelibe3.html">libe3</a> owns E3AP and the SM owns encode/decode.</p>
 <h1 class="doxsection"><a class="anchor" id="lifecycle"></a>
 Lifecycle</h1>
-<p>ctor (registers handlers) → start → wait_for_setup → (read setup via dapp_id / setup accessors) → subscribe → loop: poll_events + send_control / send_report → release → stop.</p>
+<p>ctor (registers handlers) → <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#ab5954d7cd100c8f3f26c89c59ec06305">start</a> → <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#abcf67a5c3a939b525a723db9a756370b">wait_for_setup</a> → (read setup via <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#ae4a8a04bf3e2ca5fa5fb7e46d45b5189">dapp_id</a> / setup accessors) → <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#ae61410ef7c55fcd48334daa1789b7e84">subscribe</a> → loop: <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#a3401f5d4e563d6518ec7d97b92f864a7">poll_events</a> + <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#afeb5b12bd84e5790e0bca72e918272e8">send_control</a> / <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#acd691f84c7571d77677826d2408e50a5">send_report</a> → <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#a89c3ee34f7121aa44b54cb8a6b8fef8d">release</a> → <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#a6ec5957dc209b80e7157c17e61bfd144">stop</a>.</p>
 <h1 class="doxsection"><a class="anchor" id="rejected"></a>
 Rejected alternatives (auditable)</h1>
 <ul>

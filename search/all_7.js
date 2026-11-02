@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['gate_0',['gate',['../latrec_guide.html#autotoc_md21',1,'CI overhead gate'],['../latrec_guide.html#autotoc_md9',1,'Why a ring, and why one gate']]],
+  ['gate_0',['gate',['../latrec_guide.html#autotoc_md28',1,'CI overhead gate'],['../latrec_guide.html#autotoc_md16',1,'Why a ring, and why one gate']]],
   ['generate_5fmessage_5fid_1',['generate_message_id',['../classlibe3_1_1E3Interface.html#a71828c38211f84941a98e4a9da4028b3',1,'libe3::E3Interface']]],
   ['get_5factive_5fran_5ffunctions_2',['get_active_ran_functions',['../classlibe3_1_1E3Agent.html#ac7ffb4b2aee3dc30f4d6c0b9a5585d0f',1,'libe3::E3Agent::get_active_ran_functions()'],['../classlibe3_1_1SubscriptionManager.html#a015c211dcd70ae1b15945d679957c4d6',1,'libe3::SubscriptionManager::get_active_ran_functions()']]],
   ['get_5favailable_5fran_5ffunctions_3',['get_available_ran_functions',['../classlibe3_1_1E3Agent.html#a41bdbca494f861c38458819fd7288209',1,'libe3::E3Agent::get_available_ran_functions()'],['../classlibe3_1_1E3Interface.html#a7035e3ccab342d2b32817d5456eac5bf',1,'libe3::E3Interface::get_available_ran_functions()'],['../classlibe3_1_1SmRegistry.html#a8b91f56fb5ca9952ef0c43ed205d0c9a',1,'libe3::SmRegistry::get_available_ran_functions() const']]],
@@ -17,6 +17,7 @@ var searchData=
   ['get_5fsubscription_5fperiodicity_14',['get_subscription_periodicity',['../classlibe3_1_1E3Agent.html#a5b9b0158cd26e9e3f85b4410b04ed342',1,'libe3::E3Agent']]],
   ['get_5fsubscription_5ftelemetry_5fids_15',['get_subscription_telemetry_ids',['../classlibe3_1_1E3Agent.html#a1b61ca8643b457c111afcec81cfdc75a',1,'libe3::E3Agent']]],
   ['gil_20release_20not_20callbacks_16',['Why batched drain + GIL release (not callbacks)',['../dir_921b7fe62329ee5986df8fde73ed97c3.html#autotoc_md3',1,'']]],
-  ['go_17',['Where the rings go',['../latrec_guide.html#autotoc_md12',1,'']]],
-  ['granularity_20and_20adding_20an_20identifier_18',['Granularity, and adding an identifier',['../latrec_guide.html#autotoc_md19',1,'']]]
+  ['go_17',['Where the rings go',['../latrec_guide.html#autotoc_md19',1,'']]],
+  ['goes_20away_18',['When the RAN goes away',['../md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md12',1,'']]],
+  ['granularity_20and_20adding_20an_20identifier_19',['Granularity, and adding an identifier',['../latrec_guide.html#autotoc_md26',1,'']]]
 ];

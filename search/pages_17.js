@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['→_20csv_20workflow_0',['Capture → CSV workflow',['../latrec_guide.html#autotoc_md20',1,'']]]
+  ['yet_20instrumented_0',['yet instrumented',['../path_a_e3_loop.html#autotoc_md38',1,'Not yet instrumented'],['../path_b_e2_e3_loop.html#autotoc_md48',1,'Not yet instrumented']]]
 ];

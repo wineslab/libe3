@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.7</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -142,6 +142,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2cb820c7e493703035f85c608676eb28" id="r_a2cb820c7e493703035f85c608676eb28"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2cb820c7e493703035f85c608676eb28">subscribed_ran_functions</a> () const</td></tr>
 <tr class="memitem:adbe12dacaf72ee82b6cc3d168b7b0aef" id="r_adbe12dacaf72ee82b6cc3d168b7b0aef"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structlibe3_1_1RanFunctionDef.html">RanFunctionDef</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adbe12dacaf72ee82b6cc3d168b7b0aef">remote_ran_functions</a> () const</td></tr>
 <tr class="memitem:a6fcfc65385c63d4f9d6a2ae6b784732b" id="r_a6fcfc65385c63d4f9d6a2ae6b784732b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6fcfc65385c63d4f9d6a2ae6b784732b">queue_subscription_request</a> (uint32_t ran_function_id, std::vector&lt; uint32_t &gt; telemetry_ids, std::vector&lt; uint32_t &gt; control_ids, std::optional&lt; uint32_t &gt; sub_time=std::nullopt, std::optional&lt; uint32_t &gt; periodicity=std::nullopt, uint32_t *out_request_id=nullptr)</td></tr>
+<tr class="memdesc:a6fcfc65385c63d4f9d6a2ae6b784732b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queue a <a class="el" href="structlibe3_1_1SubscriptionRequest.html" title="E3AP Subscription Request structure.">SubscriptionRequest</a> for the outbound loop to send.  <br /></td></tr>
 <tr class="memitem:a3fdfe171dd195854bfeaf8ebb8f17e9a" id="r_a3fdfe171dd195854bfeaf8ebb8f17e9a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3fdfe171dd195854bfeaf8ebb8f17e9a">queue_subscription_delete</a> (uint32_t ran_function_id)</td></tr>
 <tr class="memitem:a1db861313d63dd2a8efa457e9bd27637" id="r_a1db861313d63dd2a8efa457e9bd27637"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1db861313d63dd2a8efa457e9bd27637">queue_dapp_control_action</a> (uint32_t ran_function_id, uint32_t control_id, std::vector&lt; uint8_t &gt; action_data, uint32_t sequence_id=0, uint32_t *out_message_id=nullptr)</td></tr>
 <tr class="memitem:a045f9aefa46d5d0d5ad0a8a1c645d458" id="r_a045f9aefa46d5d0d5ad0a8a1c645d458"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a045f9aefa46d5d0d5ad0a8a1c645d458">queue_dapp_report</a> (uint32_t ran_function_id, std::vector&lt; uint8_t &gt; report_data, uint32_t sequence_id, uint32_t *out_message_id=nullptr)</td></tr>
@@ -643,6 +644,20 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Queue a <a class="el" href="structlibe3_1_1SubscriptionRequest.html" title="E3AP Subscription Request structure.">SubscriptionRequest</a> for the outbound loop to send. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ran_function_id</td><td>RAN function to subscribe to </td></tr>
+    <tr><td class="paramname">telemetry_ids</td><td>telemetry identifiers requested </td></tr>
+    <tr><td class="paramname">control_ids</td><td>control identifiers requested </td></tr>
+    <tr><td class="paramname">sub_time</td><td>how long to keep the subscription, in seconds; unset leaves it to the RAN </td></tr>
+    <tr><td class="paramname">periodicity</td><td>microseconds between indications, 0 = every event </td></tr>
+    <tr><td class="paramname">out_request_id</td><td>when non-null, receives the assigned E3-MessageID on success, so the caller can correlate the eventual <a class="el" href="structlibe3_1_1SubscriptionResponse.html" title="E3AP Subscription Response structure.">SubscriptionResponse</a> (which echoes request_id) back to this request. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>SUCCESS once queued; STATE_ERROR on a RAN-role agent; NOT_INITIALIZED before setup has assigned a dApp id; otherwise the queueing error. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01435">1435</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 

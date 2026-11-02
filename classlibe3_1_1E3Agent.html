@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.7</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.8</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -1023,6 +1023,9 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 <p>Send a dApp control action to the RAN. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">ran_function_id</td><td>RAN function the control is for </td></tr>
+    <tr><td class="paramname">control_id</td><td>control identifier granted by the RAN </td></tr>
+    <tr><td class="paramname">action_data</td><td>opaque E3SM control payload </td></tr>
     <tr><td class="paramname">sequence_id</td><td>correlation id of the xApp procedure this control re-issues; leave 0 for a control the dApp decided on its own. </td></tr>
     <tr><td class="paramname">out_message_id</td><td>when non-null, receives the assigned E3-MessageID on success, so the caller can correlate a later ack/response back to this send. </td></tr>
   </table>
@@ -1210,6 +1213,8 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 <p>Send a dApp report to the RAN. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">ran_function_id</td><td>RAN function the report is for </td></tr>
+    <tr><td class="paramname">report_data</td><td>opaque E3SM report payload </td></tr>
     <tr><td class="paramname">sequence_id</td><td>correlation id the dApp assigns to this detection. It is the head of the loop's chain and is mandatory on the wire. </td></tr>
     <tr><td class="paramname">out_message_id</td><td>when non-null, receives the assigned E3-MessageID on success, so the caller can correlate a later ack/response back to this send. </td></tr>
   </table>
@@ -1602,10 +1607,16 @@ ErrorCode::STATE_ERROR if agent is already running </dd></dl>
 <p>Subscribe to a RAN function. Must be called after a positive setup. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">ran_function_id</td><td>RAN function to subscribe to </td></tr>
+    <tr><td class="paramname">telemetry_ids</td><td>telemetry identifiers requested </td></tr>
+    <tr><td class="paramname">control_ids</td><td>control identifiers requested </td></tr>
+    <tr><td class="paramname">sub_time</td><td>how long to keep the subscription, in seconds; unset leaves it to the RAN </td></tr>
+    <tr><td class="paramname">periodicity</td><td>microseconds between indications, 0 = every event. Over ASN.1 the range is 0 to 60000000. An OCUDU RAN reads the same number as milliseconds, so pass it what it expects. </td></tr>
     <tr><td class="paramname">out_request_id</td><td>when non-null, receives the assigned E3-MessageID on success, so the caller can correlate the <a class="el" href="structlibe3_1_1SubscriptionResponse.html" title="E3AP Subscription Response structure.">SubscriptionResponse</a> (which echoes request_id) back to this subscribe call. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>SUCCESS once the request is queued; STATE_ERROR on a RAN-role agent; NOT_INITIALIZED if the agent is not running or setup has not completed; otherwise the error from queueing the message. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="e3__agent_8cpp_source.html#l00422">422</a> of file <a class="el" href="e3__agent_8cpp_source.html">e3_agent.cpp</a>.</p>
 
