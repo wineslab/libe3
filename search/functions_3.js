@@ -55,5 +55,6 @@ var searchData=
   ['entries_5flog2_52',['entries_log2',['../latrec_8c.html#a5d3a09184c691a70685e37ec7fecd034',1,'latrec.c']]],
   ['entries_5flog2_5ffrom_53',['entries_log2_from',['../latrec_8c.html#a641a0b6f4dd1a39e302e9e6051f57f91',1,'latrec.c']]],
   ['error_5fcode_5fto_5fstring_54',['error_code_to_string',['../namespacelibe3.html#aee2a6ca3a33bc7c111aa5256811a61eb',1,'libe3']]],
-  ['errorcodetostring_55',['ErrorCodeToString',['../namespacelibe3.html#a1e67547ed0251e57fee673a53a8e935f',1,'libe3']]]
+  ['errorcodetostring_55',['ErrorCodeToString',['../namespacelibe3.html#a1e67547ed0251e57fee673a53a8e935f',1,'libe3']]],
+  ['expire_5fsubscriptions_56',['expire_subscriptions',['../classlibe3_1_1DAppSubscriptionState.html#abfad29638e979a8c2c074bcd6fe61a9a',1,'libe3::DAppSubscriptionState::expire_subscriptions()'],['../classlibe3_1_1SubscriptionManager.html#a27cb1d5bfa4d2b66c5b39ca3d1f99a70',1,'libe3::SubscriptionManager::expire_subscriptions()']]]
 ];

@@ -12,7 +12,7 @@ var searchData=
   ['actiontype_9',['ActionType',['../namespacelibe3.html#ac1c5533fc81586565ca7822bf00eee90',1,'libe3']]],
   ['active_5fsubscription_5fids_10',['active_subscription_ids',['../classlibe3_1_1E3Agent.html#a51737b257127e158fd94313876eefa07',1,'libe3::E3Agent::active_subscription_ids()'],['../classlibe3_1_1E3Interface.html#ad476cf72e7d567bccc5bd842bece7d34',1,'libe3::E3Interface::active_subscription_ids()'],['../classlibe3_1_1E3Agent.html#a51737b257127e158fd94313876eefa07',1,'libe3::E3Agent::active_subscription_ids()']]],
   ['active_5fsubscriptions_11',['active_subscriptions',['../classlibe3_1_1DAppSubscriptionState.html#ac517de82d3e1cd2cd6d8181e6906a020',1,'libe3::DAppSubscriptionState']]],
-  ['add_5fsubscription_12',['add_subscription',['../classlibe3_1_1SubscriptionManager.html#aebac59907540edc5eb351b4f31576e44',1,'libe3::SubscriptionManager']]],
+  ['add_5fsubscription_12',['add_subscription',['../classlibe3_1_1SubscriptionManager.html#a4ebba3f95a3969a342e5c4b2e0eef3b9',1,'libe3::SubscriptionManager']]],
   ['adding_20an_20identifier_13',['Granularity, and adding an identifier',['../latrec_guide.html#autotoc_md29',1,'']]],
   ['aerial_3a_20what_20to_20change_20to_20align_14',['Aerial: what to change to align',['../md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md15',1,'']]],
   ['against_20a_20hand_20rolled_20integration_15',['Comparing against a hand-rolled integration',['../path_a_e3_loop.html#autotoc_md40',1,'']]],

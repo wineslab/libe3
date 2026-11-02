@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.9</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.10</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -96,7 +96,9 @@ $(function(){initNavTree('subscription__manager_8hpp.html','',''); });
 <p>E3 Subscription Manager for tracking dApp registrations.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="types_8hpp_source.html">types.hpp</a>&quot;</code><br />
+<code>#include &lt;chrono&gt;</code><br />
 <code>#include &lt;mutex&gt;</code><br />
+<code>#include &lt;optional&gt;</code><br />
 <code>#include &lt;shared_mutex&gt;</code><br />
 <code>#include &lt;utility&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
@@ -110,6 +112,8 @@ $(function(){initNavTree('subscription__manager_8hpp.html','',''); });
 Classes</h2></td></tr>
 <tr class="memitem:libe3_3A_3ASubscriptionDetails" id="r_libe3_3A_3ASubscriptionDetails"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1SubscriptionDetails.html">libe3::SubscriptionDetails</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-subscription metadata stored by the <a class="el" href="classlibe3_1_1SubscriptionManager.html" title="E3 Subscription Manager.">SubscriptionManager</a>.  <a href="structlibe3_1_1SubscriptionDetails.html#details">More...</a><br /></td></tr>
+<tr class="memitem:libe3_3A_3AExpiredSubscription" id="r_libe3_3A_3AExpiredSubscription"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1ExpiredSubscription.html">libe3::ExpiredSubscription</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A subscription ended because its subscriptionTime ran out.  <a href="structlibe3_1_1ExpiredSubscription.html#details">More...</a><br /></td></tr>
 <tr class="memitem:libe3_3A_3ASubscriptionManager" id="r_libe3_3A_3ASubscriptionManager"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1SubscriptionManager.html">libe3::SubscriptionManager</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">E3 Subscription Manager.  <a href="classlibe3_1_1SubscriptionManager.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
@@ -119,6 +123,8 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
+<tr class="memitem:aec77b94e7a6a1ec3beffe3d93426b6c9" id="r_aec77b94e7a6a1ec3beffe3d93426b6c9"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#aec77b94e7a6a1ec3beffe3d93426b6c9">libe3::SubscriptionClock</a> = std::function&lt;std::chrono::steady_clock::time_point()&gt;</td></tr>
+<tr class="memdesc:aec77b94e7a6a1ec3beffe3d93426b6c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Source of "now" for subscription expiry. Empty means std::chrono::steady_clock.  <br /></td></tr>
 <tr class="memitem:a116378b6153f809ab5d63f89eeea366d" id="r_a116378b6153f809ab5d63f89eeea366d"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a116378b6153f809ab5d63f89eeea366d">libe3::SmLifecycleCallback</a> = std::function&lt;void(uint32_t ran_function_id, bool should_start)&gt;</td></tr>
 <tr class="memdesc:a116378b6153f809ab5d63f89eeea366d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback type for SM lifecycle events.  <br /></td></tr>
 </table>

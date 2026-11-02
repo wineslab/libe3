@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.9</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.10</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -428,7 +428,7 @@ $(function(){initNavTree('e3__agent_8cpp_source.html','',''); });
 <div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>    <span class="keywordflow">if</span> (!impl_-&gt;interface) {</div>
 <div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>        <span class="keywordflow">return</span> 0;</div>
 <div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>    }</div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>    <span class="keyword">const</span> <span class="keyword">auto</span>* details = impl_-&gt;interface-&gt;subscription_manager()</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>    <span class="keyword">const</span> <span class="keyword">auto</span> details = impl_-&gt;interface-&gt;subscription_manager()</div>
 <div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>                              .get_subscription_details(<a class="code hl_function" href="classlibe3_1_1E3Agent.html#a3ced5792a47e610a82fc6f94cc066178">dapp_id</a>, ran_function_id);</div>
 <div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>    <span class="keywordflow">return</span> details ? details-&gt;periodicity_us : 0;</div>
 <div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>}</div>
@@ -439,7 +439,7 @@ $(function(){initNavTree('e3__agent_8cpp_source.html','',''); });
 <div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>    <span class="keywordflow">if</span> (!impl_-&gt;interface) {</div>
 <div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>        <span class="keywordflow">return</span> {};</div>
 <div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>    }</div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    <span class="keyword">const</span> <span class="keyword">auto</span>* details = impl_-&gt;interface-&gt;subscription_manager()</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    <span class="keyword">const</span> <span class="keyword">auto</span> details = impl_-&gt;interface-&gt;subscription_manager()</div>
 <div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>                              .get_subscription_details(<a class="code hl_function" href="classlibe3_1_1E3Agent.html#a3ced5792a47e610a82fc6f94cc066178">dapp_id</a>, ran_function_id);</div>
 <div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>    <span class="keywordflow">return</span> details ? details-&gt;telemetry_ids : std::vector&lt;uint32_t&gt;{};</div>
 <div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>}</div>
@@ -450,7 +450,7 @@ $(function(){initNavTree('e3__agent_8cpp_source.html','',''); });
 <div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>    <span class="keywordflow">if</span> (!impl_-&gt;interface) {</div>
 <div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>        <span class="keywordflow">return</span> {};</div>
 <div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>    }</div>
-<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>    <span class="keyword">const</span> <span class="keyword">auto</span>* details = impl_-&gt;interface-&gt;subscription_manager()</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>    <span class="keyword">const</span> <span class="keyword">auto</span> details = impl_-&gt;interface-&gt;subscription_manager()</div>
 <div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>                              .get_subscription_details(<a class="code hl_function" href="classlibe3_1_1E3Agent.html#a3ced5792a47e610a82fc6f94cc066178">dapp_id</a>, ran_function_id);</div>
 <div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>    <span class="keywordflow">return</span> details ? details-&gt;control_ids : std::vector&lt;uint32_t&gt;{};</div>
 <div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>}</div>

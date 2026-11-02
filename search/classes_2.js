@@ -10,5 +10,6 @@ var searchData=
   ['e3encoder_7',['E3Encoder',['../classlibe3_1_1E3Encoder.html',1,'libe3']]],
   ['e3event_8',['E3Event',['../structlibe3_1_1py_1_1E3Event.html',1,'libe3::py']]],
   ['e3interface_9',['E3Interface',['../classlibe3_1_1E3Interface.html',1,'libe3']]],
-  ['encodedmessage_10',['EncodedMessage',['../structlibe3_1_1EncodedMessage.html',1,'libe3']]]
+  ['encodedmessage_10',['EncodedMessage',['../structlibe3_1_1EncodedMessage.html',1,'libe3']]],
+  ['expiredsubscription_11',['ExpiredSubscription',['../structlibe3_1_1ExpiredSubscription.html',1,'libe3']]]
 ];

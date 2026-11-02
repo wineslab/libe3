@@ -22,6 +22,7 @@ var hierarchy =
     [ "libe3::py::E3Event", "structlibe3_1_1py_1_1E3Event.html", null ],
     [ "libe3::E3Interface", "classlibe3_1_1E3Interface.html", null ],
     [ "libe3::EncodedMessage", "structlibe3_1_1EncodedMessage.html", null ],
+    [ "libe3::ExpiredSubscription", "structlibe3_1_1ExpiredSubscription.html", null ],
     [ "libe3::E3Agent::Impl", "structlibe3_1_1E3Agent_1_1Impl.html", null ],
     [ "libe3::py::DAppSession::Impl", "structlibe3_1_1py_1_1DAppSession_1_1Impl.html", null ],
     [ "libe3::IndicationMessage", "structlibe3_1_1IndicationMessage.html", null ],

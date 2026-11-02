@@ -5,5 +5,6 @@ var searchData=
   ['enabled_2',['enabled',['../structlatrec__t.html#a302114e3e6f14d338a2b82e023cfc2dc',1,'latrec_t']]],
   ['encoding_3',['encoding',['../structe3__config__t.html#a1f725c95b3b4ac1a9a415ec53eb0f08c',1,'e3_config_t::encoding'],['../structlibe3_1_1E3Config.html#a7198ffc275e41485cf084b9e20f44c4e',1,'libe3::E3Config::encoding']]],
   ['enqueue_5fseq_4',['enqueue_seq',['../structlibe3_1_1Pdu.html#a07ca310489ccdd45e96f9786252f6f5e',1,'libe3::Pdu']]],
-  ['entries_5',['entries',['../structlatrec__hdr.html#a700399fbd27da68a2718e94f1943ff98',1,'latrec_hdr']]]
+  ['entries_5',['entries',['../structlatrec__hdr.html#a700399fbd27da68a2718e94f1943ff98',1,'latrec_hdr']]],
+  ['expires_5fat_6',['expires_at',['../structlibe3_1_1SubscriptionDetails.html#af8aa4208fc5c7931db9bc80f62b5f7a3',1,'libe3::SubscriptionDetails']]]
 ];

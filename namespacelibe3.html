@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.9</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.10</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -123,6 +123,8 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">SM Registry for managing registered Service Models.  <a href="classlibe3_1_1SmRegistry.html#details">More...</a><br /></td></tr>
 <tr class="memitem:SubscriptionDetails" id="r_SubscriptionDetails"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1SubscriptionDetails.html">SubscriptionDetails</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-subscription metadata stored by the <a class="el" href="classlibe3_1_1SubscriptionManager.html" title="E3 Subscription Manager.">SubscriptionManager</a>.  <a href="structlibe3_1_1SubscriptionDetails.html#details">More...</a><br /></td></tr>
+<tr class="memitem:ExpiredSubscription" id="r_ExpiredSubscription"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1ExpiredSubscription.html">ExpiredSubscription</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A subscription ended because its subscriptionTime ran out.  <a href="structlibe3_1_1ExpiredSubscription.html#details">More...</a><br /></td></tr>
 <tr class="memitem:SubscriptionManager" id="r_SubscriptionManager"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1SubscriptionManager.html">SubscriptionManager</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">E3 Subscription Manager.  <a href="classlibe3_1_1SubscriptionManager.html#details">More...</a><br /></td></tr>
 <tr class="memitem:EncodedMessage" id="r_EncodedMessage"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1EncodedMessage.html">EncodedMessage</a></td></tr>
@@ -192,6 +194,8 @@ Typedefs</h2></td></tr>
 <tr class="memdesc:a2516d19ac2e187935aad4c027401e3e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Log callback function type.  <br /></td></tr>
 <tr class="memitem:a81afb109c84fa5b9837d9c509f744a9d" id="r_a81afb109c84fa5b9837d9c509f744a9d"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a81afb109c84fa5b9837d9c509f744a9d">SmFactory</a> = std::function&lt;std::unique_ptr&lt;<a class="el" href="classlibe3_1_1ServiceModel.html">ServiceModel</a>&gt;()&gt;</td></tr>
 <tr class="memdesc:a81afb109c84fa5b9837d9c509f744a9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory function type for creating SM instances.  <br /></td></tr>
+<tr class="memitem:aec77b94e7a6a1ec3beffe3d93426b6c9" id="r_aec77b94e7a6a1ec3beffe3d93426b6c9"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aec77b94e7a6a1ec3beffe3d93426b6c9">SubscriptionClock</a> = std::function&lt;std::chrono::steady_clock::time_point()&gt;</td></tr>
+<tr class="memdesc:aec77b94e7a6a1ec3beffe3d93426b6c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Source of "now" for subscription expiry. Empty means std::chrono::steady_clock.  <br /></td></tr>
 <tr class="memitem:a116378b6153f809ab5d63f89eeea366d" id="r_a116378b6153f809ab5d63f89eeea366d"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a116378b6153f809ab5d63f89eeea366d">SmLifecycleCallback</a> = std::function&lt;void(uint32_t ran_function_id, bool should_start)&gt;</td></tr>
 <tr class="memdesc:a116378b6153f809ab5d63f89eeea366d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback type for SM lifecycle events.  <br /></td></tr>
 <tr class="memitem:a11f15651dcc49a68494f8215477e18fc" id="r_a11f15651dcc49a68494f8215477e18fc"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a11f15651dcc49a68494f8215477e18fc">PduChoice</a></td></tr>
@@ -570,7 +574,25 @@ template&lt;typename T&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8hpp_source.html#l00045">45</a> of file <a class="el" href="subscription__manager_8hpp_source.html">subscription_manager.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8hpp_source.html#l00062">62</a> of file <a class="el" href="subscription__manager_8hpp_source.html">subscription_manager.hpp</a>.</p>
+
+</div>
+</div>
+<a id="aec77b94e7a6a1ec3beffe3d93426b6c9" name="aec77b94e7a6a1ec3beffe3d93426b6c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec77b94e7a6a1ec3beffe3d93426b6c9">&#9670;&#160;</a></span>SubscriptionClock</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="#aec77b94e7a6a1ec3beffe3d93426b6c9">libe3::SubscriptionClock</a> = std::function&lt;std::chrono::steady_clock::time_point()&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Source of "now" for subscription expiry. Empty means std::chrono::steady_clock. </p>
+
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8hpp_source.html#l00050">50</a> of file <a class="el" href="subscription__manager_8hpp_source.html">subscription_manager.hpp</a>.</p>
 
 </div>
 </div>

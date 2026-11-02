@@ -13,7 +13,7 @@ var searchData=
   ['get_5fsubscriber_5fcount_10',['get_subscriber_count',['../classlibe3_1_1SubscriptionManager.html#a563617597d3818bea37f3b5264865ef9',1,'libe3::SubscriptionManager']]],
   ['get_5fsubscribers_11',['get_subscribers',['../classlibe3_1_1ServiceModel.html#a29fc96ee477223cb4a6c76e1b03bebb4',1,'libe3::ServiceModel']]],
   ['get_5fsubscription_5fcontrol_5fids_12',['get_subscription_control_ids',['../classlibe3_1_1E3Agent.html#a981396ba0e4de0d5f264b806ad2b978f',1,'libe3::E3Agent']]],
-  ['get_5fsubscription_5fdetails_13',['get_subscription_details',['../classlibe3_1_1SubscriptionManager.html#a7933f25ebd8922b93dae78728f677334',1,'libe3::SubscriptionManager']]],
+  ['get_5fsubscription_5fdetails_13',['get_subscription_details',['../classlibe3_1_1SubscriptionManager.html#ad96e3ee79dd3e2f8530bf00fe8e97965',1,'libe3::SubscriptionManager']]],
   ['get_5fsubscription_5fperiodicity_14',['get_subscription_periodicity',['../classlibe3_1_1E3Agent.html#a5b9b0158cd26e9e3f85b4410b04ed342',1,'libe3::E3Agent']]],
   ['get_5fsubscription_5ftelemetry_5fids_15',['get_subscription_telemetry_ids',['../classlibe3_1_1E3Agent.html#a1b61ca8643b457c111afcec81cfdc75a',1,'libe3::E3Agent']]],
   ['gil_20release_20not_20callbacks_16',['Why batched drain + GIL release (not callbacks)',['../dir_921b7fe62329ee5986df8fde73ed97c3.html#autotoc_md3',1,'']]],

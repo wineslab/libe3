@@ -17,6 +17,7 @@ var annotated_dup =
       [ "ServiceModel", "classlibe3_1_1ServiceModel.html", "classlibe3_1_1ServiceModel" ],
       [ "SmRegistry", "classlibe3_1_1SmRegistry.html", "classlibe3_1_1SmRegistry" ],
       [ "SubscriptionDetails", "structlibe3_1_1SubscriptionDetails.html", "structlibe3_1_1SubscriptionDetails" ],
+      [ "ExpiredSubscription", "structlibe3_1_1ExpiredSubscription.html", "structlibe3_1_1ExpiredSubscription" ],
       [ "SubscriptionManager", "classlibe3_1_1SubscriptionManager.html", "classlibe3_1_1SubscriptionManager" ],
       [ "EncodedMessage", "structlibe3_1_1EncodedMessage.html", "structlibe3_1_1EncodedMessage" ],
       [ "RanFunctionDefinition", "structlibe3_1_1RanFunctionDefinition.html", "structlibe3_1_1RanFunctionDefinition" ],

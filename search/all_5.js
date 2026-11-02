@@ -159,5 +159,8 @@ var searchData=
   ['example_156',['Minimal Python example',['../dir_921b7fe62329ee5986df8fde73ed97c3.html#autotoc_md5',1,'']]],
   ['existing_20collaborators_157',['For maintainers and existing collaborators',['../md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md85',1,'']]],
   ['exists_158',['Why this class exists',['../e3__dapp__session_8hpp.html#why',1,'']]],
-  ['external_20contributors_159',['For external contributors',['../md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md86',1,'']]]
+  ['expire_5fsubscriptions_159',['expire_subscriptions',['../classlibe3_1_1DAppSubscriptionState.html#abfad29638e979a8c2c074bcd6fe61a9a',1,'libe3::DAppSubscriptionState::expire_subscriptions()'],['../classlibe3_1_1SubscriptionManager.html#a27cb1d5bfa4d2b66c5b39ca3d1f99a70',1,'libe3::SubscriptionManager::expire_subscriptions()']]],
+  ['expiredsubscription_160',['ExpiredSubscription',['../structlibe3_1_1ExpiredSubscription.html',1,'libe3']]],
+  ['expires_5fat_161',['expires_at',['../structlibe3_1_1SubscriptionDetails.html#af8aa4208fc5c7931db9bc80f62b5f7a3',1,'libe3::SubscriptionDetails']]],
+  ['external_20contributors_162',['For external contributors',['../md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md86',1,'']]]
 ];
