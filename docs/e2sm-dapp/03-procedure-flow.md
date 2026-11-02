@@ -7,8 +7,8 @@ message that carries it and on the code that handles it.
 This is section 3 of the specification. The index is [README.md](README.md). The
 field lists are in [02-ie-mapping.md](02-ie-mapping.md). The E2-E3 loop and its box
 numbers (`A1`..`A20`, `B1`..`B19`) are defined in
-[../path-a-e3-loop.md](../path-a-e3-loop.md) and
-[../path-b-e2-e3-loop.md](../path-b-e2-e3-loop.md).
+[../control-loops/path-a-e3-loop.md](../control-loops/path-a-e3-loop.md) and
+[../control-loops/path-b-e2-e3-loop.md](../control-loops/path-b-e2-e3-loop.md).
 
 ## 1. The cast
 
@@ -152,7 +152,7 @@ call.
 
 ## 5. Indication delivery (report up)
 
-This is the report-up leg of [Path B](../path-b-e2-e3-loop.md#report-up-leg-legreport_up),
+This is the report-up leg of [Path B](../control-loops/path-b-e2-e3-loop.md#report-up-leg-legreport_up),
 boxes `B1` to `B4`, entered from `A20`.
 
 | Box | What happens | E2AP / E2SM-DAPP | Code |
@@ -254,7 +254,7 @@ recorder's cannot.
 
 ## 7. The loop on the boxes
 
-The same boxes as [Path B](../path-b-e2-e3-loop.md#box-order), with each E2SM-DAPP
+The same boxes as [Path B](../control-loops/path-b-e2-e3-loop.md#box-order), with each E2SM-DAPP
 message on the box that produces or consumes it. Solid boxes are in the E2-E3 loop.
 The three E2SM-DAPP-only boxes on the right are discovery and teardown, outside the
 loop.

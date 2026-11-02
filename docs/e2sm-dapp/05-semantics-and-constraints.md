@@ -79,9 +79,9 @@ crosses the boundary and is an estimate). See
 `spectranet-xapps/decision_engine_xapp/data.py:204-250`.
 
 **The payload timestamps are deliberately not latency-recorder records.** The latency
-recorder (`docs/latrec.md`) stamps `CLOCK_MONOTONIC` and its rule is that a payload
+recorder (`docs/utilities/latrec.md`) stamps `CLOCK_MONOTONIC` and its rule is that a payload
 timestamp and a latrec `t_ns` must not be subtracted
-([latrec.md](../latrec.md), the section on clocks; lines 103-112). The Spectrum
+([latrec.md](../utilities/latrec.md), the section on clocks; lines 103-112). The Spectrum
 grammar says the same in its comment on the apply outcome. The latency recorder
 measures the same interval independently, so the two figures cross-check each other.
 

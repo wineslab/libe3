@@ -24,7 +24,7 @@ Capturing itself needs no wrapper script: build with -DLIBE3_ENABLE_LATREC=ON
 and the rings are written for every run of that build -- there is no second,
 per-run gate. Where they land is chosen with latrec_set_output_dir() /
 latrec_open_in() / -DLATREC_DEFAULT_DIR= at configure time (see
-docs/latrec.md). Pass --watch to have this tool wait for the rings to go
+docs/utilities/latrec.md). Pass --watch to have this tool wait for the rings to go
 quiet first, e.g. as the last step of a capture script driving a
 backgrounded traced process.
 """

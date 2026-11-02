@@ -1,11 +1,9 @@
-\page path_a_e3_loop The E3-only end-to-end loop (Path A)
-
-# Path A — the E3-only end-to-end loop
+# Path A: the E3-only end-to-end loop
 
 The dApp control loop as it runs over the E3 interface alone, with no RIC and no
 E2 involvement.
 
-Read [latrec.md](latrec.md) first for the recorder, the clock model, and the
+Read [latrec.md](../utilities/latrec.md) first for the recorder, the clock model, and the
 stage-catalog conventions.
 
 ## Box order
@@ -62,7 +60,7 @@ flowchart LR
     A19a -.->|ack tail| A11
 ```
 
-`A19a` and `A19b` fork from `A18`, they are not a sequence — see
+`A19a` and `A19b` fork from `A18`. They are not a sequence. See
 [Two distinct terminations](#two-distinct-terminations) below. The dotted
 edges are cross-boundary hops (the two E3 wire crossings, and the
 acknowledgment tail running back from RAN to the dApp), not pipeline boxes.
@@ -73,7 +71,7 @@ collapsed into one "encode" stage, on either leg, in either direction. Keeping
 them apart is what makes the library's own cost separable from the integration's.
 
 **A1 is not IQ-specific.** "E3 data recording" is whatever raw input a Service
-Model captures — IQ samples for a spectrum-sensing SM, but equally cell load,
+Model captures. It can be IQ samples for a spectrum-sensing SM, cell load,
 mobility statistics, or anything else an SM chooses to report.
 
 The report branch terminates at the E2-E3 bridge, which is where
@@ -82,7 +80,7 @@ The report branch terminates at the E2-E3 bridge, which is where
 ## Forward leg: RAN to dApp (`leg=ind_up`)
 
 Segments name identifiers from the stage catalog in
-[`include/libe3/latrec.h`](../include/libe3/latrec.h). The catalog names
+[`include/libe3/latrec.h`](../../include/libe3/latrec.h). The catalog names
 *operations*, so the same identifier appears wherever that operation is
 performed; which component performed it is read off the ring that recorded it.
 
@@ -94,10 +92,10 @@ performed; which component performed it is read off the ring that recorded it.
 | A4 | **Encode E3AP** | **libe3** | `EMIT_ENTER` to `ENQUEUE`, then `DEQUEUE` to `ENCODE_E3AP_DONE` |
 | A5 | Queuing | **libe3** outbound queue | `ENQUEUE` to `DEQUEUE` |
 | A6 | Delivery | **libe3** connector send | `ENCODE_E3AP_DONE` to `SEND_DONE` |
-| — | **E3 wire** | — | `SEND_DONE` (RAN) to `RECV` (dApp) |
+| none | **E3 wire** | none | `SEND_DONE` (RAN) to `RECV` (dApp) |
 | A7 | Recv | **libe3** (dApp role) | `RECV` |
 | A8 | **Decode E3AP** | **libe3** | `RECV` to `DECODE_E3AP_DONE` |
-| — | libe3 dispatch | **libe3** (dApp role) | `DECODE_E3AP_DONE` to `DELIVER_BEGIN` |
+| none | libe3 dispatch | **libe3** (dApp role) | `DECODE_E3AP_DONE` to `DELIVER_BEGIN` |
 | A9 | **Decode E3SM** | dApp application | `DELIVER_BEGIN` to `DECODE_E3SM_DONE` |
 | A10 | Process | dApp application | `DECODE_E3SM_DONE` to `PROCESS_DONE` |
 
@@ -111,7 +109,7 @@ returned.
 that is a copy into ZeroMQ's own queue, not a socket write: the wire transfer
 happens later on ZeroMQ's internal I/O thread. The `SEND_DONE` to `RECV`
 segment therefore contains that hop for ZeroMQ but not for the POSIX
-connectors, and any comparison between the two must say so.
+connectors, and any comparison between the two shall say so.
 
 ## Return leg: dApp to RAN (`leg=ctrl_down` for control, `report_up` for reports)
 
@@ -122,15 +120,15 @@ connectors, and any comparison between the two must say so.
 | A13 | **Encode E3AP** | **libe3** (dApp role) | `EMIT_ENTER` to `ENQUEUE`, then `DEQUEUE` to `ENCODE_E3AP_DONE` |
 | A14 | Queuing | **libe3** | `ENQUEUE` to `DEQUEUE` |
 | A15 | Delivery | **libe3** | `ENCODE_E3AP_DONE` to `SEND_DONE` |
-| — | **E3 wire** | — | `SEND_DONE` (dApp) to `RECV` (RAN) |
+| none | **E3 wire** | none | `SEND_DONE` (dApp) to `RECV` (RAN) |
 | A16 | Recv | **libe3** (RAN role) | `RECV` |
 | A17 | **Decode E3AP** | **libe3** | `RECV` to `DECODE_E3AP_DONE` |
-| — | libe3 dispatch | **libe3** (RAN role) | `DECODE_E3AP_DONE` to `DECODE_E3SM_BEGIN` |
+| none | libe3 dispatch | **libe3** (RAN role) | `DECODE_E3AP_DONE` to `DECODE_E3SM_BEGIN` |
 | A18 | **Decode E3SM** | RAN Service Model | `DECODE_E3SM_BEGIN` to `DECODE_E3SM_DONE` |
 | A19a | Apply control | the RAN stack | `DECODE_E3SM_DONE` to `APPLY_CONTROL_DONE`, then `LIVE_ON_AIR` |
 | A19b | Queue report | **libe3** report worker | `REPORT_QUEUED` to `REPORT_DONE` |
 | A20 | E2-E3 bridge | the RAN's dApp function | `BRIDGE_IN` to `BRIDGE_OUT`. Hands over to Path B. |
-| — | Acknowledgment tail | RAN and dApp | `ACK_SENT` to `ACK_RECV` |
+| none | Acknowledgment tail | RAN and dApp | `ACK_SENT` to `ACK_RECV` |
 
 A12 and A3 share one identifier pair, and A18 and A9 share another: encoding a
 Service Model payload is the same operation whichever direction it travels in,
@@ -140,7 +138,7 @@ a report.
 At A11 a **report** is also assigned its `E3-SequenceID`, which is mandatory on
 `E3-DAppReport`. On a deployment with no xApp it is simply carried and ignored;
 where an xApp exists it becomes the identifier for the whole procedure that
-follows, so a Path A report is where a Path B loop's chain begins — see
+follows, so a Path A report is where a Path B loop's chain begins. See
 [path-b-e2-e3-loop.md](path-b-e2-e3-loop.md). A **control** the dApp decided on
 its own carries no sequenceId; one re-issued on an xApp's behalf carries that
 procedure's.
@@ -151,8 +149,8 @@ procedure's.
 `A19a` (apply control) and `A19b` (queue report) are alternative endings, not a
 sequence. A control action terminates on the air at `LIVE_ON_AIR`; a dApp
 report terminates by being queued for the report worker and, if the deployment
-has an xApp, handed to the E2-E3 bridge at `A20`. The two must be reported as
-separate legs and never summed.
+has an xApp, handed to the E2-E3 bridge at `A20`. Report the two as
+separate legs. Never add them together.
 
 `APPLY_CONTROL_DONE` and `LIVE_ON_AIR` are also distinct: the first is the
 control handler installing the change, the second is the first scheduler tick

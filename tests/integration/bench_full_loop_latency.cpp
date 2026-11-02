@@ -19,7 +19,7 @@
  * a fresh baseline.
  *
  * Phases captured (all read from latrec's CLOCK_MONOTONIC records), aligned
- * with docs/path-a-e3-loop.md's box numbering (A1..A18). "SM" is the shipped
+ * with docs/control-loops/path-a-e3-loop.md's box numbering (A1..A18). "SM" is the shipped
  * reference Service Model's own worker ring (sm_simple.<tid>); "dApp" is this
  * benchmark's handler, which runs on libe3's inbound thread
  * (libe3.inbound.<tid>); "libe3" is the library's own delivery stamp.

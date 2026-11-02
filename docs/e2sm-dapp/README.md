@@ -53,9 +53,9 @@ For an engineer adding E2SM-DAPP to a RAN stack there is a separate guide:
 
 ## Related documents
 
-* [path-b-e2-e3-loop.md](../path-b-e2-e3-loop.md) and [path-a-e3-loop.md](../path-a-e3-loop.md):
+* [path-b-e2-e3-loop.md](../control-loops/path-b-e2-e3-loop.md) and [path-a-e3-loop.md](../control-loops/path-a-e3-loop.md):
   the E2-E3 loop and its box numbers, which [03](03-procedure-flow.md) uses.
-* [latrec.md](../latrec.md): the latency recorder, whose monotonic clock must not be
+* [latrec.md](../utilities/latrec.md): the latency recorder, whose monotonic clock must not be
   mixed with the realtime timestamps of E2SM-DAPP.
 * `messages/asn1/V1/e3ap-1.0.0.asn1`: E3AP, where `E3-SequenceID` is the same value
   as E2SM-DAPP's `sequence-id`.

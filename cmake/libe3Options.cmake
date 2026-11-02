@@ -33,7 +33,7 @@ option(LIBE3_ENABLE_PROTOBUF "Enable Protocol Buffers encoding support" OFF)
 option(LIBE3_ENABLE_ASAN "Enable AddressSanitizer" OFF)
 option(LIBE3_ENABLE_TSAN "Enable ThreadSanitizer" OFF)
 option(LIBE3_BUILD_DOCS "Build documentation" OFF)
-# See docs/latrec.md.
+# See docs/utilities/latrec.md.
 option(LIBE3_ENABLE_LATREC "Compile in the latrec stage-timing recorder (benchmarking only)" OFF)
 
 # Where latrec writes its rings when nothing calls latrec_set_output_dir().

@@ -21,7 +21,7 @@
  * Gated once, at compile time, by LIBE3_ENABLE_LATREC: off by default, so a
  * normal build carries none of this, not even a disabled-ring branch. With it
  * on, tracing runs -- there is no second per-run opt-in. See the bottom of
- * this file, and docs/latrec.md for where the rings are written.
+ * this file, and docs/utilities/latrec.md for where the rings are written.
  *
  * File layout: a 4 KiB latrec_hdr followed by `entries` 32-byte records. v1
  * field offsets are frozen and v2 fields appended inside the header pad, so a
@@ -33,11 +33,11 @@
  * the stage catalog below carries their ids too, so it stays the one place a
  * new id is checked for collisions.
  *
- * @see \ref latrec_guide "docs/latrec.md" for the full guide: the clock
+ * @see [docs/utilities/latrec.md](../../docs/utilities/latrec.md) for the full guide: the clock
  *      model, ring naming/sizing, the stage catalog table, and the
  *      capture-to-CSV workflow.
- * @see \ref path_a_e3_loop "docs/path-a-e3-loop.md" and
- *      \ref path_b_e2_e3_loop "docs/path-b-e2-e3-loop.md" for the loop boxes
+ * @see [docs/control-loops/path-a-e3-loop.md](../../docs/control-loops/path-a-e3-loop.md) and
+ *      [docs/control-loops/path-b-e2-e3-loop.md](../../docs/control-loops/path-b-e2-e3-loop.md) for the loop boxes
  *      the stage catalog names.
  *
  * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
@@ -53,6 +53,7 @@
  * only before the first system header; the #error below catches the rest. */
 #if !defined(_GNU_SOURCE) && !defined(_POSIX_C_SOURCE) && \
     !defined(_DEFAULT_SOURCE) && !defined(_XOPEN_SOURCE)
+/** Selects the GNU feature set, defined only when the including file chose none. */
 #define _GNU_SOURCE 1
 #endif
 
@@ -76,6 +77,19 @@ extern "C" {
 
 /* ---- portability shims ---------------------------------------------------- */
 
+/** @def LATREC_STORE_RELEASE
+ * Store with release ordering, so earlier stores are visible first.
+ * @param p location to store to
+ * @param v value to store */
+/** @def LATREC_LOAD_ACQUIRE
+ * Load with acquire ordering.
+ * @param p location to read */
+/** @def LATREC_PREFETCH_W
+ * Hint that the cache line at @p p is about to be written.
+ * @param p address of the line */
+/** @def LATREC_UNLIKELY
+ * Branch hint: @p x is expected to be false.
+ * @param x condition */
 #if defined(__GNUC__) || defined(__clang__)
 #define LATREC_STORE_RELEASE(p, v) __atomic_store_n((p), (v), __ATOMIC_RELEASE)
 #define LATREC_LOAD_ACQUIRE(p)     __atomic_load_n((p), __ATOMIC_ACQUIRE)
@@ -89,6 +103,8 @@ extern "C" {
 #define LATREC_UNLIKELY(x)         (x)
 #endif
 
+/** @def LATREC_HAVE_GETCPU
+ * 1 where sched_getcpu() is available (Linux), else 0. */
 #if defined(__linux__)
 #define LATREC_HAVE_GETCPU 1
 /* glibc exports the symbol unconditionally; only the declaration is gated
@@ -104,7 +120,7 @@ extern int sched_getcpu(void);
 #define LATREC_HAVE_GETCPU 0
 #endif
 
-/* Read the cpu id in the stamp only where sched_getcpu() resolves in user
+/** Read the cpu id in the stamp only where sched_getcpu() resolves in user
  * space (x86-64 glibc goes through rseq). Elsewhere it can be a getcpu
  * syscall, so the stamp uses the id cached by latrec_refresh_cpu(). */
 #if LATREC_HAVE_GETCPU && (defined(__x86_64__) || defined(__i386__))
@@ -113,8 +129,17 @@ extern int sched_getcpu(void);
 #define LATREC_CPUID_ON_STAMP 0
 #endif
 
+/** Pastes two tokens; use LATREC_CAT so that both are expanded first.
+ * @param a first token
+ * @param b second token */
 #define LATREC_CAT_(a, b) a##b
+/** Pastes two tokens after expanding them.
+ * @param a first token
+ * @param b second token */
 #define LATREC_CAT(a, b)  LATREC_CAT_(a, b)
+/** Compile-time assertion for C and C++.
+ * @param c condition that has to hold
+ * @param m message shown when it does not (the pre-C11 fallback drops it) */
 #if defined(__cplusplus)
 #define LATREC_STATIC_ASSERT(c, m) static_assert(c, m)
 #elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
@@ -136,8 +161,8 @@ extern int sched_getcpu(void);
  * duplicate what the reader already knows.
  *
  * Identifiers name the boxes of the two documented loops:
- *   docs/path-a-e3-loop.md   the E3-only loop (RAN <-> dApp), boxes A1..A20
- *   docs/path-b-e2-e3-loop.md  the E2-E3 loop (dApp <-> xApp), boxes B1..B15
+ *   docs/control-loops/path-a-e3-loop.md   the E3-only loop (RAN <-> dApp), boxes A1..A20
+ *   docs/control-loops/path-b-e2-e3-loop.md  the E2-E3 loop (dApp <-> xApp), boxes B1..B15
  * Each comment below cites the box(es) it bounds. Boxes that hand off inside
  * one function on one thread share a single boundary stamp rather than
  * carrying a separate exit and entry.
@@ -368,54 +393,59 @@ enum {
     LATREC_DROP_SHUTDOWN     = 9
 };
 
-#define LATREC_MAGIC   0x31524C41u /* "ALR1" */
-#define LATREC_VERSION 2u
-#define LATREC_HDR_LEN 4096
+#define LATREC_MAGIC   0x31524C41u /**< Magic number at the start of a ring file ("ALR1") */
+#define LATREC_VERSION 2u          /**< Ring file layout version */
+#define LATREC_HDR_LEN 4096        /**< Bytes of file header, before the records */
 
-/* Measured timestamp cost above which latrec_open warns. A vDSO read is tens
+/** Measured timestamp cost above which latrec_open warns. A vDSO read is tens
  * of ns; a syscall fallback is several hundred. */
 #define LATREC_CLOCK_SLOW_NS 100u
 
+/** One record of a ring, 32 bytes. */
 typedef struct {
-    uint64_t sc;    /* seq:48 (low) | cpu:8 | stage:8 (high byte)              */
-    uint64_t t_ns;  /* CLOCK_MONOTONIC; released last: nonzero == valid record */
-    uint64_t aux;
-    uint64_t aux2;
+    uint64_t sc;    /**< seq:48 (low) | cpu:8 | stage:8 (high byte)              */
+    uint64_t t_ns;  /**< CLOCK_MONOTONIC; released last: nonzero == valid record */
+    uint64_t aux;   /**< Stage-specific value */
+    uint64_t aux2;  /**< Second stage-specific value */
 } latrec_rec;
 
-/* v1 layout through name[]; v2 appends inside the pad. v1 field offsets are
- * frozen. */
+/** File header of a ring. v1 layout through name[]; v2 appends inside the pad.
+ * v1 field offsets are frozen. */
 typedef struct {
-    uint32_t magic, version;
-    uint64_t entries;             /* ring capacity (power of two)              */
-    uint64_t rec_count;           /* final index; refreshed by latrec_heartbeat */
-    uint64_t t0_mono_ns;          /* paired clocks at open: mono<->wall mapping */
-    uint64_t t0_real_ns;
-    char     name[64];
+    uint32_t magic;               /**< LATREC_MAGIC */
+    uint32_t version;             /**< LATREC_VERSION of the writer */
+    uint64_t entries;             /**< ring capacity (power of two)              */
+    uint64_t rec_count;           /**< final index; refreshed by latrec_heartbeat */
+    uint64_t t0_mono_ns;          /**< paired clocks at open: mono<->wall mapping */
+    uint64_t t0_real_ns;          /**< realtime clock at open, paired with t0_mono_ns */
+    char     name[64];            /**< ring name, "process.thread" */
     /* --- v2 --- */
-    uint32_t rec_size;            /* sizeof(latrec_rec), for reader validation  */
-    uint32_t clock_ns_per_call;   /* measured timestamp cost (0 = not measured) */
-    uint64_t t1_mono_ns;          /* paired clocks refreshed by heartbeat/close */
-    uint64_t t1_real_ns;
-    uint8_t  pad[LATREC_HDR_LEN - 4 * 4 - 8 * 6 - 64];
+    uint32_t rec_size;            /**< sizeof(latrec_rec), for reader validation  */
+    uint32_t clock_ns_per_call;   /**< measured timestamp cost (0 = not measured) */
+    uint64_t t1_mono_ns;          /**< paired clocks refreshed by heartbeat/close */
+    uint64_t t1_real_ns;          /**< realtime clock of the last refresh, paired with t1_mono_ns */
+    uint8_t  pad[LATREC_HDR_LEN - 4 * 4 - 8 * 6 - 64]; /**< reserved, fills the header to LATREC_HDR_LEN */
 } latrec_hdr;
 
 LATREC_STATIC_ASSERT(sizeof(latrec_rec) == 32, "latrec_rec must stay 32 bytes");
 LATREC_STATIC_ASSERT(sizeof(latrec_hdr) == LATREC_HDR_LEN, "latrec_hdr must be 4 KiB");
 
+/** A ring in memory: the writer's view of one mapped file. */
 typedef struct {
-    latrec_rec* recs;
-    uint64_t    idx;
-    uint64_t    mask;
-    void*       map;
-    size_t      map_len;
-    int         enabled;
-    uint32_t    cpu;    /* cpu id used by the stamp when LATREC_CPUID_ON_STAMP
-                         * is 0; set by latrec_refresh_cpu()                   */
-    uint64_t    ctx_seq; /* seq for code too deep to be passed one; see
+    latrec_rec* recs;    /**< first record, just after the header */
+    uint64_t    idx;     /**< index of the next record to write */
+    uint64_t    mask;    /**< capacity minus one, to wrap idx */
+    void*       map;     /**< the mapped file */
+    size_t      map_len; /**< length of the mapping in bytes */
+    int         enabled; /**< nonzero while the ring is open */
+    uint32_t    cpu;     /**< cpu id used by the stamp when LATREC_CPUID_ON_STAMP
+                          * is 0; set by latrec_refresh_cpu()                   */
+    uint64_t    ctx_seq; /**< seq for code too deep to be passed one; see
                           * latrec_ctx_set()                                   */
 } latrec_t;
 
+/** Current CLOCK_MONOTONIC reading.
+ * @return nanoseconds on the monotonic clock */
 static inline uint64_t latrec_now_ns(void)
 {
     struct timespec ts;
@@ -423,6 +453,8 @@ static inline uint64_t latrec_now_ns(void)
     return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
 }
 
+/** Current CLOCK_REALTIME reading.
+ * @return nanoseconds since the Unix epoch */
 static inline uint64_t latrec_real_ns(void)
 {
     struct timespec ts;
@@ -430,8 +462,9 @@ static inline uint64_t latrec_real_ns(void)
     return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
 }
 
-/* Re-read the cpu id into the ring. Call off the hot path: sched_getcpu() is
- * a syscall on targets where LATREC_CPUID_ON_STAMP is 0. */
+/** Re-read the cpu id into the ring. Call off the hot path: sched_getcpu() is
+ * a syscall on targets where LATREC_CPUID_ON_STAMP is 0.
+ * @param r ring whose cached cpu id is refreshed */
 static inline void latrec_refresh_cpu(latrec_t* r)
 {
 #if LATREC_HAVE_GETCPU
@@ -442,8 +475,9 @@ static inline void latrec_refresh_cpu(latrec_t* r)
 #endif
 }
 
-/* Mean cost of one latrec_now_ns() over 1000 calls, about 30 us in total.
- * Called once per ring at open and recorded in the header. */
+/** Mean cost of one latrec_now_ns() over 1000 calls, about 30 us in total.
+ * Called once per ring at open and recorded in the header.
+ * @return mean nanoseconds per call, 0 when the measurement is unusable */
 static inline uint32_t latrec_measure_clock_ns(void)
 {
     enum { ITERS = 1000 };
@@ -455,7 +489,7 @@ static inline uint32_t latrec_measure_clock_ns(void)
     return (uint32_t)((t1 - t0) / (uint64_t)ITERS);
 }
 
-/* Where rings go when the caller does not name a directory. A build-time
+/** Where rings go when the caller does not name a directory. A build-time
  * setting, like the recorder itself: -DLATREC_DEFAULT_DIR=... at configure
  * time. Runtime placement is chosen with latrec_open_in(), or process-wide
  * with latrec_set_output_dir(). */
@@ -463,15 +497,19 @@ static inline uint32_t latrec_measure_clock_ns(void)
 #define LATREC_DEFAULT_DIR "/tmp/latrec"
 #endif
 
-/* Open a ring under `dir`. name ("process.thread") becomes
- * <dir>/<name>.latrec and must be unique per writer thread across every
+/** Open a ring under `dir`. name ("process.thread") becomes
+ * `<dir>/<name>.latrec` and must be unique per writer thread across every
  * process sharing the directory: the file is opened O_TRUNC, so a collision
  * discards the other writer's ring. entries_log2 sets the capacity (22 = 4 M
  * records = 128 MiB). `dir` is created if missing (one level only).
- * Returns 1 on success, -1 on error.
  *
  * There is no "tracing disabled" return: in a build with LIBE3_ENABLE_LATREC
- * the recorder records. Whether it exists at all is the build's decision. */
+ * the recorder records. Whether it exists at all is the build's decision.
+ * @param r ring to initialise
+ * @param dir directory for the file, NULL or empty for LATREC_DEFAULT_DIR
+ * @param name ring name, "process.thread"
+ * @param entries_log2 capacity as a power of two
+ * @return 1 on success, -1 on error */
 static inline int latrec_open_in(latrec_t* r, const char* dir, const char* name,
                                  unsigned entries_log2)
 {
@@ -525,13 +563,17 @@ static inline int latrec_open_in(latrec_t* r, const char* dir, const char* name,
     return 1;
 }
 
-/* Open a ring under the compiled-in default directory. */
+/** Open a ring under the compiled-in default directory.
+ * @param r ring to initialise
+ * @param name ring name, see latrec_open_in()
+ * @param entries_log2 capacity as a power of two
+ * @return 1 on success, -1 on error */
 static inline int latrec_open(latrec_t* r, const char* name, unsigned entries_log2)
 {
     return latrec_open_in(r, LATREC_DEFAULT_DIR, name, entries_log2);
 }
 
-/* Stamp carrying a timestamp the caller already took, for the case where the
+/** Stamp carrying a timestamp the caller already took, for the case where the
  * moment being recorded is not the moment the stamp can be issued: handing an
  * item to another thread is only known to have *succeeded* after the handoff,
  * by which time the consumer may already have run and stamped its own stage.
@@ -541,7 +583,13 @@ static inline int latrec_open(latrec_t* r, const char* name, unsigned entries_lo
  *
  * t_ns must be a CLOCK_MONOTONIC reading from latrec_now_ns(). Zero is treated
  * as "not taken" and replaced with the current time, since zero is also how an
- * unwritten slot reads. */
+ * unwritten slot reads.
+ * @param r ring to stamp
+ * @param seq sequence number of the message, only the low 48 bits are kept
+ * @param stage stage id from the catalog
+ * @param aux stage-specific value
+ * @param aux2 second stage-specific value
+ * @param t_ns CLOCK_MONOTONIC reading taken earlier */
 static inline void latrec_stamp_at(latrec_t* r, uint64_t seq, uint8_t stage,
                                    uint64_t aux, uint64_t aux2, uint64_t t_ns)
 {
@@ -565,12 +613,17 @@ static inline void latrec_stamp_at(latrec_t* r, uint64_t seq, uint8_t stage,
     LATREC_PREFETCH_W(&r->recs[(i + 1) & r->mask]);
 }
 
-/* Hot path: one clock read and four stores. Single writer per ring.
+/** Hot path: one clock read and four stores. Single writer per ring.
  *
  * The disabled-ring check is repeated here deliberately. latrec_now_ns() is an
  * argument, so it would be evaluated before the call even on a thread with no
  * ring, putting a clock read on a path whose whole point is to be free --
- * tests/bench_latrec.cpp holds that path to a 10 ns ceiling and catches it. */
+ * tests/bench_latrec.cpp holds that path to a 10 ns ceiling and catches it.
+ * @param r ring to stamp
+ * @param seq sequence number of the message, only the low 48 bits are kept
+ * @param stage stage id from the catalog
+ * @param aux stage-specific value
+ * @param aux2 second stage-specific value */
 static inline void latrec_stamp(latrec_t* r, uint64_t seq, uint8_t stage,
                                 uint64_t aux, uint64_t aux2)
 {
@@ -578,8 +631,9 @@ static inline void latrec_stamp(latrec_t* r, uint64_t seq, uint8_t stage,
     latrec_stamp_at(r, seq, stage, aux, aux2, latrec_now_ns());
 }
 
-/* Refresh rec_count and the closing clock pair without closing the ring. Call
- * periodically so a ring that is never closed still carries both. */
+/** Refresh rec_count and the closing clock pair without closing the ring. Call
+ * periodically so a ring that is never closed still carries both.
+ * @param r ring to refresh */
 static inline void latrec_heartbeat(latrec_t* r)
 {
     if (!r->enabled) return;
@@ -589,6 +643,9 @@ static inline void latrec_heartbeat(latrec_t* r)
     h->t1_real_ns = latrec_real_ns();
 }
 
+/** Record the final counts and clock pair, flush and unmap the ring, and
+ * disable it. Does nothing on a ring that is not open.
+ * @param r ring to close */
 static inline void latrec_close(latrec_t* r)
 {
     if (!r->enabled) return;
@@ -600,55 +657,71 @@ static inline void latrec_close(latrec_t* r)
 
 /* ---- per-thread rings (backed by latrec.c) -------------------------------- */
 
-/* @see \ref latrec_guide "docs/latrec.md" for why this is a build-time
+/* @see docs/utilities/latrec.md for why this is a build-time
  * option, and for what a consumer of an installed libe3 has to match. */
 #ifdef LIBE3_ENABLE_LATREC
 
-/* Ring of the calling thread. Never NULL: it refers to a disabled ring until
+/** Ring of the calling thread. Never NULL: it refers to a disabled ring until
  * the thread calls latrec_tls_open(), so a stamp before that is discarded. */
 extern __thread latrec_t* latrec_tls;
 
-/* Directory the per-thread rings are written to, for the whole process. Call
+/** Directory the per-thread rings are written to, for the whole process. Call
  * before the first latrec_tls_open*(); rings already open are unaffected.
  * NULL or empty restores LATREC_DEFAULT_DIR. This chooses *where*, never
  * *whether*: with LIBE3_ENABLE_LATREC on, the recorder records regardless.
  * Two processes that should not share rings (concurrent tests, one benchmark
- * per directory) each set their own. */
+ * per directory) each set their own.
+ * @param dir directory for the rings, NULL or empty for LATREC_DEFAULT_DIR */
 void latrec_set_output_dir(const char* dir);
 
-/* Opens the calling thread's ring as <role>.<tid>, or <program>.<tid> when
+/** Opens the calling thread's ring as `<role>.<tid>`, or `<program>.<tid>` when
  * role is NULL or empty; idempotent. Capacity comes from
  * LATREC_ENTRIES_LOG2_<ROLE> (role uppercased, non-alphanumerics as '_'),
  * else LATREC_ENTRIES_LOG2, else the compiled-in default. The open
  * pre-faults the whole mapping, which takes tens of ms; the stamp path does
- * not call it. */
+ * not call it.
+ * @param role ring name prefix, NULL or empty for the program name
+ * @return the calling thread's ring, a disabled one if the open failed */
 latrec_t* latrec_tls_open_as(const char* role);
+/** Same as latrec_tls_open_as() with no role.
+ * @return the calling thread's ring, a disabled one if the open failed */
 latrec_t* latrec_tls_open(void);
 
-/* Next value of the process-wide sequence counter (starts at 1). */
+/** Next value of the process-wide sequence counter (starts at 1).
+ * @return the next sequence number */
 uint64_t latrec_seq_next(void);
 
-/* Stamp into the calling thread's ring, carrying a timestamp taken earlier.
- * See latrec_stamp_at for when that is the correct thing to do. */
+/** Stamp into the calling thread's ring, carrying a timestamp taken earlier.
+ * See latrec_stamp_at for when that is the correct thing to do.
+ * @param seq sequence number of the message
+ * @param stage stage id from the catalog
+ * @param aux stage-specific value
+ * @param aux2 second stage-specific value
+ * @param t_ns reading from latrec_tnow() */
 static inline void latrec_tstamp_at(uint64_t seq, uint8_t stage, uint64_t aux,
                                     uint64_t aux2, uint64_t t_ns)
 {
     latrec_stamp_at(latrec_tls, seq, stage, aux, aux2, t_ns);
 }
 
-/* Take a timestamp for a later latrec_tstamp_at(). Pairing these two, rather
+/** Take a timestamp for a later latrec_tstamp_at(). Pairing these two, rather
  * than calling latrec_now_ns() directly, keeps the clock read out of a build
  * with the recorder compiled out: this is the point where the pair collapses
- * to nothing. */
+ * to nothing.
+ * @return a CLOCK_MONOTONIC reading, 0 when the recorder is compiled out */
 static inline uint64_t latrec_tnow(void) { return latrec_now_ns(); }
 
-/* Stamp into the calling thread's ring. */
+/** Stamp into the calling thread's ring.
+ * @param seq sequence number of the message
+ * @param stage stage id from the catalog
+ * @param aux stage-specific value
+ * @param aux2 second stage-specific value */
 static inline void latrec_tstamp(uint64_t seq, uint8_t stage, uint64_t aux, uint64_t aux2)
 {
     latrec_stamp(latrec_tls, seq, stage, aux, aux2);
 }
 
-/* Publishes the seq of the message this thread is carrying, for code whose
+/** Publishes the seq of the message this thread is carrying, for code whose
  * signature cannot receive it: the connector is handed a byte buffer, not a
  * Pdu, libe3's emit entry points are handed neither, and an application's
  * indication or control handler is handed the message alone. Caller and callee
@@ -663,7 +736,8 @@ static inline void latrec_tstamp(uint64_t seq, uint8_t stage, uint64_t aux, uint
  * into LATREC_EMIT_ENTER's aux. Inbound, libe3 sets it before invoking the
  * application handler, so the handler's own stages can key on the same seq as
  * the DELIVER_BEGIN/DELIVER_DONE pair around them; a dApp reads it with
- * latrec_ctx() on entry rather than being passed it. */
+ * latrec_ctx() on entry rather than being passed it.
+ * @param seq sequence number of the message this thread is carrying */
 static inline void latrec_ctx_set(uint64_t seq)
 {
     /* Threads without a ring share one disabled ring, so an unconditional
@@ -671,6 +745,8 @@ static inline void latrec_ctx_set(uint64_t seq)
     latrec_t* r = latrec_tls;
     if (r->enabled) r->ctx_seq = seq;
 }
+/** The seq published by latrec_ctx_set() on this thread.
+ * @return the published seq, 0 from a thread with no ring */
 static inline uint64_t latrec_ctx(void) { return latrec_tls->ctx_seq; }
 
 #else /* !LIBE3_ENABLE_LATREC */

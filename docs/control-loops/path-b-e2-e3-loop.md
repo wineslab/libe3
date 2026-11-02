@@ -1,12 +1,10 @@
-\page path_b_e2_e3_loop The full E2-E3 loop (Path B)
-
-# Path B — the full E2-E3 loop
+# Path B: the full E2-E3 loop
 
 The dApp-xApp coordination loop: a dApp report travels up through the E2-E3
 bridge, across E2 to the RIC and the xApp, and the xApp's decision comes back
 down through E2, through the bridge, and over E3 to the dApp.
 
-Read [latrec.md](latrec.md) first for the recorder, the clock model, and the
+Read [latrec.md](../utilities/latrec.md) first for the recorder, the clock model, and the
 stage-catalog conventions. Path B continues from
 [Path A](path-a-e3-loop.md) box `A20`.
 
@@ -63,7 +61,7 @@ Every Path B run should record its profile in the `ric_profile` column.
 | instrumentable RIC | The RIC-internal decode and the inner-payload extraction can be stamped. `B2` is a visible segment. |
 | opaque RIC | Neither the RIC's E2AP termination nor its internal routing can be stamped. `B2` and the routing hop collapse into the `e2_wire_up` segment. |
 
-A collector must accept a run in which `B2` is absent and fold it into the
+A collector shall accept a run in which `B2` is absent and fold it into the
 wire segment, rather than discarding the event. A figure that mixes the two
 profiles without labelling them is wrong, because `e2_wire_up` means a
 different thing in each.
@@ -71,14 +69,14 @@ different thing in each.
 ## Report-up leg (`leg=report_up`)
 
 Segments name identifiers from the stage catalog in
-[`include/libe3/latrec.h`](../include/libe3/latrec.h). As in Path A, the
+[`include/libe3/latrec.h`](../../include/libe3/latrec.h). As in Path A, the
 catalog names operations: `ENCODE_E2AP`/`DECODE_E2AP` is one identifier pair
 however many places call that codec, and the ring says which side called it.
 
 | # | Box | Owner | Segment |
 |---|---|---|---|
 | B1 | E2 indication encode | the E2 agent | `ENCODE_E2SM_BEGIN` to `ENCODE_E2SM_DONE`, then `ENCODE_E2AP_BEGIN` |
-| — | **E2 wire (SCTP)** | — | `ENCODE_E2AP_DONE` to `DECODE_E2AP_BEGIN` |
+| none | **E2 wire (SCTP)** | none | `ENCODE_E2AP_DONE` to `DECODE_E2AP_BEGIN` |
 | B2 | E2AP decode at the RIC | the RIC | `DECODE_E2AP_BEGIN` to `DECODE_E2AP_DONE`. Absent on an opaque RIC, folded into the wire. |
 | B3 | E2SM decode | the xApp framework | `DECODE_E2SM_BEGIN` to `DECODE_E2SM_DONE` |
 | B4 | xApp processing | the xApp | `DECODE_E2SM_DONE` to `XAPP_PROCESS_DONE` |
@@ -89,13 +87,13 @@ however many places call that codec, and the ring says which side called it.
 
 | # | Box | Owner | Segment |
 |---|---|---|---|
-| — | **E2 wire** | — | `ENCODE_E2AP_DONE` to `DECODE_E2AP_BEGIN` |
+| none | **E2 wire** | none | `ENCODE_E2AP_DONE` to `DECODE_E2AP_BEGIN` |
 | B7 | E2AP decode at the RAN | the E2 agent | `DECODE_E2AP_BEGIN` to `DECODE_E2AP_DONE` |
 | B8 | E2SM decode | the E2 agent | `DECODE_E2SM_BEGIN` to `DECODE_E2SM_DONE` |
 | B9 | E2-E3 bridge | the RAN's dApp function | `BRIDGE_IN` to `BRIDGE_OUT`, nested inside B8 |
 | B10 | **Encode E3AP** | **libe3** | `EMIT_ENTER` to `ENQUEUE`, then `DEQUEUE` to `ENCODE_E3AP_DONE` |
 | B11 | Queuing and delivery | **libe3** | `ENQUEUE` to `DEQUEUE`, `ENCODE_E3AP_DONE` to `SEND_DONE` |
-| — | **E3 wire** | — | `SEND_DONE` to `RECV` |
+| none | **E3 wire** | none | `SEND_DONE` to `RECV` |
 | B12 | Recv | **libe3** (dApp role) | `RECV` |
 | B13 | **Decode E3AP** | **libe3** | `RECV` to `DECODE_E3AP_DONE`, plus `SESSION_QUEUED` to `SESSION_POLLED` on a language-binding seam |
 | B14 | **Decode E3SM** | dApp application | `DECODE_E3SM_BEGIN` to `DECODE_E3SM_DONE` |
@@ -106,35 +104,36 @@ carrying the direction.
 
 ## Mitigation leg (`leg=mitigation`)
 
-For a dApp whose "apply policy" means re-issuing the control to the RAN — the
-spectrum case, where the xApp names PRBs and only the gNB can block them — B15
+Take a dApp whose "apply policy" means re-issuing the control to the RAN. The
+spectrum case is an example: the xApp names PRBs and only the gNB can block
+them. For such a dApp, B15
 is not the end of the procedure. The policy is not in effect until the RAN has
 installed it, and the xApp is not told until then.
 
 | # | Box | Owner | Segment |
 |---|---|---|---|
 | B16 | Re-issue as a dApp control | dApp application | `APPLY_POLICY_DONE` to `CREATE_OUTPUT`, carrying B15's `sequenceId` |
-| — | **Path A return leg** | — | A12-A18: the re-issued control travels dApp to RAN exactly as any dApp control does |
-| B17 | Apply control | the RAN stack | `DECODE_E3SM_DONE` to `APPLY_CONTROL_DONE` — the mask is in the MAC |
-| B18 | Live on air | the RAN's MAC | `APPLY_CONTROL_DONE` to `LIVE_ON_AIR` — the first scheduler tick that put it on air |
+| none | **Path A return leg** | none | A12-A18: the re-issued control travels dApp to RAN exactly as any dApp control does |
+| B17 | Apply control | the RAN stack | `DECODE_E3SM_DONE` to `APPLY_CONTROL_DONE`. The mask is in the MAC |
+| B18 | Live on air | the RAN's MAC | `APPLY_CONTROL_DONE` to `LIVE_ON_AIR`. The first scheduler tick that put it on air |
 | B19 | Acknowledge | the RAN | two independent acks: `ACK_SENT` on E3 to the dApp, and the deferred E2 control acknowledge to the xApp |
 
 The two acks at B19 carry **different** content and are not two views of one
 message. The dApp gets `E3-MessageAck`, which is a delivery receipt: request id
 and a response code, nothing more. The xApp gets the E2SM-DAPP control outcome,
 which carries the procedure's `sequence-id` and the Service-Model-owned apply
-outcome — for the spectrum SM, the realtime timestamps at B17 and B18.
+outcome. For the spectrum SM, the outcome is the realtime timestamps at B17 and B18.
 
 Those timestamps are **payload** fields on the realtime clock, deliberately not
 latrec records: the xApp differences them against the dApp's own report
-timestamp, and [latrec.md](latrec.md)'s clock rule forbids mixing a payload
+timestamp, and [latrec.md](../utilities/latrec.md)'s clock rule forbids mixing a payload
 timestamp with a monotonic `t_ns`. latrec measures the same interval
 independently, which makes the two a cross-check on each other rather than a
 single number derived twice.
 
 The E2 acknowledge is deferred: it is sent at B19, not when the RAN received the
 control request at B7. An acknowledge sent at B7 says only that the request was
-forwarded — it is emitted before the dApp has seen it and long before any mask
+forwarded. It is emitted before the dApp has seen it and long before any mask
 exists, so it cannot be read as completion.
 
 ## Aggregates
@@ -146,7 +145,7 @@ exists, so it cannot be read as completion.
 | `total_e2_leg` | `B1` to `B9` | everything outside libE3 and outside the applications |
 | `total_libe3_down` | `B10` to `B13` | the library's share of the down leg |
 | `total_loop` | `A1` to `B15` | the full input-to-policy loop |
-| `total_mitigation` | `A1` to `B18` | detection to the mask being on air — the number the xApp records online |
+| `total_mitigation` | `A1` to `B18` | detection to the mask being on air. This is the number the xApp records online |
 
 ## Joining: the `sequenceId`
 
@@ -167,7 +166,7 @@ control header; the bridge copies it back onto the relayed
 RAN reports it on the control outcome that acknowledges the whole procedure.
 
 An `E3-DAppControlAction` with no `sequenceId` is a control the dApp decided on
-its own — there is no xApp procedure behind it and nothing to join it to. That
+its own. There is no xApp procedure behind it and nothing to join it to. That
 is a normal message, not a malformed one.
 
 The id is `INTEGER (1..4294967295)`, the same range as `E3-MessageID`, and
@@ -176,9 +175,9 @@ sequenceId identifies the whole *procedure* across every hop.
 
 ### Where it shows up in the rings
 
-The rings themselves are not keyed on the sequenceId — each leg keeps its own
+The rings themselves are not keyed on the sequenceId. Each leg keeps its own
 ring-local counter, because `latrec_ctx_set()`'s cross-thread bridge depends on
-it (see [latrec.md](latrec.md)). The id appears instead as the `aux` payload on
+it (see [latrec.md](../utilities/latrec.md)). The id appears instead as the `aux` payload on
 the records where the loop crosses a component boundary:
 
 - `DELIVER_BEGIN` / `DELIVER_DONE` on the dApp's relayed xApp control

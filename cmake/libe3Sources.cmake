@@ -20,7 +20,7 @@ set(LIBE3_PUBLIC_HEADERS
     include/libe3/latrec.h
 )
 
-# Tooling for the ring format, installed alongside latrec.h. See docs/latrec.md.
+# Tooling for the ring format, installed alongside latrec.h. See docs/utilities/latrec.md.
 set(LIBE3_TOOLS
     tools/latrec_reader.py
     tools/latrec2csv.py
@@ -49,7 +49,7 @@ if(LIBE3_ENABLE_ZMQ)
 endif()
 
 # Backs latrec.h's TLS convenience API; excluded when the recorder is off, where
-# latrec.h falls back to inline no-op stubs. See docs/latrec.md.
+# latrec.h falls back to inline no-op stubs. See docs/utilities/latrec.md.
 if(LIBE3_ENABLE_LATREC)
     list(APPEND LIBE3_SOURCES src/core/latrec.c)
 endif()

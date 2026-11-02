@@ -18,7 +18,7 @@
 #include <pthread.h>
 #include <sys/syscall.h>
 
-/* Capacity of a per-thread ring, as a power of two. The mapping is pre-faulted
+/** Capacity of a per-thread ring, as a power of two. The mapping is pre-faulted
  * at open, so the ring is resident and a stamp costs the same at any size; the
  * size sets the footprint and how long a run fits before wrapping. It is
  * file-backed, so that footprint is page cache and disk, not anonymous memory.
@@ -26,30 +26,30 @@
  * Every thread that stamps in a LIBE3_ENABLE_LATREC build opens a ring, with
  * no per-run opt-out, so this default is what an ordinary run of an enabled
  * build costs per thread. It is deliberately modest for that reason: a long
- * capture raises it per role (see entries_log2() below and docs/latrec.md)
+ * capture raises it per role (see entries_log2() below and docs/utilities/latrec.md)
  * rather than every test and example paying for a capacity only a benchmark
  * needs. A ring that wrapped says so: rec_count keeps counting past the
  * capacity. */
 #ifndef LATREC_TLS_ENTRIES_LOG2
-#define LATREC_TLS_ENTRIES_LOG2 18 /* 256 K records = 8 MiB per thread */
+#define LATREC_TLS_ENTRIES_LOG2 18 /**< 256 K records = 8 MiB per thread */
 #endif
-#define LATREC_ENTRIES_LOG2_MIN 12
-#define LATREC_ENTRIES_LOG2_MAX 28
-#define LATREC_MAX_RINGS 64
+#define LATREC_ENTRIES_LOG2_MIN 12 /**< Smallest ring capacity accepted from the environment, as a power of two */
+#define LATREC_ENTRIES_LOG2_MAX 28 /**< Largest ring capacity accepted from the environment, as a power of two */
+#define LATREC_MAX_RINGS 64        /**< Per-thread rings tracked for the flush at exit */
 
-/* Threads refer here until they open a ring of their own. It stays zeroed, so
+/** Threads refer here until they open a ring of their own. It stays zeroed, so
  * enabled == 0 and a stamp from a thread that never called latrec_tls_open()
  * is discarded at the same check that disables tracing globally. */
 static latrec_t           disabled_ring;
 
 __thread latrec_t* latrec_tls = &disabled_ring;
 
-static latrec_t*          open_rings[LATREC_MAX_RINGS];
-static int                n_open_rings;
-static pthread_mutex_t    rings_mu = PTHREAD_MUTEX_INITIALIZER;
-static pthread_once_t     atexit_once = PTHREAD_ONCE_INIT;
+static latrec_t*          open_rings[LATREC_MAX_RINGS];   /**< rings to flush at exit */
+static int                n_open_rings;                   /**< entries used in open_rings */
+static pthread_mutex_t    rings_mu = PTHREAD_MUTEX_INITIALIZER; /**< guards open_rings and output_dir */
+static pthread_once_t     atexit_once = PTHREAD_ONCE_INIT;      /**< installs the exit handler once */
 
-/* Threads do not close their rings, so rec_count and the closing clock pair
+/** Threads do not close their rings, so rec_count and the closing clock pair
  * are refreshed at exit. Records are valid without this (t_ns != 0); it only
  * fills in the header counts. */
 static void flush_open_rings(void)
@@ -59,10 +59,13 @@ static void flush_open_rings(void)
     pthread_mutex_unlock(&rings_mu);
 }
 
+/** Register flush_open_rings() to run at process exit. */
 static void install_atexit(void) { atexit(flush_open_rings); }
 
-/* LATREC_ENTRIES_LOG2 overrides the compiled-in capacity; out-of-range and
- * unparseable values fall back to it. */
+/** LATREC_ENTRIES_LOG2 overrides the compiled-in capacity; out-of-range and
+ * unparseable values fall back to it.
+ * @param name environment variable to read
+ * @return the capacity as a power of two, 0 when the variable is unset or invalid */
 static unsigned entries_log2_from(const char* name)
 {
     const char* e = getenv(name);
@@ -77,12 +80,14 @@ static unsigned entries_log2_from(const char* name)
     return 0;
 }
 
-/* Ring capacity for a role: LATREC_ENTRIES_LOG2_<ROLE> if set, else
+/** Ring capacity for a role: LATREC_ENTRIES_LOG2_<ROLE> if set, else
  * LATREC_ENTRIES_LOG2, else the compiled-in default. The per-role name is the
  * role uppercased with every non-alphanumeric character replaced by '_', so
  * role "oai.mac" reads LATREC_ENTRIES_LOG2_OAI_MAC. Roles differ by orders of
  * magnitude in stamp rate, so sizing them together either wastes memory or
- * wraps the busiest ring. */
+ * wraps the busiest ring.
+ * @param role ring role, NULL or empty for no per-role override
+ * @return the capacity as a power of two */
 static unsigned entries_log2(const char* role)
 {
     if (role && *role) {
@@ -101,7 +106,7 @@ static unsigned entries_log2(const char* role)
     return v ? v : LATREC_TLS_ENTRIES_LOG2;
 }
 
-/* Process-wide ring directory. Written once at start-up by whoever owns the
+/** Process-wide ring directory. Written once at start-up by whoever owns the
  * process, read by every thread that opens a ring; the mutex is only there to
  * make that publication well-defined, since ring opens are not on a hot path. */
 static char output_dir[512];
