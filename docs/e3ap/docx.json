@@ -1,0 +1,18 @@
+{
+  "number": "O-RAN.WG3.TS.E3AP-R000-v00.01",
+  "title": "E3 Application Protocol (E3AP)",
+  "cover": ["E3 Application Protocol (E3AP)", ""],
+  "parts": [
+    {"clause": "1", "title": "Scope", "file": "README.md", "section": "Scope"},
+    {"clause": "2", "title": "References", "file": "README.md", "section": "References"},
+    {"clause": "3", "title": "Definition of terms, symbols and abbreviations", "file": "README.md", "section": "Terms, symbols and abbreviations"},
+    {"clause": "4", "title": "General", "file": "README.md", "section": "General"},
+    {"clause": "5", "title": "Identity and registration", "file": "01-identity-and-registration.md"},
+    {"clause": "6", "title": "Information elements", "file": "02-ie-mapping.md"},
+    {"clause": "7", "title": "Procedures", "file": "03-procedure-flow.md"},
+    {"clause": "8", "title": "Encoding and abstract syntax", "file": "04-encoding.md"},
+    {"clause": "9", "title": "Semantics, constraints and handling of erroneous data", "file": "05-semantics-and-constraints.md"},
+    {"clause": "A", "title": "Implementation notes and known discrepancies", "file": "06-discrepancies.md", "informative": true}
+  ],
+  "history": [["2026-11", "R000 v00.01", "First version", "Northeastern University"]]
+}

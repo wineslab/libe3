@@ -173,6 +173,55 @@ All open ones are sub-issues of [#84](https://github.com/wineslab/libe3/issues/8
 the table of places where Aerial and OCUDU pull in different directions. Read that for the evidence;
 the next two sections say which way libe3 goes.
 
+## Found while writing the specifications
+
+Differences between the grammar, the encoders and the code that came up while writing the
+specifications in [e3ap](e3ap/README.md), [e2sm-dapp](e2sm-dapp/README.md) and
+[e3sm](e3sm/README.md). Each row is *Source*: read from the code, not run. The specification
+side of each row is Annex A of the E3AP specification ([06-discrepancies.md](e3ap/06-discrepancies.md))
+and of each service model. Open a #84 sub-issue for a row when someone picks it up.
+
+**E3AP, libe3 against its own grammar and the other encodings**
+
+| Where | What differs | Effect |
+|---|---|---|
+| Setup, dApp side | A negative `E3-SetupResponse` still counts as a finished setup. `wait_for_setup` returns success and the dApp has no id. The response's `requestId` is not compared with the request | The application sends messages the RAN cannot match to a dApp |
+| Setup, RAN side | The dApp's `e3apProtocolVersion` is logged and never compared | A version string cannot flag a wire change |
+| Setup, RAN side | A second request from the same dApp registers a new dApp. A retry after a slow reply leaves an id with no owner | One id leaks until a release names it |
+| Setup, RAN side | A negative reply for "no free dApp id" carries `ranFunctionList`. A negative reply for a bad request does not | Two shapes of "negative" |
+| Setup, RAN side | An encode failure of the setup response ends the process | One bad RAN function can stop the RAN node. Sizes are checked first, other failures are not |
+| Subscription | The RAN function id and the telemetry and control ids are not checked against the service model. The response grants what was asked | Same as the row in the OCUDU table above, on libe3's side |
+| Subscription | A repeat keeps the stored details but the response echoes the new lists and interval | The response does not describe what the RAN holds |
+| dApp control | An unknown RAN function, or one whose service model does not run, is dropped with no reply | The dApp waits for an acknowledge that never comes |
+| `E3-MessageAck` | It has no `dAppIdentifier`, and the RAN sends it to every dApp. The dApp handler has no filter | A dApp can read another dApp's acknowledge |
+| xApp control | `E3Agent::send_xapp_control` does not refuse `sequence_id` 0. It fails later, in the encoder | The error is far from the call |
+| dApp report | No check of the dApp id, the function or the sequence id on the RAN | A bad report reaches the E2-E3 bridge |
+| POSIX framing | RAN to dApp is length-prefixed (4 octets, network order). dApp to RAN is a raw `send()` and a single `recv()` of up to 60000 octets | Messages can join or split on a stream socket |
+| POSIX framing | The framed receiver refuses more than 65536 octets, the unframed one reads 60000, the encoder buffer is 65536 | A message of 60001 to 65536 octets passes one way only |
+| POSIX link | No heartbeat and no keepalive. The RAN never learns that a dApp went away: its registration, subscriptions and running service model stay | A dead dApp keeps a service model running |
+| `ranFunctionData` | 1..262144 octets in the grammar, 1..32768 in libe3 | A peer's larger value is refused |
+| Protobuf | A response code that is not `NEGATIVE` reads as `POSITIVE`. APER and JSON read an unknown value as negative | An unknown code is a success in one encoding |
+| JSON | `timestamp` is written even when 0. APER and Protobuf leave 0 out. A missing member decodes as 0 or an empty string, not as an error | A malformed message can look valid |
+| Build | A build with only Protobuf defaults to the ASN.1 encoding | The default config does not start |
+| Config | `connect_timeout_ms`, `recv_timeout_ms`, `send_timeout_ms`, `receive_buffer_size` and `send_buffer_size` are not read anywhere | Setting them does nothing |
+
+**Service models**
+
+| Where | What differs | Effect |
+|---|---|---|
+| Spectrum grammar | The two OAI copies differ. The first lacks the apply-outcome types and `maxSlotIndex`, yet the xApp-side build file says all copies are byte identical | A codec built from the first copy cannot carry the outcome |
+| L1-KPM telemetry ids | The identifiers (1 for the IQ reference, 4 to 6 for time stamp, frame and slot, 2 and 3 unused) are defined by Aerial's dApps, not by the grammar. A comment in the RAN code calls them "bit position plus one", but no code uses a bit mask | The numbers have no owner in this repository. To clear with Aerial: which side defines them, and what 2 and 3 mean |
+| Spectrum JSON | The report and the xApp control have no JSON codec. The xApp side reads and writes APER only. The specification now requires the JSON form | A run with JSON delivers binary octets in a field that holds nested JSON. A deployment with an xApp has to use APER |
+| Spectrum JSON | The indication nests `sensing_shm{shm_name, write_idx, n_ranges}`. ASN.1 uses `shmName`, `shmWriteIdx`, `nRanges`. Protobuf uses `shm_*` | One field, three spellings |
+| Spectrum controls | `samplingThreshold` and `validityPeriod` are decoded and never used. APER range-checks them, JSON and Protobuf do not | A value that APER refuses is accepted by JSON |
+| Spectrum controls | `Spectrum-ConfigControl` has no encoder, decoder or handler | The xApp control alternative exists on the wire only |
+| Spectrum controls | A "deactivate" sensing policy still needs one mask value, because `maskPerSlot` is `SIZE (1..160)` | A policy cannot be cleared with an empty mask |
+| L1-KPM Protobuf | `L1KPMRanFunctionData` exists and is unused. A Protobuf session carries JSON text in `ranFunctionData` | A Protobuf dApp reads the wrong type |
+| L1-KPM grammar | `cellId`, `nRxAnt` and `validSymbolMask` are `OPTIONAL`, but the RAN always sends them. `cellId` is always 0 | A peer cannot tell "no cell" from cell 0 |
+| L1-KPM `timestamp` | Unconstrained integer in ASN.1, `int64` in Protobuf, signed in the codec | Large values can differ across encodings |
+| L1-KPM shared memory | The rows carry no marker, and the header has no FP16 scale. A source comment claims about 64 ms before a row is reused. The code has 32 rows, so the time depends on the uplink slot rate | A dApp cannot detect an overwrite or recover the scale from the region |
+| L1-KPM Protobuf | The header comment names a grammar file that does not exist | A reader looks for a missing file |
+
 ## Aerial: what to change to align
 
 Every statement about Aerial is *Source* (dapps v1.1.0 `99b10eb`, agent `4f65f97`), and the rows are

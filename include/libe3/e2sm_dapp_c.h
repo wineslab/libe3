@@ -16,8 +16,8 @@
  *    zeroed and nothing needs freeing.
  *  - Every `free` function zeroes the struct, so freeing twice is harmless.
  *
- * Return codes are @ref e3_error_t: 0 on success, and E3_INVALID_PARAM,
- * E3_ENCODE_FAILED, E3_DECODE_FAILED or E3_SM_ERROR_MEMORY on failure.
+ * Return codes are the values of @ref e3_error_t. They are 0 on success, and
+ * E3_INVALID_PARAM, E3_ENCODE_FAILED, E3_DECODE_FAILED or E3_SM_ERROR_MEMORY on failure.
  *
  * Built only when LIBE3_ENABLE_E2SM_DAPP is on (it needs LIBE3_ENABLE_ASN1).
  *

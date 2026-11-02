@@ -9,6 +9,7 @@ version = 1
 path = [
     "**/*.md",
     "**/*.docx",
+    "**/docx.json",
     "CITATION.cff",
     "CONTRIBUTORS",
     "LICENSE",

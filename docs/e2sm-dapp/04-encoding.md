@@ -1,24 +1,23 @@
 # E2SM-DAPP: encoding
 
-How every E2SM-DAPP information element is turned into bytes, with worked
-examples you can check against the golden vectors, the size limits, and the build
-switches that select the codec in each implementation.
+This chapter describes how an implementation turns every E2SM-DAPP information
+element into bytes. It gives worked examples that an implementer can check against
+the reference test vectors, the size limits and the type map.
 
-This is section 4 of the specification. The index is [README.md](README.md). The
-field lists are in [02-ie-mapping.md](02-ie-mapping.md), the validation rules in
-[05-semantics-and-constraints.md](05-semantics-and-constraints.md).
+The index is [README.md](../e2sm-dapp/README.md). The field lists are in
+[02-ie-mapping.md](02-ie-mapping.md). The validation rules are in
+[05-semantics-and-constraints.md](05-semantics-and-constraints.md). Code references,
+product names and build switches are in [integrator-guide.md](integrator-guide.md).
 
-Code references use these roots, all at the commits listed in the
-[README](README.md#where-the-code-references-point): `flexric/` is
-flexric with the `dapp_sm` service model, `libe3/` is this repository, `ocudu/` is
-OCUDU with the E2SM-DAPP port, `oai/` is OpenAirInterface, `xdevsm/` is `xDevSM-dApp`.
+## What is on the wire
 
-## 1. What is on the wire
+An implementation shall encode each E2SM-DAPP information element as one ASN.1 value
+with **APER (ASN.1 Packed Encoding Rules, aligned variant, X.691)**. It shall carry
+the value as the content of an `OCTET STRING` in the E2AP message. E2AP does the
+framing. E2SM-DAPP adds no header, no length prefix, no checksum and no version byte
+of its own.
 
-Each E2SM-DAPP information element is one ASN.1 value, encoded with **APER
-(ASN.1 Packed Encoding Rules, aligned variant, X.691)**, and carried as the
-content of an `OCTET STRING` in the E2AP message. E2AP does the framing. E2SM-DAPP
-adds no header, no length prefix, no checksum and no version byte of its own.
+Table: ASN.1 type that each E2AP field carries
 
 | E2AP field that carries it | ASN.1 type that is encoded into it |
 |---|---|
@@ -31,19 +30,15 @@ adds no header, no length prefix, no checksum and no version byte of its own.
 | RIC Control Message (RIC Control Request) | `E2SM-DAPP-ControlMessage` |
 | RIC Control Outcome (RIC Control Acknowledge) | `E2SM-DAPP-ControlOutcome` |
 
-The grammar is `messages/asn1/e2sm_dapp/V1/e2sm_dapp-1.0.0.asn`. It is a
-byte-identical copy of flexric's
-`src/sm/dapp_sm/ie/asn/e2sm_dapp_v0_standard.asn` (checked with `diff`). Module
-identifier `E2SM-DAPP-IEs {... oran(53148) e2(1) version1(1) e2sm(255)
-e2sm-DAPP-IEs (3)}`, so the OID is `1.3.6.1.4.1.53148.1.1.255.3`.
+The grammar is in the last clause of this chapter. Its module identifier is
+`E2SM-DAPP-IEs {... oran(53148) e2(1) version1(1) e2sm(255) e2sm-DAPP-IEs (3)}`, so
+the OID is `1.3.6.1.4.1.53148.1.1.255.3`.
 
-Plain and FlatBuffers encodings **do not exist**. flexric has stub files for
-them (`enc/dapp_enc_plain.c`, `dec/dapp_dec_plain.c`, `enc/dapp_enc_fb.c`,
-`dec/dapp_dec_fb.c`), and all 31 functions in them are
-`assert(0 != 0 && "Not implemented")` (see [06-discrepancies.md](06-discrepancies.md)).
-A conforming stack encodes APER.
+Plain and FlatBuffers encodings **do not exist**. A conforming stack encodes APER.
+Some implementations ship unused stubs for the other encodings. See
+[06-discrepancies.md](06-discrepancies.md).
 
-### 1.1 The three rules that decide almost every byte
+### The three rules that decide almost every byte
 
 1. **Alignment.** In aligned PER a value that needs whole octets (an integer longer
    than a byte, an octet string, a character string, a length determinant of
@@ -57,7 +52,9 @@ A conforming stack encodes APER.
    component, in the order the fields are declared. A cleared bit means the field is
    absent and takes no further space.
 
-### 1.2 Encoding rules, by ASN.1 construct
+### Encoding rules, by ASN.1 construct
+
+Table: APER bits for each ASN.1 construct
 
 | Construct in the grammar | APER bits | Where it appears |
 |---|---|---|
@@ -81,7 +78,7 @@ A conforming stack encodes APER.
 Notes on the table.
 
 * **Unbounded integers are not 32-bit.** A `RIC-Style-Type` of `4294967295` (the
-  value flexric stores in a `uint32_t`) needs five octets on the wire, because the
+  largest value of a 32-bit unsigned integer) needs five octets on the wire, because the
   top bit of `0xFF` would otherwise read as negative: `00 ff ff ff ff`. See
   vector `ad_style_max` below.
 * **Timestamps are 8 octets** for any value in this century. A nanosecond
@@ -96,39 +93,43 @@ Notes on the table.
   length of an E2SM-DAPP element is whatever the APER value occupies, rounded up
   to a whole octet (see the single-byte examples below).
 
-### 1.3 Byte order, packing, length prefixes
+### Byte order, packing, length prefixes
+
+Table: Byte order, padding and length prefixes
 
 | Topic | Rule |
 |---|---|
 | Byte order | APER is a bit stream, written most significant bit first. Multi-octet integers and lengths are big-endian. There is nothing host-endian on the wire. |
 | Padding | Encoders write zero pad bits. The last octet is padded with zero bits to a whole octet. |
-| Struct packing | None on the wire. The in-memory structs are ordinary C structs with natural alignment and no `packed` attribute (flexric `src/sm/dapp_sm/ie/ir/*.h`). |
+| Struct packing | None on the wire. Native structures in memory are the implementation's own business. |
 | Length prefixes | Only where the table above says so. E2SM-DAPP never prefixes a whole element with its length. |
-| Extension markers | Written as `0`. See 1.4 for what a receiver does with `1`. |
-| Trailing data | APER has no end marker. flexric and libe3 check only that the decode succeeded, not that every octet was consumed (`flexric/src/sm/dapp_sm/dec/dapp_dec_asn.c` asserts `RC_OK` only; libe3's `unpack_pdu` in `libe3/src/e2sm_dapp/e2sm_dapp.cpp` tests `rv.code`). OCUDU's `unpack_e2sm_dapp_ie` (`ocudu/lib/e2/e2sm/e2sm_dapp/e2sm_dapp_asn1_packer.h:35-39`) checks only the return code, so trailing octets are ignored there too. |
+| Extension markers | Written as `0`. The next subsection says what a receiver does with `1`. |
+| Trailing data | APER has no end marker. A decoder checks that the decode succeeded. It does not need to check that it consumed every octet, and several implementations ignore trailing octets. A receiver should not rely on a sender to append nothing. |
 
-### 1.4 A receiver that sees extension additions
+### A receiver that sees extension additions
 
-The grammar has no extension additions yet, so every extension bit a conforming
+The grammar has no extension additions yet, so every extension bit that a conforming
 sender writes is `0`. A future version could add fields after the `...` marker. A
-decoder meeting extension bit `1` has three options, and the implementations pick
+decoder that meets extension bit `1` has three options, and implementations pick
 differently.
+
+Table: Handling of extension bit 1 on a SEQUENCE
 
 | Implementation | Extension bit `1` on a `SEQUENCE` |
 |---|---|
-| flexric (asn1c) | asn1c reads the extension bitmap and skips additions it does not know (`SEQUENCE_decode_aper`, "Skip over overflow extensions", in the generated `constr_SEQUENCE_aper.c`), so the value decodes with the added fields ignored. |
-| libe3 (asn1c) | Same, because libe3 uses the same runtime family. |
-| OCUDU (hand-written codec) | `skip_ext_additions` (`ocudu/lib/asn1/e2sm/e2sm_dapp.cpp`, called at the end of every `unpack`) reads the additions as opaque open types (X.691 19.7 to 19.9) and drops them. `pack` refuses a struct with `ext == true` (`pack_unsupported_ext_flag`). |
+| A (generated codec) | The decoder reads the extension bitmap and skips additions that it does not know. The value decodes with the added fields ignored. |
+| B (hand-written codec) | The decoder reads the additions as opaque open types (X.691 19.7 to 19.9) and drops them. The encoder refuses a structure with the extension flag set. |
 
-A `CHOICE` alternative beyond the defined ones (a future format 3) is not skipped by any
-of them: asn1c fails the decode (`CHOICE_decode_aper`), and OCUDU's choice `unpack`
-returns `OCUDUASN_ERROR_DECODE_FAIL`.
+A `CHOICE` alternative beyond the defined ones (a future format 3) is not skipped by
+any implementation. The decode fails.
 
-An extension bit of `1` on a constrained `INTEGER (0..4294967295, ...)` means the
-value is outside the root range and uses a different encoding. libe3 and OCUDU
+An extension bit of `1` on a constrained `INTEGER (0..4294967295, ...)` means that the
+value is outside the root range and uses a different encoding. Implementations
 reject it. See [05-semantics-and-constraints.md](05-semantics-and-constraints.md).
 
-## 2. Maximum sizes
+## Maximum sizes
+
+Table: Size constants of the grammar
 
 | Grammar constant | Value | What it bounds |
 |---|---|---|
@@ -139,10 +140,12 @@ reject it. See [05-semantics-and-constraints.md](05-semantics-and-constraints.md
 | `maxnoofDAPPReportStyles` | 2 | items in `ric-ReportStyle-List` |
 | `maxnoofDAPPControlStyles` | 1 | items in `ric-ControlStyle-List` |
 
-Smallest and largest encodings. The smallest values are golden vectors. The
-largest values assume 64-bit signed timestamps and sequence ids (what every
-implementation holds), ids of `4294967295`, and are computed from the rules in
-1.2. The ones marked "vector" are in the golden file.
+The next table gives the smallest and the largest encodings. The smallest values are
+reference test vectors. The largest values assume 64-bit signed timestamps and
+sequence ids (what every implementation holds) and ids of `4294967295`. They follow
+from the encoding rules. The names in the Notes column are reference test vectors.
+
+Table: Smallest and largest encodings
 
 | Element | Smallest | Largest | Notes |
 |---|---|---|---|
@@ -160,41 +163,30 @@ implementation holds), ids of `4294967295`, and are computed from the rules in
 Format 2 is the one element that can be larger than 32768 octets, because the
 grammar bounds only the number of items, not the encoded size of the list.
 
-**Implementation limits are tighter than the grammar.** flexric encodes into fixed
-buffers and aborts when an element does not fit:
+**Implementation limits are tighter than the grammar.** An implementation can encode
+into fixed buffers and fail when an element does not fit. The buffers range from 1 KiB
+for an action definition to 512 KiB for an event trigger, and one implementation
+limits a control message to about 16 KiB, although the grammar allows 32768 octets.
+For this reason the reference test vector `cm1_large` stops at 16000 octets. A sender
+that wants to work with every implementation should keep a control message below 16
+KiB. The details are in [integrator-guide.md](integrator-guide.md).
 
-| Element | flexric buffer | Reference |
-|---|---|---|
-| Event trigger | 512 KiB | `flexric/src/sm/dapp_sm/enc/dapp_enc_asn.c:84` |
-| Action definition | 1 KiB | `dapp_enc_asn.c:119` |
-| Indication header | 1 KiB | `dapp_enc_asn.c:228` |
-| Indication message | 128 KiB | `dapp_enc_asn.c:344` |
-| Control header | 16 KiB | `dapp_enc_asn.c:403` |
-| Control message | 16 KiB | `dapp_enc_asn.c:443` |
-| Control outcome | 16 KiB | `dapp_enc_asn.c:504` |
-| RAN function definition | 16 KiB | `dapp_enc_asn.c:660` |
+## Worked examples
 
-So a control message above about 16 KiB aborts flexric's encoder even though the
-grammar allows 32768 (the golden vector `cm1_large` stops at 16000 octets for this
-reason, see `libe3/tests/e2sm_dapp_fixtures.inc:296`). The indication message and
-header encoders return an empty buffer instead of aborting
-(`dapp_enc_asn.c:232-236`, `350-354`). The others assert at lines 87, 122, 406,
-446, 507 and 663.
-
-## 3. Worked examples
-
-All the bytes below are from `libe3/tests/e2sm_dapp_golden.hpp`. They were
-produced by flexric's own encoder at flexric commit `71631466`. Every example here
-was re-derived by hand from the grammar and the rules in 1.2, and all 31 vectors
-(27 inline and 4 by length and hash) were also reproduced by an independent
-bit-level encoder written for this document, which agreed byte for byte.
+All the bytes below are reference test vectors. They were produced by the encoder of
+a reference implementation. Every example here was re-derived by hand from the
+grammar and the encoding rules. All 31 vectors (27 inline and 4 by length and hash)
+were also reproduced by an independent bit-level encoder, which agreed byte for
+byte.
 
 Reading the tables: a row is a run of bits in stream order. `pad` is alignment
 padding. Bit groups are written MSB first.
 
-### 3.1 `et_f1` = `00` (event trigger)
+### `et_f1` = `00` (event trigger)
 
 One octet. The event trigger has one format and no fields.
+
+Table: Bits of the event trigger `et_f1`
 
 | Bits | Meaning |
 |---|---|
@@ -203,7 +195,9 @@ One octet. The event trigger has one format and no fields.
 | `0` | `E2SM-DAPP-EventTrigger-Format1` extension bit (the SEQUENCE has no fields and no `OPTIONAL`) |
 | `00000` | pad to the octet boundary |
 
-### 3.2 `ad_style1` = `00 01 01 00` (action definition, report style 1)
+### `ad_style1` = `00 01 01 00` (action definition, report style 1)
+
+Table: Octets of the action definition `ad_style1`
 
 | Octet | Bits | Meaning |
 |---|---|---|
@@ -216,11 +210,13 @@ One octet. The event trigger has one format and no fields.
 has length 5 and the value `00 ff ff ff ff` (4294967295 needs a leading zero octet
 in two's complement), then the same closing octet.
 
-### 3.3 `ih1_min` = `00 00 ff 00 01 00 00 13 00 14 00 00` (indication header format 1, only mandatory fields)
+### `ih1_min` = `00 00 ff 00 01 00 00 13 00 14 00 00` (indication header format 1, only mandatory fields)
 
-Input (from `libe3/tests/e2sm_dapp_fixtures.inc`, function `ih1_min`):
+Input:
 `ran-function-id` 255, `dapp-id` 1, `node-type` 0, `node-plmn-id` `13 00 14`,
 `node-nb-id` 0, no `node-cu-du-id`, no `timestamp`, no `sequence-id`.
+
+Table: Octets of the indication header `ih1_min`
 
 | Octet(s) | Bits | Meaning |
 |---|---|---|
@@ -243,9 +239,11 @@ Input (from `libe3/tests/e2sm_dapp_fixtures.inc`, function `ih1_min`):
 Total 12 octets. The first octet is entirely header bits: the whole presence map
 and the first extension bit of the first integer fit in it.
 
-### 3.4 `ih1_full` = `0e 00 ff 00 07 00 02 00 f1 10 20 04 d2 00 05 08 17 97 9c fe 3d 85 cd 15 01 2a`
+### `ih1_full` = `0e 00 ff 00 07 00 02 00 f1 10 20 04 d2 00 05 08 17 97 9c fe 3d 85 cd 15 01 2a`
 
 Same shape, with all three optional fields present. Differences from `ih1_min`:
+
+Table: Octets of the indication header `ih1_full`
 
 | Octet(s) | Bits or bytes | Meaning |
 |---|---|---|
@@ -259,9 +257,11 @@ Same shape, with all three optional fields present. Differences from `ih1_min`:
 | 15-23 | `08 17 97 9c fe 3d 85 cd 15` | `timestamp`: length 8, value `0x17979cfe3d85cd15` = 1700000000123456789 ns, which is 2023-11-14 22:13:20.123456789 UTC |
 | 24-25 | `01 2a` | `sequence-id` = 42 |
 
-### 3.5 `ch1_min` = `00 01 00 02` (control header, no timestamp, no sequence-id)
+### `ch1_min` = `00 01 00 02` (control header, no timestamp, no sequence-id)
 
 Input: `ran-function-id` 1, `dapp-id` 2.
+
+Table: Octets of the control header `ch1_min`
 
 | Octet | Bits | Meaning |
 |---|---|---|
@@ -279,9 +279,11 @@ Compare with `ih1_min`: the control header has one choice alternative and two
 `OPTIONAL` fields, so the preamble is 5 bits instead of 7 and the first octet is
 completely full.
 
-### 3.6 `co1_full` = `1c 08 17979cfe3d85cd15 01 2a 0a 10 20 30 40 50 60 70 80 90 a0` (control outcome, everything present)
+### `co1_full` = `1c 08 17979cfe3d85cd15 01 2a 0a 10 20 30 40 50 60 70 80 90 a0` (control outcome, everything present)
 
 This is the outcome that carries the Service-Model payload.
+
+Table: Octets of the control outcome `co1_full`
 
 | Octet(s) | Bits or bytes | Meaning |
 |---|---|---|
@@ -297,17 +299,19 @@ This is the outcome that carries the Service-Model payload.
 
 23 octets. The three smaller outcomes show how the presence bits move:
 
+Table: Smaller control outcome vectors
+
 | Vector | Hex | Presence bits | Why |
 |---|---|---|---|
 | `co1_min` | `00` | `000` | acknowledge only: three zero extension bits, three zero presence bits, two pad bits |
 | `co1_tsseq` | `18 08 17979cfe3d85cd15 01 2a` | `110` | octet 0 = `000 110 00` |
 | `co1_payload` | `04 0a 10 20 30 40 50 60 70 80 90 a0` | `001` | octet 0 = `000 001 00` |
 
-### 3.7 Two APER layers nest in the control outcome
+### Two APER layers nest in the control outcome
 
 `e3-control-outcome` is an `OCTET STRING`, and the Spectrum Service Model fills it
 with its own APER encoding of `Spectrum-ApplyOutcomeData`
-([02-ie-mapping.md](02-ie-mapping.md#8-the-e3-control-outcome-payload)). So a received
+([02-ie-mapping.md](02-ie-mapping.md)). So a received
 outcome has two independent APER values, one inside the other:
 
 ```text
@@ -322,7 +326,9 @@ is decoded from its first octet as if it were a standalone message. The same
 tunnel is used by `ControlMessage-Format1.data` (xApp to RAN) and
 `IndicationMessage-Format1.data` (RAN to xApp).
 
-### 3.8 `im1_small` = `00 00 04 00 03 de ad be ef` (indication message format 1, 4 octets of payload)
+### `im1_small` = `00 00 04 00 03 de ad be ef` (indication message format 1, 4 octets of payload)
+
+Table: Octets of the indication message `im1_small`
 
 | Octet(s) | Bits or bytes | Meaning |
 |---|---|---|
@@ -335,7 +341,9 @@ tunnel is used by `ControlMessage-Format1.data` (xApp to RAN) and
 [06-discrepancies.md](06-discrepancies.md) for what each implementation does when
 the two disagree.
 
-### 3.9 `im2_one` = `20 00 01 00 01 00 00 01` (indication message format 2, one dApp, one function)
+### `im2_one` = `20 00 01 00 01 00 00 01` (indication message format 2, one dApp, one function)
+
+Table: Octets of the indication message `im2_one`
 
 | Octet(s) | Bits or bytes | Meaning |
 |---|---|---|
@@ -349,9 +357,11 @@ the two disagree.
 Octets 5 and 6 show a bit field spanning the octet boundary: the first length
 bit is the last bit of octet 5 and the second is the first bit of octet 6.
 
-### 3.10 fd_min, the smallest RAN function definition
+### `fd_min`, the smallest RAN function definition
 
 `00 10 45 32 53 4d 2d 44 41 50 50 00 00 1a 31 2e 33 2e 36 2e 31 2e 34 2e 31 2e 35 33 31 34 38 2e 31 2e 31 2e 32 35 35 2e 33 11 00 44 41 50 50 20 53 65 72 76 69 63 65 20 4d 6f 64 65 6c 20 66 6f 72 20 45 32 2f 45 33 20 62 72 69 64 67 65`
+
+Table: Octets of the RAN function definition `fd_min`
 
 | Octet(s) | Meaning |
 |---|---|
@@ -366,6 +376,8 @@ bit is the last bit of octet 5 and the second is the first bit of octet 6.
 
 The other three definition vectors add the optional sections:
 
+Table: Other RAN function definition vectors
+
 | Vector | Octets | Content |
 |---|---|---|
 | `fd_min` | 78 | name only |
@@ -373,12 +385,14 @@ The other three definition vectors add the optional sections:
 | `fd_ctrl` | 101 | name, event trigger section (empty), control section with one style, no map |
 | `fd_full` | 175 | name, empty event trigger section, two report styles (style 2 with a map), one control style with a map |
 
-## 4. Golden vectors (full list)
+## Reference test vectors (full list)
 
-`libe3/tests/e2sm_dapp_golden.hpp` holds the bytes. `libe3/tests/e2sm_dapp_fixtures.inc`
-builds each input. Vectors too large to inline carry a length and an FNV-1a 64-bit
-hash instead (the offset basis is `14695981039346656037`, the prime is
-`1099511628211`; see `libe3/tools/e2sm_dapp_golden/gen_golden.c`, function `emit`).
+The reference test vectors are encoded values with the inputs that produce them. An
+implementer uses them to check a codec. Vectors too large to inline carry a length
+and an FNV-1a 64-bit hash instead. The offset basis is `14695981039346656037`, and
+the prime is `1099511628211`.
+
+Table: Reference test vectors
 
 | Vector | Element | Input | Octets |
 |---|---|---|---|
@@ -414,160 +428,383 @@ hash instead (the offset basis is `14695981039346656037`, the prime is
 | `fd_full` | RAN function definition | all sections | 175 |
 | `fd_ctrl` | RAN function definition | control section | 101 |
 
-Properties these vectors pin down:
+Properties that these vectors pin down:
 
 * The all-ones values (`4294967295`, `INT64_MAX`) and the minimum values (`0`)
   of every bounded and unbounded integer.
 * An absent versus a present optional field, in each combination for the outcome.
 * The smallest and largest legal payloads of both message formats (the control
-  message stops at 16000 because of flexric's buffer).
+  message stops at 16000 because of the buffer limit of one implementation).
 * A subscription list of 0, 1, 2, 255 and 256 items.
 
 The vectors do **not** cover: extension bit `1`, a `ranFunction-Instance`, an
 `e3-control-outcome` longer than 127 octets (two-octet length form), a PLMN that is
 not three bytes, a timestamp with the top bit set, and any invalid input.
 
-## 5. The type map across implementations
 
-The same ASN.1 types appear in four code bases under four spellings. Field names in
-libe3's C++ and OCUDU are identical, on purpose (see
-[integrator-guide.md](integrator-guide.md)).
+## Native types for the grammar types
 
-### 5.1 Type names
+Implementations hold the grammar types in different native types. This clause lists
+the typical choices and the traps. Field names in the C++ and the C structures of a
+codec can follow the grammar names exactly, so that the same names work across
+implementations.
 
-| ASN.1 type | libe3 C++ (`libe3::e2sm_dapp`, `include/libe3/e2sm_dapp.hpp`) | libe3 C (`include/libe3/e2sm_dapp_c.h`) | flexric IR (`src/sm/dapp_sm/ie/`) | OCUDU (`asn1::e2sm_dapp`, `include/ocudu/asn1/e2sm/e2sm_dapp.h`) |
-|---|---|---|---|---|
-| `E2SM-DAPP-EventTrigger` | `e2sm_dapp_event_trigger_s` | `libe3_e2sm_dapp_event_trigger_t` | `e2sm_dapp_event_trigger_t` | `e2sm_dapp_event_trigger_s` |
-| `E2SM-DAPP-EventTrigger-Format1` | `e2sm_dapp_event_trigger_format1_s` | (no fields, folded into the enum) | `e2sm_dapp_ev_trg_frmt_1_t` | `e2sm_dapp_event_trigger_format1_s` |
-| `E2SM-DAPP-ActionDefinition` | `e2sm_dapp_action_definition_s` | `libe3_e2sm_dapp_action_definition_t` | `e2sm_dapp_action_def_t` | `e2sm_dapp_action_definition_s` |
-| `E2SM-DAPP-ActionDefinition-Format1` | `e2sm_dapp_action_definition_format1_s` | (no fields) | `e2sm_dapp_action_def_frmt_1_t` | `e2sm_dapp_action_definition_format1_s` |
-| `E2SM-DAPP-IndicationHeader` | `e2sm_dapp_ind_hdr_s` | `libe3_e2sm_dapp_ind_hdr_t` | `e2sm_dapp_ind_hdr_t` | `e2sm_dapp_ind_hdr_s` |
-| `E2SM-DAPP-IndicationHeader-Format1` | `e2sm_dapp_ind_hdr_format1_s` | `libe3_e2sm_dapp_ind_hdr_format1_t` | `e2sm_dapp_ind_hdr_frmt_1_t` | `e2sm_dapp_ind_hdr_format1_s` |
-| `E2SM-DAPP-IndicationHeader-Format2` | `e2sm_dapp_ind_hdr_format2_s` | `libe3_e2sm_dapp_ind_hdr_format2_t` | `e2sm_dapp_ind_hdr_frmt_2_t` | `e2sm_dapp_ind_hdr_format2_s` |
-| `E2SM-DAPP-IndicationMessage` | `e2sm_dapp_ind_msg_s` | `libe3_e2sm_dapp_ind_msg_t` | `e2sm_dapp_ind_msg_t` | `e2sm_dapp_ind_msg_s` |
-| `E2SM-DAPP-IndicationMessage-Format1` | `e2sm_dapp_ind_msg_format1_s` | `libe3_e2sm_dapp_ind_msg_format1_t` | `e2sm_dapp_ind_msg_frmt_1_t` | `e2sm_dapp_ind_msg_format1_s` |
-| `E2SM-DAPP-IndicationMessage-Format2` | `e2sm_dapp_ind_msg_format2_s` | `libe3_e2sm_dapp_ind_msg_format2_t` | `e2sm_dapp_ind_msg_frmt_2_t` | `e2sm_dapp_ind_msg_format2_s` |
-| `E2SM-DAPP-ControlHeader` | `e2sm_dapp_ctrl_hdr_s` | `libe3_e2sm_dapp_ctrl_hdr_t` (format and fields in one struct) | `e2sm_dapp_ctrl_hdr_t` | `e2sm_dapp_ctrl_hdr_s` |
-| `E2SM-DAPP-ControlHeader-Format1` | `e2sm_dapp_ctrl_hdr_format1_s` | (same struct) | `e2sm_dapp_ctrl_hdr_frmt_1_t` | `e2sm_dapp_ctrl_hdr_format1_s` |
-| `E2SM-DAPP-ControlMessage` | `e2sm_dapp_ctrl_msg_s` | `libe3_e2sm_dapp_ctrl_msg_t` (format and data in one struct) | `e2sm_dapp_ctrl_msg_t` | `e2sm_dapp_ctrl_msg_s` |
-| `E2SM-DAPP-ControlMessage-Format1` | `e2sm_dapp_ctrl_msg_format1_s` | (same struct) | `e2sm_dapp_ctrl_msg_frmt_1_t` | `e2sm_dapp_ctrl_msg_format1_s` |
-| `E2SM-DAPP-ControlOutcome` | `e2sm_dapp_ctrl_outcome_s` | `libe3_e2sm_dapp_ctrl_outcome_t` (format and fields in one struct) | `e2sm_dapp_ctrl_out_t` | `e2sm_dapp_ctrl_outcome_s` |
-| `E2SM-DAPP-ControlOutcome-Format1` | `e2sm_dapp_ctrl_outcome_format1_s` | (same struct) | `e2sm_dapp_ctrl_out_frmt_1_t` | `e2sm_dapp_ctrl_outcome_format1_s` |
-| `DAppE3Subscription-Item` | `dapp_e3_subscription_item_s` | `libe3_e2sm_dapp_sub_item_t` | `dapp_e3_subscription_item_t` | `dapp_e3_subscription_item_s` |
-| `DAppE3Subscription-List` | `dapp_e3_subscription_list_l` | `libe3_e2sm_dapp_sub_list_t` | `dapp_e3_subscription_list_t` | `dapp_e3_subscription_list_l` |
-| `RANfunction-Name` | `ran_function_name_s` | `libe3_e2sm_dapp_ran_function_name_t` | `ran_function_name_t` (`flexric/src/lib/sm/ie/ran_function_name.h`, shared with other service models) | `ran_function_name_s` |
-| `RANFunctionDefinition-Report-Item` | `ran_function_definition_report_item_s` | `libe3_e2sm_dapp_report_style_t` | `seq_report_sty_dapp_sm_t` | `ran_function_definition_report_item_s` |
-| `RANFunctionDefinition-Control-Item` | `ran_function_definition_ctrl_item_s` | `libe3_e2sm_dapp_ctrl_style_t` | `seq_ctrl_style_dapp_sm_t` | `ran_function_definition_ctrl_item_s` |
-| `RANFunctionDefinition-Report` | `ran_function_definition_report_s` | (array inside the definition struct) | `ran_func_def_report_dapp_sm_t` | `ran_function_definition_report_s` |
-| `RANFunctionDefinition-Control` | `ran_function_definition_ctrl_s` | (array inside the definition struct) | `ran_func_def_ctrl_dapp_sm_t` | `ran_function_definition_ctrl_s` |
-| `RANFunctionDefinition-EventTrigger` | `ran_function_definition_event_trigger_s` | `has_event_trigger` flag | `ran_func_def_ev_trig_dapp_sm_t` | `ran_function_definition_event_trigger_s` |
-| `E2SM-DAPP-RANFunctionDefinition` | `e2sm_dapp_ran_function_definition_s` | `libe3_e2sm_dapp_ran_function_definition_t` | `e2sm_dapp_func_def_t` | `e2sm_dapp_ran_function_definition_s` |
+Table: Typical native types for the fields
 
-### 5.2 How the same field is held
-
-| ASN.1 field | flexric IR | libe3 C++ | libe3 C | OCUDU |
-|---|---|---|---|---|
-| `ran-function-id`, `dapp-id` (0..4294967295) | `uint32_t` | `uint64_t` | `uint32_t` | `uint64_t` |
-| `node-type` (0..255) | `uint8_t` | `uint8_t` | `uint8_t` | `uint8_t` |
-| `node-plmn-id` (SIZE(3)) | `uint8_t[3]` | `fixed_octstring<3, true>` (a `std::array<uint8_t, 3>`) | `uint8_t[3]` | `fixed_octstring<3, true>` |
-| `node-nb-id` (0..4294967295) | `uint32_t` | `uint64_t` | `uint32_t` | `uint64_t` |
-| `node-cu-du-id` OPTIONAL | `bool node_cu_du_id_present` + `uint64_t` | `node_cu_du_id_present` + `uint64_t` | `has_node_cu_du_id` + `uint32_t` | `node_cu_du_id_present` + `uint64_t` |
-| `timestamp` OPTIONAL | `int64_t timestamp_ns`, **0 means absent** | `timestamp_present` + `int64_t` | `has_timestamp` + `int64_t` | `timestamp_present` + `int64_t` |
-| `sequence-id` OPTIONAL | `int64_t sequence_id`, **0 means absent** | `sequence_id_present` + `int64_t` | `has_sequence_id` + `int64_t` | `sequence_id_present` + `int64_t` |
-| `data-size` | `size_t data_size` (indication), `uint32_t data_size` (control) | `uint16_t data_size` | none, it is `data.len` | `uint16_t data_size` |
-| `data` | `uint8_t* data` | `std::vector`-like `bounded_octstring<1, 32768, true>` | `libe3_e2sm_dapp_bytes_t data` | `bounded_octstring<1, 32768, true>` |
-| `e3-control-outcome` OPTIONAL | `uint8_t*` + `uint32_t e3_control_outcome_size`, **NULL and 0 mean absent** | `e3_ctrl_outcome_present` + `unbounded_octstring<true>` | `has_e3_control_outcome` + bytes | `e3_ctrl_outcome_present` + `unbounded_octstring<true>` |
-| `ric-style-type`, format and style types | `uint32_t` | `int64_t` | `int64_t` | `int64_t` |
-| `ranFunction-Instance` OPTIONAL | `ran_function_name_t::instance` pointer, **encoder asserts it is NULL** | `ran_function_instance_present` + `int64_t` | `has_instance` + `int64_t` | `ran_function_instance_present` + `int64_t` |
-| the format choice | `enum` named `FORMAT_1_...`, values start at **0** | `type()` of an `enumerated`, `to_number()` is the wire format number, starting at **1** | `enum`, values 1, 2, ... | same as libe3 C++ |
-
-Two traps in this table:
-
-* **flexric's format enums start at 0 and the wire's format numbers start at 1.**
-  `FORMAT_1_E2SM_DAPP_IND_HDR` is `0` in memory
-  (`flexric/src/sm/dapp_sm/ie/dapp_data_ie.h:168-173`). Python code that mirrors
-  these enums through `ctypes` has to use the same numbering
-  (`xdevsm/src/xdevsm/sm_framework/py_oran/dapp/enums.py`). The enum value is
-  **not** the same as the `RIC-Format-Type` carried in the definition, which is
-  `1` and `2`.
-* **A zeroed flexric struct is a valid format 1.** Because `FORMAT_1_..._IND_MSG`
-  is `0`, an all-zero `e2sm_dapp_ind_msg_t` reads as "format 1, no data". The
-  encoder guards against this (`dapp_enc_asn.c:295-321`).
-
-### 5.3 The struct layout of flexric is an ABI
-
-`xdevsm` does not link against a header. It mirrors flexric's C structs field by
-field with `ctypes`, and calls `dapp_dec_*_asn` and `dapp_enc_*_asn` in
-`libdapp_sm.so`. The decoders return the structs **by value**. A mirror whose
-field order or type differs from `libdapp_sm.so` reads the wrong offsets and does
-not complain. Examples: `e2sm_dapp_ctrl_out_frmt_1_t` in
-`xdevsm/src/xdevsm/sm_framework/py_oran/dapp/control/DAppControlOut.py:12-22`, and
-`spectrum_sm_report_t` in `.../dapp/e3/DAppE3IndPayload.py`. Treat the IR structs in
-`flexric/src/sm/dapp_sm/ie/ir/*.h` as frozen between releases of
-`libdapp_sm.so`.
-
-## 6. Build switches
-
-### 6.1 flexric: `SM_ENCODING_DAPP`
-
-| Item | Value | Reference |
+| ASN.1 field | Typical native type | Note |
 |---|---|---|
-| CMake variable | `SM_ENCODING_DAPP`, a cache string | `flexric/CMakeLists.txt:317-319` |
-| Allowed values | `ASN` only (the property `STRINGS` lists nothing else) | `CMakeLists.txt:318` |
-| What `PLAIN` does if forced | `src/sm/dapp_sm/CMakeLists.txt` has a `PLAIN` branch that builds `enc/dapp_enc_plain.c`, and every function in it asserts | `dapp_enc_plain.c` |
-| What `FLATBUFFERS` does if forced | `message(FATAL_ERROR "DAPP SM FB not implemented")` | `src/sm/dapp_sm/CMakeLists.txt` |
-| asn1c invocation | `/opt/asn1c/bin/asn1c -no-gen-BER -no-gen-UPER -no-gen-OER -no-gen-JER -fcompound-names -no-gen-example -findirect-choice -fno-include-deps` | `src/sm/dapp_sm/ie/asn/CMakeLists.txt` |
-| Compile definitions on the SM | `-DASN_DISABLE_OER_SUPPORT -DASN_DISABLE_JER_SUPPORT` and the encoding name (`ASN`) as a public definition | `src/sm/dapp_sm/CMakeLists.txt` |
-| Generated sources | written **into the source tree** at configure time (`execute_process` with `-D ${CMAKE_CURRENT_SOURCE_DIR}`) | `ie/asn/CMakeLists.txt` |
-| Agent-side switch | the agent file is built with `ASN`, `FLATBUFFERS` or `PLAIN` defined and falls through to `static_assert(false, ...)` | `dapp_sm_agent.c:16-24` |
-| E3 relay | the `E3_AGENT` macro adds the real I/O to the control and setup paths | `dapp_sm_agent.c:72-79`, `179-201`, `251-256` |
+| `ran-function-id`, `dapp-id`, `node-nb-id` (0..4294967295) | unsigned 32-bit or 64-bit integer | Use 64 bits when `4294967295` shall stay positive in a signed language. |
+| `node-type` (0..255) | unsigned 8-bit integer | |
+| `node-plmn-id` (SIZE(3)) | array of 3 octets | |
+| `node-cu-du-id` OPTIONAL | presence flag and an unsigned integer | |
+| `timestamp` OPTIONAL | presence flag and a signed 64-bit integer | One implementation treats `0` as absent. |
+| `sequence-id` OPTIONAL | presence flag and a signed 64-bit integer | One implementation treats `0` as absent. |
+| `data-size` (0..32768) | unsigned 16-bit integer | Some implementations drop the field and use the length of `data`. |
+| `data` | octet string, size 1..32768 | |
+| `e3-control-outcome` OPTIONAL | presence flag and an octet string with no bounds | One implementation treats a null pointer and a size of `0` as absent. |
+| `ric-style-type`, format and style types | signed 64-bit integer | The grammar has no bounds for these types. |
+| `ranFunction-Instance` OPTIONAL | presence flag and a signed 64-bit integer | One encoder rejects a present instance. |
+| the format choice | enumeration | The wire format numbers start at **1**. |
 
-### 6.2 libe3: `LIBE3_ENABLE_E2SM_DAPP`
+Two traps:
 
-| Item | Value | Reference |
-|---|---|---|
-| CMake option | `LIBE3_ENABLE_E2SM_DAPP`, default `ON` | `libe3/cmake/libe3Options.cmake:26` |
-| Dependency | needs `LIBE3_ENABLE_ASN1`; if that is `OFF` the option is forced `OFF` with a status message | `libe3Options.cmake:27-30` |
-| Targets | `libe3::e2sm_dapp` (static) and `libe3::e2sm_dapp_shared` | `libe3/cmake/libe3Targets.cmake` |
-| Compile definition | `LIBE3_ENABLE_E2SM_DAPP`, public | `libe3Targets.cmake` |
-| asn1c invocation | `-pdu=all -gen-APER -gen-UPER -no-gen-JER -no-gen-BER -no-gen-OER -fno-include-deps -fcompound-names -findirect-choice -no-gen-example` | `libe3/messages/CMakeLists.txt:91` |
-| asn1c version | the fork `mouse07410/asn1c`, commit `940dd5fa9f3917913fd487b13dfddfacd0ded06e` | `libe3/build_libe3:195-227` |
-| Generated sources | in the build tree: `${PROJECT_BINARY_DIR}/generated/e2sm_dapp` | `messages/CMakeLists.txt:86` |
-| asn1c runtime | a private copy, symbols hidden, so a consumer that links its own asn1c (flexric does) does not clash | `messages/CMakeLists.txt:76-82` |
+* **A native format enumeration can start at 0 while the wire format numbers start at
+  1.** The enumeration value is not the `RIC-Format-Type` that the definition
+  carries, which is `1` and `2`. A code that mirrors the enumeration in another
+  language shall use the same numbering as the library.
+* **A zero-initialized structure can read as a valid format 1.** An all-zero
+  indication message reads as "format 1, no data" when the first enumeration value
+  is `0`. An encoder should guard against this.
 
-Targets: `libe3_e2sm_dapp` and `libe3_e2sm_dapp_shared` with the aliases above
-(`cmake/libe3Targets.cmake:190-209`). The install ships the headers `e2sm_dapp.hpp` and
-`e2sm_dapp_c.h`, the grammar under `share/libe3/e2sm_dapp/` and a `libe3_e2sm_dapp.pc`
-(`cmake/libe3Install.cmake:98-161`). `find_package(libe3 CONFIG REQUIRED COMPONENTS
-e2sm_dapp)` finds the component only if the install has the codec
-(`cmake/libe3Config.cmake.in:30-50`).
+## Checking an encoding
 
-### 6.3 OCUDU: `e2sm_dapp_enabled`
+To check a stack, an implementer encodes every input of the reference test vectors
+and compares the output with the expected bytes. Then the implementer decodes every
+expected value and compares the result with the input. The checklist and the way to
+regenerate the vectors are in [integrator-guide.md](integrator-guide.md).
 
-OCUDU does not use asn1c for E2SM-DAPP. The codec is hand-written in the style of
-OCUDU's other E2SM headers: `include/ocudu/asn1/e2sm/e2sm_dapp.h` declares the
-structs and `lib/asn1/e2sm/e2sm_dapp.cpp` implements `pack` and `unpack` on
-OCUDU's `bit_ref` and `cbit_ref`. It is built into `e2ap_asn1`
-(`ocudu/lib/asn1/CMakeLists.txt`, the `add_library(e2ap_asn1 ...)` line).
+## Abstract syntax
 
-The run-time switch is `e2sm_dapp_enabled`, default `false`:
+The ASN.1 definition of E2SM-DAPP conforms to ITU-T Rec. X.680 and ITU-T Rec. X.681.
+If the ASN.1 definition contradicts a table in this specification, the ASN.1
+definition takes precedence.
 
-| Item | Reference |
-|---|---|
-| `e2ap_configuration::e2sm_dapp_enabled` | `ocudu/include/ocudu/e2/e2ap_configuration.h:27` |
-| application config `e2_config::e2sm_dapp_enabled` | `ocudu/apps/helpers/e2/e2_appconfig.h:33` |
-| command line `--e2sm_dapp_enabled`, and the YAML key of the same name in the E2 section | `apps/helpers/e2/e2_cli11_schema.cpp:35`, `e2_config_yaml_writer.cpp:20` |
-| copied into the E2AP configuration for the **DU-high only**; the CU-CP and CU-UP translators set it `false` | `apps/units/flexible_o_du/o_du_high/e2/o_du_high_e2_config_translators.cpp:24`, `apps/units/o_cu_cp/e2/o_cu_cp_e2_config_translators.cpp:20`, `apps/units/o_cu_up/e2/o_cu_up_e2_config_translators.cpp:24` |
-| effect: `create_e2_du_agent` registers the service model (RAN function 255, the OID) and the E2 Setup Request lists it | `lib/e2/common/e2_du_factory.cpp:90-102`, `lib/e2/common/e2ap_asn1_helpers.h:138-148` |
+```asn1
+-- ASN1START
+E2SM-DAPP-IEs {iso(1) identified-organization(3) dod(6) internet(1) private(4) enterprise(1) oran(53148) e2(1) version1(1) e2sm(255) e2sm-DAPP-IEs (3)}
 
-With the flag on and no E3 link attached, the agent advertises the RAN function,
-admits subscriptions, never sends an indication, and refuses every control (see
-[03-procedure-flow.md](03-procedure-flow.md#8-the-same-flow-in-each-implementation)).
+DEFINITIONS AUTOMATIC TAGS ::=
+BEGIN
 
-## 7. Reproducing and checking an encoding
+-- **************************************************************
+-- E2SM Common IEs
+-- **************************************************************
+Bool-Type ::=											    BOOLEAN
 
-* To regenerate the golden vectors from flexric:
-  [integrator-guide.md](integrator-guide.md#reproducing-the-golden-vectors).
-* To check a stack: encode every fixture and compare with the hex in
-  `tests/e2sm_dapp_golden.hpp`, then decode every hex and compare with the fixture
-  ([checklist](integrator-guide.md#checklist-for-a-new-stack)).
+RIC-Format-Type ::= 										INTEGER
+RIC-Style-Type ::= 											INTEGER
+RIC-Style-Name ::= 											PrintableString(SIZE(1..150,...))
+
+-- Nanoseconds since the Unix epoch, from the realtime clock (time_now_ns).
+-- OPTIONAL: absent means "no producer reference", not a malformed message. A peer
+-- that does not stamp is not an error and the codec must not reject it. Same
+-- convention as the E3AP envelope timestamp in libe3.
+Timestamp ::= 													INTEGER
+
+-- The correlation id of one detection-to-mitigation procedure. Same identifier
+-- as libe3's E3-SequenceID: a dApp assigns it on the report, the RAN relays it
+-- here, the xApp echoes it on its control, and the RAN reports it back on the
+-- control outcome. Named to match, because they are the same value.
+-- OPTIONAL, same convention as Timestamp above: absent (no value encoded) means
+-- no producer reference, not a malformed message. 0 is never assigned by any
+-- producer in this codebase, so it is safe to use as the IR struct's own
+-- "absent" sentinel alongside the OPTIONAL ASN.1 encoding.
+SequenceId ::= 													INTEGER
+
+RANfunction-Name ::= 										SEQUENCE{
+    															ranFunction-ShortName						PrintableString(SIZE(1..150,...)),
+    															ranFunction-E2SM-OID						PrintableString(SIZE(1..1000,...)),
+    															ranFunction-Description						PrintableString(SIZE(1..150,...)),
+    															ranFunction-Instance						INTEGER															OPTIONAL,
+    															...
+}
+
+
+
+
+-- **************************************************************
+-- CONSTANTS
+-- **************************************************************
+
+maxE2SMDAPPIndMsgSize                                       INTEGER ::= 32768
+maxE2SMDAPPCtrlMsgSize                                      INTEGER ::= 32768
+maxnoofDApps                                                INTEGER ::= 256
+maxnoofSubscribedE3RANFunctions                             INTEGER ::= 64
+maxnoofDAPPReportStyles                                     INTEGER ::= 2
+maxnoofDAPPControlStyles                                    INTEGER ::= 1
+
+-- **************************************************************
+-- Event Trigger OCTET STRING contents
+-- **************************************************************
+
+E2SM-DAPP-EventTrigger ::= 									SEQUENCE {
+																ric-eventTrigger-formats CHOICE {
+																	eventTrigger-Format1					E2SM-DAPP-EventTrigger-Format1,
+																	...
+																},
+																...
+}
+
+E2SM-DAPP-EventTrigger-Format1 ::= 							SEQUENCE {
+
+}
+
+
+-- **************************************************************
+-- Action Definition OCTET STRING contents
+-- **************************************************************
+
+E2SM-DAPP-ActionDefinition ::=                              SEQUENCE {
+                                                                ric-Style-Type                              RIC-Style-Type,
+                                                                actionDefinition-formats CHOICE {
+                                                                    actionDefinition-Format1                E2SM-DAPP-ActionDefinition-Format1,
+                                                                    ...
+                                                                },
+                                                                ...
+}
+
+E2SM-DAPP-ActionDefinition-Format1 ::=                      SEQUENCE {
+
+}
+
+
+
+-- **************************************************************
+-- IEs
+-- **************************************************************
+
+RANFunctionDefinition-Report-Item ::= 						SEQUENCE {
+																ric-ReportStyle-Type                 		RIC-Style-Type,
+																ric-ReportStyle-Name                 		RIC-Style-Name,
+																ric-IndicationHeaderFormat-Type      		RIC-Format-Type,
+																ric-IndicationMessageFormat-Type     		RIC-Format-Type,
+																dappE3Subscriptions                         DAppE3Subscription-List                           				OPTIONAL,
+																...
+}
+
+RANFunctionDefinition-Control-Item ::= 						SEQUENCE {
+																ric-ControlStyle-Type         				RIC-Style-Type,
+																ric-ControlStyle-Name         				RIC-Style-Name,
+																ric-ControlHeaderFormat-Type  				RIC-Format-Type,
+																ric-ControlMessageFormat-Type 				RIC-Format-Type,
+																ric-ControlOutcomeFormat-Type 				RIC-Format-Type,
+																dappE3Subscriptions                         DAppE3Subscription-List                           				OPTIONAL,
+																...
+}
+
+
+
+
+-- **************************************************************
+-- Indication Header OCTET STRING contents
+-- **************************************************************
+
+E2SM-DAPP-IndicationHeader ::= 								SEQUENCE {
+																ric-indicationHeader-formats CHOICE {
+																		indicationHeader-Format1			E2SM-DAPP-IndicationHeader-Format1,
+																		indicationHeader-Format2			E2SM-DAPP-IndicationHeader-Format2,
+																		...
+																	},
+																	...
+}
+
+E2SM-DAPP-IndicationHeader-Format1 ::=                      SEQUENCE {
+                                                                ran-function-id      						INTEGER (0..4294967295, ...),
+                                                                dapp-id              						INTEGER (0..4294967295, ...),
+																node-type            						INTEGER (0..255, ...),
+																node-plmn-id         						OCTET STRING (SIZE(3)),
+																node-nb-id           						INTEGER (0..4294967295, ...),
+																node-cu-du-id        						INTEGER (0..4294967295, ...) 									OPTIONAL,
+																timestamp            						Timestamp OPTIONAL,
+															sequence-id          						SequenceId OPTIONAL,
+                                                                ...
+}
+
+E2SM-DAPP-IndicationHeader-Format2 ::=                      SEQUENCE {
+																node-type            						INTEGER (0..255, ...),
+																node-plmn-id         						OCTET STRING (SIZE(3)),
+																node-nb-id           						INTEGER (0..4294967295, ...),
+																node-cu-du-id        						INTEGER (0..4294967295, ...) 									OPTIONAL,
+																timestamp            						Timestamp OPTIONAL,
+															sequence-id          						SequenceId OPTIONAL,
+                                                                ...
+}
+
+
+
+
+-- **************************************************************
+-- Indication Message OCTET STRING contents
+-- **************************************************************
+
+E2SM-DAPP-IndicationMessage ::= 							SEQUENCE {
+																ric-indicationMessage-formats CHOICE {
+																	indicationMessage-Format1				E2SM-DAPP-IndicationMessage-Format1,
+																	indicationMessage-Format2				E2SM-DAPP-IndicationMessage-Format2,
+																	...
+																},
+																...
+}
+
+E2SM-DAPP-IndicationMessage-Format1 ::=                     SEQUENCE {
+                                                                data-size   								INTEGER (0..maxE2SMDAPPIndMsgSize),
+                                                                data        								OCTET STRING (SIZE(1..maxE2SMDAPPIndMsgSize)),
+                                                                ...
+}
+
+E2SM-DAPP-IndicationMessage-Format2 ::=                     SEQUENCE {
+                                                                dappE3Subscriptions     					DAppE3Subscription-List,
+                                                                ...
+}
+
+
+
+
+-- **************************************************************
+-- Control Header OCTET STRING contents
+-- **************************************************************
+
+E2SM-DAPP-ControlHeader ::= 								SEQUENCE {
+																ric-controlHeader-formats CHOICE {
+																	controlHeader-Format1					E2SM-DAPP-ControlHeader-Format1,
+																	...
+																},
+																...
+}
+
+E2SM-DAPP-ControlHeader-Format1 ::= 						SEQUENCE {
+	                                                            ran-function-id      						INTEGER (0..4294967295, ...),
+                                                                dapp-id              						INTEGER (0..4294967295, ...),
+																timestamp            						Timestamp OPTIONAL,
+															sequence-id          						SequenceId OPTIONAL,
+                                                                ...
+}
+
+
+
+
+-- **************************************************************
+-- Control Message OCTET STRING contents
+-- **************************************************************
+
+E2SM-DAPP-ControlMessage ::= 								SEQUENCE {
+																ric-controlMessage-formats CHOICE {
+																	controlMessage-Format1					E2SM-DAPP-ControlMessage-Format1,
+																	...
+																},
+																...
+}
+
+E2SM-DAPP-ControlMessage-Format1 ::= 						SEQUENCE {
+                                                                data-size   								INTEGER (0..maxE2SMDAPPCtrlMsgSize),
+                                                                data        								OCTET STRING (SIZE(1..maxE2SMDAPPCtrlMsgSize)),
+                                                                ...
+}
+
+
+
+
+-- **************************************************************
+-- Control Outcome OCTET STRING contents
+-- **************************************************************
+
+E2SM-DAPP-ControlOutcome ::= 								SEQUENCE {
+																ric-controlOutcome-formats CHOICE {
+																	controlOutcome-Format1					E2SM-DAPP-ControlOutcome-Format1,
+																	...
+																},
+																...
+}
+
+-- e3-control-outcome carries the Service Model's own account of what applying
+-- the control did, encoded by the SM named by the control's ran-function-id and
+-- opaque here. It is the same tunnelling that
+-- E2SM-DAPP-ControlMessage-Format1 already does for the control itself.
+-- "Applied" means something different for every SM, so this layer defines the
+-- envelope and not the meaning.
+-- OPTIONAL: an outcome that only acknowledges, with nothing to report about the
+-- application, omits it.
+E2SM-DAPP-ControlOutcome-Format1 ::= 						SEQUENCE {
+																timestamp            						Timestamp OPTIONAL,
+															sequence-id          						SequenceId OPTIONAL,
+																e3-control-outcome					OCTET STRING OPTIONAL,
+																...
+}
+
+
+-- **************************************************************
+-- dApp E3 Subscription Info
+-- **************************************************************
+SubscribedE3RANFunction-ID ::=                              INTEGER 										(0..4294967295, ...)
+
+DAppE3Subscription-Item ::=                                 SEQUENCE {
+                                                                dapp-id                 					INTEGER (0..4294967295, ...),
+                                                                subscribed-e3-ran-functions 				SEQUENCE (SIZE(1..maxnoofSubscribedE3RANFunctions)) OF SubscribedE3RANFunction-ID,
+                                                                ...
+}
+
+DAppE3Subscription-List ::=                                   SEQUENCE 										(SIZE(0..maxnoofDApps)) OF DAppE3Subscription-Item
+
+-- **************************************************************
+-- RAN Function Definition IEs
+-- **************************************************************
+
+E2SM-DAPP-RANFunctionDefinition ::= 						SEQUENCE{
+																ranFunction-Name							RANfunction-Name,
+																ranFunctionDefinition-EventTrigger			RANFunctionDefinition-EventTrigger								OPTIONAL,
+																ranFunctionDefinition-Report				RANFunctionDefinition-Report									OPTIONAL,
+																ranFunctionDefinition-Control				RANFunctionDefinition-Control									OPTIONAL,
+																...
+}
+
+
+
+
+-- **************************************************************
+-- Event Trigger
+-- **************************************************************
+
+RANFunctionDefinition-EventTrigger ::= 						SEQUENCE {
+																...
+}
+
+
+
+
+-- **************************************************************
+-- Report
+-- **************************************************************
+
+RANFunctionDefinition-Report ::= 							SEQUENCE {
+    															ric-ReportStyle-List 						SEQUENCE (SIZE(1..maxnoofDAPPReportStyles)) OF RANFunctionDefinition-Report-Item,
+    															...
+}
+
+
+
+
+-- **************************************************************
+-- Control
+-- **************************************************************
+
+RANFunctionDefinition-Control ::= 							SEQUENCE {
+    															ric-ControlStyle-List 						SEQUENCE (SIZE(1..maxnoofDAPPControlStyles)) OF RANFunctionDefinition-Control-Item,
+    															...
+}
+
+
+
+
+END
+-- ASN1STOP
+```

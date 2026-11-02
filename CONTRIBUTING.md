@@ -119,6 +119,21 @@ These rules are enforced by the `Commit policy` workflow (`.github/workflows/com
 
 This repository is part of a framework that includes [`dapps`](https://github.com/wineslab/dApp-library) (the Python dApp library) and [`dApp-openairinterface5g`](https://github.com/wineslab/dApp-openairinterface5g) (the OAI fork). **We do not accept patches that break or reduce compatibility with the twin repositories.** PRs that change the public API/ABI, the E3 wire protocol, or add a new Service Model must come with a paired PR in the affected twin repo, linked from the PR description.
 
+### Specifications and their Word editions
+
+The specifications live under `docs/` (`e2sm-dapp/`, `e3ap/`, `e3sm/spectrum/`, `e3sm/l1-kpm/`). The Markdown is the source. The Word file in each folder (`O-RAN.WG3.TS.*.docx`) is generated from it, so **never edit a Word file by hand**: the next build overwrites the edit.
+
+To change a specification:
+
+1. Edit the Markdown chapters of that folder (`README.md` for the scope, references, terms and general clauses, `01` to `06` for the clauses that follow). Write American English, short sentences, no dashes, `shall` and `should` instead of `must`. Spec text names no repository and gives no `path:line`; code pointers go in the integrator guide (`integrator-guide.md`, `code-pointers.md`).
+2. Put a line `Table: <caption>` directly above each new table, so the Word file gets a caption.
+3. To change the clause layout, the title or the document number, edit `docx.json` in the same folder.
+4. Build the Word file: `tools/oran_docx/build_docx.py docs/<folder>`. It needs Python 3 only; LibreOffice and `pdftotext` add page numbers to the table of contents. See `tools/oran_docx/README.md`.
+5. Open the result in Word or convert it to PDF, and look at the cover, one table and the ASN.1 clause.
+6. Commit the Markdown and the rebuilt Word file in the same commit, so the two never differ.
+
+A change that touches only these files runs no tests in CI (see `.github/scripts/detect_code_changes.sh`). To change the grammar in a specification that includes it (E3AP, E2SM-DAPP), change the `.asn1` or `.asn` file under `messages/` first. The ASN.1 block in `04-encoding.md` has to stay byte-identical to it.
+
 ## Code of Conduct
 
 ### Our Pledge
