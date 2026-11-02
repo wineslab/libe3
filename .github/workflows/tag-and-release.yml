@@ -222,24 +222,6 @@ jobs:
           chmod +x ./build_libe3 || true
           ./build_libe3 -r --docs
 
-      - name: Report documentation coverage
-        run: |
-          # Count documented vs undocumented symbols from Doxygen warnings
-          total=$(grep -c "is not documented" build/docs/doxygen_warnings.txt 2>/dev/null || echo 0)
-          echo "## Documentation Coverage" >> $GITHUB_STEP_SUMMARY
-          if [ "$total" -eq 0 ]; then
-            echo "✅ No undocumented public symbols detected." >> $GITHUB_STEP_SUMMARY
-          else
-            echo "⚠️ **${total} undocumented symbol(s)** found. See details below." >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "<details><summary>Undocumented symbols</summary>" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            grep "is not documented" build/docs/doxygen_warnings.txt >> $GITHUB_STEP_SUMMARY || true
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "</details>" >> $GITHUB_STEP_SUMMARY
-          fi
-
       - name: Package HTML documentation
         run: |
           version=${{ needs.create-tag.outputs.version }}
