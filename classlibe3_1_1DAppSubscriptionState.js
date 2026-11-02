@@ -3,6 +3,7 @@ var classlibe3_1_1DAppSubscriptionState =
     [ "DAppSubscriptionState", "classlibe3_1_1DAppSubscriptionState.html#a64da3b3daa86423b33e89ca51328bfa0", null ],
     [ "DAppSubscriptionState", "classlibe3_1_1DAppSubscriptionState.html#ad46eb232df8a5a6a914402c63048d584", null ],
     [ "active_subscriptions", "classlibe3_1_1DAppSubscriptionState.html#ac517de82d3e1cd2cd6d8181e6906a020", null ],
+    [ "clear_session", "classlibe3_1_1DAppSubscriptionState.html#a444033de46b0efcd0504b99ab65c9f2d", null ],
     [ "operator=", "classlibe3_1_1DAppSubscriptionState.html#a451d0c298f7bd60a8bc269254d285121", null ],
     [ "record_setup_response", "classlibe3_1_1DAppSubscriptionState.html#a9ccf2ef6fa69ab6207bf541f99d56a39", null ],
     [ "record_subscription", "classlibe3_1_1DAppSubscriptionState.html#ad43a7eb3f4d19ba51d396af2f3a0bd49", null ],

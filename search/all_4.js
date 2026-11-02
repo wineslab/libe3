@@ -29,11 +29,15 @@ var searchData=
   ['deployment_20variants_26',['Deployment variants',['../path_a_e3_loop.html#autotoc_md29',1,'']]],
   ['destroy_27',['destroy',['../classlibe3_1_1ServiceModel.html#a509d11a31eaa21d4ecba7c270c288f21',1,'libe3::ServiceModel::destroy()'],['../structe3__service__model__handle__s.html#a198c005824e4936ccc878eb7b22c308b',1,'e3_service_model_handle_s::destroy()']]],
   ['disabled_5fring_28',['disabled_ring',['../latrec_8c.html#aa190e5ff9a2fdfcb1997a98ca5ae5665',1,'latrec.c']]],
-  ['dispose_29',['dispose',['../classlibe3_1_1E3Connector.html#a7742bb39d7c324eff95c0ca2f60e26c5',1,'libe3::E3Connector::dispose()'],['../classlibe3_1_1PosixE3Connector.html#a5583b230f5ffe39460c6373bd5d49453',1,'libe3::PosixE3Connector::dispose()'],['../classlibe3_1_1ZmqE3Connector.html#aa4faf908ab702dfef5414d98d0c6a305',1,'libe3::ZmqE3Connector::dispose()']]],
-  ['distinct_20terminations_30',['Two distinct terminations',['../path_a_e3_loop.html#autotoc_md27',1,'']]],
-  ['down_20leg_20leg_20policy_5fdown_31',['Policy-down leg (&lt;span class=&quot;tt&quot;&gt;leg=policy_down&lt;/span&gt;)',['../path_b_e2_e3_loop.html#autotoc_md36',1,'']]],
-  ['downstream_32',['Matching the flag downstream',['../latrec_guide.html#autotoc_md10',1,'']]],
-  ['drain_20gil_20release_20not_20callbacks_33',['Why batched drain + GIL release (not callbacks)',['../dir_921b7fe62329ee5986df8fde73ed97c3.html#autotoc_md3',1,'']]],
-  ['dropped_34',['dropped',['../structlibe3_1_1py_1_1DAppSession_1_1Impl.html#ab95aae0df6ca13374254ba3d39e46117',1,'libe3::py::DAppSession::Impl']]],
-  ['dropped_5fevents_35',['dropped_events',['../classlibe3_1_1py_1_1DAppSession.html#a5cdfb9fddf76c03760e9e219f652f7c8',1,'libe3::py::DAppSession']]]
+  ['disconnect_5fhandler_29',['disconnect_handler',['../structlibe3_1_1E3Agent_1_1Impl.html#aeb94050d32ccd5e5d9ec1f7d66895199',1,'libe3::E3Agent::Impl']]],
+  ['disconnect_5freason_30',['disconnect_reason',['../structlibe3_1_1py_1_1E3Event.html#a64a96173f6ad562b36604c04025a21be',1,'libe3::py::E3Event']]],
+  ['disconnecthandler_31',['DisconnectHandler',['../namespacelibe3.html#adae81936974f9ce540c4eb62eb58ce2a',1,'libe3']]],
+  ['disconnectreason_32',['DisconnectReason',['../namespacelibe3.html#ac517385d2a8b182e20888ef2c3b8ca19',1,'libe3']]],
+  ['dispose_33',['dispose',['../classlibe3_1_1E3Connector.html#a7742bb39d7c324eff95c0ca2f60e26c5',1,'libe3::E3Connector::dispose()'],['../classlibe3_1_1PosixE3Connector.html#a5583b230f5ffe39460c6373bd5d49453',1,'libe3::PosixE3Connector::dispose()'],['../classlibe3_1_1ZmqE3Connector.html#aa4faf908ab702dfef5414d98d0c6a305',1,'libe3::ZmqE3Connector::dispose()']]],
+  ['distinct_20terminations_34',['Two distinct terminations',['../path_a_e3_loop.html#autotoc_md27',1,'']]],
+  ['down_20leg_20leg_20policy_5fdown_35',['Policy-down leg (&lt;span class=&quot;tt&quot;&gt;leg=policy_down&lt;/span&gt;)',['../path_b_e2_e3_loop.html#autotoc_md36',1,'']]],
+  ['downstream_36',['Matching the flag downstream',['../latrec_guide.html#autotoc_md10',1,'']]],
+  ['drain_20gil_20release_20not_20callbacks_37',['Why batched drain + GIL release (not callbacks)',['../dir_921b7fe62329ee5986df8fde73ed97c3.html#autotoc_md3',1,'']]],
+  ['dropped_38',['dropped',['../structlibe3_1_1py_1_1DAppSession_1_1Impl.html#ab95aae0df6ca13374254ba3d39e46117',1,'libe3::py::DAppSession::Impl']]],
+  ['dropped_5fevents_39',['dropped_events',['../classlibe3_1_1py_1_1DAppSession.html#a5cdfb9fddf76c03760e9e219f652f7c8',1,'libe3::py::DAppSession']]]
 ];

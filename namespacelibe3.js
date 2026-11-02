@@ -40,6 +40,7 @@ var namespacelibe3 =
     [ "ProtobufE3Encoder", "classlibe3_1_1ProtobufE3Encoder.html", "classlibe3_1_1ProtobufE3Encoder" ],
     [ "DAppReportHandler", "namespacelibe3.html#a55f022248ffc81789cb641121fea1e45", null ],
     [ "DAppStatusChangedHandler", "namespacelibe3.html#a3b9104521ca1196dc4cf2d64fd99cf83", null ],
+    [ "DisconnectHandler", "namespacelibe3.html#adae81936974f9ce540c4eb62eb58ce2a", null ],
     [ "EncodeResult", "namespacelibe3.html#a9acc43e04a971efeb933961b950d3732", null ],
     [ "IndicationHandler", "namespacelibe3.html#af327eac0d787dfaa03a13398d1be2e0b", null ],
     [ "LogCallback", "namespacelibe3.html#a2516d19ac2e187935aad4c027401e3e0", null ],
@@ -67,6 +68,10 @@ var namespacelibe3 =
       [ "STOPPING", "namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1feaf6cdb3c6710b50ec65ee07f740847e10", null ],
       [ "STOPPED", "namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1fea09d4d696b4e935115b9313e3c412509a", null ],
       [ "ERROR", "namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1feabb1ca97ec761fc37101737ba0aa2e7c5", null ]
+    ] ],
+    [ "DisconnectReason", "namespacelibe3.html#ac517385d2a8b182e20888ef2c3b8ca19", [
+      [ "RELEASED_BY_RAN", "namespacelibe3.html#ac517385d2a8b182e20888ef2c3b8ca19a7993dab10d0452f96478365ebc3f26d1", null ],
+      [ "CONNECTION_LOST", "namespacelibe3.html#ac517385d2a8b182e20888ef2c3b8ca19a6afae85c81e24d106bec978e17b89ce7", null ]
     ] ],
     [ "E3LinkLayer", "namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0e", [
       [ "ZMQ", "namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea38cf8f016825407fb4e79e319d87bd5e", null ],

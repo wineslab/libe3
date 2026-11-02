@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.6</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.7</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -336,7 +336,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Get inbound endpoint. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00191">191</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00193">193</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -473,7 +473,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Get outbound endpoint. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00196">196</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00198">198</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -507,7 +507,7 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Number of bytes received, or negative error code </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Number of bytes received; 0 on timeout (nothing yet); ErrorCode::NOT_CONNECTED once the peer has closed (dApp role); any other negative <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> on a transport error </dd></dl>
 
 <p>Implemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#a78be8b3116078571b637153efb88b96d">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#abedf1390d6c6c7baed423ceb7593f4c0">libe3::ZmqE3Connector</a>.</p>
 
@@ -576,7 +576,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#aa1148301c1383f0a68681a6e529efc9b">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#aeaa674b75ad9c9ac9e8509e4c2a1c668">libe3::ZmqE3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00124">124</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00126">126</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -605,7 +605,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Get current role. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00181">181</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00183">183</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -708,7 +708,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#a050f26143b9390d56ff01ec94eebfead">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#a5d8b4a806fb8bac843e01884652c62bd">libe3::ZmqE3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00117">117</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00119">119</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -737,7 +737,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Set role (RAN or DAPP). Affects bind vs connect direction and cleanup behaviour. Must be set before any setup_* call. Default RAN. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00176">176</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00178">178</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -766,7 +766,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Get setup endpoint. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00186">186</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00188">188</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -827,7 +827,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#adbe1526c1f351a3e6e6bf971ac94ee53">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#ac4011323bb13d364a645b970d64540d0">libe3::ZmqE3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00132">132</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00134">134</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -888,7 +888,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#a821510b86a0d1aec24a7feafc3309c01">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#a96fe3afe2ba766b96fb795daca3f4d66">libe3::ZmqE3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00110">110</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00112">112</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -949,7 +949,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#ad733335f58c2b16785cfbe6b03ce78b5">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#a0b0349e33978730857f5f2be77ce6313">libe3::ZmqE3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00140">140</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00142">142</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -981,7 +981,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#ad24cf60976a943de987c1cb0e3f64b8f">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#aec115f18a6d0df057b6da23624d2c04f">libe3::ZmqE3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00155">155</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00157">157</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -1035,7 +1035,7 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00202">202</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00204">204</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -1059,7 +1059,7 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00203">203</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00205">205</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -1083,7 +1083,7 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00204">204</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00206">206</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -1107,7 +1107,7 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00201">201</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00203">203</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>

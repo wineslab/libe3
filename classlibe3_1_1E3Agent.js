@@ -42,6 +42,7 @@ var classlibe3_1_1E3Agent =
     [ "send_xapp_control", "classlibe3_1_1E3Agent.html#ac8de55be7199ba82dfe24253e478dec9", null ],
     [ "set_dapp_report_handler", "classlibe3_1_1E3Agent.html#ae65a93ce83d567be3579cb3edbd59ba2", null ],
     [ "set_dapp_status_changed_handler", "classlibe3_1_1E3Agent.html#a3c620561a9c97d4c9a491e37e1a6b41c", null ],
+    [ "set_disconnect_handler", "classlibe3_1_1E3Agent.html#a155b885f689cbbfb889e0e43422756d8", null ],
     [ "set_indication_handler", "classlibe3_1_1E3Agent.html#adeeeba9a7598b2fd67f207bd0b1b1209", null ],
     [ "set_message_ack_handler", "classlibe3_1_1E3Agent.html#aef9014ce6df6e1d01605c6c56270c05b", null ],
     [ "set_setup_response_handler", "classlibe3_1_1E3Agent.html#a243e528b68d9cdc5cd7bdf149aec56ad", null ],

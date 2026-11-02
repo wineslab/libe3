@@ -8,5 +8,7 @@ var searchData=
   ['dapp_5fversion_5',['dapp_version',['../structlibe3_1_1SetupRequest.html#a83c42dbce9424c73837985fbdfd5ee18',1,'libe3::SetupRequest::dapp_version'],['../structlibe3_1_1E3Config.html#a1597f7d8745dcc5fe99570e9a2f20147',1,'libe3::E3Config::dapp_version']]],
   ['default_5fbuffer_5fsize_6',['DEFAULT_BUFFER_SIZE',['../namespacelibe3.html#a809598c8d63a2bdce0d447411324a2b5',1,'libe3']]],
   ['disabled_5fring_7',['disabled_ring',['../latrec_8c.html#aa190e5ff9a2fdfcb1997a98ca5ae5665',1,'latrec.c']]],
-  ['dropped_8',['dropped',['../structlibe3_1_1py_1_1DAppSession_1_1Impl.html#ab95aae0df6ca13374254ba3d39e46117',1,'libe3::py::DAppSession::Impl']]]
+  ['disconnect_5fhandler_8',['disconnect_handler',['../structlibe3_1_1E3Agent_1_1Impl.html#aeb94050d32ccd5e5d9ec1f7d66895199',1,'libe3::E3Agent::Impl']]],
+  ['disconnect_5freason_9',['disconnect_reason',['../structlibe3_1_1py_1_1E3Event.html#a64a96173f6ad562b36604c04025a21be',1,'libe3::py::E3Event']]],
+  ['dropped_10',['dropped',['../structlibe3_1_1py_1_1DAppSession_1_1Impl.html#ab95aae0df6ca13374254ba3d39e46117',1,'libe3::py::DAppSession::Impl']]]
 ];

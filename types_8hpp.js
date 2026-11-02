@@ -37,6 +37,10 @@ var types_8hpp =
       [ "libe3::AgentState::STOPPED", "namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1fea09d4d696b4e935115b9313e3c412509a", null ],
       [ "libe3::AgentState::ERROR", "namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1feabb1ca97ec761fc37101737ba0aa2e7c5", null ]
     ] ],
+    [ "libe3::DisconnectReason", "namespacelibe3.html#ac517385d2a8b182e20888ef2c3b8ca19", [
+      [ "libe3::DisconnectReason::RELEASED_BY_RAN", "namespacelibe3.html#ac517385d2a8b182e20888ef2c3b8ca19a7993dab10d0452f96478365ebc3f26d1", null ],
+      [ "libe3::DisconnectReason::CONNECTION_LOST", "namespacelibe3.html#ac517385d2a8b182e20888ef2c3b8ca19a6afae85c81e24d106bec978e17b89ce7", null ]
+    ] ],
     [ "libe3::E3LinkLayer", "namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0e", [
       [ "libe3::E3LinkLayer::ZMQ", "namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea38cf8f016825407fb4e79e319d87bd5e", null ],
       [ "libe3::E3LinkLayer::POSIX", "namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea0028405011724c5677faba466637b1e5", null ]

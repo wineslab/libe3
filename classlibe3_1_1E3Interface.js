@@ -25,6 +25,7 @@ var classlibe3_1_1E3Interface =
     [ "sanitize_request_message_id", "classlibe3_1_1E3Interface.html#afada17b0b8a1833ecd7b279db8d3babe", null ],
     [ "set_dapp_report_handler", "classlibe3_1_1E3Interface.html#ae7c86c1080c5245ebdd01e72c6c5f6a6", null ],
     [ "set_dapp_status_changed_handler", "classlibe3_1_1E3Interface.html#a58bdd2ed97b9efff0d98ebaffb727d8b", null ],
+    [ "set_disconnect_handler", "classlibe3_1_1E3Interface.html#a671cf78acf7a2ba49bcb3660a5dbe611", null ],
     [ "set_indication_handler", "classlibe3_1_1E3Interface.html#a60f59fc9396df7f3f0ab220f39cabb65", null ],
     [ "set_message_ack_handler", "classlibe3_1_1E3Interface.html#ac17e59984d9bb8aeb583bf7afb7d9b3f", null ],
     [ "set_setup_response_handler", "classlibe3_1_1E3Interface.html#ad041e8e12dff1b8d7fabccd2c41334f0", null ],

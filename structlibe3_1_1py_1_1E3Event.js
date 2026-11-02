@@ -2,6 +2,7 @@ var structlibe3_1_1py_1_1E3Event =
 [
     [ "control_granted", "structlibe3_1_1py_1_1E3Event.html#a36b0e37e84a5b2d9af93d9c5e2f15d1d", null ],
     [ "dapp_id", "structlibe3_1_1py_1_1E3Event.html#a3289640b851ae9089cc92acc0f436f65", null ],
+    [ "disconnect_reason", "structlibe3_1_1py_1_1E3Event.html#a64a96173f6ad562b36604c04025a21be", null ],
     [ "has_control_granted", "structlibe3_1_1py_1_1E3Event.html#a71647ce850dc53f08c86ecfa570be735", null ],
     [ "has_telemetry_granted", "structlibe3_1_1py_1_1E3Event.html#ab2aab3fcd79b103ea8141453bbc71a14", null ],
     [ "kind", "structlibe3_1_1py_1_1E3Event.html#a32878e95b8bbe48ae73fa982f348ce81", null ],
