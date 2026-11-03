@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.15.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>libe3: /home/runner/work/libe3/libe3/include/libe3/latrec.h File Reference</title>
+<title>libe3: include/libe3/latrec.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.10</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -125,109 +125,105 @@ Macros</h2></td></tr>
 <tr class="memitem:a4e9fbeea74f57477773635c227675bbb" id="r_a4e9fbeea74f57477773635c227675bbb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4e9fbeea74f57477773635c227675bbb">LATREC_CAT_</a>(a,  b)</td></tr>
 <tr class="memitem:aa1db4e1e307964c3410eb3aefcc3c05d" id="r_aa1db4e1e307964c3410eb3aefcc3c05d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa1db4e1e307964c3410eb3aefcc3c05d">LATREC_CAT</a>(a,  b)</td></tr>
 <tr class="memitem:a293ddc45eedf734e20d4443fc31366d5" id="r_a293ddc45eedf734e20d4443fc31366d5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a293ddc45eedf734e20d4443fc31366d5">LATREC_STATIC_ASSERT</a>(c,  m)</td></tr>
-<tr class="memitem:ab9671963b477c515c5e5f68108180aec" id="r_ab9671963b477c515c5e5f68108180aec"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab9671963b477c515c5e5f68108180aec">LATREC_MAGIC</a>&#160;&#160;&#160;0x31524C41u /* &quot;ALR1&quot; */</td></tr>
+<tr class="memitem:ab9671963b477c515c5e5f68108180aec" id="r_ab9671963b477c515c5e5f68108180aec"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab9671963b477c515c5e5f68108180aec">LATREC_MAGIC</a>&#160;&#160;&#160;0x31524C41u</td></tr>
 <tr class="memitem:a3391867cf3553b865417f58b66c349d7" id="r_a3391867cf3553b865417f58b66c349d7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3391867cf3553b865417f58b66c349d7">LATREC_VERSION</a>&#160;&#160;&#160;2u</td></tr>
 <tr class="memitem:a987a6fd768eccf4c5b260cfce62b8d89" id="r_a987a6fd768eccf4c5b260cfce62b8d89"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a987a6fd768eccf4c5b260cfce62b8d89">LATREC_HDR_LEN</a>&#160;&#160;&#160;4096</td></tr>
 <tr class="memitem:ab647ce9466125222bc27a22bb5fbb340" id="r_ab647ce9466125222bc27a22bb5fbb340"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab647ce9466125222bc27a22bb5fbb340">LATREC_CLOCK_SLOW_NS</a>&#160;&#160;&#160;100u</td></tr>
 <tr class="memitem:a7ac2904913283d2a75d46169516ce4df" id="r_a7ac2904913283d2a75d46169516ce4df"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7ac2904913283d2a75d46169516ce4df">LATREC_DEFAULT_DIR</a>&#160;&#160;&#160;&quot;/tmp/latrec&quot;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:a3a5299284d59c3fbf3594540ef136ff2" id="r_a3a5299284d59c3fbf3594540ef136ff2"><td class="memItemLeft" align="right" valign="top">typedef char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3a5299284d59c3fbf3594540ef136ff2">latrec_static_assert___LINE__</a>[(sizeof(<a class="el" href="structlatrec__rec.html">latrec_rec</a>)==32) ? 1 :-1]</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:a4fd84bfdbc521217c5cd53c800be082a" id="r_a4fd84bfdbc521217c5cd53c800be082a"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
-&#160;&#160;<a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa634c3cb97a66927863b27a6b838d843a">LATREC_RECORD_BEGIN</a> = 0x10
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa1c8c30d7c07990f03471d3383f10e65d">LATREC_PROCESS_BEGIN</a> = 0x11
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa86819aa78571a6dc93475e91604273ef">LATREC_ENCODE_E3SM_BEGIN</a> = 0x18
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa43e6fbab5d74780cb85641d055068b9b">LATREC_ENCODE_E3SM_DONE</a> = 0x19
+<tr class="memitem:a717d066d7cd15e686fb2fcedfcf8bd8d" id="r_a717d066d7cd15e686fb2fcedfcf8bd8d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
+&#160;&#160;<a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da634c3cb97a66927863b27a6b838d843a">LATREC_RECORD_BEGIN</a> = 0x10
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da1c8c30d7c07990f03471d3383f10e65d">LATREC_PROCESS_BEGIN</a> = 0x11
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da86819aa78571a6dc93475e91604273ef">LATREC_ENCODE_E3SM_BEGIN</a> = 0x18
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da43e6fbab5d74780cb85641d055068b9b">LATREC_ENCODE_E3SM_DONE</a> = 0x19
 , <br />
-&#160;&#160;<a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa750040977d4c51758c089ca35e5652c6">LATREC_DECODE_E3SM_BEGIN</a> = 0x1A
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa4eb078f3d90b897fa3c143b63f9ff8ec">LATREC_DECODE_E3SM_DONE</a> = 0x1B
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa0cb7a7a3ecee27ca69442f27546534a2">LATREC_EMIT_ENTER</a> = 0x20
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aaf2f8e0332b38a8f07f4150da70f148d1">LATREC_ENQUEUE</a> = 0x21
+&#160;&#160;<a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da750040977d4c51758c089ca35e5652c6">LATREC_DECODE_E3SM_BEGIN</a> = 0x1A
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da4eb078f3d90b897fa3c143b63f9ff8ec">LATREC_DECODE_E3SM_DONE</a> = 0x1B
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da0cb7a7a3ecee27ca69442f27546534a2">LATREC_EMIT_ENTER</a> = 0x20
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8daf2f8e0332b38a8f07f4150da70f148d1">LATREC_ENQUEUE</a> = 0x21
 , <br />
-&#160;&#160;<a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa1a05209471501d126be211d86d22b893">LATREC_DEQUEUE</a> = 0x22
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa63eba46e27cccd255b4311de89655d80">LATREC_ENCODE_E3AP_DONE</a> = 0x23
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aab39f8a53d3a96e8a0290e0b1ebf7d584">LATREC_SEND_DONE</a> = 0x24
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa6c0a753709f19195db77f6ac29b2c70a">LATREC_RECV</a> = 0x25
+&#160;&#160;<a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da1a05209471501d126be211d86d22b893">LATREC_DEQUEUE</a> = 0x22
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da63eba46e27cccd255b4311de89655d80">LATREC_ENCODE_E3AP_DONE</a> = 0x23
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8dab39f8a53d3a96e8a0290e0b1ebf7d584">LATREC_SEND_DONE</a> = 0x24
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da6c0a753709f19195db77f6ac29b2c70a">LATREC_RECV</a> = 0x25
 , <br />
-&#160;&#160;<a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa723d44655c3ab949c627f539ec368628">LATREC_DECODE_E3AP_DONE</a> = 0x26
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa8b1c65e3a7f00ec08799d47a0ac6002c">LATREC_DELIVER_BEGIN</a> = 0x27
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aaf9bb7a90953b33222678fe24a9ccb237">LATREC_DELIVER_DONE</a> = 0x28
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa83e4757b9576c096a9967287091e9b3a">LATREC_REPORT_QUEUED</a> = 0x29
+&#160;&#160;<a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da723d44655c3ab949c627f539ec368628">LATREC_DECODE_E3AP_DONE</a> = 0x26
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da8b1c65e3a7f00ec08799d47a0ac6002c">LATREC_DELIVER_BEGIN</a> = 0x27
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8daf9bb7a90953b33222678fe24a9ccb237">LATREC_DELIVER_DONE</a> = 0x28
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da83e4757b9576c096a9967287091e9b3a">LATREC_REPORT_QUEUED</a> = 0x29
 , <br />
-&#160;&#160;<a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aad4e2e394a424561fdb7fe5d944a17a27">LATREC_REPORT_DONE</a> = 0x2A
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aac2d02bf84a0cf24cc6cd6c575d868b30">LATREC_SESSION_QUEUED</a> = 0x2B
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa283dbe4c76c655544061a0a6d98c58cf">LATREC_SESSION_POLLED</a> = 0x2C
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aafab6c6362b6f6855056958947b0c7fda">LATREC_DROP</a> = 0x2F
+&#160;&#160;<a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8dad4e2e394a424561fdb7fe5d944a17a27">LATREC_REPORT_DONE</a> = 0x2A
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8dac2d02bf84a0cf24cc6cd6c575d868b30">LATREC_SESSION_QUEUED</a> = 0x2B
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da283dbe4c76c655544061a0a6d98c58cf">LATREC_SESSION_POLLED</a> = 0x2C
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8dafab6c6362b6f6855056958947b0c7fda">LATREC_DROP</a> = 0x2F
 , <br />
-&#160;&#160;<a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa1d026b3ec105d992473d668bcba64e09">LATREC_SETUP_BEGIN</a> = 0x30
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa920a7d42843884cd9087d7f4cf3aa86e">LATREC_SETUP_DONE</a> = 0x31
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa008122afd754c6105d9aa3f80c9bf682">LATREC_SUB_BEGIN</a> = 0x32
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aabf027a5c2727c7b84920f6b63d918de3">LATREC_SUB_DONE</a> = 0x33
+&#160;&#160;<a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da1d026b3ec105d992473d668bcba64e09">LATREC_SETUP_BEGIN</a> = 0x30
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da920a7d42843884cd9087d7f4cf3aa86e">LATREC_SETUP_DONE</a> = 0x31
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da008122afd754c6105d9aa3f80c9bf682">LATREC_SUB_BEGIN</a> = 0x32
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8dabf027a5c2727c7b84920f6b63d918de3">LATREC_SUB_DONE</a> = 0x33
 , <br />
-&#160;&#160;<a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa48000773a35436de5e77816a8002239e">LATREC_SM_START</a> = 0x34
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aac9ee4691cfc7401b1edc46f57e7869c3">LATREC_SM_STOP</a> = 0x35
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aaf40df3762b3f4b3d7d1a15cc6331a8ec">LATREC_SM_STATUS_BEGIN</a> = 0x36
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aaba5e953f5573b5d50ee0ae27c9f08dba">LATREC_SM_STATUS_DONE</a> = 0x37
+&#160;&#160;<a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da48000773a35436de5e77816a8002239e">LATREC_SM_START</a> = 0x34
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8dac9ee4691cfc7401b1edc46f57e7869c3">LATREC_SM_STOP</a> = 0x35
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8daf40df3762b3f4b3d7d1a15cc6331a8ec">LATREC_SM_STATUS_BEGIN</a> = 0x36
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8daba5e953f5573b5d50ee0ae27c9f08dba">LATREC_SM_STATUS_DONE</a> = 0x37
 , <br />
-&#160;&#160;<a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aaab08c283366ff106fcfa237864423128">LATREC_PROCESS_DONE</a> = 0x40
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa69e69b8e8feee23c635d40c70bdf17d1">LATREC_CREATE_OUTPUT</a> = 0x41
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aad54cbcc7750ac32e79ab2f5b0f1ee41a">LATREC_APPLY_POLICY_DONE</a> = 0x42
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aaa870b1306aa5889d1200fdc47a336012">LATREC_ADMITTED</a> = 0x43
+&#160;&#160;<a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8daab08c283366ff106fcfa237864423128">LATREC_PROCESS_DONE</a> = 0x40
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da69e69b8e8feee23c635d40c70bdf17d1">LATREC_CREATE_OUTPUT</a> = 0x41
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8dad54cbcc7750ac32e79ab2f5b0f1ee41a">LATREC_APPLY_POLICY_DONE</a> = 0x42
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8daa870b1306aa5889d1200fdc47a336012">LATREC_ADMITTED</a> = 0x43
 , <br />
-&#160;&#160;<a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aaaa32679f0cdb54403e5dea4d933706e7">LATREC_APPLY_CONTROL_DONE</a> = 0x48
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aade09ba6634984b6b786cb89f23459795">LATREC_LIVE_ON_AIR</a> = 0x49
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aac84e57e31cd404b1a6c8807245f7f8e6">LATREC_ACK_SENT</a> = 0x4A
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa1b5375c160e49c4dc0d1508e12e4c8f4">LATREC_ACK_RECV</a> = 0x4B
+&#160;&#160;<a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8daaa32679f0cdb54403e5dea4d933706e7">LATREC_APPLY_CONTROL_DONE</a> = 0x48
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8dade09ba6634984b6b786cb89f23459795">LATREC_LIVE_ON_AIR</a> = 0x49
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8dac84e57e31cd404b1a6c8807245f7f8e6">LATREC_ACK_SENT</a> = 0x4A
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da1b5375c160e49c4dc0d1508e12e4c8f4">LATREC_ACK_RECV</a> = 0x4B
 , <br />
-&#160;&#160;<a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa8b8014a4e348e4540bbff928561fc616">LATREC_BRIDGE_IN</a> = 0x50
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aae3ab567448c953b9d79eefc94b8f81bf">LATREC_BRIDGE_OUT</a> = 0x51
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa487e66e73a645cc20fd30fe805b864d5">LATREC_ENCODE_E2AP_BEGIN</a> = 0x58
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aadf60195b807c7da3490b7e3fa4fbbdb3">LATREC_ENCODE_E2AP_DONE</a> = 0x59
+&#160;&#160;<a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da8b8014a4e348e4540bbff928561fc616">LATREC_BRIDGE_IN</a> = 0x50
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8dae3ab567448c953b9d79eefc94b8f81bf">LATREC_BRIDGE_OUT</a> = 0x51
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da487e66e73a645cc20fd30fe805b864d5">LATREC_ENCODE_E2AP_BEGIN</a> = 0x58
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8dadf60195b807c7da3490b7e3fa4fbbdb3">LATREC_ENCODE_E2AP_DONE</a> = 0x59
 , <br />
-&#160;&#160;<a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa18499b156eaf6a992e379fddbda1e8fd">LATREC_DECODE_E2AP_BEGIN</a> = 0x5A
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa5a85e8ac9764b59ff182b7ac73c8212b">LATREC_DECODE_E2AP_DONE</a> = 0x5B
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa15903136740d74d06a79a19795c9d7e6">LATREC_DECODE_E2SM_BEGIN</a> = 0x60
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa4bdc040252a5927821b8daf064fbf388">LATREC_DECODE_E2SM_DONE</a> = 0x61
+&#160;&#160;<a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da18499b156eaf6a992e379fddbda1e8fd">LATREC_DECODE_E2AP_BEGIN</a> = 0x5A
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da5a85e8ac9764b59ff182b7ac73c8212b">LATREC_DECODE_E2AP_DONE</a> = 0x5B
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da15903136740d74d06a79a19795c9d7e6">LATREC_DECODE_E2SM_BEGIN</a> = 0x60
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da4bdc040252a5927821b8daf064fbf388">LATREC_DECODE_E2SM_DONE</a> = 0x61
 , <br />
-&#160;&#160;<a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aad02f98c1e4d187d9661af4a540053d31">LATREC_XAPP_PROCESS_DONE</a> = 0x62
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aaffa9ec3daa9f102d29e2bde90587c3d8">LATREC_ENCODE_E2SM_BEGIN</a> = 0x63
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aab6d3fad4fe24cd0d3ef930b3eedb9b20">LATREC_ENCODE_E2SM_DONE</a> = 0x64
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aab62f1e66a7388fc933c1af66b4100e3d">LATREC_WAIT_ENTER</a> = 0x70
+&#160;&#160;<a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8dad02f98c1e4d187d9661af4a540053d31">LATREC_XAPP_PROCESS_DONE</a> = 0x62
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8daffa9ec3daa9f102d29e2bde90587c3d8">LATREC_ENCODE_E2SM_BEGIN</a> = 0x63
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8dab6d3fad4fe24cd0d3ef930b3eedb9b20">LATREC_ENCODE_E2SM_DONE</a> = 0x64
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8dab62f1e66a7388fc933c1af66b4100e3d">LATREC_WAIT_ENTER</a> = 0x70
 , <br />
-&#160;&#160;<a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa3781ab823f44dcf726f505746c92a030">LATREC_SKIPPED</a> = 0x71
-, <a class="el" href="#a4fd84bfdbc521217c5cd53c800be082aa4146cdb87e54fa19e1bc0b32dfd5a52f">LATREC_CONTEXT</a> = 0x72
+&#160;&#160;<a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da3781ab823f44dcf726f505746c92a030">LATREC_SKIPPED</a> = 0x71
+, <a class="el" href="#a717d066d7cd15e686fb2fcedfcf8bd8da4146cdb87e54fa19e1bc0b32dfd5a52f">LATREC_CONTEXT</a> = 0x72
 <br />
  }</td></tr>
-<tr class="memitem:aab7d5757c0e9a42f8c8ef806499591cb" id="r_aab7d5757c0e9a42f8c8ef806499591cb"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <a class="el" href="#aab7d5757c0e9a42f8c8ef806499591cba0ca4e10bc19ce9bac0ccc023b2a8a1be">LATREC_OUT_PROCESSED</a> = 0
-, <a class="el" href="#aab7d5757c0e9a42f8c8ef806499591cba3e7a63051421e33ce03d9fb11e12d981">LATREC_OUT_SHED_AGE</a> = 1
-, <a class="el" href="#aab7d5757c0e9a42f8c8ef806499591cba9692897ba84aa6b2a661e6cb29513c62">LATREC_OUT_SHED_LAG</a> = 2
-, <a class="el" href="#aab7d5757c0e9a42f8c8ef806499591cbaa1ec593cedf8d51ece734a223498b1b4">LATREC_OUT_NO_RANGE</a> = 3
+<tr class="memitem:a03f123c6594f96260e658b41be168124" id="r_a03f123c6594f96260e658b41be168124"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <a class="el" href="#a03f123c6594f96260e658b41be168124a0ca4e10bc19ce9bac0ccc023b2a8a1be">LATREC_OUT_PROCESSED</a> = 0
+, <a class="el" href="#a03f123c6594f96260e658b41be168124a3e7a63051421e33ce03d9fb11e12d981">LATREC_OUT_SHED_AGE</a> = 1
+, <a class="el" href="#a03f123c6594f96260e658b41be168124a9692897ba84aa6b2a661e6cb29513c62">LATREC_OUT_SHED_LAG</a> = 2
+, <a class="el" href="#a03f123c6594f96260e658b41be168124aa1ec593cedf8d51ece734a223498b1b4">LATREC_OUT_NO_RANGE</a> = 3
  }</td></tr>
-<tr class="memitem:add907d1a5f89e450e0651089bace2742" id="r_add907d1a5f89e450e0651089bace2742"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
-&#160;&#160;<a class="el" href="#add907d1a5f89e450e0651089bace2742a49839b9b4f4f17d3bd7e9f88f03c30de">LATREC_SKIP_NO_SUBSCRIBERS</a> = 1
-, <a class="el" href="#add907d1a5f89e450e0651089bace2742aac9d72d6e6138c946a970d269649b200">LATREC_SKIP_ENCODE</a> = 2
-, <a class="el" href="#add907d1a5f89e450e0651089bace2742a4100b1bfb6e9899a00ddd7bb295be8f0">LATREC_SKIP_COALESCED</a> = 3
-, <a class="el" href="#add907d1a5f89e450e0651089bace2742afa9dabe727e888e166202d25f019e114">LATREC_SKIP_NO_SHM</a> = 4
+<tr class="memitem:a15fb3f3dbb8e1a4289e87104d131f9e5" id="r_a15fb3f3dbb8e1a4289e87104d131f9e5"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
+&#160;&#160;<a class="el" href="#a15fb3f3dbb8e1a4289e87104d131f9e5a49839b9b4f4f17d3bd7e9f88f03c30de">LATREC_SKIP_NO_SUBSCRIBERS</a> = 1
+, <a class="el" href="#a15fb3f3dbb8e1a4289e87104d131f9e5aac9d72d6e6138c946a970d269649b200">LATREC_SKIP_ENCODE</a> = 2
+, <a class="el" href="#a15fb3f3dbb8e1a4289e87104d131f9e5a4100b1bfb6e9899a00ddd7bb295be8f0">LATREC_SKIP_COALESCED</a> = 3
+, <a class="el" href="#a15fb3f3dbb8e1a4289e87104d131f9e5afa9dabe727e888e166202d25f019e114">LATREC_SKIP_NO_SHM</a> = 4
 , <br />
-&#160;&#160;<a class="el" href="#add907d1a5f89e450e0651089bace2742a0c5c4a8fe585d5ba9f7340de2abb8ee9">LATREC_SKIP_RANGES_LOST</a> = 5
+&#160;&#160;<a class="el" href="#a15fb3f3dbb8e1a4289e87104d131f9e5a0c5c4a8fe585d5ba9f7340de2abb8ee9">LATREC_SKIP_RANGES_LOST</a> = 5
 <br />
  }</td></tr>
-<tr class="memitem:ac6f9b8f395076e7f0a532895c13be7b8" id="r_ac6f9b8f395076e7f0a532895c13be7b8"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
-&#160;&#160;<a class="el" href="#ac6f9b8f395076e7f0a532895c13be7b8a6c3d9cdb0cf57eef1bddff85cc71d69a">LATREC_DROP_QUEUE_PUSH</a> = 1
-, <a class="el" href="#ac6f9b8f395076e7f0a532895c13be7b8a4babb308373a08cb591ce62423edcd3c">LATREC_DROP_ENCODE</a> = 2
-, <a class="el" href="#ac6f9b8f395076e7f0a532895c13be7b8a9319d1d85e05ed95204ad6072823f159">LATREC_DROP_SEND</a> = 3
-, <a class="el" href="#ac6f9b8f395076e7f0a532895c13be7b8a1c1e48bfba9295f31d63d08fd89161db">LATREC_DROP_DECODE</a> = 4
+<tr class="memitem:a62cd46029b2a703ee013504850ad515c" id="r_a62cd46029b2a703ee013504850ad515c"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
+&#160;&#160;<a class="el" href="#a62cd46029b2a703ee013504850ad515ca6c3d9cdb0cf57eef1bddff85cc71d69a">LATREC_DROP_QUEUE_PUSH</a> = 1
+, <a class="el" href="#a62cd46029b2a703ee013504850ad515ca4babb308373a08cb591ce62423edcd3c">LATREC_DROP_ENCODE</a> = 2
+, <a class="el" href="#a62cd46029b2a703ee013504850ad515ca9319d1d85e05ed95204ad6072823f159">LATREC_DROP_SEND</a> = 3
+, <a class="el" href="#a62cd46029b2a703ee013504850ad515ca1c1e48bfba9295f31d63d08fd89161db">LATREC_DROP_DECODE</a> = 4
 , <br />
-&#160;&#160;<a class="el" href="#ac6f9b8f395076e7f0a532895c13be7b8a53f39f7c9e003804ffbabb2eb0fcd2d4">LATREC_DROP_REPORT_QUEUE</a> = 5
-, <a class="el" href="#ac6f9b8f395076e7f0a532895c13be7b8aa5e4dd0631ba7d67eee3928e2a3c4db2">LATREC_DROP_NO_HANDLER</a> = 6
-, <a class="el" href="#ac6f9b8f395076e7f0a532895c13be7b8a1fbc062eaf1c44d9fdd51f66473e8fd1">LATREC_DROP_SESSION_QUEUE</a> = 7
-, <a class="el" href="#ac6f9b8f395076e7f0a532895c13be7b8a0937bd2e5352aef1657ac69202c8d43e">LATREC_DROP_FILTERED</a> = 8
+&#160;&#160;<a class="el" href="#a62cd46029b2a703ee013504850ad515ca53f39f7c9e003804ffbabb2eb0fcd2d4">LATREC_DROP_REPORT_QUEUE</a> = 5
+, <a class="el" href="#a62cd46029b2a703ee013504850ad515caa5e4dd0631ba7d67eee3928e2a3c4db2">LATREC_DROP_NO_HANDLER</a> = 6
+, <a class="el" href="#a62cd46029b2a703ee013504850ad515ca1fbc062eaf1c44d9fdd51f66473e8fd1">LATREC_DROP_SESSION_QUEUE</a> = 7
+, <a class="el" href="#a62cd46029b2a703ee013504850ad515ca0937bd2e5352aef1657ac69202c8d43e">LATREC_DROP_FILTERED</a> = 8
 , <br />
-&#160;&#160;<a class="el" href="#ac6f9b8f395076e7f0a532895c13be7b8a01bf0eb86e7b960cd944c000d6b5e16f">LATREC_DROP_SHUTDOWN</a> = 9
+&#160;&#160;<a class="el" href="#a62cd46029b2a703ee013504850ad515ca01bf0eb86e7b960cd944c000d6b5e16f">LATREC_DROP_SHUTDOWN</a> = 9
 <br />
  }</td></tr>
 </table><table class="memberdecls">
@@ -243,27 +239,31 @@ Functions</h2></td></tr>
 <tr class="memitem:ab522e6de464673d291aa8df6159ce5bc" id="r_ab522e6de464673d291aa8df6159ce5bc"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab522e6de464673d291aa8df6159ce5bc">latrec_stamp</a> (<a class="el" href="structlatrec__t.html">latrec_t</a> *r, uint64_t seq, uint8_t stage, uint64_t aux, uint64_t aux2)</td></tr>
 <tr class="memitem:a37f29624f3d445eca2b19fb376935118" id="r_a37f29624f3d445eca2b19fb376935118"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a37f29624f3d445eca2b19fb376935118">latrec_heartbeat</a> (<a class="el" href="structlatrec__t.html">latrec_t</a> *r)</td></tr>
 <tr class="memitem:a596bf9640530307906f9debe7f93d1a6" id="r_a596bf9640530307906f9debe7f93d1a6"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a596bf9640530307906f9debe7f93d1a6">latrec_close</a> (<a class="el" href="structlatrec__t.html">latrec_t</a> *r)</td></tr>
-<tr class="memitem:a1f5052a861351ac1f8482947de795cb4" id="r_a1f5052a861351ac1f8482947de795cb4"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1f5052a861351ac1f8482947de795cb4">latrec_set_output_dir</a> (const char *dir)</td></tr>
-<tr class="memitem:ab85ff0a6cf736e8787fc2fc8c2439a8b" id="r_ab85ff0a6cf736e8787fc2fc8c2439a8b"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structlatrec__t.html">latrec_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab85ff0a6cf736e8787fc2fc8c2439a8b">latrec_tls_open_as</a> (const char *role)</td></tr>
-<tr class="memitem:a379110c29e4a6b8108d545bc823610ce" id="r_a379110c29e4a6b8108d545bc823610ce"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structlatrec__t.html">latrec_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a379110c29e4a6b8108d545bc823610ce">latrec_tls_open</a> (void)</td></tr>
-<tr class="memitem:a36eb1fc44812c4655a20fd7b3ecea55f" id="r_a36eb1fc44812c4655a20fd7b3ecea55f"><td class="memItemLeft" align="right" valign="top">static uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a36eb1fc44812c4655a20fd7b3ecea55f">latrec_seq_next</a> (void)</td></tr>
-<tr class="memitem:a12f6875c4a420e0fb372c0c7dba87440" id="r_a12f6875c4a420e0fb372c0c7dba87440"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a12f6875c4a420e0fb372c0c7dba87440">latrec_tstamp</a> (uint64_t seq, uint8_t stage, uint64_t aux, uint64_t aux2)</td></tr>
+<tr class="memitem:a280c65aaa528a73aaebe586e62568bfb" id="r_a280c65aaa528a73aaebe586e62568bfb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a280c65aaa528a73aaebe586e62568bfb">latrec_set_output_dir</a> (const char *dir)</td></tr>
+<tr class="memitem:a77e73bd83f96c0242d91a67c0ce40fc2" id="r_a77e73bd83f96c0242d91a67c0ce40fc2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structlatrec__t.html">latrec_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a77e73bd83f96c0242d91a67c0ce40fc2">latrec_tls_open_as</a> (const char *role)</td></tr>
+<tr class="memitem:a0e836b10f4bbeff24802e6bc3698621e" id="r_a0e836b10f4bbeff24802e6bc3698621e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structlatrec__t.html">latrec_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0e836b10f4bbeff24802e6bc3698621e">latrec_tls_open</a> (void)</td></tr>
+<tr class="memitem:a71b3998748cbf895ebdc0473fd3e9175" id="r_a71b3998748cbf895ebdc0473fd3e9175"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a71b3998748cbf895ebdc0473fd3e9175">latrec_seq_next</a> (void)</td></tr>
 <tr class="memitem:a398d74ab770d233bdde5c71e80840350" id="r_a398d74ab770d233bdde5c71e80840350"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a398d74ab770d233bdde5c71e80840350">latrec_tstamp_at</a> (uint64_t seq, uint8_t stage, uint64_t aux, uint64_t aux2, uint64_t t_ns)</td></tr>
 <tr class="memitem:a1c5b0fac82c163c0f03017436f15feb0" id="r_a1c5b0fac82c163c0f03017436f15feb0"><td class="memItemLeft" align="right" valign="top">static uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1c5b0fac82c163c0f03017436f15feb0">latrec_tnow</a> (void)</td></tr>
+<tr class="memitem:a12f6875c4a420e0fb372c0c7dba87440" id="r_a12f6875c4a420e0fb372c0c7dba87440"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a12f6875c4a420e0fb372c0c7dba87440">latrec_tstamp</a> (uint64_t seq, uint8_t stage, uint64_t aux, uint64_t aux2)</td></tr>
 <tr class="memitem:a1cf8c3111daf8d291d07bd4b4f71a879" id="r_a1cf8c3111daf8d291d07bd4b4f71a879"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1cf8c3111daf8d291d07bd4b4f71a879">latrec_ctx_set</a> (uint64_t seq)</td></tr>
 <tr class="memitem:a588269eb211c77b050ab91ea4f8bc66c" id="r_a588269eb211c77b050ab91ea4f8bc66c"><td class="memItemLeft" align="right" valign="top">static uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a588269eb211c77b050ab91ea4f8bc66c">latrec_ctx</a> (void)</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:ada2df74a63adf6f0cbd4ea664eb76d32" id="r_ada2df74a63adf6f0cbd4ea664eb76d32"><td class="memItemLeft" align="right" valign="top">__thread <a class="el" href="structlatrec__t.html">latrec_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ada2df74a63adf6f0cbd4ea664eb76d32">latrec_tls</a></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Lock-free per-thread latency stamp recorder (header-only, C99). </p>
 <p>One mmap-backed ring per writer thread, single producer, no locks: a stamp is one CLOCK_MONOTONIC read and four stores, with no syscall, allocation or formatting. Records are 32 bytes (seq:48 | cpu:8 | stage:8, t_ns, aux, aux2); seq is assigned once at the producer and joins the stages offline, aux/aux2 carry the per-stage payloads listed in the stage catalog below.</p>
 <p>CLOCK_MONOTONIC shares an origin across processes, so RAN, dApp and xApp stamps join without calibration.</p>
 <p>t_ns is stored last, with release ordering: a reader that acquire-loads a nonzero t_ns also observes that record's sc, aux and aux2. That makes one record self-consistent; it does not stop the slot being reused, so a reader of a ring that has wrapped may pair one write's t_ns with the next write's payload. A live reader must therefore keep up, or detect the wrap from rec_count and the single descent in t_ns.</p>
-<p>Gated once, at compile time, by LIBE3_ENABLE_LATREC: off by default, so a normal build carries none of this, not even a disabled-ring branch. With it on, tracing runs &ndash; there is no second per-run opt-in. See the bottom of this file, and <a class="el" href="latrec_8md.html">docs/latrec.md</a> for where the rings are written.</p>
+<p>Gated once, at compile time, by LIBE3_ENABLE_LATREC: off by default, so a normal build carries none of this, not even a disabled-ring branch. With it on, tracing runs &ndash; there is no second per-run opt-in. See the bottom of this file, and <a class="el" href="latrec_8md.html">docs/utilities/latrec.md</a> for where the rings are written.</p>
 <p>File layout: a 4 KiB <a class="el" href="structlatrec__hdr.html">latrec_hdr</a> followed by <span class="tt">entries</span> 32-byte records. v1 field offsets are frozen and v2 fields appended inside the header pad, so a v1 reader parses a v2 file. Readers detect a byte-swapped LATREC_MAGIC. 64-bit hosts only: a 32-bit host can tear the t_ns store.</p>
 <p>Installed as &lt;<a class="el" href="latrec_8h.html" title="Lock-free per-thread latency stamp recorder (header-only, C99).">libe3/latrec.h</a>&gt;, so a component that links <a class="el" href="namespacelibe3.html">libe3</a> includes it from there. Components that do not link <a class="el" href="namespacelibe3.html">libe3</a> mirror the layout instead, and the stage catalog below carries their ids too, so it stays the one place a new id is checked for collisions.</p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="latrec_guide.html">docs/latrec.md</a> for the full guide: the clock model, ring naming/sizing, the stage catalog table, and the capture-to-CSV workflow. </dd>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="md_docs_2utilities_2latrec.html">docs/utilities/latrec.md</a> for the full guide: the clock model, ring naming/sizing, the stage catalog table, and the capture-to-CSV workflow. </dd>
 <dd>
-<a class="el" href="path_a_e3_loop.html">docs/path-a-e3-loop.md</a> and <a class="el" href="path_b_e2_e3_loop.html">docs/path-b-e2-e3-loop.md</a> for the loop boxes the stage catalog names.</dd></dl>
+<a class="el" href="md_docs_2control-loops_2path-a-e3-loop.html">docs/control-loops/path-a-e3-loop.md</a> and <a class="el" href="md_docs_2control-loops_2path-b-e2-e3-loop.html">docs/control-loops/path-b-e2-e3-loop.md</a> for the loop boxes the stage catalog names.</dd></dl>
 <p>SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University SPDX-License-Identifier: Apache-2.0 </p>
 
 <p class="definition">Definition in file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
@@ -279,8 +279,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Selects the GNU feature set, defined only when the including file chose none. </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00056">56</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00057">57</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -303,9 +304,16 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="#a4e9fbeea74f57477773635c227675bbb">LATREC_CAT_</a>(a, b)</div>
-<div class="ttc" id="alatrec_8h_html_a4e9fbeea74f57477773635c227675bbb"><div class="ttname"><a href="#a4e9fbeea74f57477773635c227675bbb">LATREC_CAT_</a></div><div class="ttdeci">#define LATREC_CAT_(a, b)</div><div class="ttdef"><b>Definition</b> <a href="latrec_8h_source.html#l00116">latrec.h:116</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00117">117</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<div class="ttc" id="alatrec_8h_html_a4e9fbeea74f57477773635c227675bbb"><div class="ttname"><a href="#a4e9fbeea74f57477773635c227675bbb">LATREC_CAT_</a></div><div class="ttdeci">#define LATREC_CAT_(a, b)</div><div class="ttdef"><b>Definition</b> <a href="latrec_8h_source.html#l00135">latrec.h:135</a></div></div>
+</div><!-- fragment --><p>Pastes two tokens after expanding them. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>first token </td></tr>
+    <tr><td class="paramname">b</td><td>second token </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00139">139</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -328,8 +336,15 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">a##b</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00116">116</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+</div><!-- fragment --><p>Pastes two tokens; use LATREC_CAT so that both are expanded first. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>first token </td></tr>
+    <tr><td class="paramname">b</td><td>second token </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00135">135</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -344,8 +359,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Measured timestamp cost above which latrec_open warns. A vDSO read is tens of ns; a syscall fallback is several hundred. </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00377">377</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00402">402</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -360,8 +376,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Read the cpu id in the stamp only where sched_getcpu() resolves in user space (x86-64 glibc goes through rseq). Elsewhere it can be a getcpu syscall, so the stamp uses the id cached by <a class="el" href="#a87ed81844eba64ee1a782e602279b6eb">latrec_refresh_cpu()</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00113">113</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00129">129</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -376,8 +393,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Where rings go when the caller does not name a directory. A build-time setting, like the recorder itself: -DLATREC_DEFAULT_DIR=... at configure time. Runtime placement is chosen with <a class="el" href="#a28cee5a2462d31780b13a5894b156072">latrec_open_in()</a>, or process-wide with <a class="el" href="#a280c65aaa528a73aaebe586e62568bfb">latrec_set_output_dir()</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00463">463</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00497">497</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -392,8 +410,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>1 where sched_getcpu() is available (Linux), else 0. </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00104">104</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00120">120</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -408,8 +427,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Bytes of file header, before the records </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00373">373</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00398">398</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -428,8 +448,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">(*(p))</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00087">87</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+</div><!-- fragment --><p>Load with acquire ordering. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">p</td><td>location to read </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00101">101</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -440,12 +466,13 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define LATREC_MAGIC&#160;&#160;&#160;0x31524C41u /* &quot;ALR1&quot; */</td>
+          <td class="memname">#define LATREC_MAGIC&#160;&#160;&#160;0x31524C41u</td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Magic number at the start of a ring file ("ALR1") </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00371">371</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00396">396</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -464,8 +491,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">((void)(p))</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00088">88</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+</div><!-- fragment --><p>Hint that the cache line at <code class="param">p</code> is about to be written. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">p</td><td>address of the line </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00102">102</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -488,9 +521,16 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">    <span class="keyword">typedef</span> <span class="keywordtype">char</span> <a class="code hl_define" href="#aa1db4e1e307964c3410eb3aefcc3c05d">LATREC_CAT</a>(latrec_static_assert_, __LINE__)[(c) ? 1 : -1]</div>
-<div class="ttc" id="alatrec_8h_html_aa1db4e1e307964c3410eb3aefcc3c05d"><div class="ttname"><a href="#aa1db4e1e307964c3410eb3aefcc3c05d">LATREC_CAT</a></div><div class="ttdeci">#define LATREC_CAT(a, b)</div><div class="ttdef"><b>Definition</b> <a href="latrec_8h_source.html#l00117">latrec.h:117</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00123">123</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<div class="ttc" id="alatrec_8h_html_aa1db4e1e307964c3410eb3aefcc3c05d"><div class="ttname"><a href="#aa1db4e1e307964c3410eb3aefcc3c05d">LATREC_CAT</a></div><div class="ttdeci">#define LATREC_CAT(a, b)</div><div class="ttdef"><b>Definition</b> <a href="latrec_8h_source.html#l00139">latrec.h:139</a></div></div>
+</div><!-- fragment --><p>Compile-time assertion for C and C++. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">c</td><td>condition that has to hold </td></tr>
+    <tr><td class="paramname">m</td><td>message shown when it does not (the pre-C11 fallback drops it) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00148">148</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -513,8 +553,15 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">do</span> { *(p) = (v); } <span class="keywordflow">while</span> (0)</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00086">86</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+</div><!-- fragment --><p>Store with release ordering, so earlier stores are visible first. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">p</td><td>location to store to </td></tr>
+    <tr><td class="paramname">v</td><td>value to store </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00100">100</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -533,8 +580,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">(x)</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00089">89</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+</div><!-- fragment --><p>Branch hint: <code class="param">x</code> is expected to be false. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>condition </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00103">103</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -549,31 +602,15 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Ring file layout version </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00372">372</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
-
-</div>
-</div>
-<a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Typedef Documentation</h2>
-<a id="a3a5299284d59c3fbf3594540ef136ff2" name="a3a5299284d59c3fbf3594540ef136ff2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3a5299284d59c3fbf3594540ef136ff2">&#9670;&#160;</a></span>latrec_static_assert___LINE__</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef char latrec_static_assert___LINE__[(sizeof(<a class="el" href="structlatrec__rec.html">latrec_rec</a>)==32) ? 1 :-1]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00403">403</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00397">397</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
 <a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
-<a id="aab7d5757c0e9a42f8c8ef806499591cb" name="aab7d5757c0e9a42f8c8ef806499591cb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aab7d5757c0e9a42f8c8ef806499591cb">&#9670;&#160;</a></span>anonymous enum</h2>
+<a id="a62cd46029b2a703ee013504850ad515c" name="a62cd46029b2a703ee013504850ad515c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62cd46029b2a703ee013504850ad515c">&#9670;&#160;</a></span>anonymous enum</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -584,18 +621,23 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aab7d5757c0e9a42f8c8ef806499591cba0ca4e10bc19ce9bac0ccc023b2a8a1be" name="aab7d5757c0e9a42f8c8ef806499591cba0ca4e10bc19ce9bac0ccc023b2a8a1be"></a>LATREC_OUT_PROCESSED&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="aab7d5757c0e9a42f8c8ef806499591cba3e7a63051421e33ce03d9fb11e12d981" name="aab7d5757c0e9a42f8c8ef806499591cba3e7a63051421e33ce03d9fb11e12d981"></a>LATREC_OUT_SHED_AGE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="aab7d5757c0e9a42f8c8ef806499591cba9692897ba84aa6b2a661e6cb29513c62" name="aab7d5757c0e9a42f8c8ef806499591cba9692897ba84aa6b2a661e6cb29513c62"></a>LATREC_OUT_SHED_LAG&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="aab7d5757c0e9a42f8c8ef806499591cbaa1ec593cedf8d51ece734a223498b1b4" name="aab7d5757c0e9a42f8c8ef806499591cbaa1ec593cedf8d51ece734a223498b1b4"></a>LATREC_OUT_NO_RANGE&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a62cd46029b2a703ee013504850ad515ca6c3d9cdb0cf57eef1bddff85cc71d69a" name="a62cd46029b2a703ee013504850ad515ca6c3d9cdb0cf57eef1bddff85cc71d69a"></a>LATREC_DROP_QUEUE_PUSH&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a62cd46029b2a703ee013504850ad515ca4babb308373a08cb591ce62423edcd3c" name="a62cd46029b2a703ee013504850ad515ca4babb308373a08cb591ce62423edcd3c"></a>LATREC_DROP_ENCODE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a62cd46029b2a703ee013504850ad515ca9319d1d85e05ed95204ad6072823f159" name="a62cd46029b2a703ee013504850ad515ca9319d1d85e05ed95204ad6072823f159"></a>LATREC_DROP_SEND&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a62cd46029b2a703ee013504850ad515ca1c1e48bfba9295f31d63d08fd89161db" name="a62cd46029b2a703ee013504850ad515ca1c1e48bfba9295f31d63d08fd89161db"></a>LATREC_DROP_DECODE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a62cd46029b2a703ee013504850ad515ca53f39f7c9e003804ffbabb2eb0fcd2d4" name="a62cd46029b2a703ee013504850ad515ca53f39f7c9e003804ffbabb2eb0fcd2d4"></a>LATREC_DROP_REPORT_QUEUE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a62cd46029b2a703ee013504850ad515caa5e4dd0631ba7d67eee3928e2a3c4db2" name="a62cd46029b2a703ee013504850ad515caa5e4dd0631ba7d67eee3928e2a3c4db2"></a>LATREC_DROP_NO_HANDLER&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a62cd46029b2a703ee013504850ad515ca1fbc062eaf1c44d9fdd51f66473e8fd1" name="a62cd46029b2a703ee013504850ad515ca1fbc062eaf1c44d9fdd51f66473e8fd1"></a>LATREC_DROP_SESSION_QUEUE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a62cd46029b2a703ee013504850ad515ca0937bd2e5352aef1657ac69202c8d43e" name="a62cd46029b2a703ee013504850ad515ca0937bd2e5352aef1657ac69202c8d43e"></a>LATREC_DROP_FILTERED&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a62cd46029b2a703ee013504850ad515ca01bf0eb86e7b960cd944c000d6b5e16f" name="a62cd46029b2a703ee013504850ad515ca01bf0eb86e7b960cd944c000d6b5e16f"></a>LATREC_DROP_SHUTDOWN&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00330">330</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00377">377</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
-<a id="add907d1a5f89e450e0651089bace2742" name="add907d1a5f89e450e0651089bace2742"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#add907d1a5f89e450e0651089bace2742">&#9670;&#160;</a></span>anonymous enum</h2>
+<a id="a03f123c6594f96260e658b41be168124" name="a03f123c6594f96260e658b41be168124"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03f123c6594f96260e658b41be168124">&#9670;&#160;</a></span>anonymous enum</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -606,19 +648,18 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="add907d1a5f89e450e0651089bace2742a49839b9b4f4f17d3bd7e9f88f03c30de" name="add907d1a5f89e450e0651089bace2742a49839b9b4f4f17d3bd7e9f88f03c30de"></a>LATREC_SKIP_NO_SUBSCRIBERS&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="add907d1a5f89e450e0651089bace2742aac9d72d6e6138c946a970d269649b200" name="add907d1a5f89e450e0651089bace2742aac9d72d6e6138c946a970d269649b200"></a>LATREC_SKIP_ENCODE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="add907d1a5f89e450e0651089bace2742a4100b1bfb6e9899a00ddd7bb295be8f0" name="add907d1a5f89e450e0651089bace2742a4100b1bfb6e9899a00ddd7bb295be8f0"></a>LATREC_SKIP_COALESCED&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="add907d1a5f89e450e0651089bace2742afa9dabe727e888e166202d25f019e114" name="add907d1a5f89e450e0651089bace2742afa9dabe727e888e166202d25f019e114"></a>LATREC_SKIP_NO_SHM&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="add907d1a5f89e450e0651089bace2742a0c5c4a8fe585d5ba9f7340de2abb8ee9" name="add907d1a5f89e450e0651089bace2742a0c5c4a8fe585d5ba9f7340de2abb8ee9"></a>LATREC_SKIP_RANGES_LOST&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a03f123c6594f96260e658b41be168124a0ca4e10bc19ce9bac0ccc023b2a8a1be" name="a03f123c6594f96260e658b41be168124a0ca4e10bc19ce9bac0ccc023b2a8a1be"></a>LATREC_OUT_PROCESSED&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a03f123c6594f96260e658b41be168124a3e7a63051421e33ce03d9fb11e12d981" name="a03f123c6594f96260e658b41be168124a3e7a63051421e33ce03d9fb11e12d981"></a>LATREC_OUT_SHED_AGE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a03f123c6594f96260e658b41be168124a9692897ba84aa6b2a661e6cb29513c62" name="a03f123c6594f96260e658b41be168124a9692897ba84aa6b2a661e6cb29513c62"></a>LATREC_OUT_SHED_LAG&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a03f123c6594f96260e658b41be168124aa1ec593cedf8d51ece734a223498b1b4" name="a03f123c6594f96260e658b41be168124aa1ec593cedf8d51ece734a223498b1b4"></a>LATREC_OUT_NO_RANGE&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00340">340</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00355">355</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
-<a id="a4fd84bfdbc521217c5cd53c800be082a" name="a4fd84bfdbc521217c5cd53c800be082a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4fd84bfdbc521217c5cd53c800be082a">&#9670;&#160;</a></span>anonymous enum</h2>
+<a id="a717d066d7cd15e686fb2fcedfcf8bd8d" name="a717d066d7cd15e686fb2fcedfcf8bd8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a717d066d7cd15e686fb2fcedfcf8bd8d">&#9670;&#160;</a></span>anonymous enum</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -629,64 +670,64 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa634c3cb97a66927863b27a6b838d843a" name="a4fd84bfdbc521217c5cd53c800be082aa634c3cb97a66927863b27a6b838d843a"></a>LATREC_RECORD_BEGIN&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa1c8c30d7c07990f03471d3383f10e65d" name="a4fd84bfdbc521217c5cd53c800be082aa1c8c30d7c07990f03471d3383f10e65d"></a>LATREC_PROCESS_BEGIN&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa86819aa78571a6dc93475e91604273ef" name="a4fd84bfdbc521217c5cd53c800be082aa86819aa78571a6dc93475e91604273ef"></a>LATREC_ENCODE_E3SM_BEGIN&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa43e6fbab5d74780cb85641d055068b9b" name="a4fd84bfdbc521217c5cd53c800be082aa43e6fbab5d74780cb85641d055068b9b"></a>LATREC_ENCODE_E3SM_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa750040977d4c51758c089ca35e5652c6" name="a4fd84bfdbc521217c5cd53c800be082aa750040977d4c51758c089ca35e5652c6"></a>LATREC_DECODE_E3SM_BEGIN&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa4eb078f3d90b897fa3c143b63f9ff8ec" name="a4fd84bfdbc521217c5cd53c800be082aa4eb078f3d90b897fa3c143b63f9ff8ec"></a>LATREC_DECODE_E3SM_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa0cb7a7a3ecee27ca69442f27546534a2" name="a4fd84bfdbc521217c5cd53c800be082aa0cb7a7a3ecee27ca69442f27546534a2"></a>LATREC_EMIT_ENTER&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aaf2f8e0332b38a8f07f4150da70f148d1" name="a4fd84bfdbc521217c5cd53c800be082aaf2f8e0332b38a8f07f4150da70f148d1"></a>LATREC_ENQUEUE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa1a05209471501d126be211d86d22b893" name="a4fd84bfdbc521217c5cd53c800be082aa1a05209471501d126be211d86d22b893"></a>LATREC_DEQUEUE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa63eba46e27cccd255b4311de89655d80" name="a4fd84bfdbc521217c5cd53c800be082aa63eba46e27cccd255b4311de89655d80"></a>LATREC_ENCODE_E3AP_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aab39f8a53d3a96e8a0290e0b1ebf7d584" name="a4fd84bfdbc521217c5cd53c800be082aab39f8a53d3a96e8a0290e0b1ebf7d584"></a>LATREC_SEND_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa6c0a753709f19195db77f6ac29b2c70a" name="a4fd84bfdbc521217c5cd53c800be082aa6c0a753709f19195db77f6ac29b2c70a"></a>LATREC_RECV&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa723d44655c3ab949c627f539ec368628" name="a4fd84bfdbc521217c5cd53c800be082aa723d44655c3ab949c627f539ec368628"></a>LATREC_DECODE_E3AP_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa8b1c65e3a7f00ec08799d47a0ac6002c" name="a4fd84bfdbc521217c5cd53c800be082aa8b1c65e3a7f00ec08799d47a0ac6002c"></a>LATREC_DELIVER_BEGIN&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aaf9bb7a90953b33222678fe24a9ccb237" name="a4fd84bfdbc521217c5cd53c800be082aaf9bb7a90953b33222678fe24a9ccb237"></a>LATREC_DELIVER_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa83e4757b9576c096a9967287091e9b3a" name="a4fd84bfdbc521217c5cd53c800be082aa83e4757b9576c096a9967287091e9b3a"></a>LATREC_REPORT_QUEUED&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aad4e2e394a424561fdb7fe5d944a17a27" name="a4fd84bfdbc521217c5cd53c800be082aad4e2e394a424561fdb7fe5d944a17a27"></a>LATREC_REPORT_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aac2d02bf84a0cf24cc6cd6c575d868b30" name="a4fd84bfdbc521217c5cd53c800be082aac2d02bf84a0cf24cc6cd6c575d868b30"></a>LATREC_SESSION_QUEUED&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa283dbe4c76c655544061a0a6d98c58cf" name="a4fd84bfdbc521217c5cd53c800be082aa283dbe4c76c655544061a0a6d98c58cf"></a>LATREC_SESSION_POLLED&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aafab6c6362b6f6855056958947b0c7fda" name="a4fd84bfdbc521217c5cd53c800be082aafab6c6362b6f6855056958947b0c7fda"></a>LATREC_DROP&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa1d026b3ec105d992473d668bcba64e09" name="a4fd84bfdbc521217c5cd53c800be082aa1d026b3ec105d992473d668bcba64e09"></a>LATREC_SETUP_BEGIN&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa920a7d42843884cd9087d7f4cf3aa86e" name="a4fd84bfdbc521217c5cd53c800be082aa920a7d42843884cd9087d7f4cf3aa86e"></a>LATREC_SETUP_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa008122afd754c6105d9aa3f80c9bf682" name="a4fd84bfdbc521217c5cd53c800be082aa008122afd754c6105d9aa3f80c9bf682"></a>LATREC_SUB_BEGIN&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aabf027a5c2727c7b84920f6b63d918de3" name="a4fd84bfdbc521217c5cd53c800be082aabf027a5c2727c7b84920f6b63d918de3"></a>LATREC_SUB_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa48000773a35436de5e77816a8002239e" name="a4fd84bfdbc521217c5cd53c800be082aa48000773a35436de5e77816a8002239e"></a>LATREC_SM_START&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aac9ee4691cfc7401b1edc46f57e7869c3" name="a4fd84bfdbc521217c5cd53c800be082aac9ee4691cfc7401b1edc46f57e7869c3"></a>LATREC_SM_STOP&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aaf40df3762b3f4b3d7d1a15cc6331a8ec" name="a4fd84bfdbc521217c5cd53c800be082aaf40df3762b3f4b3d7d1a15cc6331a8ec"></a>LATREC_SM_STATUS_BEGIN&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aaba5e953f5573b5d50ee0ae27c9f08dba" name="a4fd84bfdbc521217c5cd53c800be082aaba5e953f5573b5d50ee0ae27c9f08dba"></a>LATREC_SM_STATUS_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aaab08c283366ff106fcfa237864423128" name="a4fd84bfdbc521217c5cd53c800be082aaab08c283366ff106fcfa237864423128"></a>LATREC_PROCESS_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa69e69b8e8feee23c635d40c70bdf17d1" name="a4fd84bfdbc521217c5cd53c800be082aa69e69b8e8feee23c635d40c70bdf17d1"></a>LATREC_CREATE_OUTPUT&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aad54cbcc7750ac32e79ab2f5b0f1ee41a" name="a4fd84bfdbc521217c5cd53c800be082aad54cbcc7750ac32e79ab2f5b0f1ee41a"></a>LATREC_APPLY_POLICY_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aaa870b1306aa5889d1200fdc47a336012" name="a4fd84bfdbc521217c5cd53c800be082aaa870b1306aa5889d1200fdc47a336012"></a>LATREC_ADMITTED&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aaaa32679f0cdb54403e5dea4d933706e7" name="a4fd84bfdbc521217c5cd53c800be082aaaa32679f0cdb54403e5dea4d933706e7"></a>LATREC_APPLY_CONTROL_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aade09ba6634984b6b786cb89f23459795" name="a4fd84bfdbc521217c5cd53c800be082aade09ba6634984b6b786cb89f23459795"></a>LATREC_LIVE_ON_AIR&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aac84e57e31cd404b1a6c8807245f7f8e6" name="a4fd84bfdbc521217c5cd53c800be082aac84e57e31cd404b1a6c8807245f7f8e6"></a>LATREC_ACK_SENT&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa1b5375c160e49c4dc0d1508e12e4c8f4" name="a4fd84bfdbc521217c5cd53c800be082aa1b5375c160e49c4dc0d1508e12e4c8f4"></a>LATREC_ACK_RECV&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa8b8014a4e348e4540bbff928561fc616" name="a4fd84bfdbc521217c5cd53c800be082aa8b8014a4e348e4540bbff928561fc616"></a>LATREC_BRIDGE_IN&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aae3ab567448c953b9d79eefc94b8f81bf" name="a4fd84bfdbc521217c5cd53c800be082aae3ab567448c953b9d79eefc94b8f81bf"></a>LATREC_BRIDGE_OUT&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa487e66e73a645cc20fd30fe805b864d5" name="a4fd84bfdbc521217c5cd53c800be082aa487e66e73a645cc20fd30fe805b864d5"></a>LATREC_ENCODE_E2AP_BEGIN&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aadf60195b807c7da3490b7e3fa4fbbdb3" name="a4fd84bfdbc521217c5cd53c800be082aadf60195b807c7da3490b7e3fa4fbbdb3"></a>LATREC_ENCODE_E2AP_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa18499b156eaf6a992e379fddbda1e8fd" name="a4fd84bfdbc521217c5cd53c800be082aa18499b156eaf6a992e379fddbda1e8fd"></a>LATREC_DECODE_E2AP_BEGIN&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa5a85e8ac9764b59ff182b7ac73c8212b" name="a4fd84bfdbc521217c5cd53c800be082aa5a85e8ac9764b59ff182b7ac73c8212b"></a>LATREC_DECODE_E2AP_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa15903136740d74d06a79a19795c9d7e6" name="a4fd84bfdbc521217c5cd53c800be082aa15903136740d74d06a79a19795c9d7e6"></a>LATREC_DECODE_E2SM_BEGIN&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa4bdc040252a5927821b8daf064fbf388" name="a4fd84bfdbc521217c5cd53c800be082aa4bdc040252a5927821b8daf064fbf388"></a>LATREC_DECODE_E2SM_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aad02f98c1e4d187d9661af4a540053d31" name="a4fd84bfdbc521217c5cd53c800be082aad02f98c1e4d187d9661af4a540053d31"></a>LATREC_XAPP_PROCESS_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aaffa9ec3daa9f102d29e2bde90587c3d8" name="a4fd84bfdbc521217c5cd53c800be082aaffa9ec3daa9f102d29e2bde90587c3d8"></a>LATREC_ENCODE_E2SM_BEGIN&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aab6d3fad4fe24cd0d3ef930b3eedb9b20" name="a4fd84bfdbc521217c5cd53c800be082aab6d3fad4fe24cd0d3ef930b3eedb9b20"></a>LATREC_ENCODE_E2SM_DONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aab62f1e66a7388fc933c1af66b4100e3d" name="a4fd84bfdbc521217c5cd53c800be082aab62f1e66a7388fc933c1af66b4100e3d"></a>LATREC_WAIT_ENTER&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa3781ab823f44dcf726f505746c92a030" name="a4fd84bfdbc521217c5cd53c800be082aa3781ab823f44dcf726f505746c92a030"></a>LATREC_SKIPPED&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4fd84bfdbc521217c5cd53c800be082aa4146cdb87e54fa19e1bc0b32dfd5a52f" name="a4fd84bfdbc521217c5cd53c800be082aa4146cdb87e54fa19e1bc0b32dfd5a52f"></a>LATREC_CONTEXT&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da634c3cb97a66927863b27a6b838d843a" name="a717d066d7cd15e686fb2fcedfcf8bd8da634c3cb97a66927863b27a6b838d843a"></a>LATREC_RECORD_BEGIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da1c8c30d7c07990f03471d3383f10e65d" name="a717d066d7cd15e686fb2fcedfcf8bd8da1c8c30d7c07990f03471d3383f10e65d"></a>LATREC_PROCESS_BEGIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da86819aa78571a6dc93475e91604273ef" name="a717d066d7cd15e686fb2fcedfcf8bd8da86819aa78571a6dc93475e91604273ef"></a>LATREC_ENCODE_E3SM_BEGIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da43e6fbab5d74780cb85641d055068b9b" name="a717d066d7cd15e686fb2fcedfcf8bd8da43e6fbab5d74780cb85641d055068b9b"></a>LATREC_ENCODE_E3SM_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da750040977d4c51758c089ca35e5652c6" name="a717d066d7cd15e686fb2fcedfcf8bd8da750040977d4c51758c089ca35e5652c6"></a>LATREC_DECODE_E3SM_BEGIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da4eb078f3d90b897fa3c143b63f9ff8ec" name="a717d066d7cd15e686fb2fcedfcf8bd8da4eb078f3d90b897fa3c143b63f9ff8ec"></a>LATREC_DECODE_E3SM_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da0cb7a7a3ecee27ca69442f27546534a2" name="a717d066d7cd15e686fb2fcedfcf8bd8da0cb7a7a3ecee27ca69442f27546534a2"></a>LATREC_EMIT_ENTER&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8daf2f8e0332b38a8f07f4150da70f148d1" name="a717d066d7cd15e686fb2fcedfcf8bd8daf2f8e0332b38a8f07f4150da70f148d1"></a>LATREC_ENQUEUE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da1a05209471501d126be211d86d22b893" name="a717d066d7cd15e686fb2fcedfcf8bd8da1a05209471501d126be211d86d22b893"></a>LATREC_DEQUEUE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da63eba46e27cccd255b4311de89655d80" name="a717d066d7cd15e686fb2fcedfcf8bd8da63eba46e27cccd255b4311de89655d80"></a>LATREC_ENCODE_E3AP_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8dab39f8a53d3a96e8a0290e0b1ebf7d584" name="a717d066d7cd15e686fb2fcedfcf8bd8dab39f8a53d3a96e8a0290e0b1ebf7d584"></a>LATREC_SEND_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da6c0a753709f19195db77f6ac29b2c70a" name="a717d066d7cd15e686fb2fcedfcf8bd8da6c0a753709f19195db77f6ac29b2c70a"></a>LATREC_RECV&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da723d44655c3ab949c627f539ec368628" name="a717d066d7cd15e686fb2fcedfcf8bd8da723d44655c3ab949c627f539ec368628"></a>LATREC_DECODE_E3AP_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da8b1c65e3a7f00ec08799d47a0ac6002c" name="a717d066d7cd15e686fb2fcedfcf8bd8da8b1c65e3a7f00ec08799d47a0ac6002c"></a>LATREC_DELIVER_BEGIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8daf9bb7a90953b33222678fe24a9ccb237" name="a717d066d7cd15e686fb2fcedfcf8bd8daf9bb7a90953b33222678fe24a9ccb237"></a>LATREC_DELIVER_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da83e4757b9576c096a9967287091e9b3a" name="a717d066d7cd15e686fb2fcedfcf8bd8da83e4757b9576c096a9967287091e9b3a"></a>LATREC_REPORT_QUEUED&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8dad4e2e394a424561fdb7fe5d944a17a27" name="a717d066d7cd15e686fb2fcedfcf8bd8dad4e2e394a424561fdb7fe5d944a17a27"></a>LATREC_REPORT_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8dac2d02bf84a0cf24cc6cd6c575d868b30" name="a717d066d7cd15e686fb2fcedfcf8bd8dac2d02bf84a0cf24cc6cd6c575d868b30"></a>LATREC_SESSION_QUEUED&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da283dbe4c76c655544061a0a6d98c58cf" name="a717d066d7cd15e686fb2fcedfcf8bd8da283dbe4c76c655544061a0a6d98c58cf"></a>LATREC_SESSION_POLLED&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8dafab6c6362b6f6855056958947b0c7fda" name="a717d066d7cd15e686fb2fcedfcf8bd8dafab6c6362b6f6855056958947b0c7fda"></a>LATREC_DROP&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da1d026b3ec105d992473d668bcba64e09" name="a717d066d7cd15e686fb2fcedfcf8bd8da1d026b3ec105d992473d668bcba64e09"></a>LATREC_SETUP_BEGIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da920a7d42843884cd9087d7f4cf3aa86e" name="a717d066d7cd15e686fb2fcedfcf8bd8da920a7d42843884cd9087d7f4cf3aa86e"></a>LATREC_SETUP_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da008122afd754c6105d9aa3f80c9bf682" name="a717d066d7cd15e686fb2fcedfcf8bd8da008122afd754c6105d9aa3f80c9bf682"></a>LATREC_SUB_BEGIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8dabf027a5c2727c7b84920f6b63d918de3" name="a717d066d7cd15e686fb2fcedfcf8bd8dabf027a5c2727c7b84920f6b63d918de3"></a>LATREC_SUB_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da48000773a35436de5e77816a8002239e" name="a717d066d7cd15e686fb2fcedfcf8bd8da48000773a35436de5e77816a8002239e"></a>LATREC_SM_START&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8dac9ee4691cfc7401b1edc46f57e7869c3" name="a717d066d7cd15e686fb2fcedfcf8bd8dac9ee4691cfc7401b1edc46f57e7869c3"></a>LATREC_SM_STOP&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8daf40df3762b3f4b3d7d1a15cc6331a8ec" name="a717d066d7cd15e686fb2fcedfcf8bd8daf40df3762b3f4b3d7d1a15cc6331a8ec"></a>LATREC_SM_STATUS_BEGIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8daba5e953f5573b5d50ee0ae27c9f08dba" name="a717d066d7cd15e686fb2fcedfcf8bd8daba5e953f5573b5d50ee0ae27c9f08dba"></a>LATREC_SM_STATUS_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8daab08c283366ff106fcfa237864423128" name="a717d066d7cd15e686fb2fcedfcf8bd8daab08c283366ff106fcfa237864423128"></a>LATREC_PROCESS_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da69e69b8e8feee23c635d40c70bdf17d1" name="a717d066d7cd15e686fb2fcedfcf8bd8da69e69b8e8feee23c635d40c70bdf17d1"></a>LATREC_CREATE_OUTPUT&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8dad54cbcc7750ac32e79ab2f5b0f1ee41a" name="a717d066d7cd15e686fb2fcedfcf8bd8dad54cbcc7750ac32e79ab2f5b0f1ee41a"></a>LATREC_APPLY_POLICY_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8daa870b1306aa5889d1200fdc47a336012" name="a717d066d7cd15e686fb2fcedfcf8bd8daa870b1306aa5889d1200fdc47a336012"></a>LATREC_ADMITTED&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8daaa32679f0cdb54403e5dea4d933706e7" name="a717d066d7cd15e686fb2fcedfcf8bd8daaa32679f0cdb54403e5dea4d933706e7"></a>LATREC_APPLY_CONTROL_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8dade09ba6634984b6b786cb89f23459795" name="a717d066d7cd15e686fb2fcedfcf8bd8dade09ba6634984b6b786cb89f23459795"></a>LATREC_LIVE_ON_AIR&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8dac84e57e31cd404b1a6c8807245f7f8e6" name="a717d066d7cd15e686fb2fcedfcf8bd8dac84e57e31cd404b1a6c8807245f7f8e6"></a>LATREC_ACK_SENT&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da1b5375c160e49c4dc0d1508e12e4c8f4" name="a717d066d7cd15e686fb2fcedfcf8bd8da1b5375c160e49c4dc0d1508e12e4c8f4"></a>LATREC_ACK_RECV&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da8b8014a4e348e4540bbff928561fc616" name="a717d066d7cd15e686fb2fcedfcf8bd8da8b8014a4e348e4540bbff928561fc616"></a>LATREC_BRIDGE_IN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8dae3ab567448c953b9d79eefc94b8f81bf" name="a717d066d7cd15e686fb2fcedfcf8bd8dae3ab567448c953b9d79eefc94b8f81bf"></a>LATREC_BRIDGE_OUT&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da487e66e73a645cc20fd30fe805b864d5" name="a717d066d7cd15e686fb2fcedfcf8bd8da487e66e73a645cc20fd30fe805b864d5"></a>LATREC_ENCODE_E2AP_BEGIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8dadf60195b807c7da3490b7e3fa4fbbdb3" name="a717d066d7cd15e686fb2fcedfcf8bd8dadf60195b807c7da3490b7e3fa4fbbdb3"></a>LATREC_ENCODE_E2AP_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da18499b156eaf6a992e379fddbda1e8fd" name="a717d066d7cd15e686fb2fcedfcf8bd8da18499b156eaf6a992e379fddbda1e8fd"></a>LATREC_DECODE_E2AP_BEGIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da5a85e8ac9764b59ff182b7ac73c8212b" name="a717d066d7cd15e686fb2fcedfcf8bd8da5a85e8ac9764b59ff182b7ac73c8212b"></a>LATREC_DECODE_E2AP_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da15903136740d74d06a79a19795c9d7e6" name="a717d066d7cd15e686fb2fcedfcf8bd8da15903136740d74d06a79a19795c9d7e6"></a>LATREC_DECODE_E2SM_BEGIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da4bdc040252a5927821b8daf064fbf388" name="a717d066d7cd15e686fb2fcedfcf8bd8da4bdc040252a5927821b8daf064fbf388"></a>LATREC_DECODE_E2SM_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8dad02f98c1e4d187d9661af4a540053d31" name="a717d066d7cd15e686fb2fcedfcf8bd8dad02f98c1e4d187d9661af4a540053d31"></a>LATREC_XAPP_PROCESS_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8daffa9ec3daa9f102d29e2bde90587c3d8" name="a717d066d7cd15e686fb2fcedfcf8bd8daffa9ec3daa9f102d29e2bde90587c3d8"></a>LATREC_ENCODE_E2SM_BEGIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8dab6d3fad4fe24cd0d3ef930b3eedb9b20" name="a717d066d7cd15e686fb2fcedfcf8bd8dab6d3fad4fe24cd0d3ef930b3eedb9b20"></a>LATREC_ENCODE_E2SM_DONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8dab62f1e66a7388fc933c1af66b4100e3d" name="a717d066d7cd15e686fb2fcedfcf8bd8dab62f1e66a7388fc933c1af66b4100e3d"></a>LATREC_WAIT_ENTER&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da3781ab823f44dcf726f505746c92a030" name="a717d066d7cd15e686fb2fcedfcf8bd8da3781ab823f44dcf726f505746c92a030"></a>LATREC_SKIPPED&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a717d066d7cd15e686fb2fcedfcf8bd8da4146cdb87e54fa19e1bc0b32dfd5a52f" name="a717d066d7cd15e686fb2fcedfcf8bd8da4146cdb87e54fa19e1bc0b32dfd5a52f"></a>LATREC_CONTEXT&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00147">147</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00172">172</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
-<a id="ac6f9b8f395076e7f0a532895c13be7b8" name="ac6f9b8f395076e7f0a532895c13be7b8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac6f9b8f395076e7f0a532895c13be7b8">&#9670;&#160;</a></span>anonymous enum</h2>
+<a id="a15fb3f3dbb8e1a4289e87104d131f9e5" name="a15fb3f3dbb8e1a4289e87104d131f9e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15fb3f3dbb8e1a4289e87104d131f9e5">&#9670;&#160;</a></span>anonymous enum</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -697,18 +738,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ac6f9b8f395076e7f0a532895c13be7b8a6c3d9cdb0cf57eef1bddff85cc71d69a" name="ac6f9b8f395076e7f0a532895c13be7b8a6c3d9cdb0cf57eef1bddff85cc71d69a"></a>LATREC_DROP_QUEUE_PUSH&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ac6f9b8f395076e7f0a532895c13be7b8a4babb308373a08cb591ce62423edcd3c" name="ac6f9b8f395076e7f0a532895c13be7b8a4babb308373a08cb591ce62423edcd3c"></a>LATREC_DROP_ENCODE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ac6f9b8f395076e7f0a532895c13be7b8a9319d1d85e05ed95204ad6072823f159" name="ac6f9b8f395076e7f0a532895c13be7b8a9319d1d85e05ed95204ad6072823f159"></a>LATREC_DROP_SEND&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ac6f9b8f395076e7f0a532895c13be7b8a1c1e48bfba9295f31d63d08fd89161db" name="ac6f9b8f395076e7f0a532895c13be7b8a1c1e48bfba9295f31d63d08fd89161db"></a>LATREC_DROP_DECODE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ac6f9b8f395076e7f0a532895c13be7b8a53f39f7c9e003804ffbabb2eb0fcd2d4" name="ac6f9b8f395076e7f0a532895c13be7b8a53f39f7c9e003804ffbabb2eb0fcd2d4"></a>LATREC_DROP_REPORT_QUEUE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ac6f9b8f395076e7f0a532895c13be7b8aa5e4dd0631ba7d67eee3928e2a3c4db2" name="ac6f9b8f395076e7f0a532895c13be7b8aa5e4dd0631ba7d67eee3928e2a3c4db2"></a>LATREC_DROP_NO_HANDLER&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ac6f9b8f395076e7f0a532895c13be7b8a1fbc062eaf1c44d9fdd51f66473e8fd1" name="ac6f9b8f395076e7f0a532895c13be7b8a1fbc062eaf1c44d9fdd51f66473e8fd1"></a>LATREC_DROP_SESSION_QUEUE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ac6f9b8f395076e7f0a532895c13be7b8a0937bd2e5352aef1657ac69202c8d43e" name="ac6f9b8f395076e7f0a532895c13be7b8a0937bd2e5352aef1657ac69202c8d43e"></a>LATREC_DROP_FILTERED&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ac6f9b8f395076e7f0a532895c13be7b8a01bf0eb86e7b960cd944c000d6b5e16f" name="ac6f9b8f395076e7f0a532895c13be7b8a01bf0eb86e7b960cd944c000d6b5e16f"></a>LATREC_DROP_SHUTDOWN&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a15fb3f3dbb8e1a4289e87104d131f9e5a49839b9b4f4f17d3bd7e9f88f03c30de" name="a15fb3f3dbb8e1a4289e87104d131f9e5a49839b9b4f4f17d3bd7e9f88f03c30de"></a>LATREC_SKIP_NO_SUBSCRIBERS&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a15fb3f3dbb8e1a4289e87104d131f9e5aac9d72d6e6138c946a970d269649b200" name="a15fb3f3dbb8e1a4289e87104d131f9e5aac9d72d6e6138c946a970d269649b200"></a>LATREC_SKIP_ENCODE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a15fb3f3dbb8e1a4289e87104d131f9e5a4100b1bfb6e9899a00ddd7bb295be8f0" name="a15fb3f3dbb8e1a4289e87104d131f9e5a4100b1bfb6e9899a00ddd7bb295be8f0"></a>LATREC_SKIP_COALESCED&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a15fb3f3dbb8e1a4289e87104d131f9e5afa9dabe727e888e166202d25f019e114" name="a15fb3f3dbb8e1a4289e87104d131f9e5afa9dabe727e888e166202d25f019e114"></a>LATREC_SKIP_NO_SHM&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a15fb3f3dbb8e1a4289e87104d131f9e5a0c5c4a8fe585d5ba9f7340de2abb8ee9" name="a15fb3f3dbb8e1a4289e87104d131f9e5a0c5c4a8fe585d5ba9f7340de2abb8ee9"></a>LATREC_SKIP_RANGES_LOST&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00352">352</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00365">365</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -735,8 +772,14 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Record the final counts and clock pair, flush and unmap the ring, and disable it. Does nothing on a ring that is not open. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">r</td><td>ring to close </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00592">592</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00649">649</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -762,8 +805,9 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>The seq published by <a class="el" href="#a1cf8c3111daf8d291d07bd4b4f71a879">latrec_ctx_set()</a> on this thread. </p><dl class="section return"><dt>Returns</dt><dd>the published seq, 0 from a thread with no ring </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00697">697</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00750">750</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -789,8 +833,16 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Publishes the seq of the message this thread is carrying, for code whose signature cannot receive it: the connector is handed a byte buffer, not a Pdu, <a class="el" href="namespacelibe3.html">libe3</a>'s emit entry points are handed neither, and an application's indication or control handler is handed the message alone. Caller and callee run on the same thread. <a class="el" href="#a588269eb211c77b050ab91ea4f8bc66c">latrec_ctx()</a> reads back 0 from a thread with no ring.</p>
+<p>The value is sticky until overwritten, so a producer that wants its records joined to <a class="el" href="namespacelibe3.html">libe3</a>'s outbound leg (via LATREC_EMIT_ENTER's aux) sets it once per message, immediately before emitting. Readers must tolerate a stale or zero value rather than treating it as authoritative.</p>
+<p>Both directions use it. Outbound, the producer sets it and <a class="el" href="namespacelibe3.html">libe3</a> reads it into LATREC_EMIT_ENTER's aux. Inbound, <a class="el" href="namespacelibe3.html">libe3</a> sets it before invoking the application handler, so the handler's own stages can key on the same seq as the DELIVER_BEGIN/DELIVER_DONE pair around them; a dApp reads it with <a class="el" href="#a588269eb211c77b050ab91ea4f8bc66c">latrec_ctx()</a> on entry rather than being passed it. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">seq</td><td>sequence number of the message this thread is carrying </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00696">696</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00741">741</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -816,8 +868,14 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Refresh rec_count and the closing clock pair without closing the ring. Call periodically so a ring that is never closed still carries both. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">r</td><td>ring to refresh </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00583">583</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00637">637</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -843,8 +901,9 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Mean cost of one <a class="el" href="#a4df9f2de25c3b49006269a66151254f9">latrec_now_ns()</a> over 1000 calls, about 30 us in total. Called once per ring at open and recorded in the header. </p><dl class="section return"><dt>Returns</dt><dd>mean nanoseconds per call, 0 when the measurement is unusable </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00447">447</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00481">481</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -870,8 +929,9 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Current CLOCK_MONOTONIC reading. </p><dl class="section return"><dt>Returns</dt><dd>nanoseconds on the monotonic clock </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00419">419</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00449">449</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -906,8 +966,17 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Open a ring under the compiled-in default directory. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">r</td><td>ring to initialise </td></tr>
+    <tr><td class="paramname">name</td><td>ring name, see <a class="el" href="#a28cee5a2462d31780b13a5894b156072">latrec_open_in()</a> </td></tr>
+    <tr><td class="paramname">entries_log2</td><td>capacity as a power of two </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>1 on success, -1 on error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00529">529</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00571">571</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -947,8 +1016,23 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Open a ring under <span class="tt">dir</span>. name ("process.thread") becomes <span class="tt">&lt;dir&gt;/&lt;name&gt;.latrec</span> and must be unique per writer thread across every process sharing the directory: the file is opened O_TRUNC, so a collision discards the other writer's ring. entries_log2 sets the capacity (22 = 4 M records = 128 MiB). <span class="tt">dir</span> is created if missing (one level only).</p>
+<p>There is no "tracing disabled" return: in a build with LIBE3_ENABLE_LATREC the recorder records. Whether it exists at all is the build's decision. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">r</td><td>ring to initialise </td></tr>
+    <tr><td class="paramname">dir</td><td>directory for the file, NULL or empty for LATREC_DEFAULT_DIR </td></tr>
+    <tr><td class="paramname">name</td><td>ring name, "process.thread" </td></tr>
+    <tr><td class="paramname">entries_log2</td><td>capacity as a power of two </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>1 on success, -1 on error </dd></dl>
+<p>&lt; Bytes of file header, before the records</p>
+<p>&lt; Magic number at the start of a ring file ("ALR1")</p>
+<p>&lt; Ring file layout version</p>
+<p>&lt; Bytes of file header, before the records</p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00475">475</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00513">513</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -974,8 +1058,9 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Current CLOCK_REALTIME reading. </p><dl class="section return"><dt>Returns</dt><dd>nanoseconds since the Unix epoch </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00426">426</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00458">458</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -1001,19 +1086,22 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Re-read the cpu id into the ring. Call off the hot path: sched_getcpu() is a syscall on targets where LATREC_CPUID_ON_STAMP is 0. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">r</td><td>ring whose cached cpu id is refreshed </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00435">435</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00468">468</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
-<a id="a36eb1fc44812c4655a20fd7b3ecea55f" name="a36eb1fc44812c4655a20fd7b3ecea55f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a36eb1fc44812c4655a20fd7b3ecea55f">&#9670;&#160;</a></span>latrec_seq_next()</h2>
+<a id="a71b3998748cbf895ebdc0473fd3e9175" name="a71b3998748cbf895ebdc0473fd3e9175"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71b3998748cbf895ebdc0473fd3e9175">&#9670;&#160;</a></span>latrec_seq_next()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">uint64_t latrec_seq_next </td>
@@ -1022,25 +1110,18 @@ Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
+<p>Next value of the process-wide sequence counter (starts at 1). </p><dl class="section return"><dt>Returns</dt><dd>the next sequence number </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00684">684</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00164">164</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
 </div>
 </div>
-<a id="a1f5052a861351ac1f8482947de795cb4" name="a1f5052a861351ac1f8482947de795cb4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1f5052a861351ac1f8482947de795cb4">&#9670;&#160;</a></span>latrec_set_output_dir()</h2>
+<a id="a280c65aaa528a73aaebe586e62568bfb" name="a280c65aaa528a73aaebe586e62568bfb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a280c65aaa528a73aaebe586e62568bfb">&#9670;&#160;</a></span>latrec_set_output_dir()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void latrec_set_output_dir </td>
@@ -1049,14 +1130,15 @@ Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
+<p>Directory the per-thread rings are written to, for the whole process. Call before the first latrec_tls_open*(); rings already open are unaffected. NULL or empty restores LATREC_DEFAULT_DIR. This chooses <em>where</em>, never <em>whether</em>: with LIBE3_ENABLE_LATREC on, the recorder records regardless. Two processes that should not share rings (concurrent tests, one benchmark per directory) each set their own. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dir</td><td>directory for the rings, NULL or empty for LATREC_DEFAULT_DIR </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00681">681</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00114">114</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
 </div>
 </div>
@@ -1101,8 +1183,19 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Hot path: one clock read and four stores. Single writer per ring.</p>
+<p>The disabled-ring check is repeated here deliberately. <a class="el" href="#a4df9f2de25c3b49006269a66151254f9">latrec_now_ns()</a> is an argument, so it would be evaluated before the call even on a thread with no ring, putting a clock read on a path whose whole point is to be free &ndash; tests/bench_latrec.cpp holds that path to a 10 ns ceiling and catches it. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">r</td><td>ring to stamp </td></tr>
+    <tr><td class="paramname">seq</td><td>sequence number of the message, only the low 48 bits are kept </td></tr>
+    <tr><td class="paramname">stage</td><td>stage id from the catalog </td></tr>
+    <tr><td class="paramname">aux</td><td>stage-specific value </td></tr>
+    <tr><td class="paramname">aux2</td><td>second stage-specific value </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00574">574</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00627">627</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -1152,19 +1245,28 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Stamp carrying a timestamp the caller already took, for the case where the moment being recorded is not the moment the stamp can be issued: handing an item to another thread is only known to have <em>succeeded</em> after the handoff, by which time the consumer may already have run and stamped its own stage. Reading the clock before the handoff and passing it here keeps the interval meaningful; issuing a fresh stamp afterwards can order the producer's record after the consumer's.</p>
+<p>t_ns must be a CLOCK_MONOTONIC reading from <a class="el" href="#a4df9f2de25c3b49006269a66151254f9">latrec_now_ns()</a>. Zero is treated as "not taken" and replaced with the current time, since zero is also how an unwritten slot reads. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">r</td><td>ring to stamp </td></tr>
+    <tr><td class="paramname">seq</td><td>sequence number of the message, only the low 48 bits are kept </td></tr>
+    <tr><td class="paramname">stage</td><td>stage id from the catalog </td></tr>
+    <tr><td class="paramname">aux</td><td>stage-specific value </td></tr>
+    <tr><td class="paramname">aux2</td><td>second stage-specific value </td></tr>
+    <tr><td class="paramname">t_ns</td><td>CLOCK_MONOTONIC reading taken earlier </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00545">545</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00593">593</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
-<a id="a379110c29e4a6b8108d545bc823610ce" name="a379110c29e4a6b8108d545bc823610ce"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a379110c29e4a6b8108d545bc823610ce">&#9670;&#160;</a></span>latrec_tls_open()</h2>
+<a id="a0e836b10f4bbeff24802e6bc3698621e" name="a0e836b10f4bbeff24802e6bc3698621e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e836b10f4bbeff24802e6bc3698621e">&#9670;&#160;</a></span>latrec_tls_open()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="structlatrec__t.html">latrec_t</a> * latrec_tls_open </td>
@@ -1173,25 +1275,18 @@ Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
+<p>Same as <a class="el" href="#a77e73bd83f96c0242d91a67c0ce40fc2">latrec_tls_open_as()</a> with no role. </p><dl class="section return"><dt>Returns</dt><dd>the calling thread's ring, a disabled one if the open failed </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00683">683</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00162">162</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
 </div>
 </div>
-<a id="ab85ff0a6cf736e8787fc2fc8c2439a8b" name="ab85ff0a6cf736e8787fc2fc8c2439a8b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab85ff0a6cf736e8787fc2fc8c2439a8b">&#9670;&#160;</a></span>latrec_tls_open_as()</h2>
+<a id="a77e73bd83f96c0242d91a67c0ce40fc2" name="a77e73bd83f96c0242d91a67c0ce40fc2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77e73bd83f96c0242d91a67c0ce40fc2">&#9670;&#160;</a></span>latrec_tls_open_as()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="structlatrec__t.html">latrec_t</a> * latrec_tls_open_as </td>
@@ -1200,14 +1295,17 @@ Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
+<p>Opens the calling thread's ring as <span class="tt">&lt;role&gt;.&lt;tid&gt;</span>, or <span class="tt">&lt;program&gt;.&lt;tid&gt;</span> when role is NULL or empty; idempotent. Capacity comes from LATREC_ENTRIES_LOG2_&lt;ROLE&gt; (role uppercased, non-alphanumerics as '_'), else LATREC_ENTRIES_LOG2, else the compiled-in default. The open pre-faults the whole mapping, which takes tens of ms; the stamp path does not call it. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">role</td><td>ring name prefix, NULL or empty for the program name </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the calling thread's ring, a disabled one if the open failed </dd></dl>
+<p>&lt; Per-thread rings tracked for the flush at exit</p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00682">682</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00122">122</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
 </div>
 </div>
@@ -1233,8 +1331,9 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Take a timestamp for a later <a class="el" href="#a398d74ab770d233bdde5c71e80840350">latrec_tstamp_at()</a>. Pairing these two, rather than calling <a class="el" href="#a4df9f2de25c3b49006269a66151254f9">latrec_now_ns()</a> directly, keeps the clock read out of a build with the recorder compiled out: this is the point where the pair collapses to nothing. </p><dl class="section return"><dt>Returns</dt><dd>a CLOCK_MONOTONIC reading, 0 when the recorder is compiled out </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00695">695</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00712">712</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -1274,8 +1373,17 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Stamp into the calling thread's ring. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">seq</td><td>sequence number of the message </td></tr>
+    <tr><td class="paramname">stage</td><td>stage id from the catalog </td></tr>
+    <tr><td class="paramname">aux</td><td>stage-specific value </td></tr>
+    <tr><td class="paramname">aux2</td><td>second stage-specific value </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00685">685</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00719">719</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -1320,8 +1428,44 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Stamp into the calling thread's ring, carrying a timestamp taken earlier. See latrec_stamp_at for when that is the correct thing to do. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">seq</td><td>sequence number of the message </td></tr>
+    <tr><td class="paramname">stage</td><td>stage id from the catalog </td></tr>
+    <tr><td class="paramname">aux</td><td>stage-specific value </td></tr>
+    <tr><td class="paramname">aux2</td><td>second stage-specific value </td></tr>
+    <tr><td class="paramname">t_ns</td><td>reading from <a class="el" href="#a1c5b0fac82c163c0f03017436f15feb0">latrec_tnow()</a> </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00689">689</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00701">701</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="ada2df74a63adf6f0cbd4ea664eb76d32" name="ada2df74a63adf6f0cbd4ea664eb76d32"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada2df74a63adf6f0cbd4ea664eb76d32">&#9670;&#160;</a></span>latrec_tls</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">__thread <a class="el" href="structlatrec__t.html">latrec_t</a>* latrec_tls</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Ring of the calling thread. Never NULL: it refers to a disabled ring until the thread calls <a class="el" href="#a0e836b10f4bbeff24802e6bc3698621e">latrec_tls_open()</a>, so a stamp before that is discarded. </p>
+
+<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00045">45</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
 </div>
 </div>

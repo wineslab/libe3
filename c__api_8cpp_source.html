@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.15.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>libe3: /home/runner/work/libe3/libe3/src/c_api.cpp Source File</title>
+<title>libe3: src/c_api.cpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.10</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -272,8 +272,8 @@ $(function(){initNavTree('c__api_8cpp_source.html','',''); });
 <div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    <span class="comment">// Keys the outbound leg from this boundary, so the payload copy and the Pdu</span></div>
 <div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    <span class="comment">// construction below fall inside it. aux carries the producer&#39;s own trace</span></div>
 <div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    <span class="comment">// seq, which joins its stages to this leg.</span></div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    pdu.<a class="code hl_variable" href="structlibe3_1_1Pdu.html#a07ca310489ccdd45e96f9786252f6f5e">enqueue_seq</a> = <a class="code hl_function" href="latrec_8h.html#a36eb1fc44812c4655a20fd7b3ecea55f">latrec_seq_next</a>();</div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    <a class="code hl_function" href="latrec_8h.html#a12f6875c4a420e0fb372c0c7dba87440">latrec_tstamp</a>(pdu.<a class="code hl_variable" href="structlibe3_1_1Pdu.html#a07ca310489ccdd45e96f9786252f6f5e">enqueue_seq</a>, <a class="code hl_enumvalue" href="latrec_8h.html#a4fd84bfdbc521217c5cd53c800be082aa0cb7a7a3ecee27ca69442f27546534a2">LATREC_EMIT_ENTER</a>, <a class="code hl_function" href="latrec_8h.html#a588269eb211c77b050ab91ea4f8bc66c">latrec_ctx</a>(), ran_function_id);</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    pdu.<a class="code hl_variable" href="structlibe3_1_1Pdu.html#a07ca310489ccdd45e96f9786252f6f5e">enqueue_seq</a> = <a class="code hl_function" href="latrec_8h.html#a71b3998748cbf895ebdc0473fd3e9175">latrec_seq_next</a>();</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    <a class="code hl_function" href="latrec_8h.html#a12f6875c4a420e0fb372c0c7dba87440">latrec_tstamp</a>(pdu.<a class="code hl_variable" href="structlibe3_1_1Pdu.html#a07ca310489ccdd45e96f9786252f6f5e">enqueue_seq</a>, <a class="code hl_enumvalue" href="latrec_8h.html#a717d066d7cd15e686fb2fcedfcf8bd8da0cb7a7a3ecee27ca69442f27546534a2">LATREC_EMIT_ENTER</a>, <a class="code hl_function" href="latrec_8h.html#a588269eb211c77b050ab91ea4f8bc66c">latrec_ctx</a>(), ran_function_id);</div>
 <div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span> </div>
 <div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <a class="code hl_struct" href="structlibe3_1_1IndicationMessage.html">IndicationMessage</a> msg;</div>
 <div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    msg.<a class="code hl_variable" href="structlibe3_1_1IndicationMessage.html#aff840c4fb915f56c86cea43ec06b5a46">dapp_identifier</a> = dapp_id;</div>
@@ -678,10 +678,10 @@ $(function(){initNavTree('c__api_8cpp_source.html','',''); });
 <div class="ttc" id="aerror__codes_8h_html_a5f578656b21ce0f8b5f4e411421b6ff9"><div class="ttname"><a href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a></div><div class="ttdeci">int e3_error_t</div><div class="ttdoc">C error type alias.</div><div class="ttdef"><b>Definition</b> <a href="error__codes_8h_source.html#l00116">error_codes.h:116</a></div></div>
 <div class="ttc" id="agroup__error__codes_html_ga36076106bfe5aefabf75dbd1d52175fd"><div class="ttname"><a href="group__error__codes.html#ga36076106bfe5aefabf75dbd1d52175fd">LIBE3_ERROR_CODE_LIST</a></div><div class="ttdeci">#define LIBE3_ERROR_CODE_LIST</div><div class="ttdoc">X-macro list of all libe3 error codes.</div><div class="ttdef"><b>Definition</b> <a href="error__codes_8h_source.html#l00067">error_codes.h:67</a></div></div>
 <div class="ttc" id="alatrec_8h_html"><div class="ttname"><a href="latrec_8h.html">latrec.h</a></div><div class="ttdoc">Lock-free per-thread latency stamp recorder (header-only, C99).</div></div>
-<div class="ttc" id="alatrec_8h_html_a12f6875c4a420e0fb372c0c7dba87440"><div class="ttname"><a href="latrec_8h.html#a12f6875c4a420e0fb372c0c7dba87440">latrec_tstamp</a></div><div class="ttdeci">static void latrec_tstamp(uint64_t seq, uint8_t stage, uint64_t aux, uint64_t aux2)</div><div class="ttdef"><b>Definition</b> <a href="latrec_8h_source.html#l00685">latrec.h:685</a></div></div>
-<div class="ttc" id="alatrec_8h_html_a36eb1fc44812c4655a20fd7b3ecea55f"><div class="ttname"><a href="latrec_8h.html#a36eb1fc44812c4655a20fd7b3ecea55f">latrec_seq_next</a></div><div class="ttdeci">static uint64_t latrec_seq_next(void)</div><div class="ttdef"><b>Definition</b> <a href="latrec_8h_source.html#l00684">latrec.h:684</a></div></div>
-<div class="ttc" id="alatrec_8h_html_a4fd84bfdbc521217c5cd53c800be082aa0cb7a7a3ecee27ca69442f27546534a2"><div class="ttname"><a href="latrec_8h.html#a4fd84bfdbc521217c5cd53c800be082aa0cb7a7a3ecee27ca69442f27546534a2">LATREC_EMIT_ENTER</a></div><div class="ttdeci">@ LATREC_EMIT_ENTER</div><div class="ttdef"><b>Definition</b> <a href="latrec_8h_source.html#l00174">latrec.h:174</a></div></div>
-<div class="ttc" id="alatrec_8h_html_a588269eb211c77b050ab91ea4f8bc66c"><div class="ttname"><a href="latrec_8h.html#a588269eb211c77b050ab91ea4f8bc66c">latrec_ctx</a></div><div class="ttdeci">static uint64_t latrec_ctx(void)</div><div class="ttdef"><b>Definition</b> <a href="latrec_8h_source.html#l00697">latrec.h:697</a></div></div>
+<div class="ttc" id="alatrec_8h_html_a12f6875c4a420e0fb372c0c7dba87440"><div class="ttname"><a href="latrec_8h.html#a12f6875c4a420e0fb372c0c7dba87440">latrec_tstamp</a></div><div class="ttdeci">static void latrec_tstamp(uint64_t seq, uint8_t stage, uint64_t aux, uint64_t aux2)</div><div class="ttdef"><b>Definition</b> <a href="latrec_8h_source.html#l00719">latrec.h:719</a></div></div>
+<div class="ttc" id="alatrec_8h_html_a588269eb211c77b050ab91ea4f8bc66c"><div class="ttname"><a href="latrec_8h.html#a588269eb211c77b050ab91ea4f8bc66c">latrec_ctx</a></div><div class="ttdeci">static uint64_t latrec_ctx(void)</div><div class="ttdef"><b>Definition</b> <a href="latrec_8h_source.html#l00750">latrec.h:750</a></div></div>
+<div class="ttc" id="alatrec_8h_html_a717d066d7cd15e686fb2fcedfcf8bd8da0cb7a7a3ecee27ca69442f27546534a2"><div class="ttname"><a href="latrec_8h.html#a717d066d7cd15e686fb2fcedfcf8bd8da0cb7a7a3ecee27ca69442f27546534a2">LATREC_EMIT_ENTER</a></div><div class="ttdeci">@ LATREC_EMIT_ENTER</div><div class="ttdef"><b>Definition</b> <a href="latrec_8h_source.html#l00199">latrec.h:199</a></div></div>
+<div class="ttc" id="alatrec_8h_html_a71b3998748cbf895ebdc0473fd3e9175"><div class="ttname"><a href="latrec_8h.html#a71b3998748cbf895ebdc0473fd3e9175">latrec_seq_next</a></div><div class="ttdeci">uint64_t latrec_seq_next(void)</div><div class="ttdef"><b>Definition</b> <a href="latrec_8c_source.html#l00164">latrec.c:164</a></div></div>
 <div class="ttc" id="alogger_8hpp_html"><div class="ttname"><a href="logger_8hpp.html">logger.hpp</a></div><div class="ttdoc">Logging facility for libe3.</div></div>
 <div class="ttc" id="alogger_8hpp_html_a95e326d05fe1b245f98aa703ee67a10c"><div class="ttname"><a href="logger_8hpp.html#a95e326d05fe1b245f98aa703ee67a10c">E3_LOG_ERROR</a></div><div class="ttdeci">#define E3_LOG_ERROR(component)</div><div class="ttdef"><b>Definition</b> <a href="logger_8hpp_source.html#l00225">logger.hpp:225</a></div></div>
 <div class="ttc" id="anamespacelibe3_html"><div class="ttname"><a href="namespacelibe3.html">libe3</a></div><div class="ttdef"><b>Definition</b> <a href="libe3_8hpp_source.html#l00029">libe3.hpp:29</a></div></div>

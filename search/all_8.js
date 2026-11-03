@@ -1,10 +1,18 @@
 var searchData=
 [
-  ['hand_20rolled_20integration_0',['Comparing against a hand-rolled integration',['../path_a_e3_loop.html#autotoc_md40',1,'']]],
-  ['handle_5fcontrol_5faction_1',['handle_control_action',['../classlibe3_1_1ServiceModel.html#a9db06b14342c2e140d1a0df72a174ef3',1,'libe3::ServiceModel::handle_control_action()'],['../structe3__service__model__handle__s.html#a5593452cfbbd466c6bcac6f8a8e325fd',1,'e3_service_model_handle_s::handle_control_action()']]],
-  ['has_5fcontrol_5fgranted_2',['has_control_granted',['../structlibe3_1_1py_1_1E3Event.html#a71647ce850dc53f08c86ecfa570be735',1,'libe3::py::E3Event']]],
-  ['has_5fsubscribers_3',['has_subscribers',['../classlibe3_1_1SubscriptionManager.html#a7e4ec70e51cc5798d2c83db91f623da4',1,'libe3::SubscriptionManager']]],
-  ['has_5ftelemetry_5fgranted_4',['has_telemetry_granted',['../structlibe3_1_1py_1_1E3Event.html#ab2aab3fcd79b103ea8141453bbc71a14',1,'libe3::py::E3Event']]],
-  ['have_5fsetup_5',['have_setup',['../structlibe3_1_1py_1_1DAppSession_1_1Impl.html#a72a87722470c8a3deb9228e8e616da34',1,'libe3::py::DAppSession::Impl']]],
-  ['headers_6',['Licensing headers',['../md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md91',1,'']]]
+  ['8_201_20what_20applied_20means_20and_20what_20the_20acknowledge_20says_0',['8 1 What applied means and what the acknowledge says',['../md_docs_2e2sm-dapp_205-semantics-and-constraints.html#autotoc_md121',1,'8.1 What &quot;applied&quot; means, and what the acknowledge says'],['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md209',1,'8.1 What &quot;applied&quot; means, and what the acknowledge says']]],
+  ['8_201_20who_20owns_20what_1',['8.1 Who owns what',['../md_docs_2e2sm-dapp_202-ie-mapping.html#autotoc_md61',1,'']]],
+  ['8_202_2',['The Spectrum outcome worked example (old section 8.2)',['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md160',1,'']]],
+  ['8_202_20what_20a_20consumer_20must_20do_3',['8.2 What a consumer must do',['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md210',1,'']]],
+  ['8_202_20what_20a_20consumer_20shall_20do_4',['8.2 What a consumer shall do',['../md_docs_2e2sm-dapp_205-semantics-and-constraints.html#autotoc_md122',1,'']]],
+  ['8_202_20worked_20example_3a_20the_20spectrum_20service_20model_5',['8.2 Worked example: the Spectrum service model',['../md_docs_2e2sm-dapp_202-ie-mapping.html#autotoc_md62',1,'']]],
+  ['8_203_6',['How a consumer reads the outcome (old section 8.3)',['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md161',1,'']]],
+  ['8_203_20how_20a_20consumer_20reads_20it_7',['8.3 How a consumer reads it',['../md_docs_2e2sm-dapp_202-ie-mapping.html#autotoc_md63',1,'']]],
+  ['8_203_20ordering_20and_20replacement_8',['8 3 Ordering and replacement',['../md_docs_2e2sm-dapp_205-semantics-and-constraints.html#autotoc_md123',1,'8.3 Ordering and replacement'],['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md211',1,'8.3 Ordering and replacement']]],
+  ['8_204_9',['E3 RAN function id registry (old section 8.4)',['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md162',1,'']]],
+  ['8_204_20how_20another_20service_20model_20adds_20its_20own_20outcome_10',['8.4 How another service model adds its own outcome',['../md_docs_2e2sm-dapp_202-ie-mapping.html#autotoc_md64',1,'']]],
+  ['8_20control_20semantics_11',['8 Control semantics',['../md_docs_2e2sm-dapp_205-semantics-and-constraints.html#autotoc_md120',1,'8. Control semantics'],['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md208',1,'8. Control semantics']]],
+  ['8_20the_20e3_20control_20outcome_20payload_12',['8. The &lt;span class=&quot;tt&quot;&gt;e3-control-outcome&lt;/span&gt; payload',['../md_docs_2e2sm-dapp_202-ie-mapping.html#autotoc_md60',1,'']]],
+  ['80_2090_20a0_20control_20outcome_20everything_20present_13',['&lt;span class=&quot;tt&quot;&gt;co1_full&lt;/span&gt; = &lt;span class=&quot;tt&quot;&gt;1c 08 17979cfe3d85cd15 01 2a 0a 10 20 30 40 50 60 70 80 90 a0&lt;/span&gt; (control outcome, everything present)',['../md_docs_2e2sm-dapp_204-encoding.html#autotoc_md99',1,'']]],
+  ['85_20cd_2015_2001_202a_14',['&lt;span class=&quot;tt&quot;&gt;ih1_full&lt;/span&gt; = &lt;span class=&quot;tt&quot;&gt;0e 00 ff 00 07 00 02 00 f1 10 20 04 d2 00 05 08 17 97 9c fe 3d 85 cd 15 01 2a&lt;/span&gt;',['../md_docs_2e2sm-dapp_204-encoding.html#autotoc_md97',1,'']]]
 ];

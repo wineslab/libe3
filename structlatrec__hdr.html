@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.10</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -111,8 +111,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a54ad3e378cd92424a2f3f79e384b54d3" id="r_a54ad3e378cd92424a2f3f79e384b54d3"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a54ad3e378cd92424a2f3f79e384b54d3">pad</a> [4096 - 4 *4 - 8 *6 - 64]</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00388">388</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<div class="textblock"><p>File header of a ring. v1 layout through name[]; v2 appends inside the pad. v1 field offsets are frozen. </p>
+
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00414">414</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
 <a id="aba13f9bab42bb213c81a1e66a3bdfb5d" name="aba13f9bab42bb213c81a1e66a3bdfb5d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aba13f9bab42bb213c81a1e66a3bdfb5d">&#9670;&#160;</a></span>clock_ns_per_call</h2>
@@ -125,8 +126,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>measured timestamp cost (0 = not measured) </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00397">397</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00424">424</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -141,8 +143,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>ring capacity (power of two) </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00390">390</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00417">417</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -157,8 +160,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>LATREC_MAGIC </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00389">389</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00415">415</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -173,8 +177,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>ring name, "process.thread" </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00394">394</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00421">421</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -189,8 +194,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>reserved, fills the header to LATREC_HDR_LEN </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00400">400</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00427">427</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -205,8 +211,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>final index; refreshed by latrec_heartbeat </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00391">391</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00418">418</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -221,8 +228,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>sizeof(latrec_rec), for reader validation </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00396">396</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00423">423</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -237,8 +245,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>paired clocks at open: mono&lt;-&gt;wall mapping </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00392">392</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00419">419</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -253,8 +262,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>realtime clock at open, paired with t0_mono_ns </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00393">393</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00420">420</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -269,8 +279,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>paired clocks refreshed by heartbeat/close </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00398">398</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00425">425</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -285,8 +296,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>realtime clock of the last refresh, paired with t1_mono_ns </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00399">399</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00426">426</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -301,13 +313,14 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>LATREC_VERSION of the writer </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00389">389</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00416">416</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>/home/runner/work/libe3/libe3/include/libe3/<a class="el" href="latrec_8h_source.html">latrec.h</a></li>
+<li>include/libe3/<a class="el" href="latrec_8h_source.html">latrec.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

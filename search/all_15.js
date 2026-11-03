@@ -1,12 +1,12 @@
 var searchData=
 [
-  ['uninitialized_0',['UNINITIALIZED',['../namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1feadd652546039b18970b8dcf2cff824268',1,'libe3']]],
-  ['unregister_5fdapp_1',['unregister_dapp',['../classlibe3_1_1SubscriptionManager.html#a31b2b3b526c1205edd5e8f0e7548d5df',1,'libe3::SubscriptionManager']]],
-  ['unregister_5fsm_2',['unregister_sm',['../classlibe3_1_1SmRegistry.html#a457164e750ad3eab42e10d35ee1623d3',1,'libe3::SmRegistry']]],
-  ['unsubscribe_3',['unsubscribe',['../classlibe3_1_1E3Agent.html#a6c24b5b987280d40ce95661c83a04bb9',1,'libe3::E3Agent::unsubscribe()'],['../classlibe3_1_1py_1_1DAppSession.html#a281047a21ea464eaf35816d26b730af1',1,'libe3::py::DAppSession::unsubscribe()'],['../classlibe3_1_1E3Agent.html#a6c24b5b987280d40ce95661c83a04bb9',1,'libe3::E3Agent::unsubscribe()']]],
-  ['up_20in_20the_20rings_4',['Where it shows up in the rings',['../path_b_e2_e3_loop.html#autotoc_md50',1,'']]],
-  ['up_20leg_20leg_20report_5fup_5',['Report-up leg (&lt;span class=&quot;tt&quot;&gt;leg=report_up&lt;/span&gt;)',['../path_b_e2_e3_loop.html#autotoc_md45',1,'']]],
-  ['up_3a_20tier_20aware_20attribution_6',['Possible follow-up: tier-aware attribution',['../latrec_guide.html#autotoc_md28',1,'']]],
-  ['update_7',['UPDATE',['../namespacelibe3.html#ac1c5533fc81586565ca7822bf00eee90a15a8022d0ed9cd9c2a2e756822703eb4',1,'libe3']]],
-  ['usage_8',['Usage',['../index.html#autotoc_md64',1,'']]]
+  ['joining_20across_20components_0',['Joining across components',['../md_docs_2utilities_2latrec.html#autotoc_md642',1,'']]],
+  ['joining_3a_20the_20sequenceid_1',['Joining: the &lt;span class=&quot;tt&quot;&gt;sequenceId&lt;/span&gt;',['../md_docs_2control-loops_2path-b-e2-e3-loop.html#autotoc_md25',1,'']]],
+  ['joins_2',['How a new service model joins',['../dir_d9d2420dd0a82854388aea0d70f7609f.html#autotoc_md491',1,'']]],
+  ['json_3',['JSON',['../namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444a0ecd11c1d7a287401d148a23bbd7a2f8',1,'libe3::JSON'],['../md_docs_2e3ap_204-encoding.html#autotoc_md346',1,'JSON'],['../md_docs_2e3sm_2l1-kpm_204-encoding.html#autotoc_md443',1,'JSON'],['../md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md562',1,'JSON']]],
+  ['json_20as_20libe3_20speaks_20it_4',['JSON as libe3 speaks it',['../md_docs_2interop.html#autotoc_md625',1,'']]],
+  ['json_20codec_5',['The xApp leg has no JSON codec',['../md_docs_2e3sm_2spectrum_206-discrepancies.html#autotoc_md592',1,'']]],
+  ['json_5fencoder_2ecpp_6',['json_encoder.cpp',['../json__encoder_8cpp.html',1,'']]],
+  ['json_5fencoder_2ehpp_7',['json_encoder.hpp',['../json__encoder_8hpp.html',1,'']]],
+  ['jsone3encoder_8',['JsonE3Encoder',['../classlibe3_1_1JsonE3Encoder.html',1,'libe3::JsonE3Encoder'],['../classlibe3_1_1JsonE3Encoder.html#a49d5c3e026a8ec6cb5a2a92763ee694c',1,'libe3::JsonE3Encoder::JsonE3Encoder()']]]
 ];

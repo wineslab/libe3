@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['responsecode_0',['ResponseCode',['../namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5',1,'libe3']]]
+  ['pdutype_0',['PduType',['../namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185',1,'libe3']]]
 ];

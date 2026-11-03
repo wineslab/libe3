@@ -1,15 +1,13 @@
 var searchData=
 [
-  ['e3_5fagent_5fhandle_5fs_0',['e3_agent_handle_s',['../structe3__agent__handle__s.html',1,'']]],
-  ['e3_5fc_5fservice_5fmodel_5fdesc_5ft_1',['e3_c_service_model_desc_t',['../structe3__c__service__model__desc__t.html',1,'']]],
-  ['e3_5fconfig_5ft_2',['e3_config_t',['../structe3__config__t.html',1,'']]],
-  ['e3_5fservice_5fmodel_5fhandle_5fs_3',['e3_service_model_handle_s',['../structe3__service__model__handle__s.html',1,'']]],
-  ['e3agent_4',['E3Agent',['../classlibe3_1_1E3Agent.html',1,'libe3']]],
-  ['e3config_5',['E3Config',['../structlibe3_1_1E3Config.html',1,'libe3']]],
-  ['e3connector_6',['E3Connector',['../classlibe3_1_1E3Connector.html',1,'libe3']]],
-  ['e3encoder_7',['E3Encoder',['../classlibe3_1_1E3Encoder.html',1,'libe3']]],
-  ['e3event_8',['E3Event',['../structlibe3_1_1py_1_1E3Event.html',1,'libe3::py']]],
-  ['e3interface_9',['E3Interface',['../classlibe3_1_1E3Interface.html',1,'libe3']]],
-  ['encodedmessage_10',['EncodedMessage',['../structlibe3_1_1EncodedMessage.html',1,'libe3']]],
-  ['expiredsubscription_11',['ExpiredSubscription',['../structlibe3_1_1ExpiredSubscription.html',1,'libe3']]]
+  ['dapp_5fe3_5fsubscription_5fitem_5fs_0',['dapp_e3_subscription_item_s',['../structlibe3_1_1e2sm__dapp_1_1dapp__e3__subscription__item__s.html',1,'libe3::e2sm_dapp']]],
+  ['dappcontrolaction_1',['DAppControlAction',['../structlibe3_1_1DAppControlAction.html',1,'libe3']]],
+  ['dappentry_2',['DAppEntry',['../structlibe3_1_1DAppEntry.html',1,'libe3']]],
+  ['dappreport_3',['DAppReport',['../structlibe3_1_1DAppReport.html',1,'libe3']]],
+  ['dappsession_4',['DAppSession',['../classlibe3_1_1py_1_1DAppSession.html',1,'libe3::py']]],
+  ['dappsubscriptionstate_5',['DAppSubscriptionState',['../classlibe3_1_1DAppSubscriptionState.html',1,'libe3']]],
+  ['dyn_5farray_6',['dyn_array',['../classlibe3_1_1e2sm__dapp_1_1dyn__array.html',1,'libe3::e2sm_dapp']]],
+  ['dyn_5farray_3c_20dapp_5fe3_5fsubscription_5fitem_5fs_20_3e_7',['dyn_array&lt; dapp_e3_subscription_item_s &gt;',['../classlibe3_1_1e2sm__dapp_1_1dyn__array.html',1,'libe3::e2sm_dapp']]],
+  ['dyn_5farray_3c_20ran_5ffunction_5fdefinition_5fctrl_5fitem_5fs_20_3e_8',['dyn_array&lt; ran_function_definition_ctrl_item_s &gt;',['../classlibe3_1_1e2sm__dapp_1_1dyn__array.html',1,'libe3::e2sm_dapp']]],
+  ['dyn_5farray_3c_20ran_5ffunction_5fdefinition_5freport_5fitem_5fs_20_3e_9',['dyn_array&lt; ran_function_definition_report_item_s &gt;',['../classlibe3_1_1e2sm__dapp_1_1dyn__array.html',1,'libe3::e2sm_dapp']]]
 ];

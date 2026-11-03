@@ -1,18 +1,18 @@
 var searchData=
 [
-  ['identifier_0',['Granularity, and adding an identifier',['../latrec_guide.html#autotoc_md29',1,'']]],
-  ['in_20libe3_20e3sm_20in_20python_1',['The split: E3AP in libe3, E3SM in Python',['../dir_921b7fe62329ee5986df8fde73ed97c3.html#autotoc_md1',1,'']]],
-  ['in_20python_2',['The split: E3AP in libe3, E3SM in Python',['../dir_921b7fe62329ee5986df8fde73ed97c3.html#autotoc_md1',1,'']]],
-  ['in_20the_20rings_3',['Where it shows up in the rings',['../path_b_e2_e3_loop.html#autotoc_md50',1,'']]],
-  ['ind_5fup_4',['Forward leg: RAN to dApp (&lt;span class=&quot;tt&quot;&gt;leg=ind_up&lt;/span&gt;)',['../path_a_e3_loop.html#autotoc_md34',1,'']]],
-  ['install_5',['Build &amp;amp; install',['../dir_921b7fe62329ee5986df8fde73ed97c3.html#autotoc_md6',1,'']]],
-  ['install_20dependencies_6',['Install Dependencies',['../index.html#autotoc_md59',1,'']]],
-  ['installing_20libe3_7',['Installing libe3',['../index.html#autotoc_md61',1,'']]],
-  ['instrumented_8',['instrumented',['../path_a_e3_loop.html#autotoc_md41',1,'Not yet instrumented'],['../path_b_e2_e3_loop.html#autotoc_md51',1,'Not yet instrumented']]],
-  ['integration_9',['Comparing against a hand-rolled integration',['../path_a_e3_loop.html#autotoc_md40',1,'']]],
-  ['internals_20same_20on_20both_20sides_10',['E3Agent internals (same on both sides)',['../index.html#autotoc_md56',1,'']]],
-  ['interoperability_11',['Interoperability',['../md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html',1,'']]],
-  ['issues_12',['Issues',['../md__2home_2runner_2work_2libe3_2libe3_2CONTRIBUTING.html#autotoc_md89',1,'']]],
-  ['it_13',['JSON as libe3 speaks it',['../md__2home_2runner_2work_2libe3_2libe3_2docs_2interop.html#autotoc_md10',1,'']]],
-  ['it_20shows_20up_20in_20the_20rings_14',['Where it shows up in the rings',['../path_b_e2_e3_loop.html#autotoc_md50',1,'']]]
+  ['8_201_20what_20applied_20means_20and_20what_20the_20acknowledge_20says_0',['8 1 What applied means and what the acknowledge says',['../md_docs_2e2sm-dapp_205-semantics-and-constraints.html#autotoc_md121',1,'8.1 What &quot;applied&quot; means, and what the acknowledge says'],['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md209',1,'8.1 What &quot;applied&quot; means, and what the acknowledge says']]],
+  ['8_201_20who_20owns_20what_1',['8.1 Who owns what',['../md_docs_2e2sm-dapp_202-ie-mapping.html#autotoc_md61',1,'']]],
+  ['8_202_2',['The Spectrum outcome worked example (old section 8.2)',['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md160',1,'']]],
+  ['8_202_20what_20a_20consumer_20must_20do_3',['8.2 What a consumer must do',['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md210',1,'']]],
+  ['8_202_20what_20a_20consumer_20shall_20do_4',['8.2 What a consumer shall do',['../md_docs_2e2sm-dapp_205-semantics-and-constraints.html#autotoc_md122',1,'']]],
+  ['8_202_20worked_20example_3a_20the_20spectrum_20service_20model_5',['8.2 Worked example: the Spectrum service model',['../md_docs_2e2sm-dapp_202-ie-mapping.html#autotoc_md62',1,'']]],
+  ['8_203_6',['How a consumer reads the outcome (old section 8.3)',['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md161',1,'']]],
+  ['8_203_20how_20a_20consumer_20reads_20it_7',['8.3 How a consumer reads it',['../md_docs_2e2sm-dapp_202-ie-mapping.html#autotoc_md63',1,'']]],
+  ['8_203_20ordering_20and_20replacement_8',['8 3 Ordering and replacement',['../md_docs_2e2sm-dapp_205-semantics-and-constraints.html#autotoc_md123',1,'8.3 Ordering and replacement'],['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md211',1,'8.3 Ordering and replacement']]],
+  ['8_204_9',['E3 RAN function id registry (old section 8.4)',['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md162',1,'']]],
+  ['8_204_20how_20another_20service_20model_20adds_20its_20own_20outcome_10',['8.4 How another service model adds its own outcome',['../md_docs_2e2sm-dapp_202-ie-mapping.html#autotoc_md64',1,'']]],
+  ['8_20control_20semantics_11',['8 Control semantics',['../md_docs_2e2sm-dapp_205-semantics-and-constraints.html#autotoc_md120',1,'8. Control semantics'],['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md208',1,'8. Control semantics']]],
+  ['8_20the_20e3_20control_20outcome_20payload_12',['8. The &lt;span class=&quot;tt&quot;&gt;e3-control-outcome&lt;/span&gt; payload',['../md_docs_2e2sm-dapp_202-ie-mapping.html#autotoc_md60',1,'']]],
+  ['80_2090_20a0_20control_20outcome_20everything_20present_13',['&lt;span class=&quot;tt&quot;&gt;co1_full&lt;/span&gt; = &lt;span class=&quot;tt&quot;&gt;1c 08 17979cfe3d85cd15 01 2a 0a 10 20 30 40 50 60 70 80 90 a0&lt;/span&gt; (control outcome, everything present)',['../md_docs_2e2sm-dapp_204-encoding.html#autotoc_md99',1,'']]],
+  ['85_20cd_2015_2001_202a_14',['&lt;span class=&quot;tt&quot;&gt;ih1_full&lt;/span&gt; = &lt;span class=&quot;tt&quot;&gt;0e 00 ff 00 07 00 02 00 f1 10 20 04 d2 00 05 08 17 97 9c fe 3d 85 cd 15 01 2a&lt;/span&gt;',['../md_docs_2e2sm-dapp_204-encoding.html#autotoc_md97',1,'']]]
 ];

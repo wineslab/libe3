@@ -1,9 +1,8 @@
 var searchData=
 [
-  ['variants_0',['Deployment variants',['../path_a_e3_loop.html#autotoc_md39',1,'']]],
-  ['vendor_1',['vendor',['../structlibe3_1_1SetupRequest.html#a5f9b64febc7f338303eaa2182b155359',1,'libe3::SetupRequest::vendor'],['../structlibe3_1_1E3Config.html#af7cca75f0e517f5a8d3143d7d407b156',1,'libe3::E3Config::vendor']]],
-  ['vendor_20neutral_20e3ap_20c_20library_2',['libe3 - Vendor-Neutral E3AP C++ Library',['../index.html',1,'']]],
-  ['version_3',['version',['../structe3__c__service__model__desc__t.html#a07b97ac1d5e8d9d71142ab1748603f1f',1,'e3_c_service_model_desc_t::version'],['../structlatrec__hdr.html#ac7c9597fde7b6ffc1417d313a3946a44',1,'latrec_hdr::version'],['../classlibe3_1_1ServiceModel.html#a2d17ab4667c5ccfff19d5079a47f7677',1,'libe3::ServiceModel::version()'],['../structe3__service__model__handle__s.html#ab4e885a71302bfdce43f7c4a3dcbb431',1,'e3_service_model_handle_s::version()'],['../namespacelibe3.html#a85c33a76111e517c006df1b1fc0411bc',1,'libe3::version() noexcept'],['../namespacelibe3.html#acf6808999eb4ab8698c77b30b933b284',1,'libe3::version(int &amp;major, int &amp;minor, int &amp;patch) noexcept']]],
-  ['version_5fs_4',['version_s',['../structe3__service__model__handle__s.html#ac03969c8ed0d1c1dea54fe4ef4556d7d',1,'e3_service_model_handle_s']]],
-  ['versioning_5',['Versioning',['../index.html#autotoc_md75',1,'']]]
+  ['keys_20and_20ranges_0',['Unknown keys and ranges',['../md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md566',1,'']]],
+  ['kind_1',['kind',['../structlibe3_1_1py_1_1E3Event.html#a32878e95b8bbe48ae73fa982f348ce81',1,'libe3::py::E3Event']]],
+  ['kinds_20of_20ran_20function_20id_2',['Two kinds of &quot;RAN function ID&quot;',['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md144',1,'']]],
+  ['known_20differences_3',['Known differences',['../md_docs_2interop.html#autotoc_md629',1,'']]],
+  ['known_20discrepancies_4',['known discrepancies',['../md_docs_2e2sm-dapp_206-discrepancies.html',1,'E2SM-DAPP: implementation notes and known discrepancies'],['../md_docs_2e3ap_206-discrepancies.html',1,'E3AP: implementation notes and known discrepancies']]]
 ];

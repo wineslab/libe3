@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.10</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -107,8 +107,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a028910a5bf21125176eb25d4e7f9a098" id="r_a028910a5bf21125176eb25d4e7f9a098"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a028910a5bf21125176eb25d4e7f9a098">ctx_seq</a></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00406">406</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<div class="textblock"><p>A ring in memory: the writer's view of one mapped file. </p>
+
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00434">434</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
 <a id="a82c7e9150c8c80ba979eb525ceae1b54" name="a82c7e9150c8c80ba979eb525ceae1b54"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a82c7e9150c8c80ba979eb525ceae1b54">&#9670;&#160;</a></span>cpu</h2>
@@ -121,8 +122,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>cpu id used by the stamp when LATREC_CPUID_ON_STAMP is 0; set by <a class="el" href="latrec_8h.html#a87ed81844eba64ee1a782e602279b6eb">latrec_refresh_cpu()</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00413">413</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00441">441</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -137,8 +139,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>seq for code too deep to be passed one; see <a class="el" href="latrec_8h.html#a1cf8c3111daf8d291d07bd4b4f71a879">latrec_ctx_set()</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00415">415</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00443">443</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -153,8 +156,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>nonzero while the ring is open </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00412">412</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00440">440</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -169,8 +173,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>index of the next record to write </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00408">408</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00436">436</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -185,8 +190,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>the mapped file </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00410">410</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00438">438</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -201,8 +207,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>length of the mapping in bytes </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00411">411</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00439">439</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -217,8 +224,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>capacity minus one, to wrap idx </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00409">409</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00437">437</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
@@ -233,13 +241,14 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>first record, just after the header </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00407">407</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8h_source.html#l00435">435</a> of file <a class="el" href="latrec_8h_source.html">latrec.h</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>/home/runner/work/libe3/libe3/include/libe3/<a class="el" href="latrec_8h_source.html">latrec.h</a></li>
+<li>include/libe3/<a class="el" href="latrec_8h_source.html">latrec.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

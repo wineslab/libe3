@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.15.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>libe3: /home/runner/work/libe3/libe3/src/core/latrec.c File Reference</title>
+<title>libe3: src/core/latrec.c File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.2.10</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -104,7 +104,7 @@ $(function(){initNavTree('latrec_8c.html','',''); });
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:acf0e97ca3e511c5032f2fcfadfe94965" id="r_acf0e97ca3e511c5032f2fcfadfe94965"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acf0e97ca3e511c5032f2fcfadfe94965">LATREC_TLS_ENTRIES_LOG2</a>&#160;&#160;&#160;18 /* 256 K records = 8 MiB per thread */</td></tr>
+<tr class="memitem:acf0e97ca3e511c5032f2fcfadfe94965" id="r_acf0e97ca3e511c5032f2fcfadfe94965"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acf0e97ca3e511c5032f2fcfadfe94965">LATREC_TLS_ENTRIES_LOG2</a>&#160;&#160;&#160;18</td></tr>
 <tr class="memitem:aff493e31e403edd078ffebea0c5f509d" id="r_aff493e31e403edd078ffebea0c5f509d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff493e31e403edd078ffebea0c5f509d">LATREC_ENTRIES_LOG2_MIN</a>&#160;&#160;&#160;12</td></tr>
 <tr class="memitem:abae986ae587681813d1ba3d482a04d4e" id="r_abae986ae587681813d1ba3d482a04d4e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abae986ae587681813d1ba3d482a04d4e">LATREC_ENTRIES_LOG2_MAX</a>&#160;&#160;&#160;28</td></tr>
 <tr class="memitem:a52413724c3b8dbf3bfd5ba4412bf286b" id="r_a52413724c3b8dbf3bfd5ba4412bf286b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a52413724c3b8dbf3bfd5ba4412bf286b">LATREC_MAX_RINGS</a>&#160;&#160;&#160;64</td></tr>
@@ -148,6 +148,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Largest ring capacity accepted from the environment, as a power of two </p>
 
 <p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00037">37</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
@@ -164,6 +165,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Smallest ring capacity accepted from the environment, as a power of two </p>
 
 <p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00036">36</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
@@ -180,6 +182,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Per-thread rings tracked for the flush at exit </p>
 
 <p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00038">38</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
@@ -192,10 +195,12 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define LATREC_TLS_ENTRIES_LOG2&#160;&#160;&#160;18 /* 256 K records = 8 MiB per thread */</td>
+          <td class="memname">#define LATREC_TLS_ENTRIES_LOG2&#160;&#160;&#160;18</td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Capacity of a per-thread ring, as a power of two. The mapping is pre-faulted at open, so the ring is resident and a stamp costs the same at any size; the size sets the footprint and how long a run fits before wrapping. It is file-backed, so that footprint is page cache and disk, not anonymous memory.</p>
+<p>Every thread that stamps in a LIBE3_ENABLE_LATREC build opens a ring, with no per-run opt-out, so this default is what an ordinary run of an enabled build costs per thread. It is deliberately modest for that reason: a long capture raises it per role (see <a class="el" href="#a5d3a09184c691a70685e37ec7fecd034">entries_log2()</a> below and <a class="el" href="latrec_8md.html">docs/utilities/latrec.md</a>) rather than every test and example paying for a capacity only a benchmark needs. A ring that wrapped says so: rec_count keeps counting past the capacity. 256 K records = 8 MiB per thread </p>
 
 <p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00034">34</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
@@ -224,8 +229,16 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Ring capacity for a role: LATREC_ENTRIES_LOG2_&lt;ROLE&gt; if set, else LATREC_ENTRIES_LOG2, else the compiled-in default. The per-role name is the role uppercased with every non-alphanumeric character replaced by '_', so role "oai.mac" reads LATREC_ENTRIES_LOG2_OAI_MAC. Roles differ by orders of magnitude in stamp rate, so sizing them together either wastes memory or wraps the busiest ring. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">role</td><td>ring role, NULL or empty for no per-role override </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the capacity as a power of two </dd></dl>
+<p>&lt; 256 K records = 8 MiB per thread</p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00086">86</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00091">91</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
 </div>
 </div>
@@ -251,8 +264,19 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>LATREC_ENTRIES_LOG2 overrides the compiled-in capacity; out-of-range and unparseable values fall back to it. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>environment variable to read </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the capacity as a power of two, 0 when the variable is unset or invalid </dd></dl>
+<p>&lt; Smallest ring capacity accepted from the environment, as a power of two</p>
+<p>&lt; Largest ring capacity accepted from the environment, as a power of two</p>
+<p>&lt; Smallest ring capacity accepted from the environment, as a power of two</p>
+<p>&lt; Largest ring capacity accepted from the environment, as a power of two</p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00066">66</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00069">69</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
 </div>
 </div>
@@ -278,6 +302,7 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Threads do not close their rings, so rec_count and the closing clock pair are refreshed at exit. Records are valid without this (t_ns != 0); it only fills in the header counts. </p>
 
 <p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00055">55</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
@@ -305,8 +330,9 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Register <a class="el" href="#a0e69180a6b24b27436d1e011ae1f5629">flush_open_rings()</a> to run at process exit. </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00062">62</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00063">63</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
 </div>
 </div>
@@ -324,8 +350,9 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Next value of the process-wide sequence counter (starts at 1). </p><dl class="section return"><dt>Returns</dt><dd>the next sequence number </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00159">159</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00164">164</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
 </div>
 </div>
@@ -343,8 +370,14 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Directory the per-thread rings are written to, for the whole process. Call before the first latrec_tls_open*(); rings already open are unaffected. NULL or empty restores LATREC_DEFAULT_DIR. This chooses <em>where</em>, never <em>whether</em>: with LIBE3_ENABLE_LATREC on, the recorder records regardless. Two processes that should not share rings (concurrent tests, one benchmark per directory) each set their own. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dir</td><td>directory for the rings, NULL or empty for LATREC_DEFAULT_DIR </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00109">109</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00114">114</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
 </div>
 </div>
@@ -362,8 +395,9 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Same as <a class="el" href="latrec_8h.html#a77e73bd83f96c0242d91a67c0ce40fc2">latrec_tls_open_as()</a> with no role. </p><dl class="section return"><dt>Returns</dt><dd>the calling thread's ring, a disabled one if the open failed </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00157">157</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00162">162</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
 </div>
 </div>
@@ -381,8 +415,16 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Opens the calling thread's ring as <span class="tt">&lt;role&gt;.&lt;tid&gt;</span>, or <span class="tt">&lt;program&gt;.&lt;tid&gt;</span> when role is NULL or empty; idempotent. Capacity comes from LATREC_ENTRIES_LOG2_&lt;ROLE&gt; (role uppercased, non-alphanumerics as '_'), else LATREC_ENTRIES_LOG2, else the compiled-in default. The open pre-faults the whole mapping, which takes tens of ms; the stamp path does not call it. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">role</td><td>ring name prefix, NULL or empty for the program name </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the calling thread's ring, a disabled one if the open failed </dd></dl>
+<p>&lt; Per-thread rings tracked for the flush at exit</p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00117">117</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00122">122</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
 </div>
 </div>
@@ -406,6 +448,7 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>installs the exit handler once </p>
 
 <p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00050">50</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
@@ -430,6 +473,7 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Threads refer here until they open a ring of their own. It stays zeroed, so enabled == 0 and a stamp from a thread that never called <a class="el" href="#a0e836b10f4bbeff24802e6bc3698621e">latrec_tls_open()</a> is discarded at the same check that disables tracing globally. </p>
 
 <p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00043">43</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
@@ -446,6 +490,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Ring of the calling thread. Never NULL: it refers to a disabled ring until the thread calls <a class="el" href="latrec_8h.html#a0e836b10f4bbeff24802e6bc3698621e">latrec_tls_open()</a>, so a stamp before that is discarded. </p>
 
 <p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00045">45</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
@@ -470,6 +515,7 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>entries used in open_rings </p>
 
 <p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00048">48</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
@@ -494,6 +540,7 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>rings to flush at exit </p>
 
 <p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00047">47</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
@@ -518,8 +565,9 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Process-wide ring directory. Written once at start-up by whoever owns the process, read by every thread that opens a ring; the mutex is only there to make that publication well-defined, since ring opens are not on a hot path. </p>
 
-<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00107">107</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00112">112</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 
 </div>
 </div>
@@ -542,6 +590,7 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>guards open_rings and output_dir </p>
 
 <p class="definition">Definition at line <a class="el" href="latrec_8c_source.html#l00049">49</a> of file <a class="el" href="latrec_8c_source.html">latrec.c</a>.</p>
 

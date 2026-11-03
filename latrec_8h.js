@@ -18,7 +18,6 @@ var latrec_8h =
     [ "LATREC_STORE_RELEASE", "latrec_8h.html#a696b7ddc69a88e2f609114f4964d37c4", null ],
     [ "LATREC_UNLIKELY", "latrec_8h.html#a941cec219aae9e18895b0cb78982dceb", null ],
     [ "LATREC_VERSION", "latrec_8h.html#a3391867cf3553b865417f58b66c349d7", null ],
-    [ "latrec_static_assert___LINE__", "latrec_8h.html#a3a5299284d59c3fbf3594540ef136ff2", null ],
     [ "latrec_close", "latrec_8h.html#a596bf9640530307906f9debe7f93d1a6", null ],
     [ "latrec_ctx", "latrec_8h.html#a588269eb211c77b050ab91ea4f8bc66c", null ],
     [ "latrec_ctx_set", "latrec_8h.html#a1cf8c3111daf8d291d07bd4b4f71a879", null ],
@@ -29,13 +28,14 @@ var latrec_8h =
     [ "latrec_open_in", "latrec_8h.html#a28cee5a2462d31780b13a5894b156072", null ],
     [ "latrec_real_ns", "latrec_8h.html#a9c1c202e5b53fd31bf83b50d1b60b426", null ],
     [ "latrec_refresh_cpu", "latrec_8h.html#a87ed81844eba64ee1a782e602279b6eb", null ],
-    [ "latrec_seq_next", "latrec_8h.html#a36eb1fc44812c4655a20fd7b3ecea55f", null ],
-    [ "latrec_set_output_dir", "latrec_8h.html#a1f5052a861351ac1f8482947de795cb4", null ],
+    [ "latrec_seq_next", "latrec_8h.html#a71b3998748cbf895ebdc0473fd3e9175", null ],
+    [ "latrec_set_output_dir", "latrec_8h.html#a280c65aaa528a73aaebe586e62568bfb", null ],
     [ "latrec_stamp", "latrec_8h.html#ab522e6de464673d291aa8df6159ce5bc", null ],
     [ "latrec_stamp_at", "latrec_8h.html#afa80ac772d8ccbcc3d22ffc523e11f72", null ],
-    [ "latrec_tls_open", "latrec_8h.html#a379110c29e4a6b8108d545bc823610ce", null ],
-    [ "latrec_tls_open_as", "latrec_8h.html#ab85ff0a6cf736e8787fc2fc8c2439a8b", null ],
+    [ "latrec_tls_open", "latrec_8h.html#a0e836b10f4bbeff24802e6bc3698621e", null ],
+    [ "latrec_tls_open_as", "latrec_8h.html#a77e73bd83f96c0242d91a67c0ce40fc2", null ],
     [ "latrec_tnow", "latrec_8h.html#a1c5b0fac82c163c0f03017436f15feb0", null ],
     [ "latrec_tstamp", "latrec_8h.html#a12f6875c4a420e0fb372c0c7dba87440", null ],
-    [ "latrec_tstamp_at", "latrec_8h.html#a398d74ab770d233bdde5c71e80840350", null ]
+    [ "latrec_tstamp_at", "latrec_8h.html#a398d74ab770d233bdde5c71e80840350", null ],
+    [ "latrec_tls", "latrec_8h.html#ada2df74a63adf6f0cbd4ea664eb76d32", null ]
 ];

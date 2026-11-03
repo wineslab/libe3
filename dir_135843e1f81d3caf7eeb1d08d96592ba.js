@@ -2,6 +2,8 @@ var dir_135843e1f81d3caf7eeb1d08d96592ba =
 [
     [ "c_api.h", "c__api_8h.html", "c__api_8h" ],
     [ "dapp_subscription_state.hpp", "dapp__subscription__state_8hpp.html", "dapp__subscription__state_8hpp" ],
+    [ "e2sm_dapp.hpp", "e2sm__dapp_8hpp.html", "e2sm__dapp_8hpp" ],
+    [ "e2sm_dapp_c.h", "e2sm__dapp__c_8h.html", "e2sm__dapp__c_8h" ],
     [ "e3_agent.hpp", "e3__agent_8hpp.html", "e3__agent_8hpp" ],
     [ "e3_connector.hpp", "e3__connector_8hpp.html", "e3__connector_8hpp" ],
     [ "e3_encoder.hpp", "e3__encoder_8hpp.html", "e3__encoder_8hpp" ],

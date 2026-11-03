@@ -1,4 +1,8 @@
 var searchData=
 [
-  ['dapp_5fsubscription_5fstate_2ehpp_0',['dapp_subscription_state.hpp',['../dapp__subscription__state_8hpp.html',1,'']]]
+  ['c_5fapi_2ecpp_0',['c_api.cpp',['../c__api_8cpp.html',1,'']]],
+  ['c_5fapi_2eh_1',['c_api.h',['../c__api_8h.html',1,'']]],
+  ['code_2dpointers_2emd_2',['code-pointers.md',['../code-pointers_8md.html',1,'']]],
+  ['connector_5ffactory_2ecpp_3',['connector_factory.cpp',['../connector__factory_8cpp.html',1,'']]],
+  ['contributing_2emd_4',['CONTRIBUTING.md',['../CONTRIBUTING_8md.html',1,'']]]
 ];
