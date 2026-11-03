@@ -8,8 +8,8 @@
 #
 #   detect_code_changes.sh <base-sha> <head-sha>      prints true or false
 #
-# Not code: Markdown, Word editions, docs/, .github/, the O-RAN Word generator
-# under tools/oran_docx/, license and citation files, REUSE.toml, .gitignore, and a
+# Not code: Markdown, Word editions, docs/, .github/, the O-RAN Word generators
+# under tools/oran_docx/ and tools/e3sm_l1kpm_v2/, license and citation files, REUSE.toml, .gitignore, and a
 # pyproject.toml change that only edits the project links.
 set -euo pipefail
 
@@ -19,7 +19,7 @@ head="$2"
 echo "Changed files:" >&2
 git diff --name-only "$base..$head" >&2
 
-noncode='(\.md$)|(\.docx$)|(^docs/)|(^\.github/)|(^tools/oran_docx/)|(^LICENSE$)|(^NOTICE$)|(^CONTRIBUTORS$)|(^CITATION\.cff$)|(^REUSE\.toml$)|(^\.gitignore$)'
+noncode='(\.md$)|(\.docx$)|(^docs/)|(^\.github/)|(^tools/oran_docx/)|(^tools/e3sm_l1kpm_v2/)|(^LICENSE$)|(^NOTICE$)|(^CONTRIBUTORS$)|(^CITATION\.cff$)|(^REUSE\.toml$)|(^\.gitignore$)'
 files="$(git diff --name-only "$base..$head" | grep -vE "$noncode" || true)"
 
 # pyproject.toml carries the build too, so it counts as code unless every changed
