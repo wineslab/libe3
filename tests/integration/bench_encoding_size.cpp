@@ -33,8 +33,14 @@
  * encodings sit far above the baseline because field names and punctuation
  * travel on the wire as text.
  *
+ * With --sizes-only no benchmark is run and the CSV carries only the first
+ * four columns; each PDU is also decoded and re-encoded, and a mismatch is
+ * reported on stderr. --no-timestamp zeroes Pdu::timestamp so the optional
+ * E3-PDU envelope timestamp is left off the wire.
+ *
  * Usage:
  *   ./bench_encoding_size
+ *   ./bench_encoding_size --sizes-only
  *   taskset -c 2 ./bench_encoding_size | python scripts/collect_baseline.py \
  *       --type encoding --output data/baseline/encoding/encoding.csv
  *
@@ -237,9 +243,10 @@ std::vector<Sample> make_samples(bool json_payloads) {
         rep.dapp_identifier        = 1;
         rep.ran_function_identifier = 1;
         rep.report_data            = payload;
+        rep.sequence_id            = 1;
         s.pdu.choice = rep;
         s.pdu.message_id = 8;
-        s.info_bytes = kMsgId + kU32 + kU32 + rep.report_data.size();
+        s.info_bytes = kMsgId + kU32 + kU32 + rep.report_data.size() + kU32;
         samples.push_back(std::move(s));
     }
 
@@ -250,9 +257,10 @@ std::vector<Sample> make_samples(bool json_payloads) {
         xaction.dapp_identifier        = 1;
         xaction.ran_function_identifier = 1;
         xaction.xapp_control_data      = payload;
+        xaction.sequence_id            = 1;
         s.pdu.choice = xaction;
         s.pdu.message_id = 9;
-        s.info_bytes = kMsgId + kU32 + kU32 + xaction.xapp_control_data.size();
+        s.info_bytes = kMsgId + kU32 + kU32 + xaction.xapp_control_data.size() + kU32;
         samples.push_back(std::move(s));
     }
 
@@ -370,6 +378,19 @@ void register_cell(Cell& cell) {
 // ---------------------------------------------------------------------------
 
 int main(int argc, char* argv[]) {
+    bool sizes_only = false;
+    bool no_timestamp = false;
+    for (int i = 1; i < argc; ++i) {
+        const bool so = std::strcmp(argv[i], "--sizes-only") == 0;
+        const bool nt = std::strcmp(argv[i], "--no-timestamp") == 0;
+        if (so || nt) {
+            sizes_only |= so;
+            no_timestamp |= nt;
+            for (int j = i; j < argc; ++j) argv[j] = argv[j + 1];
+            --argc;
+            --i;
+        }
+    }
     benchmark::Initialize(&argc, argv);
 
     struct EncoderCase {
@@ -397,11 +418,22 @@ int main(int argc, char* argv[]) {
             continue;
         }
         for (auto& sample : make_samples(ec.json_payloads)) {
+            if (no_timestamp) sample.pdu.timestamp = 0;
             auto result = enc->encode(sample.pdu);
             if (!result.has_value()) {
                 std::fprintf(stderr, "WARN: encode failed for %s/%s\n",
                              ec.name, sample.name);
                 continue;
+            }
+            if (sizes_only) {
+                auto back = enc->decode(*result);
+                auto again = back ? enc->encode(*back)
+                                  : tl::expected<EncodedMessage, ErrorCode>(
+                                        tl::unexpected(back.error()));
+                if (!again || again->buffer != result->buffer) {
+                    std::fprintf(stderr, "WARN: round trip mismatch for %s/%s\n",
+                                 ec.name, sample.name);
+                }
             }
             Cell cell;
             cell.encoding      = ec.name;
@@ -418,6 +450,17 @@ int main(int argc, char* argv[]) {
 
     // Register after `cells` is fully built: the benchmark lambdas capture
     // pointers into the vector, which must not reallocate afterwards.
+    if (sizes_only) {
+        std::printf("encoding,message_type,encoded_bytes,info_bytes\n");
+        for (const auto& cell : cells) {
+            std::printf("%s,%s,%zu,%zu\n", cell.encoding.c_str(),
+                        cell.message.c_str(), cell.encoded_bytes,
+                        cell.info_bytes);
+        }
+        benchmark::Shutdown();
+        return 0;
+    }
+
     for (auto& cell : cells) register_cell(cell);
 
     CaptureReporter capture;
