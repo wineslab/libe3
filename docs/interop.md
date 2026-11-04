@@ -125,6 +125,31 @@ always reaches the RAN after the old subscription is gone. Aerial's manager coun
 instead. A libe3 RAN answers a delete for a subscription that has run out `negative`, as it does
 for any unknown subscription.
 
+## RAN function ids
+
+A function entry in the setup response carries `ranFunctionIdentifier`, the telemetry and control id
+lists and an opaque `ranFunctionData`. It has no name and no version, so on the wire the id is the only
+thing that says which service model a function is. libe3 does not interpret it.
+
+| Id | Service model | Served by |
+|---|---|---|
+| 1 | Spectrum | OAI |
+| 2 | NVIDIA L1 KPM | Aerial's agent, which accepts no other id, and OAI, whose L1 KPM is built to be wire-compatible with it and advertises a subset of the telemetry ids (1, 4, 5 and 6 of Aerial's 25) |
+| 10, 11 | Telemetry, management (`OCUDU-TELEMETRY-SM`) | OCUDU |
+
+Id 2 is one service model on both stacks, not two that happen to share a number, so a dApp written for
+Aerial connects to OAI unchanged. The agreement lives in the two codebases, not in the protocol:
+nothing on the wire says "NVIDIA L1 KPM, version 1", and libe3 cannot check it. OCUDU's entry has an
+optional `ranFunctionName` and `ranFunctionVersion` for this. libe3's has neither, and
+`RanFunctionDefinition::sm_name` and `sm_version` are declared but never sent. Carrying a name and
+version would let a dApp verify the id, and tell apart two services that pick the same number later.
+It is not done; [#87](https://github.com/wineslab/libe3/issues/87) records it. Until then a dApp should
+treat an id as an agreement with the RAN's vendor, not as something it can verify.
+
+All rows are *Source*, not tested: OCUDU at dApp platform `38fc00bb526c`, Aerial and OAI at the commits
+cited on [#87](https://github.com/wineslab/libe3/issues/87). The telemetry ids OAI advertises are as
+stated there.
+
 ## Conformance fixtures
 
 What CI checks against messages or bytes that did not come from the code under test. Added in
