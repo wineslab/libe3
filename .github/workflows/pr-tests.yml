@@ -5,44 +5,33 @@ name: Unit Tests
 
 on:
   pull_request:
+    # Started only when a changed file is code. The last pattern brings back this
+    # workflow's own file, so a PR that edits it is tested by it.
+    paths:
+      - '**'
+      - '!**.md'
+      - '!**.docx'
+      - '!docs/**'
+      - '!.github/**'
+      - '!tools/oran_docx/**'
+      - '!tools/e3sm_l1kpm_v2/**'
+      - '!LICENSE'
+      - '!NOTICE'
+      - '!CONTRIBUTORS'
+      - '!CITATION.cff'
+      - '!REUSE.toml'
+      - '!.gitignore'
+      - '.github/workflows/pr-tests.yml'
 
 concurrency:
   group: unit-tests-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  changes:
-    name: Detect code changes
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      code: ${{ steps.filter.outputs.code }}
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-      - id: filter
-        shell: bash
-        run: |
-          base="${{ github.event.pull_request.base.sha }}"
-          head="${{ github.event.pull_request.head.sha }}"
-          echo "code=$(bash .github/scripts/detect_code_changes.sh "$base" "$head")" >> "$GITHUB_OUTPUT"
-
-  # Below: every job that does real work is gated at the STEP level on
-  # needs.changes.outputs.code, not at the job level. A job-level `if:` makes
-  # GitHub report the job's required-check context as "skipped" when false,
-  # and required-status-checks does not treat "skipped" as satisfied -- on a
-  # docs-only PR that would block merging (or require the SAME admin bypass
-  # this whole "Detect code changes" gate was supposed to make unnecessary)
-  # forever, confirmed empirically against this repo's own history (PR #43).
-  # Running the job unconditionally and skipping only its expensive steps
-  # keeps the CI-minutes savings while still reporting a real `success`.
-
   asn1c-cache:
     # Builds/warms the asn1c cache once, ahead of the matrix legs below, so
     # they don't race each other rebuilding it from source on a cold cache.
     name: Warm asn1c cache
-    needs: changes
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -50,7 +39,6 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Prepare /opt/asn1c for caching
-        if: needs.changes.outputs.code == 'true'
         run: |
           sudo mkdir -p /opt/asn1c
           sudo chown "$(id -u):$(id -g)" /opt/asn1c
@@ -58,21 +46,19 @@ jobs:
       - name: Cache asn1c build
         # Exact-match only: a hit must imply the pinned commit inside
         # build_libe3 is unchanged. Do not add restore-keys here.
-        if: needs.changes.outputs.code == 'true'
         uses: actions/cache@v5
         with:
           path: /opt/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
 
       - name: Install build dependencies
-        if: needs.changes.outputs.code == 'true'
         run: |
           chmod +x ./build_libe3
           ./build_libe3 -I
 
   test:
     name: Build and Test
-    needs: [changes, asn1c-cache]
+    needs: asn1c-cache
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
@@ -84,26 +70,22 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Prepare /opt/asn1c for caching
-        if: needs.changes.outputs.code == 'true'
         run: |
           sudo mkdir -p /opt/asn1c
           sudo chown "$(id -u):$(id -g)" /opt/asn1c
 
       - name: Cache asn1c build
-        if: needs.changes.outputs.code == 'true'
         uses: actions/cache@v5
         with:
           path: /opt/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
 
       - name: Install build dependencies
-        if: needs.changes.outputs.code == 'true'
         run: |
           chmod +x ./build_libe3
           ./build_libe3 -I
 
       - name: Build and test with build_libe3 (${{ matrix.build_type }})
-        if: needs.changes.outputs.code == 'true'
         shell: bash
         run: |
           chmod +x ./build_libe3 || true
@@ -117,33 +99,29 @@ jobs:
   integration:
     name: Integration Tests
     runs-on: ubuntu-latest
-    needs: [changes, test]
+    needs: test
     timeout-minutes: 20
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
       - name: Prepare /opt/asn1c for caching
-        if: needs.changes.outputs.code == 'true'
         run: |
           sudo mkdir -p /opt/asn1c
           sudo chown "$(id -u):$(id -g)" /opt/asn1c
 
       - name: Cache asn1c build
-        if: needs.changes.outputs.code == 'true'
         uses: actions/cache@v5
         with:
           path: /opt/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
 
       - name: Install build dependencies
-        if: needs.changes.outputs.code == 'true'
         run: |
           chmod +x ./build_libe3
           ./build_libe3 -I
 
       - name: Configure with integration tests
-        if: needs.changes.outputs.code == 'true'
         run: |
           cmake -S . -B build \
             -DCMAKE_BUILD_TYPE=Release \
@@ -151,11 +129,9 @@ jobs:
             -DLIBE3_ENABLE_LATREC=ON
 
       - name: Build
-        if: needs.changes.outputs.code == 'true'
         run: cmake --build build -j $(nproc)
 
       - name: Run integration tests
-        if: needs.changes.outputs.code == 'true'
         run: cd build && ctest -L integration --output-on-failure
 
   all-encodings:
@@ -165,33 +141,29 @@ jobs:
     # runs the full test suite against it.
     name: All Encodings (ASN.1 + JSON + Protobuf)
     runs-on: ubuntu-latest
-    needs: [changes, test]
+    needs: test
     timeout-minutes: 20
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
       - name: Prepare /opt/asn1c for caching
-        if: needs.changes.outputs.code == 'true'
         run: |
           sudo mkdir -p /opt/asn1c
           sudo chown "$(id -u):$(id -g)" /opt/asn1c
 
       - name: Cache asn1c build
-        if: needs.changes.outputs.code == 'true'
         uses: actions/cache@v5
         with:
           path: /opt/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
 
       - name: Install build dependencies
-        if: needs.changes.outputs.code == 'true'
         run: |
           chmod +x ./build_libe3
           ./build_libe3 -I
 
       - name: Configure with all encoders enabled
-        if: needs.changes.outputs.code == 'true'
         run: |
           cmake -S . -B build-all \
             -DCMAKE_BUILD_TYPE=Release \
@@ -200,11 +172,9 @@ jobs:
             -DLIBE3_ENABLE_PROTOBUF=ON
 
       - name: Build
-        if: needs.changes.outputs.code == 'true'
         run: cmake --build build-all -j $(nproc)
 
       - name: Run tests
-        if: needs.changes.outputs.code == 'true'
         run: cd build-all && ctest --output-on-failure
 
       # Also the off-by-default transport combination, which nothing else
@@ -214,7 +184,6 @@ jobs:
       # symbol. Lives in this job (rather than its own) so the required-status
       # ruleset does not have to change to gate on it.
       - name: Configure, build and test with ZeroMQ disabled
-        if: needs.changes.outputs.code == 'true'
         run: |
           cmake -S . -B build-nozmq \
             -DCMAKE_BUILD_TYPE=Release \
@@ -225,33 +194,29 @@ jobs:
   swig:
     name: SWIG Python Bindings
     runs-on: ubuntu-latest
-    needs: [changes, test]
+    needs: test
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
 
       - name: Prepare /opt/asn1c for caching
-        if: needs.changes.outputs.code == 'true'
         run: |
           sudo mkdir -p /opt/asn1c
           sudo chown "$(id -u):$(id -g)" /opt/asn1c
 
       - name: Cache asn1c build
-        if: needs.changes.outputs.code == 'true'
         uses: actions/cache@v5
         with:
           path: /opt/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
 
       - name: Install build + SWIG dependencies
-        if: needs.changes.outputs.code == 'true'
         run: |
           sudo apt-get install -y swig python3-dev
           chmod +x ./build_libe3
           ./build_libe3 -I
 
       - name: Configure with SWIG enabled
-        if: needs.changes.outputs.code == 'true'
         run: |
           cmake -S . -B build \
             -DCMAKE_BUILD_TYPE=Release \
@@ -260,15 +225,12 @@ jobs:
             -DLIBE3_PYTHON_INSTALL_DIR="$PWD/stage/py"
 
       - name: Build SWIG bindings
-        if: needs.changes.outputs.code == 'true'
         run: cmake --build build --target libe3py -j $(nproc)
 
       - name: Run SWIG smoke test
-        if: needs.changes.outputs.code == 'true'
         run: PYTHONPATH=build/swig python3 tests/test_swig_smoke.py
 
       - name: Install and verify (module import + sm defs + smdir)
-        if: needs.changes.outputs.code == 'true'
         run: |
           cmake --build build -j $(nproc)   # full lib needed for install
           cmake --install build
@@ -283,7 +245,6 @@ jobs:
       # both went unnoticed. This builds a standalone project against the
       # staged install, the way a real consumer does, on both routes.
       - name: Consume the installed package out of tree
-        if: needs.changes.outputs.code == 'true'
         run: |
           set -euo pipefail
 
@@ -313,7 +274,6 @@ jobs:
       # The way users get the binding: the sdist that the release publishes,
       # built by pip against the installed library.
       - name: pip-install the libe3py sdist against the installed library
-        if: needs.changes.outputs.code == 'true'
         run: |
           set -euo pipefail
           python3 -m venv "$RUNNER_TEMP/venv"

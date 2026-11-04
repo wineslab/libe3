@@ -7,10 +7,14 @@ name: CI report
 # publishes its detail as a `ci-report-*` artifact and posts nothing itself;
 # this job waits until they have all finished, then writes a single sticky
 # comment with the verdict, a per-workflow table, that detail, and the
-# fast-forward merge command once the required checks are green.
+# fast-forward merge command once everything is green.
 #
-# Deliberately NOT a required status check: it waits on the required contexts,
-# so requiring it too would make the ruleset wait on itself.
+# This is the ONE required status check of the ruleset ("CI report"). The build
+# and test workflows start only when a changed file is code, so none of them can
+# be required on its own: a workflow kept off by its `paths` filter never reports.
+# This job works out which workflows the PR's files should have started, waits
+# for them, and fails when one failed or never started. It never waits on its own
+# check, which is the one the ruleset reads.
 
 on:
   pull_request:
@@ -34,6 +38,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+
+      - name: Check the workflow filters this report relies on
+        run: python3 -m unittest discover -s .github/scripts -p 'test_*.py'
 
       - name: Wait for CI, then post the consolidated report
         env:
