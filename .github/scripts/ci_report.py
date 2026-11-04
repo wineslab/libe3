@@ -13,6 +13,11 @@ post, and the `merge-command` job that polled for them.
 The workflow list is discovered from the API and the checkout, never
 hardcoded: a new workflow appears in the report on its own.
 
+This job is the required check of the ruleset, so its exit code is the verdict:
+non-zero when a workflow failed, when one that the PR's changed files should have
+started never did (see workflow_triggers.py), or when CI did not finish in time.
+A workflow kept off by its own `paths` filter is not an error.
+
 Usage:
   ci_report.py --repo OWNER/NAME --pr N --sha HEAD_SHA [--branch REF]
   ci_report.py --repo OWNER/NAME --pr N --sha HEAD_SHA --dry-run
@@ -21,14 +26,23 @@ import argparse
 import calendar
 import json
 import os
-import re
 import shutil
 import subprocess
 import sys
 import tempfile
 import time
 
+import workflow_triggers
+
 MARKER = "<!-- ci-report -->"
+
+# This job's own check name, which the ruleset requires. It is in progress for
+# as long as the report waits, so it must never be waited on.
+SELF_CONTEXT = "CI report"
+
+# A finished run with one of these conclusions fails the report.
+BAD_CONCLUSIONS = ("failure", "cancelled", "timed_out", "startup_failure",
+                   "action_required", "stale")
 
 # The per-workflow comments this report replaces. Removed from the thread on
 # first run so a migrating PR does not keep six comments alive.
@@ -40,12 +54,11 @@ LEGACY_MARKERS = (
     "<!-- full-loop-latency-results -->",
 )
 
-# Mirrors the `Detect code changes` filter every gated workflow applies. This
-# decides only how the report *labels* a workflow whose steps self-skipped,
-# never whether anything runs.
-NONCODE = re.compile(r"(\.md$)|(^docs/)|(^\.github/)|(^LICENSE$)|(^CONTRIBUTORS$)|(^\.gitignore$)")
-
+# The per-commit build in commit-trailers.yml still gates its own steps on this
+# job; the report only uses the name to label a run whose steps self-skipped.
 GATE_JOB = "Detect code changes"
+# The workflow whose `paths` filter says whether a PR changes code.
+CODE_FILTER_WORKFLOW = "pr-tests.yml"
 FRAGMENT_PREFIX = "ci-report-"
 
 
@@ -118,25 +131,27 @@ def run_jobs(repo: str, run_id: int) -> list[dict]:
     return api_paged(f"repos/{repo}/actions/runs/{run_id}/jobs", "jobs")
 
 
-def pr_touches_code(repo: str, pr: int) -> bool:
-    files = api_paged(f"repos/{repo}/pulls/{pr}/files")
-    return any(not NONCODE.search(f["filename"]) for f in files)
+def changed_files(repo: str, pr: int) -> list[str]:
+    return [f["filename"] for f in api_paged(f"repos/{repo}/pulls/{pr}/files")]
 
 
 def wait_for_ci(repo: str, pr: int, sha: str, self_run_id: str | None,
-                required: set[str] | None, deadline_s: int, poll_s: int) -> bool:
-    """Block until every run and every required context is terminal.
+                required: set[str] | None, expected: list[workflow_triggers.Trigger],
+                deadline_s: int, poll_s: int) -> bool:
+    """Block until every run, every expected workflow and every required context is terminal.
 
     Returns False if the deadline passed with work outstanding. Iterates over
-    the *required* list rather than over the check-runs found: a required
-    context whose job has not been created yet appears nowhere in the
-    check-runs response, so keying off that response alone can conclude
-    "everything found is done" while a required check has not started.
+    the *expected* workflows and the *required* list rather than over the runs
+    and check-runs found: a workflow or a job that has not been created yet
+    appears nowhere in those responses, so keying off them alone can conclude
+    "everything found is done" while something has not started.
     """
     end = time.monotonic() + deadline_s
     while True:
-        pending = [r["name"] for r in workflow_runs(repo, sha, self_run_id)
-                   if r["status"] != "completed"]
+        runs = workflow_runs(repo, sha, self_run_id)
+        pending = [r["name"] for r in runs if r["status"] != "completed"]
+        started = {os.path.basename(r["path"]) for r in runs}
+        pending += [f"{t.name} (not started yet)" for t in expected if t.file not in started]
         seen = {c["name"]: c for c in check_runs(repo, sha)}
         for context in sorted(required or ()):
             check = seen.get(context)
@@ -213,8 +228,9 @@ def fragments(repo: str, runs: list[dict], workdir: str) -> dict[str, list[str]]
 
 
 def render(sha: str, branch: str, runs: list[dict], jobs_by_run: dict[int, list[dict]],
-           missing: list[str], detail: dict[str, list[str]], required: set[str] | None,
-           checks: list[dict], code_changed: bool, complete: bool) -> str:
+           kept_off: list[str], problems: list[str], detail: dict[str, list[str]],
+           required: set[str] | None, checks: list[dict], code_changed: bool,
+           complete: bool) -> str:
     short = sha[:7]
     by_name = {c["name"]: c for c in checks}
     gate_note = ""
@@ -229,6 +245,8 @@ def render(sha: str, branch: str, runs: list[dict], jobs_by_run: dict[int, list[
                         if by_name.get(ctx, {}).get("conclusion") not in (None, "success"))
     if not complete:
         verdict = "⏳ CI did not finish inside the report window"
+    elif problems:
+        verdict = f"❌ {len(problems)} workflow problem{'s' if len(problems) > 1 else ''}"
     elif failed_ctx:
         verdict = f"❌ {len(failed_ctx)} required check{'s' if len(failed_ctx) > 1 else ''} failed"
     elif green:
@@ -241,19 +259,17 @@ def render(sha: str, branch: str, runs: list[dict], jobs_by_run: dict[int, list[
         result, rank = classify(run, jobs_by_run.get(run["id"], []), code_changed)
         rows.append((rank, run["name"], result, duration(run),
                      f"[#{run['run_number']}]({run['html_url']})"))
-    for name in missing:
-        rows.append((4, name, "⏭️ not triggered (paths filter)", "—", "—"))
+    for name in kept_off:
+        rows.append((4, name, "⏭️ not started (no changed file matches its `paths` filter)", "—", "—"))
     rows.sort(key=lambda row: (row[0], row[1].lower()))
 
     out = [MARKER, f"## CI report — `{short}` — {verdict}", ""]
-    if not code_changed:
-        out += ["> No code changes in this PR: the workflows gated by `Detect code changes` "
-                "report success without building or testing anything. A workflow triggered by "
-                "its own `paths` filter still ran in full.", ""]
     out += ["| Workflow | Result | Time | Run |", "|---|---|---|---|"]
     out += [f"| {name} | {result} | {took} | {link} |" for _, name, result, took, link in rows]
     out.append("")
 
+    if problems:
+        out += ["**Problems:** " + "; ".join(problems), ""]
     if failed_ctx:
         out += ["**Failing required checks:** " + ", ".join(f"`{c}`" for c in failed_ctx), ""]
 
@@ -261,7 +277,7 @@ def render(sha: str, branch: str, runs: list[dict], jobs_by_run: dict[int, list[
         out += [f"<details><summary>{workflow}</summary>", "",
                 "\n\n".join(detail[workflow]), "", "</details>", ""]
 
-    if complete and green and not failed_ctx:
+    if complete and green and not failed_ctx and not problems:
         out += ["### Ready to merge (fast-forward only)", "",
                 "A maintainer can land the reviewed commits with:", "",
                 "```bash", "git fetch origin",
@@ -297,21 +313,17 @@ def post(repo: str, pr: int, body: str) -> None:
             print(f"removed superseded comment {comment['id']}")
 
 
-def untriggered(workflows_dir: str, ran: set[str], self_workflow: str) -> list[str]:
-    """Display names of PR-triggered workflows with no run here (a `paths` skip)."""
-    if not os.path.isdir(workflows_dir):
-        return []
-    names = []
-    for filename in sorted(os.listdir(workflows_dir)):
-        if not filename.endswith((".yml", ".yaml")) or filename in ran or filename == self_workflow:
-            continue
-        with open(os.path.join(workflows_dir, filename), encoding="utf-8") as handle:
-            head = handle.read(4000)
-        if "pull_request" not in head:
-            continue
-        declared = re.search(r"(?m)^name:\s*(.+?)\s*$", head)
-        names.append(declared.group(1).strip("\"'") if declared else filename)
-    return names
+def find_problems(runs: list[dict], expected: list[workflow_triggers.Trigger],
+                  complete: bool) -> list[str]:
+    """What makes the report fail: a failed run, a workflow that never started, a timeout."""
+    started = {os.path.basename(run["path"]) for run in runs}
+    problems = [f"{run['name']} {run['conclusion'].replace('_', ' ')}" for run in runs
+                if run["status"] == "completed" and run.get("conclusion") in BAD_CONCLUSIONS]
+    problems += [f"{t.name} should have started and did not" for t in expected
+                 if t.file not in started]
+    if not complete:
+        problems.append("CI did not finish inside the report window")
+    return problems
 
 
 def main() -> int:
@@ -337,18 +349,23 @@ def main() -> int:
         return 0
 
     required = required_contexts(args.repo, args.base_branch)
+    if required is not None:
+        required.discard(SELF_CONTEXT)
+    files = changed_files(args.repo, args.pr)
+    should_start, kept_off = workflow_triggers.expected(
+        args.workflows_dir, files, args.self_workflow)
+    code_changed = any(t.file == CODE_FILTER_WORKFLOW for t in should_start)
+
     complete = True
     if not args.dry_run:
         complete = wait_for_ci(args.repo, args.pr, args.sha, args.self_run_id, required,
-                               args.deadline_minutes * 60, args.poll_seconds)
+                               should_start, args.deadline_minutes * 60, args.poll_seconds)
 
     runs = workflow_runs(args.repo, args.sha, args.self_run_id)
     if args.dry_run:
         complete = all(run["status"] == "completed" for run in runs)
     jobs_by_run = {run["id"]: run_jobs(args.repo, run["id"]) for run in runs}
-    missing = untriggered(args.workflows_dir,
-                          {os.path.basename(run["path"]) for run in runs}, args.self_workflow)
-    code_changed = pr_touches_code(args.repo, args.pr)
+    problems = find_problems(runs, should_start, complete)
 
     workdir = tempfile.mkdtemp(prefix="ci-report-")
     try:
@@ -356,8 +373,9 @@ def main() -> int:
     finally:
         shutil.rmtree(workdir, ignore_errors=True)
 
-    body = render(args.sha, args.branch, runs, jobs_by_run, missing, detail, required,
-                  check_runs(args.repo, args.sha), code_changed, complete)
+    checks = [c for c in check_runs(args.repo, args.sha) if c["name"] != SELF_CONTEXT]
+    body = render(args.sha, args.branch, runs, jobs_by_run, [t.name for t in kept_off],
+                  problems, detail, required, checks, code_changed, complete)
     if args.dry_run:
         print(body)
         return 0
@@ -365,10 +383,10 @@ def main() -> int:
         post(args.repo, args.pr, body)
     except RuntimeError as exc:
         # A fork PR hands this job a read-only token, so commenting is not
-        # possible. The report is advisory: warn and stay green rather than
-        # painting a failure the contributor cannot act on.
+        # possible. The comment is advisory: warn rather than failing a check
+        # the contributor cannot act on. The verdict below still stands.
         print(f"::warning::could not post the CI report: {exc}")
-    return 0
+    return 1 if problems else 0
 
 
 if __name__ == "__main__":
