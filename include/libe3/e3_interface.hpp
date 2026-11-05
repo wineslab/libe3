@@ -39,6 +39,7 @@ class E3Agent;
  * @brief Callback types for E3Interface events
  */
 using SetupRequestHandler = std::function<ResponseCode(const SetupRequest&, SetupResponse&)>;
+/// Called for a SubscriptionRequest; the returned code is the answer. @param request The request @return POSITIVE to grant it
 using SubscriptionRequestHandler = std::function<ResponseCode(const SubscriptionRequest&)>;
 using DAppReportHandler = std::function<void(const DAppReport&)>;
 using DAppStatusChangedHandler = std::function<void()>;
@@ -67,6 +68,7 @@ class E3Interface {
 public:
     /**
      * @brief Construct with configuration
+     * @param config Role, transport, encoding and tuning for this interface
      */
     explicit E3Interface(const E3Config& config);
 
@@ -106,11 +108,13 @@ public:
 
     /**
      * @brief Get current state
+     * @return The lifecycle state of the interface
      */
     AgentState state() const noexcept { return state_.load(); }
 
     /**
      * @brief Check if interface is running
+     * @return True while the state is RUNNING
      */
     bool is_running() const noexcept { 
         return state_.load() == AgentState::RUNNING; 
@@ -118,6 +122,7 @@ public:
 
     /**
      * @brief Get the subscription manager
+     * @return The manager that holds the dApps and their subscriptions
      */
     SubscriptionManager& subscription_manager() noexcept { 
         return *subscription_manager_; 
@@ -125,6 +130,7 @@ public:
 
     /**
      * @brief Get the response queue for outbound messages
+     * @return The queue the outbound loop drains
      */
     LockFreeQueue<Pdu>& response_queue() noexcept {
         return *response_queue_;
@@ -132,16 +138,21 @@ public:
 
     /**
      * @brief Queue a PDU for outbound transmission
+     * @param pdu PDU to send; it is moved into the queue
+     * @return SUCCESS once queued; the queueing error otherwise
      */
     ErrorCode queue_outbound(Pdu pdu);
 
     /**
      * @brief Get available RAN functions
+     * @return The identifiers of the registered Service Models, sorted
      */
     std::vector<uint32_t> get_available_ran_functions() const;
 
     /**
      * @brief Register a Service Model
+     * @param sm Service Model to register; ownership moves to the registry
+     * @return SUCCESS, or the registry's error
      */
     ErrorCode register_sm(std::unique_ptr<ServiceModel> sm);
 
@@ -149,39 +160,51 @@ public:
     // Event Handlers - Set by E3Agent
     // =========================================================================
 
+    /// Set the callback for a dApp report that reaches the RAN. @param handler Callback to call
     void set_dapp_report_handler(DAppReportHandler handler) {
         dapp_report_handler_ = std::move(handler);
     }
 
+    /// Set the callback for a dApp that connects, subscribes, unsubscribes or leaves. @param handler Callback to call
     void set_dapp_status_changed_handler(DAppStatusChangedHandler handler) {
         dapp_status_changed_handler_ = std::move(handler);
     }
 
     // dApp-side handlers (set before start() when role==DAPP)
+    /// Set the callback for a SetupResponse. @param handler Callback to call
     void set_setup_response_handler(SetupResponseHandler handler) {
         setup_response_handler_ = std::move(handler);
     }
+    /// Set the callback for a SubscriptionResponse. @param handler Callback to call
     void set_subscription_response_handler(SubscriptionResponseHandler handler) {
         subscription_response_handler_ = std::move(handler);
     }
+    /// Set the callback for an IndicationMessage. @param handler Callback to call
     void set_indication_handler(IndicationHandler handler) {
         indication_handler_ = std::move(handler);
     }
+    /// Set the callback for an XAppControlAction. @param handler Callback to call
     void set_xapp_control_handler(XAppControlHandler handler) {
         xapp_control_handler_ = std::move(handler);
     }
+    /// Set the callback for a MessageAck. @param handler Callback to call
     void set_message_ack_handler(MessageAckHandler handler) {
         message_ack_handler_ = std::move(handler);
     }
     /// Called once when the dApp's session with the RAN ends (see E3Agent::set_disconnect_handler).
+    /// @param handler Callback to call
     void set_disconnect_handler(DisconnectHandler handler) {
         disconnect_handler_ = std::move(handler);
     }
 
     // dApp-side accessors
+    /// @return The dApp identifier the RAN assigned, or nothing before setup completes
     std::optional<uint32_t> dapp_id() const noexcept;
+    /// @return The subscription identifiers the RAN granted and that have not ended
     std::vector<uint32_t> active_subscription_ids() const;
+    /// @return The RAN functions this dApp holds a subscription to
     std::vector<uint32_t> subscribed_ran_functions() const;
+    /// @return The RAN functions the RAN advertised in its setup response
     std::vector<RanFunctionDef> remote_ran_functions() const;
 
     // dApp-side outbound helpers (queue PDUs that the outbound loop will encode + send)
@@ -204,25 +227,46 @@ public:
                                          std::optional<uint32_t> sub_time = std::nullopt,
                                          std::optional<uint32_t> periodicity = std::nullopt,
                                          uint32_t* out_request_id = nullptr);
+    /// Queue a SubscriptionDelete for the outbound loop to send.
+    /// @param ran_function_id RAN function whose subscription ends
+    /// @return SUCCESS once queued; STATE_ERROR on a RAN-role agent; NOT_INITIALIZED before setup has assigned a dApp id;
+    ///         SUBSCRIPTION_NOT_FOUND when the dApp holds none for it; otherwise the queueing error
     ErrorCode queue_subscription_delete(uint32_t ran_function_id);
-    // out_message_id, when non-null, receives the assigned E3-MessageID on
-    // success, so the caller can correlate a later ack/response back to this
-    // send.
+    /// Queue a dApp control action for the outbound loop to send.
+    /// @param ran_function_id RAN function the control is for
+    /// @param control_id control identifier granted by the RAN
+    /// @param action_data opaque payload of the Service Model
+    /// @param sequence_id correlation id of the xApp procedure this control re-issues; 0 for none
+    /// @param out_message_id when non-null, receives the assigned E3-MessageID on
+    ///        success, so the caller can correlate a later ack/response back to this send
+    /// @return SUCCESS once queued; otherwise the queueing error
     ErrorCode queue_dapp_control_action(uint32_t ran_function_id,
                                         uint32_t control_id,
                                         std::vector<uint8_t> action_data,
                                         uint32_t sequence_id = 0,
                                         uint32_t* out_message_id = nullptr);
+    /// Queue a dApp report for the outbound loop to send.
+    /// @param ran_function_id RAN function the report is for
+    /// @param report_data opaque payload of the Service Model
+    /// @param sequence_id correlation id the dApp assigns to this detection; mandatory, not 0
+    /// @param out_message_id when non-null, receives the assigned E3-MessageID on success
+    /// @return SUCCESS once queued; INVALID_PARAM for a sequence id of 0; otherwise the queueing error
     ErrorCode queue_dapp_report(uint32_t ran_function_id,
                                 std::vector<uint8_t> report_data,
                                 uint32_t sequence_id,
                                 uint32_t* out_message_id = nullptr);
+    /// Queue a ReleaseMessage that ends this dApp's session.
+    /// @return SUCCESS once queued; otherwise the queueing error
     ErrorCode queue_release_message();
 
-    // Block until the setup handshake completes (or times out / fails).
-    // Only meaningful on dApp role.
+    /// Block until the setup handshake completes (or times out / fails).
+    /// Only meaningful on dApp role.
+    /// @param timeout How long to wait
+    /// @return SUCCESS when setup completed; TIMEOUT when it did not complete in time; CONNECTION_FAILED when it failed;
+    ///         INVALID_PARAM on a RAN-role interface
     ErrorCode wait_for_setup(std::chrono::milliseconds timeout);
 
+    /// Tell the status handler that a dApp connected, subscribed, unsubscribed or left.
     void notify_dapp_status_changed();
 
 private:
@@ -445,6 +489,8 @@ public:
      * Wraps a lock-free counter into the ASN.1 E3-MessageID range, skipping 0.
      * Monotonic (not random) so an id is unique, letting a caller correlate a
      * response by the id it was assigned.
+     *
+     * @return The next message id
      */
     uint32_t generate_message_id();
 
@@ -456,6 +502,9 @@ public:
      * can reach the handlers; echoing it into a response would fail the
      * encode. Every non-zero id passes through unchanged, 0 is replaced
      * with a fresh generated id.
+     *
+     * @param request_id Message id a peer sent
+     * @return The same id when it is not 0, a fresh one otherwise
      */
     uint32_t sanitize_request_message_id(uint32_t request_id);
 };
