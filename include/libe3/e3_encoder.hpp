@@ -43,7 +43,10 @@ public:
     // Non-copyable, movable
     E3Encoder(const E3Encoder&) = delete;
     E3Encoder& operator=(const E3Encoder&) = delete;
+    /// Movable.
     E3Encoder(E3Encoder&&) = default;
+    /// Movable.
+    /// @return This encoder
     E3Encoder& operator=(E3Encoder&&) = default;
 
     /**
@@ -70,6 +73,7 @@ public:
 
     /**
      * @brief Get the encoding format
+     * @return The format this encoder reads and writes
      */
     virtual EncodingFormat format() const noexcept = 0;
 
@@ -103,6 +107,7 @@ public:
      * @param ran_function_list List of available RAN functions (optional).
      *        std::nullopt and an empty list both encode with the OPTIONAL
      *        ranFunctionList absent on the wire.
+     * @return Encoded message on success, error code on failure
      */
     EncodeResult<EncodedMessage> encode_setup_response(
         uint32_t message_id,
@@ -122,6 +127,7 @@ public:
      * @param telemetry_identifier_list List of telemetry identifiers
      * @param control_identifier_list List of control identifiers
      * @param subscription_time How long to keep the subscription (0-86400 sec, optional)
+     * @return Encoded message on success, error code on failure
      */
     EncodeResult<EncodedMessage> encode_subscription_request(
         uint32_t message_id,
@@ -137,6 +143,7 @@ public:
      * @param message_id Unique message ID
      * @param dapp_identifier dApp identifier
      * @param subscription_id Subscription ID to delete
+     * @return Encoded message on success, error code on failure
      */
     EncodeResult<EncodedMessage> encode_subscription_delete(
         uint32_t message_id,
@@ -151,6 +158,7 @@ public:
      * @param dapp_identifier dApp identifier
      * @param response_code Response code (positive/negative)
      * @param subscription_id Subscription ID (optional)
+     * @return Encoded message on success, error code on failure
      */
     EncodeResult<EncodedMessage> encode_subscription_response(
         uint32_t message_id,
@@ -166,6 +174,7 @@ public:
      * @param dapp_identifier dApp identifier
      * @param ran_function_identifier RAN function identifier
      * @param protocol_data Protocol data
+     * @return Encoded message on success, error code on failure
      */
     EncodeResult<EncodedMessage> encode_indication_message(
         uint32_t message_id,
@@ -181,6 +190,7 @@ public:
      * @param ran_function_identifier RAN function identifier
      * @param control_identifier Control identifier
      * @param action_data Action data
+     * @return Encoded message on success, error code on failure
      */
     EncodeResult<EncodedMessage> encode_dapp_control_action(
         uint32_t message_id,
@@ -196,6 +206,7 @@ public:
      * @param dapp_identifier dApp identifier
      * @param ran_function_identifier RAN function identifier
      * @param report_data Report data
+     * @return Encoded message on success, error code on failure
      */
     EncodeResult<EncodedMessage> encode_dapp_report(
         uint32_t message_id,
@@ -210,6 +221,7 @@ public:
      * @param dapp_identifier dApp identifier
      * @param ran_function_identifier RAN function identifier
      * @param xapp_control_data xApp control data
+     * @return Encoded message on success, error code on failure
      */
     EncodeResult<EncodedMessage> encode_xapp_control_action(
         uint32_t message_id,
@@ -223,6 +235,7 @@ public:
      * @param message_id Unique message ID
      * @param request_id Message ID of the request being acknowledged
      * @param response_code Positive or negative
+     * @return Encoded message on success, error code on failure
      */
     EncodeResult<EncodedMessage> encode_message_ack(
         uint32_t message_id,

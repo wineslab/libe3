@@ -37,6 +37,8 @@ namespace libe3 {
  * @warning This is @c CLOCK_REALTIME, not a monotonic clock. It can step
  *          backwards or jump when the system clock is adjusted, and it must
  *          never be subtracted from a monotonic reading to derive a duration.
+ *
+ * @return Nanoseconds since the Unix epoch, UTC
  */
 inline uint64_t now_realtime_ns() noexcept {
     return static_cast<uint64_t>(
@@ -147,6 +149,7 @@ enum class AgentState : uint8_t {
  * Use shared error-code list (see libe3/error_codes.h)
  */
 enum class ErrorCode : int {
+/// Expands one entry of the shared error-code list to an enumerator.
 #define X(name, val) name = val,
     LIBE3_ERROR_CODE_LIST
 #undef X
@@ -154,9 +157,12 @@ enum class ErrorCode : int {
 
 /**
  * @brief Convert ErrorCode to string name (C++ wrapper)
+ * @param code Error code to name
+ * @return The enumerator's name, or "UNKNOWN_ERROR_CODE" for a value outside the list
  */
 inline const char* ErrorCodeToString(ErrorCode code) {
     switch (static_cast<int>(code)) {
+/// Expands one entry of the shared error-code list to a case label that returns its name.
 #define X(name, val) case val: return #name;
         LIBE3_ERROR_CODE_LIST
 #undef X
@@ -165,16 +171,16 @@ inline const char* ErrorCodeToString(ErrorCode code) {
 }
 
 // Maximum sizes for E3AP data fields (aligned with original C implementation)
-constexpr size_t MAX_PROTOCOL_DATA_SIZE = 32768;
-constexpr size_t MAX_ACTION_DATA_SIZE = 32768;
-constexpr size_t MAX_DAPP_REPORT_DATA_SIZE = 32768;
-constexpr size_t MAX_XAPP_CTRL_DATA_SIZE = 32768;
+constexpr size_t MAX_PROTOCOL_DATA_SIZE = 32768;     ///< Largest `protocolData` of an indication, in bytes
+constexpr size_t MAX_ACTION_DATA_SIZE = 32768;       ///< Largest `actionData` of a dApp control action, in bytes
+constexpr size_t MAX_DAPP_REPORT_DATA_SIZE = 32768;  ///< Largest `reportData` of a dApp report, in bytes
+constexpr size_t MAX_XAPP_CTRL_DATA_SIZE = 32768;    ///< Largest `xAppControlData` of an xApp control action, in bytes
 constexpr size_t MAX_RAN_FUNCTIONS = 64;           ///< ranFunctionList SIZE (0..64)
 constexpr size_t MAX_IDENTIFIER_LIST_SIZE = 256;   ///< telemetry and control lists SIZE (0..256)
-constexpr size_t DEFAULT_BUFFER_SIZE = 60000;
+constexpr size_t DEFAULT_BUFFER_SIZE = 60000;      ///< Default encode and receive buffer size, in bytes
 
 // Protocol version
-constexpr uint32_t LIBE3_PROTOCOL_VERSION = 1;
+constexpr uint32_t LIBE3_PROTOCOL_VERSION = 1;  ///< Protocol version this library speaks
 
 /**
  * @brief Encoded message wrapper
@@ -185,13 +191,21 @@ struct EncodedMessage {
     std::vector<uint8_t> buffer;  ///< Encoded data buffer
     EncodingFormat format;        ///< Format used for encoding
 
+    /// Empty message with no format set.
     EncodedMessage() = default;
+    /// Wrap an already encoded buffer.
+    /// @param buf Encoded bytes, moved in
+    /// @param fmt Format the bytes are in
     EncodedMessage(std::vector<uint8_t> buf, EncodingFormat fmt)
         : buffer(std::move(buf)), format(fmt) {}
-    
+
+    /// @return Number of encoded bytes
     size_t size() const noexcept { return buffer.size(); }
+    /// @return True when there are no encoded bytes
     bool empty() const noexcept { return buffer.empty(); }
+    /// @return Read-only pointer to the first encoded byte
     const uint8_t* data() const noexcept { return buffer.data(); }
+    /// @return Pointer to the first encoded byte
     uint8_t* data() noexcept { return buffer.data(); }
 };
 
@@ -218,10 +232,10 @@ struct SetupRequest {
  * @brief RAN Function Definition for Setup Response
  */
 struct RanFunctionDef {
-    uint32_t ran_function_identifier{0};
+    uint32_t ran_function_identifier{0};              ///< RAN function identifier
     std::vector<uint32_t> telemetry_identifier_list;  ///< List of telemetry identifiers
     std::vector<uint32_t> control_identifier_list;    ///< List of control identifiers
-    std::vector<uint8_t> ran_function_data;
+    std::vector<uint8_t> ran_function_data;           ///< Opaque description of the function, 1..262144 bytes over ASN.1
 };
 
 /**
@@ -274,19 +288,19 @@ struct SubscriptionResponse {
  * @brief E3AP Indication Message structure
  */
 struct IndicationMessage {
-    uint32_t dapp_identifier{0};
+    uint32_t dapp_identifier{0};         ///< dApp the indication is for
     uint32_t ran_function_identifier{0}; ///< RAN function identifier
-    std::vector<uint8_t> protocol_data;
+    std::vector<uint8_t> protocol_data;  ///< Opaque payload of the service model
 };
 
 /**
  * @brief E3AP dApp Control Action structure
  */
 struct DAppControlAction {
-    uint32_t dapp_identifier{0};
-    uint32_t ran_function_identifier{0};
+    uint32_t dapp_identifier{0};         ///< dApp that sends the control
+    uint32_t ran_function_identifier{0}; ///< RAN function the control is for
     uint32_t control_identifier{0};      ///< Control identifier
-    std::vector<uint8_t> action_data;
+    std::vector<uint8_t> action_data;    ///< Opaque payload of the service model
     /// Correlation id of the xApp procedure this control re-issues; 0 when the
     /// dApp decided on its own. Optional on the wire, absent when 0.
     uint32_t sequence_id{0};
@@ -304,9 +318,9 @@ struct MessageAck {
  * @brief E3AP dApp Report structure
  */
 struct DAppReport {
-    uint32_t dapp_identifier{0};
-    uint32_t ran_function_identifier{0};
-    std::vector<uint8_t> report_data;
+    uint32_t dapp_identifier{0};         ///< dApp that sends the report
+    uint32_t ran_function_identifier{0}; ///< RAN function the report is for
+    std::vector<uint8_t> report_data;    ///< Opaque payload of the service model
     /// Correlation id assigned by the dApp; the head of the loop's chain.
     /// Mandatory on the wire.
     uint32_t sequence_id{0};
@@ -317,14 +331,14 @@ struct DAppReport {
  * @brief E3AP xApp Control Action structure
  */
 struct XAppControlAction {
-    uint32_t dapp_identifier{0};
-    uint32_t ran_function_identifier{0};
-    std::vector<uint8_t> xapp_control_data;
+    uint32_t dapp_identifier{0};         ///< dApp the control is for
+    uint32_t ran_function_identifier{0}; ///< RAN function the control is for
+    std::vector<uint8_t> xapp_control_data;  ///< Opaque payload of the service model
     /// Correlation id copied by the RAN bridge from the E2SM-DAPP control
     /// header's sequence-id. Mandatory on the wire.
     uint32_t sequence_id{0};
-    // Set by the inbound loop from the wrapping E3-PDU's id field; not
-    // serialized, so it carries no ASN.1/JSON/Protobuf grammar of its own.
+    /// Set by the inbound loop from the wrapping E3-PDU's id field; not
+    /// serialized, so it carries no ASN.1/JSON/Protobuf grammar of its own.
     uint32_t message_id{0};
 };
 
@@ -356,8 +370,8 @@ using PduChoice = std::variant<
  * @brief Generic E3AP PDU structure
  */
 struct Pdu {
-    PduType type{PduType::SETUP_REQUEST};
-    PduChoice choice;
+    PduType type{PduType::SETUP_REQUEST};  ///< Which alternative of `choice` is set
+    PduChoice choice;                      ///< The message itself
     uint32_t message_id{0};        ///< Unique message identifier
     uint64_t enqueue_seq{0};       ///< Set by queue_outbound; keys the [latrec] L-stage records
 
@@ -375,22 +389,35 @@ struct Pdu {
      */
     uint64_t timestamp{0};
 
+    /// SetupRequest-typed PDU with a default-constructed message and a fresh timestamp.
     Pdu() : timestamp(now_realtime_ns()) {}
 
+    /// PDU of type `t` with a default-constructed message and a fresh timestamp.
+    /// @param t PDU type
     explicit Pdu(PduType t) : type(t), timestamp(now_realtime_ns()) {}
 
+    /// PDU of type `t` that holds `data`, with a fresh timestamp.
+    /// @param t PDU type; it must match the type of `data`
+    /// @param data The message
     template<typename T>
     Pdu(PduType t, T&& data)
         : type(t), choice(std::forward<T>(data)), timestamp(now_realtime_ns()) {}
 
     /**
      * @brief Get PDU data with type checking
+     * @tparam T Message type to look for
+     * @return The message, or nullptr when the PDU holds another type
      */
     template<typename T>
     T* get_if() noexcept {
         return std::get_if<T>(&choice);
     }
 
+    /**
+     * @brief Get PDU data with type checking
+     * @tparam T Message type to look for
+     * @return The message, or nullptr when the PDU holds another type
+     */
     template<typename T>
     const T* get_if() const noexcept {
         return std::get_if<T>(&choice);
@@ -401,7 +428,7 @@ struct Pdu {
  * @brief Configuration for E3Agent
  */
 struct E3Config {
-    // Role: RAN (today's default — binds sockets) or DAPP (connects).
+    /// Role: RAN (today's default — binds sockets) or DAPP (connects).
     E3Role role{E3Role::RAN};
 
     // RAN identification (used when role==RAN to advertise this RAN's id)
@@ -524,6 +551,8 @@ struct SubscriptionEntry {
 
 /**
  * @brief Convert PduType to string representation
+ * @param type PDU type
+ * @return A static name, "unknown" for a value outside the enumeration
  */
 inline const char* pdu_type_to_string(PduType type) noexcept {
     switch (type) {
@@ -544,6 +573,8 @@ inline const char* pdu_type_to_string(PduType type) noexcept {
 
 /**
  * @brief Convert ActionType to string representation
+ * @param type Action type
+ * @return A static name, "unknown" for a value outside the enumeration
  */
 inline const char* action_type_to_string(ActionType type) noexcept {
     switch (type) {
@@ -556,6 +587,8 @@ inline const char* action_type_to_string(ActionType type) noexcept {
 
 /**
  * @brief Convert ResponseCode to string representation
+ * @param code Response code
+ * @return "positive" or "negative", "unknown" for a value outside the enumeration
  */
 inline const char* response_code_to_string(ResponseCode code) noexcept {
     switch (code) {
@@ -567,6 +600,8 @@ inline const char* response_code_to_string(ResponseCode code) noexcept {
 
 /**
  * @brief Convert ErrorCode to string representation
+ * @param code Error code
+ * @return A short description, "Unknown error" for a value outside the enumeration
  */
 inline const char* error_code_to_string(ErrorCode code) noexcept {
     switch (code) {
@@ -597,6 +632,8 @@ inline const char* error_code_to_string(ErrorCode code) noexcept {
 
 /**
  * @brief Convert AgentState to string representation
+ * @param state Agent state
+ * @return A static name, "Unknown" for a value outside the enumeration
  */
 inline const char* agent_state_to_string(AgentState state) noexcept {
     switch (state) {
@@ -614,6 +651,8 @@ inline const char* agent_state_to_string(AgentState state) noexcept {
 
 /**
  * @brief Convert E3Role to string representation
+ * @param role Role
+ * @return "ran" or "dapp", "unknown" for a value outside the enumeration
  */
 inline const char* role_to_string(E3Role role) noexcept {
     switch (role) {
@@ -625,6 +664,8 @@ inline const char* role_to_string(E3Role role) noexcept {
 
 /**
  * @brief Convert E3LinkLayer to string representation
+ * @param layer Link layer
+ * @return "zmq" or "posix", "unknown" for a value outside the enumeration
  */
 inline const char* link_layer_to_string(E3LinkLayer layer) noexcept {
     switch (layer) {
@@ -636,6 +677,8 @@ inline const char* link_layer_to_string(E3LinkLayer layer) noexcept {
 
 /**
  * @brief Convert E3TransportLayer to string representation
+ * @param layer Transport layer
+ * @return "sctp", "tcp" or "ipc", "unknown" for a value outside the enumeration
  */
 inline const char* transport_layer_to_string(E3TransportLayer layer) noexcept {
     switch (layer) {
