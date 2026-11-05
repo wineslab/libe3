@@ -106,6 +106,31 @@ enum class ResponseCode : uint8_t {
 };
 
 /**
+ * @brief Why a RAN refused a request (E3-Cause)
+ *
+ * Carried with a negative setup response, subscription response or message
+ * acknowledgment, next to a free-text `detail`. The names and values are the
+ * ones OCUDU's E3AP grammar uses; Aerial has no code and sends only text.
+ */
+enum class Cause : uint8_t {
+    UNSPECIFIED = 0,                   ///< No more specific cause applies
+    PROTOCOL_ERROR = 1,                ///< The message was malformed or out of sequence
+    SETUP_REQUIRED = 2,                ///< The dApp has not completed setup
+    SETUP_ALREADY_COMPLETE = 3,        ///< A second setup on one association
+    UNSUPPORTED_PROTOCOL_VERSION = 4,  ///< The E3AP version of the dApp is not served
+    UNSUPPORTED_RAN_FUNCTION = 5,      ///< The RAN function is not served
+    UNSUPPORTED_IDENTIFIER = 6,        ///< A telemetry or control identifier is not advertised by the RAN function
+    INVALID_REQUEST = 7,               ///< The request is well formed but its content is not acceptable
+    NOT_FOUND = 8,                     ///< The subscription or procedure the request names does not exist
+    DUPLICATE = 9,                     ///< The request repeats one that is already active
+    RESOURCE_EXHAUSTED = 10,           ///< The RAN has no room for the request
+    AUTHORIZATION_REJECTED = 11,       ///< The dApp is not allowed to do this
+    PAYLOAD_TOO_LARGE = 12,            ///< The payload is over the bound the RAN accepts
+    TRANSPORT_OVERRUN = 13,            ///< The transport could not keep up
+    SHUTTING_DOWN = 14                 ///< The RAN is stopping
+};
+
+/**
  * @brief Why a dApp's session with the RAN ended (see DisconnectHandler)
  */
 enum class DisconnectReason : uint8_t {
@@ -178,6 +203,7 @@ constexpr size_t MAX_XAPP_CTRL_DATA_SIZE = 32768;    ///< Largest `xAppControlDa
 constexpr size_t MAX_RAN_FUNCTIONS = 64;           ///< ranFunctionList SIZE (0..64)
 constexpr size_t MAX_IDENTIFIER_LIST_SIZE = 256;   ///< telemetry and control lists SIZE (0..256)
 constexpr size_t DEFAULT_BUFFER_SIZE = 60000;      ///< Default encode and receive buffer size, in bytes
+constexpr size_t MAX_DETAIL_SIZE = 512;            ///< Largest `detail` text of a negative response, in bytes (E3-Text)
 
 // Protocol version
 constexpr uint32_t LIBE3_PROTOCOL_VERSION = 1;  ///< Protocol version this library speaks
@@ -248,6 +274,8 @@ struct SetupResponse {
     std::optional<uint32_t> dapp_identifier;            ///< Assigned dApp identifier (optional)
     std::string ran_identifier;                         ///< RAN identifier (mandatory); 1..64 bytes over ASN.1
     std::vector<RanFunctionDef> ran_function_list;      ///< List of available RAN functions (optional)
+    std::optional<Cause> cause;                         ///< Why the setup was refused (negative only)
+    std::optional<std::string> detail;                  ///< UTF-8 text for the cause, up to MAX_DETAIL_SIZE bytes
 };
 
 /**
@@ -282,6 +310,8 @@ struct SubscriptionResponse {
     std::optional<std::vector<uint32_t>> control_identifier_list;    ///< Granted control ids (absent = not reported, empty = none granted)
     std::optional<uint32_t> ran_function_identifier;  ///< RAN function the grant is for
     std::optional<uint32_t> periodicity;              ///< Granted interval, same unit and range as the request
+    std::optional<Cause> cause;                       ///< Why the subscription was refused (negative only)
+    std::optional<std::string> detail;                ///< UTF-8 text for the cause, up to MAX_DETAIL_SIZE bytes
 };
 
 /**
@@ -312,6 +342,8 @@ struct DAppControlAction {
 struct MessageAck {
     uint32_t request_id{0};              ///< ID of the request being acknowledged
     ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
+    std::optional<Cause> cause;          ///< Why the request was refused (negative only)
+    std::optional<std::string> detail;   ///< UTF-8 text for the cause, up to MAX_DETAIL_SIZE bytes
 };
 
 /**
@@ -596,6 +628,55 @@ inline const char* response_code_to_string(ResponseCode code) noexcept {
         case ResponseCode::NEGATIVE: return "negative";
         default: return "unknown";
     }
+}
+
+/**
+ * @brief Convert Cause to the name E3AP gives it in JSON and in logs
+ * @param cause Cause to name
+ * @return The camelCase name, for example "unsupportedIdentifier"; "unspecified" for a value outside the enumeration
+ */
+inline const char* cause_to_string(Cause cause) noexcept {
+    switch (cause) {
+        case Cause::UNSPECIFIED: return "unspecified";
+        case Cause::PROTOCOL_ERROR: return "protocolError";
+        case Cause::SETUP_REQUIRED: return "setupRequired";
+        case Cause::SETUP_ALREADY_COMPLETE: return "setupAlreadyComplete";
+        case Cause::UNSUPPORTED_PROTOCOL_VERSION: return "unsupportedProtocolVersion";
+        case Cause::UNSUPPORTED_RAN_FUNCTION: return "unsupportedRanFunction";
+        case Cause::UNSUPPORTED_IDENTIFIER: return "unsupportedIdentifier";
+        case Cause::INVALID_REQUEST: return "invalidRequest";
+        case Cause::NOT_FOUND: return "notFound";
+        case Cause::DUPLICATE: return "duplicate";
+        case Cause::RESOURCE_EXHAUSTED: return "resourceExhausted";
+        case Cause::AUTHORIZATION_REJECTED: return "authorizationRejected";
+        case Cause::PAYLOAD_TOO_LARGE: return "payloadTooLarge";
+        case Cause::TRANSPORT_OVERRUN: return "transportOverrun";
+        case Cause::SHUTTING_DOWN: return "shuttingDown";
+        default: return "unspecified";
+    }
+}
+
+/**
+ * @brief Read a Cause from its E3AP name
+ * @param name camelCase name, for example "unsupportedIdentifier"
+ * @return The cause; Cause::UNSPECIFIED for a name this version does not know, so a
+ *         peer that adds a cause is still read as a refusal
+ */
+inline Cause cause_from_string(const std::string& name) noexcept {
+    for (uint8_t v = 0; v <= static_cast<uint8_t>(Cause::SHUTTING_DOWN); ++v) {
+        if (name == cause_to_string(static_cast<Cause>(v))) return static_cast<Cause>(v);
+    }
+    return Cause::UNSPECIFIED;
+}
+
+/**
+ * @brief Read a Cause from its wire value
+ * @param value Enumeration value as APER or Protocol Buffers carries it
+ * @return The cause; Cause::UNSPECIFIED for a value this version does not know
+ */
+inline Cause cause_from_value(long value) noexcept {
+    return (value >= 0 && value <= static_cast<long>(Cause::SHUTTING_DOWN))
+        ? static_cast<Cause>(value) : Cause::UNSPECIFIED;
 }
 
 /**

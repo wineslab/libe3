@@ -107,6 +107,8 @@ public:
      * @param ran_function_list List of available RAN functions (optional).
      *        std::nullopt and an empty list both encode with the OPTIONAL
      *        ranFunctionList absent on the wire.
+     * @param cause Why the setup was refused (optional, negative only)
+     * @param detail Text for the cause, up to MAX_DETAIL_SIZE bytes (optional)
      * @return Encoded message on success, error code on failure
      */
     EncodeResult<EncodedMessage> encode_setup_response(
@@ -116,7 +118,9 @@ public:
         const std::optional<std::string>& e3ap_protocol_version = std::nullopt,
         const std::optional<uint32_t>& dapp_identifier = std::nullopt,
         const std::string& ran_identifier = "",
-        const std::optional<std::vector<RanFunctionDef>>& ran_function_list = std::nullopt
+        const std::optional<std::vector<RanFunctionDef>>& ran_function_list = std::nullopt,
+        const std::optional<Cause>& cause = std::nullopt,
+        const std::optional<std::string>& detail = std::nullopt
     );
 
     /**
@@ -158,6 +162,8 @@ public:
      * @param dapp_identifier dApp identifier
      * @param response_code Response code (positive/negative)
      * @param subscription_id Subscription ID (optional)
+     * @param cause Why the subscription was refused (optional, negative only)
+     * @param detail Text for the cause, up to MAX_DETAIL_SIZE bytes (optional)
      * @return Encoded message on success, error code on failure
      */
     EncodeResult<EncodedMessage> encode_subscription_response(
@@ -165,7 +171,9 @@ public:
         uint32_t request_id,
         uint32_t dapp_identifier,
         ResponseCode response_code,
-        const std::optional<uint32_t>& subscription_id = std::nullopt
+        const std::optional<uint32_t>& subscription_id = std::nullopt,
+        const std::optional<Cause>& cause = std::nullopt,
+        const std::optional<std::string>& detail = std::nullopt
     );
 
     /**
@@ -235,12 +243,16 @@ public:
      * @param message_id Unique message ID
      * @param request_id Message ID of the request being acknowledged
      * @param response_code Positive or negative
+     * @param cause Why the request was refused (optional, negative only)
+     * @param detail Text for the cause, up to MAX_DETAIL_SIZE bytes (optional)
      * @return Encoded message on success, error code on failure
      */
     EncodeResult<EncodedMessage> encode_message_ack(
         uint32_t message_id,
         uint32_t request_id,
-        ResponseCode response_code
+        ResponseCode response_code,
+        const std::optional<Cause>& cause = std::nullopt,
+        const std::optional<std::string>& detail = std::nullopt
     );
 
 protected:

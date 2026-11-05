@@ -18,6 +18,27 @@ enum ResponseCode {
   RESPONSE_CODE_NEGATIVE = 1;  // Request rejected
 }
 
+// Why a RAN refused a request. Values and names follow E3-Cause in the ASN.1
+// grammar. proto3 reads a value it does not know as that number, which the
+// encoder maps to CAUSE_UNSPECIFIED.
+enum Cause {
+  CAUSE_UNSPECIFIED = 0;
+  CAUSE_PROTOCOL_ERROR = 1;
+  CAUSE_SETUP_REQUIRED = 2;
+  CAUSE_SETUP_ALREADY_COMPLETE = 3;
+  CAUSE_UNSUPPORTED_PROTOCOL_VERSION = 4;
+  CAUSE_UNSUPPORTED_RAN_FUNCTION = 5;
+  CAUSE_UNSUPPORTED_IDENTIFIER = 6;
+  CAUSE_INVALID_REQUEST = 7;
+  CAUSE_NOT_FOUND = 8;
+  CAUSE_DUPLICATE = 9;
+  CAUSE_RESOURCE_EXHAUSTED = 10;
+  CAUSE_AUTHORIZATION_REJECTED = 11;
+  CAUSE_PAYLOAD_TOO_LARGE = 12;
+  CAUSE_TRANSPORT_OVERRUN = 13;
+  CAUSE_SHUTTING_DOWN = 14;
+}
+
 // E3 Setup Request (dApp -> RAN).
 message SetupRequest {
   string e3ap_protocol_version = 1;
@@ -42,6 +63,9 @@ message SetupResponse {
   optional uint32 dapp_identifier = 4;
   string ran_identifier = 5;
   repeated RanFunctionDef ran_function_list = 6;
+  // Why the setup was refused, and a text for it of up to 512 bytes.
+  optional Cause cause = 7;
+  optional string detail = 8;
 }
 
 // Subscription Request (dApp -> RAN).
@@ -77,6 +101,9 @@ message SubscriptionResponse {
   optional uint32 ran_function_identifier = 7;
   // Granted interval, same unit as the request.
   optional uint32 periodicity = 8;
+  // Why the subscription was refused, and a text for it of up to 512 bytes.
+  optional Cause cause = 9;
+  optional string detail = 10;
 }
 
 // Indication Message (RAN -> dApp). protocol_data carries the opaque
@@ -129,6 +156,9 @@ message ReleaseMessage {
 message MessageAck {
   uint32 request_id = 1;
   ResponseCode response_code = 2;
+  // Why the request was refused, and a text for it of up to 512 bytes.
+  optional Cause cause = 3;
+  optional string detail = 4;
 }
 
 // Top-level E3AP PDU envelope. The oneof case identifies the PDU type; its

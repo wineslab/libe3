@@ -24,6 +24,27 @@ pb::ResponseCode to_pb_response_code(ResponseCode rc) {
                                         : pb::RESPONSE_CODE_NEGATIVE;
 }
 
+pb::Cause to_pb_cause(Cause c) {
+    return static_cast<pb::Cause>(static_cast<int>(c));
+}
+
+Cause from_pb_cause(pb::Cause c) {
+    return cause_from_value(static_cast<long>(c));
+}
+
+// The same two optional fields sit on setup, subscription and ack messages.
+template <typename PbMsg, typename Resp>
+void set_reason(PbMsg* m, const Resp& s) {
+    if (s.cause) m->set_cause(to_pb_cause(*s.cause));
+    if (s.detail) m->set_detail(*s.detail);
+}
+
+template <typename PbMsg, typename Resp>
+void get_reason(const PbMsg& m, Resp& s) {
+    if (m.has_cause()) s.cause = from_pb_cause(m.cause());
+    if (m.has_detail()) s.detail = m.detail();
+}
+
 ResponseCode from_pb_response_code(pb::ResponseCode rc) {
     return rc == pb::RESPONSE_CODE_NEGATIVE ? ResponseCode::NEGATIVE
                                             : ResponseCode::POSITIVE;
@@ -66,6 +87,7 @@ bool ProtobufE3Encoder::pdu_to_proto(const Pdu& pdu, pb::E3Pdu& out) const {
                 for (auto c : rf.control_identifier_list) pf->add_control_identifier_list(c);
                 pf->set_ran_function_data(rf.ran_function_data.data(), rf.ran_function_data.size());
             }
+            set_reason(m, *s);
             return true;
         }
         case PduType::SUBSCRIPTION_REQUEST: {
@@ -106,6 +128,7 @@ bool ProtobufE3Encoder::pdu_to_proto(const Pdu& pdu, pb::E3Pdu& out) const {
             }
             if (s->ran_function_identifier) m->set_ran_function_identifier(*s->ran_function_identifier);
             if (s->periodicity) m->set_periodicity(*s->periodicity);
+            set_reason(m, *s);
             return true;
         }
         case PduType::INDICATION_MESSAGE: {
@@ -161,6 +184,7 @@ bool ProtobufE3Encoder::pdu_to_proto(const Pdu& pdu, pb::E3Pdu& out) const {
             auto* m = out.mutable_message_ack();
             m->set_request_id(s->request_id);
             m->set_response_code(to_pb_response_code(s->response_code));
+            set_reason(m, *s);
             return true;
         }
     }
@@ -203,6 +227,7 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
                 rf.ran_function_data = to_bytes(pf.ran_function_data());
                 s.ran_function_list.push_back(std::move(rf));
             }
+            get_reason(m, s);
             pdu.type = PduType::SETUP_RESPONSE;
             pdu.choice = std::move(s);
             break;
@@ -248,6 +273,7 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
             }
             if (m.has_ran_function_identifier()) s.ran_function_identifier = m.ran_function_identifier();
             if (m.has_periodicity()) s.periodicity = m.periodicity();
+            get_reason(m, s);
             pdu.type = PduType::SUBSCRIPTION_RESPONSE;
             pdu.choice = std::move(s);
             break;
@@ -309,6 +335,7 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
             MessageAck s;
             s.request_id = m.request_id();
             s.response_code = from_pb_response_code(m.response_code());
+            get_reason(m, s);
             pdu.type = PduType::MESSAGE_ACK;
             pdu.choice = std::move(s);
             break;

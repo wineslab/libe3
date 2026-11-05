@@ -258,6 +258,31 @@ nlohmann::json JsonE3Encoder::encode_setup_request(const SetupRequest& req) cons
     return j;
 }
 
+namespace {
+
+// A refusal's reason is the same two optional members on three responses.
+template <typename Resp>
+void write_reason(nlohmann::json& j, const Resp& resp) {
+    if (resp.cause) j["cause"] = cause_to_string(*resp.cause);
+    if (resp.detail) j["detail"] = *resp.detail;
+}
+
+// Aerial sends the text as `message`; `detail` wins when both are there.
+template <typename Resp>
+void read_reason(const nlohmann::json& j, Resp& resp) {
+    if (auto it = j.find("cause"); it != j.end() && it->is_string()) {
+        resp.cause = cause_from_string(it->get<std::string>());
+    }
+    for (const char* key : {"detail", "message"}) {
+        if (auto it = j.find(key); it != j.end() && it->is_string()) {
+            resp.detail = it->get<std::string>();
+            break;
+        }
+    }
+}
+
+}  // namespace
+
 nlohmann::json JsonE3Encoder::encode_setup_response(const SetupResponse& resp) const {
     nlohmann::json j;
     j["requestId"] = resp.request_id;
@@ -282,6 +307,7 @@ nlohmann::json JsonE3Encoder::encode_setup_response(const SetupResponse& resp) c
         }
         j["ranFunctionList"] = ran_funcs;
     }
+    write_reason(j, resp);
     return j;
 }
 
@@ -327,6 +353,7 @@ nlohmann::json JsonE3Encoder::encode_subscription_response(const SubscriptionRes
     if (resp.periodicity.has_value()) {
         j["periodicity"] = *resp.periodicity;
     }
+    write_reason(j, resp);
     return j;
 }
 
@@ -376,6 +403,7 @@ nlohmann::json JsonE3Encoder::encode_message_ack(const MessageAck& ack) const {
     nlohmann::json j;
     j["requestId"] = ack.request_id;
     j["responseCode"] = (ack.response_code == ResponseCode::POSITIVE) ? "positive" : "negative";
+    write_reason(j, ack);
     return j;
 }
 
@@ -419,6 +447,7 @@ SetupResponse JsonE3Encoder::decode_setup_response(const nlohmann::json& j) cons
             resp.ran_function_list.push_back(func);
         }
     }
+    read_reason(j, resp);
     return resp;
 }
 
@@ -468,6 +497,7 @@ SubscriptionResponse JsonE3Encoder::decode_subscription_response(const nlohmann:
     if (j.contains("periodicity")) {
         resp.periodicity = j["periodicity"].get<uint32_t>();
     }
+    read_reason(j, resp);
     return resp;
 }
 
@@ -533,6 +563,7 @@ MessageAck JsonE3Encoder::decode_message_ack(const nlohmann::json& j) const {
     ack.request_id = j.value("requestId", 0u);
     std::string response_code_str = j.value("responseCode", "negative");
     ack.response_code = (response_code_str == "positive") ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
+    read_reason(j, ack);
     return ack;
 }
 

@@ -112,7 +112,7 @@ static bool equals(const SetupResponse& a, const SetupResponse& b) {
     for (size_t i = 0; i < a.ran_function_list.size(); ++i) {
         if (!equals(a.ran_function_list[i], b.ran_function_list[i])) return false;
     }
-    return true;
+    return a.cause == b.cause && a.detail == b.detail;
 }
 
 static bool equals(const SubscriptionRequest& a, const SubscriptionRequest& b) {
@@ -137,7 +137,9 @@ static bool equals(const SubscriptionResponse& a, const SubscriptionResponse& b)
         && a.telemetry_identifier_list == b.telemetry_identifier_list
         && a.control_identifier_list == b.control_identifier_list
         && a.ran_function_identifier == b.ran_function_identifier
-        && a.periodicity == b.periodicity;
+        && a.periodicity == b.periodicity
+        && a.cause == b.cause
+        && a.detail == b.detail;
 }
 
 static bool equals(const IndicationMessage& a, const IndicationMessage& b) {
@@ -174,7 +176,9 @@ static bool equals(const ReleaseMessage& a, const ReleaseMessage& b) {
 
 static bool equals(const MessageAck& a, const MessageAck& b) {
     return a.request_id == b.request_id
-        && a.response_code == b.response_code;
+        && a.response_code == b.response_code
+        && a.cause == b.cause
+        && a.detail == b.detail;
 }
 
 // Adding an alternative to PduChoice without adding a comparator above (and a
@@ -324,6 +328,53 @@ static std::vector<Sample> sample_pdus() {
     return samples;
 }
 
+/// The three responses that can refuse a request, each with a cause and a
+/// text. They sit apart from sample_pdus() because that list is one PDU per
+/// type and its positive samples carry no reason.
+static std::vector<Sample> refusal_pdus() {
+    std::vector<Sample> samples;
+    auto add = [&samples](const char* name, PduType type, auto&& payload) {
+        Pdu pdu(type);
+        pdu.choice = std::forward<decltype(payload)>(payload);
+        pdu.message_id = 918;
+        pdu.timestamp = kStamp;
+        samples.push_back(Sample{name, std::move(pdu)});
+    };
+
+    SetupResponse setup;
+    setup.request_id = 918;
+    setup.response_code = ResponseCode::NEGATIVE;
+    setup.ran_identifier = "ran-node-1";
+    setup.cause = Cause::UNSUPPORTED_PROTOCOL_VERSION;
+    setup.detail = "version 2.0.0 is not served";
+    add("SetupResponse refused", PduType::SETUP_RESPONSE, setup);
+
+    SubscriptionResponse subscription;
+    subscription.request_id = 918;
+    subscription.dapp_identifier = 42;
+    subscription.response_code = ResponseCode::NEGATIVE;
+    subscription.cause = Cause::UNSUPPORTED_IDENTIFIER;
+    subscription.detail = "unknown telemetry identifier 7";
+    add("SubscriptionResponse refused", PduType::SUBSCRIPTION_RESPONSE, subscription);
+
+    MessageAck ack;
+    ack.request_id = 918;
+    ack.response_code = ResponseCode::NEGATIVE;
+    ack.cause = Cause::NOT_FOUND;
+    ack.detail = "no subscription to this RAN function";
+    add("MessageAck refused", PduType::MESSAGE_ACK, ack);
+
+    // A cause with no text, and a text with no cause, are both legal.
+    MessageAck bare = ack;
+    bare.detail.reset();
+    add("MessageAck cause only", PduType::MESSAGE_ACK, bare);
+    bare.cause.reset();
+    bare.detail = "text only";
+    add("MessageAck text only", PduType::MESSAGE_ACK, bare);
+
+    return samples;
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -391,6 +442,30 @@ TEST(EncoderEquivalence_all_encoders_decode_to_the_same_pdu) {
                              sample.name);
             }
             ASSERT_TRUE(agree);
+        }
+    }
+}
+
+TEST(EncoderEquivalence_refusal_reason_survives_every_encoder) {
+    const auto formats = available_encoders();
+    ASSERT_FALSE(formats.empty());
+
+    for (auto format : formats) {
+        auto encoder = create_encoder(format);
+        ASSERT_TRUE(encoder != nullptr);
+
+        for (const auto& sample : refusal_pdus()) {
+            auto encoded = encoder->encode(sample.pdu);
+            report_if(!encoded.has_value(), format, sample.name, "encode failed");
+            ASSERT_TRUE(encoded.has_value());
+
+            auto decoded = encoder->decode(*encoded);
+            report_if(!decoded.has_value(), format, sample.name, "decode failed");
+            ASSERT_TRUE(decoded.has_value());
+
+            const bool same = equals(sample.pdu, *decoded);
+            report_if(!same, format, sample.name, "cause or detail changed on the wire");
+            ASSERT_TRUE(same);
         }
     }
 }

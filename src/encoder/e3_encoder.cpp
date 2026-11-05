@@ -38,7 +38,9 @@ EncodeResult<EncodedMessage> E3Encoder::encode_setup_response(
     const std::optional<std::string>& e3ap_protocol_version,
     const std::optional<uint32_t>& dapp_identifier,
     const std::string& ran_identifier,
-    const std::optional<std::vector<RanFunctionDef>>& ran_function_list
+    const std::optional<std::vector<RanFunctionDef>>& ran_function_list,
+    const std::optional<Cause>& cause,
+    const std::optional<std::string>& detail
 ) {
     Pdu pdu(PduType::SETUP_RESPONSE);
     SetupResponse resp;
@@ -50,6 +52,8 @@ EncodeResult<EncodedMessage> E3Encoder::encode_setup_response(
     if (ran_function_list.has_value()) {
         resp.ran_function_list = ran_function_list.value();
     }
+    resp.cause = cause;
+    resp.detail = detail;
     pdu.message_id = message_id;
     pdu.choice = resp;
     return encode(pdu);
@@ -94,7 +98,9 @@ EncodeResult<EncodedMessage> E3Encoder::encode_subscription_response(
     uint32_t request_id,
     uint32_t dapp_identifier,
     ResponseCode response_code,
-    const std::optional<uint32_t>& subscription_id
+    const std::optional<uint32_t>& subscription_id,
+    const std::optional<Cause>& cause,
+    const std::optional<std::string>& detail
 ) {
     Pdu pdu(PduType::SUBSCRIPTION_RESPONSE);
     SubscriptionResponse resp;
@@ -102,6 +108,8 @@ EncodeResult<EncodedMessage> E3Encoder::encode_subscription_response(
     resp.dapp_identifier = dapp_identifier;
     resp.response_code = response_code;
     resp.subscription_id = subscription_id;
+    resp.cause = cause;
+    resp.detail = detail;
     pdu.message_id = message_id;
     pdu.choice = resp;
     return encode(pdu);
@@ -176,12 +184,16 @@ EncodeResult<EncodedMessage> E3Encoder::encode_xapp_control_action(
 EncodeResult<EncodedMessage> E3Encoder::encode_message_ack(
     uint32_t message_id,
     uint32_t request_id,
-    ResponseCode response_code
+    ResponseCode response_code,
+    const std::optional<Cause>& cause,
+    const std::optional<std::string>& detail
 ) {
     Pdu pdu(PduType::MESSAGE_ACK);
     MessageAck ack;
     ack.request_id = request_id;
     ack.response_code = response_code;
+    ack.cause = cause;
+    ack.detail = detail;
     pdu.message_id = message_id;
     pdu.choice = ack;
     return encode(pdu);

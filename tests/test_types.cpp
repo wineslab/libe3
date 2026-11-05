@@ -229,6 +229,35 @@ TEST(MessageAck_fields) {
     ASSERT_TRUE(ack.response_code == ResponseCode::POSITIVE);
 }
 
+TEST(Cause_names_and_values_match_the_grammar) {
+    // E3-Cause in e3ap-1.0.0.asn1 and in OCUDU's grammar: same names, same values.
+    const char* names[] = {"unspecified", "protocolError", "setupRequired", "setupAlreadyComplete",
+                           "unsupportedProtocolVersion", "unsupportedRanFunction",
+                           "unsupportedIdentifier", "invalidRequest", "notFound", "duplicate",
+                           "resourceExhausted", "authorizationRejected", "payloadTooLarge",
+                           "transportOverrun", "shuttingDown"};
+    for (long v = 0; v < 15; ++v) {
+        const Cause cause = cause_from_value(v);
+        ASSERT_EQ(static_cast<long>(cause), v);
+        ASSERT_STREQ(cause_to_string(cause), names[v]);
+        ASSERT_TRUE(cause_from_string(names[v]) == cause);
+    }
+}
+
+TEST(Cause_unknown_reads_as_unspecified) {
+    ASSERT_TRUE(cause_from_value(15) == Cause::UNSPECIFIED);
+    ASSERT_TRUE(cause_from_value(-1) == Cause::UNSPECIFIED);
+    ASSERT_TRUE(cause_from_value(1000) == Cause::UNSPECIFIED);
+    ASSERT_TRUE(cause_from_string("someFutureCause") == Cause::UNSPECIFIED);
+    ASSERT_TRUE(cause_from_string("") == Cause::UNSPECIFIED);
+}
+
+TEST(NegativeResponses_carry_no_reason_by_default) {
+    ASSERT_FALSE(SetupResponse{}.cause.has_value());
+    ASSERT_FALSE(SubscriptionResponse{}.detail.has_value());
+    ASSERT_FALSE(MessageAck{}.cause.has_value());
+}
+
 int main() {
     return RUN_ALL_TESTS();
 }

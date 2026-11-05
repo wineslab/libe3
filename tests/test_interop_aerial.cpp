@@ -108,6 +108,10 @@ const std::map<std::string, std::pair<PduType, Check>>& expectations() {
             ASSERT_TRUE(m.ran_function_list.empty());
             // Aerial leaves ranIdentifier out of a negative reply.
             ASSERT_TRUE(m.ran_identifier.empty());
+            // Aerial's `message` is the detail; it has no code.
+            ASSERT_TRUE(m.detail.has_value());
+            ASSERT_STREQ(*m.detail, "protocol version mismatch");
+            ASSERT_FALSE(m.cause.has_value());
         }}},
         {"subscriptionRequest_pusch", {PduType::SUBSCRIPTION_REQUEST, [](const Pdu& p, const json&) {
             const auto& m = as<SubscriptionRequest>(p);
@@ -150,6 +154,9 @@ const std::map<std::string, std::pair<PduType, Check>>& expectations() {
             ASSERT_TRUE(m.response_code == ResponseCode::NEGATIVE);
             ASSERT_FALSE(m.subscription_id.has_value());
             ASSERT_FALSE(m.telemetry_identifier_list.has_value());
+            ASSERT_TRUE(m.detail.has_value());
+            ASSERT_STREQ(*m.detail, "missing or invalid parameters in subscription request");
+            ASSERT_FALSE(m.cause.has_value());
         }}},
         {"indicationMessage_single_ue", {PduType::INDICATION_MESSAGE, nullptr}},
         {"indicationMessage_multi_ue", {PduType::INDICATION_MESSAGE, nullptr}},
@@ -182,6 +189,9 @@ const std::map<std::string, std::pair<PduType, Check>>& expectations() {
             const auto& m = as<MessageAck>(p);
             ASSERT_EQ(m.request_id, 4u);
             ASSERT_TRUE(m.response_code == ResponseCode::NEGATIVE);
+            ASSERT_TRUE(m.detail.has_value());
+            ASSERT_STREQ(*m.detail, "control actions not implemented");
+            ASSERT_FALSE(m.cause.has_value());
         }}},
         {"releaseMessage_from_dapp", {PduType::RELEASE_MESSAGE, [](const Pdu& p, const json&) {
             ASSERT_EQ(as<ReleaseMessage>(p).dapp_identifier, 1u);
@@ -259,8 +269,10 @@ TEST(InteropAerial_reencodingAgreesOnEveryKeyBothWrite) {
                 expect(out.contains(libe3_key) && out[libe3_key] == value, name, libe3_key,
                        "granted list differs");
             } else if (key == "message") {
-                // Free text on a negative reply: libe3 has no field for it.
-                expect(!out.contains(key), name, key, "libe3 now writes it");
+                // Free text on a negative reply: libe3 writes it as `detail`.
+                expect(!out.contains(key), name, key, "libe3 now writes it under Aerial's name");
+                expect(out.contains("detail") && out["detail"] == value, name, "detail",
+                       "libe3 does not write Aerial's text as the detail");
             } else if ((type == "indicationMessage" && key == "subscriptionId") ||
                        (type == "messageAck" && key == "dAppIdentifier")) {
                 // Aerial tags every indication with its subscription and every ack

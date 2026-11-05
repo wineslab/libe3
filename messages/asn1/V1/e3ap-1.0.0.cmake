@@ -105,6 +105,7 @@ set(e3ap_source
     xer_encoder.c
     xer_support.c
     # E3AP protocol types
+    E3-Cause.c
     E3-DAppControlAction.c
     E3-DAppID.c
     E3-DAppReport.c
@@ -122,6 +123,7 @@ set(e3ap_source
     E3-SubscriptionDelete.c
     E3-SubscriptionRequest.c
     E3-SubscriptionResponse.c
+    E3-Text.c
     E3-Timestamp.c
     E3-Version.c
     E3-XAppControlAction.c
@@ -176,6 +178,7 @@ set(e3ap_headers
     xer_encoder.h
     xer_support.h
     # E3AP protocol headers
+    E3-Cause.h
     E3-DAppControlAction.h
     E3-DAppID.h
     E3-DAppReport.h
@@ -193,6 +196,7 @@ set(e3ap_headers
     E3-SubscriptionDelete.h
     E3-SubscriptionRequest.h
     E3-SubscriptionResponse.h
+    E3-Text.h
     E3-Timestamp.h
     E3-Version.h
     E3-XAppControlAction.h

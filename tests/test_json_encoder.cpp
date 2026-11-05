@@ -120,6 +120,73 @@ TEST(JsonEncoder_setup_response_ran_function_data_is_nested) {
     ASSERT_STREQ(data["name"].get<std::string>().c_str(), "SIMPLE");
 }
 
+TEST(JsonEncoder_negative_response_writes_cause_and_detail) {
+    auto encoder = create_encoder();
+
+    Pdu pdu(PduType::SUBSCRIPTION_RESPONSE);
+    SubscriptionResponse resp;
+    resp.request_id = 5;
+    resp.dapp_identifier = 3;
+    resp.response_code = ResponseCode::NEGATIVE;
+    resp.cause = Cause::UNSUPPORTED_IDENTIFIER;
+    resp.detail = "unknown telemetry identifier 7";
+    pdu.choice = resp;
+
+    auto encoded = encoder->encode(pdu);
+    ASSERT_TRUE(encoded.has_value());
+    auto wire = nlohmann::json::parse(encoded->buffer);
+    ASSERT_STREQ(wire["responseCode"].get<std::string>().c_str(), "negative");
+    ASSERT_STREQ(wire["cause"].get<std::string>().c_str(), "unsupportedIdentifier");
+    ASSERT_STREQ(wire["detail"].get<std::string>().c_str(), "unknown telemetry identifier 7");
+    // Aerial's name for the text is read, never written.
+    ASSERT_FALSE(wire.contains("message"));
+}
+
+TEST(JsonEncoder_positive_response_writes_no_reason) {
+    auto encoder = create_encoder();
+
+    Pdu pdu(PduType::MESSAGE_ACK);
+    MessageAck ack;
+    ack.request_id = 5;
+    ack.response_code = ResponseCode::POSITIVE;
+    pdu.choice = ack;
+
+    auto encoded = encoder->encode(pdu);
+    ASSERT_TRUE(encoded.has_value());
+    auto wire = nlohmann::json::parse(encoded->buffer);
+    ASSERT_FALSE(wire.contains("cause"));
+    ASSERT_FALSE(wire.contains("detail"));
+}
+
+TEST(JsonEncoder_decode_reads_aerials_message_as_detail) {
+    auto encoder = create_encoder();
+    const std::string wire = R"JSON({
+        "type": "messageAck", "id": 1, "requestId": 4, "dAppIdentifier": 1,
+        "responseCode": "negative", "message": "control actions not implemented"})JSON";
+    auto decoded = encoder->decode(reinterpret_cast<const uint8_t*>(wire.data()), wire.size());
+    ASSERT_TRUE(decoded.has_value());
+    auto& ack = std::get<MessageAck>(decoded->choice);
+    ASSERT_TRUE(ack.detail.has_value());
+    ASSERT_STREQ(ack.detail->c_str(), "control actions not implemented");
+    ASSERT_FALSE(ack.cause.has_value());
+}
+
+TEST(JsonEncoder_decode_prefers_detail_over_message_and_reads_unknown_cause) {
+    auto encoder = create_encoder();
+    const std::string wire = R"JSON({
+        "type": "setupResponse", "id": 1, "requestId": 7, "responseCode": "negative",
+        "ranIdentifier": "ran", "cause": "someFutureCause",
+        "detail": "the new text", "message": "the old text"})JSON";
+    auto decoded = encoder->decode(reinterpret_cast<const uint8_t*>(wire.data()), wire.size());
+    ASSERT_TRUE(decoded.has_value());
+    auto& resp = std::get<SetupResponse>(decoded->choice);
+    ASSERT_TRUE(resp.response_code == ResponseCode::NEGATIVE);
+    // A cause this version does not know is still a refusal with a cause.
+    ASSERT_TRUE(resp.cause.has_value());
+    ASSERT_TRUE(*resp.cause == Cause::UNSPECIFIED);
+    ASSERT_STREQ(resp.detail->c_str(), "the new text");
+}
+
 TEST(JsonEncoder_decode_setup_response_with_stream_descriptor_array) {
     // The shape an Aerial agent sends: ranFunctionData is an array of stream
     // descriptors. The dApp must still get its id.

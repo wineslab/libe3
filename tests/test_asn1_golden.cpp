@@ -150,6 +150,47 @@ std::vector<Golden> goldens() {
     ack.response_code = ResponseCode::NEGATIVE;
     out.push_back({"MessageAck", make(PduType::MESSAGE_ACK, ack), "4029081861684accc3cd15502980"});
 
+    // The reason a RAN gives with a refusal. cause and detail are the first
+    // extension additions of all three responses.
+    SetupResponse setup_refused;
+    setup_refused.request_id = kMessageId;
+    setup_refused.response_code = ResponseCode::NEGATIVE;
+    setup_refused.ran_identifier = "vector-ran";
+    setup_refused.cause = Cause::UNSUPPORTED_PROTOCOL_VERSION;
+    setup_refused.detail = "unsupported version";
+    out.push_back({"SetupResponseRefused", make(PduType::SETUP_RESPONSE, setup_refused), "4029081861684accc3cd150c002992766563746f722d72616e03800120150013756e737570706f727465642076657273696f6e"});
+
+    SubscriptionResponse subscription_refused;
+    subscription_refused.request_id = kMessageId;
+    subscription_refused.dapp_identifier = 7;
+    subscription_refused.response_code = ResponseCode::NEGATIVE;
+    subscription_refused.cause = Cause::UNSUPPORTED_IDENTIFIER;
+    subscription_refused.detail = "unknown telemetry identifier 7";
+    out.push_back({"SubscriptionResponseRefused",
+                   make(PduType::SUBSCRIPTION_RESPONSE, subscription_refused), "4029081861684accc3cd15240029000683c0013020001e756e6b6e6f776e2074656c656d65747279206964656e7469666965722037"});
+
+    // A granted subscription, with the two extension additions that follow
+    // cause and detail: their place in the extension bitmap is what the
+    // grammar order fixes.
+    SubscriptionResponse subscription_granted;
+    subscription_granted.request_id = kMessageId;
+    subscription_granted.dapp_identifier = 7;
+    subscription_granted.response_code = ResponseCode::POSITIVE;
+    subscription_granted.subscription_id = 1;
+    subscription_granted.telemetry_identifier_list = std::vector<uint32_t>{1, 2};
+    subscription_granted.control_identifier_list = std::vector<uint32_t>{};
+    subscription_granted.ran_function_identifier = 1;
+    subscription_granted.periodicity = 100;
+    out.push_back({"SubscriptionResponseGranted",
+                   make(PduType::SUBSCRIPTION_RESPONSE, subscription_granted), "4029081861684accc3cd15278029000600000000020000000100000660020000020064"});
+
+    MessageAck ack_refused;
+    ack_refused.request_id = kMessageId;
+    ack_refused.response_code = ResponseCode::NEGATIVE;
+    ack_refused.cause = Cause::NOT_FOUND;
+    ack_refused.detail = "no subscription to this RAN function";
+    out.push_back({"MessageAckRefused", make(PduType::MESSAGE_ACK, ack_refused), "4029081861684accc3cd15542981c001402600246e6f20737562736372697074696f6e20746f20746869732052414e2066756e6374696f6e"});
+
     return out;
 }
 
@@ -226,6 +267,48 @@ TEST(Asn1Golden_libe3_0_1_3_pdusAreRefused) {
         }
     }
     ASSERT_STREQ(accepted, "");
+}
+
+TEST(Asn1Golden_detailIsCutAtACharacterBoundary) {
+    auto encoder = create_encoder(EncodingFormat::ASN1);
+    ASSERT_TRUE(encoder != nullptr);
+
+    // 511 bytes, then a two-byte character that would end at byte 513.
+    MessageAck ack;
+    ack.request_id = kMessageId;
+    ack.response_code = ResponseCode::NEGATIVE;
+    ack.detail = std::string(511, 'a') + "\xC3\xA9" + "tail";
+
+    auto encoded = encoder->encode(make(PduType::MESSAGE_ACK, ack));
+    ASSERT_TRUE(encoded.has_value());
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+    const auto& got = std::get<MessageAck>(decoded->choice);
+    ASSERT_TRUE(got.detail.has_value());
+    // The text is shortened to 511 bytes and not left as half a character.
+    ASSERT_EQ(got.detail->size(), 511u);
+    ASSERT_STREQ(*got.detail, std::string(511, 'a'));
+}
+
+TEST(Asn1Golden_detailThatIsNotUtf8IsDroppedOnDecode) {
+    auto encoder = create_encoder(EncodingFormat::ASN1);
+    ASSERT_TRUE(encoder != nullptr);
+
+    MessageAck ack;
+    ack.request_id = kMessageId;
+    ack.response_code = ResponseCode::NEGATIVE;
+    ack.cause = Cause::INVALID_REQUEST;
+    ack.detail = std::string("bad \xFF\xFE bytes");
+
+    auto encoded = encoder->encode(make(PduType::MESSAGE_ACK, ack));
+    ASSERT_TRUE(encoded.has_value());
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+    const auto& got = std::get<MessageAck>(decoded->choice);
+    // The refusal and its cause survive; the text is not passed on.
+    ASSERT_TRUE(got.response_code == ResponseCode::NEGATIVE);
+    ASSERT_TRUE(got.cause.has_value());
+    ASSERT_FALSE(got.detail.has_value());
 }
 
 int main() {

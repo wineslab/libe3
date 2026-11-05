@@ -29,6 +29,7 @@ extern "C" {
 #include "E3-Timestamp.h"
 }
 
+#include <algorithm>
 #include <cstring>
 
 namespace libe3 {
@@ -70,6 +71,65 @@ std::optional<std::vector<uint32_t>> get_id_list(const SeqPtr& src) {
         ids.push_back(static_cast<uint32_t>(*src->list.array[i]));
     }
     return ids;
+}
+
+// True when `text` is well-formed UTF-8: shortest forms only, no surrogates,
+// nothing past U+10FFFF. E3-Text is UTF-8 carried as an OCTET STRING, so the
+// grammar does not check it.
+bool is_utf8(const char* text, size_t size) {
+    const auto* p = reinterpret_cast<const unsigned char*>(text);
+    size_t i = 0;
+    while (i < size) {
+        const unsigned char c = p[i];
+        size_t len = 0;
+        uint32_t cp = 0;
+        if (c < 0x80) { i++; continue; }
+        if (c >= 0xC2 && c <= 0xDF) { len = 2; cp = c & 0x1Fu; }
+        else if (c >= 0xE0 && c <= 0xEF) { len = 3; cp = c & 0x0Fu; }
+        else if (c >= 0xF0 && c <= 0xF4) { len = 4; cp = c & 0x07u; }
+        else return false;
+        if (i + len > size) return false;
+        for (size_t k = 1; k < len; k++) {
+            if ((p[i + k] & 0xC0u) != 0x80u) return false;
+            cp = (cp << 6) | (p[i + k] & 0x3Fu);
+        }
+        if ((len == 3 && cp < 0x800) || (len == 4 && (cp < 0x10000 || cp > 0x10FFFF))
+            || (cp >= 0xD800 && cp <= 0xDFFF)) return false;
+        i += len;
+    }
+    return true;
+}
+
+// `cause` and `detail` are the same two optional members on E3-SetupResponse,
+// E3-SubscriptionResponse and E3-MessageAck, hence the template.
+template <typename Resp>
+void set_reason(Resp* out, const std::optional<Cause>& cause, const std::optional<std::string>& detail) {
+    if (cause) {
+        out->cause = static_cast<decltype(out->cause)>(calloc(1, sizeof(*out->cause)));
+        *out->cause = static_cast<long>(*cause);
+    }
+    if (detail && !detail->empty()) {
+        // The bound is on bytes. Cut at a character boundary, so a long text
+        // is shortened and not turned into invalid UTF-8.
+        size_t size = std::min(detail->size(), MAX_DETAIL_SIZE);
+        while (size > 0 && size < detail->size()
+               && (static_cast<unsigned char>((*detail)[size]) & 0xC0u) == 0x80u) {
+            size--;
+        }
+        out->detail = static_cast<decltype(out->detail)>(calloc(1, sizeof(*out->detail)));
+        OCTET_STRING_fromBuf(out->detail, detail->data(), static_cast<int>(size));
+    }
+}
+
+template <typename Resp>
+void get_reason(const Resp* in, std::optional<Cause>& cause, std::optional<std::string>& detail) {
+    // An unknown extension value reads as "unspecified": still a refusal.
+    if (in->cause) cause = cause_from_value(static_cast<long>(*in->cause));
+    // A text that is not UTF-8 is dropped, not passed on to a log or a JSON writer.
+    if (in->detail && in->detail->buf && in->detail->size > 0
+        && is_utf8(reinterpret_cast<const char*>(in->detail->buf), in->detail->size)) {
+        detail = std::string(reinterpret_cast<const char*>(in->detail->buf), in->detail->size);
+    }
 }
 } // anonymous namespace
 
@@ -287,6 +347,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                     ASN_SEQUENCE_ADD(&asn1_pdu->msg.choice.setupResponse->ranFunctionList->list, ran_func);
                 }
             }
+            set_reason(asn1_pdu->msg.choice.setupResponse, resp->cause, resp->detail);
             break;
         }
         
@@ -383,6 +444,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
                     static_cast<long*>(malloc(sizeof(long)));
                 *asn1_pdu->msg.choice.subscriptionResponse->periodicity = resp->periodicity.value();
             }
+            set_reason(asn1_pdu->msg.choice.subscriptionResponse, resp->cause, resp->detail);
             break;
         }
         
@@ -488,6 +550,7 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             asn1_pdu->msg.choice.messageAck->requestId = ack->request_id;
             asn1_pdu->msg.choice.messageAck->responseCode = 
                 (ack->response_code == ResponseCode::POSITIVE) ? 0 : 1;
+            set_reason(asn1_pdu->msg.choice.messageAck, ack->cause, ack->detail);
             break;
         }
         
@@ -611,6 +674,7 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
                     resp.ran_function_list.push_back(func);
                 }
             }
+            get_reason(asn1_pdu->msg.choice.setupResponse, resp.cause, resp.detail);
             
             pdu.choice = resp;
             break;
@@ -686,6 +750,7 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
                 resp.periodicity = static_cast<uint32_t>(
                     *asn1_pdu->msg.choice.subscriptionResponse->periodicity);
             }
+            get_reason(asn1_pdu->msg.choice.subscriptionResponse, resp.cause, resp.detail);
             
             pdu.choice = resp;
             break;
@@ -761,6 +826,7 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             ack.request_id = static_cast<uint32_t>(asn1_pdu->msg.choice.messageAck->requestId);
             ack.response_code = (asn1_pdu->msg.choice.messageAck->responseCode == 0)
                 ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
+            get_reason(asn1_pdu->msg.choice.messageAck, ack.cause, ack.detail);
             
             pdu.choice = ack;
             break;

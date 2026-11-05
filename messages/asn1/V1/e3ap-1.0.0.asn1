@@ -18,7 +18,9 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         e3apProtocolVersion  E3-Version OPTIONAL,
         dAppIdentifier       E3-DAppID OPTIONAL,
         ranFunctionList      SEQUENCE (SIZE (0..64)) OF E3-RanFunctionDefinition OPTIONAL,
-        ...
+        ...,
+        cause                E3-Cause OPTIONAL,
+        detail               E3-Text OPTIONAL
     }
 
     E3-SubscriptionRequest ::= SEQUENCE {
@@ -45,6 +47,8 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         telemetryIdentifierList SEQUENCE (SIZE (0..256)) OF INTEGER (1..65535) OPTIONAL,
         controlIdentifierList   SEQUENCE (SIZE (0..256)) OF INTEGER (1..65535) OPTIONAL,
         ...,
+        cause                   E3-Cause OPTIONAL,
+        detail                  E3-Text OPTIONAL,
         ranFunctionIdentifier   INTEGER (1..65535) OPTIONAL,
         periodicity             INTEGER (0..60000000) OPTIONAL
     }
@@ -108,7 +112,9 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     E3-MessageAck ::= SEQUENCE {
         requestId            E3-MessageID,
         responseCode         E3-ResponseCode,
-        ...
+        ...,
+        cause                E3-Cause OPTIONAL,
+        detail               E3-Text OPTIONAL
     }
 
     -- Correlation identifier for one detection-to-mitigation procedure, assigned
@@ -131,6 +137,22 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     -- response-code switch in the encoders into a partial function. Adding a
     -- response code is a wire change we are willing to pay for explicitly.
     E3-ResponseCode ::= ENUMERATED { positive(0), negative(1) }
+
+    -- Why a RAN refused a request. Sent with a negative response next to a
+    -- free-text detail. The names, the values and the text bound are OCUDU's,
+    -- so a refusal reads the same on every RAN; the enumeration is extensible
+    -- as it is there, and a receiver reads a value it does not know as
+    -- unspecified. A negative response is still negative without either field.
+    E3-Cause ::= ENUMERATED {
+        unspecified(0), protocolError(1), setupRequired(2), setupAlreadyComplete(3),
+        unsupportedProtocolVersion(4), unsupportedRanFunction(5), unsupportedIdentifier(6),
+        invalidRequest(7), notFound(8), duplicate(9), resourceExhausted(10),
+        authorizationRejected(11), payloadTooLarge(12), transportOverrun(13),
+        shuttingDown(14), ...
+    }
+
+    -- UTF-8 text of up to 512 bytes, carried as an OCTET STRING as E3-Name is.
+    E3-Text ::= OCTET STRING (SIZE (0..512))
 
     -- Nanoseconds since the Unix epoch on the realtime (UTC) clock. Never
     -- subtract it from a monotonic stamp.
