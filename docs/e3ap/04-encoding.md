@@ -37,7 +37,7 @@ them as `bytes`.
 ### The rules that decide almost every byte
 
 1. **Alignment.** In aligned PER a value that needs whole octets first skips to the next octet boundary. The skipped bits are zero. Small fields (extension bits, presence bits, choice indices, short length codes) are not aligned. They are packed from the most significant bit.
-2. **Extension bit.** Every `SEQUENCE` and the `CHOICE` of `E3-PDU` has an extension marker. An encoder writes the extension bit as 0. Each marker costs one bit.
+2. **Extension bit.** Every `SEQUENCE` and the `CHOICE` of `E3-PDU` has an extension marker. An encoder writes the extension bit as 0, unless the message carries an extension addition. Each marker costs one bit.
 3. **Presence bits.** Each `OPTIONAL` field costs one bit. The bits come before the first field, in the order of the grammar. A cleared bit means that the field is absent and takes no more space.
 
 ### Rules for each construct
@@ -134,10 +134,14 @@ message by the size of its elements.
 
 ### A receiver that sees extension additions
 
-A decoder shall ignore an extension addition that it does not know. Two fields of
-`E3-SubscriptionResponse` are extension additions: `ranFunctionIdentifier` and
-`periodicity`. A decoder built before them skips both. A change of a constraint
-is not an extension addition. It changes the bytes.
+A decoder shall ignore an extension addition that it does not know. `cause` and
+`detail` are the first extension additions of `E3-SetupResponse`,
+`E3-SubscriptionResponse` and `E3-MessageAck`, in that order. In
+`E3-SubscriptionResponse` `ranFunctionIdentifier` and `periodicity` follow them. APER
+sends one presence bit for each extension addition of the grammar, so the order is
+part of the encoding: a decoder that has the additions in another order reads one
+field as another. A change of a constraint is not an extension addition either. It
+changes the bytes.
 
 ## JSON
 
@@ -152,6 +156,8 @@ Table: Rules of the JSON encoding
 | `type` | the name of the message in camel case: `setupRequest`, `setupResponse`, `subscriptionRequest`, `subscriptionDelete`, `subscriptionResponse`, `indicationMessage`, `dAppControlAction`, `dAppReport`, `xAppControlAction`, `releaseMessage`, `messageAck` |
 | Keys | the ASN.1 field names, for example `dAppIdentifier`, `ranFunctionIdentifier`, `telemetryIdentifierList`, `subscriptionTime`, `periodicity`, `subscriptionId`, `requestId`, `sequenceId` |
 | `responseCode` | the string "positive" or the string "negative". An unknown string means "negative" |
+| `cause` | the name of the `E3-Cause` value in camel case, for example `unsupportedIdentifier`. A name that the decoder does not know reads as `unspecified`. A decoder reads it from a SETUP RESPONSE, SUBSCRIPTION RESPONSE or MESSAGE ACK message |
+| `detail` | the text, as a JSON string. A decoder also reads the key `message` as `detail`, when `detail` is not there |
 | `timestamp` | written on every message. The value 0 means that there is no timestamp |
 | Payload fields | a JSON object or array. `ranFunctionData`, `actionData`, `reportData` and `xAppControlData` shall be an object or an array. An empty payload does not encode. `protocolData` may be any valid JSON value |
 | Wrapper | a message with a nested `data` wrapper is refused |
@@ -193,6 +199,7 @@ Table: Rules of the Protobuf encoding
 | Zero values | `timestamp` and `sequence_id` of a dApp CONTROL ACTION message use the value 0 for "absent" |
 | Granted lists | a wrapper message `IdentifierList` makes "not reported" differ from "none granted" |
 | Response code | an enumeration with the values "positive" (0) and "negative" (1). A value that is not "negative" reads as "positive" |
+| Cause | an enumeration `Cause` with the values of `E3-Cause`, and an `optional string detail`, on the three messages that carry them. A value that is not in the enumeration reads as unspecified |
 | Unknown fields | a decoder ignores them |
 | Empty envelope | an envelope with no `oneof` case does not decode |
 
@@ -271,7 +278,9 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         e3apProtocolVersion  E3-Version OPTIONAL,
         dAppIdentifier       E3-DAppID OPTIONAL,
         ranFunctionList      SEQUENCE (SIZE (0..64)) OF E3-RanFunctionDefinition OPTIONAL,
-        ...
+        ...,
+        cause                E3-Cause OPTIONAL,
+        detail               E3-Text OPTIONAL
     }
 
     E3-SubscriptionRequest ::= SEQUENCE {
@@ -299,7 +308,9 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         telemetryIdentifierList SEQUENCE (SIZE (0..256)) OF INTEGER (1..65535) OPTIONAL,
         controlIdentifierList   SEQUENCE (SIZE (0..256)) OF INTEGER (1..65535) OPTIONAL,
         ...,
-        -- Extension additions: decoders from before them skip both.
+        -- Extension additions, in this order.
+        cause                   E3-Cause OPTIONAL,
+        detail                  E3-Text OPTIONAL,
         ranFunctionIdentifier   INTEGER (1..65535) OPTIONAL,
         -- Granted interval, same unit and range as the request.
         periodicity             INTEGER (0..60000000) OPTIONAL
@@ -364,7 +375,9 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     E3-MessageAck ::= SEQUENCE {
         requestId            E3-MessageID,
         responseCode         E3-ResponseCode,
-        ...
+        ...,
+        cause                E3-Cause OPTIONAL,
+        detail               E3-Text OPTIONAL
     }
 
     -- Correlation identifier for one detection-to-mitigation procedure, assigned
@@ -387,6 +400,22 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     -- response-code switch in the encoders into a partial function. Adding a
     -- response code is a wire change we are willing to pay for explicitly.
     E3-ResponseCode ::= ENUMERATED { positive(0), negative(1) }
+
+    -- Why a RAN refused a request. Sent with a negative response next to a
+    -- free-text detail. The names, the values and the text bound are OCUDU's,
+    -- so a refusal reads the same on every RAN; the enumeration is extensible
+    -- as it is there, and a receiver reads a value it does not know as
+    -- unspecified. A negative response is still negative without either field.
+    E3-Cause ::= ENUMERATED {
+        unspecified(0), protocolError(1), setupRequired(2), setupAlreadyComplete(3),
+        unsupportedProtocolVersion(4), unsupportedRanFunction(5), unsupportedIdentifier(6),
+        invalidRequest(7), notFound(8), duplicate(9), resourceExhausted(10),
+        authorizationRejected(11), payloadTooLarge(12), transportOverrun(13),
+        shuttingDown(14), ...
+    }
+
+    -- UTF-8 text of up to 512 bytes, carried as an OCTET STRING as E3-Name is.
+    E3-Text ::= OCTET STRING (SIZE (0..512))
 
     -- Nanoseconds since the Unix epoch on the realtime (UTC) clock. Never
     -- subtract it from a monotonic stamp.

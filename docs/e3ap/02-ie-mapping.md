@@ -39,10 +39,36 @@ Table: Types shared by the messages
 | E3-Name | OCTET STRING | 1 to 64 octets | The name of a dApp, a vendor or a RAN node. |
 | E3-Version | OCTET STRING | 1 to 32 octets | A version string. |
 | E3-ResponseCode | ENUMERATED | "positive" (0), "negative" (1) | The result of a request. The type has no extension marker. |
+| E3-Cause | ENUMERATED | see below | Why the E3 Agent refused a request. It is sent with a negative response code. The type has an extension marker. |
+| E3-Text | OCTET STRING | 0 to 512 octets | Text in UTF-8 for a person who reads a log. A receiver shall drop a text that is not UTF-8. |
 | E3-Timestamp | INTEGER | not constrained | Nanoseconds since the Unix epoch on the realtime (UTC) clock. |
 | RAN function identifier | INTEGER | 1 to 65535 | The number of a RAN function. It is the same number in every message that names the function. |
 | Telemetry identifier, control identifier | INTEGER | 1 to 65535 | The number of one telemetry stream or one control action of a RAN function. |
 | Subscription identifier | INTEGER | 1 to 65535 | The number that the E3 Agent assigns to a subscription. |
+
+Table: Values of E3-Cause
+
+| Value | Name | The E3 Agent uses it when |
+|---|---|---|
+| 0 | unspecified | no other cause applies |
+| 1 | protocolError | the message does not decode, or is not valid in this place |
+| 2 | setupRequired | the dApp has not completed the Setup procedure |
+| 3 | setupAlreadyComplete | the dApp sends a second SETUP REQUEST message on one association |
+| 4 | unsupportedProtocolVersion | it does not serve the version of E3AP that the dApp names |
+| 5 | unsupportedRanFunction | it does not serve the RAN function |
+| 6 | unsupportedIdentifier | a telemetry identifier or control identifier is not one that the RAN function offers |
+| 7 | invalidRequest | the message is well formed and its content is not acceptable, for example a subscription that names no identifier |
+| 8 | notFound | the subscription, or the subscription that a control needs, does not exist |
+| 9 | duplicate | the request repeats one that is active |
+| 10 | resourceExhausted | it has no free dApp identifier, subscription identifier or other resource |
+| 11 | authorizationRejected | the dApp is not allowed to do it |
+| 12 | payloadTooLarge | the payload is larger than it accepts |
+| 13 | transportOverrun | the link cannot keep up |
+| 14 | shuttingDown | it is stopping |
+
+A receiver that gets a value that it does not know shall read it as unspecified and
+still treat the response as a refusal. A sender that has no cause to give sends none: a
+negative response with no `cause` and no `detail` is valid.
 
 A message identifier and a sequence identifier have the same range on purpose.
 Both are counters of the component that creates them. A value of one can then
@@ -87,6 +113,8 @@ Table: E3-SetupResponse
 | `e3apProtocolVersion` | O | | E3-Version | The version of E3AP that the E3 Agent speaks. |
 | `dAppIdentifier` | O | | E3-DAppID | The identifier that the E3 Agent assigns to the dApp. It is present when the response code is "positive". |
 | `ranFunctionList` | O | 0 to 64 | SEQUENCE OF E3-RanFunctionDefinition | The RAN functions that the dApp can use. It is present when the response code is "positive". |
+| `cause` | O | | E3-Cause | Why the E3 Agent refused the dApp. It is present only when the response code is "negative". This field is an extension addition. |
+| `detail` | O | | E3-Text | Text for the cause. This field is an extension addition. |
 
 ## E3-RanFunctionDefinition
 
@@ -130,6 +158,8 @@ Table: E3-SubscriptionResponse
 | `subscriptionId` | O | | INTEGER (1 to 65535) | The identifier that the E3 Agent assigns to the subscription. It is present in the response to a request that succeeds. |
 | `telemetryIdentifierList` | O | 0 to 256 | SEQUENCE OF INTEGER (1 to 65535) | The telemetry streams that the E3 Agent grants. A missing list means that the E3 Agent does not report the grant. An empty list means that it grants none. |
 | `controlIdentifierList` | O | 0 to 256 | SEQUENCE OF INTEGER (1 to 65535) | The control actions that the E3 Agent grants. The same rule as for the telemetry list applies. |
+| `cause` | O | | E3-Cause | Why the E3 Agent refused the request. It is present only when the response code is "negative". This field is an extension addition. |
+| `detail` | O | | E3-Text | Text for the cause. This field is an extension addition. |
 | `ranFunctionIdentifier` | O | | INTEGER (1 to 65535) | The RAN function that the grant is for. This field is an extension addition. |
 | `periodicity` | O | 0 to 60000000 | INTEGER | The interval that the E3 Agent grants, in microseconds. Same unit and range as in the request. This field is an extension addition. |
 
@@ -208,7 +238,7 @@ Table: E3-ReleaseMessage
 
 ## E3-MessageAck
 
-The E3 Agent, or the service model behind it, sends it to say what happened to a dApp control action. The message has no dApp identifier. A dApp shall ignore a MESSAGE ACK message whose `requestId` is not the identifier of a message that it sent.
+The E3 Agent, or the service model behind it, sends it to say what happened to a dApp control action. The E3 Agent sends it with "negative" when it cannot hand the control to a service model. The message has no dApp identifier. A dApp shall ignore a MESSAGE ACK message whose `requestId` is not the identifier of a message that it sent.
 
 Table: E3-MessageAck
 
@@ -216,6 +246,8 @@ Table: E3-MessageAck
 |---|---|---|---|---|
 | `requestId` | M | | E3-MessageID | The `id` of the E3-PDU of the dApp control action. |
 | `responseCode` | M | | E3-ResponseCode | The result. |
+| `cause` | O | | E3-Cause | Why the control was refused. It is present only when the response code is "negative". This field is an extension addition. |
+| `detail` | O | | E3-Text | Text for the cause. This field is an extension addition. |
 
 ## Presence notation
 

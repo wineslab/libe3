@@ -78,7 +78,7 @@ Table: What a receiver checks
 | Decoding | A message that does not decode is an abstract syntax error. See below |
 | dApp identifier | The E3 Agent shall refuse a SUBSCRIPTION REQUEST message from a dApp that is not registered. The dApp shall ignore a message for another dApp |
 | Subscription key | A dApp has at most one subscription for a RAN function |
-| RAN function and identifiers | An E3 Agent should refuse a subscription to a RAN function that it does not list, and to telemetry or control identifiers that the RAN function does not offer |
+| RAN function and identifiers | An E3 Agent shall refuse a subscription to a RAN function that it does not list, a subscription that names no identifier, and a subscription to telemetry or control identifiers that the RAN function does not offer. It shall refuse a dApp control action for a RAN function that it does not list and for a control identifier that the RAN function does not offer. The response carries the cause. See the Subscription and dApp Control procedures |
 | Ranges | APER refuses a value outside its range at the encoder and the decoder. JSON and Protobuf do not. A sender shall keep every value in range |
 | Payload content | E3AP does not check the payload. The service model does |
 
@@ -110,10 +110,17 @@ fail because of it.
 in APER and JSON. In Protobuf a value other than "negative" reads as "positive".
 New codes need a new version of E3AP. See [README.md](../e3ap/README.md).
 
+### Unknown cause
+
+`E3-Cause` has an extension marker. A value that the receiver does not know reads as
+"unspecified". The response stays a refusal.
+
 ### Unknown RAN function or stopped service model
 
-A dApp CONTROL ACTION message for an unknown RAN function, or for a RAN function
-whose service model does not run, is dropped. The E3 Agent sends no response.
+A dApp CONTROL ACTION message for an unknown RAN function, for a control identifier
+that the RAN function does not offer, or for a RAN function whose service model does
+not run is answered with a MESSAGE ACK message with `responseCode` "negative" and
+the cause. It does not reach the service model.
 
 ### Queues that are full
 

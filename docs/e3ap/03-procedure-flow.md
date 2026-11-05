@@ -81,7 +81,10 @@ The E3 Agent shall answer with `responseCode` "negative" when it cannot register
 dApp, for example when it has no free dApp identifier. A negative response has no
 `dAppIdentifier`. The E3 Agent shall also answer with a negative response when the
 message does not decode or is not a SETUP REQUEST message. The response then has no
-`ranFunctionList`.
+`ranFunctionList`. The E3 Agent should give the reason in `cause` and `detail`:
+resourceExhausted when it has no free dApp identifier, protocolError when the message
+is not a SETUP REQUEST message, and unsupportedProtocolVersion when it refuses the
+version string.
 
 A dApp that receives a negative response has no session. It shall not send other
 messages.
@@ -125,11 +128,23 @@ each event. A missing interval means that the service model sets the rate.
 
 ### Unsuccessful operation
 
-The E3 Agent shall answer "negative" when the dApp is not registered or when it has no
-free subscription identifier. The E3 Agent should answer "negative" when the RAN
-function identifier is not in its list, and when an identifier is not offered by
-the RAN function. Some implementations do not make these two checks. They answer
-"positive" and grant what the dApp asked for.
+The E3 Agent shall answer "negative" and shall not create a subscription when one of
+these holds. It gives the cause in `cause` and a text in `detail`.
+
+Table: Reasons to refuse a SUBSCRIPTION REQUEST message
+
+| The E3 Agent finds that | `cause` |
+|---|---|
+| the dApp has not completed the Setup procedure | setupRequired |
+| the RAN function identifier is not in its RAN function list | unsupportedRanFunction |
+| the telemetry list and the control list are both empty | invalidRequest |
+| a telemetry identifier or a control identifier is not offered by the RAN function | unsupportedIdentifier |
+| it has no free subscription identifier | resourceExhausted |
+
+The check of an identifier is against the lists that the RAN function advertises in
+the SETUP RESPONSE message. A RAN function that has controls accepts a request that
+names one of them. The E3 Agent shall not start the service model for a request that
+it refuses.
 
 ### Abnormal conditions
 
@@ -158,7 +173,8 @@ identifier is free again.
 ### Unsuccessful operation
 
 The response has `responseCode` "negative" when the subscription identifier is
-unknown, belongs to another dApp, or has already ended.
+unknown, belongs to another dApp, or has already ended. The cause is notFound, or
+setupRequired when the dApp has not completed the Setup procedure.
 
 ### Abnormal conditions
 
@@ -201,7 +217,7 @@ The dApp Control procedure lets a dApp ask a RAN function to do something.
 
 1. The dApp sends a dApp CONTROL ACTION message on the inbound channel. It names the RAN function and the control identifier. It carries the payload in `actionData`.
 2. If the dApp acts on an xApp CONTROL ACTION message, it puts that message's `sequenceId` in the new message. If the dApp decided on its own, it leaves `sequenceId` out.
-3. The E3 Agent finds the service model of the RAN function. If the service model runs, the E3 Agent gives it the payload and the message identifier.
+3. The E3 Agent finds the service model of the RAN function and checks the control identifier against the control identifiers that the RAN function advertises. If the service model runs, the E3 Agent gives it the payload and the message identifier.
 4. The service model applies the action. It may send a MESSAGE ACK message.
 
 ### Successful operation
@@ -214,10 +230,24 @@ holds the result.
 
 The service model may send a MESSAGE ACK message with `responseCode` "negative".
 
+The E3 Agent shall answer with a MESSAGE ACK message with `responseCode` "negative"
+when it cannot hand the control to a service model. `requestId` holds the message
+identifier of the dApp CONTROL ACTION message.
+
+Table: Reasons to refuse a dApp CONTROL ACTION message
+
+| The E3 Agent finds that | `cause` |
+|---|---|
+| the dApp has not completed the Setup procedure | setupRequired |
+| the RAN function identifier is not in its RAN function list | unsupportedRanFunction |
+| the control identifier is not offered by the RAN function | unsupportedIdentifier |
+| the service model does not run, because no dApp has a subscription to the RAN function | notFound |
+
+A message that the E3 Agent refuses does not reach the service model.
+
 ### Abnormal conditions
 
-* The RAN function is not known, or its service model does not run. The E3 Agent drops the message. It sends no response.
-* The E3 Agent does not check the control identifier or the dApp identifier. The service model does.
+* The service model takes the control and fails to apply it. The E3 Agent sends no response of its own. The service model answers, or does not.
 * A MESSAGE ACK message has no dApp identifier. On a link that broadcasts, every dApp receives it. A dApp shall ignore a MESSAGE ACK message whose `requestId` is not the identifier of a message that it sent.
 
 ## dApp Report
