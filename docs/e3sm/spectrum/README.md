@@ -33,6 +33,9 @@ The document does not define the E3 Application Protocol. It does not define the
 E2 service model that carries dApp traffic to an xApp. It does not define how a
 scheduler enforces a PRB block internally.
 
+This document is generated from the codebase and protocol definitions for the libe3
+implementation in https://github.com/wineslab/libe3.
+
 ## References
 
 ### Normative references
@@ -43,12 +46,12 @@ applies. For non-specific references, the latest version of the referenced docum
 applies.
 
 > NOTE: While any hyperlinks included in this clause were valid at the time of
-> publication, O-RAN cannot guarantee their long-term validity.
+> publication, their long-term validity cannot be guaranteed.
 
 The following referenced documents are necessary for the application of the present
 document.
 
-[1] E3AP specification: "E3 Application Protocol (E3AP)", see [the E3AP specification](../../e3ap/README.md).
+[1] O-RAN.XXX.TS.E3AP-R000-v00.01: "E3 Application Protocol (E3AP)", https://github.com/wineslab/libe3/tree/main/docs/e3ap.
 
 [2] ITU-T Recommendation X.680 (2002-07): "Information technology: Abstract Syntax Notation One (ASN.1): Specification of basic notation".
 

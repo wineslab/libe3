@@ -44,6 +44,9 @@ The present document does not define E3AP messages or procedures. They are defin
 [1]. It does not define how a RAN node computes the values that it reports. It does not
 define the transport between the dApp and the E3 Agent.
 
+This document is generated from the codebase and protocol definitions for the libe3
+implementation in https://github.com/wineslab/libe3.
+
 ## References
 
 ### Normative references
@@ -53,7 +56,7 @@ References are specific. Only the cited version applies.
 The following referenced documents are necessary for the application of the present
 document.
 
-[1] "[E3 Application Protocol (E3AP)](../../e3ap/README.md)", R000 v00.01.
+[1] O-RAN.XXX.TS.E3AP-R000-v00.01: "E3 Application Protocol (E3AP)", https://github.com/wineslab/libe3/tree/main/docs/e3ap.
 
 [2] ITU-T Recommendation X.680 (2002-07): "Information technology: Abstract Syntax Notation One (ASN.1): Specification of basic notation".
 

@@ -43,7 +43,7 @@ Table: Identifiers and their ranges
 | `dapp-id` | the dApp | `0..4294967295` | `1..65535` | |
 | `SubscribedE3RANFunction-ID` | an E3 RAN function a dApp has subscribed to | `0..4294967295` | `1..65535` | |
 | `sequence-id` | one detection-to-mitigation procedure | unbounded, optional | `1..4294967295` (`E3-SequenceID`) | **`E3-SequenceID` equals E2SM-DAPP `sequence-id`**: same value, assigned by the dApp, never reassigned. |
-| `node-type`, `node-plmn-id`, `node-nb-id`, `node-cu-du-id` | identity of the reporting node | see 02 | | the grammar defines no enumeration and no packing. See 02. |
+| `node-type`, `node-plmn-id`, `node-nb-id`, `node-cu-du-id` | identity of the reporting node | see [02](02-ie-mapping.md) | | the grammar defines no enumeration and no packing. See [02](02-ie-mapping.md). |
 
 **A sender should keep the E2SM-DAPP ids inside the E3 ranges.** E2SM-DAPP can carry
 `0` and values above `65535`. A RAN that relays a control over E3 cannot deliver them,

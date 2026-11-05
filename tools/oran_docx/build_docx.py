@@ -29,16 +29,14 @@ above a table becomes the table caption. An image on a line of its own,
 ![caption](figures/flow.png), becomes a figure with that caption. Fenced
 blocks become a box of monospaced lines.
 
+A link to a file of the same specification becomes its clause number
+("clause 8", "Annex A", or with an anchor "clause 8.2"); every other link
+becomes an absolute GitHub URL. The sentence "The index is README.md." is
+left out.
+
 The styles, headers, footers and cover come from template.docx, which
-make_template.py cuts from an O-RAN specification. The template names the
-working group of DEFAULT_GROUP on the cover and in the Foreword. A manifest
-names another one with "group", as E2SM-DAPP does:
-
-      "group": {"cover": ["O-RAN Work Group 3", "Near-Real-time RAN Intelligent Controller"],
-                "foreword": "WG3"}
-
-The page numbers of the
-table of contents come from a LibreOffice layout, so Word may move them by a
+make_template.py cuts from an O-RAN specification and gives the copyright of
+Northeastern University. The page numbers of the table of contents come from a LibreOffice layout, so Word may move them by a
 page: press F9 on the table of contents in Word to refresh them.
 """
 import argparse
@@ -54,12 +52,12 @@ import zipfile
 from xml.sax.saxutils import escape
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.dirname(os.path.dirname(HERE))
+# Links to files outside the specification point here, on the main branch.
+REPO_URL = "https://github.com/wineslab/libe3"
 TOC_MARK = "@@TOC@@"
 BODY_MARK = "@@BODY@@"
 TEMPLATE_NUMBER = "O-RAN.WG3.TS.E2SM-KPM-R005-v08.00"
-# The working group of the E3 specifications. X holds the place of its number
-# until the naming is agreed, as XXX does in the document numbers.
-DEFAULT_GROUP = {"cover": ["O-RAN Work Group X", "Real-Time Distributed Applications (dApps)"], "foreword": "WGX"}
 TABLE_WIDTH = 9631
 MONO = '<w:rFonts w:ascii="Courier New" w:hAnsi="Courier New" w:cs="Courier New"/>'
 CODE_BOX = (
@@ -119,9 +117,12 @@ def inline_runs(text, **base):
             out.append(run(unescape_md(m.group("ital")), **{**base, "italic": True}))
         else:
             label, url = m.group("ltext"), m.group("lurl")
-            out.append("".join(inline_runs(label, **base)))
-            if url.startswith("http"):
-                out.append(run(f" ({url})", **base))
+            if url.startswith("http") or LINKS is None:
+                out.append("".join(inline_runs(label, **base)))
+                if url.startswith("http"):
+                    out.append(run(f" ({url})", **base))
+            else:
+                out.append(LINKS.runs(label, url, base))
         pos = m.end()
     if pos < len(text):
         out.append(run(unescape_md(text[pos:]), **base))
@@ -137,6 +138,91 @@ def plain(text):
     t = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", text)
     t = re.sub(r"[`*]", "", t)
     return unescape_md(t)
+
+
+# ---------------------------------------------------------------------- links
+
+
+def slug(heading):
+    """The anchor that GitHub gives a heading."""
+    return re.sub(r"[^\w\- ]", "", plain(heading).strip().lower()).replace(" ", "-")
+
+
+class Links:
+    """Links of the Markdown edition, made into references that a reader of the Word edition can follow.
+
+    A link to a file of the specification becomes the clause that holds its target. The
+    clause numbers are known only when every part is rendered, so a link leaves a marker
+    in the text, and resolve() puts the number in. Any other link becomes a GitHub URL.
+    """
+
+    def __init__(self, folder, parts):
+        self.folder = os.path.abspath(folder)
+        self.files = {os.path.join(self.folder, p["file"]) for p in parts if "file" in p}
+        self.whole = {}    # file -> clause of the part that is the whole file
+        self.anchors = {}  # (file, anchor) -> clause
+        self.seen = {}     # (file, slug) -> times seen, for GitHub's -1, -2 suffixes
+        self.refs = []     # (file, anchor, url to fall back to)
+        self.current = None
+
+    def enter(self, part, clause):
+        self.current = os.path.join(self.folder, part["file"])
+        if part.get("section"):
+            self.add(self.current, slug(part["section"]), clause)
+        else:
+            self.whole[self.current] = clause
+
+    def add(self, path, anchor, clause):
+        n = self.seen.get((path, anchor), 0)
+        self.seen[(path, anchor)] = n + 1
+        self.anchors.setdefault((path, anchor if n == 0 else f"{anchor}-{n}"), clause)
+
+    def heading(self, text, ids, clause):
+        self.add(self.current, slug(text), clause)
+        for i in ids:
+            self.anchors.setdefault((self.current, i), clause)
+
+    def url(self, path, anchor):
+        rel = os.path.relpath(path, REPO_ROOT).replace(os.sep, "/")
+        if os.path.basename(path) == "README.md" and not anchor:
+            return f"{REPO_URL}/tree/main/{os.path.dirname(rel)}"
+        return f"{REPO_URL}/blob/main/{rel}" + (f"#{anchor}" if anchor else "")
+
+    def runs(self, label, url, base):
+        path, _, anchor = url.partition("#")
+        target = os.path.normpath(os.path.join(os.path.dirname(self.current), path)) if path else self.current
+        text = plain(label).strip()
+        # A label that only names the target: the path, the file name, its number
+        # ("06" for 06-discrepancies.md) or a clause number of the Markdown edition.
+        bare = (
+            text in (url, path, os.path.basename(path))
+            or (re.fullmatch(r"\d\d", text) and os.path.basename(path).startswith(text + "-"))
+            or re.fullmatch(r"(?i)(clause|section|annex)\s+[\w.]+", text)
+        )
+        if target in self.files:
+            self.refs.append((target, anchor, self.url(target, anchor)))
+            ref = f"@@REF{len(self.refs) - 1}@@"
+        else:
+            ref = self.url(target, anchor)
+        if bare:
+            return run(ref, **base)
+        return "".join(inline_runs(label, **base)) + run(f" ({ref})", **base)
+
+    def resolve(self, xml):
+        def number(m):
+            target, anchor, fallback = self.refs[int(m.group(1))]
+            clause = self.anchors.get((target, anchor))
+            if clause is None:
+                if anchor:
+                    print(f"note: no heading for #{anchor} in {os.path.relpath(target, REPO_ROOT)}", file=sys.stderr)
+                clause = self.whole.get(target)
+            if clause is None:
+                return fallback
+            return f"Annex {clause}" if clause[0].isalpha() and "." not in clause else f"clause {clause}"
+        return re.sub(r"@@REF(\d+)@@", number, xml)
+
+
+LINKS = None  # the Links of the specification being built
 
 
 # ------------------------------------------------------------- markdown blocks
@@ -160,8 +246,9 @@ def longest_word(text):
 
 
 # A line that holds only HTML anchors, such as <a id="x"></a>, is a link target
-# for the Markdown edition. Word has its own bookmarks, so the line is dropped.
+# for the Markdown edition. The line is dropped and its ids go to the next heading.
 ANCHOR = re.compile(r'^\s*(<a\s+(?:id|name)="[^"]*"\s*>\s*</a>\s*)+$')
+ANCHOR_ID = re.compile(r'(?:id|name)="([^"]*)"')
 # An image on a line of its own is a figure. Its alt text is the caption.
 IMAGE = re.compile(r'^\s*!\[(?P<alt>[^\]]*)\]\((?P<src>[^)\s]+)(?:\s+"[^"]*")?\)\s*$')
 
@@ -169,6 +256,7 @@ IMAGE = re.compile(r'^\s*!\[(?P<alt>[^\]]*)\]\((?P<src>[^)\s]+)(?:\s+"[^"]*")?\)
 def parse_blocks(lines):
     """Split Markdown lines into blocks: heading, para, list, table, code, quote."""
     blocks = []
+    ids = []  # anchor ids waiting for the next heading
     i = 0
     n = len(lines)
     while i < n:
@@ -182,6 +270,7 @@ def parse_blocks(lines):
             i += 1
             continue
         if ANCHOR.match(line):
+            ids += ANCHOR_ID.findall(line)
             i += 1
             continue
         m = IMAGE.match(line)
@@ -202,7 +291,8 @@ def parse_blocks(lines):
             continue
         m = re.match(r"^(#{1,6})\s+(.*?)\s*#*\s*$", line)
         if m:
-            blocks.append(("heading", len(m.group(1)), m.group(2)))
+            blocks.append(("heading", len(m.group(1)), m.group(2), ids))
+            ids = []
             i += 1
             continue
         if re.match(r"^\s*(-{3,}|\*{3,}|_{3,})\s*$", line):
@@ -477,6 +567,7 @@ def render_part(doc, part, base):
     top = clause.split(".")[0]
     if "file" not in part:
         return
+    LINKS.enter(part, clause)
     with open(os.path.join(base, part["file"]), encoding="utf8") as f:
         blocks = parse_blocks(f.read().split("\n"))
     blocks, top_level = select(blocks, part.get("section"))
@@ -494,11 +585,15 @@ def render_part(doc, part, base):
             number = f"{parent}.{counts[parent]}"
             path.append(number)
             doc.heading(depth + rel, number, text)
+            LINKS.heading(b[2], b[3], number)
         elif kind == "para":
             if b[1].startswith("Table:") and i + 1 < len(blocks) and blocks[i + 1][0] == "table":
                 caption = b[1][len("Table:"):].strip()
             else:
-                doc.para(inline_runs(b[1]))
+                # The Word edition has its own contents, so it needs no pointer to the index.
+                text = re.sub(r"\s*The index is \[README\.md\]\([^)]*\)\.", "", b[1]).strip()
+                if text:
+                    doc.para(inline_runs(text))
         elif kind == "list":
             doc.lst(b[1])
         elif kind == "table":
@@ -558,7 +653,6 @@ def toc_xml(doc, pages, extra):
 def set_cover(xml, number, cover):
     za = re.search(r"<w:p [^>]*>(?:(?!</w:p>).)*?w:val=\"ZA\".*?</w:p>", xml, re.S)
     p = za.group(0)
-    drawing = re.search(r"<w:r[ >](?:(?!</w:r>).)*?<w:drawing>.*?</w:drawing></w:r>", p, re.S).group(0)
     sep = p.index('w:fldCharType="separate"')
     head = p[: p.rfind("<w:r", 0, sep)]
     newp = (
@@ -566,7 +660,6 @@ def set_cover(xml, number, cover):
         + '<w:r><w:fldChar w:fldCharType="separate"/></w:r>'
         + run(number)
         + '<w:r><w:fldChar w:fldCharType="end"/></w:r>'
-        + drawing
         + "</w:p>"
     )
     xml = xml.replace(p, newp, 1)
@@ -576,33 +669,6 @@ def set_cover(xml, number, cover):
         p = m.group(0)
         ppr_end = p.index("</w:pPr>") + len("</w:pPr>")
         xml = xml.replace(p, p[:ppr_end] + (run(text) if text else "") + "</w:p>", 1)
-    return xml
-
-
-def set_group(xml, group):
-    """Name the working group on the cover (two lines) and in the Foreword."""
-    def text(p):
-        return "".join(re.findall(r"<w:t[^>]*>([^<]*)</w:t>", p))
-
-    def rewrite(p, runs):
-        ppr = re.search(r"<w:pPr>.*?</w:pPr>", p, re.S)
-        return re.match(r"<w:p[^>]*>", p).group(0) + (ppr.group(0) if ppr else "") + runs + "</w:p>"
-
-    foreword = f"This Technical Specification (TS) has been produced by {group['foreword']} of the O-RAN ALLIANCE."
-    found = []
-
-    def fix(m):
-        p = m.group(0)
-        if 'w:val="ZT"' in p and text(p).startswith("O-RAN Work Group"):
-            found.append("cover")
-            return rewrite(p, "<w:r><w:br/></w:r>".join(run(t) for t in group["cover"]))
-        if text(p).startswith("This Technical Specification (TS) has been produced by "):
-            found.append("foreword")
-            return rewrite(p, run(foreword))
-        return p
-
-    xml = re.sub(r"<w:p[ >](?:(?!</w:p>).)*</w:p>", fix, xml, flags=re.S)
-    assert sorted(found) == ["cover", "foreword"], "template cover or Foreword changed"
     return xml
 
 
@@ -670,11 +736,14 @@ def pages_from_pdf(docx_path, headings, extra):
 def build(folder, out, with_pages=True):
     with open(os.path.join(folder, "docx.json"), encoding="utf8") as f:
         man = json.load(f)
+    global LINKS
+    LINKS = Links(folder, man["parts"])
     doc = Doc()
     for part in man["parts"]:
         render_part(doc, part, folder)
     if man.get("history"):
         history_table(doc, man["history"])
+    doc.xml = [LINKS.resolve(x) for x in doc.xml]
 
     extra = [("Foreword", "_Toc223965221"), ("Modal verbs terminology", "_Toc223965222")]
     tpl = zipfile.ZipFile(os.path.join(HERE, "template.docx"))
@@ -687,8 +756,6 @@ def build(folder, out, with_pages=True):
                 if name == "word/document.xml":
                     x = data.decode("utf8")
                     x = set_cover(x, man["number"], man["cover"])
-                    if man.get("group"):
-                        x = set_group(x, man["group"])
                     x = x.replace(TOC_MARK, toc_xml(doc, pages, extra)).replace(BODY_MARK, "".join(doc.xml))
                     data = x.encode("utf8")
                 elif name == "word/_rels/document.xml.rels":
@@ -704,6 +771,8 @@ def build(folder, out, with_pages=True):
                     data = x.encode("utf8")
                 elif name in ("word/header1.xml", "word/header2.xml"):
                     data = data.decode("utf8").replace(TEMPLATE_NUMBER, man["number"]).encode("utf8")
+                elif name == "docProps/app.xml":
+                    data = re.sub(r"(<TitlesOfParts>.*?<vt:lpstr>).*?(</vt:lpstr>)", lambda m: m.group(1) + escape(man["number"]) + m.group(2), data.decode("utf8"), flags=re.S).encode("utf8")
                 elif name == "docProps/core.xml":
                     data = re.sub(r"<dc:title>.*?</dc:title>", f"<dc:title>{escape(man['number'])}</dc:title>", data.decode("utf8")).encode("utf8")
                 elif name == "docProps/custom.xml":

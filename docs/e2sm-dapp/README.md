@@ -26,6 +26,9 @@ The present document defines the RAN function definition, the information elemen
 the procedures of this service model. It also defines the APER encoding of the
 information elements and the handling of unknown and erroneous data.
 
+This document is generated from the codebase and protocol definitions for the libe3
+implementation in https://github.com/wineslab/libe3.
+
 ## References
 
 ### Normative references
@@ -37,7 +40,7 @@ applies. For a non-specific reference, the latest version applies.
 The following referenced documents are necessary for the application of the present
 document.
 
-1. O-RAN-WG3.TS.E2GAP: "O-RAN E2 General Aspects and Principles".
+1. O-RAN.WG3.TS.E2GAP: "O-RAN E2 General Aspects and Principles".
 2. O-RAN.WG3.TS.E2AP: "O-RAN E2 Application Protocol (E2AP)".
 3. O-RAN.WG3.TS.E2SM: "O-RAN E2 Service Model (E2SM)".
 4. ITU-T Recommendation X.680: "Information technology: Abstract Syntax Notation One (ASN.1): Specification of basic notation".
@@ -49,15 +52,15 @@ document.
 The following referenced documents are not necessary for the application of the present
 document, but they help the reader.
 
-1. The E3 Application Protocol (E3AP) specification, [../e3ap/README.md](../e3ap/README.md).
+1. O-RAN.XXX.TS.E3AP-R000-v00.01: "E3 Application Protocol (E3AP)", https://github.com/wineslab/libe3/tree/main/docs/e3ap.
 2. The OpenAirInterface implementation of E3AP and of this service model: https://github.com/duranta-project/openairinterface5g/pull/729.
 
 ## Terms, symbols and abbreviations
 
 ### Terms
 
-For the purposes of the present document, the terms and definitions given in O-RAN
-WG3.TS.E2GAP [1], O-RAN.WG3.TS.E2SM [3] and the following apply.
+For the purposes of the present document, the terms and definitions given in
+O-RAN.WG3.TS.E2GAP [1], O-RAN.WG3.TS.E2SM [3] and the following apply.
 
 * **dApp**: an application that runs next to the E2 node and talks to it over E3.
 * **dApp E3 subscription map**: the list of the dApps connected to the E2 node, each with the E3 RAN functions it has subscribed to.

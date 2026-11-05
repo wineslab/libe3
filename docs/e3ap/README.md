@@ -19,6 +19,9 @@ how a RAN node produces telemetry or applies a control action. It does not defin
 the E2 interface. The E2SM-DAPP specification defines how a RIC reaches a dApp
 through the E2 interface. See the [E2SM-DAPP specification](../e2sm-dapp/README.md).
 
+This document is generated from the codebase and protocol definitions for the libe3
+implementation in https://github.com/wineslab/libe3.
+
 ## References
 
 ### Normative references
@@ -43,9 +46,9 @@ References are specific. Only the cited version applies.
 
 [i.1] Protocol Buffers Language Guide (proto3), https://protobuf.dev/programming-guides/proto3/.
 
-[i.2] The E2SM-DAPP specification of this series. See [../e2sm-dapp/README.md](../e2sm-dapp/README.md).
+[i.2] O-RAN.XXX.TS.E2SM-DAPP-R000-v00.01: "E2 Service Model dApp (E2SM-DAPP)", https://github.com/wineslab/libe3/tree/main/docs/e2sm-dapp.
 
-[i.3] The E3SM Spectrum and E3SM L1-KPM specifications of this series. See [../e3sm/README.md](../e3sm/README.md).
+[i.3] O-RAN.XXX.TS.E3SM-SPEC-R000-v00.01: "E3 Service Model Spectrum (E3SM-SPEC)", https://github.com/wineslab/libe3/tree/main/docs/e3sm/spectrum, and O-RAN.XXX.TS.E3SM-L1-KPM-R000-v00.01: "E3 Service Model (E3SM), L1 KPM (E3SM-L1-KPM)", https://github.com/wineslab/libe3/tree/main/docs/e3sm/l1-kpm.
 
 [i.4] The OpenAirInterface implementation of E3AP, https://github.com/duranta-project/openairinterface5g/pull/729.
 
