@@ -274,7 +274,7 @@ int main(int argc, char** argv) {
                 return 1;
             }
             dapp.wait_for_setup(std::chrono::seconds(5));
-            dapp.subscribe(/*ran_function_id=*/1, {}, {});
+            dapp.subscribe(/*ran_function_id=*/1, {1}, {1});
             std::this_thread::sleep_for(std::chrono::milliseconds(400));
 
             std::atomic<bool> stop{false};

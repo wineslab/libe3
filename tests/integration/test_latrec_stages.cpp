@@ -335,7 +335,7 @@ bool run_combo(const Combo& c, const std::string& trace_dir) {
     E3Agent dapp(dapp_cfg);
     if (dapp.start() != ErrorCode::SUCCESS) { ran.stop(); return false; }
     dapp.wait_for_setup(std::chrono::seconds(5));
-    dapp.subscribe(/*ran_function_id=*/1, {}, {});
+    dapp.subscribe(/*ran_function_id=*/1, {1}, {1});
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     // Drives the dApp -> RAN direction alongside the indication flow, so the

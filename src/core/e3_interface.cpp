@@ -11,6 +11,7 @@
 #include "libe3/e3_interface.hpp"
 #include "libe3/logger.hpp"
 #include "libe3/latrec.h"
+#include <algorithm>
 #include <cctype>
 #include <cerrno>
 #include <chrono>
@@ -834,6 +835,68 @@ void E3Interface::context_monitor_loop() {
 #endif  // LIBE3_ENABLE_LATREC
 
 // =========================================================================
+// Refusals
+// =========================================================================
+
+namespace {
+
+/// The reason a peer gave with a negative answer, for a log line: " (cause: detail)", or nothing.
+template <typename Response>
+std::string reason_suffix(const Response& resp) {
+    if (resp.response_code != ResponseCode::NEGATIVE || (!resp.cause && !resp.detail)) return {};
+    std::string out = " (";
+    if (resp.cause) out += cause_to_string(*resp.cause);
+    if (resp.cause && resp.detail) out += ": ";
+    if (resp.detail) out += *resp.detail;
+    return out + ")";
+}
+
+/// Why a request is refused: the code and the text a RAN sends with a negative answer.
+struct Refusal {
+    Cause cause;
+    std::string detail;
+};
+
+bool contains(const std::vector<uint32_t>& ids, uint32_t id) {
+    return std::find(ids.begin(), ids.end(), id) != ids.end();
+}
+
+/// What a subscription asks for against what the RAN function advertises in its setup
+/// response. The same three questions Aerial's and OCUDU's agents ask: is the function
+/// served, is anything asked for, is every identifier one the function offers.
+/// Unknown identifiers are refused for controls as well as telemetry, because a RAN
+/// function may have controls (OCUDU refuses any control, Aerial ignores the list).
+std::optional<Refusal> refusal_for_subscription(const SubscriptionRequest& request) {
+    ServiceModel* sm = SmRegistry::instance().get_by_ran_function(request.ran_function_identifier);
+    if (sm == nullptr) {
+        return Refusal{Cause::UNSUPPORTED_RAN_FUNCTION,
+                       "RAN function " + std::to_string(request.ran_function_identifier)
+                           + " is not served"};
+    }
+    if (request.telemetry_identifier_list.empty() && request.control_identifier_list.empty()) {
+        return Refusal{Cause::INVALID_REQUEST,
+                       "a subscription names at least one telemetry or control identifier"};
+    }
+    const std::vector<uint32_t> telemetry = sm->telemetry_ids();
+    for (uint32_t id : request.telemetry_identifier_list) {
+        if (!contains(telemetry, id)) {
+            return Refusal{Cause::UNSUPPORTED_IDENTIFIER,
+                           "unknown telemetry identifier " + std::to_string(id)};
+        }
+    }
+    const std::vector<uint32_t> controls = sm->control_ids();
+    for (uint32_t id : request.control_identifier_list) {
+        if (!contains(controls, id)) {
+            return Refusal{Cause::UNSUPPORTED_IDENTIFIER,
+                           "unknown control identifier " + std::to_string(id)};
+        }
+    }
+    return std::nullopt;
+}
+
+}  // namespace
+
+// =========================================================================
 // Message Handlers
 // =========================================================================
 
@@ -847,6 +910,8 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
     
     ResponseCode response_code = ResponseCode::NEGATIVE;
     uint32_t assigned_dapp_id = 0;
+    std::optional<Cause> refusal_cause;
+    std::optional<std::string> refusal_detail;
     
     // Register the dApp
     auto [result, dapp_id] = subscription_manager_->register_dapp();
@@ -858,6 +923,8 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
         notify_dapp_status_changed();
     } else {
         E3_LOG_ERROR(LOG_TAG) << "Failed to register dApp '" << request.dapp_name << "': " << error_code_to_string(result);
+        refusal_cause = Cause::RESOURCE_EXHAUSTED;
+        refusal_detail = "no free dApp identifier";
     }
     
     // Create and send response
@@ -923,7 +990,9 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
             ? std::optional<uint32_t>(assigned_dapp_id)
             : std::nullopt,
         name_or_unknown(config_.ran_identifier),
-        ran_function_list
+        ran_function_list,
+        refusal_cause,
+        refusal_detail
     );
 
     if (!encode_result) {
@@ -962,7 +1031,9 @@ void E3Interface::send_negative_setup_reply(uint32_t request_id) {
         config_.e3ap_version,
         std::nullopt,  // no dApp identifier assigned
         name_or_unknown(config_.ran_identifier),
-        std::nullopt   // no RAN functions advertised
+        std::nullopt,  // no RAN functions advertised
+        Cause::PROTOCOL_ERROR,
+        std::string("not a decodable setup request")
     );
 
     if (!encode_result) {
@@ -986,10 +1057,16 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
 
     ResponseCode response_code = ResponseCode::NEGATIVE;
     uint32_t subscription_id = 1;
+    std::optional<Refusal> refusal;
     
     // Check if dApp is registered
     if (!subscription_manager_->is_dapp_registered(request.dapp_identifier)) {
         E3_LOG_ERROR(LOG_TAG) << "dApp " << request.dapp_identifier << " not registered";
+        refusal = Refusal{Cause::SETUP_REQUIRED, "complete setup before subscribing"};
+    } else if ((refusal = refusal_for_subscription(request))) {
+        E3_LOG_WARN(LOG_TAG) << "Refusing subscription of dApp " << request.dapp_identifier
+                             << " to RAN function " << request.ran_function_identifier << ": "
+                             << cause_to_string(refusal->cause) << " (" << refusal->detail << ")";
     } else {
         uint32_t period = request.periodicity.value_or(0);
         // Seconds, absent or 0 = no limit.
@@ -1015,6 +1092,11 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
         } else {
             E3_LOG_ERROR(LOG_TAG) << "Failed to add subscription: " 
                                   << error_code_to_string(result);
+            refusal = Refusal{result == ErrorCode::INTERNAL_ERROR ? Cause::RESOURCE_EXHAUSTED
+                                                                  : Cause::UNSPECIFIED,
+                              result == ErrorCode::INTERNAL_ERROR
+                                  ? std::string("no free subscription identifier")
+                                  : std::string(error_code_to_string(result))};
         }
     }
     
@@ -1032,6 +1114,9 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
         resp.control_identifier_list = request.control_identifier_list;
         resp.ran_function_identifier = request.ran_function_identifier;
         resp.periodicity = request.periodicity;
+    } else if (refusal) {
+        resp.cause = refusal->cause;
+        resp.detail = refusal->detail;
     }
     response_pdu.choice = resp;
 
@@ -1045,6 +1130,7 @@ void E3Interface::handle_subscription_delete(const SubscriptionDelete& del, uint
                          << " for subscription " << del.subscription_id;
     
     ResponseCode response_code = ResponseCode::NEGATIVE;
+    std::optional<Cause> refusal_cause;
     
     ErrorCode result = subscription_manager_->remove_subscription_by_id(
         del.dapp_identifier,
@@ -1058,6 +1144,8 @@ void E3Interface::handle_subscription_delete(const SubscriptionDelete& del, uint
     } else {
         E3_LOG_ERROR(LOG_TAG) << "Failed to remove subscription: "
                               << error_code_to_string(result);
+        refusal_cause = result == ErrorCode::DAPP_NOT_REGISTERED ? Cause::SETUP_REQUIRED
+                                                                 : Cause::NOT_FOUND;
     }
     
     // Create and queue response
@@ -1069,6 +1157,11 @@ void E3Interface::handle_subscription_delete(const SubscriptionDelete& del, uint
     resp.response_code = response_code;
     if (response_code == ResponseCode::POSITIVE) {
         resp.subscription_id = del.subscription_id;
+    } else {
+        resp.cause = refusal_cause;
+        resp.detail = refusal_cause == Cause::SETUP_REQUIRED
+                          ? "complete setup before deleting a subscription"
+                          : "the subscription does not exist or has ended";
     }
     response_pdu.choice = resp;
     
@@ -1082,29 +1175,62 @@ void E3Interface::handle_control_action(const DAppControlAction& action, uint32_
                          << " control " << action.control_identifier
                          << " (" << action.action_data.size() << " bytes)";
 
-    ServiceModel* sm = SmRegistry::instance().get_by_ran_function(action.ran_function_identifier);
+    // The RAN answers a control it cannot hand to a Service Model with a negative
+    // acknowledgment, as Aerial's and OCUDU's agents do, so the dApp is not left
+    // waiting for one. An SM that takes the control answers for itself.
+    auto refuse = [&](Cause cause, std::string detail) {
+        E3_LOG_WARN(LOG_TAG) << "Refusing control of dApp " << action.dapp_identifier
+                             << " for RAN function " << action.ran_function_identifier << ": "
+                             << cause_to_string(cause) << " (" << detail << ")";
+        Pdu ack_pdu(PduType::MESSAGE_ACK);
+        MessageAck ack;
+        ack.request_id = sanitize_request_message_id(request_message_id);
+        ack.response_code = ResponseCode::NEGATIVE;
+        ack.cause = cause;
+        ack.detail = std::move(detail);
+        ack_pdu.message_id = generate_message_id();
+        ack_pdu.choice = std::move(ack);
+        queue_outbound(std::move(ack_pdu));
+    };
 
-    if (sm && sm->is_running()) {
-        // The SM's own DECODE_E3SM_BEGIN/DONE already marks the library-to-SM
-        // boundary, keyed on the SM's own inflight counter -- that pair needs
-        // no bridge. What has none is whatever the SM emits in response
-        // (typically a MessageAck): its EMIT_ENTER has nothing to read unless
-        // this inbound leg's key is published first, the same bridge
-        // handle_indication and handle_xapp_control_action publish on the
-        // dApp role.
-        latrec_ctx_set(latrec_seq);
-        ErrorCode result = sm->handle_control_action(request_message_id, action);
-        if (result != ErrorCode::SUCCESS) {
-            E3_LOG_ERROR(LOG_TAG) << "SM failed to process control action: "
-                                  << error_code_to_string(result);
+    if (!subscription_manager_->is_dapp_registered(action.dapp_identifier)) {
+        refuse(Cause::SETUP_REQUIRED, "complete setup before sending a control");
+        return;
+    }
+    ServiceModel* sm = SmRegistry::instance().get_by_ran_function(action.ran_function_identifier);
+    if (sm == nullptr) {
+        refuse(Cause::UNSUPPORTED_RAN_FUNCTION,
+               "RAN function " + std::to_string(action.ran_function_identifier) + " is not served");
+        return;
+    }
+    {
+        const std::vector<uint32_t> controls = sm->control_ids();
+        if (!contains(controls, action.control_identifier)) {
+            refuse(Cause::UNSUPPORTED_IDENTIFIER,
+                   "unknown control identifier " + std::to_string(action.control_identifier));
             return;
         }
-        E3_LOG_INFO(LOG_TAG) << "Control action processed by SM";
-    } else {
-        E3_LOG_ERROR(LOG_TAG) << "No running SM found for RAN function " 
-                              << action.ran_function_identifier;
+    }
+    if (!sm->is_running()) {
+        refuse(Cause::NOT_FOUND, "no subscription to this RAN function");
         return;
-    }    
+    }
+
+    // The SM's own DECODE_E3SM_BEGIN/DONE already marks the library-to-SM
+    // boundary, keyed on the SM's own inflight counter -- that pair needs
+    // no bridge. What has none is whatever the SM emits in response
+    // (typically a MessageAck): its EMIT_ENTER has nothing to read unless
+    // this inbound leg's key is published first, the same bridge
+    // handle_indication and handle_xapp_control_action publish on the
+    // dApp role.
+    latrec_ctx_set(latrec_seq);
+    ErrorCode result = sm->handle_control_action(request_message_id, action);
+    if (result != ErrorCode::SUCCESS) {
+        E3_LOG_ERROR(LOG_TAG) << "SM failed to process control action: "
+                              << error_code_to_string(result);
+        return;
+    }
+    E3_LOG_INFO(LOG_TAG) << "Control action processed by SM";
 }
 
 void E3Interface::handle_dapp_report(const DAppReport& report) {
@@ -1385,7 +1511,7 @@ void E3Interface::handle_release_from_ran(const ReleaseMessage& release) {
 
 void E3Interface::handle_setup_response(const SetupResponse& resp) {
     E3_LOG_INFO(LOG_TAG) << "Handling SetupResponse rc="
-                         << response_code_to_string(resp.response_code);
+                         << response_code_to_string(resp.response_code) << reason_suffix(resp);
     if (dapp_state_ && resp.response_code == ResponseCode::POSITIVE) {
         uint32_t dapp_id = resp.dapp_identifier.value_or(0);
         dapp_state_->record_setup_response(dapp_id, resp.ran_function_list);
@@ -1406,7 +1532,7 @@ void E3Interface::handle_subscription_response(const SubscriptionResponse& resp)
     }
     E3_LOG_INFO(LOG_TAG) << "Handling SubscriptionResponse for request "
                          << resp.request_id << " rc="
-                         << response_code_to_string(resp.response_code);
+                         << response_code_to_string(resp.response_code) << reason_suffix(resp);
     // Attribute the response to the request that caused it. The RAN function id
     // is optional on the wire, so it comes from the pending-op record keyed by
     // the id we sent.
@@ -1496,6 +1622,10 @@ void E3Interface::handle_xapp_control_action(const XAppControlAction& action,
 }
 
 void E3Interface::handle_message_ack(const MessageAck& ack) {
+    if (ack.response_code == ResponseCode::NEGATIVE) {
+        E3_LOG_WARN(LOG_TAG) << "MessageAck for request " << ack.request_id << " is negative"
+                             << reason_suffix(ack);
+    }
     // Closes the acknowledgment tail. Keyed on the acknowledged message's id,
     // matching the LATREC_ACK_SENT the RAN-side Service Model stamps, so the
     // leg joins on a libe3 build the way it already did on backends that
