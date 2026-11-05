@@ -23,6 +23,7 @@ Table: Encodings by message
 |---|---|---|---|
 | RAN function data | yes | yes | yes |
 | Sensing indication | yes | yes | yes |
+| Cell configuration indication | yes | yes | no |
 | dApp control | yes | yes | yes |
 | dApp report | yes | required, no codec yet | yes |
 | xApp control | yes | required, no codec yet | yes |
@@ -60,18 +61,25 @@ Table: Widths of the fields in this service model
 | `Spectrum-RanFunctionData.name` | size 1..32 | 5 bit length, then the octets |
 | `Spectrum-RanFunctionData.version` | 0..65535 | 2 octets |
 | `Spectrum-RanFunctionData.description` | size 1..128 | 7 bit length, then the octets |
+| `Spectrum-Indication` alternative | 2 alternatives, no extension marker | 1 bit |
 | `sfn`, `slot` in the indication | 0..65535 | 2 octets each |
 | `beam` | 0..3 | 2 bits |
 | `shmWriteIdx` | 0..65535 | 2 octets |
 | `nRanges` | 0..128 | 8 bits |
 | `blacklistedPRBs`, `blockedPRBs` count | 0..273 | 2 octets |
 | each PRB index | 0..272 | 2 octets |
-| `samplingThreshold` | 0..100 | 7 bits |
-| `validityPeriod` | 1..3600 | 2 octets |
 | `maskPerSlot` count | 1..160 | 8 bits |
 | each symbol mask | 0..16383 | 2 octets |
 | `noiseFloorThreshold` | -100..100 | 8 bits |
 | `averagingFrames` | 1..255 | 8 bits |
+| `validityPeriod` | 1..3600000 | a 2 bit length, then 1 to 3 octets |
+| `ulCarrierPRBs` | 1..273 | 2 octets |
+| `ulOffsetToCarrier` | 0..272 | 2 octets |
+| `ulSubcarrierSpacing` | 0..3 | 2 bits |
+| `ulArfcnPointA` | 0..3279165 | a 2 bit length, then 1 to 3 octets |
+| `slotsPerFrame` | 1..160 | 8 bits |
+| `tddSlotPattern` | size 1..160 | 8 bit length, then the octets |
+| `nrPci` | 0..1007 | 2 octets |
 | `sfn`, `slot` in the apply outcome | 0..1023, 0..159 | 2 octets, 8 bits |
 
 An encoded list of n PRB indices needs about 2 + 2n octets. The longest list, 273 indices, needs about
@@ -87,12 +95,17 @@ The choices `Spectrum-DAppControlPayload`, `Spectrum-DAppReportPayload`,
 * An extension alternative uses the extension bit "1", then an index, then an open type. The open type
   holds a length and the encoded alternative.
 
-`Spectrum-DAppControlPayload` has `prbBlacklistControl` in the root and `sensingPolicyControl` as an
-extension alternative. The encoding of the sensing policy is therefore longer by the index and the
-length prefix than it would be in the root. The rule exists to keep the encoding of the first
-alternative stable when a second alternative is added. Without the extension marker, going from one
-alternative to two would change the width of the index from 0 bits to 1 bit. Every existing sender
-would then break.
+`Spectrum-DAppControlPayload`, `Spectrum-DAppReportPayload` and `Spectrum-ApplyOutcomePayload` have one
+root alternative, which takes the extension bit and no index. `Spectrum-XAppControlPayload` has two
+root alternatives, `prbBlockedControl` and `configControl`, which take the extension bit and a 1 bit
+index. `Spectrum-DAppControlPayload` also has `sensingPolicyControl` after the extension marker. Its
+encoding is longer by the index and the length prefix than it would be in the root. The rule keeps
+the encoding of the first alternative stable when a second alternative is added. Without the extension marker, going from one alternative
+to two would change the width of the index from 0 bits to 1 bit. Every existing sender would then
+break.
+
+The choice `Spectrum-Indication` has two root alternatives and no extension marker. Its index takes
+one bit. A third indication would change that width. See [Annex A](06-discrepancies.md).
 
 A sender that adds an alternative to a choice shall add it after the extension marker. A sender shall
 not move an existing alternative.
@@ -107,19 +120,29 @@ The JSON encoding follows RFC 8259 [5].
 {"name": "spectrum_sm", "version": 1, "description": "Spectrum service model for sensing range indication, PRB block and sensing policy control"}
 ```
 
+### Indication
+
+The JSON indication is an object with the member of the alternative, `sensingIndication` or
+`cellConfigIndication`, and a member `indicationType` with the value "sensing" or "cellConfig".
+The key `indicationType` is not a field of the grammar. A codec adds it for readability. A receiver
+shall use the member of the alternative to tell the two indications apart.
+
+The members of the two alternatives use other names than the grammar. See
+[Annex A](06-discrepancies.md).
+
 ### Sensing indication
 
-The JSON indication groups the reference to the ring in one object. The object and its keys use
-other names than the grammar. See [Annex A](06-discrepancies.md).
+The JSON sensing indication groups the reference to the ring in one object.
 
 ```json
-{"sensing_shm": {"shm_name": "/e3_l2_sensing", "write_idx": 17, "n_ranges": 3},
- "timestamp": 1700000000000000000, "sfn": 512, "slot": 7, "beam": 0}
+{"indicationType": "sensing",
+ "sensingIndication": {"sensing_shm": {"shm_name": "/e3_l2_sensing", "write_idx": 17, "n_ranges": 3},
+                       "timestamp": 7078771133456789, "sfn": 512, "slot": 7, "beam": 0}}
 ```
 
 The values in the example are for illustration. They are not taken from a captured message.
 
-Table: JSON keys of the sensing indication
+Table: JSON keys of the sensing indication, inside `sensingIndication`
 
 | Key | Grammar field | Type |
 |---|---|---|
@@ -131,6 +154,29 @@ Table: JSON keys of the sensing indication
 | `slot` | `slot` | number |
 | `beam` | `beam` | number |
 
+### Cell configuration indication
+
+```json
+{"indicationType": "cellConfig",
+ "cellConfigIndication": {"timestamp": 7078771000000000, "ul_carrier_prbs": 273,
+                          "ul_offset_to_carrier": 0, "ul_subcarrier_spacing": 1,
+                          "ul_arfcn_point_a": 620000, "slots_per_frame": 20,
+                          "tdd_slot_pattern": "DDDDDDDSUU", "nr_pci": 1}}
+```
+
+Table: JSON keys of the cell configuration indication, inside `cellConfigIndication`
+
+| Key | Grammar field | Type |
+|---|---|---|
+| `timestamp` | `timestamp` | number |
+| `ul_carrier_prbs` | `ulCarrierPRBs` | number |
+| `ul_offset_to_carrier` | `ulOffsetToCarrier` | number |
+| `ul_subcarrier_spacing` | `ulSubcarrierSpacing` | number |
+| `ul_arfcn_point_a` | `ulArfcnPointA` | number |
+| `slots_per_frame` | `slotsPerFrame` | number |
+| `tdd_slot_pattern` | `tddSlotPattern` | string of "D", "U" and "S", left out for an FDD cell |
+| `nr_pci` | `nrPci` | number, left out when absent |
+
 ### dApp control
 
 The JSON control has the same shape as the grammar. The key of the alternative is the discriminator.
@@ -138,13 +184,13 @@ The JSON control has the same shape as the grammar. The key of the alternative i
 ```json
 {"controlType": "prbBlacklist",
  "controlPayload": {"prbBlacklistControl": {"blacklistedPRBs": [10, 11, 12],
-                                            "samplingThreshold": 5, "validityPeriod": 60}}}
+                                            "validityPeriod": 60000}}}
 ```
 
 ```json
 {"controlType": "sensingPolicy",
  "controlPayload": {"sensingPolicyControl": {"maskPerSlot": [0, 0, 0, 16256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                             "deactivate": false, "validityPeriod": 60}}}
+                                             "deactivate": false, "validityPeriod": 60000}}}
 ```
 
 The key `controlType` is not a field of the grammar. A codec adds it for readability.
@@ -182,7 +228,8 @@ of the payload object, and a member `reportType` or `controlType` names the alte
 ```
 
 The values of `reportType` and `controlType` are `prbBlacklist` and `prbBlocked`. The alternative
-`configControl` has the value `config`. These forms are not checked against a codec.
+`configControl` has the value `config`. These forms are not
+checked against a codec.
 
 ## Protocol Buffers
 
@@ -196,8 +243,8 @@ Table: Protocol Buffers messages
 |---|---|
 | `SpectrumRanFunctionData` | 1: name, bytes. 2: version, uint32. 3: description, bytes. |
 | `SpectrumSensingIndication` | 1: timestamp, int64. 2: sfn, uint32. 3: slot, uint32. 4: beam, uint32. 5: shm_name, bytes. 6: shm_write_idx, uint32. 7: n_ranges, uint32. |
-| `SpectrumPRBBlacklistControl` | 1: blacklisted_prbs, repeated uint32. 2: sampling_threshold, uint32. 3: validity_period, uint32. |
-| `SpectrumSensingPolicyControl` | 1: mask_per_slot, repeated uint32. 2: deactivate, bool, default false. 3: validity_period, uint32. |
+| `SpectrumPRBBlacklistControl` | 1: blacklisted_prbs, repeated uint32. 3: validity_period, uint32, in milliseconds. Number 2 is reserved. It held sampling_threshold in earlier revisions (Annex A). |
+| `SpectrumSensingPolicyControl` | 1: mask_per_slot, repeated uint32. 2: deactivate, bool, default false. 3: validity_period, uint32, in milliseconds. |
 | `SpectrumDAppControlData` | oneof control_payload: 1: prb_blacklist_control. 2: sensing_policy_control. |
 | `SpectrumPRBBlacklistReport` | 1: blacklisted_prbs, repeated uint32. |
 | `SpectrumDAppReportData` | 3: timestamp, uint64. oneof report_payload: 1: prb_blacklist_report. |
@@ -205,7 +252,8 @@ Table: Protocol Buffers messages
 | `SpectrumConfigControl` | 1: noise_floor_threshold, int32. 2: averaging_frames, uint32. 3: enable, bool. |
 | `SpectrumXAppControlData` | 3: timestamp, uint64. oneof control_payload: 1: prb_blocked_control. 2: config_control. |
 
-The apply outcome has no Protocol Buffers message.
+The cell configuration indication and the apply outcome have no Protocol Buffers message. A Protocol
+Buffers indication is a `SpectrumSensingIndication`, and no `oneof` wraps it.
 
 The field numbers are the contract between the sender and the receiver. A change of a number is a
 change of the wire.
@@ -234,6 +282,7 @@ Table: Size limits
 | octets of any message in an E3AP field | 1 to 32768 |
 | PRB indices in one list | 0 to 273 |
 | symbol masks in a sensing policy | 1 to 160 |
+| characters of the TDD slot pattern | 1 to 160 |
 | sensing ranges in one ring slot | 0 to 128 |
 | ring slots | 256 |
 | RAN function data, encoded | the RAN buffer holds 512 octets |
@@ -244,12 +293,160 @@ Table: Size limits
 The ASN.1 definitions conform to ITU-T Recommendation X.680 [2] and X.681 [3]. The module name is
 "SPECTRUM-SM". The module uses automatic tags.
 
-The definitions are to be inserted between the delimiters below. The tables in
+The definitions are between the delimiters below. The tables in
 [clause 6](02-ie-mapping.md) describe every type. If the ASN.1 and the tables disagree, the
 ASN.1 takes precedence, except for the conditions of presence, where the tables take precedence.
 
 ```asn1
 -- ASN1START
--- The grammar of this service model is to be inserted here. See the OpenAirInterface implementation reference.
+-- E3SM-SPEC, version 1
+
+SPECTRUM-SM DEFINITIONS AUTOMATIC TAGS ::= BEGIN
+
+-- ============================================================================
+-- SM SPECTRUM RAN FUNCTION DATA STRUCTURES  
+-- ============================================================================
+
+Spectrum-RanFunctionData ::= SEQUENCE {
+    name                    OCTET STRING (SIZE (1..32)),
+    version                 INTEGER (0..65535),
+    description             OCTET STRING (SIZE (1..128))
+}
+
+-- ============================================================================
+-- INDICATION MESSAGE STRUCTURES
+-- ============================================================================
+
+Spectrum-CellConfigIndication ::= SEQUENCE {
+    timestamp            INTEGER,
+    ulCarrierPRBs        INTEGER (1..maxPRBs),
+    ulOffsetToCarrier    INTEGER (0..maxPRBIndex),
+    ulSubcarrierSpacing  INTEGER (0..3),
+    ulArfcnPointA        INTEGER (0..maxARFCN),
+    slotsPerFrame        INTEGER (1..maxSlotsFrame),
+    tddSlotPattern       OCTET STRING (SIZE (1..maxSlotsFrame)) OPTIONAL,
+    nrPci                INTEGER (0..maxPCI) OPTIONAL,
+    ...
+}
+
+Spectrum-SensingIndication ::= SEQUENCE {
+    timestamp    INTEGER,
+    sfn          INTEGER (0..65535),
+    slot         INTEGER (0..65535),
+    beam         INTEGER (0..3) OPTIONAL,
+    shmName      OCTET STRING,
+    shmWriteIdx  INTEGER (0..65535),
+    nRanges      INTEGER (0..128)
+}
+
+Spectrum-Indication ::= CHOICE {
+    sensingIndication       Spectrum-SensingIndication,
+    cellConfigIndication    Spectrum-CellConfigIndication
+}
+
+-- ============================================================================
+-- CONTROL ACTION STRUCTURES  
+-- ============================================================================
+
+Spectrum-PRBBlacklistControl ::= SEQUENCE {
+    blacklistedPRBs   SEQUENCE (SIZE (0..maxPRBs)) OF INTEGER (0..maxPRBIndex),
+    validityPeriod          INTEGER (1..3600000) OPTIONAL
+}
+
+Spectrum-SensingPolicyControl ::= SEQUENCE {
+    maskPerSlot             SEQUENCE (SIZE (1..maxSlotsFrame)) OF INTEGER (0..maxSymbolMask),
+    deactivate              BOOLEAN DEFAULT FALSE,
+    validityPeriod          INTEGER (1..3600000) OPTIONAL
+}
+
+Spectrum-DAppControlPayload ::= CHOICE {
+    prbBlacklistControl     Spectrum-PRBBlacklistControl,
+    ...,
+    sensingPolicyControl    Spectrum-SensingPolicyControl
+}
+
+Spectrum-DAppControlData ::= SEQUENCE {
+    controlPayload          Spectrum-DAppControlPayload
+}
+
+-- ============================================================================
+-- dAPP REPORT STRUCTURES
+-- ============================================================================
+
+Spectrum-PRBBlacklistReport ::= SEQUENCE {
+    blacklistedPRBs         SEQUENCE (SIZE (0..maxPRBs)) OF INTEGER (0..maxPRBIndex)
+}
+
+Spectrum-DAppReportPayload ::= CHOICE {
+    prbBlacklistReport      Spectrum-PRBBlacklistReport,
+    ...
+}
+
+Spectrum-DAppReportData ::= SEQUENCE {
+    timestamp               INTEGER OPTIONAL,
+    reportPayload           Spectrum-DAppReportPayload
+}
+
+-- ============================================================================
+-- xAPP CONTROL ACTION STRUCTURES  
+-- ============================================================================
+
+
+Spectrum-PRBBlockedControl ::= SEQUENCE {
+    blockedPRBs             SEQUENCE (SIZE (0..maxPRBs)) OF INTEGER (0..maxPRBIndex)
+}
+
+Spectrum-XAppControlPayload ::= CHOICE {
+    prbBlockedControl       Spectrum-PRBBlockedControl,
+    configControl           Spectrum-ConfigControl,
+    ...
+}
+
+Spectrum-XAppControlData ::= SEQUENCE {
+    timestamp               INTEGER OPTIONAL,
+    controlPayload          Spectrum-XAppControlPayload
+}
+
+Spectrum-ConfigControl ::= SEQUENCE {
+    noiseFloorThreshold     INTEGER (-100..100) OPTIONAL,
+    averagingFrames         INTEGER (1..255) OPTIONAL,
+    enable                  BOOLEAN OPTIONAL
+}
+
+
+-- ============================================================================
+-- APPLY OUTCOME STRUCTURES
+-- ============================================================================
+
+Spectrum-PRBBlockApplyOutcome ::= SEQUENCE {
+    installedTimestamp      INTEGER OPTIONAL,
+    onAirTimestamp          INTEGER OPTIONAL,
+    sfn                     INTEGER (0..1023) OPTIONAL,
+    slot                    INTEGER (0..maxSlotIndex) OPTIONAL,
+    ...
+}
+
+Spectrum-ApplyOutcomePayload ::= CHOICE {
+    prbBlockApplyOutcome    Spectrum-PRBBlockApplyOutcome,
+    ...
+}
+
+Spectrum-ApplyOutcomeData ::= SEQUENCE {
+    timestamp               INTEGER OPTIONAL,
+    applyOutcomePayload     Spectrum-ApplyOutcomePayload
+}
+
+-- ============================================================================
+-- CONSTANTS AND CONSTRAINTS
+-- ============================================================================
+maxPRBs                     INTEGER ::= 273
+maxPRBIndex                 INTEGER ::= 272
+maxSlotsFrame               INTEGER ::= 160
+maxSlotIndex                INTEGER ::= 159
+maxSymbolMask               INTEGER ::= 16383
+maxARFCN                    INTEGER ::= 3279165
+maxPCI                      INTEGER ::= 1007
+
+END
 -- ASN1STOP
 ```

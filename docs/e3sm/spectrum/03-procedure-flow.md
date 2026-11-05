@@ -15,7 +15,8 @@ Table: Procedures and the E3AP message that carries each
 | Procedure | Initiator | E3AP message | Service model structure | Loop boxes |
 |---|---|---|---|---|
 | Subscription | dApp | E3 Subscription Request and Response | none | none |
-| Sensing indication | RAN | E3 Indication Message | `Spectrum-SensingIndication` | A1 to A10 |
+| Sensing indication | RAN | E3 Indication Message | `Spectrum-Indication`, alternative `sensingIndication` | A1 to A10 |
+| Cell configuration indication | RAN | E3 Indication Message | `Spectrum-Indication`, alternative `cellConfigIndication` | none |
 | PRB block control | dApp | E3 dApp Control Action, answered by E3 Message Ack | `Spectrum-DAppControlData` | A11 to A19a |
 | Sensing policy control | dApp | E3 dApp Control Action, answered by E3 Message Ack | `Spectrum-DAppControlData` | A11 to A19a |
 | dApp report | dApp | E3 dApp Report | `Spectrum-DAppReportData` | A11 to A20 |
@@ -46,7 +47,8 @@ controls.
 
 ### Successful operation
 
-The RAN publishes sensing indications to the dApp. The RAN accepts the controls of the dApp.
+The RAN publishes sensing indications and cell configuration indications to the dApp. The RAN
+accepts the controls of the dApp.
 
 ### Unsuccessful operation
 
@@ -69,7 +71,8 @@ The RAN tells a dApp which resources of a slot are free, so that the dApp can an
 2. For every publish, the service model reads the ranges and writes them into the next slot of the
    sensing ring. The ring is written for every publish, also when the emission period is longer
    than the publish interval.
-3. The service model builds one `Spectrum-SensingIndication` with the reference to the ring slot.
+3. The service model builds one `Spectrum-Indication` with the alternative `sensingIndication` and
+   the reference to the ring slot.
 4. The service model sends the same encoded indication to every dApp that subscribed to RAN
    function 1, in one E3 Indication Message for each dApp. The `ranFunctionIdentifier` is "1".
 5. With period "0", the service model sends one indication for each publish. With a period greater
@@ -93,6 +96,37 @@ a ring that does not exist would be useless. If the RAN cannot encode the indica
   expects. The dApp shall not read the ring.
 * The dApp runs on another host than the RAN. The dApp cannot map the ring. It shall not use the
   Spectrum sensing telemetry.
+
+## Cell configuration indication
+
+### Purpose
+
+The RAN tells a dApp the uplink carrier that the PRB indices of the sensing ranges refer to.
+
+### Procedure text
+
+1. While the service model runs, the RAN samples the configuration of the uplink carrier about once
+   a second, independently of the sensing publishes.
+2. The service model builds one `Spectrum-Indication` with the alternative `cellConfigIndication`.
+3. The service model sends the same encoded indication to every dApp that subscribed to RAN
+   function 1, in one E3 Indication Message for each dApp. The `ranFunctionIdentifier` is "1". The
+   emission period of the sensing indication does not apply to it.
+
+### Successful operation
+
+The dApp keeps the latest configuration and uses it to place the sensing ranges in frequency.
+
+### Unsuccessful operation
+
+If the RAN cannot read the configuration or encode the indication, it sends no indication for that
+period.
+
+### Abnormal conditions
+
+* A value is outside the range of the grammar. The dApp shall ignore the whole indication, and keep
+  the configuration that it had.
+* The configuration changes between two indications. The dApp uses the latest one. Sensing ranges
+  that arrive in between may refer to the new carrier.
 
 ## PRB block control
 
@@ -279,7 +313,7 @@ holds 64. A control that finds the table full is answered at once.
 
 When the last subscription to RAN function 1 ends, the RAN shall:
 
-1. stop the telemetry worker and remove the sensing ring,
+1. stop the telemetry workers and remove the sensing ring,
 2. clear the sensing policy, and
 3. clear the PRB block in uplink and downlink.
 

@@ -17,7 +17,7 @@ Table: Messages of the Spectrum service model
 | Message | Structure | Direction | E3AP carrier |
 |---|---|---|---|
 | RAN function data | `Spectrum-RanFunctionData` | RAN to dApp | `ranFunctionData` of the E3 Setup Response |
-| Sensing indication | `Spectrum-SensingIndication` | RAN to dApp | `protocolData` of the E3 Indication Message |
+| Indication | `Spectrum-Indication`: a sensing indication or a cell configuration indication | RAN to dApp | `protocolData` of the E3 Indication Message |
 | dApp control | `Spectrum-DAppControlData` | dApp to RAN | `actionData` of the E3 dApp Control Action |
 | dApp report | `Spectrum-DAppReportData` | dApp to RAN, then to an xApp | `reportData` of the E3 dApp Report |
 | xApp control | `Spectrum-XAppControlData` | xApp to dApp, through the RAN | `xAppControlData` of the E3 xApp Control Action |
@@ -36,7 +36,19 @@ Table: `Spectrum-RanFunctionData`
 | `version` | INTEGER | 0..65535 | M | the version of the service model, "1" |
 | `description` | OCTET STRING | size 1..128 | M | a text for an operator |
 
-## Sensing indication
+## Indication
+
+Table: `Spectrum-Indication` (CHOICE)
+
+| Alternative | Type | Description |
+|---|---|---|
+| `sensingIndication` | `Spectrum-SensingIndication` | the reference to the sensing ranges of one slot |
+| `cellConfigIndication` | `Spectrum-CellConfigIndication` | the configuration of the uplink carrier |
+
+The choice has two alternatives and no extension marker. The alternative tells a dApp which
+indication it received.
+
+### Sensing indication
 
 The indication does not carry the sensing ranges. It carries a reference to a slot of the sensing
 ring, and a dApp reads the ranges from the ring. See the last section of this clause.
@@ -56,6 +68,33 @@ Table: `Spectrum-SensingIndication`
 The `timestamp` uses the monotonic clock. It is only valid on the host of the RAN. Do not subtract
 it from a realtime timestamp. See [clause 9](05-semantics-and-constraints.md).
 
+### Cell configuration indication
+
+The RAN samples the configuration of the uplink carrier about once a second and sends it in a cell
+configuration indication. The values come from the common serving cell configuration of the cell
+[i.6].
+
+Table: `Spectrum-CellConfigIndication`
+
+| Field | Type | Range | Presence | Description |
+|---|---|---|---|---|
+| `timestamp` | INTEGER | not constrained | M | nanoseconds on the monotonic clock of the RAN host, taken when the RAN samples the configuration |
+| `ulCarrierPRBs` | INTEGER | 1..273 | M | the bandwidth of the uplink carrier in PRBs, at the subcarrier spacing of the carrier |
+| `ulOffsetToCarrier` | INTEGER | 0..272 | M | the first PRB of the carrier in the common resource grid, counted in PRBs from point A |
+| `ulSubcarrierSpacing` | INTEGER | 0..3 | M | the subcarrier spacing of the carrier as the numerology index: "0" is 15 kHz, "1" 30 kHz, "2" 60 kHz and "3" 120 kHz [i.1] |
+| `ulArfcnPointA` | INTEGER | 0..3279165 | M | point A of the uplink carrier as an NR-ARFCN [i.7]. A cell without an uplink point A of its own sends the downlink one. |
+| `slotsPerFrame` | INTEGER | 1..160 | M | the number of slots in a frame of 10 ms at the subcarrier spacing of the carrier |
+| `tddSlotPattern` | OCTET STRING | size 1..160 | O | one character for each slot of the TDD period: "D" downlink, "U" uplink, "S" special. The length is the period in slots. Absent for an FDD cell. |
+| `nrPci` | INTEGER | 0..1007 | O | the physical cell identity [i.1] |
+| extension marker | | | | the grammar can add fields |
+
+The PRB indices of the sensing ranges are absolute in the common resource grid. With the cell
+configuration, a dApp places a range in frequency: the lowest frequency of the carrier is the
+frequency of point A, plus `ulOffsetToCarrier` times 12 subcarriers at the subcarrier spacing.
+
+A dApp that has not yet received a cell configuration indication shall not place the ranges in
+frequency. It can still use the PRB indices.
+
 ## dApp control
 
 ### Envelope
@@ -74,8 +113,9 @@ Table: `Spectrum-DAppControlPayload` (CHOICE)
 | extension marker | | | the grammar can add alternatives |
 | `sensingPolicyControl` | `Spectrum-SensingPolicyControl` | 2 | install or clear a sensing policy. This is an extension alternative. |
 
-The choice has one root alternative and one extension alternative. The encoding therefore carries
-an extension bit before the alternative index. See [clause 8](04-encoding.md).
+The choice has one root alternative and one extension alternative. The PRB block control takes the
+extension bit and no index. The sensing policy control takes the extension bit, an index and a
+length. See [clause 8](04-encoding.md).
 
 ### PRB block control
 
@@ -84,8 +124,7 @@ Table: `Spectrum-PRBBlacklistControl`
 | Field | Type | Range | Presence | Description |
 |---|---|---|---|---|
 | `blacklistedPRBs` | SEQUENCE OF INTEGER | list size 0..273, each 0..272 | M | the complete list of PRB indices to block. The index is absolute in the carrier. An empty list clears the block. |
-| `samplingThreshold` | INTEGER | 0..100 | O | a sampling ratio for IQ captures: one delivery for each `samplingThreshold`. The RAN decodes it and does not use it. |
-| `validityPeriod` | INTEGER | 1..3600 | O | seconds that the block stays valid. The RAN decodes it and does not use it. |
+| `validityPeriod` | INTEGER | 1..3600000 | O | milliseconds that the block stays valid, up to one hour. The RAN decodes it and does not use it. |
 
 The RAN blocks every listed PRB for all 14 symbols, in uplink and in downlink. The list replaces the
 block that is active. The dApp sends the complete list for every change.
@@ -98,7 +137,7 @@ Table: `Spectrum-SensingPolicyControl`
 |---|---|---|---|---|
 | `maskPerSlot` | SEQUENCE OF INTEGER | list size 1..160, each 0..16383 | M | one 14 bit symbol mask for each slot of a frame. Bit s set means: keep symbol s of that slot free for sensing. |
 | `deactivate` | BOOLEAN | | D | default "FALSE". When "TRUE", the RAN clears the policy and ignores the masks. |
-| `validityPeriod` | INTEGER | 1..3600 | O | seconds that the policy stays valid. The RAN decodes it and uses it only in a log line. |
+| `validityPeriod` | INTEGER | 1..3600000 | O | milliseconds that the policy stays valid, up to one hour. The RAN decodes it and uses it only in a log line. |
 
 The length of `maskPerSlot` shall equal the number of slots in a frame of the RAN. That number is 20
 at 30 kHz subcarrier spacing. A list with another length gets a negative acknowledge. A message that
@@ -208,6 +247,8 @@ Table: Constants of the grammar
 | `maxSlotsFrame` | 160 | the slots in a frame at the largest numerology; 20 at 30 kHz |
 | `maxSlotIndex` | 159 | `maxSlotsFrame` minus 1 |
 | `maxSymbolMask` | 16383 | the largest 14 bit symbol bitmap, 2 to the power 14, minus 1 |
+| `maxARFCN` | 3279165 | the largest NR-ARFCN [i.7] |
+| `maxPCI` | 1007 | the largest physical cell identity [i.1] |
 
 ## The sensing ring
 

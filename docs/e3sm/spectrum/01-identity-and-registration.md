@@ -17,7 +17,7 @@ Table: Identity of the Spectrum service model
 | E3 RAN function ID | `1` | The E3AP field `ranFunctionIdentifier`. Range 1 to 65535. |
 | Service model name | `spectrum_sm` | Sent in the RAN function data. |
 | Service model version | `1` | Sent in the RAN function data. Range 0 to 65535. |
-| Service model description | `Spectrum service model for sensing range indication, PRB block and sensing policy control` | Sent in the RAN function data. |
+| Service model description | `Spectrum service model for sensing range indication, PRB block and sensing policy control` | Sent in the RAN function data. A text for an operator. |
 | Telemetry identifiers | `1`, `2`, `3`, `4`, `5` | See the next table. |
 | Control identifiers | `1`, `2` | See the next table. |
 
@@ -51,6 +51,10 @@ Table: Control identifiers
 The RAN emits all five telemetry values in one sensing indication. The service model
 does not filter the indication by the telemetry identifiers that a dApp subscribed to.
 A dApp can subscribe to any subset, and it still receives the whole indication.
+
+The cell configuration indication has no telemetry identifier of its own. The RAN sends
+it to every dApp that holds a subscription to RAN function 1, about once a second. It
+gives the uplink carrier that the PRB indices of the sensing ranges refer to.
 
 A control message carries one control identifier. The identifier selects the handler.
 The payload shall hold the alternative that matches the identifier. See clause 7.
@@ -103,7 +107,8 @@ A RAN that offers the Spectrum service model shall do the following.
 4. Accept controls while the service model runs, and reject them when it is not
    running. See [clause 9](05-semantics-and-constraints.md).
 5. Clear a held PRB block and a held sensing policy when the service model stops.
-6. Send the sensing indication with the encoding of the E3 interface.
+6. Send the sensing indication and the cell configuration indication with the encoding
+   of the E3 interface.
 
 The RAN may offer RAN function 2 (the L1-KPM service model) at the same time. The
 two service models are independent. The Spectrum service model carries no IQ samples.
@@ -119,6 +124,6 @@ The service model has two states: running and stopped.
 * The service model stops when the last subscription to RAN function 1 ends.
 
 While the service model runs, the RAN publishes indications and accepts controls.
-When it stops, the RAN stops the telemetry worker, removes the sensing ring, and
+When it stops, the RAN stops the telemetry workers, removes the sensing ring, and
 clears the PRB block and the sensing policy. A control that arrives while the service
 model is stopped gets a negative message acknowledge.

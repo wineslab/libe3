@@ -13,6 +13,7 @@ Table: Units of the fields
 | Field | Unit | Notes |
 |---|---|---|
 | `Spectrum-SensingIndication.timestamp` | nanoseconds | monotonic clock of the RAN host |
+| `Spectrum-CellConfigIndication.timestamp` | nanoseconds | monotonic clock of the RAN host |
 | `Spectrum-DAppReportData.timestamp` | nanoseconds since the Unix epoch | realtime clock of the dApp host |
 | `Spectrum-XAppControlData.timestamp` | nanoseconds since the Unix epoch | realtime clock of the xApp host |
 | `Spectrum-ApplyOutcomeData.timestamp`, `installedTimestamp`, `onAirTimestamp` | nanoseconds since the Unix epoch | realtime clock of the RAN host |
@@ -20,18 +21,21 @@ Table: Units of the fields
 | `slot` | slot number | 0..159 in practice, 0..19 at 30 kHz |
 | PRB index | PRB | absolute in the carrier, 0..272 |
 | symbol mask | bit field | bit s is symbol s of the slot, 14 bits |
-| `validityPeriod` | seconds | 1..3600 |
-| `samplingThreshold` | ratio | 0..100, one delivery for each value |
-| `periodicity` in E3AP | microseconds | selects the indication period. See the E3AP specification. |
+| `ulCarrierPRBs`, `ulOffsetToCarrier` | PRB | at the subcarrier spacing of the carrier |
+| `ulSubcarrierSpacing` | numerology index | 0..3, the spacing is 15 kHz times 2 to the power of the index |
+| `ulArfcnPointA` | NR-ARFCN | 0..3279165 [i.7] |
+| `slotsPerFrame` | slots | in a frame of 10 ms |
+| `validityPeriod` | milliseconds | 1..3600000, up to one hour |
 | `noiseFloorThreshold` | not defined | the dApp and the xApp agree on it |
+| `periodicity` in E3AP | microseconds | selects the indication period. See the E3AP specification. |
 
 ## Clocks
 
 Two clocks exist in the service model. They shall not be mixed.
 
-* The sensing indication uses the monotonic clock. It has a common origin for all processes on one host
-  and no relation to the calendar. The indication only has a meaning on the host of the RAN, because it
-  holds a reference to local shared memory.
+* The sensing indication and the cell configuration indication use the monotonic clock. It has a common
+  origin for all processes on one host and no relation to the calendar. The sensing indication only has
+  a meaning on the host of the RAN, because it holds a reference to local shared memory.
 * The dApp report, the xApp control and the apply outcome use the realtime clock. Each of them crosses
   from one host to another. The RAN relays the first two without a change.
 
@@ -52,9 +56,10 @@ Table: Meaning of an absent field
 | Field | Absent means |
 |---|---|
 | `beam` | no beam information. A RAN that does not use several beams sends "0". |
-| `samplingThreshold` | no sampling ratio |
 | `validityPeriod` | no validity limit stated |
 | `deactivate` | "FALSE" |
+| `tddSlotPattern` | the cell is an FDD cell |
+| `nrPci` | the RAN does not give the physical cell identity |
 | report `timestamp` | the dApp did not stamp the report. This is a normal message. |
 | xApp control `timestamp` | the xApp did not stamp the control. This is a normal message. |
 | `installedTimestamp` | the control did not install |
@@ -74,8 +79,8 @@ has no value shall omit the field.
 * A PRB that appears twice in the list is blocked once.
 * The scheduler applies the block from the start of a following slot. It marks the PRBs as occupied in
   its resource map, so that every allocation step schedules around them.
-* The `validityPeriod` and the `samplingThreshold` of the control are accepted. The RAN does not use
-  them. A dApp that needs a block to expire shall send a clearing control itself.
+* The `validityPeriod` of the control is accepted. The RAN does not use it. A dApp that needs a block
+  to expire shall send a clearing control itself.
 
 ## Limits of a PRB block
 
@@ -113,6 +118,7 @@ limits apply. A dApp and an operator shall know them.
   allocation.
 * `deactivate` "TRUE" clears the policy and the masks are ignored.
 * The number of masks shall equal the number of slots in a frame of the RAN.
+* The `validityPeriod` of the policy is accepted. The RAN does not use it. A policy does not expire.
 
 ## What does and does not touch the radio
 
@@ -120,7 +126,7 @@ Table: Effect of each function on the scheduler
 
 | Function | Changes scheduling |
 |---|---|
-| sensing indication and the sensing ring | no. They only export data. |
+| sensing indication, cell configuration indication and the sensing ring | no. They only export data. |
 | PRB block control | yes. It removes PRBs from allocation. |
 | sensing policy control | yes. It changes the choice of time domain allocation. |
 | dApp report | no |

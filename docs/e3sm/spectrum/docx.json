@@ -12,7 +12,8 @@
     {"clause": "7", "title": "Procedures", "file": "03-procedure-flow.md"},
     {"clause": "8", "title": "Encoding and abstract syntax", "file": "04-encoding.md"},
     {"clause": "9", "title": "Semantics, constraints and error handling", "file": "05-semantics-and-constraints.md"},
-    {"clause": "A", "title": "Discrepancies, dead fields and open items", "file": "06-discrepancies.md", "informative": true}
+    {"clause": "A", "title": "Discrepancies, dead fields and open items", "file": "06-discrepancies.md", "informative": true},
+    {"clause": "B", "title": "Example message exchange", "file": "07-examples.md", "informative": true}
   ],
   "history": [["2026-11", "R000 v00.01", "First version", "Northeastern University"]]
 }

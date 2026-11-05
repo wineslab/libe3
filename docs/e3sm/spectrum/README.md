@@ -1,9 +1,11 @@
 # E3SM-SPEC: the Spectrum service model
 
 E3SM-SPEC is the E3 service model for spectrum sensing and spectrum sharing. A RAN
-that offers it publishes a map of free time and frequency resources to dApps. It
-also accepts two controls that change how the scheduler uses the spectrum. A dApp
-can report the PRBs it found occupied, and an xApp can suggest PRBs to block.
+that offers it publishes a map of free time and frequency resources to dApps, and
+the configuration of the uplink carrier that the map refers to. It also accepts two
+controls: one blocks PRBs in the scheduler, the other asks the uplink scheduler to
+keep symbols free for sensing. A dApp can report the PRBs it found occupied, and an
+xApp can suggest PRBs to block.
 
 This directory is the specification of the service model: what the fields mean, how
 each message is encoded, and how the procedures run. The E3 Application Protocol
@@ -17,7 +19,7 @@ that carries these messages is specified in [the E3AP specification](../../e3ap/
 | Telemetry identifiers | `1` to `5` (sensing ranges, timestamp, SFN, slot, beam) |
 | Control identifiers | `1` (PRB block), `2` (sensing policy) |
 | Encodings | APER, JSON, Protocol Buffers. The RAN serves one per run. |
-| Message types | RAN function data, sensing indication, dApp control, dApp report, xApp control, apply outcome |
+| Message types | RAN function data, sensing indication, cell configuration indication, dApp control, dApp report, xApp control, apply outcome |
 
 ## Scope
 
@@ -76,6 +78,10 @@ present document, but they assist the user with regard to a particular subject a
 
 [i.5] OpenAirInterface implementation of the Spectrum service model, https://github.com/duranta-project/openairinterface5g/pull/729.
 
+[i.6] 3GPP TS 38.331: "NR; Radio Resource Control (RRC); Protocol specification".
+
+[i.7] 3GPP TS 38.104: "NR; Base Station (BS) radio transmission and reception".
+
 ## Terms, symbols and abbreviations
 
 ### Terms
@@ -99,6 +105,10 @@ downlink, until the set is replaced or cleared.
 **Sensing policy**: a list of symbol masks, one for each slot of a frame. The uplink
 scheduler prefers time domain allocations that leave the masked symbols free.
 
+**Cell configuration**: the geometry and the slot structure of the uplink carrier that
+the sensing ranges refer to: its bandwidth, its offset in the resource grid, its
+subcarrier spacing, its point A and its TDD pattern.
+
 **Apply outcome**: the report of the RAN on what applying a PRB block control did, and
 when.
 
@@ -116,10 +126,13 @@ the E3AP specification.
 | Abbreviation | Meaning |
 |---|---|
 | APER | Aligned Packed Encoding Rules |
+| ARFCN | Absolute Radio Frequency Channel Number |
+| FDD | Frequency Division Duplex |
+| PCI | Physical Cell Identity |
 | PRB | Physical Resource Block |
 | SFN | System Frame Number |
 | SM | Service Model |
-| TDA | Time Domain Allocation |
+| TDD | Time Division Duplex |
 | UL | Uplink |
 | DL | Downlink |
 
@@ -132,7 +145,7 @@ For the purposes of the present document, the following notations apply.
 **Message**: a message is written in capital letters, for example E3 RAN FUNCTION DATA.
 
 **Information element**: an information element (IE) is written in italic font with its
-name as in the grammar, for example `samplingThreshold`.
+name as in the grammar, for example `validityPeriod`.
 
 **Value**: the value of an IE is written in quotation marks, for example "0".
 
@@ -141,8 +154,11 @@ specification, for example "E3AP [1]".
 
 ### Forwards and backwards compatibility
 
-The grammar of the service model is version 1. Every payload alternative and every
-structure that can grow carries an extension marker. A receiver that meets an
+The grammar of the service model is version 1. The payload choices of the dApp
+control, the dApp report, the xApp control and the apply outcome carry an extension
+marker, and so do the cell configuration indication and the apply outcome structure.
+The indication choice, the sensing indication and the RAN function data have none
+(Annex A). A receiver that meets an
 alternative it does not know shall reject the message as described in clause 9. A
 receiver shall ignore an extension field that it does not know, where the encoding
 allows it.
@@ -161,6 +177,7 @@ messages that already exist. Clause 8 gives the rule and the effect.
 | Encoding | APER widths, JSON keys, Protocol Buffers messages, size limits and the ASN.1 clause | [04-encoding.md](04-encoding.md) |
 | Semantics and constraints | units, clocks, absent versus zero, PRB limits, validation and error handling | [05-semantics-and-constraints.md](05-semantics-and-constraints.md) |
 | Discrepancies | where the grammar, the Protocol Buffers file and the codecs disagree, dead fields, open items | [06-discrepancies.md](06-discrepancies.md) |
+| Examples | a complete exchange in APER and JSON, from the setup to the PRB block, and an apply outcome | [07-examples.md](07-examples.md) |
 
 For an engineer who adds the service model to a RAN or to a dApp there is a separate
 guide: [integrator-guide.md](integrator-guide.md). It is not part of the

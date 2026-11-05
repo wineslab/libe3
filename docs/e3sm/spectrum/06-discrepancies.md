@@ -6,22 +6,61 @@ that this specification could not verify. The text names no product. The code ev
 
 This is Annex A of the specification. It is informative.
 
-## Two copies of the grammar
+## Revisions of the grammar
 
-The grammar exists in more than one copy. The copies are meant to be identical. They are not.
+The grammar exists in more than one copy and in more than one revision. The present document
+describes the latest grammar without the sensing reservation, the PUSCH slots and the sampling
+threshold.
 
-Table: Differences between the grammar copies
+Table: Revisions of the grammar
 
-| Item | Copy used by the RAN, first revision | Copy used by the xApp side and the later RAN revision |
-|---|---|---|
-| `Spectrum-PRBBlockApplyOutcome`, `Spectrum-ApplyOutcomePayload`, `Spectrum-ApplyOutcomeData` | absent | present |
-| constant `maxSlotIndex` | absent | 159 |
-| comment about the copies | none | a comment says that all copies are byte identical |
+| Item | First RAN revision | Later revision, used by the RAN, the dApp and the xApp side | Present document |
+|---|---|---|---|
+| Apply outcome (`Spectrum-PRBBlockApplyOutcome`, `Spectrum-ApplyOutcomePayload`, `Spectrum-ApplyOutcomeData`) | absent | present | present |
+| constant `maxSlotIndex` | absent | 159 | 159 |
+| content of `protocolData` | `Spectrum-SensingIndication` | `Spectrum-Indication`, with the cell configuration indication | `Spectrum-Indication` |
+| alternatives of the dApp control | the PRB block in the root, the sensing policy as an extension | as the first revision, plus the sensing reservation and the PUSCH slots as extensions | as the first revision |
+| alternatives of the xApp control | `prbBlockedControl` and `configControl`, both in the root | the same | the same |
+| optional fields of the PRB block control | `samplingThreshold` and `validityPeriod` | the same | `validityPeriod` only |
+| unit and range of `validityPeriod`, in the PRB block and in the sensing policy | seconds, 1..3600 | the same | milliseconds, 1..3600000 |
 
 A RAN of the first revision cannot send an apply outcome. An xApp that waits for it gets the answer
-after the timeout, with no timestamps. This specification describes the later copy.
+after the timeout, with no timestamps.
 
-## The sensing indication has three spellings
+The effect on the wire was checked by encoding the same values with the grammar of the later
+revision and with the grammar of the present document.
+
+* A dApp report, a sensing indication, a cell configuration indication, an apply outcome and an xApp
+  control of either alternative have the same octets in both grammars.
+* A PRB block control with neither optional field has the same octets in both grammars. A control
+  with one of them does not. The present grammar has one presence bit where the later revision has
+  two, and its `validityPeriod` has a length field. The table after this list gives examples.
+* In Protocol Buffers and JSON, `validity_period` and `validityPeriod` keep their field number and
+  key, and the unit changes. A value of 60 from a sender of the later revision means one minute. A
+  receiver of the present document reads it as 60 ms.
+* In Protocol Buffers, a receiver of the present document skips field 2, `sampling_threshold`, as an
+  unknown field. In JSON, it ignores the key `samplingThreshold` (clause 8).
+* A sensing policy control without `validityPeriod` has the same octets in both grammars. It is the
+  first extension alternative in both. With a `validityPeriod`, the field is wider in the present
+  grammar. The open type keeps the error inside the alternative: the later revision reads 60000 ms as
+  16619, and the present grammar reads 60 s as 60 ms.
+* A sensing reservation or PUSCH slots control of the later revision is an extension alternative that
+  the present grammar does not know. A receiver rejects it (clause 9).
+* The indication of the first revision is a bare `Spectrum-SensingIndication`. A receiver of the
+  later revisions decodes `protocolData` as `Spectrum-Indication`, so the two do not interwork.
+
+Table: PRB block controls between the later revision and the present grammar, in APER
+
+| Sent with the grammar of | Optional fields sent | Read by the other grammar as |
+|---|---|---|
+| the later revision | `samplingThreshold` 5, `validityPeriod` 60 | `validityPeriod` 1 |
+| the later revision | `validityPeriod` 60 | no `validityPeriod` |
+| the later revision | `samplingThreshold` 5 | a decoding error |
+| the present document | `validityPeriod` 60000 | `samplingThreshold` 32, no `validityPeriod` |
+
+Only the third case reports an error. In the others, the receiver accepts wrong values.
+
+## The indications have three spellings
 
 The same fields have different names in the three encodings.
 
@@ -34,8 +73,15 @@ Table: Names of the reference to the ring
 | number of ranges | `nRanges` | `n_ranges` | `sensing_shm.n_ranges` |
 
 The JSON form also nests the three values in an object, while `timestamp`, `sfn`, `slot` and `beam` stay
-at the top level. A JSON consumer written from the grammar does not find its keys. A consumer that
-reads JSON needs the nested names. The two other encodings are flat.
+at the level of the sensing indication. A JSON consumer written from the grammar does not find its
+keys. A consumer that reads JSON needs the nested names. The two other encodings are flat.
+
+The JSON cell configuration indication writes every field in lower case with underscores, for example
+`ul_carrier_prbs` for `ulCarrierPRBs` (clause 8). It has no Protocol Buffers form.
+
+A JSON indication also holds the member `indicationType`, which is not in the grammar. A Protocol
+Buffers indication is a sensing indication with no wrapper, so nothing in it tells the two
+indications apart.
 
 ## Fields that the RAN decodes and does not use
 
@@ -43,12 +89,11 @@ Table: Fields without an effect
 
 | Field | What the RAN does |
 |---|---|
-| `Spectrum-PRBBlacklistControl.samplingThreshold` | decodes it and ignores it |
 | `Spectrum-PRBBlacklistControl.validityPeriod` | decodes it and ignores it. A block does not expire. |
 | `Spectrum-SensingPolicyControl.validityPeriod` | decodes it and writes it to a log line. A policy does not expire. |
 | telemetry identifiers 2 to 5 | advertises them. The indication does not depend on them. |
 
-A dApp that relies on a block to expire after `validityPeriod` seconds is wrong. It shall clear the
+A dApp that relies on a block to expire after `validityPeriod` milliseconds is wrong. It shall clear the
 block itself.
 
 ## The three decoders have different strictness
@@ -63,10 +108,9 @@ Table: Range checks by encoding
 | PRB list size at most 273 | checked | checked | checked |
 | symbol mask 0..16383 | checked | checked | checked |
 | mask list size 1..160 | checked | checked | checked |
-| `samplingThreshold` 0..100 | checked | not checked | not checked |
-| `validityPeriod` 1..3600 | checked | not checked | not checked |
+| `validityPeriod` 1..3600000 | checked | not checked | not checked |
 
-A value of 500 for `samplingThreshold` is refused in APER and accepted in JSON and Protocol Buffers.
+A value of 5000000 for `validityPeriod` is refused in APER and accepted in JSON and Protocol Buffers.
 Because the RAN ignores the field, the effect is none today. The difference matters when the RAN starts
 to use it.
 
@@ -97,6 +141,8 @@ Wider fields cost bits in APER. They also hide errors. They are not wrong.
 * `Spectrum-ConfigControl` (`noiseFloorThreshold`, `averagingFrames`, `enable`) is in the grammar and in
   the Protocol Buffers file. This specification found no encoder, no decoder and no handler for it on
   the RAN, the dApp or the xApp side. The unit of `noiseFloorThreshold` is not defined anywhere.
+* The cell configuration indication has an APER and a JSON encoder on the RAN side and a JSON decoder
+  on the dApp side. It has no Protocol Buffers form.
 * `Spectrum-PRBBlockedControl` has an xApp encoder and a dApp decoder. No other xApp control alternative
   has one.
 * The apply outcome has an encoder on the RAN side and a decoder on the xApp side, in APER only. It has
@@ -141,6 +187,7 @@ Table: Open items
 | What a dApp does with a ring when the RAN stops and starts the service model. The RAN removes the region and creates a new one. A mapping that the dApp holds still points to the old region. | Not defined. A dApp should unmap and map again on every new subscription. This is not verified. |
 | The wire values of the telemetry identifiers. A comment says that they follow a convention of the L1-KPM service model, in which the identifier is a bit position plus one. | The convention is not a rule of this specification. No code uses a bit mask. The numbers are tracked on the [interoperability page](../../interop.md). |
 | Unit and range of `noiseFloorThreshold`. | Not defined. |
+| `Spectrum-Indication` has no extension marker. A third kind of indication would change the width of its alternative index. | Open. An extension marker added now would change the encoding of every indication once. |
 | The JSON codecs of the dApp report and of the xApp control. | Required by this specification and missing. See [encoding](04-encoding.md#json). |
 | The behavior of an unknown extension alternative in an APER choice. The RAN rejects a control that holds an alternative other than the one for its control identifier. What the decoder reports for an unknown extension alternative was not tested. | Not tested. |
 | An end to end test of the sensing indication, the ring and the apply outcome against a second implementation. | None found. No golden vectors exist for this service model. |
