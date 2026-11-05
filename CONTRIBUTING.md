@@ -122,14 +122,14 @@ This repository is part of a framework that includes [`dapps`](https://github.co
 
 ### Specifications and their Word editions
 
-The specifications live under `docs/` (`e2sm-dapp/`, `e3ap/`, `e3sm/spectrum/`, `e3sm/l1-kpm/`). The Markdown is the source. The Word file in each folder (`O-RAN.WG3.TS.*.docx`) is generated from it, so **never edit a Word file by hand**: the next build overwrites the edit.
+The specifications live under `docs/` (`e2sm-dapp/`, `e3ap/`, `e3sm/spectrum/`, `e3sm/l1-kpm/`). The Markdown is the source. The Word file in each folder (`O-RAN.XXX.TS.*.docx`, where `XXX` holds the place of the group name until the naming is agreed) is generated from it, so **never edit a Word file by hand**: the next build overwrites the edit.
 
 To change a specification:
 
 1. Edit the Markdown chapters of that folder (`README.md` for the scope, references, terms and general clauses, `01` to `06` for the clauses that follow). Write American English, short sentences, no dashes, `shall` and `should` instead of `must`. Spec text names no repository and gives no `path:line`; code pointers go in the integrator guide (`integrator-guide.md`, `code-pointers.md`).
 2. Put a line `Table: <caption>` directly above each new table, so the Word file gets a caption.
 3. To change the clause layout, the title or the document number, edit `docx.json` in the same folder.
-4. Build the Word file: `tools/oran_docx/build_docx.py docs/<folder>`. It needs Python 3 only; LibreOffice and `pdftotext` add page numbers to the table of contents. See `tools/oran_docx/README.md`.
+4. Build the Word file in the container of `tools/oran_docx/`, so that the table of contents has page numbers: `docker build -t libe3-oran-docx tools/oran_docx`, then `docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/src libe3-oran-docx docs/<folder>`. Without Docker, `tools/oran_docx/build_docx.py docs/<folder>` needs Python 3 only, and adds the page numbers only when LibreOffice and `pdftotext` are installed. See `tools/oran_docx/README.md`.
 5. Open the result in Word or convert it to PDF, and look at the cover, one table and the ASN.1 clause.
 6. Commit the Markdown and the rebuilt Word file in the same commit, so the two never differ.
 

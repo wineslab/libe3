@@ -29,6 +29,12 @@ precedence = "override"
 SPDX-FileCopyrightText = "Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
 SPDX-License-Identifier = "Apache-2.0"
 
+# The figures of the specifications are PNG files, which cannot carry a header.
+[[annotations]]
+path = "docs/**/figures/*.png"
+SPDX-FileCopyrightText = "Copyright (c) 2026 Northeastern University"
+SPDX-License-Identifier = "Apache-2.0"
+
 # The E2SM-DAPP grammar is a byte-identical copy of flexric's, so that the two
 # can be compared with cmp; it therefore cannot carry an inline header.
 [[annotations]]

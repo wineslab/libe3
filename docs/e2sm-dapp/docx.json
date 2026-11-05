@@ -1,7 +1,8 @@
 {
-  "number": "O-RAN.WG3.TS.E2SM-DAPP-R000-v00.01",
+  "number": "O-RAN.XXX.TS.E2SM-DAPP-R000-v00.01",
   "title": "E2 Service Model dApp (E2SM-DAPP)",
   "cover": ["E2 Service Model (E2SM)", "dApp (E2SM-DAPP)"],
+  "group": {"cover": ["O-RAN Work Group 3", "Near-Real-time RAN Intelligent Controller"], "foreword": "WG3"},
   "parts": [
     {"clause": "1", "title": "Scope", "file": "README.md", "section": "Scope"},
     {"clause": "2", "title": "References", "file": "README.md", "section": "References"},

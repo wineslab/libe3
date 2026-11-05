@@ -1,18 +1,24 @@
 {
-  "number": "O-RAN.WG3.TS.E3SM-L1KPM-R000-v00.01",
-  "title": "E3 Service Model L1 KPM (E3SM-L1KPM)",
-  "cover": ["E3 Service Model (E3SM)", "L1 KPM (E3SM-L1KPM)"],
+  "number": "O-RAN.XXX.TS.E3SM-L1-KPM-R000-v00.01",
+  "title": "E3 Service Model (E3SM), L1 KPM (E3SM-L1-KPM)",
+  "cover": ["E3 Service Model (E3SM)", "L1 KPM (E3SM-L1-KPM)"],
   "parts": [
     {"clause": "1", "title": "Scope", "file": "README.md", "section": "Scope"},
     {"clause": "2", "title": "References", "file": "README.md", "section": "References"},
     {"clause": "3", "title": "Definition of terms, symbols and abbreviations", "file": "README.md", "section": "Terms, symbols and abbreviations"},
     {"clause": "4", "title": "General", "file": "README.md", "section": "General"},
-    {"clause": "5", "title": "Identity and registration", "file": "01-identity-and-registration.md"},
-    {"clause": "6", "title": "Information elements", "file": "02-ie-mapping.md"},
-    {"clause": "7", "title": "Procedures", "file": "03-procedure-flow.md"},
-    {"clause": "8", "title": "Encoding and abstract syntax", "file": "04-encoding.md"},
-    {"clause": "9", "title": "Semantics and constraints", "file": "05-semantics-and-constraints.md"},
-    {"clause": "A", "title": "Discrepancies and open items", "file": "06-discrepancies.md", "informative": true}
+    {"clause": "5", "title": "E3SM services", "file": "01-services.md"},
+    {"clause": "6", "title": "RAN function service model description", "file": "02-service-model-description.md"},
+    {"clause": "7", "title": "RAN function description", "file": "03-ran-function-description.md"},
+    {"clause": "8", "title": "Elements for E3SM service model", "file": "04-elements.md"},
+    {"clause": "8.4", "title": "Information element abstract syntax (with ASN.1)", "file": "05-abstract-syntax.md"},
+    {"clause": "8.5", "title": "Encoding", "file": "06-encoding.md", "section": "Encoding"},
+    {"clause": "8.6", "title": "JSON encoding", "file": "06-encoding.md", "section": "JSON encoding"},
+    {"clause": "8.7", "title": "Size limits", "file": "06-encoding.md", "section": "Size limits"},
+    {"clause": "9", "title": "Handling of unknown, unforeseen and erroneous protocol data", "file": "07-error-handling.md"},
+    {"clause": "A", "title": "Shared memory region", "file": "annex-a-shared-memory.md", "informative": false},
+    {"clause": "B", "title": "Example message exchange", "file": "annex-b-examples.md", "informative": true},
+    {"clause": "C", "title": "Open items", "file": "annex-c-open-items.md", "informative": true}
   ],
-  "history": [["2026-11", "R000 v00.01", "First version", "Northeastern University"]]
+  "history": [["2026-11", "R000 v00.01", "First version", "NVIDIA, Northeastern University"]]
 }

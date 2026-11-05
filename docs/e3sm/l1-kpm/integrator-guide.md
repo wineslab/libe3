@@ -1,10 +1,14 @@
-# E3SM-L1KPM: integrator guide
+# E3SM-L1-KPM: integrator guide
 
-A practical guide for an engineer who adds E3SM-L1KPM to a RAN stack or reads it in a
+A practical guide for an engineer who adds E3SM-L1-KPM to a RAN stack or reads it in a
 dApp. It is not part of the specification. Where it and the specification differ, the
 specification wins. Code pointers are allowed here and only here.
 
 The index of the specification is [README.md](../l1-kpm/README.md).
+
+The implementation described here predates the present draft of the specification.
+[Annex C](annex-c-open-items.md) lists where it differs from the draft, and the last two
+clauses of this guide give the evidence in the code.
 
 ## Code roots
 
@@ -57,26 +61,40 @@ Line numbers drift. Function names are the stable reference. Paths under `oai/` 
 
 ## For a dApp
 
-1. Subscribe with `ranFunctionIdentifier` `2` and an empty control list. Set `periodicity` if you want a slower rate. Remember the RAN sends the fastest rate of all dApps to everyone.
-2. Decode the indication with the codec of your session. Take the reference from `iqSamplesRef`.
-3. Open the region once with `shm_open(name, O_RDONLY, 0)` and `mmap` with `PROT_READ` and `MAP_SHARED`. Map the whole file. Check `version` in the header.
-4. Compute the row and sample addresses with the formulas of [02-ie-mapping.md](02-ie-mapping.md). The row size is `num_fh_samples * 2` bytes, and the buffer size is in the header.
-5. Copy the samples you need, convert from binary16, divide by the `beta` of the RAN if you need the FFT scale, then run the overwrite rules of [03-procedure-flow.md](03-procedure-flow.md).
+1. Subscribe with `ranFunctionIdentifier` `2` and an empty control list. Set `periodicity` if you want a slower rate. Remember the RAN sends the fastest rate of all dApps to everyone (Annex C, item C.17).
+2. Decode the indication with the codec of your session. It has the flat form of Annex C, item C.18, and the RAN function data the form of item C.27. Take the reference from `iqSamplesRef`.
+3. Open the region once with `shm_open(name, O_RDONLY, 0)` and `mmap` with `PROT_READ` and `MAP_SHARED`. Map the whole file. Check `version` in the header. The region of this implementation has version `1` and a header of 64 octets (Annex C, item C.25).
+4. Compute the row and sample addresses with the formulas of [Annex A.5](annex-a-shared-memory.md#location-of-the-data) and [Annex A.6.1](annex-a-shared-memory.md#iq-samples), with the header of 64 octets in place of the header of Annex A.3. The row size is `num_fh_samples * 2` bytes, and the buffer size is in the header.
+5. Copy the samples you need, convert from binary16, divide by the `beta` of the RAN if you need the FFT scale (Annex C, item C.13), then run the overwrite rules of [Annex A.4](annex-a-shared-memory.md#rows-buffers-and-reuse). One slot fills one row here, so the finer check of Annex A.4 applies.
 6. Retry `shm_open` for a short time after the subscription. The RAN creates the object at the first uplink slot.
 7. In a container, share `/dev/shm` with the RAN container.
 
-## Evidence for the discrepancies
+## Evidence for the items of Annex C
 
-| # in [06](06-discrepancies.md) | Evidence |
+| Item of [Annex C](annex-c-open-items.md) | Evidence |
 |---|---|
-| 1.1, 1.2 | `l1_kpm_enc.c`, ASN.1 branch of `l1_kpm_enc_indication`: `cellId`, `nRxAnt`, `validSymbolMask` always set. `e3_ran_buffers.c`: `.cell_id = 0` in the snapshot (line 381) |
-| 1.5, 2.6 | `l1_kpm_enc.c`: `pdu.timestamp = (long)slot->timestamp_ns`. `.proto`: `int64 timestamp` |
-| 1.6 | comment on `L1KPM-Indication` in the grammar file |
-| 2.1 | `l1_kpm_enc.c:160-220`: the `else` branch of `l1_kpm_enc_ran_function_data` writes JSON for every encoding that is not ASN.1 |
-| 2.4 | `l1_kpm_enc.c:207`: `snprintf` with `%s` |
-| 2.5 | header comment of `e3sm_l1_kpm.proto` |
-| 3.2 | `e3_ran_buffers_header_t` in `e3_ran_buffers.h`, `reserved[7]` |
-| 3.3 | comment above `E3_RB_NUM_FH_ROWS` in `e3_ran_buffers.c` |
-| 3.4 | `e3_ran_buffers.c:316-350`: the loop runs over `ants` only. The comment above `E3_RB_N_ANTS` says "zero-fills the rest" |
-| 3.6 | `e3_ran_buffers.c:207-213` and `:300-306`: init is retried at each call |
-| 4.1, 4.2 | `e3_ran_buffers_slot_info_t` fields written in `e3_ran_buffers_push_rxdataF` and read nowhere else |
+| C.19, C.20 | `l1_kpm_enc.c`, ASN.1 branch of `l1_kpm_enc_indication`: `cellId`, `nRxAnt`, `validSymbolMask` always set. `e3_ran_buffers.c`: `.cell_id = 0` in the snapshot (line 381) |
+| C.22 | `l1_kpm_enc.c`: `pdu.timestamp = (long)slot->timestamp_ns`. `.proto`: `int64 timestamp` |
+| C.3 | comment on `L1KPM-Indication` in the grammar file: a subscription grants only the four core identifiers, so `cellId` and `nRxAnt` are optional |
+| C.4 | `l1_kpm_enc.c:160-220`: the `else` branch of `l1_kpm_enc_ran_function_data` writes JSON for every encoding that is not ASN.1 |
+| C.23 | `l1_kpm_enc.c:207`: `snprintf` with `%s` |
+| C.13 | `e3_ran_buffers_header_t` in `e3_ran_buffers.h`, `reserved[7]` |
+| C.26 | `e3_ran_buffers.c:316-350`: the loop runs over `ants` only. The comment above `E3_RB_N_ANTS` says "zero-fills the rest" |
+| C.16 | `e3_ran_buffers.c:207-213` and `:300-306`: init is retried at each call |
+
+## Code notes
+
+Findings in the code that do not change what the specification says. Severity as in
+Annex C.
+
+| # | Note | Evidence |
+|---|---|---|
+| N.1 | The Protocol Buffers file says that it mirrors a grammar file with a different name from the file that exists. A reader looks for a file that is not there. Severity: doc. | header comment of `e3sm_l1_kpm.proto` |
+| N.2 | A comment says that the depth of the buffers gives about 64 ms before the RAN reuses a row. The code has 32 rows, and the time depends on the rate of uplink slots. The 64 ms could not be reproduced from the code. Severity: doc. | comment above `E3_RB_NUM_FH_ROWS` in `e3_ran_buffers.c` |
+| N.3 | The producer keeps indices and sizes for the PUSCH and channel estimate areas (`pusch_buffer_index`, `hest_buffer_index`, `hest_data_size`). They are always `0` and are not encoded. | `e3_ran_buffers_slot_info_t` fields written in `e3_ran_buffers_push_rxdataF` and read nowhere else |
+| N.4 | The `valid` flag of the snapshot is set and never read. | as N.3 |
+| N.5 | The header fields `num_pusch_rows`, `num_hest_rows` and `max_hest_samples_per_row` are constants. No code reads them. | not recorded |
+| N.6 | A comment says that the header layout matches an external one byte for byte. It could not be tied to code. | a comment in the region code |
+| N.7 | The symbol mask uses the slot number as the index into the TDD table. Whether that is right for a TDD period shorter than a frame could not be checked. | `e3_ran_buffers.c:352-363` |
+| N.8 | The cadence of an absent `periodicity`: the RAN reads it as `0` through a helper that was not opened. | `min_subscription_period_us` in `e3_agent.c` |
+| N.9 | A failed encoding or a failed send records one warning, and the later ones are silenced. A dApp that a send misses is counted as skipped for that indication. | not recorded |

@@ -9,7 +9,7 @@
 The folder holds the Markdown chapters and one manifest, docx.json:
 
     {
-      "number": "O-RAN.WG3.TS.E3AP-R000-v00.01",
+      "number": "O-RAN.XXX.TS.E3AP-R000-v00.01",
       "title":  "E3 Application Protocol (E3AP)",
       "cover":  ["E3 Application Protocol (E3AP)", ""],
       "parts": [
@@ -25,10 +25,19 @@ heading of the file. The clause number gives the part its place and its heading
 level (one dot per level). A part without "file" is a bare heading. Headings
 inside a part are numbered under the part. A leading number in a Markdown
 heading is dropped. A paragraph that starts with "Table:" and sits directly
-above a table becomes the table caption. Fenced blocks become monospaced lines.
+above a table becomes the table caption. An image on a line of its own,
+![caption](figures/flow.png), becomes a figure with that caption. Fenced
+blocks become a box of monospaced lines.
 
 The styles, headers, footers and cover come from template.docx, which
-make_template.py cuts from an O-RAN specification. The page numbers of the
+make_template.py cuts from an O-RAN specification. The template names the
+working group of DEFAULT_GROUP on the cover and in the Foreword. A manifest
+names another one with "group", as E2SM-DAPP does:
+
+      "group": {"cover": ["O-RAN Work Group 3", "Near-Real-time RAN Intelligent Controller"],
+                "foreword": "WG3"}
+
+The page numbers of the
 table of contents come from a LibreOffice layout, so Word may move them by a
 page: press F9 on the table of contents in Word to refresh them.
 """
@@ -37,6 +46,7 @@ import json
 import os
 import re
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -47,8 +57,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 TOC_MARK = "@@TOC@@"
 BODY_MARK = "@@BODY@@"
 TEMPLATE_NUMBER = "O-RAN.WG3.TS.E2SM-KPM-R005-v08.00"
+# The working group of the E3 specifications. X holds the place of its number
+# until the naming is agreed, as XXX does in the document numbers.
+DEFAULT_GROUP = {"cover": ["O-RAN Work Group X", "Real-Time Distributed Applications (dApps)"], "foreword": "WGX"}
 TABLE_WIDTH = 9631
 MONO = '<w:rFonts w:ascii="Courier New" w:hAnsi="Courier New" w:cs="Courier New"/>'
+CODE_BOX = (
+    "<w:pBdr>"
+    + "".join(f'<w:{side} w:val="single" w:sz="4" w:space="4" w:color="A6A6A6"/>' for side in ("top", "left", "bottom", "right"))
+    + '</w:pBdr><w:shd w:val="clear" w:color="auto" w:fill="F2F2F2"/>'
+    '<w:spacing w:after="0" w:line="240" w:lineRule="auto"/><w:ind w:left="113" w:right="113"/>'
+)
 
 # ---------------------------------------------------------------- inline text
 
@@ -140,6 +159,13 @@ def longest_word(text):
     return best + 220
 
 
+# A line that holds only HTML anchors, such as <a id="x"></a>, is a link target
+# for the Markdown edition. Word has its own bookmarks, so the line is dropped.
+ANCHOR = re.compile(r'^\s*(<a\s+(?:id|name)="[^"]*"\s*>\s*</a>\s*)+$')
+# An image on a line of its own is a figure. Its alt text is the caption.
+IMAGE = re.compile(r'^\s*!\[(?P<alt>[^\]]*)\]\((?P<src>[^)\s]+)(?:\s+"[^"]*")?\)\s*$')
+
+
 def parse_blocks(lines):
     """Split Markdown lines into blocks: heading, para, list, table, code, quote."""
     blocks = []
@@ -153,6 +179,14 @@ def parse_blocks(lines):
         if line.lstrip().startswith("<!--"):
             while i < n and "-->" not in lines[i]:
                 i += 1
+            i += 1
+            continue
+        if ANCHOR.match(line):
+            i += 1
+            continue
+        m = IMAGE.match(line)
+        if m:
+            blocks.append(("image", m.group("alt"), m.group("src")))
             i += 1
             continue
         m = re.match(r"^(\s*)(`{3,}|~{3,})\s*([\w+-]*)\s*$", line)
@@ -205,7 +239,7 @@ def parse_blocks(lines):
             continue
         para = [line.strip()]
         i += 1
-        while i < n and lines[i].strip() and not re.match(
+        while i < n and lines[i].strip() and not ANCHOR.match(lines[i]) and not IMAGE.match(lines[i]) and not re.match(
             r"^(\s*([-*+]|\d+[.)])\s|#{1,6}\s|\s*`{3,}|\s*\||\s*>|\s*<!--)", lines[i]
         ):
             para.append(lines[i].strip())
@@ -244,12 +278,67 @@ def select(blocks, section):
 # --------------------------------------------------------------------- output
 
 
+EMU_PER_INCH = 914400
+MAX_FIGURE_EMU = (TABLE_WIDTH * 635, 8 * EMU_PER_INCH)  # text width, and 8 inches of height
+DRAWINGML = "http://schemas.openxmlformats.org/drawingml/2006"
+IMAGE_REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
+
+
+def image_size(path):
+    """Extension, and width and height in EMU at the resolution the file states (96 dpi if none)."""
+    if not os.path.isfile(path):
+        raise SystemExit(f"{path}: figure not found")
+    with open(path, "rb") as f:
+        data = f.read()
+    dpi = 96.0
+    if data[:8] == b"\x89PNG\r\n\x1a\n":
+        ext = "png"
+        w, h = struct.unpack(">II", data[16:24])
+        i = 8
+        while i + 8 <= len(data):
+            length, kind = struct.unpack(">I4s", data[i:i + 8])
+            if kind == b"pHYs":
+                ppu, _, unit = struct.unpack(">IIB", data[i + 8:i + 17])
+                if unit == 1 and ppu:
+                    dpi = ppu * 0.0254
+            if kind in (b"IDAT", b"IEND"):
+                break
+            i += 12 + length
+    elif data[:2] == b"\xff\xd8":
+        ext = "jpeg"
+        w = h = 0
+        i = 2
+        while i + 4 <= len(data) and data[i] == 0xFF:
+            marker = data[i + 1]
+            if marker == 0xD8 or 0xD0 <= marker <= 0xD7:
+                i += 2
+                continue
+            length = struct.unpack(">H", data[i + 2:i + 4])[0]
+            if marker == 0xE0 and data[i + 4:i + 9] == b"JFIF\0":
+                units, density = data[i + 11], struct.unpack(">H", data[i + 12:i + 14])[0]
+                if density and units in (1, 2):
+                    dpi = density if units == 1 else density * 2.54
+            if 0xC0 <= marker <= 0xCF and marker not in (0xC4, 0xC8, 0xCC):
+                h, w = struct.unpack(">HH", data[i + 5:i + 9])
+                break
+            i += 2 + length
+        if not w or not h:
+            raise SystemExit(f"{path}: no frame size in the JPEG file")
+    else:
+        raise SystemExit(f"{path}: a figure must be a PNG or JPEG file")
+    cx, cy = w / dpi * EMU_PER_INCH, h / dpi * EMU_PER_INCH
+    scale = min(1.0, MAX_FIGURE_EMU[0] / cx, MAX_FIGURE_EMU[1] / cy)
+    return data, ext, int(cx * scale), int(cy * scale)
+
+
 class Doc:
     def __init__(self):
         self.xml = []
         self.headings = []  # (depth, number, title, bookmark)
         self.bm = 0
         self.table_no = {}
+        self.figure_no = {}
+        self.media = []  # (part name under word/, bytes, relationship id)
 
     def para(self, runs, style=None, ppr=""):
         st = f'<w:pStyle w:val="{style}"/>' if style else ""
@@ -272,17 +361,10 @@ class Doc:
         self.headings.append((depth, annex_label or number, title, name))
 
     def code(self, lines):
+        """PL paragraphs with one border and shading, which Word and LibreOffice join into one box."""
         for ln in lines:
-            ppr = '<w:spacing w:after="0" w:line="240" w:lineRule="auto"/>'
-            if ln.strip():
-                r = (
-                    '<w:r><w:rPr><w:rFonts w:ascii="Courier New" w:hAnsi="Courier New" w:cs="Courier New"/>'
-                    '<w:sz w:val="16"/><w:szCs w:val="16"/></w:rPr>'
-                    f'<w:t xml:space="preserve">{escape(ln.expandtabs(4))}</w:t></w:r>'
-                )
-            else:
-                r = ""
-            self.para([r] if r else [], ppr=ppr)
+            r = f'<w:r><w:t xml:space="preserve">{escape(ln.expandtabs(4))}</w:t></w:r>' if ln.strip() else ""
+            self.para([r] if r else [], style="PL", ppr=CODE_BOX)
         self.para([], ppr='<w:spacing w:after="0"/>')
 
     def table(self, header, rows, caption, top):
@@ -336,6 +418,30 @@ class Doc:
         out.append("</w:tbl>")
         self.xml.append("".join(out))
         self.para([], ppr='<w:spacing w:after="120"/>')
+
+    def figure(self, path, caption, top):
+        data, ext, cx, cy = image_size(path)
+        n = len(self.media) + 1
+        rid, part, pid = f"rIdFig{n}", f"media/figure{n}.{ext}", 1000 + n
+        self.media.append((part, data, rid))
+        descr = escape(caption, {'"': "&quot;"})
+        drawing = (
+            f'<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">'
+            f'<wp:extent cx="{cx}" cy="{cy}"/><wp:effectExtent l="0" t="0" r="0" b="0"/>'
+            f'<wp:docPr id="{pid}" name="Figure {n}" descr="{descr}"/>'
+            f'<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="{DRAWINGML}/main" noChangeAspect="1"/></wp:cNvGraphicFramePr>'
+            f'<a:graphic xmlns:a="{DRAWINGML}/main"><a:graphicData uri="{DRAWINGML}/picture">'
+            f'<pic:pic xmlns:pic="{DRAWINGML}/picture">'
+            f'<pic:nvPicPr><pic:cNvPr id="{pid}" name="figure{n}.{ext}"/>'
+            f'<pic:cNvPicPr><a:picLocks noChangeAspect="1"/></pic:cNvPicPr></pic:nvPicPr>'
+            f'<pic:blipFill><a:blip r:embed="{rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>'
+            f'<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="{cx}" cy="{cy}"/></a:xfrm>'
+            f'<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>'
+            f"</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>"
+        )
+        self.para([drawing], style="TH")
+        self.figure_no[top] = self.figure_no.get(top, 0) + 1
+        self.para([run(f"Figure {top}-{self.figure_no[top]}: {caption}")], style="TF")
 
     def lst(self, items):
         counters = {}
@@ -398,6 +504,8 @@ def render_part(doc, part, base):
         elif kind == "table":
             doc.table(b[1], b[2], plain(caption) if caption else None, top)
             caption = None
+        elif kind == "image":
+            doc.figure(os.path.join(base, b[2]), plain(b[1]), top)
         elif kind == "code" and b[1] == "mermaid":
             doc.para([run("[A diagram is in the Markdown edition of this clause.]", italic=True)])
         elif kind == "code":
@@ -468,6 +576,33 @@ def set_cover(xml, number, cover):
         p = m.group(0)
         ppr_end = p.index("</w:pPr>") + len("</w:pPr>")
         xml = xml.replace(p, p[:ppr_end] + (run(text) if text else "") + "</w:p>", 1)
+    return xml
+
+
+def set_group(xml, group):
+    """Name the working group on the cover (two lines) and in the Foreword."""
+    def text(p):
+        return "".join(re.findall(r"<w:t[^>]*>([^<]*)</w:t>", p))
+
+    def rewrite(p, runs):
+        ppr = re.search(r"<w:pPr>.*?</w:pPr>", p, re.S)
+        return re.match(r"<w:p[^>]*>", p).group(0) + (ppr.group(0) if ppr else "") + runs + "</w:p>"
+
+    foreword = f"This Technical Specification (TS) has been produced by {group['foreword']} of the O-RAN ALLIANCE."
+    found = []
+
+    def fix(m):
+        p = m.group(0)
+        if 'w:val="ZT"' in p and text(p).startswith("O-RAN Work Group"):
+            found.append("cover")
+            return rewrite(p, "<w:r><w:br/></w:r>".join(run(t) for t in group["cover"]))
+        if text(p).startswith("This Technical Specification (TS) has been produced by "):
+            found.append("foreword")
+            return rewrite(p, run(foreword))
+        return p
+
+    xml = re.sub(r"<w:p[ >](?:(?!</w:p>).)*</w:p>", fix, xml, flags=re.S)
+    assert sorted(found) == ["cover", "foreword"], "template cover or Foreword changed"
     return xml
 
 
@@ -552,7 +687,20 @@ def build(folder, out, with_pages=True):
                 if name == "word/document.xml":
                     x = data.decode("utf8")
                     x = set_cover(x, man["number"], man["cover"])
+                    if man.get("group"):
+                        x = set_group(x, man["group"])
                     x = x.replace(TOC_MARK, toc_xml(doc, pages, extra)).replace(BODY_MARK, "".join(doc.xml))
+                    data = x.encode("utf8")
+                elif name == "word/_rels/document.xml.rels":
+                    rels = "".join(
+                        f'<Relationship Id="{rid}" Type="{IMAGE_REL}" Target="{part}"/>' for part, _, rid in doc.media
+                    )
+                    data = data.decode("utf8").replace("</Relationships>", rels + "</Relationships>").encode("utf8")
+                elif name == "[Content_Types].xml":
+                    x = data.decode("utf8")
+                    for ext in sorted({p.rsplit(".", 1)[1] for p, _, _ in doc.media}):
+                        if f'Extension="{ext}"' not in x:
+                            x = x.replace("<Override ", f'<Default Extension="{ext}" ContentType="image/{ext}"/><Override ', 1)
                     data = x.encode("utf8")
                 elif name in ("word/header1.xml", "word/header2.xml"):
                     data = data.decode("utf8").replace(TEMPLATE_NUMBER, man["number"]).encode("utf8")
@@ -564,6 +712,8 @@ def build(folder, out, with_pages=True):
                     x = re.sub(r'(name="TITLE"><vt:lpwstr>).*?(</vt:lpwstr>)', lambda m: m.group(1) + escape(man["title"]) + m.group(2), x)
                     data = x.encode("utf8")
                 zout.writestr(item.filename, data)
+            for part, blob, _ in doc.media:
+                zout.writestr("word/" + part, blob)
 
     write(out, {})
     if with_pages:

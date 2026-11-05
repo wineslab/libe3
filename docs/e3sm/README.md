@@ -7,11 +7,14 @@ function and the dApp use it.
 
 Each service model has its own folder with the same six chapters as the
 [E2SM-DAPP specification](../e2sm-dapp/README.md) and the [E3AP specification](../e3ap/README.md).
+The L1-KPM draft follows the clause layout of the E2 service models instead: services,
+RAN function description, information elements with ASN.1 and JSON, error handling, and
+annexes.
 
 | Service model | RAN function ID | What it does | Folder | Word edition |
 |---|---|---|---|---|
-| E3SM Spectrum | 1 | Sensing telemetry, PRB blacklist control, sensing policy control, dApp reports and xApp controls for spectrum sharing | [spectrum/](spectrum/README.md) | `O-RAN.WG3.TS.E3SM-SPEC-R000-v00.01.docx` |
-| E3SM L1-KPM | 2 | Telemetry from the physical layer: a reference to the IQ samples of each uplink slot | [l1-kpm/](l1-kpm/README.md) | `O-RAN.WG3.TS.E3SM-L1KPM-R000-v00.01.docx` |
+| E3SM Spectrum | 1 | Sensing telemetry, PRB blacklist control, sensing policy control, dApp reports and xApp controls for spectrum sharing | [spectrum/](spectrum/README.md) | `O-RAN.XXX.TS.E3SM-SPEC-R000-v00.01.docx` |
+| E3SM L1-KPM (draft) | 2 | Telemetry from the uplink layer 1: the PUSCH and SRS data of each uplink slot (79 telemetry identifiers and the valid symbol mask), selection of cells and UEs, and a shared memory layout for the large arrays | [l1-kpm/](l1-kpm/README.md) | `O-RAN.XXX.TS.E3SM-L1-KPM-R000-v00.01.docx` |
 
 ## What the service models share
 

@@ -108,7 +108,7 @@ A RAN that offers the Spectrum service model shall do the following.
 The RAN may offer RAN function 2 (the L1-KPM service model) at the same time. The
 two service models are independent. The Spectrum service model carries no IQ samples.
 IQ samples are carried by the L1-KPM service model, and a dApp joins the two streams
-by `(sfn, slot)`. See the [E3SM-L1KPM specification](../l1-kpm/README.md).
+by `(sfn, slot)`. See the [E3SM-L1-KPM specification](../l1-kpm/README.md).
 
 ## Lifecycle
 

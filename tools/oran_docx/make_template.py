@@ -8,7 +8,9 @@ specification has: the cover, the copyright page, the "Contents" heading, the
 Foreword and the Modal verbs clause, the styles, the numbering, the headers
 and the footers. It replaces the table of contents and the body with two
 markers, and ends the document with one section, so a generated document needs
-no landscape or per-clause section breaks.
+no landscape or per-clause section breaks. The cover and the Foreword name the
+working group of the E3 specifications, DEFAULT_GROUP of build_docx.py, instead
+of O-RAN Work Group 3.
 
     make_template.py O-RAN.WG3.TS.E2SM-KPM-R005-v08.00.docx template.docx
 
@@ -18,6 +20,8 @@ template.docx next to this script.
 import re
 import sys
 import zipfile
+
+from build_docx import DEFAULT_GROUP, set_group
 
 TOC_MARK = "@@TOC@@"
 BODY_MARK = "@@BODY@@"
@@ -80,7 +84,7 @@ def main() -> int:
         for item in zin.infolist():
             data = zin.read(item.filename)
             if item.filename == "word/document.xml":
-                data = cut(data.decode("utf8")).encode("utf8")
+                data = set_group(cut(data.decode("utf8")), DEFAULT_GROUP).encode("utf8")
             zout.writestr(item.filename, data)
     return 0
 
