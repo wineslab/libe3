@@ -12,6 +12,7 @@
 #include "libe3/e3_connector.hpp"
 #include <atomic>
 #include <cstddef>
+#include <unordered_map>
 #include <vector>
 
 namespace libe3 {
@@ -32,6 +33,17 @@ namespace libe3 {
  */
 class PosixE3Connector : public E3Connector {
 public:
+    /**
+     * @brief Create a POSIX connector
+     *
+     * @param transport_layer SCTP, TCP or IPC
+     * @param setup_endpoint Endpoint of the setup channel
+     * @param inbound_endpoint Endpoint of the inbound channel
+     * @param outbound_endpoint Endpoint of the outbound channel
+     * @param setup_port Port of the setup channel (SCTP and TCP)
+     * @param inbound_port Port of the inbound channel (SCTP and TCP)
+     * @param outbound_port Port of the outbound channel (SCTP and TCP)
+     */
     PosixE3Connector(
         E3TransportLayer transport_layer,
         const std::string& setup_endpoint,
@@ -42,6 +54,7 @@ public:
         uint16_t outbound_port
     );
     
+    /** @brief Close every socket. */
     ~PosixE3Connector() override;
 
     ErrorCode setup_initial_connection() override;
@@ -61,6 +74,8 @@ public:
 
     void dispose() override;
     void shutdown() override;
+    uint64_t last_peer_token() const override;
+    std::vector<uint64_t> take_closed_peers() override;
     
     E3LinkLayer link_layer() const noexcept override {
         return E3LinkLayer::POSIX;
@@ -93,6 +108,14 @@ private:
     // dispose(). A caller that disposes without joining those threads first
     // would race on these vectors.
     std::vector<int> inbound_peer_sockets_;
+
+    // Inbound peers are named by a token that is never reused, because a file
+    // descriptor is (see E3Connector::last_peer_token). Owned by the inbound
+    // thread, like inbound_peer_sockets_.
+    std::unordered_map<int, uint64_t> inbound_peer_tokens_;
+    uint64_t next_peer_token_{1};
+    uint64_t last_peer_token_{0};
+    std::vector<uint64_t> closed_peers_;
     std::vector<int> outbound_peer_sockets_;
 
     // Rotating start index for the inbound peer scan in receive(), so no single

@@ -606,6 +606,91 @@ TEST(SubscriptionManager_expiry_uses_steady_clock_by_default) {
     ASSERT_TRUE(*details->expires_at > std::chrono::steady_clock::now());
 }
 
+// =========================================================================
+// Idle dApps
+// =========================================================================
+
+TEST(SubscriptionManager_idle_dapp_counts_from_registration) {
+    FakeClock clock;
+    SubscriptionManager mgr(clock.fn());
+    auto [reg, dapp] = mgr.register_dapp();
+
+    clock.advance(59s);
+    ASSERT_TRUE(mgr.idle_dapps(60s).empty());
+    clock.advance(1s);
+    ASSERT_EQ(mgr.idle_dapps(60s).size(), 1u);
+    ASSERT_EQ(mgr.idle_dapps(60s)[0], dapp);
+}
+
+TEST(SubscriptionManager_touch_restarts_the_idle_time) {
+    FakeClock clock;
+    SubscriptionManager mgr(clock.fn());
+    auto [reg, dapp] = mgr.register_dapp();
+
+    clock.advance(50s);
+    mgr.touch_dapp(dapp);
+    clock.advance(50s);
+    ASSERT_TRUE(mgr.idle_dapps(60s).empty());
+    clock.advance(10s);
+    ASSERT_EQ(mgr.idle_dapps(60s).size(), 1u);
+}
+
+TEST(SubscriptionManager_idle_dapps_are_listed_lowest_first_and_only_the_quiet_ones) {
+    FakeClock clock;
+    SubscriptionManager mgr(clock.fn());
+    auto [r1, first] = mgr.register_dapp();
+    auto [r2, second] = mgr.register_dapp();
+    auto [r3, third] = mgr.register_dapp();
+
+    clock.advance(30s);
+    mgr.touch_dapp(second);
+    clock.advance(30s);
+
+    const auto idle = mgr.idle_dapps(60s);
+    ASSERT_EQ(idle.size(), 2u);
+    ASSERT_EQ(idle[0], first);
+    ASSERT_EQ(idle[1], third);
+}
+
+TEST(SubscriptionManager_touching_an_unknown_dapp_registers_nothing) {
+    FakeClock clock;
+    SubscriptionManager mgr(clock.fn());
+    mgr.touch_dapp(7);
+    clock.advance(1h);
+    ASSERT_TRUE(mgr.idle_dapps(1s).empty());
+    ASSERT_EQ(mgr.dapp_count(), 0u);
+}
+
+TEST(SubscriptionManager_unregistered_dapp_is_no_longer_idle) {
+    FakeClock clock;
+    SubscriptionManager mgr(clock.fn());
+    auto [reg, dapp] = mgr.register_dapp();
+    clock.advance(1h);
+    ASSERT_EQ(mgr.idle_dapps(60s).size(), 1u);
+    mgr.unregister_dapp(dapp);
+    ASSERT_TRUE(mgr.idle_dapps(60s).empty());
+}
+
+TEST(SubscriptionManager_an_id_handed_out_again_has_a_new_generation) {
+    SubscriptionManager mgr;
+    auto [r1, first] = mgr.register_dapp();
+    const auto before = mgr.dapp_generation(first);
+    ASSERT_TRUE(before.has_value());
+
+    mgr.unregister_dapp(first);
+    ASSERT_FALSE(mgr.dapp_generation(first).has_value());
+
+    auto [r2, again] = mgr.register_dapp();
+    ASSERT_EQ(again, first);
+    ASSERT_TRUE(mgr.dapp_generation(again).has_value());
+    ASSERT_TRUE(*mgr.dapp_generation(again) > *before);
+}
+
+TEST(SubscriptionManager_generation_of_an_unknown_dapp_is_nothing) {
+    SubscriptionManager mgr;
+    ASSERT_FALSE(mgr.dapp_generation(5).has_value());
+}
+
 int main() {
     return RUN_ALL_TESTS();
 }

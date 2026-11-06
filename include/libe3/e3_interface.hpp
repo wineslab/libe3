@@ -102,7 +102,9 @@ public:
     /**
      * @brief Stop the interface
      *
-     * Signals all threads to stop and waits for them to finish.
+     * Signals all threads to stop and waits for them to finish. It also ends
+     * the dApp's reconnecting, so the dApp stays down. Not to be called from
+     * the disconnect handler, which runs on a thread stop() joins.
      */
     void stop();
 
@@ -322,6 +324,17 @@ private:
     std::unique_ptr<std::thread> expiry_thread_;
     std::mutex expiry_mu_;
     std::condition_variable expiry_cv_;  // woken by stop() so the thread exits at once
+
+    // dApp reconnect. reconnect_thread_ restarts the interface (stop_locked, then
+    // start_locked) when the RAN is gone or setup failed. lifecycle_mu_ keeps
+    // that from overlapping a start() or stop() of the application;
+    // reconnect_mu_ guards the two flags below and is never held across either.
+    std::mutex lifecycle_mu_;
+    std::mutex reconnect_mu_;
+    std::condition_variable reconnect_cv_;
+    bool reconnect_pending_{false};  ///< a restart has been asked for
+    bool user_stopped_{false};       ///< stop() was called and start() has not been since
+    std::unique_ptr<std::thread> reconnect_thread_;
 #ifdef LIBE3_ENABLE_LATREC
     // ~1 Hz slow-lane sampler stamping LATREC_CONTEXT (involuntary context
     // switches, current CPU frequency), to explain p99 tails. Exists only in
@@ -423,6 +436,66 @@ private:
     void handle_dapp_report(const DAppReport& report);
     void handle_release_message(const ReleaseMessage &release);
     void handle_dapp_disconnection(uint32_t dapp_id);
+
+    /**
+     * @brief Release and remove every dApp that has been quiet for dapp_idle_timeout_s
+     *
+     * Runs on the expiry thread. Each dApp gets a ReleaseMessage first, then the
+     * same removal a release from the dApp gets.
+     */
+    void remove_idle_dapps();
+
+    /// start() and stop() without the lifecycle lock or the reconnect thread.
+    ErrorCode start_locked();
+    void stop_locked();
+
+    /// Ask the reconnect thread for a restart, unless it is off or stop() was called.
+    void request_reconnect();
+
+    /// Body of reconnect_thread_: wait for a request, pause, restart, repeat.
+    void reconnect_loop();
+
+    /// stop_locked() then start_locked() under the lifecycle lock, unless stop() was called.
+    void restart_session();
+
+    /**
+     * @brief Which connection each dApp id belongs to, on a RAN that can tell its peers apart.
+     *
+     * A dApp id belongs to the connection that first sent a message naming it, for as
+     * long as that registration lasts. Each entry carries the generation of the
+     * registration (see SubscriptionManager::dapp_generation), because an id is handed
+     * out again after its dApp is removed. Only the inbound thread uses it.
+     */
+    struct PeerBindings {
+        /// Connection token, then the dApps seen on it, each with its registration's generation.
+        std::unordered_map<uint64_t, std::unordered_map<uint32_t, uint64_t>> by_peer;
+        /// dApp id, then its connection token and its registration's generation.
+        std::unordered_map<uint32_t, std::pair<uint64_t, uint64_t>> owner;
+    };
+
+    /**
+     * @brief Decide whether a message that names a dApp may be acted on, and bind the dApp to its connection
+     *
+     * The first message that names a registered dApp binds the dApp to the connection it
+     * came on. Later messages that name it must come on that connection: the E3AP messages
+     * carry no authentication, so without this any dApp could release or control another.
+     *
+     * @param bindings The inbound thread's bindings
+     * @param peer Token of the connection the message came on, 0 if the connector cannot tell
+     * @param dapp_id The dApp the message names
+     * @return false if the dApp is bound to another connection, so the message is to be dropped
+     */
+    bool admit_dapp_message(PeerBindings& bindings, uint64_t peer, uint32_t dapp_id);
+
+    /**
+     * @brief Remove every dApp that was seen on a connection that has since closed
+     *
+     * No release is sent, there is nobody to send it to. A dApp whose id was
+     * removed and handed out again since it was seen is left alone.
+     *
+     * @param bindings The inbound thread's bindings
+     */
+    void remove_dapps_of_closed_peers(PeerBindings& bindings);
 
     /**
      * @brief Reply to a setup request that cannot be answered positively.
