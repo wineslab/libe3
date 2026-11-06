@@ -35,8 +35,7 @@ The grammar is in the last clause of this chapter. Its module identifier is
 the OID is `1.3.6.1.4.1.53148.1.1.255.3`.
 
 Plain and FlatBuffers encodings **do not exist**. A conforming stack encodes APER.
-Some implementations ship unused stubs for the other encodings. See
-[06-discrepancies.md](06-discrepancies.md).
+Some implementations ship unused stubs for the other encodings.
 
 ### The three rules that decide almost every byte
 
@@ -337,9 +336,7 @@ Table: Octets of the indication message `im1_small`
 | 3-4 | `00 03` | `data` length minus 1 = 3, two aligned octets (the size range 1..32768 is above 256 too) |
 | 5-8 | `de ad be ef` | `data` |
 
-`data-size` and the octet-string length both carry the payload size. See
-[06-discrepancies.md](06-discrepancies.md) for what each implementation does when
-the two disagree.
+`data-size` and the octet-string length both carry the payload size.
 
 ### `im2_one` = `20 00 01 00 01 00 00 01` (indication message format 2, one dApp, one function)
 

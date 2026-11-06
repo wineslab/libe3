@@ -12,7 +12,6 @@ The folder holds the Markdown chapters and one manifest, docx.json:
       "number": "O-RAN.XXX.TS.E3AP-R000-v00.01",
       "title":  "E3 Application Protocol (E3AP)",
       "cover":  ["E3 Application Protocol (E3AP)", ""],
-      "markdown_only": ["06-discrepancies.md"],
       "parts": [
         {"clause": "1", "title": "Scope", "file": "README.md", "section": "Scope"},
         {"clause": "5", "title": "Identity", "file": "01-identity.md"},
@@ -33,8 +32,7 @@ blocks become a box of monospaced lines.
 A link to a file of the same specification becomes its clause number
 ("clause 8", "Annex A", or with an anchor "clause 8.2"); every other link
 becomes an absolute GitHub URL. The sentence "The index is README.md." is
-left out. The optional "markdown_only" lists files that stay in the Markdown
-edition, such as "06-discrepancies.md"; every reference to them is left out.
+left out.
 
 The styles, headers, footers and cover come from template.docx, which
 make_template.py cuts from an O-RAN specification and gives the copyright of
@@ -158,11 +156,8 @@ class Links:
     in the text, and resolve() puts the number in. Any other link becomes a GitHub URL.
     """
 
-    def __init__(self, folder, parts, markdown_only=()):
+    def __init__(self, folder, parts):
         self.folder = os.path.abspath(folder)
-        # A link to one of these files, in this or another folder, is left out with its sentence.
-        names = "|".join(re.escape(n) for n in markdown_only) or r"(?!)"
-        self.omitted = re.compile(rf"\[[^\]]*\]\((?:[^)\s]*/)?(?:{names})(?:#[^)\s]*)?\)")
         self.files = {os.path.join(self.folder, p["file"]) for p in parts if "file" in p}
         self.whole = {}    # file -> clause of the part that is the whole file
         self.anchors = {}  # (file, anchor) -> clause
@@ -212,39 +207,6 @@ class Links:
         if bare:
             return run(ref, **base)
         return "".join(inline_runs(label, **base)) + run(f" ({ref})", **base)
-
-    def strip(self, text):
-        """The text without its references to a Markdown-only file."""
-        if not self.omitted.search(text):
-            return text
-        link = self.omitted.pattern
-        text = re.sub(rf"\s*\(\s*see\s+{link}\s*\)", "", text, flags=re.I)  # " (see [x](y))"
-        text = re.sub(rf"[,;]\s*see\s+{link}", "", text, flags=re.I)  # ", see [x](y)"
-        text = re.sub(rf"\s*\(\s*{link}\s*\)", "", text)  # " ([x](y))"
-        sentences = re.split(r"(?<=[.!?])\s+(?=[A-Z0-9`*\[(\"_])", text)
-        return " ".join(x for x in sentences if not self.omitted.search(x)).strip()
-
-    def clean(self, blocks):
-        """Blocks without their references to a Markdown-only file; a block left empty goes."""
-        out = []
-        for b in blocks:
-            kind = b[0]
-            if kind in ("para", "quote"):
-                text = self.strip(b[1])
-                if text:
-                    out.append((kind, text) + tuple(b[2:]))
-            elif kind == "list":
-                items = [[lvl, num, self.strip(t)] for lvl, num, t in b[1]]
-                items = [i for i in items if i[2]]
-                if items:
-                    out.append((kind, items))
-            elif kind == "table":
-                # A row whose cell is only such a link is an entry for that file: it goes.
-                rows = [r for r in b[2] if not any(self.omitted.fullmatch(c.strip()) for c in r)]
-                out.append((kind, b[1], [[self.strip(c) for c in r] for r in rows]))
-            else:
-                out.append(b)
-        return out
 
     def resolve(self, xml):
         def number(m):
@@ -609,7 +571,6 @@ def render_part(doc, part, base):
     with open(os.path.join(base, part["file"]), encoding="utf8") as f:
         blocks = parse_blocks(f.read().split("\n"))
     blocks, top_level = select(blocks, part.get("section"))
-    blocks = LINKS.clean(blocks)
     path = [clause]  # clause number of the heading at each level below the part
     counts = {}
     caption = None
@@ -776,7 +737,7 @@ def build(folder, out, with_pages=True):
     with open(os.path.join(folder, "docx.json"), encoding="utf8") as f:
         man = json.load(f)
     global LINKS
-    LINKS = Links(folder, man["parts"], man.get("markdown_only", ()))
+    LINKS = Links(folder, man["parts"])
     doc = Doc()
     for part in man["parts"]:
         render_part(doc, part, folder)

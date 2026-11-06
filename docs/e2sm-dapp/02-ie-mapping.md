@@ -400,7 +400,7 @@ Table: Fields of indication message format 1
 
 | Field | Type | Range | Presence | Notes |
 |---|---|---|---|---|
-| `data-size` | `INTEGER` | `0..maxE2SMDAPPIndMsgSize` (32768), no extension | mandatory | the number of octets in `data`. It repeats the length of the octet string. See [06-discrepancies.md](06-discrepancies.md). |
+| `data-size` | `INTEGER` | `0..maxE2SMDAPPIndMsgSize` (32768), no extension | mandatory | the number of octets in `data`. It repeats the length of the octet string. |
 | `data` | `OCTET STRING` | `SIZE(1..maxE2SMDAPPIndMsgSize)` (1..32768) | mandatory | the encoding of the dApp report by the service model. The RAN copies it unchanged from the E3 `reportData`. E2SM-DAPP does not interpret it. It has at least one octet. |
 
 The service model that the header field `ran-function-id` names decodes `data`. For

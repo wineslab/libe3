@@ -131,7 +131,7 @@ E3AP uses these means to stay compatible when it grows.
 1. Every SEQUENCE and the main CHOICE in the ASN.1 grammar has an extension marker. A receiver shall ignore an extension addition that it does not know.
 2. A new optional field goes after the extension marker. An old receiver skips it.
 3. The `E3-ResponseCode` type has no extension marker. A new response code needs a new version of E3AP.
-4. The Setup procedure carries a version string. An E3 Agent may answer with a negative response code when it does not support the version of the dApp. Implementations differ on this point. See [06-discrepancies.md](06-discrepancies.md).
+4. The Setup procedure carries a version string. An E3 Agent may answer with a negative response code when it does not support the version of the dApp. Implementations differ on this point.
 5. A change to a constraint changes the encoded bytes. The sender and the receiver shall use the same version of the grammar.
 
 ## Where each part is specified
@@ -143,7 +143,6 @@ E3AP uses these means to stay compatible when it grows.
 | 3. Procedure flow | Setup, Subscription, Indication, Control, Report, Release, acknowledgement and the sequence identifier chain | [03-procedure-flow.md](03-procedure-flow.md) |
 | 4. Encoding | APER, JSON and Protobuf rules, framing on each link, size limits, the ASN.1 grammar | [04-encoding.md](04-encoding.md) |
 | 5. Semantics and constraints | units, clocks, absent versus zero, validation, error paths, what is mandatory | [05-semantics-and-constraints.md](05-semantics-and-constraints.md) |
-| 6. Discrepancies | where implementations and encodings disagree, and the resolution each one needs | [06-discrepancies.md](06-discrepancies.md) |
 
 An engineer who adds E3AP to a RAN stack or to a dApp finds code pointers and a
 checklist in the [integrator guide](integrator-guide.md). The guide is not part of the specification.

@@ -137,7 +137,7 @@ message by the size of its elements.
 A decoder shall ignore an extension addition that it does not know. Two fields of
 `E3-SubscriptionResponse` are extension additions: `ranFunctionIdentifier` and
 `periodicity`. A decoder built before them skips both. A change of a constraint
-is not an extension addition. It changes the bytes. See [06-discrepancies.md](06-discrepancies.md).
+is not an extension addition. It changes the bytes.
 
 ## JSON
 
@@ -223,8 +223,7 @@ Table: Framing on the POSIX link layer
 A receiver of a framed message shall refuse a length of 0 and a length above 65536.
 
 The framing is not symmetric. A stream socket does not keep message boundaries, so a
-receiver of unframed messages can see two messages joined or one message split. See
-[06-discrepancies.md](06-discrepancies.md).
+receiver of unframed messages can see two messages joined or one message split.
 
 The E3 Agent sends every message of the outbound channel to every connected dApp.
 It closes the connection to a dApp whose socket stalls for 500 ms.

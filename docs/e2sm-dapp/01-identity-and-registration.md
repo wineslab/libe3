@@ -15,7 +15,7 @@ Table: Identity of E2SM-DAPP
 | Item | Value | Remark |
 |---|---|---|
 | **RAN function ID** (E2) | `255` | The E2AP range is 0..4095. |
-| **RAN function revision** | `1` | One implementation announces `0`. See [06-discrepancies.md](06-discrepancies.md). |
+| **RAN function revision** | `1` | One implementation announces `0`. |
 | **RAN function short name** | `E2SM-DAPP` | |
 | **RAN function description** | `DAPP Service Model for E2/E3 bridge` | |
 | **E2SM OID** | `1.3.6.1.4.1.53148.1.1.255.3` | It is also the module identifier of the grammar. |
@@ -38,8 +38,7 @@ model number. It is deliberately the same number as the E2 RAN function ID. The
 final `3` is the module number inside that service model.
 
 One implementation carries a stale source comment that spells the same OID with
-`e2sm(2)`. The OID string and the grammar both use `255`. See
-[06-discrepancies.md](06-discrepancies.md).
+`e2sm(2)`. The OID string and the grammar both use `255`.
 
 ### 1.2 Two things named "RAN function ID"
 
@@ -100,8 +99,7 @@ Its style names are `E3 Data Report`, `E3 Subscription Map` and `dApp Control`.
 It has no dApp E3 subscription map. An xApp that selects the control style by the
 name `DAPP-CONTROL-STYLE-1` does not find that style there. The test data in the
 repository also uses these names. Test data is not what a RAN advertises. The
-content of the definition is the responsibility of the RAN. See
-[06-discrepancies.md](06-discrepancies.md).
+content of the definition is the responsibility of the RAN.
 
 ### 2.2 Who sets the name block
 
@@ -180,8 +178,7 @@ A RAN stack that implements the E2 side shall meet these requirements.
    subscribed E3 RAN functions. Keep the list to **at most 256** items. Omit the
    `dappE3Subscriptions` field when no dApp has a subscribed function. Some
    implementations cannot encode an empty list in the definition. They also cannot
-   decode more than 255 items or 63 functions. See
-   [06-discrepancies.md](06-discrepancies.md).
+   decode more than 255 items or 63 functions.
 5. Send a RIC Service Update with the new definition when the dApp set changes.
    Increase the revision each time.
 6. Accept RIC Subscription Requests with exactly one report action, event trigger

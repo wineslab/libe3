@@ -157,8 +157,7 @@ specification, for example "E3AP [1]".
 The grammar of the service model is version 1. The payload choices of the dApp
 control, the dApp report, the xApp control and the apply outcome carry an extension
 marker, and so do the cell configuration indication and the apply outcome structure.
-The indication choice, the sensing indication and the RAN function data have none
-(see [06-discrepancies.md](06-discrepancies.md)). A receiver that meets an
+The indication choice, the sensing indication and the RAN function data have none. A receiver that meets an
 alternative it does not know shall reject the message as described in clause 9. A
 receiver shall ignore an extension field that it does not know, where the encoding
 allows it.
@@ -176,7 +175,6 @@ messages that already exist. Clause 8 gives the rule and the effect.
 | Procedure flow | telemetry, controls, report, xApp control relay and the apply outcome, with the E3AP message that carries each | [03-procedure-flow.md](03-procedure-flow.md) |
 | Encoding | APER widths, JSON keys, Protocol Buffers messages, size limits and the ASN.1 clause | [04-encoding.md](04-encoding.md) |
 | Semantics and constraints | units, clocks, absent versus zero, PRB limits, validation and error handling | [05-semantics-and-constraints.md](05-semantics-and-constraints.md) |
-| Discrepancies | where the grammar, the Protocol Buffers file and the codecs disagree, dead fields, open items | [06-discrepancies.md](06-discrepancies.md) |
 | Examples | a complete exchange in APER and JSON, from the setup to the PRB block, and an apply outcome | [07-examples.md](07-examples.md) |
 
 For an engineer who adds the service model to a RAN or to a dApp there is a separate

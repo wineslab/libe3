@@ -2,7 +2,6 @@
   "number": "O-RAN.XXX.TS.E3AP-R000-v00.01",
   "title": "E3 Application Protocol (E3AP)",
   "cover": ["E3 Application Protocol (E3AP)", ""],
-  "markdown_only": ["06-discrepancies.md"],
   "parts": [
     {"clause": "1", "title": "Scope", "file": "README.md", "section": "Scope"},
     {"clause": "2", "title": "References", "file": "README.md", "section": "References"},

@@ -210,50 +210,289 @@ the next two sections say which way libe3 goes.
 
 Differences between the grammar, the encoders and the code that came up while writing the
 specifications in [e3ap](e3ap/README.md), [e2sm-dapp](e2sm-dapp/README.md) and
-[e3sm](e3sm/README.md). Each row is *Source*: read from the code, not run. The specification
-side of each row is Annex A of the E3AP specification ([06-discrepancies.md](e3ap/06-discrepancies.md))
-and of each service model. Open a #84 sub-issue for a row when someone picks it up.
+[e3sm](e3sm/README.md). This page is where they are kept. The specifications do not list them, and
+neither do their Word editions, because they change with the code and not with the specification.
+Each row is *Source*: read from the code, not run. Open a #84 sub-issue for a row when someone picks
+it up.
 
-**E3AP, libe3 against its own grammar and the other encodings**
+Differences between peers that already have their own place on this page (units, id ranges, the
+version string, the SCTP mapping, the asn1c build, OCUDU's optional additions) are in the tables above
+and below, and are not repeated here.
+
+### E3AP
+
+libe3, the grammar and the three encodings. The last column is what the specification expects.
+
+| Where | What differs | Effect | Expected resolution |
+|---|---|---|---|
+| Setup, dApp side | A negative `E3-SetupResponse` still counts as a finished setup. `wait_for_setup` returns success and the dApp has no id. The response's `requestId` is not compared with the request | The application sends messages the RAN cannot match to a dApp. A late response to an older attempt completes the current one | Report a failed setup on a negative response. Compare the two ids and drop a response that does not match |
+| Setup, RAN side | The dApp's `e3apProtocolVersion` is logged and never compared. Aerial accepts only the exact string `1.0.0`, OCUDU any string that starts with `1.` | A version string cannot flag a wire change. A dApp that works with libe3 can fail against Aerial | Accept any string that starts with `1.`. Use the string to flag a wire change |
+| Setup, RAN side | A second request from the same dApp registers a new dApp. The RAN has no identity check | A retry after a slow reply leaves an id with no owner. One id leaks until a release names it | Let the dApp send a release for an id it did not use, or give the dApp an identity in the request |
+| Setup, RAN side | A negative reply for "no free dApp id" carries `ranFunctionList`. A negative reply for a bad request does not | Two shapes of "negative" | Send no `ranFunctionList` in any negative reply |
+| Setup, RAN side | An encode failure of the setup response ends the process | One bad RAN function can stop the RAN node. Sizes are checked first, other failures are not | Leave the failing function out and answer. libe3 does so for the sizes it checks |
+| Subscription | The RAN function id and the telemetry and control ids are not checked against the service model. The response grants what was asked. OCUDU already answers negative | The dApp thinks it receives data. The service model fails to start and only a log line says so | Answer negative for an unknown function or id |
+| Subscription | A repeat returns the existing subscription in libe3, is refused by Aerial, and creates a second one in OCUDU ([#97](https://github.com/wineslab/libe3/issues/97)) | A dApp that renews a subscription gets different results | Return the existing subscription, as libe3 does |
+| Subscription | A repeat keeps the stored details but the response echoes the new lists and interval | The response does not describe what the RAN holds | Echo the stored details, or replace them |
+| dApp control | An unknown RAN function, or one whose service model does not run, is dropped with no reply | The dApp waits for an acknowledge that never comes | Answer with a negative `E3-MessageAck` |
+| `E3-MessageAck` | It has no `dAppIdentifier`, and the RAN sends it to every dApp. The dApp handler has no filter | A dApp can read another dApp's acknowledge | Add a `dAppIdentifier`, or let the dApp compare `requestId` with its own messages |
+| xApp control | `E3Agent::send_xapp_control` does not refuse `sequence_id` 0. It fails later, in the encoder | The error is far from the call | Refuse the value at the call |
+| dApp report | No check of the dApp id, the function or the sequence id on the RAN | A bad report reaches the E2-E3 bridge | Validate the report before it leaves the RAN |
+| Release | No code sends an `E3-ReleaseMessage` from the RAN. It reads one from a peer | A dApp learns of the end only from a lost link | Send a release before the RAN drops a dApp |
+| Release | OCUDU closes the association after 30 s idle and never sends a release. Aerial sends one after 1800 s idle, and only to a dApp with no subscription | The reason reported to the dApp differs | Agree one rule for idle dApps |
+| Release | A release is not authenticated. Any dApp can name another dApp | A dApp can end another dApp | Bind the id to the connection |
+| POSIX framing | RAN to dApp is length-prefixed (4 octets, network order). dApp to RAN is a raw `send()` and a single `recv()` of up to 60000 octets | Messages can join or split on a stream socket | Frame both directions with the same length prefix |
+| POSIX framing | The framed receiver refuses more than 65536 octets, the unframed one reads 60000, the encoder buffer is 65536 | A message of 60001 to 65536 octets passes one way only | Use one limit for every direction and every link |
+| ZMQ framing | A ZMQ message larger than the receive buffer is cut by the library | The receiver may read a short buffer as a whole message | Refuse a message that does not fit |
+| POSIX link | No heartbeat and no keepalive. ZMQ has a heartbeat on the dApp side. The RAN never learns that a dApp went away: its registration, subscriptions and running service model stay | A dead dApp keeps a service model running. A silent peer on POSIX is not noticed | Remove the dApp when its link closes. Add a keepalive or a heartbeat message |
+| `ranFunctionData` | 1..262144 octets in the grammar, 1..32768 in libe3. OCUDU allows 262144 for `ranFunctionData` only; the payload fields stay 1..32768 | A peer's larger value is refused | Raise libe3's limit, or lower the grammar. The grammar is the reference. Keep 32768 for the payload fields |
+| Ranges | JSON and Protobuf do not check ranges. APER does | A message that works in JSON can fail to encode in APER | Check the ranges in every encoder |
+| Protobuf | A response code that is not `NEGATIVE` reads as `POSITIVE`. APER and JSON read an unknown value as negative | An unknown code is a success in one encoding | Read an unknown code as negative everywhere |
+| JSON | `timestamp` is written even when 0. APER and Protobuf leave 0 out. A missing member decodes as 0 or an empty string, not as an error | A receiver that reads the key by name sees 0. A malformed message can look valid | Treat 0 as absent in every encoding. Refuse a message that lacks a mandatory field |
+| Build | A build with only Protobuf defaults to the ASN.1 encoding | The default config does not start | Choose the encoding explicitly |
+| Config | `connect_timeout_ms`, `recv_timeout_ms`, `send_timeout_ms`, `receive_buffer_size` and `send_buffer_size` are not read anywhere | Setting them does nothing | |
+
+### E3 service models
+
+Spectrum (E3SM-SPEC, RAN function 1) and L1-KPM (E3SM-L1-KPM, RAN function 2).
 
 | Where | What differs | Effect |
 |---|---|---|
-| Setup, dApp side | A negative `E3-SetupResponse` still counts as a finished setup. `wait_for_setup` returns success and the dApp has no id. The response's `requestId` is not compared with the request | The application sends messages the RAN cannot match to a dApp |
-| Setup, RAN side | The dApp's `e3apProtocolVersion` is logged and never compared | A version string cannot flag a wire change |
-| Setup, RAN side | A second request from the same dApp registers a new dApp. A retry after a slow reply leaves an id with no owner | One id leaks until a release names it |
-| Setup, RAN side | A negative reply for "no free dApp id" carries `ranFunctionList`. A negative reply for a bad request does not | Two shapes of "negative" |
-| Setup, RAN side | An encode failure of the setup response ends the process | One bad RAN function can stop the RAN node. Sizes are checked first, other failures are not |
-| Subscription | The RAN function id and the telemetry and control ids are not checked against the service model. The response grants what was asked | Same as the row in the OCUDU table above, on libe3's side |
-| Subscription | A repeat keeps the stored details but the response echoes the new lists and interval | The response does not describe what the RAN holds |
-| dApp control | An unknown RAN function, or one whose service model does not run, is dropped with no reply | The dApp waits for an acknowledge that never comes |
-| `E3-MessageAck` | It has no `dAppIdentifier`, and the RAN sends it to every dApp. The dApp handler has no filter | A dApp can read another dApp's acknowledge |
-| xApp control | `E3Agent::send_xapp_control` does not refuse `sequence_id` 0. It fails later, in the encoder | The error is far from the call |
-| dApp report | No check of the dApp id, the function or the sequence id on the RAN | A bad report reaches the E2-E3 bridge |
-| POSIX framing | RAN to dApp is length-prefixed (4 octets, network order). dApp to RAN is a raw `send()` and a single `recv()` of up to 60000 octets | Messages can join or split on a stream socket |
-| POSIX framing | The framed receiver refuses more than 65536 octets, the unframed one reads 60000, the encoder buffer is 65536 | A message of 60001 to 65536 octets passes one way only |
-| POSIX link | No heartbeat and no keepalive. The RAN never learns that a dApp went away: its registration, subscriptions and running service model stay | A dead dApp keeps a service model running |
-| `ranFunctionData` | 1..262144 octets in the grammar, 1..32768 in libe3 | A peer's larger value is refused |
-| Protobuf | A response code that is not `NEGATIVE` reads as `POSITIVE`. APER and JSON read an unknown value as negative | An unknown code is a success in one encoding |
-| JSON | `timestamp` is written even when 0. APER and Protobuf leave 0 out. A missing member decodes as 0 or an empty string, not as an error | A malformed message can look valid |
-| Build | A build with only Protobuf defaults to the ASN.1 encoding | The default config does not start |
-| Config | `connect_timeout_ms`, `recv_timeout_ms`, `send_timeout_ms`, `receive_buffer_size` and `send_buffer_size` are not read anywhere | Setting them does nothing |
-
-**Service models**
-
-| Where | What differs | Effect |
-|---|---|---|
-| Spectrum grammar | The two OAI copies differ. The first lacks the apply-outcome types and `maxSlotIndex`, yet the xApp-side build file says all copies are byte identical | A codec built from the first copy cannot carry the outcome |
-| L1-KPM telemetry ids | The identifiers (1 for the IQ reference, 4 to 6 for time stamp, frame and slot, 2 and 3 unused) are defined by Aerial's dApps, not by the grammar. A comment in the RAN code calls them "bit position plus one", but no code uses a bit mask | The numbers have no owner in this repository. To clear with Aerial: which side defines them, and what 2 and 3 mean |
-| Spectrum JSON | The report and the xApp control have no JSON codec. The xApp side reads and writes APER only. The specification now requires the JSON form | A run with JSON delivers binary octets in a field that holds nested JSON. A deployment with an xApp has to use APER |
-| Spectrum JSON | The indication nests `sensing_shm{shm_name, write_idx, n_ranges}`. ASN.1 uses `shmName`, `shmWriteIdx`, `nRanges`. Protobuf uses `shm_*` | One field, three spellings |
-| Spectrum controls | `samplingThreshold` and `validityPeriod` are decoded and never used. APER range-checks them, JSON and Protobuf do not | A value that APER refuses is accepted by JSON |
-| Spectrum controls | `Spectrum-ConfigControl` has no encoder, decoder or handler | The xApp control alternative exists on the wire only |
-| Spectrum controls | A "deactivate" sensing policy still needs one mask value, because `maskPerSlot` is `SIZE (1..160)` | A policy cannot be cleared with an empty mask |
+| Spectrum grammar | The two OAI copies differ. The first lacks the apply-outcome types and `maxSlotIndex`, yet the xApp-side build file says all copies are byte identical. The revisions are in the table below | A codec built from the first copy cannot carry the outcome |
+| L1-KPM telemetry ids | The identifiers (1 for the IQ reference, 4 to 6 for time stamp, frame and slot, 2 and 3 unused) are defined by Aerial's dApps, not by the grammar. A comment in the RAN code calls them "bit position plus one", but no code uses a bit mask. The L1-KPM specification does not adopt that convention | The numbers have no owner in this repository. To clear with Aerial: which side defines them, and what 2 and 3 mean |
+| Spectrum telemetry ids | The RAN advertises ids 2 to 5. The indication does not depend on them | An id a dApp subscribes to does nothing |
+| Spectrum JSON | The report and the xApp control have no JSON codec. The xApp side reads and writes APER only. The specification now requires the JSON form. The dApp control follows the encoding of the run (verified) | A run with JSON delivers binary octets in a field that holds nested JSON. A deployment with an xApp has to use APER for the whole run, until the codecs are added |
+| Spectrum JSON | The indication nests `sensing_shm{shm_name, write_idx, n_ranges}`. ASN.1 uses `shmName`, `shmWriteIdx`, `nRanges`. Protobuf uses `shm_name`, `shm_write_idx`, `n_ranges`. `timestamp`, `sfn`, `slot` and `beam` stay at the top level in all three | One field, three spellings. A JSON consumer written from the grammar does not find its keys |
+| Spectrum JSON | The cell configuration indication writes every field in lower case with underscores (`ul_carrier_prbs` for `ulCarrierPRBs`) and has no Protobuf form. A JSON indication holds the member `indicationType`, which is not in the grammar. A Protobuf indication is a sensing indication with no wrapper | Nothing in a Protobuf indication tells the two kinds apart |
+| Spectrum codecs | `Spectrum-PRBBlockedControl` has an xApp encoder and a dApp decoder, and no other xApp control alternative has one. The apply outcome has a RAN encoder and an xApp decoder, in APER only. The dApp report has an xApp decoder in APER only | The other forms do not exist, in any encoding |
+| Spectrum controls | `samplingThreshold` and `validityPeriod` are decoded and never used: the PRB block ignores `validityPeriod`, the sensing policy writes it to a log line. A block or a policy does not expire. APER range-checks `validityPeriod` (1..3600000), JSON and Protobuf do not. PRB index 0..272, PRB list at most 273, symbol mask 0..16383 and mask list 1..160 are checked in all three | A dApp that relies on a block to expire after `validityPeriod` ms is wrong and has to clear the block itself. A value of 5000000 is refused by APER and accepted by JSON and Protobuf. Today the RAN ignores the field, so nothing shows; it will when the RAN starts to use it |
+| Spectrum controls | `Spectrum-ConfigControl` (`noiseFloorThreshold`, `averagingFrames`, `enable`) has no encoder, decoder or handler on the RAN, the dApp or the xApp side. The unit of `noiseFloorThreshold` is not defined anywhere | The xApp control alternative exists on the wire only |
+| Spectrum controls | A "deactivate" sensing policy still needs one mask value, because `maskPerSlot` is `SIZE (1..160)`. An empty list is rejected in all three encodings | A policy cannot be cleared with an empty mask; a dApp usually sends the list it used before |
+| Spectrum fields | `sfn` is 0..65535 in the sensing indication (a frame number has 10 bits; the apply outcome uses 0..1023). `slot` is 0..65535 (at most 159; the apply outcome uses 0..159). `shmWriteIdx` is 0..65535 and the ring has 256 slots. `beam` is 0..3 and optional, and the RAN always sends it; what a RAN does with an index above 3 is not stated, an APER encoder is expected to refuse it, and no test of this case was found. `shmName` has no size limit here, the L1-KPM shared memory reference limits its name to 1..63 octets | Wider fields cost bits in APER and hide errors. They are not wrong |
+| Spectrum dead code | The RAN clamps the number of listed PRBs to 275, the size of the largest bandwidth part, and ignores a PRB index of 275 or more when it builds the block mask. The grammar limits the list to 273 entries and the index to 272 | Neither check can trigger |
+| Spectrum revisions | The apply outcome needs the E3AP sequence id in the control. A RAN of the first revision does not pass the id to the service model, so it cannot report an apply outcome for the procedure. The pending procedure table and its timeout exist in the later revision only | An xApp that waits for the outcome gets the answer after the timeout, with no timestamps |
 | L1-KPM Protobuf | `L1KPMRanFunctionData` exists and is unused. A Protobuf session carries JSON text in `ranFunctionData` | A Protobuf dApp reads the wrong type |
 | L1-KPM grammar | `cellId`, `nRxAnt` and `validSymbolMask` are `OPTIONAL`, but the RAN always sends them. `cellId` is always 0 | A peer cannot tell "no cell" from cell 0 |
 | L1-KPM `timestamp` | Unconstrained integer in ASN.1, `int64` in Protobuf, signed in the codec | Large values can differ across encodings |
 | L1-KPM shared memory | The rows carry no marker, and the header has no FP16 scale. A source comment claims about 64 ms before a row is reused. The code has 32 rows, so the time depends on the uplink slot rate | A dApp cannot detect an overwrite or recover the scale from the region |
 | L1-KPM Protobuf | The header comment names a grammar file that does not exist | A reader looks for a missing file |
+
+**Revisions of the Spectrum grammar.** The grammar exists in more than one copy and revision. The
+[E3SM-SPEC specification](e3sm/spectrum/README.md) describes the latest grammar without the sensing
+reservation, the PUSCH slots and the sampling threshold.
+
+| Item | First RAN revision | Later revision, used by the RAN, the dApp and the xApp side | E3SM-SPEC |
+|---|---|---|---|
+| Apply outcome (`Spectrum-PRBBlockApplyOutcome`, `Spectrum-ApplyOutcomePayload`, `Spectrum-ApplyOutcomeData`) | absent | present | present |
+| constant `maxSlotIndex` | absent | 159 | 159 |
+| content of `protocolData` | `Spectrum-SensingIndication` | `Spectrum-Indication`, with the cell configuration indication | `Spectrum-Indication` |
+| alternatives of the dApp control | the PRB block in the root, the sensing policy as an extension | as the first revision, plus the sensing reservation and the PUSCH slots as extensions | as the first revision |
+| alternatives of the xApp control | `prbBlockedControl` and `configControl`, both in the root | the same | the same |
+| optional fields of the PRB block control | `samplingThreshold` and `validityPeriod` | the same | `validityPeriod` only |
+| unit and range of `validityPeriod`, in the PRB block and in the sensing policy | seconds, 1..3600 | the same | milliseconds, 1..3600000 |
+
+What that means on the wire, checked by encoding the same values with the grammar of the later revision
+and with E3SM-SPEC:
+
+* A dApp report, a sensing indication, a cell configuration indication, an apply outcome and an xApp
+  control of either alternative have the same octets in both grammars.
+* A PRB block control with neither optional field has the same octets in both. A control with one of them
+  does not: E3SM-SPEC has one presence bit where the later revision has two, and its `validityPeriod`
+  has a length field. The table below gives examples.
+* In Protobuf and JSON, `validity_period` and `validityPeriod` keep their field number and key, and the
+  unit changes. A value of 60 from a sender of the later revision means one minute. A receiver of
+  E3SM-SPEC reads it as 60 ms.
+* In Protobuf, a receiver of E3SM-SPEC skips field 2, `sampling_threshold`, as an unknown field. In JSON
+  it ignores the key `samplingThreshold`.
+* A sensing policy control without `validityPeriod` has the same octets in both grammars. It is the
+  first extension alternative in both. With a `validityPeriod` the field is wider in E3SM-SPEC. The open
+  type keeps the error inside the alternative: the later revision reads 60000 ms as 16619, and
+  E3SM-SPEC reads 60 s as 60 ms.
+* A sensing reservation or PUSCH slots control of the later revision is an extension alternative that
+  E3SM-SPEC does not know. A receiver rejects it ([clause 9](e3sm/spectrum/05-semantics-and-constraints.md)).
+* The indication of the first revision is a bare `Spectrum-SensingIndication`. A receiver of the later
+  revisions decodes `protocolData` as `Spectrum-Indication`, so the two do not interwork.
+* A RAN of the first revision cannot send an apply outcome.
+
+| Sent with the grammar of | Optional fields sent | Read by the other grammar as |
+|---|---|---|
+| the later revision | `samplingThreshold` 5, `validityPeriod` 60 | `validityPeriod` 1 |
+| the later revision | `validityPeriod` 60 | no `validityPeriod` |
+| the later revision | `samplingThreshold` 5 | a decoding error |
+| E3SM-SPEC | `validityPeriod` 60000 | `samplingThreshold` 32, no `validityPeriod` |
+
+Only the third case reports an error. In the others the receiver accepts wrong values.
+
+**Open items for Spectrum.** None of these has an owner yet.
+
+| Item | State |
+|---|---|
+| What a version bump means. The field `version` is "1" and the ring header has `version` "1". No rule says how a dApp reacts to another value | Not defined |
+| What a dApp does with a ring when the RAN stops and starts the service model. The RAN removes the region and creates a new one. A mapping that the dApp holds still points to the old region | Not defined. A dApp should unmap and map again on every new subscription. Not verified |
+| The wire values of the telemetry identifiers. A comment says that they follow a convention of the L1-KPM service model, in which the identifier is a bit position plus one | The convention is not a rule of E3SM-SPEC, and no code uses a bit mask. See the L1-KPM telemetry ids row above |
+| Unit and range of `noiseFloorThreshold` | Not defined |
+| `Spectrum-Indication` has no extension marker. A third kind of indication would change the width of its alternative index | Open. An extension marker added now would change the encoding of every indication once |
+| The JSON codecs of the dApp report and of the xApp control | Required by E3SM-SPEC ([encoding](e3sm/spectrum/04-encoding.md#json)) and missing |
+| What the decoder reports for an unknown extension alternative in an APER choice. The RAN rejects a control that holds an alternative other than the one for its control identifier | Not tested |
+| An end to end test of the sensing indication, the ring and the apply outcome against a second implementation | None found. No golden vectors exist for this service model |
+
+### E2SM-DAPP
+
+[E2SM-DAPP](e2sm-dapp/README.md) carries dApp traffic between an E2 node and an xApp. The
+specification names the implementations by letter, and so does this subsection:
+
+* **A**, flexric: the original C implementation of the service model, in an E2 agent and a RIC library.
+* **B**, libe3: the C++ and C codec that ships with this repository.
+* **C**, OCUDU: a C++ RAN stack with a hand-ported codec.
+* **OAI**: the RAN bridge described in reference [i.2] of the README.
+* **An xApp framework**: a Python framework that wraps flexric.
+
+File names, line numbers and code roots for each entry are in the
+[integrator guide](e2sm-dapp/integrator-guide.md) and [code pointers](e2sm-dapp/code-pointers.md).
+Nothing here is a design decision; those are in the specification.
+
+Severity: **abort** means an assertion or equivalent takes the process down in a build with assertions
+on. **wrong** means a wrong result with no error. **latent** means only a corner case triggers it.
+**doc** means documentation only.
+
+**1. Dead code**
+
+| # | What | Notes |
+|---|---|---|
+| 1.1 | The plain and FlatBuffers encoders and decoders of flexric | All 31 functions fail with "not implemented". The build allows only the ASN.1 encoding. A build branch for the plain encoding would still build the stubs. A branch for FlatBuffers stops the build. The generic dispatch macros still point to them. **doc** |
+| 1.2 | Unused includes of the headers of other service models in flexric's codec | Nothing from them is used. Building the codec alone requires deleting them |
+| 1.3 | `Bool-Type ::= BOOLEAN` | Defined and referenced nowhere. The ASN.1 compiler still generates code for it |
+| 1.4 | A structure with a pointer to a control outcome in flexric | Used nowhere |
+| 1.5 | A RIC Service Update structure in the read union of flexric | Nothing fills or reads it for E2SM-DAPP. The RIC Service Update goes through the generic path |
+| 1.6 | The sweep of pending controls in flexric | **Nothing calls it**, in the library or in OAI. The 200 ms safety net for an unanswered deferred control never runs. The only timeout in effect is the 150 ms timeout of OAI. **latent** |
+| 1.7 | The function that sends a RIC Control Failure in flexric | Nothing calls it. A control for E2SM-DAPP always ends in a RIC Control Acknowledge. An xApp framework registers failure handlers that a flexric RAN never triggers |
+| 1.8 | The handlers of the RIC Service Update in the agent and in the RIC of flexric | They are stubs. The agent comment says that the RIC Service Update is not used for this service model, yet the RAN sends one. The stub is the hook for *receiving* one. Sending does not go through it. **doc** |
+| 1.9 | Commented-out code in an xApp framework | Dead branches left in place |
+
+**2. Where the grammar and the implementations disagree**
+
+| # | What | Effect |
+|---|---|---|
+| 2.1 | **`data-size` duplicates the octet string length** in `IndicationMessage-Format1` and `ControlMessage-Format1`. flexric writes its own `data_size` into both the ASN.1 field and the octet string length. On decode it takes the size from the octet string and ignores the ASN.1 field. libe3 and OCUDU keep the ASN.1 field as its own value on encode and decode. They check neither against the octet count | A sender that writes different values is read as the octet length by flexric and as the field by libe3 and OCUDU. **wrong**. Always send equal values |
+| 2.2 | The grammar allows **0..256** dApps and **1..64** functions per dApp. flexric accepts fewer. Its decoder, its encoder for the report and control item lists, and its list helpers assert on 256 dApps and on 64 functions. The generator of the reference test vectors documents this | A list of 256 dApps, a list of 0 items in a definition, or a dApp with 64 functions **aborts** flexric. The indication message format 2 path tolerates an empty list. It does not tolerate 256 items on decode. **abort** |
+| 2.3 | The definition item lists. flexric checks `0 < n < 64`. The grammar allows 1 or 2 report styles and 1 control style | flexric accepts what the grammar forbids and leaves the rejection to the ASN.1 runtime |
+| 2.4 | `ranFunction-Instance` is in the grammar and unusable in flexric. Its encoder asserts that the instance is absent. Its decoder never reads it | A definition with an instance is lost on decode and cannot be encoded. libe3 and OCUDU support it |
+| 2.5 | `RIC-Style-Type` and `RIC-Format-Type` are unbounded `INTEGER`. flexric stores 32 bits | A style above `4294967295` or a negative style cannot be represented. libe3 and OCUDU hold 64 bits. **latent** |
+| 2.6 | `Timestamp` and `SequenceId` are unbounded `INTEGER`. Every implementation holds 64 bits | A value that needs more than 8 octets cannot be decoded. OCUDU rejects it. libe3 checks that it fits |
+| 2.7 | `node-plmn-id` is `OCTET STRING (SIZE(3))`, not the 3GPP `PLMN-Identity`. OAI writes the digits as three shifted values. This drops a digit of a three-digit MNC and is not BCD | A consumer cannot read the PLMN without knowing the packing of the RAN. The grammar does not define a packing |
+| 2.8 | The dApp E3 subscription list may be empty (`SIZE(0..256)`). A **subscription item** needs at least one function. The report and control item path of flexric needs at least one item | OAI omits the field when no dApp has a function. An empty list in indication message format 2 is legal and works |
+| 2.9 | E2SM-DAPP ids are `0..4294967295`. E3AP ids are `1..65535` | Values that E3 cannot carry are legal in E2SM-DAPP. The reference test vectors include them |
+| 2.10 | `SequenceId` is unbounded. `E3-SequenceID` is `1..4294967295`. The control path has no range check. flexric converts a signed value to an unsigned key. OAI truncates it to 32 bits | An id above `2^32 - 1` or a negative id makes the parked key and the completion key differ. The relay never completes the control. The 150 ms timeout of OAI retires it. **latent** |
+| 2.11 | The OID text. The grammar and the string use `e2sm(255)`. One comment uses `e2sm(2)` | Stale comment. **doc** |
+| 2.12 | The grammar file in flexric has a `v0` in its name and its module is version 1 | The `v0` does not mean a version 0 grammar. The grammar files of flexric and libe3 are byte-identical. **doc** |
+| 2.13 | The control header carries no style number | This works while there is one control style. A second control style needs a new header format |
+| 2.14 | The control outcome carries no `ran-function-id` | The xApp shall remember the E3 RAN function per `sequence-id` to decode the payload. See [02-ie-mapping.md](e2sm-dapp/02-ie-mapping.md#73-e2sm-dapp-controloutcome) |
+| 2.15 | An absent `timestamp` or `sequence-id` is not an error in the grammar. In flexric, `0` means absent | flexric cannot send a present `0`. See [05-semantics-and-constraints.md](e2sm-dapp/05-semantics-and-constraints.md#4-optional-fields-absent-is-not-an-error) |
+
+**3. Aborts and error handling in flexric**
+
+| # | What |
+|---|---|
+| 3.1 | Every decoder asserts a successful decode. A malformed or truncated PDU aborts the process |
+| 3.2 | The encoders of the event trigger, action definition, control header, control message, control outcome and definition assert instead of returning an error. Only the encoders of the indication header and message return an empty buffer |
+| 3.3 | A control request without "ack requested" aborts the E2 agent |
+| 3.4 | A subscription with more or fewer than one action, or with an insert or policy action, aborts the agent |
+| 3.5 | An unknown report style. OAI returns an empty answer, then an assertion of the agent aborts |
+| 3.6 | A deferred control with key `0` aborts the agent. The service model defers on whatever `sequence-id` the header holds, and the table asserts that it is not `0`. OAI avoids this by answering at once when the id is `0` |
+| 3.7 | The inner decode on the RIC side asserts. A format 1 indication whose `ran-function-id` has no decoder aborts the xApp. Only id `1` (Spectrum) is known. An unknown indication format aborts too |
+| 3.8 | The control path on the RIC side aborts when it cannot encode the inner control payload. It returns an **empty** request without error when the E3 type is "none" or the message already carries data |
+| 3.9 | The RIC Service Update handler on the RIC side does not decode the new definition |
+| 3.10 | The first RIC Service Update repeats the revision of the E2 Setup. The trigger also finds the service model by the literal `255`. **wrong** |
+| 3.11 | A comment says that unanswered controls are acknowledged "negatively". The sweep sends a RIC Control Acknowledge with no outcome. **doc** |
+| 3.12 | Two parked controls with the same key. A completion releases one. The other waits for a sweep that nothing runs (see 1.6) |
+| 3.13 | A fixed encode buffer means that large elements abort. The sizes are 512 KiB for the event trigger, 1 KiB for the action definition, 1 KiB for the indication header, 128 KiB for the indication message, 16 KiB for the control header, control message and control outcome, and 16 KiB for the definition. A control message above about 16 KiB aborts although the grammar allows 32768. The reference test vector for a large control message stops at 16000 octets. A definition with the map for 256 dApps of 64 functions each (about 83 KiB per copy, listed twice) does not fit either |
+| 3.14 | The clock helper returns `-1` on error and OAI uses it unchecked |
+| 3.15 | OAI does not clamp the dApp list to the grammar. More than 256 dApps, or a dApp with more than 64 functions, would reach flexric's encoder |
+| 3.16 | The equality helper of the event trigger compares the format of the first argument only. **latent** (there is one format) |
+
+**4. Consumers**
+
+| # | What | Effect |
+|---|---|---|
+| 4.1 | The wrapper of the control outcome in an xApp framework has an open "to do" and **no free binding** for the outcome. The likely reason is that the library hides symbols by default and the free function for the outcome is not exported, unlike the free functions of the indication header, indication message and definition | The `e3-control-outcome` buffer leaks at every acknowledge. **latent** |
+| 4.2 | An xApp framework mirrors flexric's C structures field by field | The layouts of the library are an **ABI**. A changed field order or type reads the wrong numbers without an error. The decoders return structures by value |
+| 4.3 | The mirror of the event trigger definition has two fields. The structure of flexric is empty | Reading a field of a decoded definition that has the event trigger section reads outside the allocation. OAI omits the section, so it does not trigger today. **latent** |
+| 4.4 | An xApp framework finds the control style by the name `DAPP-CONTROL-STYLE-1` | A RAN that names it differently is refused. The name is free text in the grammar |
+| 4.5 | An xApp framework sends a call process id of `1` in every control request | flexric ignores it. A conforming sender omits it |
+| 4.6 | An xApp framework hard-codes RAN function id `255` | |
+| 4.7 | A decision engine caches the decoded definition per gNB for its lifetime | The cache is stale after a RIC Service Update. The engine takes the `dapp-id` from reports, so this does not matter today |
+
+**5. Differences between the implementations.** The behavior below differs between flexric (A), libe3
+(B) and OCUDU (C) for the same input. The reference test vectors do not detect these differences,
+because every vector is a valid message and none sets a present `0` or disagreeing sizes.
+
+| # | Input | flexric (A) | libe3 (B) | OCUDU (C) |
+|---|---|---|---|---|
+| 5.1 | present `timestamp` or `sequence-id` equal to `0` | encoded as absent | encoded as present `0` | encoded as present `0` |
+| 5.2 | `data-size` different from the octet count | encoded as the stored value, decoded as the octet length | encoded and decoded as the field | encoded and decoded as the field |
+| 5.3 | extension additions on a `SEQUENCE` | skipped by the ASN.1 runtime | skipped by the ASN.1 runtime | skipped as opaque open types |
+| 5.4 | extension bit on a structure to be packed | not applicable | the member is never read when packing. The bit is always `0` | a set member makes `pack` fail |
+| 5.5 | a `PrintableString` with a character outside the alphabet | encoded, no check | rejected on encode and decode | rejected on encode, accepted on decode |
+| 5.6 | an `INTEGER` of exactly `2^(8k-1)`, for example a `SequenceId` of 128 | correct (two octets `00 80`) | correct | handled by a local routine. The generic helpers of its runtime size it wrongly |
+| 5.7 | an empty subscription list in a definition | **abort** | allowed | allowed |
+| 5.8 | a dApp item with 0 functions | the ASN.1 encoder rejects it | rejected on encode and decode | rejected on encode and decode |
+| 5.9 | the unbounded octet string above 16383 octets | not reachable (16 KiB buffer) | handed to the ASN.1 runtime, untested | rejected on encode |
+| 5.10 | malformed input | **abort** | decoding failure code | decoding failure code |
+| 5.11 | the format number | enumeration from `0` | `to_number()` from `1` | `to_number()` from `1` |
+
+OCUDU's E2 module against flexric and OAI:
+
+| # | Item | OCUDU | flexric and OAI |
+|---|---|---|---|
+| 5.12 | RAN function revision in the E2 Setup Request | `0`, although its service model class holds `1` | `1` |
+| 5.13 | dApp E3 subscription map in the definition | never present ("dynamic, so not part of the definition") | present in report style 1 and control style 1 when any dApp has a function |
+| 5.14 | RIC Service Update for E2SM-DAPP | never sent | sent when the dApp set changes |
+| 5.15 | Style names | `E3 Data Report`, `E3 Subscription Map`, `dApp Control` | `DAPP-E3-DATA-REPORT`, `DAPP-E3-SUBSCRIPTION-MAP`, `DAPP-CONTROL-STYLE-1` (the name an xApp framework requires) |
+| 5.16 | Event trigger section in the definition | present | absent in OAI |
+| 5.17 | `timestamp` of the control outcome | echoes the **control header's** timestamp | the time the outcome was built, on the gNB clock |
+| 5.18 | Outcome on failure | RIC Control Failure with the cause of the sink, outcome included | RIC Control Acknowledge only. No failure path exists |
+| 5.19 | Control without "ack requested" | applied, not answered | flexric's agent aborts |
+| 5.20 | `data-size` not equal to the octet count | an indication is dropped. A control is refused with `ctrl_msg_invalid` | not checked. The ASN.1 field is ignored on decode |
+| 5.21 | Reporting rate | one indication per subscription per 10 ms poll | event driven, one indication per report |
+| 5.22 | Size caps | indication header plus message at most 16319 octets. `e3-control-outcome` at most 16287 octets. The E2AP codec cannot carry 16384 octets or more | the fixed buffers of flexric (section 3) |
+| 5.23 | Where it is enabled | the DU-high only, by a configuration flag | not applicable |
+| 5.24 | An unknown report style | not admitted in the RIC Subscription Response | aborts (3.5) |
+
+Limits of the shared ASN.1 helpers of OCUDU, found while its authors hand-ported the grammar. They
+affect any other generated E2 service model there and are listed for whoever maintains that runtime.
+The E2SM-DAPP codec does not depend on them.
+
+| # | Helper | Problem | What the E2SM-DAPP codec does |
+|---|---|---|---|
+| 5.25 | the packer for an unconstrained integer | It sizes the values `2^(8k-1)` wrongly. `128` goes out as the single octet `0x80`, which a conforming peer reads as `-128`. Decode zero-extends, so negative values come back wrong | A local two's complement encoder and decoder. `128` encodes as `02 00 80` |
+| 5.26 | the packer for an 8-bit integer with upper bound 255 | It treats the field as unbounded and writes nothing | `node-type` is held in a 16-bit integer while packing |
+| 5.27 | the integer unpacker, extension path | It can reach an assertion on a long length read from the wire | Out-of-root values are rejected before that path |
+| 5.28 | the string unpacker | It ignores the result of its length decode, so an out-of-range length is accepted. There is no alphabet check | A wrapper checks the size on decode. It checks the size and the PrintableString alphabet on encode |
+| 5.29 | the unbounded octet string, length packer and unpacker | They cannot produce or parse OCTET STRINGs of 16384 octets or more | The codec refuses to emit such payloads (see 5.22) |
+
+**6. What the reference test vectors prove and what they do not**
+
+* They prove that libe3 and OCUDU **encode** every listed input to the exact bytes of flexric and
+  **decode** those bytes back (see the
+  [integrator guide](e2sm-dapp/integrator-guide.md#the-contract-the-golden-vectors)).
+* flexric produces them, so they inherit its limits. There is no present `0`, no
+  `ranFunction-Instance`, no control message above 16000 octets, no `e3-control-outcome` longer than 10
+  octets and no extension bits.
+* They say nothing about invalid input. Section 5 lists the places where the three codecs differ on it.
+* The expected behavior on extension bits, trailing octets and outcome payloads above 127 octets
+  (two-octet length form) comes from ITU-T X.691 and the ASN.1 runtime. It does not come from a vector.
+
+**7. Open items**
+
+| # | Item | Owner | Status |
+|---|---|---|---|
+| 7.1 | The real E3 link and the Spectrum codec are **out of scope** of the codec work of libe3 and OCUDU. The E2SM-DAPP codec does not touch E3 | | not scheduled |
+| 7.2 | Decide the `data-size` rule: equal and enforced, or ignored | the specification owners | open. Recommendation: send equal values |
+| 7.3 | Define the `node-plmn-id` packing and the `node-type` values | the specification owners | open |
+| 7.4 | Fix the limits of flexric (2.2, 3.13) or document them as the limits of that implementation | maintainers of flexric | open |
+| 7.5 | Wire the sweep of pending controls into a RAN, or remove it | maintainers of flexric and of RAN stacks | open |
+| 7.6 | Add a free binding for the control outcome to the xApp framework | maintainers of the xApp framework | open |
+| 7.7 | Extend the reference test vectors with cases that flexric cannot produce (present zero, instance, long payload outcome), from a second source | | not scheduled |
+| 7.8 | The E3 side of OCUDU's E2SM-DAPP module: the indication source and the control sink that carry the dApp traffic. Only the no-op versions exist | maintainers of OCUDU | not in the module |
 
 ## Aerial: what to change to align
 

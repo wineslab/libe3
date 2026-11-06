@@ -2,7 +2,6 @@
   "number": "O-RAN.XXX.TS.E3SM-SPEC-R000-v00.01",
   "title": "E3 Service Model Spectrum (E3SM-SPEC)",
   "cover": ["E3 Service Model (E3SM)", "Spectrum (E3SM-SPEC)"],
-  "markdown_only": ["06-discrepancies.md"],
   "parts": [
     {"clause": "1", "title": "Scope", "file": "README.md", "section": "Scope"},
     {"clause": "2", "title": "References", "file": "README.md", "section": "References"},

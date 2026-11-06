@@ -181,11 +181,13 @@ matter today.
 
 ## Evidence for the discrepancies
 
+The discrepancies are listed in [interop.md](../../interop.md#e3-service-models). This is where each one comes from.
+
 Table: Where each discrepancy comes from
 
 | Discrepancy | Evidence |
 |---|---|
-| Grammar copies differ | the diff of the first and the later `e3sm_spectrum.asn`: the cell configuration indication (line 40), the apply outcome (lines 206 to 248) and the constant `maxSlotIndex` (line 258) exist only in the later copy. The differences between the later copy and the present grammar are in [Annex A](06-discrepancies.md). |
+| Grammar copies differ | the diff of the first and the later `e3sm_spectrum.asn`: the cell configuration indication (line 40), the apply outcome (lines 206 to 248) and the constant `maxSlotIndex` (line 258) exist only in the later copy. The differences between the later copy and the present grammar are in [interop.md](../../interop.md#e3-service-models). |
 | JSON indication keys | `spectrum_enc.c:396-405` (`indicationType`, `sensing_shm`, `write_idx`) and `spectrum_enc.c:260-275` (the cell configuration in lower case with underscores) against the grammar and the proto file |
 | Cell configuration has no Protocol Buffers form | `spectrum_enc.c:291-293` |
 | `validityPeriod` unused | `spectrum_process_prb_block` reads only the list (`spectrum_sm.c:631-714`). `spectrum_process_sensing_policy` logs `validity_period` only (`spectrum_sm.c:840-843`). |

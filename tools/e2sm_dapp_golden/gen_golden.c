@@ -206,7 +206,7 @@ int main(void)
 
     /* Large lists: maxnoofDApps = 256 items, and 64 functions on one of them.
      * flexric's decoder asserts n < 256, so the grammar's own maximum of 256 can
-     * be encoded but not decoded by flexric (see the discrepancies doc). The
+     * be encoded but not decoded by flexric (see docs/interop.md). The
      * 256-item case is therefore emitted without flexric's round trip. */
     enum { N = 256 };
     uint32_t ids[N];

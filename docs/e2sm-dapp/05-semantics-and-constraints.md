@@ -4,9 +4,7 @@ This clause defines what the numbers mean, the units and clocks, the rules a mes
 shall satisfy, and what a sender and a receiver shall do when the input is wrong or
 unknown.
 
-This is section 5 of the specification. The index is [README.md](../e2sm-dapp/README.md). Where an
-implementation and the grammar disagree, the disagreement is in
-[06-discrepancies.md](06-discrepancies.md) and is only referenced here.
+This is section 5 of the specification. The index is [README.md](../e2sm-dapp/README.md).
 
 ## 1. Numbering: formats and styles
 
@@ -157,7 +155,7 @@ Table: Rules that implementations enforce in addition to the grammar
 | A RIC Subscription Request shall carry an **action definition** with style 1 or 2 | the RAN aborts, or answers with an empty subscription outcome that a second check then rejects |
 | A control shall carry a **`sequence-id` that is not `0`** | the OpenAirInterface implementation acknowledges the control at once and **does not apply it**. A RAN that defers a control whose id is `0` aborts the E2 agent of implementation A. |
 | An indication or control payload shall have **at least one octet** | the grammar says `SIZE(1..32768)`. One implementation drops an empty indication and aborts on an empty control message. The OpenAirInterface implementation ignores a report with no data. |
-| A subscription **item** shall have 1 to 64 functions | implementation A aborts its decoder at 64 (see [06-discrepancies.md](06-discrepancies.md)); the others reject 0 and more than 64 |
+| A subscription **item** shall have 1 to 64 functions | implementation A aborts its decoder at 64; the others reject 0 and more than 64 |
 | The report style list shall have 1 or 2 items and the control style list exactly 1 | implementation B rejects other sizes on encode and decode. Implementation A leaves the grammar limit to the ASN.1 runtime. |
 | The definition shall have the three-string name | |
 | The control's `ran-function-id` shall name a service model **the RAN can decode** | an unknown id: the E3 relay still sends the control and the dApp decides |
@@ -293,8 +291,7 @@ sends a RIC Control Failure for this service model.
 * An agent cannot tell apart two controls in flight with the same `sequence-id`. Its
   pending table uses `sequence-id` alone as the key. A completion releases the first
   slot with that key. The other slot stays until a timeout sweep retires it. In
-  implementation A, nothing runs that sweep (see
-  [06-discrepancies.md](06-discrepancies.md)).
+  implementation A, nothing runs that sweep.
 * A later Spectrum install replaces an earlier mask. This retires the earlier control
   as superseded. The RAN does not queue controls per dApp.
 * A re-installed subscription under the same RIC request id replaces the old one.

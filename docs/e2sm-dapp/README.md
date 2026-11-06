@@ -66,6 +66,11 @@ O-RAN.WG3.TS.E2GAP [1], O-RAN.WG3.TS.E2SM [3] and the following apply.
 * **dApp E3 subscription map**: the list of the dApps connected to the E2 node, each with the E3 RAN functions it has subscribed to.
 * **E3 RAN function**: a RAN function that is offered to dApps over E3. It is named by an E3 RAN function id. Do not confuse it with the E2 RAN function.
 * **Sequence id**: the identifier of one detection-to-mitigation procedure. The dApp assigns it. Every later message of the procedure carries it unchanged.
+* **Implementation A**: the original C implementation of the service model, in an E2 agent and a RIC library.
+* **Implementation B**: the C++ and C codec that ships with this repository.
+* **Implementation C**: a C++ RAN stack with a hand-ported codec.
+* **OpenAirInterface implementation**: the RAN bridge described in reference [i.2].
+* **xApp framework**: a Python framework that wraps implementation A.
 
 ### Symbols
 
@@ -112,7 +117,7 @@ Table: Identity of the E2SM-DAPP service model
 | Item | Value |
 |---|---|
 | E2 RAN function ID | `255` |
-| RAN function revision | `1` (one implementation announces `0`, see [06](06-discrepancies.md)) |
+| RAN function revision | `1` (one implementation announces `0`) |
 | Short name | `E2SM-DAPP` |
 | OID | `1.3.6.1.4.1.53148.1.1.255.3` |
 | Grammar | module `E2SM-DAPP-IEs`, APER (aligned), see [04](04-encoding.md) |
@@ -134,7 +139,6 @@ Table: Chapters of the specification
 | 3. Procedure flow | 7 | discovery of dApp ids, subscription, indication delivery, control relay, the deferred acknowledge, the `sequence-id` chain | [03-procedure-flow.md](03-procedure-flow.md) |
 | 4. Encoding | 8 | APER rules, byte-level worked examples checked against the reference test vectors, size limits, the ASN.1 grammar | [04-encoding.md](04-encoding.md) |
 | 5. Semantics and constraints | 9 | format and style numbers, units and clocks, absent versus zero, validation, error paths, unknown ids and formats, what is mandatory | [05-semantics-and-constraints.md](05-semantics-and-constraints.md) |
-| 6. Implementation notes and known discrepancies | none | where an implementation and the grammar disagree, limits and aborts, dead code, differences between the implementations | [06-discrepancies.md](06-discrepancies.md) |
 
 For an engineer who adds E2SM-DAPP to a RAN stack, there is a separate guide:
 [integrator-guide.md](integrator-guide.md). It is not part of the specification. It

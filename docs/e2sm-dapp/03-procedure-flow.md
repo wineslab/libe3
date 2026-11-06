@@ -83,7 +83,7 @@ Procedure:
   RAN function.
 * If no dApp has a subscribed function, the RAN shall omit `dappE3Subscriptions`.
   The RAN shall not send an empty list in the definition, because some encoders
-  cannot encode it. See [06-discrepancies.md](06-discrepancies.md).
+  cannot encode it.
 * An xApp shall treat an absent field and an empty list in the same way: no dApp is
   connected.
 
@@ -182,7 +182,7 @@ Procedure:
 * A style-2 indication follows the same path with R2 and a different trigger (see
   Discovery). It has no `A20`: the RAN generates it from the E3 subscription map.
 * A RIC side that cannot decode the inner payload of a format 1 message, or that
-  meets an unknown format, can fail. See [06-discrepancies.md](06-discrepancies.md).
+  meets an unknown format, can fail.
 
 ## Control relay and the deferred acknowledge
 
@@ -409,8 +409,7 @@ Implementations share the E2SM-DAPP messages and differ in what they do around t
 Two kinds exist. Implementation A has both the E2 side and the E3 side in the RAN.
 Implementation B has the E2 side only, and it reaches the E3 side through two
 interfaces: a source of indications and a sink for controls. The code references and
-the product names are in [integrator-guide.md](integrator-guide.md) and
-[06-discrepancies.md](06-discrepancies.md).
+the product names are in [integrator-guide.md](integrator-guide.md).
 
 Table: Behavior of implementation B
 

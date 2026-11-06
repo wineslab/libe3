@@ -26,7 +26,7 @@ ships the grammar and a tested codec for it.
 | Item | Value |
 |---|---|
 | E2 RAN function ID | `255` |
-| RAN function revision | `1` (flexric, OAI; OCUDU currently announces `0`, see [06](06-discrepancies.md)) |
+| RAN function revision | `1` (flexric, OAI; OCUDU currently announces `0`, see [interop.md](../interop.md#e2sm-dapp)) |
 | Short name | `E2SM-DAPP` |
 | OID | `1.3.6.1.4.1.53148.1.1.255.3` |
 | Grammar | [`messages/asn1/e2sm_dapp/V1/e2sm_dapp-1.0.0.asn`](../../messages/asn1/e2sm_dapp/V1/e2sm_dapp-1.0.0.asn), module `E2SM-DAPP-IEs`, APER (aligned) |
@@ -45,7 +45,7 @@ Everything of substance is in the numbered files. This page only says where.
 | 3. Procedure flow | discovery of dApp ids, subscription, indication delivery, control relay, the deferred acknowledge, the `sequence-id` chain, with the code of each step | [03-procedure-flow.md](03-procedure-flow.md) |
 | 4. Encoding | APER rules, byte-level worked examples checked against the golden vectors, size limits, the type map across flexric, libe3 and OCUDU, build switches | [04-encoding.md](04-encoding.md) |
 | 5. Semantics and constraints | format and style numbers, units and clocks, absent versus zero, validation, error paths, unknown ids and formats, what is mandatory | [05-semantics-and-constraints.md](05-semantics-and-constraints.md) |
-| 6. Discrepancies, TODOs, dead code | where the code and the grammar disagree, flexric limits and aborts, dead code, differences between the implementations | [06-discrepancies.md](06-discrepancies.md) |
+| 6. Discrepancies, TODOs, dead code | where the code and the grammar disagree, flexric limits and aborts, dead code, differences between the implementations | [interop.md](../interop.md#e2sm-dapp) |
 
 For an engineer adding E2SM-DAPP to a RAN stack there is a separate guide:
 [integrator-guide.md](integrator-guide.md). It is not part of the specification.
@@ -110,7 +110,7 @@ Roots are those of the README "Where the code references point" table: `flexric/
 
 ### The OID comment
 
-A comment in `flexric/src/sm/dapp_sm/dapp_sm_id.h:11-15` spells the same OID with `e2sm(2)`. It is a stale comment; the string constant on line 17 and the grammar both use `255`. See [06-discrepancies.md](06-discrepancies.md).
+A comment in `flexric/src/sm/dapp_sm/dapp_sm_id.h:11-15` spells the same OID with `e2sm(2)`. It is a stale comment; the string constant on line 17 and the grammar both use `255`. See [interop.md](../interop.md#e2sm-dapp).
 
 ### Two kinds of "RAN function ID"
 
@@ -182,7 +182,7 @@ The agent-side callback `on_ric_service_update_dapp_sm_ag` (`dapp_sm_agent.c:283
 ### Checklist notes (old section 4)
 
 * The control style name `DAPP-CONTROL-STYLE-1` is what `xdevsm` xApps look for when they control the RAN.
-* flexric's encoder cannot encode an empty list in the definition, and its decoder cannot decode more than 255 items or 63 functions; see [06-discrepancies.md](06-discrepancies.md).
+* flexric's encoder cannot encode an empty list in the definition, and its decoder cannot decode more than 255 items or 63 functions; see [interop.md](../interop.md#e2sm-dapp).
 * The flexric agent does not increase the revision for the first RIC Service Update.
 
 ## Chapter 2: E2AP information element mapping (code evidence)
@@ -390,7 +390,7 @@ References use the roots of the README table "Where the code references point".
 | xApp decodes it | | xDevSM: `get_ran_function_description` finds the RAN function with id 255 in the RIC's node information and calls `dapp_dec_func_def_asn` | `xdevsm/src/xdevsm/decorators/report.py:132-155`, `decorators/control.py:82-114`, `sm_framework/py_oran/dapp/report/DAppFunctionDef.py:147-151` |
 
 * The definition is rebuilt on every E2 Setup Request. The OAI comment at `ran_func_dapp.c:331-336` says the agent regenerates the definition, including the current map, on every E2 SETUP REQUEST retry.
-* If no dApp has any subscribed function, OAI omits `dappE3Subscriptions` instead of sending an empty list (`ran_func_dapp.c:142-145,195-205`). flexric's encoder cannot encode an empty list in the definition (see [06-discrepancies.md](06-discrepancies.md)).
+* If no dApp has any subscribed function, OAI omits `dappE3Subscriptions` instead of sending an empty list (`ran_func_dapp.c:142-145,195-205`). flexric's encoder cannot encode an empty list in the definition (see [interop.md](../interop.md#e2sm-dapp)).
 
 ### When the set of dApps changes
 
@@ -537,7 +537,7 @@ Code references use these roots, all at the commits listed in the README table "
 | Claim | Code pointer |
 |---|---|
 | The grammar is `messages/asn1/e2sm_dapp/V1/e2sm_dapp-1.0.0.asn`. It is a byte-identical copy of flexric's grammar (checked with `diff`) | `flexric/src/sm/dapp_sm/ie/asn/e2sm_dapp_v0_standard.asn` |
-| Plain and FlatBuffers encodings do not exist. flexric has stub files for them, and all 31 functions in them are `assert(0 != 0 && "Not implemented")` (see [06-discrepancies.md](06-discrepancies.md)) | `enc/dapp_enc_plain.c`, `dec/dapp_dec_plain.c`, `enc/dapp_enc_fb.c`, `dec/dapp_dec_fb.c` |
+| Plain and FlatBuffers encodings do not exist. flexric has stub files for them, and all 31 functions in them are `assert(0 != 0 && "Not implemented")` (see [interop.md](../interop.md#e2sm-dapp)) | `enc/dapp_enc_plain.c`, `dec/dapp_dec_plain.c`, `enc/dapp_enc_fb.c`, `dec/dapp_dec_fb.c` |
 
 ### Byte order, packing, length prefixes
 
@@ -707,7 +707,7 @@ or unknown.
 
 This is section 5 of the specification. The index is [README.md](../e2sm-dapp/README.md). Where
 the code and the grammar disagree, the disagreement is listed in
-[06-discrepancies.md](06-discrepancies.md) and only referenced here.
+[interop.md](../interop.md#e2sm-dapp) and only referenced here.
 
 ### 1. Numbering: formats and styles
 
@@ -844,7 +844,7 @@ of it, so a sender knows what will break at the receiver.
 | A RIC Subscription Request carries an **action definition** with style 1 or 2 | OAI `ran_func_dapp.c:461` (`assert`), `463-480` | the RAN aborts, or answers with an empty subscription outcome that flexric's own `assert` at `dapp_sm_agent.c:74` then rejects |
 | A control carries a **`sequence-id` that is not `0`** | OAI `ran_func_dapp.c:527-531`. flexric's agent parks a deferred control under that id and asserts it is not `0` (`pending_ctrl.c:49`). | OAI: the control is acknowledged at once and **not applied**. A RAN that defers a control whose id is `0` aborts the flexric agent. |
 | An indication or control payload has **at least one octet** | grammar `SIZE(1..32768)`; flexric: `dapp_enc_asn.c:277-278` (indication, via `valid_ind_msg` at 300), `dapp_enc_asn.c:415-416` (control, `assert`) | flexric drops an empty indication, aborts on an empty control message. The OAI bridge ignores a report with no data (`ran_func_dapp.c:361-363`). |
-| A subscription **item** has 1 to 64 functions | grammar | flexric's decoder aborts at 64 (see [06-discrepancies.md](06-discrepancies.md)); libe3 and OCUDU reject 0 and more than 64 |
+| A subscription **item** has 1 to 64 functions | grammar | flexric's decoder aborts at 64 (see [interop.md](../interop.md#e2sm-dapp)); libe3 and OCUDU reject 0 and more than 64 |
 | The report style list has 1 or 2 items, the control style list exactly 1 | grammar | libe3 rejects other sizes on encode and on decode. flexric's IR check is `0 < n < 64` for both (`ran_func_def_report.c:8`, `ran_func_def_ctrl.c:7`) and leaves the grammar limit to asn1c. |
 | The definition has the three-string name | grammar | |
 | The control's `ran-function-id` names a service model **the RAN can decode** | OAI: Spectrum service model | an unknown id: the E3 relay still sends the control, the dApp decides |
@@ -967,7 +967,7 @@ Control Failure for this service model.
   agent: the pending table is keyed by `sequence-id` alone. A completion releases the
   first slot with that key and leaves the other until a timeout sweep retires it, and
   nothing runs that sweep (`flexric/src/agent/pending_ctrl.c:92-114`; see
-  [06-discrepancies.md](06-discrepancies.md)).
+  [interop.md](../interop.md#e2sm-dapp)).
 * A later Spectrum install replaces an earlier mask, which retires the earlier
   control as superseded. Controls are not queued per dApp.
 * A re-installed subscription under the same RIC request id replaces the old one

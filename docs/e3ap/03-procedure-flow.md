@@ -129,7 +129,7 @@ The E3 Agent shall answer "negative" when the dApp is not registered or when it 
 free subscription identifier. The E3 Agent should answer "negative" when the RAN
 function identifier is not in its list, and when an identifier is not offered by
 the RAN function. Some implementations do not make these two checks. They answer
-"positive" and grant what the dApp asked for. See [06-discrepancies.md](06-discrepancies.md).
+"positive" and grant what the dApp asked for.
 
 ### Abnormal conditions
 

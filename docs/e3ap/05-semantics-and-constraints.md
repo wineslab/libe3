@@ -20,7 +20,7 @@ Table: Units and ranges
 | Sequence identifier | none | 1 to 4294967295 | not valid on a report and on an xApp control. Means "absent" on a dApp control in Protobuf | on a dApp control: the dApp decided on its own |
 
 Some implementations read `periodicity` in milliseconds. A sender that talks to such
-an implementation shall convert the value. See [06-discrepancies.md](06-discrepancies.md).
+an implementation shall convert the value.
 
 ## Clocks
 
@@ -126,7 +126,7 @@ side.
 A dApp that loses its link reports the reason "connection lost". It does not
 reconnect by itself. An E3 Agent that loses a dApp should remove the registration and
 the subscriptions of that dApp. Some implementations do not detect this, so the
-registration stays. See [06-discrepancies.md](06-discrepancies.md).
+registration stays.
 
 ## Identifiers over time
 

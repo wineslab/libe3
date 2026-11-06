@@ -218,7 +218,7 @@ and with hidden symbol visibility, so the runtime does not clash with another as
 the process. Encode with `ATS_ALIGNED_BASIC_PER` and decode with `aper_decode`.
 
 Pitfalls when you call asn1c directly (all seen in flexric's code, see
-[06-discrepancies.md](06-discrepancies.md)):
+[interop.md](../interop.md#e2sm-dapp)):
 
 * asn1c does not reject an oversized octet string cleanly; it can fault inside the
   encoder. Check `1..32768` yourself first.
