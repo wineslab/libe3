@@ -134,7 +134,7 @@ Table: Chapters of the specification
 | 3. Procedure flow | 7 | discovery of dApp ids, subscription, indication delivery, control relay, the deferred acknowledge, the `sequence-id` chain | [03-procedure-flow.md](03-procedure-flow.md) |
 | 4. Encoding | 8 | APER rules, byte-level worked examples checked against the reference test vectors, size limits, the ASN.1 grammar | [04-encoding.md](04-encoding.md) |
 | 5. Semantics and constraints | 9 | format and style numbers, units and clocks, absent versus zero, validation, error paths, unknown ids and formats, what is mandatory | [05-semantics-and-constraints.md](05-semantics-and-constraints.md) |
-| 6. Implementation notes and known discrepancies | Annex A (informative) | where an implementation and the grammar disagree, limits and aborts, dead code, differences between the implementations | [06-discrepancies.md](06-discrepancies.md) |
+| 6. Implementation notes and known discrepancies | none | where an implementation and the grammar disagree, limits and aborts, dead code, differences between the implementations | [06-discrepancies.md](06-discrepancies.md) |
 
 For an engineer who adds E2SM-DAPP to a RAN stack, there is a separate guide:
 [integrator-guide.md](integrator-guide.md). It is not part of the specification. It

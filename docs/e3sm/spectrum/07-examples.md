@@ -2,7 +2,7 @@
 
 A complete exchange of the Spectrum service model in APER and in JSON, from the setup to the PRB block that an xApp asked for.
 
-This is Annex B of the specification. It is informative.
+This is Annex A of the specification. It is informative.
 
 ## General
 

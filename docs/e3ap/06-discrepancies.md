@@ -4,7 +4,7 @@ Places where implementations of E3AP, the three encodings and the grammar disagr
 Each entry says what differs, what it means for an implementer and the resolution
 that this specification expects. This chapter is informative.
 
-This is Annex A of the specification. The index is [README.md](../e3ap/README.md). The named,
+This note is informative. The index is [README.md](../e3ap/README.md). The named,
 peer by peer ledger of changes is [../interop.md](../interop.md). Code pointers are in
 [integrator-guide.md](integrator-guide.md).
 

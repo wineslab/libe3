@@ -1,11 +1,11 @@
 # E2SM-DAPP: implementation notes and known discrepancies
 
-This annex is informative. It lists the places where an implementation and the grammar
+This note is informative. It lists the places where an implementation and the grammar
 disagree, where an implementation is incomplete, and where code is dead. Each entry says
 what it means for someone who implements or consumes E2SM-DAPP. Nothing here is a design
 decision. The design decisions are in the other clauses.
 
-This is section 6 of the specification. The index is [README.md](../e2sm-dapp/README.md). The
+The index is [README.md](../e2sm-dapp/README.md). The
 implementations are named by letter:
 
 * **Implementation A** is the original C implementation of the service model, in an

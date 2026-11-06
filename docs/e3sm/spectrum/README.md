@@ -158,7 +158,7 @@ The grammar of the service model is version 1. The payload choices of the dApp
 control, the dApp report, the xApp control and the apply outcome carry an extension
 marker, and so do the cell configuration indication and the apply outcome structure.
 The indication choice, the sensing indication and the RAN function data have none
-(Annex A). A receiver that meets an
+(see [06-discrepancies.md](06-discrepancies.md)). A receiver that meets an
 alternative it does not know shall reject the message as described in clause 9. A
 receiver shall ignore an extension field that it does not know, where the encoding
 allows it.

@@ -42,10 +42,11 @@ docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/src libe3-oran-docx docs/e3ap
   "number": "O-RAN.XXX.TS.E3AP-R000-v00.01",
   "title":  "E3 Application Protocol (E3AP)",
   "cover":  ["E3 Application Protocol (E3AP)", ""],
+  "markdown_only": ["06-discrepancies.md"],
   "parts": [
     {"clause": "1", "title": "Scope", "file": "README.md", "section": "Scope"},
     {"clause": "5", "title": "Identity and registration", "file": "01-identity-and-registration.md"},
-    {"clause": "A", "title": "Discrepancies", "file": "06-discrepancies.md", "informative": true}
+    {"clause": "A", "title": "Example message exchange", "file": "07-examples.md", "informative": true}
   ],
   "history": [["2026-11", "R000 v00.01", "First version", "Northeastern University"]]
 }

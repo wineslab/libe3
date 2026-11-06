@@ -105,7 +105,7 @@ to two would change the width of the index from 0 bits to 1 bit. Every existing 
 break.
 
 The choice `Spectrum-Indication` has two root alternatives and no extension marker. Its index takes
-one bit. A third indication would change that width. See [Annex A](06-discrepancies.md).
+one bit. A third indication would change that width. See [06-discrepancies.md](06-discrepancies.md).
 
 A sender that adds an alternative to a choice shall add it after the extension marker. A sender shall
 not move an existing alternative.
@@ -128,7 +128,7 @@ The key `indicationType` is not a field of the grammar. A codec adds it for read
 shall use the member of the alternative to tell the two indications apart.
 
 The members of the two alternatives use other names than the grammar. See
-[Annex A](06-discrepancies.md).
+[06-discrepancies.md](06-discrepancies.md).
 
 ### Sensing indication
 
@@ -243,7 +243,7 @@ Table: Protocol Buffers messages
 |---|---|
 | `SpectrumRanFunctionData` | 1: name, bytes. 2: version, uint32. 3: description, bytes. |
 | `SpectrumSensingIndication` | 1: timestamp, int64. 2: sfn, uint32. 3: slot, uint32. 4: beam, uint32. 5: shm_name, bytes. 6: shm_write_idx, uint32. 7: n_ranges, uint32. |
-| `SpectrumPRBBlacklistControl` | 1: blacklisted_prbs, repeated uint32. 3: validity_period, uint32, in milliseconds. Number 2 is reserved. It held sampling_threshold in earlier revisions (Annex A). |
+| `SpectrumPRBBlacklistControl` | 1: blacklisted_prbs, repeated uint32. 3: validity_period, uint32, in milliseconds. Number 2 is reserved. It held sampling_threshold in earlier revisions (see [06-discrepancies.md](06-discrepancies.md)). |
 | `SpectrumSensingPolicyControl` | 1: mask_per_slot, repeated uint32. 2: deactivate, bool, default false. 3: validity_period, uint32, in milliseconds. |
 | `SpectrumDAppControlData` | oneof control_payload: 1: prb_blacklist_control. 2: sensing_policy_control. |
 | `SpectrumPRBBlacklistReport` | 1: blacklisted_prbs, repeated uint32. |

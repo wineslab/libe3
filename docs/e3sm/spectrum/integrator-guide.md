@@ -200,6 +200,6 @@ Table: Where each discrepancy comes from
 
 No test or golden vector for this service model was found in the E3AP library tree or in `oai/`. The
 CI test script of the OpenAirInterface tree runs the service model against a radio simulator, and this
-guide did not read its result. [Annex B](07-examples.md) gives one exchange generated from the grammar.
+guide did not read its result. [Annex A](07-examples.md) gives one exchange generated from the grammar.
 It was not run against an implementation. Treat the encodings as untested against a second
 implementation.

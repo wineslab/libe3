@@ -4,7 +4,7 @@ Where the grammar, the Protocol Buffers file and the codecs disagree. Fields tha
 that this specification could not verify. The text names no product. The code evidence is in
 [the integrator guide](integrator-guide.md).
 
-This is Annex A of the specification. It is informative.
+This note is informative.
 
 ## Revisions of the grammar
 
