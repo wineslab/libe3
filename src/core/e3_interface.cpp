@@ -144,6 +144,9 @@ constexpr const char* LATREC_ROLE_CONTEXT  = "libe3.context";
 constexpr size_t MAX_NAME_BYTES = 64;
 constexpr size_t MAX_VERSION_BYTES = 32;
 
+// Largest periodicity e3ap-1.0.0.asn1 carries, in microseconds.
+constexpr uint32_t MAX_PERIODICITY_US = 60000000;
+
 // OCTET STRING (SIZE (1..n)) refuses an empty string, so a name the config
 // left unset goes out as a placeholder on every encoding.
 std::string name_or_unknown(const std::string& name) {
@@ -1179,15 +1182,21 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
         resp.subscription_id = subscription_id;
         resp.ran_function_identifier = request.ran_function_identifier;
         if (!repeated) {
-            // Core grants exactly what was asked; only the SM sets the real rate.
             resp.telemetry_identifier_list = request.telemetry_identifier_list;
             resp.control_identifier_list = request.control_identifier_list;
-            resp.periodicity = request.periodicity;
         } else if (held) {
             // A repeat keeps the subscription it repeats, so say what that holds.
             resp.telemetry_identifier_list = held->telemetry_ids;
             resp.control_identifier_list = held->control_ids;
-            if (held->periodicity_us != 0) resp.periodicity = held->periodicity_us;
+        }
+        // Only the SM knows the interval it keeps, so the response has one when it says so.
+        if (!repeated || held) {
+            const uint32_t requested = held ? held->periodicity_us
+                                            : request.periodicity.value_or(0);
+            ServiceModel* sm = SmRegistry::instance().get_by_ran_function(
+                request.ran_function_identifier);
+            const auto granted = sm ? sm->granted_periodicity(requested) : std::nullopt;
+            if (granted && *granted != 0 && *granted <= MAX_PERIODICITY_US) resp.periodicity = *granted;
         }
     } else if (refusal) {
         resp.cause = refusal->cause;

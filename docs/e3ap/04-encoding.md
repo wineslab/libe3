@@ -312,7 +312,7 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         cause                   E3-Cause OPTIONAL,
         detail                  E3-Text OPTIONAL,
         ranFunctionIdentifier   INTEGER (1..65535) OPTIONAL,
-        -- Granted interval, same unit and range as the request.
+        -- Least microseconds the E3 Agent keeps between two indications. Absent: not reported.
         periodicity             INTEGER (0..60000000) OPTIONAL
     }
 

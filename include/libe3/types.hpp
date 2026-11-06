@@ -309,7 +309,7 @@ struct SubscriptionResponse {
     std::optional<std::vector<uint32_t>> telemetry_identifier_list;  ///< Granted telemetry ids (absent = not reported, empty = none granted)
     std::optional<std::vector<uint32_t>> control_identifier_list;    ///< Granted control ids (absent = not reported, empty = none granted)
     std::optional<uint32_t> ran_function_identifier;  ///< RAN function the grant is for
-    std::optional<uint32_t> periodicity;              ///< Granted interval, same unit and range as the request
+    std::optional<uint32_t> periodicity;              ///< Least microseconds the RAN keeps between two indications (absent = not reported)
     std::optional<Cause> cause;                       ///< Why the subscription was refused (negative only)
     std::optional<std::string> detail;                ///< UTF-8 text for the cause, up to MAX_DETAIL_SIZE bytes
 };

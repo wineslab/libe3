@@ -49,6 +49,7 @@ Table: Absent, zero and empty
 | `periodicity` 0 | one indication for each event |
 | Granted list absent | the E3 Agent does not report the grant |
 | Granted list present and empty | the E3 Agent grants nothing |
+| `periodicity` absent in a response | the E3 Agent does not report an interval. It may still keep one |
 | `sequenceId` absent on a dApp control | the dApp decided on its own. No procedure is behind it |
 | `timestamp` absent | no producer reference |
 

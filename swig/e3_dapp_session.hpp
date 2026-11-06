@@ -87,7 +87,7 @@ struct E3Event {
     int response_code{-1};          ///< 0=positive, 1=negative, -1=n/a
     int disconnect_reason{-1};      ///< disconnect: 0=released by RAN, 1=connection lost, -1=n/a
     std::vector<uint8_t> payload;   ///< opaque E3SM bytes (indication / xApp control)
-    long periodicity{-1};           ///< granted interval in microseconds (subscription response), -1 = not reported
+    long periodicity{-1};           ///< least microseconds the RAN keeps between two indications (subscription response), -1 = not reported
     bool has_telemetry_granted{false};          ///< telemetry_granted was reported
     bool has_control_granted{false};            ///< control_granted was reported
     std::vector<uint32_t> telemetry_granted;    ///< granted telemetry ids

@@ -99,8 +99,8 @@ public:
      *
      * @param requested_us Periodicity the dApp asked for, in microseconds. 0 when
      *        it asked for none or for one indication per event.
-     * @return Microseconds between two indications, or std::nullopt when the SM
-     *         keeps no interval or does not say.
+     * @return Microseconds between two indications. std::nullopt or 0 when the SM
+     *         keeps no interval or does not say; the response then has none.
      */
     virtual std::optional<uint32_t> granted_periodicity(uint32_t requested_us) const {
         (void)requested_us;
