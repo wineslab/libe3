@@ -22,20 +22,24 @@ constexpr const char* LOG_TAG = "E3Agent";
  * @brief E3Agent implementation details
  */
 struct E3Agent::Impl {
-    E3Config config;
-    std::unique_ptr<E3Interface> interface;
-    DAppReportHandler dapp_report_handler;
-    DAppStatusChangedHandler dapp_status_changed_handler;
+    E3Config config;                                 ///< The configuration the agent was created with
+    std::unique_ptr<E3Interface> interface;          ///< The protocol engine
+    DAppReportHandler dapp_report_handler;           ///< Called with each dApp report (RAN role)
+    DAppStatusChangedHandler dapp_status_changed_handler;  ///< Called when a dApp's status changes (RAN role)
 
     // dApp-side handlers stored before init() so they can be forwarded
     // to E3Interface after construction.
-    SetupResponseHandler setup_response_handler;
-    SubscriptionResponseHandler subscription_response_handler;
-    IndicationHandler indication_handler;
-    XAppControlHandler xapp_control_handler;
-    MessageAckHandler message_ack_handler;
-    DisconnectHandler disconnect_handler;
+    SetupResponseHandler setup_response_handler;                ///< Called with each setup response
+    SubscriptionResponseHandler subscription_response_handler;  ///< Called with each subscription response
+    IndicationHandler indication_handler;                       ///< Called with each indication
+    XAppControlHandler xapp_control_handler;                    ///< Called with each xApp control action
+    MessageAckHandler message_ack_handler;                      ///< Called with each message ack
+    DisconnectHandler disconnect_handler;                       ///< Called when the session with the RAN ends
 
+    /**
+     * @brief Keep the configuration
+     * @param cfg The configuration the agent was created with
+     */
     explicit Impl(E3Config cfg) : config(std::move(cfg)) {}
 };
 
