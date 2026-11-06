@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -104,12 +104,52 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:acb67ea142416987e3e0ca8c225ee2533"><td class="mdescLeft">&#160;</td><td class="mdescRight">ID of the request being acknowledged.  <br /></td></tr>
 <tr class="memitem:a85e368c648061152821524b97c43d3b4" id="r_a85e368c648061152821524b97c43d3b4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5">ResponseCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a85e368c648061152821524b97c43d3b4">response_code</a> {<a class="el" href="namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5a50546bf973283065b6ccf09faf7a580a">ResponseCode::NEGATIVE</a>}</td></tr>
 <tr class="memdesc:a85e368c648061152821524b97c43d3b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Response code (positive/negative).  <br /></td></tr>
+<tr class="memitem:a5c8e06726f31be557f13290c2c6c4ca7" id="r_a5c8e06726f31be557f13290c2c6c4ca7"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5c8e06726f31be557f13290c2c6c4ca7">cause</a></td></tr>
+<tr class="memdesc:a5c8e06726f31be557f13290c2c6c4ca7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why the request was refused (negative only).  <br /></td></tr>
+<tr class="memitem:abdd8a93de59b913f1b7b30804b6d8f12" id="r_abdd8a93de59b913f1b7b30804b6d8f12"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abdd8a93de59b913f1b7b30804b6d8f12">detail</a></td></tr>
+<tr class="memdesc:abdd8a93de59b913f1b7b30804b6d8f12"><td class="mdescLeft">&#160;</td><td class="mdescRight">UTF-8 text for the cause, up to MAX_DETAIL_SIZE bytes.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>E3AP Message Acknowledgment structure. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00298">298</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00342">342</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a5c8e06726f31be557f13290c2c6c4ca7" name="a5c8e06726f31be557f13290c2c6c4ca7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c8e06726f31be557f13290c2c6c4ca7">&#9670;&#160;</a></span>cause</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt;<a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a>&gt; libe3::MessageAck::cause</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Why the request was refused (negative only). </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00345">345</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="abdd8a93de59b913f1b7b30804b6d8f12" name="abdd8a93de59b913f1b7b30804b6d8f12"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abdd8a93de59b913f1b7b30804b6d8f12">&#9670;&#160;</a></span>detail</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt;std::string&gt; libe3::MessageAck::detail</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>UTF-8 text for the cause, up to MAX_DETAIL_SIZE bytes. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00346">346</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
 <a id="acb67ea142416987e3e0ca8c225ee2533" name="acb67ea142416987e3e0ca8c225ee2533"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acb67ea142416987e3e0ca8c225ee2533">&#9670;&#160;</a></span>request_id</h2>
 
@@ -124,7 +164,7 @@ Public Attributes</h2></td></tr>
 
 <p>ID of the request being acknowledged. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00299">299</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00343">343</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -142,7 +182,7 @@ Public Attributes</h2></td></tr>
 
 <p>Response code (positive/negative). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00300">300</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00344">344</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

@@ -8,5 +8,6 @@ var searchData=
   ['info_5',['INFO',['../namespacelibe3.html#a509338e1414d84a610f21816d04940a0a551b723eafd6a31d444fcb2f5920fbd3',1,'libe3']]],
   ['initialized_6',['INITIALIZED',['../namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1feadee5f03c2c4e73657824e028494b18c0',1,'libe3']]],
   ['insert_7',['INSERT',['../namespacelibe3.html#ac1c5533fc81586565ca7822bf00eee90a61ee777e7f71dc466c3b2c685d8d313b',1,'libe3']]],
-  ['ipc_8',['IPC',['../namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40ac8660c6d72e7323867ec800d6bb953df',1,'libe3']]]
+  ['invalid_5frequest_8',['INVALID_REQUEST',['../namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ab8c9d7ce4c399c56136475f36309020f',1,'libe3']]],
+  ['ipc_9',['IPC',['../namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40ac8660c6d72e7323867ec800d6bb953df',1,'libe3']]]
 ];

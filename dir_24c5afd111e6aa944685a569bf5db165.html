@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -93,11 +93,11 @@ $(function(){initNavTree('dir_24c5afd111e6aa944685a569bf5db165.html','',''); });
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md243"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md233"></a>
 E2SM-DAPP</h1>
 <p>E2SM-DAPP is the E2 service model that carries dApp traffic between an E2 node (a RAN) and an xApp. The RAN relays each dApp report to the xApp as a RIC Indication. It relays each xApp decision to the dApp as a RIC Control. The acknowledge reports what applying the decision did on the air.</p>
 <p>This directory is the specification of the service model: the grammar, what the fields mean, and the encoding. A RAN or an xApp written from this text can interoperate with any other. The integrator guide is not part of the specification. It holds the pointers to code and artifacts.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md244"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md234"></a>
 Scope</h1>
 <p>The present document specifies the E2 Service Model (E2SM) "dApp" (E2SM-DAPP) for the RAN function that relays the traffic of dApps between an E2 node and a Near-RT RIC.</p>
 <p>The RAN function offers two RIC services:</p>
@@ -106,42 +106,48 @@ Scope</h1>
 <li>The CONTROL service delivers the decision of the xApp to the dApp, and returns the outcome of applying it.</li>
 </ul>
 <p>The present document defines the RAN function definition, the information elements and the procedures of this service model. It also defines the APER encoding of the information elements and the handling of unknown and erroneous data.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md245"></a>
+<p>This document is generated from the codebase and protocol definitions for the <a class="el" href="namespacelibe3.html">libe3</a> implementation in <a href="https://github.com/wineslab/libe3">https://github.com/wineslab/libe3</a>.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md235"></a>
 References</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md246"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md236"></a>
 Normative references</h2>
 <p>References are either specific (identified by date of publication, edition number or version number) or non-specific. For a specific reference, only the cited version applies. For a non-specific reference, the latest version applies.</p>
 <p>The following referenced documents are necessary for the application of the present document.</p>
 <ol type="1">
-<li>O-RAN-WG3.TS.E2GAP: "O-RAN E2 General Aspects and Principles".</li>
+<li>O-RAN.WG3.TS.E2GAP: "O-RAN E2 General Aspects and Principles".</li>
 <li>O-RAN.WG3.TS.E2AP: "O-RAN E2 Application Protocol (E2AP)".</li>
 <li>O-RAN.WG3.TS.E2SM: "O-RAN E2 Service Model (E2SM)".</li>
 <li>ITU-T Recommendation X.680: "Information technology: Abstract Syntax Notation One (ASN.1): Specification of basic notation".</li>
 <li>ITU-T Recommendation X.681: "Information technology: Abstract Syntax Notation One (ASN.1): Information object specification".</li>
 <li>ITU-T Recommendation X.691: "Information technology: ASN.1 encoding rules: Specification of Packed Encoding Rules (PER)".</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md247"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md237"></a>
 Informative references</h2>
 <p>The following referenced documents are not necessary for the application of the present document, but they help the reader.</p>
 <ol type="1">
-<li>The E3 Application Protocol (E3AP) specification, <a class="el" href="dir_af0c76cc165e127d1e03e322192d98eb.html">../e3ap/README.md</a>.</li>
+<li>O-RAN.XXX.TS.E3AP-R000-v00.01: "E3 Application Protocol (E3AP)", <a href="https://github.com/wineslab/libe3/tree/main/docs/e3ap">https://github.com/wineslab/libe3/tree/main/docs/e3ap</a>.</li>
 <li>The OpenAirInterface implementation of E3AP and of this service model: <a href="https://github.com/duranta-project/openairinterface5g/pull/729">https://github.com/duranta-project/openairinterface5g/pull/729</a>.</li>
 </ol>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md248"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md238"></a>
 Terms, symbols and abbreviations</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md249"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md239"></a>
 Terms</h2>
-<p>For the purposes of the present document, the terms and definitions given in O-RAN WG3.TS.E2GAP [1], O-RAN.WG3.TS.E2SM [3] and the following apply.</p>
+<p>For the purposes of the present document, the terms and definitions given in O-RAN.WG3.TS.E2GAP [1], O-RAN.WG3.TS.E2SM [3] and the following apply.</p>
 <ul>
 <li><b>dApp</b>: an application that runs next to the E2 node and talks to it over E3.</li>
 <li><b>dApp E3 subscription map</b>: the list of the dApps connected to the E2 node, each with the E3 RAN functions it has subscribed to.</li>
 <li><b>E3 RAN function</b>: a RAN function that is offered to dApps over E3. It is named by an E3 RAN function id. Do not confuse it with the E2 RAN function.</li>
 <li><b>Sequence id</b>: the identifier of one detection-to-mitigation procedure. The dApp assigns it. Every later message of the procedure carries it unchanged.</li>
+<li><b>Implementation A</b>: the original C implementation of the service model, in an E2 agent and a RIC library.</li>
+<li><b>Implementation B</b>: the C++ and C codec that ships with this repository.</li>
+<li><b>Implementation C</b>: a C++ RAN stack with a hand-ported codec.</li>
+<li><b>OpenAirInterface implementation</b>: the RAN bridge described in reference [i.2].</li>
+<li><b>xApp framework</b>: a Python framework that wraps implementation A.</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md250"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md240"></a>
 Symbols</h2>
 <p>Void.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md251"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md241"></a>
 Abbreviations</h2>
 <p>For the purposes of the present document, the abbreviations given in O-RAN.WG3.TS.E2SM [3] and the following apply. An abbreviation defined in the present document takes precedence over the definition of the same abbreviation in [3].</p>
 <ul>
@@ -153,9 +159,9 @@ Abbreviations</h2>
 <li><b>PRB</b>: Physical Resource Block</li>
 <li><b>RIC</b>: RAN Intelligent Controller</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md252"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md242"></a>
 General</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md253"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md243"></a>
 Notations</h2>
 <p>For the purposes of the present document, the following notations apply:</p>
 <ul>
@@ -166,10 +172,10 @@ Notations</h2>
 <li>A value of an information element is written between quotation marks. Example: "Value".</li>
 <li>An ASN.1 type or field name is written in a monospaced font.</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md254"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md244"></a>
 Forwards and backwards compatibility</h2>
 <p>The ASN.1 types of this service model are extensible. A decoder shall ignore extension additions that it does not know. A sender shall not set the extension bit of a type until this specification defines the additions. A change of the grammar that alters the APER encoding of an existing message is a change of the E2 RAN function revision.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md255"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md245"></a>
 Identity of the service model</h2>
 <p>Table: Identity of the E2SM-DAPP service model</p>
 <table class="markdownTable">
@@ -178,7 +184,7 @@ Identity of the service model</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">E2 RAN function ID  </td><td class="markdownTableBodyNone"><span class="tt">255</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">RAN function revision  </td><td class="markdownTableBodyNone"><span class="tt">1</span> (one implementation announces <span class="tt">0</span>, see <a class="el" href="md_docs_2e2sm-dapp_206-discrepancies.html">06</a>)  </td></tr>
+<td class="markdownTableBodyNone">RAN function revision  </td><td class="markdownTableBodyNone"><span class="tt">1</span> (one implementation announces <span class="tt">0</span>)  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Short name  </td><td class="markdownTableBodyNone"><span class="tt">E2SM-DAPP</span>  </td></tr>
 <tr class="markdownTableRowEven">
@@ -192,7 +198,7 @@ Identity of the service model</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Not used  </td><td class="markdownTableBodyNone">call process ID, INSERT, POLICY, QUERY  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md256"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md246"></a>
 Where each part is specified</h1>
 <p>Everything of substance is in the numbered files. This page only says where. The clause numbers are those of the Word edition of the specification.</p>
 <p>Table: Chapters of the specification</p>
@@ -209,11 +215,9 @@ Where each part is specified</h1>
 <td class="markdownTableBodyNone">4. Encoding  </td><td class="markdownTableBodyNone">8  </td><td class="markdownTableBodyNone">APER rules, byte-level worked examples checked against the reference test vectors, size limits, the ASN.1 grammar  </td><td class="markdownTableBodyNone"><a class="el" href="md_docs_2e2sm-dapp_204-encoding.html">04-encoding.md</a>  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">5. Semantics and constraints  </td><td class="markdownTableBodyNone">9  </td><td class="markdownTableBodyNone">format and style numbers, units and clocks, absent versus zero, validation, error paths, unknown ids and formats, what is mandatory  </td><td class="markdownTableBodyNone"><a class="el" href="md_docs_2e2sm-dapp_205-semantics-and-constraints.html">05-semantics-and-constraints.md</a>  </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">6. Implementation notes and known discrepancies  </td><td class="markdownTableBodyNone">Annex A (informative)  </td><td class="markdownTableBodyNone">where an implementation and the grammar disagree, limits and aborts, dead code, differences between the implementations  </td><td class="markdownTableBodyNone"><a class="el" href="md_docs_2e2sm-dapp_206-discrepancies.html">06-discrepancies.md</a>  </td></tr>
 </table>
 <p>For an engineer who adds E2SM-DAPP to a RAN stack, there is a separate guide: <a class="el" href="md_docs_2e2sm-dapp_2integrator-guide.html">integrator-guide.md</a>. It is not part of the specification. It holds the code pointers, the list of artifacts (grammar, codec sources, reference test vectors, tests, build options) and the code roots and revisions read.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md257"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md247"></a>
 Related documents</h1>
 <ul>
 <li><a class="el" href="md_docs_2control-loops_2path-b-e2-e3-loop.html">path-b-e2-e3-loop.md</a> and <a class="el" href="md_docs_2control-loops_2path-a-e3-loop.html">path-a-e3-loop.md</a>: the E2-E3 loop and its box numbers, which <a class="el" href="md_docs_2e2sm-dapp_203-procedure-flow.html">03</a> uses.</li>

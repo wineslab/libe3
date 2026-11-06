@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['disconnectreason_0',['DisconnectReason',['../namespacelibe3.html#ac517385d2a8b182e20888ef2c3b8ca19',1,'libe3']]]
+  ['cause_0',['Cause',['../namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7',1,'libe3']]]
 ];

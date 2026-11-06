@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_2integrator-guide.html','',''); });
   <div class="headertitle"><div class="title">E2SM-DAPP: integrator guide </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md223"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md213"></a></p>
 <p>For an engineer adding E2SM-DAPP to a RAN stack. OCUDU did it. OAI has it through its flexric submodule. A future stack may follow. This guide is about the codec and about proving that your stack produces and accepts the same bytes as the others. It is not part of the specification: the specification is the six numbered files in <a class="el" href="dir_24c5afd111e6aa944685a569bf5db165.html">README.md</a>. The code pointers, repository roots and the named per-implementation evidence for every chapter are in <a class="el" href="md_docs_2e2sm-dapp_2code-pointers.html">code-pointers.md</a>.</p>
 <p>What you do <b>not</b> need: the real E3 link and the Spectrum service-model codec. They are out of scope of the E2SM-DAPP codec. The codec packs and unpacks E2SM-DAPP elements and nothing else; the payloads inside (<span class="tt">data</span>, <span class="tt">e3-control-outcome</span>) are opaque octets to it.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md224"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md214"></a>
 Choose a route</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -108,15 +108,15 @@ Choose a route</h1>
 <td class="markdownTableBodyNone"><b>C. Write a codec by hand</b> (what OCUDU did)  </td><td class="markdownTableBodyNone">full control, no asn1c  </td><td class="markdownTableBodyNone">a bit-level APER library  </td><td class="markdownTableBodyNone">your stack already has one and forbids a second ASN.1 runtime  </td></tr>
 </table>
 <p>Whichever you choose, <b>the golden vectors are the acceptance test</b> (<a class="el" href="#golden-vectors-contract">below</a>).</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md225"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md215"></a>
 Route A: link libe3</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md226"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md216"></a>
 Build and install libe3</h2>
 <div class="fragment"><div class="line">cmake -S . -B build -DLIBE3_ENABLE_ASN1=ON -DLIBE3_ENABLE_E2SM_DAPP=ON</div>
 <div class="line">cmake --build build</div>
 <div class="line">cmake --install build --prefix /opt/libe3</div>
 </div><!-- fragment --><p><span class="tt">LIBE3_ENABLE_E2SM_DAPP</span> is <span class="tt">ON</span> by default and is forced <span class="tt">OFF</span> when <span class="tt">LIBE3_ENABLE_ASN1</span> is <span class="tt">OFF</span> (<span class="tt">cmake/libe3Options.cmake:26-30</span>). The codec does not need the E3 agent, ZeroMQ or the E3AP grammar: it has its own private copy of the asn1c runtime, with the runtime symbols hidden, so it can sit next to another asn1c in the same process (<span class="tt">messages/CMakeLists.txt:74-105</span>).</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md227"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md217"></a>
 Use it from CMake</h2>
 <div class="fragment"><div class="line">find_package(libe3 CONFIG REQUIRED COMPONENTS e2sm_dapp)</div>
 <div class="line"> </div>
@@ -126,7 +126,7 @@ Use it from CMake</h2>
 <div class="line">target_link_libraries(my_ran PRIVATE libe3::e2sm_dapp_shared)   # shared</div>
 </div><!-- fragment --><p><span class="tt"><a class="el" href="namespacelibe3_1_1e2sm__dapp.html">libe3::e2sm_dapp</a></span> (static) and <span class="tt">libe3::e2sm_dapp_shared</span> are the two targets. The component is "found" exactly when the install was built with the codec; without it, <span class="tt">find_package(... REQUIRED COMPONENTS e2sm_dapp)</span> fails with a message that says how to rebuild (<span class="tt">cmake/libe3Config.cmake.in:30-50</span>). The compile definition <span class="tt">LIBE3_ENABLE_E2SM_DAPP</span> comes with the target.</p>
 <p>pkg-config: <span class="tt">pkg-config --cflags --libs libe3_e2sm_dapp</span>, and <span class="tt">pkg-config --variable=asndir libe3_e2sm_dapp</span> for the grammar directory (<span class="tt">cmake/libe3_e2sm_dapp.pc.in</span>). The out-of-tree consumer checks in <span class="tt">tests/consume/</span> (<span class="tt"><a class="el" href="e2sm__dapp_8cpp.html" title="E2SM-DAPP APER codec: the C++ structs of e2sm_dapp.hpp &lt;-&gt; asn1c &lt;-&gt; bytes.">e2sm_dapp.cpp</a></span>, <span class="tt">e2sm_dapp_c.c</span>) show both routes against an install prefix.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md228"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md218"></a>
 C++: pack an indication header and indication message</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="e2sm__dapp_8hpp.html">libe3/e2sm_dapp.hpp</a>&gt;</span></div>
 <div class="line"> </div>
@@ -170,7 +170,7 @@ C++: pack an indication header and indication message</h2>
 <div class="ttc" id="astructlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__msg__s_html"><div class="ttname"><a href="structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__msg__s.html">libe3::e2sm_dapp::e2sm_dapp_ind_msg_s</a></div><div class="ttdoc">Indication message (ASN.1 E2SM-DAPP-IndicationMessage ::= SEQUENCE (top-level)).</div><div class="ttdef"><b>Definition</b> <a href="e2sm__dapp_8hpp_source.html#l00593">e2sm_dapp.hpp:593</a></div></div>
 <div class="ttc" id="astructlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__msg__s_html_a51a4610fa5bddfd8d85edf9bd855e8a6"><div class="ttname"><a href="structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__msg__s.html#a51a4610fa5bddfd8d85edf9bd855e8a6">libe3::e2sm_dapp::e2sm_dapp_ind_msg_s::pack</a></div><div class="ttdeci">asn_code pack(std::vector&lt; uint8_t &gt; &amp;out) const</div><div class="ttdef"><b>Definition</b> <a href="e2sm__dapp_8cpp_source.html#l00962">e2sm_dapp.cpp:962</a></div></div>
 <div class="ttc" id="astructlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__msg__s_html_af4b5175d9ae5ad08666b9b6193fd282d"><div class="ttname"><a href="structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__msg__s.html#af4b5175d9ae5ad08666b9b6193fd282d">libe3::e2sm_dapp::e2sm_dapp_ind_msg_s::ric_ind_msg_formats</a></div><div class="ttdeci">ric_ind_msg_formats_c_ ric_ind_msg_formats</div><div class="ttdoc">Format of the element, a CHOICE with one alternative per format.</div><div class="ttdef"><b>Definition</b> <a href="e2sm__dapp_8hpp_source.html#l00667">e2sm_dapp.hpp:667</a></div></div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md229"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md219"></a>
 C++: unpack a control and read it</h2>
 <div class="fragment"><div class="line"><a class="code hl_struct" href="structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ctrl__hdr__s.html">e2sm_dapp_ctrl_hdr_s</a> ch;</div>
 <div class="line"><span class="keywordflow">if</span> (ch.<a class="code hl_function" href="structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ctrl__hdr__s.html#afa28592b0501150a8ddfa46a4aa108cc">unpack</a>(hdr_bytes.data(), hdr_bytes.size()) != <a class="code hl_enumvalue" href="namespacelibe3_1_1e2sm__dapp.html#a2207b1cbda09564e91c05d2e692b4f6ca35c73269a15315839c2ac7904dae605c">ASN_SUCCESS</a>) { <span class="keywordflow">return</span>; }</div>
@@ -198,7 +198,7 @@ C++: unpack a control and read it</h2>
 <div class="line"><span class="keywordflow">if</span> (hdr.<a class="code hl_variable" href="structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__hdr__s.html#aed05bb9a8ce553ac7bc47ae9fb220352">ric_ind_hdr_formats</a>.<a class="code hl_function" href="structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__hdr__s_1_1ric__ind__hdr__formats__c__.html#a3dd72b46f4ea6fe78a3ab22780f88342">type</a>() == types::ind_hdr_format1) { <span class="comment">/* ... */</span> }</div>
 <div class="ttc" id="astructlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__hdr__s_1_1ric__ind__hdr__formats__c___html_a3dd72b46f4ea6fe78a3ab22780f88342"><div class="ttname"><a href="structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__hdr__s_1_1ric__ind__hdr__formats__c__.html#a3dd72b46f4ea6fe78a3ab22780f88342">libe3::e2sm_dapp::e2sm_dapp_ind_hdr_s::ric_ind_hdr_formats_c_::type</a></div><div class="ttdeci">types type() const</div><div class="ttdef"><b>Definition</b> <a href="e2sm__dapp_8hpp_source.html#l00509">e2sm_dapp.hpp:509</a></div></div>
 <div class="ttc" id="astructlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__hdr__s_1_1ric__ind__hdr__formats__c___html_adc1b45ee0661e8bdc18333b84de4e9f0"><div class="ttname"><a href="structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__hdr__s_1_1ric__ind__hdr__formats__c__.html#adc1b45ee0661e8bdc18333b84de4e9f0">libe3::e2sm_dapp::e2sm_dapp_ind_hdr_s::ric_ind_hdr_formats_c_::types</a></div><div class="ttdeci">enumerated&lt; types_opts, true &gt; types</div><div class="ttdoc">The selected alternative as an enumerated value.</div><div class="ttdef"><b>Definition</b> <a href="e2sm__dapp_8hpp_source.html#l00495">e2sm_dapp.hpp:495</a></div></div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md230"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md220"></a>
 C++: build the control outcome (the RAN side of an acknowledge)</h2>
 <div class="fragment"><div class="line"><a class="code hl_struct" href="structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ctrl__outcome__s.html">e2sm_dapp_ctrl_outcome_s</a> out;</div>
 <div class="line"><span class="keyword">auto</span>&amp; o = out.<a class="code hl_variable" href="structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ctrl__outcome__s.html#ab274f2e91a0986fff049b1b3b757d97e">ric_ctrl_outcome_formats</a>.<a class="code hl_function" href="structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ctrl__outcome__s_1_1ric__ctrl__outcome__formats__c__.html#ac9798a657871de3b46ae58c7d9fd8636">ctrl_outcome_format1</a>();</div>
@@ -214,7 +214,7 @@ C++: build the control outcome (the RAN side of an acknowledge)</h2>
 <div class="ttc" id="astructlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ctrl__outcome__s_html_a190fd42fd80a7b24ec7a109aa5b4156e"><div class="ttname"><a href="structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ctrl__outcome__s.html#a190fd42fd80a7b24ec7a109aa5b4156e">libe3::e2sm_dapp::e2sm_dapp_ctrl_outcome_s::pack</a></div><div class="ttdeci">asn_code pack(std::vector&lt; uint8_t &gt; &amp;out) const</div><div class="ttdef"><b>Definition</b> <a href="e2sm__dapp_8cpp_source.html#l01087">e2sm_dapp.cpp:1087</a></div></div>
 <div class="ttc" id="astructlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ctrl__outcome__s_html_ab274f2e91a0986fff049b1b3b757d97e"><div class="ttname"><a href="structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ctrl__outcome__s.html#ab274f2e91a0986fff049b1b3b757d97e">libe3::e2sm_dapp::e2sm_dapp_ctrl_outcome_s::ric_ctrl_outcome_formats</a></div><div class="ttdeci">ric_ctrl_outcome_formats_c_ ric_ctrl_outcome_formats</div><div class="ttdoc">Format of the element, a CHOICE with one alternative per format.</div><div class="ttdef"><b>Definition</b> <a href="e2sm__dapp_8hpp_source.html#l00879">e2sm_dapp.hpp:879</a></div></div>
 </div><!-- fragment --><p>Leave <span class="tt">e3_ctrl_outcome_present</span> false for an acknowledge with nothing to say.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md231"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md221"></a>
 C: the same, from C</h2>
 <p>The C API is in <span class="tt">&lt;<a class="el" href="e2sm__dapp__c_8h.html" title="E2SM-DAPP information elements and their APER codec (C API).">libe3/e2sm_dapp_c.h</a>&gt;</span>. Every optional field has an explicit <span class="tt">has_*</span> flag, and <span class="tt">0</span> is a normal value.</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="e2sm__dapp__c_8h.html">libe3/e2sm_dapp_c.h</a>&gt;</span></div>
@@ -252,27 +252,27 @@ C: the same, from C</h2>
 <div class="ttc" id="astructlibe3__e2sm__dapp__ctrl__hdr__t_html_adeb277e4c0ded74240964a301b432c3c"><div class="ttname"><a href="structlibe3__e2sm__dapp__ctrl__hdr__t.html#adeb277e4c0ded74240964a301b432c3c">libe3_e2sm_dapp_ctrl_hdr_t::sequence_id</a></div><div class="ttdeci">int64_t sequence_id</div><div class="ttdoc">Id of the procedure, echoed from the indication header; absent or 0 means the RAN cannot defer the ac...</div><div class="ttdef"><b>Definition</b> <a href="e2sm__dapp__c_8h_source.html#l00173">e2sm_dapp_c.h:173</a></div></div>
 <div class="ttc" id="astructlibe3__e2sm__dapp__ctrl__hdr__t_html_afeb401446e5119a174b73d768a379ee0"><div class="ttname"><a href="structlibe3__e2sm__dapp__ctrl__hdr__t.html#afeb401446e5119a174b73d768a379ee0">libe3_e2sm_dapp_ctrl_hdr_t::format</a></div><div class="ttdeci">libe3_e2sm_dapp_ctrl_hdr_format_e format</div><div class="ttdoc">Selected format.</div><div class="ttdef"><b>Definition</b> <a href="e2sm__dapp__c_8h_source.html#l00167">e2sm_dapp_c.h:167</a></div></div>
 </div><!-- fragment --><p>Ownership rules (<span class="tt"><a class="el" href="e2sm__dapp__c_8h.html" title="E2SM-DAPP information elements and their APER codec (C API).">include/libe3/e2sm_dapp_c.h</a>:10-20</span>): inputs to <span class="tt">encode_*</span> stay yours. <span class="tt">encode_*</span> allocates <span class="tt">out-&gt;data</span>; release it with <span class="tt"><a class="el" href="e2sm__dapp__c_8h.html#aa3a3989666b92224787ba2b411a0bfd6">libe3_e2sm_dapp_bytes_free</a></span> (plain <span class="tt">free</span> also works). <span class="tt">decode_*</span> allocates everything inside <span class="tt">*out</span>; release with the matching <span class="tt">libe3_e2sm_dapp_free_*</span>. On failure <span class="tt">*out</span> is zeroed and needs no freeing, and every <span class="tt">free</span> function zeroes its argument, so freeing twice is harmless. Errors are <span class="tt"><a class="el" href="error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8ae7e2cb456b9f2ab568b681d883d793ba">E3_INVALID_PARAM</a></span>, <span class="tt"><a class="el" href="error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a18f777be8d60634e7bfe0eee45876092">E3_ENCODE_FAILED</a></span>, <span class="tt"><a class="el" href="error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8ac53cff2a3a3d59d3948383e112d16be1">E3_DECODE_FAILED</a></span> and <span class="tt"><a class="el" href="error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8ab8f1129351fbb6fe4b47255e43d3088d">E3_SM_ERROR_MEMORY</a></span>. Unlike flexric's C IR, <b>nothing aborts</b>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md232"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md222"></a>
 Route B: run asn1c yourself</h1>
 <p>The grammar is <span class="tt">messages/asn1/e2sm_dapp/V1/e2sm_dapp-1.0.0.asn</span> in the <a class="el" href="namespacelibe3.html">libe3</a> source, and <span class="tt">share/libe3/e2sm_dapp/e2sm_dapp-1.0.0.asn</span> in an install (<span class="tt">cmake/libe3Install.cmake:160-161</span>). It is a byte-identical copy of flexric's <span class="tt">src/sm/dapp_sm/ie/asn/e2sm_dapp_v0_standard.asn</span>. <b>Do not edit it.</b></p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md233"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md223"></a>
 The asn1c you must use</h2>
 <p><a class="el" href="namespacelibe3.html">libe3</a> builds with the fork <span class="tt">mouse07410/asn1c</span>, pinned to commit <span class="tt">940dd5fa9f3917913fd487b13dfddfacd0ded06e</span> (<span class="tt">build_libe3:195-227</span>, function <span class="tt">install_asn1c_from_source</span>):</p>
 <div class="fragment"><div class="line">git clone https://github.com/mouse07410/asn1c /tmp/asn1c</div>
 <div class="line">cd /tmp/asn1c &amp;&amp; git checkout 940dd5fa9f3917913fd487b13dfddfacd0ded06e</div>
 <div class="line">./configure --prefix /opt/asn1c/ &amp;&amp; make &amp;&amp; sudo make install</div>
 </div><!-- fragment --><p>(<span class="tt">build_libe3</span> does this for you when the pinned commit is not installed.) A different asn1c can produce a different APER encoding for the same grammar, in particular for extension handling and unconstrained integers. Check against the golden vectors if you use another.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md234"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md224"></a>
 The exact flags</h2>
 <p>From <span class="tt">messages/CMakeLists.txt:91</span>:</p>
 <div class="fragment"><div class="line">asn1c -pdu=all -gen-APER -gen-UPER -no-gen-JER -no-gen-BER -no-gen-OER \</div>
 <div class="line">      -fno-include-deps -fcompound-names -findirect-choice -no-gen-example \</div>
 <div class="line">      -D &lt;output-dir&gt; e2sm_dapp-1.0.0.asn</div>
 </div><!-- fragment --><p>flexric uses a slightly different line, with <span class="tt">-no-gen-UPER</span> and without <span class="tt">-pdu=all</span> (<span class="tt">src/sm/dapp_sm/ie/asn/CMakeLists.txt</span>). The APER rules are the same; confirm with the golden vectors.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md235"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md225"></a>
 Compile definitions and layout</h2>
 <p>Compile the generated <span class="tt">*.c</span> files and the asn1c runtime it emits (the list is in <span class="tt">messages/asn1/e2sm_dapp/V1/e2sm_dapp-1.0.0.cmake</span>: runtime support first, then the protocol types) with <span class="tt">-DASN_DISABLE_OER_SUPPORT</span>. <a class="el" href="namespacelibe3.html">libe3</a> also compiles them <span class="tt">-w</span> and with hidden symbol visibility, so the runtime does not clash with another asn1c in the process. Encode with <span class="tt">ATS_ALIGNED_BASIC_PER</span> and decode with <span class="tt">aper_decode</span>.</p>
-<p>Pitfalls when you call asn1c directly (all seen in flexric's code, see <a class="el" href="md_docs_2e2sm-dapp_206-discrepancies.html">06-discrepancies.md</a>):</p>
+<p>Pitfalls when you call asn1c directly (all seen in flexric's code, see <a href="../interop.md#e2sm-dapp">interop.md</a>):</p>
 <ul>
 <li>asn1c does not reject an oversized octet string cleanly; it can fault inside the encoder. Check <span class="tt">1..32768</span> yourself first.</li>
 <li>Check constraints (<span class="tt">asn_check_constraints</span>) before encoding. Do not rely on the encoder to refuse out-of-range values.</li>
@@ -280,7 +280,7 @@ Compile definitions and layout</h2>
 <li>Free the decoded structure on every path, including a failed decode: asn1c leaves a half-built structure behind.</li>
 <li>The unbounded integers (<span class="tt">Timestamp</span>, <span class="tt">SequenceId</span>, <span class="tt">RIC-Style-Type</span>) are <span class="tt">long</span> in the generated structs. They are 64-bit on LP64 and 32-bit on 32-bit targets.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md236"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md226"></a>
 Route C: a hand-written codec (OCUDU)</h1>
 <p>OCUDU writes the structs in the style of its other E2SM headers (<span class="tt">ocudu/include/ocudu/asn1/e2sm/e2sm_dapp.h</span>) and implements <span class="tt">pack</span> and <span class="tt">unpack</span> on its <span class="tt">bit_ref</span> and <span class="tt">cbit_ref</span> (<span class="tt">ocudu/lib/asn1/e2sm/e2sm_dapp.cpp</span>). Things it had to handle by hand, which any hand-written codec must:</p>
 <ul>
@@ -289,7 +289,7 @@ Route C: a hand-written codec (OCUDU)</h1>
 <li><b>The extension bit</b> on a <span class="tt">SEQUENCE</span> set by a peer: read and skip the additions as open types (<span class="tt">skip_ext_additions</span>).</li>
 <li><b><span class="tt">PrintableString</span></b> alphabet and length are checked by the codec, because the generic string utilities check neither.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md237"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md227"></a>
 The OCUDU to libe3 C++ interface</h1>
 <p><a class="el" href="namespacelibe3.html">libe3</a>'s <span class="tt"><a class="el" href="e2sm__dapp_8hpp.html" title="E2SM-DAPP information elements and their APER codec (C++ API).">include/libe3/e2sm_dapp.hpp</a></span> deliberately copies OCUDU's <span class="tt">asn1::e2sm_dapp</span>: same type names, same field names, so a message-building function reads the same in both. The differences are small and mechanical.</p>
 <table class="markdownTable">
@@ -328,10 +328,10 @@ The OCUDU to libe3 C++ interface</h1>
 </table>
 <p>A function written for one compiles for the other if it avoids <span class="tt">to_json</span>, the getters on an unchecked choice, and <span class="tt">pack</span> of a non-top-level struct. The shared test fixtures rely on exactly that.</p>
 <p><a class="anchor" id="golden-vectors-contract"></a></p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md238"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md228"></a>
 The contract: the golden vectors</h1>
 <p><span class="tt">tests/e2sm_dapp_golden.hpp</span> holds the APER bytes of 31 inputs (<a href="04-encoding.md#reference-test-vectors-full-list">04-encoding.md</a>), generated by flexric's own encoder at the flexric commit named in the file. It is <b>generated; do not edit it by hand</b>. <a class="el" href="namespacelibe3.html">libe3</a> and OCUDU each carry the same table (<span class="tt">ocudu/tests/unittests/e2/e2sm_dapp_golden.h</span>). If your stack reproduces every vector and decodes every vector to an equal value, it is byte-compatible with flexric, <a class="el" href="namespacelibe3.html">libe3</a> and OCUDU.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md239"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md229"></a>
 The shared test-fixture technique</h2>
 <p>The inputs are not described by hand in each repository. Each stack builds them through <b>the same code</b>:</p>
 <ul>
@@ -353,7 +353,7 @@ The shared test-fixture technique</h2>
 <li>The flexric side of the same table is <span class="tt">tools/e2sm_dapp_golden/gen_golden.c</span>, which builds the same inputs in C. The three places are changed together (<span class="tt">tools/e2sm_dapp_golden/README.md</span>, section "Changing the inputs").</li>
 </ul>
 <p>To add E2SM-DAPP to a new stack, copy <span class="tt">e2sm_dapp_fixtures.inc</span> and <span class="tt">e2sm_dapp_golden.hpp</span>, define the three macros, and write the two loops. If your stack's types differ from the shared names, add thin adapters. Do not change the fixtures.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md240"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md230"></a>
 Reproducing the golden vectors</h2>
 <div class="fragment"><div class="line">tools/e2sm_dapp_golden/regen.sh &lt;flexric-checkout&gt; &lt;asn1c-binary&gt; &lt;gcc&gt; [output-file]</div>
 </div><!-- fragment --><ul>
@@ -365,7 +365,7 @@ Reproducing the golden vectors</h2>
 <p>To check the committed header is reproducible:</p>
 <div class="fragment"><div class="line">tools/e2sm_dapp_golden/regen.sh ~/flexric /opt/asn1c/bin/asn1c gcc-15 /tmp/golden.hpp</div>
 <div class="line">cmp /tmp/golden.hpp tests/e2sm_dapp_golden.hpp</div>
-</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md241"></a>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md231"></a>
 Checklist for a new stack</h1>
 <ol type="1">
 <li><b>Identity.</b> Register RAN function <span class="tt">255</span>, revision <span class="tt">1</span>, OID <span class="tt">1.3.6.1.4.1.53148.1.1.255.3</span> (<a href="01-identity-and-registration.md#4-requirements-for-a-ran-that-announces-e2sm-dapp">01-identity-and-registration.md</a>).</li>
@@ -381,7 +381,7 @@ Checklist for a new stack</h1>
 <li><b>Interoperate with <span class="tt">xdevsm</span>.</b> If its xApps are to work against your RAN, name the control style <span class="tt">DAPP-CONTROL-STYLE-1</span> (OCUDU currently names it <span class="tt">dApp Control</span>, so <span class="tt">xdevsm</span> refuses it), accept a RIC Control Request that asks for an acknowledge, and accept a call process id you ignore.</li>
 <li><b>Do not abort the RAN</b> on a malformed message from the RIC.</li>
 </ol>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md242"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md232"></a>
 What is deliberately not here</h1>
 <ul>
 <li>The real E3 link (<a class="el" href="namespacelibe3.html">libe3</a>'s E3 agent and its transports). The E2SM-DAPP codec has no dependency on it.</li>

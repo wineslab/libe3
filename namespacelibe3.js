@@ -72,6 +72,23 @@ var namespacelibe3 =
       [ "STOPPED", "namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1fea09d4d696b4e935115b9313e3c412509a", null ],
       [ "ERROR", "namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1feabb1ca97ec761fc37101737ba0aa2e7c5", null ]
     ] ],
+    [ "Cause", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7", [
+      [ "UNSPECIFIED", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a1c04cc3823d476c3017238679a0fdf52", null ],
+      [ "PROTOCOL_ERROR", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a23f149f0f9ae9ed9e0119e7209178a5d", null ],
+      [ "SETUP_REQUIRED", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a041599013e82a7ccaf8ec2910da356a9", null ],
+      [ "SETUP_ALREADY_COMPLETE", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a3b1fc07332b77e8803fca5cecedaaf04", null ],
+      [ "UNSUPPORTED_PROTOCOL_VERSION", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ad0bbad81de26b4f35e3e681ac73308ec", null ],
+      [ "UNSUPPORTED_RAN_FUNCTION", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7abe32d56dee3a6318cc92422f8e0f3e59", null ],
+      [ "UNSUPPORTED_IDENTIFIER", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ae64f307d4ee019c0cce6ce06779411e3", null ],
+      [ "INVALID_REQUEST", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ab8c9d7ce4c399c56136475f36309020f", null ],
+      [ "NOT_FOUND", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a8c02547a8a3b02382bac3557bcb2280d", null ],
+      [ "DUPLICATE", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a5c57b592f6421079706484abebcab81b", null ],
+      [ "RESOURCE_EXHAUSTED", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a4a739fa42dcdbdb8dfe5a5e4d9c5a627", null ],
+      [ "AUTHORIZATION_REJECTED", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a9fdac9ed7bccc6af6b88d4e090f848f7", null ],
+      [ "PAYLOAD_TOO_LARGE", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ac379e50491099134897f11767ac77544", null ],
+      [ "TRANSPORT_OVERRUN", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7afeea87fe86102a3a54f6a787e04dc58a", null ],
+      [ "SHUTTING_DOWN", "namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a89e5325b1f9acbf5dde5c70b84bbdcb1", null ]
+    ] ],
     [ "DisconnectReason", "namespacelibe3.html#ac517385d2a8b182e20888ef2c3b8ca19", [
       [ "RELEASED_BY_RAN", "namespacelibe3.html#ac517385d2a8b182e20888ef2c3b8ca19a7993dab10d0452f96478365ebc3f26d1", null ],
       [ "CONNECTION_LOST", "namespacelibe3.html#ac517385d2a8b182e20888ef2c3b8ca19a6afae85c81e24d106bec978e17b89ce7", null ]
@@ -124,6 +141,9 @@ var namespacelibe3 =
     ] ],
     [ "action_type_to_string", "namespacelibe3.html#a73e5843bd75cd76372b7bfff4894fcf5", null ],
     [ "agent_state_to_string", "namespacelibe3.html#a7cd0e90b0c01822a4a7fbe5b64842fc1", null ],
+    [ "cause_from_string", "namespacelibe3.html#aea5cad3e2e304461d5a38de98ca6a7bf", null ],
+    [ "cause_from_value", "namespacelibe3.html#ab9079f464bfd858520f4bbce5386384b", null ],
+    [ "cause_to_string", "namespacelibe3.html#a289413885a89ed74d969b7723f8e012e", null ],
     [ "cpu_relax", "namespacelibe3.html#a979479d8033aec7c1268d3a5af3223c7", null ],
     [ "create_connector", "namespacelibe3.html#aa9ff798ade0521070e6332830f7d35bd", null ],
     [ "create_encoder", "namespacelibe3.html#a3fd9e4c182481cd094c35bab83ede638", null ],
@@ -142,6 +162,7 @@ var namespacelibe3 =
     [ "LIBE3_PROTOCOL_VERSION", "namespacelibe3.html#ac69f2e5f639ef2bdb04445cf7ac2b408", null ],
     [ "MAX_ACTION_DATA_SIZE", "namespacelibe3.html#aca224e72d9af7089c4d9c1a150a705db", null ],
     [ "MAX_DAPP_REPORT_DATA_SIZE", "namespacelibe3.html#a1fdb0c4f4c6f3060e3b0448610c7a289", null ],
+    [ "MAX_DETAIL_SIZE", "namespacelibe3.html#ab9fd4d0a2f9f4256043102de4b108d0b", null ],
     [ "MAX_IDENTIFIER_LIST_SIZE", "namespacelibe3.html#af4b3cf6c64a692090cd6b7d26f62b6bf", null ],
     [ "MAX_PROTOCOL_DATA_SIZE", "namespacelibe3.html#a581a3bc9ba0fad9e97f52c00fdce32b9", null ],
     [ "MAX_RAN_FUNCTIONS", "namespacelibe3.html#aa385e749637e30801ce6405782b0c699", null ],

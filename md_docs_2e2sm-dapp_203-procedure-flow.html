@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -169,7 +169,7 @@ In the RAN function definition</h2>
 <ul>
 <li>The RAN shall build the definition again on every E2 Setup Request, including a retried request. A retried request therefore carries the map as it is at that moment.</li>
 <li>The map shall hold one item for every dApp that has at least one subscribed E3 RAN function.</li>
-<li>If no dApp has a subscribed function, the RAN shall omit <span class="tt">dappE3Subscriptions</span>. The RAN shall not send an empty list in the definition, because some encoders cannot encode it. See <a class="el" href="md_docs_2e2sm-dapp_206-discrepancies.html">06-discrepancies.md</a>.</li>
+<li>If no dApp has a subscribed function, the RAN shall omit <span class="tt">dappE3Subscriptions</span>. The RAN shall not send an empty list in the definition, because some encoders cannot encode it.</li>
 <li>An xApp shall treat an absent field and an empty list in the same way: no dApp is connected.</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md72"></a>
@@ -243,7 +243,7 @@ Indication delivery (report up)</h1>
 <li>The bridge shall send every report to every style-1 subscriber. It shall not filter by dApp or by function.</li>
 <li>The bridge shall copy the unchanged <span class="tt">reportData</span> into <span class="tt">data</span>, and the <span class="tt">sequenceId</span> of the report into <span class="tt">sequence-id</span>.</li>
 <li>A style-2 indication follows the same path with R2 and a different trigger (see Discovery). It has no <span class="tt">A20</span>: the RAN generates it from the E3 subscription map.</li>
-<li>A RIC side that cannot decode the inner payload of a format 1 message, or that meets an unknown format, can fail. See <a class="el" href="md_docs_2e2sm-dapp_206-discrepancies.html">06-discrepancies.md</a>.</li>
+<li>A RIC side that cannot decode the inner payload of a format 1 message, or that meets an unknown format, can fail.</li>
 </ul>
 <h1 class="doxsection"><a class="anchor" id="autotoc_md77"></a>
 Control relay and the deferred acknowledge</h1>
@@ -444,7 +444,7 @@ The same flow as a sequence</h2>
 <div class="line">    R-&gt;&gt;C: RIC Indication, style 2 (header F2, message F2 with the map)</div>
 </div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md85"></a>
 Differences between implementations</h1>
-<p>Implementations share the E2SM-DAPP messages and differ in what they do around them. Two kinds exist. Implementation A has both the E2 side and the E3 side in the RAN. Implementation B has the E2 side only, and it reaches the E3 side through two interfaces: a source of indications and a sink for controls. The code references and the product names are in <a class="el" href="md_docs_2e2sm-dapp_2integrator-guide.html">integrator-guide.md</a> and <a class="el" href="md_docs_2e2sm-dapp_206-discrepancies.html">06-discrepancies.md</a>.</p>
+<p>Implementations share the E2SM-DAPP messages and differ in what they do around them. Two kinds exist. Implementation A has both the E2 side and the E3 side in the RAN. Implementation B has the E2 side only, and it reaches the E3 side through two interfaces: a source of indications and a sink for controls. The code references and the product names are in <a class="el" href="md_docs_2e2sm-dapp_2integrator-guide.html">integrator-guide.md</a>.</p>
 <p>Table: Behavior of implementation B</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">

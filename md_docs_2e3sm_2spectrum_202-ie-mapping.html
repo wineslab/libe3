@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e3sm_2spectrum_202-ie-mapping.html','',''); }
   <div class="headertitle"><div class="title">E3SM-SPEC: information elements </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md499"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md531"></a></p>
 <p>Every information element (IE) of the Spectrum service model: its type, its range, whether it is present, and what it means. The layout of the sensing ring is in the last section.</p>
 <p>This is clause 6 of the specification. The encoding of the elements is in <a class="el" href="md_docs_2e3sm_2spectrum_204-encoding.html">clause 8</a>. Where each message travels is in <a class="el" href="md_docs_2e3sm_2spectrum_203-procedure-flow.html">clause 7</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md500"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md532"></a>
 Overview</h1>
 <p>Each service model message is the content of one octet string field of an E3AP message. The RAN or the dApp encodes it. E3AP does not look inside it.</p>
 <p>Table: Messages of the Spectrum service model</p>
@@ -105,7 +105,7 @@ Overview</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">RAN function data  </td><td class="markdownTableBodyNone"><span class="tt">Spectrum-RanFunctionData</span>  </td><td class="markdownTableBodyNone">RAN to dApp  </td><td class="markdownTableBodyNone"><span class="tt">ranFunctionData</span> of the E3 Setup Response  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Sensing indication  </td><td class="markdownTableBodyNone"><span class="tt">Spectrum-SensingIndication</span>  </td><td class="markdownTableBodyNone">RAN to dApp  </td><td class="markdownTableBodyNone"><span class="tt">protocolData</span> of the E3 Indication Message  </td></tr>
+<td class="markdownTableBodyNone">Indication  </td><td class="markdownTableBodyNone"><span class="tt">Spectrum-Indication</span>: a sensing indication or a cell configuration indication  </td><td class="markdownTableBodyNone">RAN to dApp  </td><td class="markdownTableBodyNone"><span class="tt">protocolData</span> of the E3 Indication Message  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">dApp control  </td><td class="markdownTableBodyNone"><span class="tt">Spectrum-DAppControlData</span>  </td><td class="markdownTableBodyNone">dApp to RAN  </td><td class="markdownTableBodyNone"><span class="tt">actionData</span> of the E3 dApp Control Action  </td></tr>
 <tr class="markdownTableRowEven">
@@ -116,7 +116,7 @@ Overview</h1>
 <td class="markdownTableBodyNone">Apply outcome  </td><td class="markdownTableBodyNone"><span class="tt">Spectrum-ApplyOutcomeData</span>  </td><td class="markdownTableBodyNone">RAN to xApp  </td><td class="markdownTableBodyNone">opaque outcome field of the E2 control outcome  </td></tr>
 </table>
 <p>Table notation: "M" is mandatory, "O" is optional, and "D" is optional with a default value. A range written <span class="tt">0..N</span> includes both ends.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md501"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md533"></a>
 RAN function data</h1>
 <p>Table: <span class="tt">Spectrum-RanFunctionData</span></p>
 <table class="markdownTable">
@@ -129,8 +129,20 @@ RAN function data</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">description</span>  </td><td class="markdownTableBodyNone">OCTET STRING  </td><td class="markdownTableBodyNone">size 1..128  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">a text for an operator  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md502"></a>
-Sensing indication</h1>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md534"></a>
+Indication</h1>
+<p>Table: <span class="tt">Spectrum-Indication</span> (CHOICE)</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Alternative  </th><th class="markdownTableHeadNone">Type  </th><th class="markdownTableHeadNone">Description  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">sensingIndication</span>  </td><td class="markdownTableBodyNone"><span class="tt">Spectrum-SensingIndication</span>  </td><td class="markdownTableBodyNone">the reference to the sensing ranges of one slot  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">cellConfigIndication</span>  </td><td class="markdownTableBodyNone"><span class="tt">Spectrum-CellConfigIndication</span>  </td><td class="markdownTableBodyNone">the configuration of the uplink carrier  </td></tr>
+</table>
+<p>The choice has two alternatives and no extension marker. The alternative tells a dApp which indication it received.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md535"></a>
+Sensing indication</h2>
 <p>The indication does not carry the sensing ranges. It carries a reference to a slot of the sensing ring, and a dApp reads the ranges from the ring. See the last section of this clause.</p>
 <p>Table: <span class="tt">Spectrum-SensingIndication</span></p>
 <table class="markdownTable">
@@ -152,9 +164,37 @@ Sensing indication</h1>
 <td class="markdownTableBodyNone"><span class="tt">nRanges</span>  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">0..128  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">the number of valid sensing ranges in that ring slot  </td></tr>
 </table>
 <p>The <span class="tt">timestamp</span> uses the monotonic clock. It is only valid on the host of the RAN. Do not subtract it from a realtime timestamp. See <a class="el" href="md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html">clause 9</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md503"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md536"></a>
+Cell configuration indication</h2>
+<p>The RAN samples the configuration of the uplink carrier about once a second and sends it in a cell configuration indication. The values come from the common serving cell configuration of the cell [i.6].</p>
+<p>Table: <span class="tt">Spectrum-CellConfigIndication</span></p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Field  </th><th class="markdownTableHeadNone">Type  </th><th class="markdownTableHeadNone">Range  </th><th class="markdownTableHeadNone">Presence  </th><th class="markdownTableHeadNone">Description  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">timestamp</span>  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">not constrained  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">nanoseconds on the monotonic clock of the RAN host, taken when the RAN samples the configuration  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">ulCarrierPRBs</span>  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">1..273  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">the bandwidth of the uplink carrier in PRBs, at the subcarrier spacing of the carrier  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">ulOffsetToCarrier</span>  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">0..272  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">the first PRB of the carrier in the common resource grid, counted in PRBs from point A  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">ulSubcarrierSpacing</span>  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">0..3  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">the subcarrier spacing of the carrier as the numerology index: "0" is 15 kHz, "1" 30 kHz, "2" 60 kHz and "3" 120 kHz [i.1]  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">ulArfcnPointA</span>  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">0..3279165  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">point A of the uplink carrier as an NR-ARFCN [i.7]. A cell without an uplink point A of its own sends the downlink one.  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">slotsPerFrame</span>  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">1..160  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">the number of slots in a frame of 10 ms at the subcarrier spacing of the carrier  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">tddSlotPattern</span>  </td><td class="markdownTableBodyNone">OCTET STRING  </td><td class="markdownTableBodyNone">size 1..160  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone">one character for each slot of the TDD period: "D" downlink, "U" uplink, "S" special. The length is the period in slots. Absent for an FDD cell.  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">nrPci</span>  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">0..1007  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone">the physical cell identity [i.1]  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">extension marker  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">the grammar can add fields  </td></tr>
+</table>
+<p>The PRB indices of the sensing ranges are absolute in the common resource grid. With the cell configuration, a dApp places a range in frequency: the lowest frequency of the carrier is the frequency of point A, plus <span class="tt">ulOffsetToCarrier</span> times 12 subcarriers at the subcarrier spacing.</p>
+<p>A dApp that has not yet received a cell configuration indication shall not place the ranges in frequency. It can still use the PRB indices.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md537"></a>
 dApp control</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md504"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md538"></a>
 Envelope</h2>
 <p>Table: <span class="tt">Spectrum-DAppControlData</span></p>
 <table class="markdownTable">
@@ -174,8 +214,8 @@ Envelope</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">sensingPolicyControl</span>  </td><td class="markdownTableBodyNone"><span class="tt">Spectrum-SensingPolicyControl</span>  </td><td class="markdownTableBodyNone">2  </td><td class="markdownTableBodyNone">install or clear a sensing policy. This is an extension alternative.  </td></tr>
 </table>
-<p>The choice has one root alternative and one extension alternative. The encoding therefore carries an extension bit before the alternative index. See <a class="el" href="md_docs_2e3sm_2spectrum_204-encoding.html">clause 8</a>.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md505"></a>
+<p>The choice has one root alternative and one extension alternative. The PRB block control takes the extension bit and no index. The sensing policy control takes the extension bit, an index and a length. See <a class="el" href="md_docs_2e3sm_2spectrum_204-encoding.html">clause 8</a>.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md539"></a>
 PRB block control</h2>
 <p>Table: <span class="tt">Spectrum-PRBBlacklistControl</span></p>
 <table class="markdownTable">
@@ -184,12 +224,10 @@ PRB block control</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">blacklistedPRBs</span>  </td><td class="markdownTableBodyNone">SEQUENCE OF INTEGER  </td><td class="markdownTableBodyNone">list size 0..273, each 0..272  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">the complete list of PRB indices to block. The index is absolute in the carrier. An empty list clears the block.  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">samplingThreshold</span>  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">0..100  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone">a sampling ratio for IQ captures: one delivery for each <span class="tt">samplingThreshold</span>. The RAN decodes it and does not use it.  </td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">validityPeriod</span>  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">1..3600  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone">seconds that the block stays valid. The RAN decodes it and does not use it.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">validityPeriod</span>  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">1..3600000  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone">milliseconds that the block stays valid, up to one hour. The RAN decodes it and does not use it.  </td></tr>
 </table>
 <p>The RAN blocks every listed PRB for all 14 symbols, in uplink and in downlink. The list replaces the block that is active. The dApp sends the complete list for every change.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md506"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md540"></a>
 Sensing policy control</h2>
 <p>Table: <span class="tt">Spectrum-SensingPolicyControl</span></p>
 <table class="markdownTable">
@@ -200,10 +238,10 @@ Sensing policy control</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">deactivate</span>  </td><td class="markdownTableBodyNone">BOOLEAN  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">D  </td><td class="markdownTableBodyNone">default "FALSE". When "TRUE", the RAN clears the policy and ignores the masks.  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">validityPeriod</span>  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">1..3600  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone">seconds that the policy stays valid. The RAN decodes it and uses it only in a log line.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">validityPeriod</span>  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">1..3600000  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone">milliseconds that the policy stays valid, up to one hour. The RAN decodes it and uses it only in a log line.  </td></tr>
 </table>
 <p>The length of <span class="tt">maskPerSlot</span> shall equal the number of slots in a frame of the RAN. That number is 20 at 30 kHz subcarrier spacing. A list with another length gets a negative acknowledge. A message that only clears the policy shall still carry at least one mask value.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md507"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md541"></a>
 dApp report</h1>
 <p>Table: <span class="tt">Spectrum-DAppReportData</span></p>
 <table class="markdownTable">
@@ -231,7 +269,7 @@ dApp report</h1>
 <td class="markdownTableBodyNone"><span class="tt">blacklistedPRBs</span>  </td><td class="markdownTableBodyNone">SEQUENCE OF INTEGER  </td><td class="markdownTableBodyNone">list size 0..273, each 0..272  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">the PRB indices that the dApp holds in its current list  </td></tr>
 </table>
 <p>The RAN does not decode the report. It relays the octets to the E2 side. A decoder at an xApp reads the structure.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md508"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md542"></a>
 xApp control</h1>
 <p>An xApp control reaches the dApp through the RAN. The dApp decides what to do with it. The usual action is to send a PRB block control to the RAN.</p>
 <p>Table: <span class="tt">Spectrum-XAppControlData</span></p>
@@ -273,7 +311,7 @@ xApp control</h1>
 <td class="markdownTableBodyNone"><span class="tt">enable</span>  </td><td class="markdownTableBodyNone">BOOLEAN  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone">switch spectrum monitoring on or off  </td></tr>
 </table>
 <p>The service model does not define the unit of <span class="tt">noiseFloorThreshold</span>. The dApp and the xApp need to agree on it.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md509"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md543"></a>
 Apply outcome</h1>
 <p>The apply outcome tells an xApp what the RAN did with a PRB block control that the xApp started. The E2 service model carries it as an opaque field of the control outcome. See the <a class="el" href="dir_24c5afd111e6aa944685a569bf5db165.html">E2SM-DAPP specification</a>. The outcome is encoded with APER only.</p>
 <p>Table: <span class="tt">Spectrum-ApplyOutcomeData</span></p>
@@ -308,7 +346,7 @@ Apply outcome</h1>
 <td class="markdownTableBodyNone"><span class="tt">slot</span>  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">0..159  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone">the slot of that tick. Present together with <span class="tt">onAirTimestamp</span>.  </td></tr>
 </table>
 <p>The structure has an extension marker, so a later version can add fields.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md510"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md544"></a>
 Constants</h1>
 <p>Table: Constants of the grammar</p>
 <table class="markdownTable">
@@ -324,8 +362,12 @@ Constants</h1>
 <td class="markdownTableBodyNone"><span class="tt">maxSlotIndex</span>  </td><td class="markdownTableBodyNone">159  </td><td class="markdownTableBodyNone"><span class="tt">maxSlotsFrame</span> minus 1  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">maxSymbolMask</span>  </td><td class="markdownTableBodyNone">16383  </td><td class="markdownTableBodyNone">the largest 14 bit symbol bitmap, 2 to the power 14, minus 1  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">maxARFCN</span>  </td><td class="markdownTableBodyNone">3279165  </td><td class="markdownTableBodyNone">the largest NR-ARFCN [i.7]  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">maxPCI</span>  </td><td class="markdownTableBodyNone">1007  </td><td class="markdownTableBodyNone">the largest physical cell identity [i.1]  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md511"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md545"></a>
 The sensing ring</h1>
 <p>The sensing ring is a region of POSIX shared memory. Its name is "/e3_l2_sensing". The RAN is the only writer. A dApp on the same host maps it read only. A dApp on another host cannot use the sensing indication, because the indication holds only a reference.</p>
 <p>The region holds one header and 256 slots. All integers are in the byte order of the host. The RAN creates the region with the permission "0644".</p>

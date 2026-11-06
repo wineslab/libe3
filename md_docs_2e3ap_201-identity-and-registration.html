@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e3ap_201-identity-and-registration.html','','
   <div class="headertitle"><div class="title">E3AP: identity and registration </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md258"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md248"></a></p>
 <p>The numbers and strings that identify E3AP, the roles of the two sides, the links that carry the messages, and how a dApp registers with an E3 Agent.</p>
 <p>This is clause 5 of the specification. The index is <a class="el" href="dir_af0c76cc165e127d1e03e322192d98eb.html">README.md</a>. The messages are in <a class="el" href="md_docs_2e3ap_202-ie-mapping.html">02-ie-mapping.md</a>. The procedures are in <a class="el" href="md_docs_2e3ap_203-procedure-flow.html">03-procedure-flow.md</a>. The bytes are in <a class="el" href="md_docs_2e3ap_204-encoding.html">04-encoding.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md259"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md249"></a>
 Identity</h1>
 <p>Table: Identity of E3AP</p>
 <table class="markdownTable">
@@ -119,7 +119,7 @@ Identity</h1>
 <td class="markdownTableBodyNone">Transport layers  </td><td class="markdownTableBodyNone">IPC, TCP, SCTP  </td></tr>
 </table>
 <p>The version string is a free text of 1 to 32 octets. Both sides write it in the Setup procedure. This version of the specification uses <span class="tt">1.0.0</span>. The string names the version of the protocol. It does not say which grammar revision a sender uses. A change of a constraint changes the encoded bytes of APER, so both sides shall use the same grammar revision.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md260"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md250"></a>
 Two sides of one interface</h2>
 <p>E3AP is a client and server protocol.</p>
 <ul>
@@ -127,7 +127,7 @@ Two sides of one interface</h2>
 <li>The <b>dApp</b> is the client. It connects to the E3 Agent, registers, subscribes, and then sends and receives messages.</li>
 </ul>
 <p>One E3 Agent serves many dApps at the same time. A dApp uses one session with one E3 Agent. A message in the direction from the E3 Agent to the dApps reaches every connected dApp on some links. A dApp shall ignore a message that names another dApp in <span class="tt">dAppIdentifier</span>.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md261"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md251"></a>
 Identifiers</h2>
 <p>Table: Identifiers in E3AP</p>
 <table class="markdownTable">
@@ -148,7 +148,7 @@ Identifiers</h2>
 </table>
 <p>The E3 Agent assigns the lowest free number for a dApp identifier and for a subscription identifier. A number becomes free again as soon as its owner goes away.</p>
 <p>The RAN function identifier of E3AP is not the RAN function identifier of the E2 interface. See <a href="../e2sm-dapp/01-identity-and-registration.md#12-two-things-named-ran-function-id">E2SM-DAPP, identity</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md262"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md252"></a>
 Links and transports</h1>
 <p>E3AP does not define its own framing on a link that already keeps message boundaries. It runs over a choice of a link layer and a transport layer. Both sides shall use the same choice. There is no negotiation.</p>
 <p>Table: Link layers and transport layers</p>
@@ -166,7 +166,7 @@ Links and transports</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">POSIX  </td><td class="markdownTableBodyNone">SCTP  </td><td class="markdownTableBodyNone">3  </td><td class="markdownTableBodyNone">the same as POSIX over IPC  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md263"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md253"></a>
 The three channels</h2>
 <p>A dApp uses three channels to one E3 Agent.</p>
 <p>Table: Channels between a dApp and an E3 Agent</p>
@@ -181,7 +181,7 @@ The three channels</h2>
 <td class="markdownTableBodyNone">Outbound from the E3 Agent  </td><td class="markdownTableBodyNone">E3 Agent to dApp  </td><td class="markdownTableBodyNone">SUBSCRIPTION RESPONSE, INDICATION, xApp CONTROL ACTION, MESSAGE ACK and RELEASE messages  </td><td class="markdownTableBodyNone">PUB on the E3 Agent, SUB on the dApp  </td></tr>
 </table>
 <p>The E3 Agent opens the three endpoints and waits. The dApp connects to them. On a ZeroMQ link the E3 Agent binds all three sockets.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md264"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md254"></a>
 Default endpoints</h2>
 <p>Table: Default endpoints</p>
 <table class="markdownTable">
@@ -195,11 +195,11 @@ Default endpoints</h2>
 <td class="markdownTableBodyNone">Outbound from the E3 Agent  </td><td class="markdownTableBodyNone">9991  </td><td class="markdownTableBodyNone"><span class="tt">ipc:///tmp/dapps/e3_socket</span>  </td></tr>
 </table>
 <p>An implementation may use other values. Both sides shall use the same values. On a TCP or SCTP link the E3 Agent listens on all addresses of the host on these ports.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md265"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md255"></a>
 How a dApp registers</h1>
 <p>A dApp registers with the Setup procedure. The dApp sends a SETUP REQUEST message with its protocol version, its name, its version and its vendor. The E3 Agent answers with a SETUP RESPONSE message. On success the response holds the dApp identifier and the list of RAN functions. See <a href="03-procedure-flow.md#setup">03-procedure-flow.md</a>.</p>
 <p>Until the dApp has a dApp identifier, it shall not send any message on the other two channels.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md266"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md256"></a>
 What the RAN function list holds</h2>
 <p>For each RAN function the E3 Agent lists:</p>
 <ul>
@@ -209,7 +209,7 @@ What the RAN function list holds</h2>
 <li>the RAN function data, an octet string that only the service model reads.</li>
 </ul>
 <p>The list holds at most 64 RAN functions. A RAN function with more than 256 telemetry identifiers or more than 256 control identifiers does not fit. An E3 Agent shall leave such a RAN function out of the list.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md267"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md257"></a>
 Requirements for an E3 Agent</h1>
 <p>An implementation of the E3 Agent shall:</p>
 <ol type="1">
@@ -227,7 +227,7 @@ Requirements for an E3 Agent</h1>
 <li>ignore a message that names another dApp, and</li>
 <li>retry the Setup procedure when no response arrives.</li>
 </ol>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md268"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md258"></a>
 Related</h1>
 <ul>
 <li><a class="el" href="md_docs_2e3ap_202-ie-mapping.html">02-ie-mapping.md</a>: the messages and their fields.</li>

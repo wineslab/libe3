@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e3ap_203-procedure-flow.html','',''); });
   <div class="headertitle"><div class="title">E3AP: procedure flow </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md286"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md276"></a></p>
 <p>The procedures of E3AP, in the order a dApp uses them: Setup, Subscription, Indication, Control, Report and Release. Each procedure has a purpose, the steps of each side, the successful operation, the unsuccessful operation and the abnormal conditions.</p>
 <p>This is clause 7 of the specification. The index is <a class="el" href="dir_af0c76cc165e127d1e03e322192d98eb.html">README.md</a>. The messages are in <a class="el" href="md_docs_2e3ap_202-ie-mapping.html">02-ie-mapping.md</a>. The rules for ranges, clocks and errors are in <a class="el" href="md_docs_2e3ap_205-semantics-and-constraints.html">05-semantics-and-constraints.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md287"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md277"></a>
 Roles</h1>
 <p>Table: Roles in the procedures</p>
 <table class="markdownTable">
@@ -110,7 +110,7 @@ Roles</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">RIC side  </td><td class="markdownTableBodyNone">an xApp and the E2 interface  </td><td class="markdownTableBodyNone">sends xApp Control through the E3 Agent. Receives dApp Report through the E3 Agent. See <a class="el" href="dir_24c5afd111e6aa944685a569bf5db165.html">E2SM-DAPP</a>.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md288"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md278"></a>
 Messages on the flow</h1>
 <p>Table: Which message starts which procedure</p>
 <table class="markdownTable">
@@ -150,12 +150,12 @@ Messages on the flow</h1>
 <div class="line">    D-&gt;&gt;A: SUBSCRIPTION DELETE</div>
 <div class="line">    A--&gt;&gt;D: SUBSCRIPTION RESPONSE</div>
 <div class="line">    D-&gt;&gt;A: RELEASE</div>
-</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md289"></a>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md279"></a>
 Setup</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md290"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md280"></a>
 Purpose</h2>
 <p>The Setup procedure registers a dApp with an E3 Agent. It gives the dApp an identifier and tells it which RAN functions exist.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md291"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md281"></a>
 Procedure</h2>
 <ol type="1">
 <li>The dApp sends a SETUP REQUEST message on the setup channel. The message holds the protocol version, the name of the dApp, the version of the dApp and the vendor.</li>
@@ -163,26 +163,26 @@ Procedure</h2>
 <li>The E3 Agent builds the RAN function list from its service models. It leaves out a RAN function that does not fit the limits in <a href="01-identity-and-registration.md#what-the-ran-function-list-holds">01-identity-and-registration.md</a>.</li>
 <li>The E3 Agent sends a SETUP RESPONSE message. It sets <span class="tt">requestId</span> to the message identifier of the request.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md292"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md282"></a>
 Successful operation</h2>
 <p>The SETUP RESPONSE message has <span class="tt">responseCode</span> "positive". It holds <span class="tt">dAppIdentifier</span>, <span class="tt">ranIdentifier</span>, <span class="tt">e3apProtocolVersion</span> and <span class="tt">ranFunctionList</span>. The dApp keeps the dApp identifier and the RAN function list. The dApp may subscribe from now.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md293"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md283"></a>
 Unsuccessful operation</h2>
-<p>The E3 Agent shall answer with <span class="tt">responseCode</span> "negative" when it cannot register the dApp, for example when it has no free dApp identifier. A negative response has no <span class="tt">dAppIdentifier</span>. The E3 Agent shall also answer with a negative response when the message does not decode or is not a SETUP REQUEST message. The response then has no <span class="tt">ranFunctionList</span>.</p>
+<p>The E3 Agent shall answer with <span class="tt">responseCode</span> "negative" when it cannot register the dApp, for example when it has no free dApp identifier. A negative response has no <span class="tt">dAppIdentifier</span>. The E3 Agent shall also answer with a negative response when the message does not decode or is not a SETUP REQUEST message. The response then has no <span class="tt">ranFunctionList</span>. The E3 Agent should give the reason in <span class="tt">cause</span> and <span class="tt">detail</span>: resourceExhausted when it has no free dApp identifier, protocolError when the message is not a SETUP REQUEST message, and unsupportedProtocolVersion when it refuses the version string.</p>
 <p>A dApp that receives a negative response has no session. It shall not send other messages.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md294"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md284"></a>
 Abnormal conditions</h2>
 <ul>
 <li>The dApp gets no response. It shall send the request again. The E3 Agent has no memory of the first attempt, so each attempt that reaches it registers a new dApp. A late response to an earlier attempt leaves one identifier registered with no owner. The E3 Agent frees it only when a RELEASE message names it.</li>
 <li>The E3 Agent receives a version string that it does not support. It may answer with "negative". An implementation that does not check the version answers "positive".</li>
 <li>The message identifier of the request is 0. The E3 Agent shall put a new message identifier in <span class="tt">requestId</span>, because 0 is not a valid value.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md295"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md285"></a>
 Subscription</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md296"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md286"></a>
 Purpose</h2>
 <p>The Subscription procedure tells the E3 Agent that a dApp uses a RAN function. It starts the service model of the RAN function if the dApp is its first subscriber.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md297"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md287"></a>
 Procedure</h2>
 <ol type="1">
 <li>The dApp sends a SUBSCRIPTION REQUEST message on the inbound channel. It names the RAN function and lists the telemetry identifiers and the control identifiers that it wants. It may add a time limit and an interval.</li>
@@ -191,27 +191,43 @@ Procedure</h2>
 <li>If this is the first subscriber of the RAN function, the E3 Agent starts the service model.</li>
 <li>The E3 Agent sends a SUBSCRIPTION RESPONSE message.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md298"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md288"></a>
 Successful operation</h2>
 <p>The SUBSCRIPTION RESPONSE message has <span class="tt">responseCode</span> "positive" and holds <span class="tt">subscriptionId</span>. It also lists the telemetry identifiers and control identifiers that the E3 Agent grants, the RAN function identifier and the interval that it grants. The dApp keeps the subscription identifier. A grant list that is missing means that the E3 Agent does not report the grant. A grant list that is empty means that it grants nothing.</p>
 <p>A second SUBSCRIPTION REQUEST message for the same RAN function from the same dApp returns the existing subscription identifier and "positive". It does not create a second subscription.</p>
 <p>The E3 Agent sends the interval in microseconds. The value 0 means one indication for each event. A missing interval means that the service model sets the rate.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md299"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md289"></a>
 Unsuccessful operation</h2>
-<p>The E3 Agent shall answer "negative" when the dApp is not registered or when it has no free subscription identifier. The E3 Agent should answer "negative" when the RAN function identifier is not in its list, and when an identifier is not offered by the RAN function. Some implementations do not make these two checks. They answer "positive" and grant what the dApp asked for. See <a class="el" href="md_docs_2e3ap_206-discrepancies.html">06-discrepancies.md</a>.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md300"></a>
+<p>The E3 Agent shall answer "negative" and shall not create a subscription when one of these holds. It gives the cause in <span class="tt">cause</span> and a text in <span class="tt">detail</span>.</p>
+<p>Table: Reasons to refuse a SUBSCRIPTION REQUEST message</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">The E3 Agent finds that  </th><th class="markdownTableHeadNone"><span class="tt">cause</span>  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">the dApp has not completed the Setup procedure  </td><td class="markdownTableBodyNone">setupRequired  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">the RAN function identifier is not in its RAN function list  </td><td class="markdownTableBodyNone">unsupportedRanFunction  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">the telemetry list and the control list are both empty  </td><td class="markdownTableBodyNone">invalidRequest  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">a telemetry identifier or a control identifier is not offered by the RAN function  </td><td class="markdownTableBodyNone">unsupportedIdentifier  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">it has no free subscription identifier  </td><td class="markdownTableBodyNone">resourceExhausted  </td></tr>
+</table>
+<p>The check of an identifier is against the lists that the RAN function advertises in the SETUP RESPONSE message. A RAN function that has controls accepts a request that names one of them. The E3 Agent shall not start the service model for a request that it refuses.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md290"></a>
 Abnormal conditions</h2>
 <ul>
 <li>The time limit ends. The E3 Agent removes the subscription and sends nothing. It stops the service model if the subscription was the last one. A time of 0 or a missing time means no limit.</li>
 <li>The dApp sends the same request again after the time limit has ended and before the E3 Agent removes the subscription. The E3 Agent renews the subscription under the same identifier.</li>
 <li>The service model fails to start. The E3 Agent still answers "positive". The dApp receives no indication.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md301"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md291"></a>
 Subscription delete</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md302"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md292"></a>
 Purpose</h2>
 <p>The Subscription delete procedure ends one subscription.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md303"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md293"></a>
 Procedure</h2>
 <ol type="1">
 <li>The dApp sends a SUBSCRIPTION DELETE message with the subscription identifier.</li>
@@ -219,23 +235,23 @@ Procedure</h2>
 <li>If the subscription was the last one for the RAN function, the E3 Agent stops the service model.</li>
 <li>The E3 Agent sends a SUBSCRIPTION RESPONSE message.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md304"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md294"></a>
 Successful operation</h2>
 <p>The response has <span class="tt">responseCode</span> "positive" and <span class="tt">subscriptionId</span>. The subscription identifier is free again.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md305"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md295"></a>
 Unsuccessful operation</h2>
-<p>The response has <span class="tt">responseCode</span> "negative" when the subscription identifier is unknown, belongs to another dApp, or has already ended.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md306"></a>
+<p>The response has <span class="tt">responseCode</span> "negative" when the subscription identifier is unknown, belongs to another dApp, or has already ended. The cause is notFound, or setupRequired when the dApp has not completed the Setup procedure.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md296"></a>
 Abnormal conditions</h2>
 <ul>
 <li>A subscription that has passed its time limit can still be deleted with "positive" until the E3 Agent removes it. The E3 Agent checks for such subscriptions every 250 ms.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md307"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md297"></a>
 Indication</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md308"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md298"></a>
 Purpose</h2>
 <p>The Indication procedure delivers telemetry from a RAN function to a dApp.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md309"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md299"></a>
 Procedure</h2>
 <ol type="1">
 <li>The service model produces a payload.</li>
@@ -243,50 +259,64 @@ Procedure</h2>
 <li>The E3 Agent sends the message on the outbound channel.</li>
 <li>The dApp reads <span class="tt">dAppIdentifier</span>. If the identifier is not its own, the dApp ignores the message. Otherwise it gives the payload to its handler.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md310"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md300"></a>
 Successful operation</h2>
 <p>The dApp handler receives the payload. There is no response.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md311"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md301"></a>
 Unsuccessful operation</h2>
 <p>There is no response. If the outbound queue of the E3 Agent is full, the E3 Agent drops the message.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md312"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md302"></a>
 Abnormal conditions</h2>
 <ul>
 <li>On a link that broadcasts, every dApp receives every INDICATION message. The check of <span class="tt">dAppIdentifier</span> is the only filter.</li>
 <li>The E3 Agent may send an INDICATION message to a dApp that did not subscribe. A dApp should ignore an indication for a RAN function that it did not subscribe to.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md313"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md303"></a>
 dApp Control</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md314"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md304"></a>
 Purpose</h2>
 <p>The dApp Control procedure lets a dApp ask a RAN function to do something.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md315"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md305"></a>
 Procedure</h2>
 <ol type="1">
 <li>The dApp sends a dApp CONTROL ACTION message on the inbound channel. It names the RAN function and the control identifier. It carries the payload in <span class="tt">actionData</span>.</li>
 <li>If the dApp acts on an xApp CONTROL ACTION message, it puts that message's <span class="tt">sequenceId</span> in the new message. If the dApp decided on its own, it leaves <span class="tt">sequenceId</span> out.</li>
-<li>The E3 Agent finds the service model of the RAN function. If the service model runs, the E3 Agent gives it the payload and the message identifier.</li>
+<li>The E3 Agent finds the service model of the RAN function and checks the control identifier against the control identifiers that the RAN function advertises. If the service model runs, the E3 Agent gives it the payload and the message identifier.</li>
 <li>The service model applies the action. It may send a MESSAGE ACK message.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md316"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md306"></a>
 Successful operation</h2>
 <p>The service model applies the action. If it sends a MESSAGE ACK message, <span class="tt">requestId</span> holds the message identifier of the dApp CONTROL ACTION message and <span class="tt">responseCode</span> holds the result.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md317"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md307"></a>
 Unsuccessful operation</h2>
 <p>The service model may send a MESSAGE ACK message with <span class="tt">responseCode</span> "negative".</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md318"></a>
+<p>The E3 Agent shall answer with a MESSAGE ACK message with <span class="tt">responseCode</span> "negative" when it cannot hand the control to a service model. <span class="tt">requestId</span> holds the message identifier of the dApp CONTROL ACTION message.</p>
+<p>Table: Reasons to refuse a dApp CONTROL ACTION message</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">The E3 Agent finds that  </th><th class="markdownTableHeadNone"><span class="tt">cause</span>  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">the dApp has not completed the Setup procedure  </td><td class="markdownTableBodyNone">setupRequired  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">the RAN function identifier is not in its RAN function list  </td><td class="markdownTableBodyNone">unsupportedRanFunction  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">the control identifier is not offered by the RAN function  </td><td class="markdownTableBodyNone">unsupportedIdentifier  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">the service model does not run, because no dApp has a subscription to the RAN function  </td><td class="markdownTableBodyNone">notFound  </td></tr>
+</table>
+<p>A message that the E3 Agent refuses does not reach the service model.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md308"></a>
 Abnormal conditions</h2>
 <ul>
-<li>The RAN function is not known, or its service model does not run. The E3 Agent drops the message. It sends no response.</li>
-<li>The E3 Agent does not check the control identifier or the dApp identifier. The service model does.</li>
+<li>The service model takes the control and fails to apply it. The E3 Agent sends no response of its own. The service model answers, or does not.</li>
 <li>A MESSAGE ACK message has no dApp identifier. On a link that broadcasts, every dApp receives it. A dApp shall ignore a MESSAGE ACK message whose <span class="tt">requestId</span> is not the identifier of a message that it sent.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md319"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md309"></a>
 dApp Report</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md320"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md310"></a>
 Purpose</h2>
 <p>The dApp Report procedure sends a result from a dApp to a RIC. It is the start of an E2-E3 loop.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md321"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md311"></a>
 Procedure</h2>
 <ol type="1">
 <li>The dApp assigns a sequence identifier. The identifier is the key of the whole procedure.</li>
@@ -294,25 +324,25 @@ Procedure</h2>
 <li>The E3 Agent puts the message in a queue. A worker takes it from the queue and gives it to the RIC side. The E3 Agent does not read <span class="tt">reportData</span>.</li>
 <li>The RIC side copies <span class="tt">sequenceId</span> into the E2SM-DAPP indication header. See <a class="el" href="md_docs_2e2sm-dapp_203-procedure-flow.html">E2SM-DAPP</a>.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md322"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md312"></a>
 Successful operation</h2>
 <p>There is no response. The report is delivered when the RIC side receives it.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md323"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md313"></a>
 Unsuccessful operation</h2>
 <p>A dApp shall not send a dApp REPORT message with <span class="tt">sequenceId</span> 0. The value is not valid on any encoding.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md324"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md314"></a>
 Abnormal conditions</h2>
 <ul>
 <li>The report queue of the E3 Agent is full. The E3 Agent drops the message and logs it.</li>
 <li>No handler is set on the E3 Agent. It drops the message.</li>
 <li>The E3 Agent does not check the dApp identifier, the RAN function identifier or the sequence identifier of a report.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md325"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md315"></a>
 xApp Control</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md326"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md316"></a>
 Purpose</h2>
 <p>The xApp Control procedure hands a decision of an xApp to a dApp.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md327"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md317"></a>
 Procedure</h2>
 <ol type="1">
 <li>The RIC side receives a decision for a dApp. Its E2SM-DAPP control header holds a sequence identifier.</li>
@@ -320,44 +350,44 @@ Procedure</h2>
 <li>The dApp ignores the message if the dApp identifier is not its own.</li>
 <li>The dApp gives the payload to its handler. It may act on it. If it re-issues the action to the RAN, it follows the dApp Control procedure with the same sequence identifier.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md328"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md318"></a>
 Successful operation</h2>
 <p>The dApp handler receives the payload. There is no response in E3AP. The RIC side learns the result from the control outcome of E2SM-DAPP.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md329"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md319"></a>
 Unsuccessful operation</h2>
 <p>An E3 Agent shall not send an xApp CONTROL ACTION message with <span class="tt">sequenceId</span> 0.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md330"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md320"></a>
 Abnormal conditions</h2>
 <ul>
 <li>The dApp is not registered. The E3 Agent has no one to send to. The message is lost.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md331"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md321"></a>
 Release</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md332"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md322"></a>
 Purpose</h2>
 <p>The Release procedure ends the session of a dApp.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md333"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md323"></a>
 Procedure from the dApp</h2>
 <ol type="1">
 <li>The dApp sends a RELEASE message with its dApp identifier.</li>
 <li>The E3 Agent removes the dApp and all its subscriptions. The dApp identifier and the subscription identifiers become free. A service model that lost its last subscriber stops.</li>
 </ol>
 <p>There is no response. The dApp does not get an event when the E3 Agent later closes the link.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md334"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md324"></a>
 Procedure from the E3 Agent</h2>
 <ol type="1">
 <li>The E3 Agent sends a RELEASE message that names the dApp. An E3 Agent does this before it drops a dApp.</li>
 <li>The dApp ignores a RELEASE message for another dApp. Otherwise the dApp clears its session: its dApp identifier, the RAN function list, its subscriptions and its pending requests.</li>
 <li>The dApp reports the end to its application with the reason "released by the RAN".</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md335"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md325"></a>
 Abnormal conditions</h2>
 <ul>
 <li>The link is lost with no RELEASE message. The dApp reports the reason "connection lost". The dApp does not reconnect by itself. The application stops the session and starts it again.</li>
 <li>An E3 Agent that does not detect the end of a dApp keeps its dApp identifier, its subscriptions and its running service models.</li>
 <li>A RELEASE message from a dApp that names another dApp identifier is not authenticated. The E3 Agent removes that dApp.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md336"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md326"></a>
 The sequence identifier chain</h1>
 <p>One sequence identifier joins all the messages of one procedure from the detection by a dApp to the application of the decision.</p>
 <p>Table: How the sequence identifier travels</p>
@@ -377,7 +407,7 @@ The sequence identifier chain</h1>
 </table>
 <p>A dApp control that the dApp decided on its own has no sequence identifier. It has no procedure behind it. The message is normal.</p>
 <p>An implementation may keep timing records for these messages. The records are not keyed on the sequence identifier. See <a class="el" href="md_docs_2utilities_2latrec.html">the latency recorder</a>. The loop boxes are in <a class="el" href="md_docs_2control-loops_2path-a-e3-loop.html">path A</a> and <a class="el" href="md_docs_2control-loops_2path-b-e2-e3-loop.html">path B</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md337"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md327"></a>
 Threads and queues</h1>
 <p>The E3 Agent does not process the messages on the thread of the sender. This description is informative. It explains where a message waits.</p>
 <ul>

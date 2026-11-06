@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -153,7 +153,9 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:a874ed6a0d72190fc26699b18a6e0432c" id="r_a874ed6a0d72190fc26699b18a6e0432c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a874ed6a0d72190fc26699b18a6e0432c">X</a>(name,  val)</td></tr>
+<tr class="memdesc:a874ed6a0d72190fc26699b18a6e0432c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Expands one entry of the shared error-code list to an enumerator.  <br /></td></tr>
 <tr class="memitem:a526b755eddfcd2e01b18ac2e06b175f6" id="r_a526b755eddfcd2e01b18ac2e06b175f6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a526b755eddfcd2e01b18ac2e06b175f6">X</a>(name,  val)</td></tr>
+<tr class="memdesc:a526b755eddfcd2e01b18ac2e06b175f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Expands one entry of the shared error-code list to an enumerator.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -191,6 +193,28 @@ Enumerations</h2></td></tr>
 , <a class="el" href="namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5a50546bf973283065b6ccf09faf7a580a">libe3::NEGATIVE</a> = 1
  }</td></tr>
 <tr class="memdesc:a53bfd79bd9406bfe120864d4eb83b0d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">E3AP response codes.  <a href="namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5">More...</a><br /></td></tr>
+<tr class="memitem:aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" id="r_aa5a8f2c5dd74ad4e6a1e12859aa8c6c7"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">libe3::Cause</a> : uint8_t { <br />
+&#160;&#160;<a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a1c04cc3823d476c3017238679a0fdf52">libe3::UNSPECIFIED</a> = 0
+, <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a23f149f0f9ae9ed9e0119e7209178a5d">libe3::PROTOCOL_ERROR</a> = 1
+, <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a041599013e82a7ccaf8ec2910da356a9">libe3::SETUP_REQUIRED</a> = 2
+, <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a3b1fc07332b77e8803fca5cecedaaf04">libe3::SETUP_ALREADY_COMPLETE</a> = 3
+, <br />
+&#160;&#160;<a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ad0bbad81de26b4f35e3e681ac73308ec">libe3::UNSUPPORTED_PROTOCOL_VERSION</a> = 4
+, <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7abe32d56dee3a6318cc92422f8e0f3e59">libe3::UNSUPPORTED_RAN_FUNCTION</a> = 5
+, <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ae64f307d4ee019c0cce6ce06779411e3">libe3::UNSUPPORTED_IDENTIFIER</a> = 6
+, <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ab8c9d7ce4c399c56136475f36309020f">libe3::INVALID_REQUEST</a> = 7
+, <br />
+&#160;&#160;<a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a8c02547a8a3b02382bac3557bcb2280d">libe3::NOT_FOUND</a> = 8
+, <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a5c57b592f6421079706484abebcab81b">libe3::DUPLICATE</a> = 9
+, <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a4a739fa42dcdbdb8dfe5a5e4d9c5a627">libe3::RESOURCE_EXHAUSTED</a> = 10
+, <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a9fdac9ed7bccc6af6b88d4e090f848f7">libe3::AUTHORIZATION_REJECTED</a> = 11
+, <br />
+&#160;&#160;<a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ac379e50491099134897f11767ac77544">libe3::PAYLOAD_TOO_LARGE</a> = 12
+, <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7afeea87fe86102a3a54f6a787e04dc58a">libe3::TRANSPORT_OVERRUN</a> = 13
+, <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a89e5325b1f9acbf5dde5c70b84bbdcb1">libe3::SHUTTING_DOWN</a> = 14
+<br />
+ }</td></tr>
+<tr class="memdesc:aa5a8f2c5dd74ad4e6a1e12859aa8c6c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why a RAN refused a request (E3-Cause).  <a href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">More...</a><br /></td></tr>
 <tr class="memitem:ac517385d2a8b182e20888ef2c3b8ca19" id="r_ac517385d2a8b182e20888ef2c3b8ca19"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#ac517385d2a8b182e20888ef2c3b8ca19">libe3::DisconnectReason</a> : uint8_t { <a class="el" href="namespacelibe3.html#ac517385d2a8b182e20888ef2c3b8ca19a7993dab10d0452f96478365ebc3f26d1">libe3::RELEASED_BY_RAN</a> = 0
 , <a class="el" href="namespacelibe3.html#ac517385d2a8b182e20888ef2c3b8ca19a6afae85c81e24d106bec978e17b89ce7">libe3::CONNECTION_LOST</a> = 1
  }</td></tr>
@@ -241,6 +265,12 @@ Functions</h2></td></tr>
 <tr class="memdesc:a73e5843bd75cd76372b7bfff4894fcf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert <a class="el" href="namespacelibe3.html#ac1c5533fc81586565ca7822bf00eee90" title="E3AP action types for Setup and Subscription requests.">ActionType</a> to string representation.  <br /></td></tr>
 <tr class="memitem:a91f7245a15a8f381b892d146355c0429" id="r_a91f7245a15a8f381b892d146355c0429"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a91f7245a15a8f381b892d146355c0429">libe3::response_code_to_string</a> (<a class="el" href="namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5">ResponseCode</a> code) noexcept</td></tr>
 <tr class="memdesc:a91f7245a15a8f381b892d146355c0429"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert <a class="el" href="namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5" title="E3AP response codes.">ResponseCode</a> to string representation.  <br /></td></tr>
+<tr class="memitem:a289413885a89ed74d969b7723f8e012e" id="r_a289413885a89ed74d969b7723f8e012e"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a289413885a89ed74d969b7723f8e012e">libe3::cause_to_string</a> (<a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a> cause) noexcept</td></tr>
+<tr class="memdesc:a289413885a89ed74d969b7723f8e012e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" title="Why a RAN refused a request (E3-Cause).">Cause</a> to the name E3AP gives it in JSON and in logs.  <br /></td></tr>
+<tr class="memitem:aea5cad3e2e304461d5a38de98ca6a7bf" id="r_aea5cad3e2e304461d5a38de98ca6a7bf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#aea5cad3e2e304461d5a38de98ca6a7bf">libe3::cause_from_string</a> (const std::string &amp;name) noexcept</td></tr>
+<tr class="memdesc:aea5cad3e2e304461d5a38de98ca6a7bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" title="Why a RAN refused a request (E3-Cause).">Cause</a> from its E3AP name.  <br /></td></tr>
+<tr class="memitem:ab9079f464bfd858520f4bbce5386384b" id="r_ab9079f464bfd858520f4bbce5386384b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#ab9079f464bfd858520f4bbce5386384b">libe3::cause_from_value</a> (long value) noexcept</td></tr>
+<tr class="memdesc:ab9079f464bfd858520f4bbce5386384b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" title="Why a RAN refused a request (E3-Cause).">Cause</a> from its wire value.  <br /></td></tr>
 <tr class="memitem:aee2a6ca3a33bc7c111aa5256811a61eb" id="r_aee2a6ca3a33bc7c111aa5256811a61eb"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#aee2a6ca3a33bc7c111aa5256811a61eb">libe3::error_code_to_string</a> (<a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> code) noexcept</td></tr>
 <tr class="memdesc:aee2a6ca3a33bc7c111aa5256811a61eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> to string representation.  <br /></td></tr>
 <tr class="memitem:a7cd0e90b0c01822a4a7fbe5b64842fc1" id="r_a7cd0e90b0c01822a4a7fbe5b64842fc1"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a7cd0e90b0c01822a4a7fbe5b64842fc1">libe3::agent_state_to_string</a> (<a class="el" href="namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1fe">AgentState</a> state) noexcept</td></tr>
@@ -255,15 +285,23 @@ Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
 <tr class="memitem:a581a3bc9ba0fad9e97f52c00fdce32b9" id="r_a581a3bc9ba0fad9e97f52c00fdce32b9"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a581a3bc9ba0fad9e97f52c00fdce32b9">libe3::MAX_PROTOCOL_DATA_SIZE</a> = 32768</td></tr>
+<tr class="memdesc:a581a3bc9ba0fad9e97f52c00fdce32b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest <span class="tt">protocolData</span> of an indication, in bytes.  <br /></td></tr>
 <tr class="memitem:aca224e72d9af7089c4d9c1a150a705db" id="r_aca224e72d9af7089c4d9c1a150a705db"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#aca224e72d9af7089c4d9c1a150a705db">libe3::MAX_ACTION_DATA_SIZE</a> = 32768</td></tr>
+<tr class="memdesc:aca224e72d9af7089c4d9c1a150a705db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest <span class="tt">actionData</span> of a dApp control action, in bytes.  <br /></td></tr>
 <tr class="memitem:a1fdb0c4f4c6f3060e3b0448610c7a289" id="r_a1fdb0c4f4c6f3060e3b0448610c7a289"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a1fdb0c4f4c6f3060e3b0448610c7a289">libe3::MAX_DAPP_REPORT_DATA_SIZE</a> = 32768</td></tr>
+<tr class="memdesc:a1fdb0c4f4c6f3060e3b0448610c7a289"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest <span class="tt">reportData</span> of a dApp report, in bytes.  <br /></td></tr>
 <tr class="memitem:a058435e96914a52e2830d4c403b1d541" id="r_a058435e96914a52e2830d4c403b1d541"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a058435e96914a52e2830d4c403b1d541">libe3::MAX_XAPP_CTRL_DATA_SIZE</a> = 32768</td></tr>
+<tr class="memdesc:a058435e96914a52e2830d4c403b1d541"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest <span class="tt">xAppControlData</span> of an xApp control action, in bytes.  <br /></td></tr>
 <tr class="memitem:aa385e749637e30801ce6405782b0c699" id="r_aa385e749637e30801ce6405782b0c699"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#aa385e749637e30801ce6405782b0c699">libe3::MAX_RAN_FUNCTIONS</a> = 64</td></tr>
 <tr class="memdesc:aa385e749637e30801ce6405782b0c699"><td class="mdescLeft">&#160;</td><td class="mdescRight">ranFunctionList SIZE (0..64)  <br /></td></tr>
 <tr class="memitem:af4b3cf6c64a692090cd6b7d26f62b6bf" id="r_af4b3cf6c64a692090cd6b7d26f62b6bf"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#af4b3cf6c64a692090cd6b7d26f62b6bf">libe3::MAX_IDENTIFIER_LIST_SIZE</a> = 256</td></tr>
 <tr class="memdesc:af4b3cf6c64a692090cd6b7d26f62b6bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">telemetry and control lists SIZE (0..256)  <br /></td></tr>
 <tr class="memitem:a809598c8d63a2bdce0d447411324a2b5" id="r_a809598c8d63a2bdce0d447411324a2b5"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a809598c8d63a2bdce0d447411324a2b5">libe3::DEFAULT_BUFFER_SIZE</a> = 60000</td></tr>
+<tr class="memdesc:a809598c8d63a2bdce0d447411324a2b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default encode and receive buffer size, in bytes.  <br /></td></tr>
+<tr class="memitem:ab9fd4d0a2f9f4256043102de4b108d0b" id="r_ab9fd4d0a2f9f4256043102de4b108d0b"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#ab9fd4d0a2f9f4256043102de4b108d0b">libe3::MAX_DETAIL_SIZE</a> = 512</td></tr>
+<tr class="memdesc:ab9fd4d0a2f9f4256043102de4b108d0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest <span class="tt">detail</span> text of a negative response, in bytes (E3-Text).  <br /></td></tr>
 <tr class="memitem:ac69f2e5f639ef2bdb04445cf7ac2b408" id="r_ac69f2e5f639ef2bdb04445cf7ac2b408"><td class="memItemLeft" align="right" valign="top">constexpr uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#ac69f2e5f639ef2bdb04445cf7ac2b408">libe3::LIBE3_PROTOCOL_VERSION</a> = 1</td></tr>
+<tr class="memdesc:ac69f2e5f639ef2bdb04445cf7ac2b408"><td class="mdescLeft">&#160;</td><td class="mdescRight">Protocol version this library speaks.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>E3AP Protocol Types - Vendor-neutral type definitions. </p>
@@ -292,7 +330,9 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">case</span> val: <span class="keywordflow">return</span> #name;</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00150">150</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p>Expands one entry of the shared error-code list to an enumerator. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00178">178</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -316,7 +356,9 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">name = val,</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00150">150</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p>Expands one entry of the shared error-code list to an enumerator. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00178">178</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

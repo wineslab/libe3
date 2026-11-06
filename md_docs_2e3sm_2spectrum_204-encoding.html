@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e3sm_2spectrum_204-encoding.html','',''); });
   <div class="headertitle"><div class="title">E3SM-SPEC: encoding </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md558"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md598"></a></p>
 <p>How each message of the Spectrum service model is written on the wire: the APER widths, the JSON keys, the Protocol Buffers messages, the size limits, and the place of the ASN.1 grammar.</p>
 <p>This is clause 8 of the specification. The fields are in <a class="el" href="md_docs_2e3sm_2spectrum_202-ie-mapping.html">clause 6</a>. The encodings of the outer E3AP message are in the <a class="el" href="md_docs_2e3ap_204-encoding.html">E3AP encoding chapter</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md559"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md599"></a>
 Principles</h1>
 <ol type="1">
 <li>A service model message is an octet string for E3AP. It is not part of the E3AP grammar.</li>
@@ -112,16 +112,18 @@ Principles</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Sensing indication  </td><td class="markdownTableBodyNone">yes  </td><td class="markdownTableBodyNone">yes  </td><td class="markdownTableBodyNone">yes  </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Cell configuration indication  </td><td class="markdownTableBodyNone">yes  </td><td class="markdownTableBodyNone">yes  </td><td class="markdownTableBodyNone">no  </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">dApp control  </td><td class="markdownTableBodyNone">yes  </td><td class="markdownTableBodyNone">yes  </td><td class="markdownTableBodyNone">yes  </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">dApp report  </td><td class="markdownTableBodyNone">yes  </td><td class="markdownTableBodyNone">required, no codec yet  </td><td class="markdownTableBodyNone">yes  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">xApp control  </td><td class="markdownTableBodyNone">yes  </td><td class="markdownTableBodyNone">required, no codec yet  </td><td class="markdownTableBodyNone">yes  </td></tr>
+<td class="markdownTableBodyNone">dApp report  </td><td class="markdownTableBodyNone">yes  </td><td class="markdownTableBodyNone">required, no codec yet  </td><td class="markdownTableBodyNone">yes  </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">xApp control  </td><td class="markdownTableBodyNone">yes  </td><td class="markdownTableBodyNone">required, no codec yet  </td><td class="markdownTableBodyNone">yes  </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Apply outcome  </td><td class="markdownTableBodyNone">yes  </td><td class="markdownTableBodyNone">no  </td><td class="markdownTableBodyNone">no  </td></tr>
 </table>
-<p>"Yes" means that a grammar, a Protocol Buffers message or a codec exists. "Required, no codec yet" means that this specification requires the JSON form of the JSON section and that no codec exists today. See <a class="el" href="md_docs_2e3sm_2spectrum_206-discrepancies.html">06-discrepancies.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md560"></a>
+<p>"Yes" means that a grammar, a Protocol Buffers message or a codec exists. "Required, no codec yet" means that this specification requires the JSON form of the JSON section and that no codec exists today.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md600"></a>
 APER</h1>
 <p>The grammar uses automatic tags. The encoding rules are ITU-T X.691 [4] in the aligned variant. The text below states the consequence for each type. The widths are derived from the rules by hand. They are not checked against an encoder.</p>
 <p>Table: APER width by constraint</p>
@@ -160,55 +162,75 @@ APER</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">Spectrum-RanFunctionData.description</span>  </td><td class="markdownTableBodyNone">size 1..128  </td><td class="markdownTableBodyNone">7 bit length, then the octets  </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">Spectrum-Indication</span> alternative  </td><td class="markdownTableBodyNone">2 alternatives, no extension marker  </td><td class="markdownTableBodyNone">1 bit  </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">sfn</span>, <span class="tt">slot</span> in the indication  </td><td class="markdownTableBodyNone">0..65535  </td><td class="markdownTableBodyNone">2 octets each  </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">beam</span>  </td><td class="markdownTableBodyNone">0..3  </td><td class="markdownTableBodyNone">2 bits  </td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">shmWriteIdx</span>  </td><td class="markdownTableBodyNone">0..65535  </td><td class="markdownTableBodyNone">2 octets  </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">nRanges</span>  </td><td class="markdownTableBodyNone">0..128  </td><td class="markdownTableBodyNone">8 bits  </td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">blacklistedPRBs</span>, <span class="tt">blockedPRBs</span> count  </td><td class="markdownTableBodyNone">0..273  </td><td class="markdownTableBodyNone">2 octets  </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">each PRB index  </td><td class="markdownTableBodyNone">0..272  </td><td class="markdownTableBodyNone">2 octets  </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">samplingThreshold</span>  </td><td class="markdownTableBodyNone">0..100  </td><td class="markdownTableBodyNone">7 bits  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">validityPeriod</span>  </td><td class="markdownTableBodyNone">1..3600  </td><td class="markdownTableBodyNone">2 octets  </td></tr>
-<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">maskPerSlot</span> count  </td><td class="markdownTableBodyNone">1..160  </td><td class="markdownTableBodyNone">8 bits  </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">each symbol mask  </td><td class="markdownTableBodyNone">0..16383  </td><td class="markdownTableBodyNone">2 octets  </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">noiseFloorThreshold</span>  </td><td class="markdownTableBodyNone">-100..100  </td><td class="markdownTableBodyNone">8 bits  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">averagingFrames</span>  </td><td class="markdownTableBodyNone">1..255  </td><td class="markdownTableBodyNone">8 bits  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">noiseFloorThreshold</span>  </td><td class="markdownTableBodyNone">-100..100  </td><td class="markdownTableBodyNone">8 bits  </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">averagingFrames</span>  </td><td class="markdownTableBodyNone">1..255  </td><td class="markdownTableBodyNone">8 bits  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">validityPeriod</span>  </td><td class="markdownTableBodyNone">1..3600000  </td><td class="markdownTableBodyNone">a 2 bit length, then 1 to 3 octets  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">ulCarrierPRBs</span>  </td><td class="markdownTableBodyNone">1..273  </td><td class="markdownTableBodyNone">2 octets  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">ulOffsetToCarrier</span>  </td><td class="markdownTableBodyNone">0..272  </td><td class="markdownTableBodyNone">2 octets  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">ulSubcarrierSpacing</span>  </td><td class="markdownTableBodyNone">0..3  </td><td class="markdownTableBodyNone">2 bits  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">ulArfcnPointA</span>  </td><td class="markdownTableBodyNone">0..3279165  </td><td class="markdownTableBodyNone">a 2 bit length, then 1 to 3 octets  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">slotsPerFrame</span>  </td><td class="markdownTableBodyNone">1..160  </td><td class="markdownTableBodyNone">8 bits  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">tddSlotPattern</span>  </td><td class="markdownTableBodyNone">size 1..160  </td><td class="markdownTableBodyNone">8 bit length, then the octets  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">nrPci</span>  </td><td class="markdownTableBodyNone">0..1007  </td><td class="markdownTableBodyNone">2 octets  </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">sfn</span>, <span class="tt">slot</span> in the apply outcome  </td><td class="markdownTableBodyNone">0..1023, 0..159  </td><td class="markdownTableBodyNone">2 octets, 8 bits  </td></tr>
 </table>
 <p>An encoded list of n PRB indices needs about 2 + 2n octets. The longest list, 273 indices, needs about 548 octets, and so it fits the E3AP limit of 32768 octets by a wide margin.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md561"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md601"></a>
 Extension marker and extension alternative</h2>
 <p>The choices <span class="tt">Spectrum-DAppControlPayload</span>, <span class="tt">Spectrum-DAppReportPayload</span>, <span class="tt">Spectrum-XAppControlPayload</span> and <span class="tt">Spectrum-ApplyOutcomePayload</span> have an extension marker.</p>
 <ul>
 <li>A root alternative uses one extension bit with the value "0". In a choice with one root alternative the alternative index takes no bits.</li>
 <li>An extension alternative uses the extension bit "1", then an index, then an open type. The open type holds a length and the encoded alternative.</li>
 </ul>
-<p><span class="tt">Spectrum-DAppControlPayload</span> has <span class="tt">prbBlacklistControl</span> in the root and <span class="tt">sensingPolicyControl</span> as an extension alternative. The encoding of the sensing policy is therefore longer by the index and the length prefix than it would be in the root. The rule exists to keep the encoding of the first alternative stable when a second alternative is added. Without the extension marker, going from one alternative to two would change the width of the index from 0 bits to 1 bit. Every existing sender would then break.</p>
+<p><span class="tt">Spectrum-DAppControlPayload</span>, <span class="tt">Spectrum-DAppReportPayload</span> and <span class="tt">Spectrum-ApplyOutcomePayload</span> have one root alternative, which takes the extension bit and no index. <span class="tt">Spectrum-XAppControlPayload</span> has two root alternatives, <span class="tt">prbBlockedControl</span> and <span class="tt">configControl</span>, which take the extension bit and a 1 bit index. <span class="tt">Spectrum-DAppControlPayload</span> also has <span class="tt">sensingPolicyControl</span> after the extension marker. Its encoding is longer by the index and the length prefix than it would be in the root. The rule keeps the encoding of the first alternative stable when a second alternative is added. Without the extension marker, going from one alternative to two would change the width of the index from 0 bits to 1 bit. Every existing sender would then break.</p>
+<p>The choice <span class="tt">Spectrum-Indication</span> has two root alternatives and no extension marker. Its index takes one bit. A third indication would change that width.</p>
 <p>A sender that adds an alternative to a choice shall add it after the extension marker. A sender shall not move an existing alternative.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md562"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md602"></a>
 JSON</h1>
 <p>The JSON encoding follows RFC 8259 [5].</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md563"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md603"></a>
 RAN function data</h2>
 <div class="fragment"><div class="line">{&quot;name&quot;: &quot;spectrum_sm&quot;, &quot;version&quot;: 1, &quot;description&quot;: &quot;Spectrum service model for sensing range indication, PRB block and sensing policy control&quot;}</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md564"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md604"></a>
+Indication</h2>
+<p>The JSON indication is an object with the member of the alternative, <span class="tt">sensingIndication</span> or <span class="tt">cellConfigIndication</span>, and a member <span class="tt">indicationType</span> with the value "sensing" or "cellConfig". The key <span class="tt">indicationType</span> is not a field of the grammar. A codec adds it for readability. A receiver shall use the member of the alternative to tell the two indications apart.</p>
+<p>The members of the two alternatives use other names than the grammar.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md605"></a>
 Sensing indication</h2>
-<p>The JSON indication groups the reference to the ring in one object. The object and its keys use other names than the grammar. See <a class="el" href="md_docs_2e3sm_2spectrum_206-discrepancies.html">Annex A</a>.</p>
-<div class="fragment"><div class="line">{&quot;sensing_shm&quot;: {&quot;shm_name&quot;: &quot;/e3_l2_sensing&quot;, &quot;write_idx&quot;: 17, &quot;n_ranges&quot;: 3},</div>
-<div class="line"> &quot;timestamp&quot;: 1700000000000000000, &quot;sfn&quot;: 512, &quot;slot&quot;: 7, &quot;beam&quot;: 0}</div>
+<p>The JSON sensing indication groups the reference to the ring in one object.</p>
+<div class="fragment"><div class="line">{&quot;indicationType&quot;: &quot;sensing&quot;,</div>
+<div class="line"> &quot;sensingIndication&quot;: {&quot;sensing_shm&quot;: {&quot;shm_name&quot;: &quot;/e3_l2_sensing&quot;, &quot;write_idx&quot;: 17, &quot;n_ranges&quot;: 3},</div>
+<div class="line">                       &quot;timestamp&quot;: 7078771133456789, &quot;sfn&quot;: 512, &quot;slot&quot;: 7, &quot;beam&quot;: 0}}</div>
 </div><!-- fragment --><p>The values in the example are for illustration. They are not taken from a captured message.</p>
-<p>Table: JSON keys of the sensing indication</p>
+<p>Table: JSON keys of the sensing indication, inside <span class="tt">sensingIndication</span></p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Key  </th><th class="markdownTableHeadNone">Grammar field  </th><th class="markdownTableHeadNone">Type  </th></tr>
@@ -227,15 +249,43 @@ Sensing indication</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">beam</span>  </td><td class="markdownTableBodyNone"><span class="tt">beam</span>  </td><td class="markdownTableBodyNone">number  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md565"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md606"></a>
+Cell configuration indication</h2>
+<div class="fragment"><div class="line">{&quot;indicationType&quot;: &quot;cellConfig&quot;,</div>
+<div class="line"> &quot;cellConfigIndication&quot;: {&quot;timestamp&quot;: 7078771000000000, &quot;ul_carrier_prbs&quot;: 273,</div>
+<div class="line">                          &quot;ul_offset_to_carrier&quot;: 0, &quot;ul_subcarrier_spacing&quot;: 1,</div>
+<div class="line">                          &quot;ul_arfcn_point_a&quot;: 620000, &quot;slots_per_frame&quot;: 20,</div>
+<div class="line">                          &quot;tdd_slot_pattern&quot;: &quot;DDDDDDDSUU&quot;, &quot;nr_pci&quot;: 1}}</div>
+</div><!-- fragment --><p>Table: JSON keys of the cell configuration indication, inside <span class="tt">cellConfigIndication</span></p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Key  </th><th class="markdownTableHeadNone">Grammar field  </th><th class="markdownTableHeadNone">Type  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">timestamp</span>  </td><td class="markdownTableBodyNone"><span class="tt">timestamp</span>  </td><td class="markdownTableBodyNone">number  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">ul_carrier_prbs</span>  </td><td class="markdownTableBodyNone"><span class="tt">ulCarrierPRBs</span>  </td><td class="markdownTableBodyNone">number  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">ul_offset_to_carrier</span>  </td><td class="markdownTableBodyNone"><span class="tt">ulOffsetToCarrier</span>  </td><td class="markdownTableBodyNone">number  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">ul_subcarrier_spacing</span>  </td><td class="markdownTableBodyNone"><span class="tt">ulSubcarrierSpacing</span>  </td><td class="markdownTableBodyNone">number  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">ul_arfcn_point_a</span>  </td><td class="markdownTableBodyNone"><span class="tt">ulArfcnPointA</span>  </td><td class="markdownTableBodyNone">number  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">slots_per_frame</span>  </td><td class="markdownTableBodyNone"><span class="tt">slotsPerFrame</span>  </td><td class="markdownTableBodyNone">number  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">tdd_slot_pattern</span>  </td><td class="markdownTableBodyNone"><span class="tt">tddSlotPattern</span>  </td><td class="markdownTableBodyNone">string of "D", "U" and "S", left out for an FDD cell  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">nr_pci</span>  </td><td class="markdownTableBodyNone"><span class="tt">nrPci</span>  </td><td class="markdownTableBodyNone">number, left out when absent  </td></tr>
+</table>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md607"></a>
 dApp control</h2>
 <p>The JSON control has the same shape as the grammar. The key of the alternative is the discriminator.</p>
 <div class="fragment"><div class="line">{&quot;controlType&quot;: &quot;prbBlacklist&quot;,</div>
 <div class="line"> &quot;controlPayload&quot;: {&quot;prbBlacklistControl&quot;: {&quot;blacklistedPRBs&quot;: [10, 11, 12],</div>
-<div class="line">                                            &quot;samplingThreshold&quot;: 5, &quot;validityPeriod&quot;: 60}}}</div>
+<div class="line">                                            &quot;validityPeriod&quot;: 60000}}}</div>
 </div><!-- fragment --><div class="fragment"><div class="line">{&quot;controlType&quot;: &quot;sensingPolicy&quot;,</div>
 <div class="line"> &quot;controlPayload&quot;: {&quot;sensingPolicyControl&quot;: {&quot;maskPerSlot&quot;: [0, 0, 0, 16256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],</div>
-<div class="line">                                             &quot;deactivate&quot;: false, &quot;validityPeriod&quot;: 60}}}</div>
+<div class="line">                                             &quot;deactivate&quot;: false, &quot;validityPeriod&quot;: 60000}}}</div>
 </div><!-- fragment --><p>The key <span class="tt">controlType</span> is not a field of the grammar. A codec adds it for readability.</p>
 <ul>
 <li>A sender may omit <span class="tt">controlType</span>.</li>
@@ -243,10 +293,10 @@ dApp control</h2>
 <li>The object under <span class="tt">controlPayload</span> shall hold the key of the expected alternative. A control that holds another key is rejected.</li>
 </ul>
 <p>The key <span class="tt">blacklistedPRBs</span> is required, also for a clear. An empty array clears the block. A message without the key is rejected, and it does not clear the block. The key <span class="tt">maskPerSlot</span> is required and shall hold at least one value.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md566"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md608"></a>
 Unknown keys and ranges</h2>
 <p>A receiver ignores keys that it does not know. A receiver rejects an array element that is outside the range of the grammar.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md567"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md609"></a>
 dApp report and xApp control</h2>
 <p>An implementation shall write the dApp report and the xApp control in JSON with the same rules as the dApp control: the members have the names of the grammar, the alternative of the payload is the member of the payload object, and a member <span class="tt">reportType</span> or <span class="tt">controlType</span> names the alternative. The member <span class="tt">timestamp</span> is the realtime time stamp in nanoseconds and is left out when it is absent.</p>
 <div class="fragment"><div class="line">{&quot;reportType&quot;: &quot;prbBlacklist&quot;, &quot;timestamp&quot;: 1756800000123456789,</div>
@@ -254,7 +304,7 @@ dApp report and xApp control</h2>
 </div><!-- fragment --><div class="fragment"><div class="line">{&quot;controlType&quot;: &quot;prbBlocked&quot;, &quot;timestamp&quot;: 1756800000123456789,</div>
 <div class="line"> &quot;controlPayload&quot;: {&quot;prbBlockedControl&quot;: {&quot;blockedPRBs&quot;: [10, 11, 12]}}}</div>
 </div><!-- fragment --><p>The values of <span class="tt">reportType</span> and <span class="tt">controlType</span> are <span class="tt">prbBlacklist</span> and <span class="tt">prbBlocked</span>. The alternative <span class="tt">configControl</span> has the value <span class="tt">config</span>. These forms are not checked against a codec.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md568"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md610"></a>
 Protocol Buffers</h1>
 <p>The messages use proto2, so that every field has explicit presence, as in ASN.1 OPTIONAL. The package is "e3sm.spectrum.v1". A choice maps to a <span class="tt">oneof</span>. The member that is set is the discriminator.</p>
 <p>Table: Protocol Buffers messages</p>
@@ -266,9 +316,9 @@ Protocol Buffers</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">SpectrumSensingIndication</span>  </td><td class="markdownTableBodyNone">1: timestamp, int64. 2: sfn, uint32. 3: slot, uint32. 4: beam, uint32. 5: shm_name, bytes. 6: shm_write_idx, uint32. 7: n_ranges, uint32.  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">SpectrumPRBBlacklistControl</span>  </td><td class="markdownTableBodyNone">1: blacklisted_prbs, repeated uint32. 2: sampling_threshold, uint32. 3: validity_period, uint32.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">SpectrumPRBBlacklistControl</span>  </td><td class="markdownTableBodyNone">1: blacklisted_prbs, repeated uint32. 3: validity_period, uint32, in milliseconds. Number 2 is reserved. It held sampling_threshold in earlier revisions.  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">SpectrumSensingPolicyControl</span>  </td><td class="markdownTableBodyNone">1: mask_per_slot, repeated uint32. 2: deactivate, bool, default false. 3: validity_period, uint32.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">SpectrumSensingPolicyControl</span>  </td><td class="markdownTableBodyNone">1: mask_per_slot, repeated uint32. 2: deactivate, bool, default false. 3: validity_period, uint32, in milliseconds.  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">SpectrumDAppControlData</span>  </td><td class="markdownTableBodyNone">oneof control_payload: 1: prb_blacklist_control. 2: sensing_policy_control.  </td></tr>
 <tr class="markdownTableRowEven">
@@ -282,9 +332,9 @@ Protocol Buffers</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">SpectrumXAppControlData</span>  </td><td class="markdownTableBodyNone">3: timestamp, uint64. oneof control_payload: 1: prb_blocked_control. 2: config_control.  </td></tr>
 </table>
-<p>The apply outcome has no Protocol Buffers message.</p>
+<p>The cell configuration indication and the apply outcome have no Protocol Buffers message. A Protocol Buffers indication is a <span class="tt">SpectrumSensingIndication</span>, and no <span class="tt">oneof</span> wraps it.</p>
 <p>The field numbers are the contract between the sender and the receiver. A change of a number is a change of the wire.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md569"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md611"></a>
 Carrying in E3AP</h1>
 <p>Table: Where each message sits in an E3AP message</p>
 <table class="markdownTable">
@@ -302,7 +352,7 @@ Carrying in E3AP</h1>
 <td class="markdownTableBodyNone">xApp control  </td><td class="markdownTableBodyNone"><span class="tt">xAppControlData</span> of the E3 xApp Control Action  </td><td class="markdownTableBodyNone">1..32768 octets  </td></tr>
 </table>
 <p>In the JSON encoding of E3AP, these fields hold a JSON value and not a string of hexadecimal digits. See the <a class="el" href="md_docs_2e3ap_204-encoding.html">E3AP encoding chapter</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md570"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md612"></a>
 Size limits</h1>
 <p>Table: Size limits</p>
 <table class="markdownTable">
@@ -315,20 +365,170 @@ Size limits</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">symbol masks in a sensing policy  </td><td class="markdownTableBodyNone">1 to 160  </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">characters of the TDD slot pattern  </td><td class="markdownTableBodyNone">1 to 160  </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">sensing ranges in one ring slot  </td><td class="markdownTableBodyNone">0 to 128  </td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">ring slots  </td><td class="markdownTableBodyNone">256  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">RAN function data, encoded  </td><td class="markdownTableBodyNone">the RAN buffer holds 512 octets  </td></tr>
+<td class="markdownTableBodyNone">ring slots  </td><td class="markdownTableBodyNone">256  </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">RAN function data, encoded  </td><td class="markdownTableBodyNone">the RAN buffer holds 512 octets  </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">sensing indication, encoded  </td><td class="markdownTableBodyNone">the RAN buffer holds 512 octets  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md571"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md613"></a>
 Abstract syntax with ASN.1</h1>
 <p>The ASN.1 definitions conform to ITU-T Recommendation X.680 [2] and X.681 [3]. The module name is "SPECTRUM-SM". The module uses automatic tags.</p>
-<p>The definitions are to be inserted between the delimiters below. The tables in <a class="el" href="md_docs_2e3sm_2spectrum_202-ie-mapping.html">clause 6</a> describe every type. If the ASN.1 and the tables disagree, the ASN.1 takes precedence, except for the conditions of presence, where the tables take precedence.</p>
+<p>The definitions are between the delimiters below. The tables in <a class="el" href="md_docs_2e3sm_2spectrum_202-ie-mapping.html">clause 6</a> describe every type. If the ASN.1 and the tables disagree, the ASN.1 takes precedence, except for the conditions of presence, where the tables take precedence.</p>
 <div class="fragment"><div class="line">-- ASN1START</div>
-<div class="line">-- The grammar of this service model is to be inserted here. See the OpenAirInterface implementation reference.</div>
+<div class="line">-- E3SM-SPEC, version 1</div>
+<div class="line"> </div>
+<div class="line">SPECTRUM-SM DEFINITIONS AUTOMATIC TAGS ::= BEGIN</div>
+<div class="line"> </div>
+<div class="line">-- ============================================================================</div>
+<div class="line">-- SM SPECTRUM RAN FUNCTION DATA STRUCTURES  </div>
+<div class="line">-- ============================================================================</div>
+<div class="line"> </div>
+<div class="line">Spectrum-RanFunctionData ::= SEQUENCE {</div>
+<div class="line">    name                    OCTET STRING (SIZE (1..32)),</div>
+<div class="line">    version                 INTEGER (0..65535),</div>
+<div class="line">    description             OCTET STRING (SIZE (1..128))</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">-- ============================================================================</div>
+<div class="line">-- INDICATION MESSAGE STRUCTURES</div>
+<div class="line">-- ============================================================================</div>
+<div class="line"> </div>
+<div class="line">Spectrum-CellConfigIndication ::= SEQUENCE {</div>
+<div class="line">    timestamp            INTEGER,</div>
+<div class="line">    ulCarrierPRBs        INTEGER (1..maxPRBs),</div>
+<div class="line">    ulOffsetToCarrier    INTEGER (0..maxPRBIndex),</div>
+<div class="line">    ulSubcarrierSpacing  INTEGER (0..3),</div>
+<div class="line">    ulArfcnPointA        INTEGER (0..maxARFCN),</div>
+<div class="line">    slotsPerFrame        INTEGER (1..maxSlotsFrame),</div>
+<div class="line">    tddSlotPattern       OCTET STRING (SIZE (1..maxSlotsFrame)) OPTIONAL,</div>
+<div class="line">    nrPci                INTEGER (0..maxPCI) OPTIONAL,</div>
+<div class="line">    ...</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">Spectrum-SensingIndication ::= SEQUENCE {</div>
+<div class="line">    timestamp    INTEGER,</div>
+<div class="line">    sfn          INTEGER (0..65535),</div>
+<div class="line">    slot         INTEGER (0..65535),</div>
+<div class="line">    beam         INTEGER (0..3) OPTIONAL,</div>
+<div class="line">    shmName      OCTET STRING,</div>
+<div class="line">    shmWriteIdx  INTEGER (0..65535),</div>
+<div class="line">    nRanges      INTEGER (0..128)</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">Spectrum-Indication ::= CHOICE {</div>
+<div class="line">    sensingIndication       Spectrum-SensingIndication,</div>
+<div class="line">    cellConfigIndication    Spectrum-CellConfigIndication</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">-- ============================================================================</div>
+<div class="line">-- CONTROL ACTION STRUCTURES  </div>
+<div class="line">-- ============================================================================</div>
+<div class="line"> </div>
+<div class="line">Spectrum-PRBBlacklistControl ::= SEQUENCE {</div>
+<div class="line">    blacklistedPRBs   SEQUENCE (SIZE (0..maxPRBs)) OF INTEGER (0..maxPRBIndex),</div>
+<div class="line">    validityPeriod          INTEGER (1..3600000) OPTIONAL</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">Spectrum-SensingPolicyControl ::= SEQUENCE {</div>
+<div class="line">    maskPerSlot             SEQUENCE (SIZE (1..maxSlotsFrame)) OF INTEGER (0..maxSymbolMask),</div>
+<div class="line">    deactivate              BOOLEAN DEFAULT FALSE,</div>
+<div class="line">    validityPeriod          INTEGER (1..3600000) OPTIONAL</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">Spectrum-DAppControlPayload ::= CHOICE {</div>
+<div class="line">    prbBlacklistControl     Spectrum-PRBBlacklistControl,</div>
+<div class="line">    ...,</div>
+<div class="line">    sensingPolicyControl    Spectrum-SensingPolicyControl</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">Spectrum-DAppControlData ::= SEQUENCE {</div>
+<div class="line">    controlPayload          Spectrum-DAppControlPayload</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">-- ============================================================================</div>
+<div class="line">-- dAPP REPORT STRUCTURES</div>
+<div class="line">-- ============================================================================</div>
+<div class="line"> </div>
+<div class="line">Spectrum-PRBBlacklistReport ::= SEQUENCE {</div>
+<div class="line">    blacklistedPRBs         SEQUENCE (SIZE (0..maxPRBs)) OF INTEGER (0..maxPRBIndex)</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">Spectrum-DAppReportPayload ::= CHOICE {</div>
+<div class="line">    prbBlacklistReport      Spectrum-PRBBlacklistReport,</div>
+<div class="line">    ...</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">Spectrum-DAppReportData ::= SEQUENCE {</div>
+<div class="line">    timestamp               INTEGER OPTIONAL,</div>
+<div class="line">    reportPayload           Spectrum-DAppReportPayload</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">-- ============================================================================</div>
+<div class="line">-- xAPP CONTROL ACTION STRUCTURES  </div>
+<div class="line">-- ============================================================================</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line">Spectrum-PRBBlockedControl ::= SEQUENCE {</div>
+<div class="line">    blockedPRBs             SEQUENCE (SIZE (0..maxPRBs)) OF INTEGER (0..maxPRBIndex)</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">Spectrum-XAppControlPayload ::= CHOICE {</div>
+<div class="line">    prbBlockedControl       Spectrum-PRBBlockedControl,</div>
+<div class="line">    configControl           Spectrum-ConfigControl,</div>
+<div class="line">    ...</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">Spectrum-XAppControlData ::= SEQUENCE {</div>
+<div class="line">    timestamp               INTEGER OPTIONAL,</div>
+<div class="line">    controlPayload          Spectrum-XAppControlPayload</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">Spectrum-ConfigControl ::= SEQUENCE {</div>
+<div class="line">    noiseFloorThreshold     INTEGER (-100..100) OPTIONAL,</div>
+<div class="line">    averagingFrames         INTEGER (1..255) OPTIONAL,</div>
+<div class="line">    enable                  BOOLEAN OPTIONAL</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line">-- ============================================================================</div>
+<div class="line">-- APPLY OUTCOME STRUCTURES</div>
+<div class="line">-- ============================================================================</div>
+<div class="line"> </div>
+<div class="line">Spectrum-PRBBlockApplyOutcome ::= SEQUENCE {</div>
+<div class="line">    installedTimestamp      INTEGER OPTIONAL,</div>
+<div class="line">    onAirTimestamp          INTEGER OPTIONAL,</div>
+<div class="line">    sfn                     INTEGER (0..1023) OPTIONAL,</div>
+<div class="line">    slot                    INTEGER (0..maxSlotIndex) OPTIONAL,</div>
+<div class="line">    ...</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">Spectrum-ApplyOutcomePayload ::= CHOICE {</div>
+<div class="line">    prbBlockApplyOutcome    Spectrum-PRBBlockApplyOutcome,</div>
+<div class="line">    ...</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">Spectrum-ApplyOutcomeData ::= SEQUENCE {</div>
+<div class="line">    timestamp               INTEGER OPTIONAL,</div>
+<div class="line">    applyOutcomePayload     Spectrum-ApplyOutcomePayload</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">-- ============================================================================</div>
+<div class="line">-- CONSTANTS AND CONSTRAINTS</div>
+<div class="line">-- ============================================================================</div>
+<div class="line">maxPRBs                     INTEGER ::= 273</div>
+<div class="line">maxPRBIndex                 INTEGER ::= 272</div>
+<div class="line">maxSlotsFrame               INTEGER ::= 160</div>
+<div class="line">maxSlotIndex                INTEGER ::= 159</div>
+<div class="line">maxSymbolMask               INTEGER ::= 16383</div>
+<div class="line">maxARFCN                    INTEGER ::= 3279165</div>
+<div class="line">maxPCI                      INTEGER ::= 1007</div>
+<div class="line"> </div>
+<div class="line">END</div>
 <div class="line">-- ASN1STOP</div>
 </div><!-- fragment --> </div></div><!-- contents -->
 </div><!-- PageDoc -->

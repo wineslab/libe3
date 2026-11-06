@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e3ap_202-ie-mapping.html','',''); });
   <div class="headertitle"><div class="title">E3AP: information elements </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md269"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md259"></a></p>
 <p>The messages of E3AP and their information elements: names, types, ranges, presence and meaning. The ASN.1 grammar is in <a href="04-encoding.md#abstract-syntax">04-encoding.md</a>. If a table and the grammar disagree, the grammar takes precedence.</p>
 <p>This is section 2 of the specification. The index is <a class="el" href="dir_af0c76cc165e127d1e03e322192d98eb.html">README.md</a>. The procedures that use these messages are in <a class="el" href="md_docs_2e3ap_203-procedure-flow.html">03-procedure-flow.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md270"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md260"></a>
 The messages at a glance</h1>
 <p>E3AP has eleven messages. Each one travels inside one <span class="tt">E3-PDU</span>.</p>
 <p>Table: Messages of E3AP</p>
@@ -125,7 +125,7 @@ The messages at a glance</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">E3-MessageAck  </td><td class="markdownTableBodyNone">10  </td><td class="markdownTableBodyNone">E3 Agent to dApp  </td><td class="markdownTableBodyNone">acknowledgement of a dApp control action  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md271"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md261"></a>
 Common types</h1>
 <p>Table: Types shared by the messages</p>
 <table class="markdownTable">
@@ -144,6 +144,10 @@ Common types</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">E3-ResponseCode  </td><td class="markdownTableBodyNone">ENUMERATED  </td><td class="markdownTableBodyNone">"positive" (0), "negative" (1)  </td><td class="markdownTableBodyNone">The result of a request. The type has no extension marker.  </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">E3-Cause  </td><td class="markdownTableBodyNone">ENUMERATED  </td><td class="markdownTableBodyNone">see below  </td><td class="markdownTableBodyNone">Why the E3 Agent refused a request. It is sent with a negative response code. The type has an extension marker.  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">E3-Text  </td><td class="markdownTableBodyNone">OCTET STRING  </td><td class="markdownTableBodyNone">0 to 512 octets  </td><td class="markdownTableBodyNone">Text in UTF-8 for a person who reads a log. A receiver shall drop a text that is not UTF-8.  </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">E3-Timestamp  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">not constrained  </td><td class="markdownTableBodyNone">Nanoseconds since the Unix epoch on the realtime (UTC) clock.  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">RAN function identifier  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">1 to 65535  </td><td class="markdownTableBodyNone">The number of a RAN function. It is the same number in every message that names the function.  </td></tr>
@@ -152,8 +156,44 @@ Common types</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Subscription identifier  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">1 to 65535  </td><td class="markdownTableBodyNone">The number that the E3 Agent assigns to a subscription.  </td></tr>
 </table>
+<p>Table: Values of E3-Cause</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Value  </th><th class="markdownTableHeadNone">Name  </th><th class="markdownTableHeadNone">The E3 Agent uses it when  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">0  </td><td class="markdownTableBodyNone">unspecified  </td><td class="markdownTableBodyNone">no other cause applies  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">1  </td><td class="markdownTableBodyNone">protocolError  </td><td class="markdownTableBodyNone">the message does not decode, or is not valid in this place  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">2  </td><td class="markdownTableBodyNone">setupRequired  </td><td class="markdownTableBodyNone">the dApp has not completed the Setup procedure  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">3  </td><td class="markdownTableBodyNone">setupAlreadyComplete  </td><td class="markdownTableBodyNone">the dApp sends a second SETUP REQUEST message on one association  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">4  </td><td class="markdownTableBodyNone">unsupportedProtocolVersion  </td><td class="markdownTableBodyNone">it does not serve the version of E3AP that the dApp names  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">5  </td><td class="markdownTableBodyNone">unsupportedRanFunction  </td><td class="markdownTableBodyNone">it does not serve the RAN function  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">6  </td><td class="markdownTableBodyNone">unsupportedIdentifier  </td><td class="markdownTableBodyNone">a telemetry identifier or control identifier is not one that the RAN function offers  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">7  </td><td class="markdownTableBodyNone">invalidRequest  </td><td class="markdownTableBodyNone">the message is well formed and its content is not acceptable, for example a subscription that names no identifier  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">8  </td><td class="markdownTableBodyNone">notFound  </td><td class="markdownTableBodyNone">the subscription, or the subscription that a control needs, does not exist  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">9  </td><td class="markdownTableBodyNone">duplicate  </td><td class="markdownTableBodyNone">the request repeats one that is active  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">10  </td><td class="markdownTableBodyNone">resourceExhausted  </td><td class="markdownTableBodyNone">it has no free dApp identifier, subscription identifier or other resource  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">11  </td><td class="markdownTableBodyNone">authorizationRejected  </td><td class="markdownTableBodyNone">the dApp is not allowed to do it  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">12  </td><td class="markdownTableBodyNone">payloadTooLarge  </td><td class="markdownTableBodyNone">the payload is larger than it accepts  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">13  </td><td class="markdownTableBodyNone">transportOverrun  </td><td class="markdownTableBodyNone">the link cannot keep up  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">14  </td><td class="markdownTableBodyNone">shuttingDown  </td><td class="markdownTableBodyNone">it is stopping  </td></tr>
+</table>
+<p>A receiver that gets a value that it does not know shall read it as unspecified and still treat the response as a refusal. A sender that has no cause to give sends none: a negative response with no <span class="tt">cause</span> and no <span class="tt">detail</span> is valid.</p>
 <p>A message identifier and a sequence identifier have the same range on purpose. Both are counters of the component that creates them. A value of one can then be stored in a field made for the other without loss.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md272"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md262"></a>
 E3-PDU</h1>
 <p>The envelope of every message.</p>
 <p>Table: E3-PDU</p>
@@ -167,7 +207,7 @@ E3-PDU</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">msg</span>  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">CHOICE  </td><td class="markdownTableBodyNone">One of the eleven messages. The CHOICE has an extension marker.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md273"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md263"></a>
 E3-SetupRequest</h1>
 <p>A dApp sends it first. It asks the E3 Agent to register the dApp.</p>
 <p>Table: E3-SetupRequest</p>
@@ -183,7 +223,7 @@ E3-SetupRequest</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">vendor</span>  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">E3-Name  </td><td class="markdownTableBodyNone">The name of the vendor of the dApp.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md274"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md264"></a>
 E3-SetupResponse</h1>
 <p>The E3 Agent answers a SETUP REQUEST message with it.</p>
 <p>Table: E3-SetupResponse</p>
@@ -202,8 +242,12 @@ E3-SetupResponse</h1>
 <td class="markdownTableBodyNone"><span class="tt">dAppIdentifier</span>  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">E3-DAppID  </td><td class="markdownTableBodyNone">The identifier that the E3 Agent assigns to the dApp. It is present when the response code is "positive".  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">ranFunctionList</span>  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone">0 to 64  </td><td class="markdownTableBodyNone">SEQUENCE OF E3-RanFunctionDefinition  </td><td class="markdownTableBodyNone">The RAN functions that the dApp can use. It is present when the response code is "positive".  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">cause</span>  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">E3-Cause  </td><td class="markdownTableBodyNone">Why the E3 Agent refused the dApp. It is present only when the response code is "negative". This field is an extension addition.  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">detail</span>  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">E3-Text  </td><td class="markdownTableBodyNone">Text for the cause. This field is an extension addition.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md275"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md265"></a>
 E3-RanFunctionDefinition</h1>
 <p>One entry of the RAN function list of a SETUP RESPONSE message.</p>
 <p>Table: E3-RanFunctionDefinition</p>
@@ -219,7 +263,7 @@ E3-RanFunctionDefinition</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">ranFunctionData</span>  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">1 to 262144 octets  </td><td class="markdownTableBodyNone">OCTET STRING  </td><td class="markdownTableBodyNone">A description that only the service model of the RAN function can read. E3AP does not read it.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md276"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md266"></a>
 E3-SubscriptionRequest</h1>
 <p>A dApp sends it to use a RAN function.</p>
 <p>Table: E3-SubscriptionRequest</p>
@@ -239,7 +283,7 @@ E3-SubscriptionRequest</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">periodicity</span>  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone">0 to 60000000  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">The time, in microseconds, between two indications. "0" means one indication for each event. A missing value means that the service model sets the rate.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md277"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md267"></a>
 E3-SubscriptionResponse</h1>
 <p>The E3 Agent answers a SUBSCRIPTION REQUEST message or a SUBSCRIPTION DELETE message with it.</p>
 <p>Table: E3-SubscriptionResponse</p>
@@ -259,11 +303,15 @@ E3-SubscriptionResponse</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">controlIdentifierList</span>  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone">0 to 256  </td><td class="markdownTableBodyNone">SEQUENCE OF INTEGER (1 to 65535)  </td><td class="markdownTableBodyNone">The control actions that the E3 Agent grants. The same rule as for the telemetry list applies.  </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">cause</span>  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">E3-Cause  </td><td class="markdownTableBodyNone">Why the E3 Agent refused the request. It is present only when the response code is "negative". This field is an extension addition.  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">detail</span>  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">E3-Text  </td><td class="markdownTableBodyNone">Text for the cause. This field is an extension addition.  </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">ranFunctionIdentifier</span>  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">INTEGER (1 to 65535)  </td><td class="markdownTableBodyNone">The RAN function that the grant is for. This field is an extension addition.  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">periodicity</span>  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone">0 to 60000000  </td><td class="markdownTableBodyNone">INTEGER  </td><td class="markdownTableBodyNone">The interval that the E3 Agent grants, in microseconds. Same unit and range as in the request. This field is an extension addition.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md278"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md268"></a>
 E3-SubscriptionDelete</h1>
 <p>A dApp sends it to end a subscription.</p>
 <p>Table: E3-SubscriptionDelete</p>
@@ -275,7 +323,7 @@ E3-SubscriptionDelete</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">subscriptionId</span>  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">INTEGER (1 to 65535)  </td><td class="markdownTableBodyNone">The subscription to end.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md279"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md269"></a>
 E3-IndicationMessage</h1>
 <p>The E3 Agent sends it to deliver telemetry.</p>
 <p>Table: E3-IndicationMessage</p>
@@ -289,7 +337,7 @@ E3-IndicationMessage</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">protocolData</span>  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">1 to 32768 octets  </td><td class="markdownTableBodyNone">OCTET STRING  </td><td class="markdownTableBodyNone">The payload. Only the service model of the RAN function can read it.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md280"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md270"></a>
 E3-DAppControlAction</h1>
 <p>A dApp sends it to ask a RAN function to do something.</p>
 <p>Table: E3-DAppControlAction</p>
@@ -307,7 +355,7 @@ E3-DAppControlAction</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">actionData</span>  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">1 to 32768 octets  </td><td class="markdownTableBodyNone">OCTET STRING  </td><td class="markdownTableBodyNone">The payload. Only the service model can read it.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md281"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md271"></a>
 E3-DAppReport</h1>
 <p>A dApp sends it to give a result to a RIC.</p>
 <p>Table: E3-DAppReport</p>
@@ -323,7 +371,7 @@ E3-DAppReport</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">reportData</span>  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">1 to 32768 octets  </td><td class="markdownTableBodyNone">OCTET STRING  </td><td class="markdownTableBodyNone">The payload. Only the service model can read it.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md282"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md272"></a>
 E3-XAppControlAction</h1>
 <p>The E3 Agent sends it to hand an xApp decision to a dApp.</p>
 <p>Table: E3-XAppControlAction</p>
@@ -339,7 +387,7 @@ E3-XAppControlAction</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">xAppControlData</span>  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">1 to 32768 octets  </td><td class="markdownTableBodyNone">OCTET STRING  </td><td class="markdownTableBodyNone">The payload. Only the service model can read it.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md283"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md273"></a>
 E3-ReleaseMessage</h1>
 <p>Either side sends it to end the session of a dApp.</p>
 <p>Table: E3-ReleaseMessage</p>
@@ -349,9 +397,9 @@ E3-ReleaseMessage</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">dAppIdentifier</span>  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">E3-DAppID  </td><td class="markdownTableBodyNone">The dApp whose session ends.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md284"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md274"></a>
 E3-MessageAck</h1>
-<p>The E3 Agent, or the service model behind it, sends it to say what happened to a dApp control action. The message has no dApp identifier. A dApp shall ignore a MESSAGE ACK message whose <span class="tt">requestId</span> is not the identifier of a message that it sent.</p>
+<p>The E3 Agent, or the service model behind it, sends it to say what happened to a dApp control action. The E3 Agent sends it with "negative" when it cannot hand the control to a service model. The message has no dApp identifier. A dApp shall ignore a MESSAGE ACK message whose <span class="tt">requestId</span> is not the identifier of a message that it sent.</p>
 <p>Table: E3-MessageAck</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -360,8 +408,12 @@ E3-MessageAck</h1>
 <td class="markdownTableBodyNone"><span class="tt">requestId</span>  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">E3-MessageID  </td><td class="markdownTableBodyNone">The <span class="tt">id</span> of the E3-PDU of the dApp control action.  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">responseCode</span>  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">E3-ResponseCode  </td><td class="markdownTableBodyNone">The result.  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">cause</span>  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">E3-Cause  </td><td class="markdownTableBodyNone">Why the control was refused. It is present only when the response code is "negative". This field is an extension addition.  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">detail</span>  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">E3-Text  </td><td class="markdownTableBodyNone">Text for the cause. This field is an extension addition.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md285"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md275"></a>
 Presence notation</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">

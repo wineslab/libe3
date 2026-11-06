@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -93,17 +93,18 @@ $(function(){initNavTree('dir_af0c76cc165e127d1e03e322192d98eb.html','',''); });
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md385"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md370"></a>
 E3AP</h1>
 <p>E3AP is the E3 Application Protocol. It connects a dApp to the RAN function that hosts it. A dApp is a small application that runs next to the RAN and reacts in less than a millisecond. E3AP lets the dApp discover what the RAN offers, ask for telemetry, send control actions back, and send reports that a RIC can use.</p>
 <p>E3AP carries the data of the E3 service models without reading it. Each service model defines the meaning of its own payloads. See the <a class="el" href="dir_d9d2420dd0a82854388aea0d70f7609f.html">E3SM specifications</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md386"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md371"></a>
 Scope</h1>
 <p>The present document specifies the E3 Application Protocol (E3AP) between a dApp and an E3 Agent in a RAN node. It defines the messages, the procedures, the information elements, the encodings and the handling of errors.</p>
 <p>E3AP does not define the content of a service model payload. It does not define how a RAN node produces telemetry or applies a control action. It does not define the E2 interface. The E2SM-DAPP specification defines how a RIC reaches a dApp through the E2 interface. See the <a class="el" href="dir_24c5afd111e6aa944685a569bf5db165.html">E2SM-DAPP specification</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md387"></a>
+<p>This document is generated from the codebase and protocol definitions for the <a class="el" href="namespacelibe3.html">libe3</a> implementation in <a href="https://github.com/wineslab/libe3">https://github.com/wineslab/libe3</a>.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md372"></a>
 References</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md388"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md373"></a>
 Normative references</h2>
 <p>References are specific. Only the cited version applies.</p>
 <p>[1] ITU-T Recommendation X.680 (2002-07): "Information technology: Abstract Syntax Notation One (ASN.1): Specification of basic notation".</p>
@@ -113,15 +114,15 @@ Normative references</h2>
 <p>[5] IETF RFC 4960 (2007-09): "Stream Control Transmission Protocol".</p>
 <p>[6] IETF RFC 9293 (2022-08): "Transmission Control Protocol (TCP)".</p>
 <p>[7] ZeroMQ RFC 23 (ZMTP 3.0): "ZeroMQ Message Transport Protocol", <a href="https://rfc.zeromq.org/spec/23/">https://rfc.zeromq.org/spec/23/</a>.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md389"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md374"></a>
 Informative references</h2>
 <p>[i.1] Protocol Buffers Language Guide (proto3), <a href="https://protobuf.dev/programming-guides/proto3/">https://protobuf.dev/programming-guides/proto3/</a>.</p>
-<p>[i.2] The E2SM-DAPP specification of this series. See <a class="el" href="dir_24c5afd111e6aa944685a569bf5db165.html">../e2sm-dapp/README.md</a>.</p>
-<p>[i.3] The E3SM Spectrum and E3SM L1-KPM specifications of this series. See <a class="el" href="dir_d9d2420dd0a82854388aea0d70f7609f.html">../e3sm/README.md</a>.</p>
+<p>[i.2] O-RAN.XXX.TS.E2SM-DAPP-R000-v00.01: "E2 Service Model dApp (E2SM-DAPP)", <a href="https://github.com/wineslab/libe3/tree/main/docs/e2sm-dapp">https://github.com/wineslab/libe3/tree/main/docs/e2sm-dapp</a>.</p>
+<p>[i.3] O-RAN.XXX.TS.E3SM-SPEC-R000-v00.01: "E3 Service Model Spectrum (E3SM-SPEC)", <a href="https://github.com/wineslab/libe3/tree/main/docs/e3sm/spectrum">https://github.com/wineslab/libe3/tree/main/docs/e3sm/spectrum</a>, and O-RAN.XXX.TS.E3SM-L1-KPM-R000-v00.01: "E3 Service Model (E3SM), L1 KPM (E3SM-L1-KPM)", <a href="https://github.com/wineslab/libe3/tree/main/docs/e3sm/l1-kpm">https://github.com/wineslab/libe3/tree/main/docs/e3sm/l1-kpm</a>.</p>
 <p>[i.4] The OpenAirInterface implementation of E3AP, <a href="https://github.com/duranta-project/openairinterface5g/pull/729">https://github.com/duranta-project/openairinterface5g/pull/729</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md390"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md375"></a>
 Terms, symbols and abbreviations</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md391"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md376"></a>
 Terms</h2>
 <p>For the purposes of the present document, the following terms apply.</p>
 <p><b>dApp</b>: an application that runs in the RAN node or next to it and uses E3AP to reach a RAN function.</p>
@@ -136,10 +137,10 @@ Terms</h2>
 <p><b>Sequence identifier</b>: a number that joins all messages of one detection-to-mitigation procedure.</p>
 <p><b>Link layer</b>: the messaging library that moves E3AP messages. The link layer is ZeroMQ or POSIX sockets.</p>
 <p><b>Transport layer</b>: the network transport that the POSIX link layer uses. It is SCTP, TCP or inter-process communication (IPC).</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md392"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md377"></a>
 Symbols</h2>
 <p>Void.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md393"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md378"></a>
 Abbreviations</h2>
 <p>For the purposes of the present document, the following abbreviations apply.</p>
 <table class="markdownTable">
@@ -176,9 +177,9 @@ Abbreviations</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">ZMQ  </td><td class="markdownTableBodyNone">ZeroMQ  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md394"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md379"></a>
 General</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md395"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md380"></a>
 Notations</h2>
 <p>For the purposes of the present document, the following notations apply.</p>
 <table class="markdownTable">
@@ -194,17 +195,17 @@ Notations</h2>
 <td class="markdownTableBodyNone">Value of an IE  </td><td class="markdownTableBodyNone">The value is in quotation marks. Example: "positive".  </td></tr>
 </table>
 <p>The ASN.1 name of a message has the prefix "E3-" and no spaces. Example: E3-SetupRequest. The text uses the ASN.1 field name when it refers to a field. Example: <span class="tt">subscriptionTime</span>.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md396"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md381"></a>
 Forwards and backwards compatibility</h2>
 <p>E3AP uses these means to stay compatible when it grows.</p>
 <ol type="1">
 <li>Every SEQUENCE and the main CHOICE in the ASN.1 grammar has an extension marker. A receiver shall ignore an extension addition that it does not know.</li>
 <li>A new optional field goes after the extension marker. An old receiver skips it.</li>
 <li>The <span class="tt">E3-ResponseCode</span> type has no extension marker. A new response code needs a new version of E3AP.</li>
-<li>The Setup procedure carries a version string. An E3 Agent may answer with a negative response code when it does not support the version of the dApp. Implementations differ on this point. See <a class="el" href="md_docs_2e3ap_206-discrepancies.html">06-discrepancies.md</a>.</li>
+<li>The Setup procedure carries a version string. An E3 Agent may answer with a negative response code when it does not support the version of the dApp. Implementations differ on this point.</li>
 <li>A change to a constraint changes the encoded bytes. The sender and the receiver shall use the same version of the grammar.</li>
 </ol>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md397"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md382"></a>
 Where each part is specified</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -219,11 +220,9 @@ Where each part is specified</h1>
 <td class="markdownTableBodyNone">4. Encoding  </td><td class="markdownTableBodyNone">APER, JSON and Protobuf rules, framing on each link, size limits, the ASN.1 grammar  </td><td class="markdownTableBodyNone"><a class="el" href="md_docs_2e3ap_204-encoding.html">04-encoding.md</a>  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">5. Semantics and constraints  </td><td class="markdownTableBodyNone">units, clocks, absent versus zero, validation, error paths, what is mandatory  </td><td class="markdownTableBodyNone"><a class="el" href="md_docs_2e3ap_205-semantics-and-constraints.html">05-semantics-and-constraints.md</a>  </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">6. Discrepancies  </td><td class="markdownTableBodyNone">where implementations and encodings disagree, and the resolution each one needs  </td><td class="markdownTableBodyNone"><a class="el" href="md_docs_2e3ap_206-discrepancies.html">06-discrepancies.md</a>  </td></tr>
 </table>
 <p>An engineer who adds E3AP to a RAN stack or to a dApp finds code pointers and a checklist in the <a class="el" href="md_docs_2e3ap_2integrator-guide.html">integrator guide</a>. The guide is not part of the specification.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md398"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md383"></a>
 Related documents</h1>
 <ul>
 <li><a class="el" href="md_docs_2interop.html">../interop.md</a>: what pairs with what, the JSON form in use, the field contracts where peers differ, and the change ledger.</li>

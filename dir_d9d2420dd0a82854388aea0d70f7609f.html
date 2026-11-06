@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -99,19 +99,19 @@ Directories</h2></td></tr>
 <tr class="memitem:spectrum" id="r_spectrum"><td class="memItemLeft" align="right" valign="top"><span class="iconfolder"><div class="folder-icon"></div></span>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dir_bf4e70bd8af5703d8fd0ae314deb09dd.html">spectrum</a></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md489"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md521"></a>
 E3 service models</h1>
 <p>An E3 service model (E3SM) gives meaning to the payloads that E3AP carries for one RAN function. E3AP moves the payloads as octet strings and does not read them. The service model defines what each payload contains, how it is encoded and how the RAN function and the dApp use it.</p>
-<p>Each service model has its own folder with the same six chapters as the <a class="el" href="dir_24c5afd111e6aa944685a569bf5db165.html">E2SM-DAPP specification</a> and the <a class="el" href="dir_af0c76cc165e127d1e03e322192d98eb.html">E3AP specification</a>.</p>
+<p>Each service model has its own folder with the same six chapters as the <a class="el" href="dir_24c5afd111e6aa944685a569bf5db165.html">E2SM-DAPP specification</a> and the <a class="el" href="dir_af0c76cc165e127d1e03e322192d98eb.html">E3AP specification</a>. The L1-KPM draft follows the clause layout of the E2 service models instead: services, RAN function description, information elements with ASN.1 and JSON, error handling, and annexes.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Service model  </th><th class="markdownTableHeadNone">RAN function ID  </th><th class="markdownTableHeadNone">What it does  </th><th class="markdownTableHeadNone">Folder  </th><th class="markdownTableHeadNone">Word edition  </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">E3SM Spectrum  </td><td class="markdownTableBodyNone">1  </td><td class="markdownTableBodyNone">Sensing telemetry, PRB blacklist control, sensing policy control, dApp reports and xApp controls for spectrum sharing  </td><td class="markdownTableBodyNone"><a class="el" href="dir_bf4e70bd8af5703d8fd0ae314deb09dd.html">spectrum/</a>  </td><td class="markdownTableBodyNone"><span class="tt">O-RAN.WG3.TS.E3SM-SPEC-R000-v00.01.docx</span>  </td></tr>
+<td class="markdownTableBodyNone">E3SM Spectrum  </td><td class="markdownTableBodyNone">1  </td><td class="markdownTableBodyNone">Sensing telemetry, PRB blacklist control, sensing policy control, dApp reports and xApp controls for spectrum sharing  </td><td class="markdownTableBodyNone"><a class="el" href="dir_bf4e70bd8af5703d8fd0ae314deb09dd.html">spectrum/</a>  </td><td class="markdownTableBodyNone"><span class="tt">O-RAN.XXX.TS.E3SM-SPEC-R000-v00.01.docx</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">E3SM L1-KPM  </td><td class="markdownTableBodyNone">2  </td><td class="markdownTableBodyNone">Telemetry from the physical layer: a reference to the IQ samples of each uplink slot  </td><td class="markdownTableBodyNone"><a class="el" href="dir_75429917a6ddd2daabca8d27e432849a.html">l1-kpm/</a>  </td><td class="markdownTableBodyNone"><span class="tt">O-RAN.WG3.TS.E3SM-L1KPM-R000-v00.01.docx</span>  </td></tr>
+<td class="markdownTableBodyNone">E3SM L1-KPM (draft)  </td><td class="markdownTableBodyNone">2  </td><td class="markdownTableBodyNone">Telemetry from the uplink layer 1: the PUSCH and SRS data of each uplink slot (79 telemetry identifiers and the valid symbol mask), selection of cells and UEs, and a shared memory layout for the large arrays  </td><td class="markdownTableBodyNone"><a class="el" href="dir_75429917a6ddd2daabca8d27e432849a.html">l1-kpm/</a>  </td><td class="markdownTableBodyNone"><span class="tt">O-RAN.XXX.TS.E3SM-L1-KPM-R000-v00.01.docx</span>  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md490"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md522"></a>
 What the service models share</h1>
 <ul>
 <li>The RAN function identifier is the number that E3AP carries in <span class="tt">ranFunctionIdentifier</span>. It has no link to the E2 RAN function identifier. See <a class="el" href="md_docs_2e2sm-dapp_201-identity-and-registration.html">E2SM-DAPP</a> for the difference.</li>
@@ -119,7 +119,7 @@ What the service models share</h1>
 <li>The encoding of a payload follows the encoding of E3AP on the same link: APER, JSON or Protobuf. See <a class="el" href="md_docs_2e3ap_204-encoding.html">E3AP encoding</a>.</li>
 <li>A payload that crosses hosts carries a realtime timestamp. A payload that stays on one host and points into shared memory carries a monotonic timestamp. The two clocks shall never be subtracted from each other. See <a href="../utilities/latrec.md#clock-model">latrec</a>.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md491"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md523"></a>
 How a new service model joins</h1>
 <p>A new service model needs a folder next to the two above with the same chapters, a RAN function identifier that no other service model uses, and a Word edition built with <span class="tt">tools/oran_docx</span> (see its <span class="tt">README.md</span>). </p>
 </div><!-- contents -->

@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -93,9 +93,9 @@ $(function(){initNavTree('dir_bf4e70bd8af5703d8fd0ae314deb09dd.html','',''); });
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md609"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md653"></a>
 E3SM-SPEC: the Spectrum service model</h1>
-<p>E3SM-SPEC is the E3 service model for spectrum sensing and spectrum sharing. A RAN that offers it publishes a map of free time and frequency resources to dApps. It also accepts two controls that change how the scheduler uses the spectrum. A dApp can report the PRBs it found occupied, and an xApp can suggest PRBs to block.</p>
+<p>E3SM-SPEC is the E3 service model for spectrum sensing and spectrum sharing. A RAN that offers it publishes a map of free time and frequency resources to dApps, and the configuration of the uplink carrier that the map refers to. It also accepts two controls: one blocks PRBs in the scheduler, the other asks the uplink scheduler to keep symbols free for sensing. A dApp can report the PRBs it found occupied, and an xApp can suggest PRBs to block.</p>
 <p>This directory is the specification of the service model: what the fields mean, how each message is encoded, and how the procedures run. The E3 Application Protocol that carries these messages is specified in <a class="el" href="dir_af0c76cc165e127d1e03e322192d98eb.html">the E3AP specification</a>.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -113,28 +113,29 @@ E3SM-SPEC: the Spectrum service model</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Encodings  </td><td class="markdownTableBodyNone">APER, JSON, Protocol Buffers. The RAN serves one per run.  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Message types  </td><td class="markdownTableBodyNone">RAN function data, sensing indication, dApp control, dApp report, xApp control, apply outcome  </td></tr>
+<td class="markdownTableBodyNone">Message types  </td><td class="markdownTableBodyNone">RAN function data, sensing indication, cell configuration indication, dApp control, dApp report, xApp control, apply outcome  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md610"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md654"></a>
 Scope</h1>
 <p>The present document specifies the E3 Service Model (E3SM) "Spectrum" for the RAN function that exposes spectrum sensing telemetry and spectrum control.</p>
 <p>The document defines the identity of the RAN function and how a RAN announces it. It defines the information elements of every message, and the procedures that use them. It defines the encodings, the units, the clocks and the limits of each field. It also defines how a receiver handles a message that is unknown or wrong.</p>
 <p>The document does not define the E3 Application Protocol. It does not define the E2 service model that carries dApp traffic to an xApp. It does not define how a scheduler enforces a PRB block internally.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md611"></a>
+<p>This document is generated from the codebase and protocol definitions for the <a class="el" href="namespacelibe3.html">libe3</a> implementation in <a href="https://github.com/wineslab/libe3">https://github.com/wineslab/libe3</a>.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md655"></a>
 References</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md612"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md656"></a>
 Normative references</h2>
 <p>References are either specific (identified by date of publication, edition number or version number) or non-specific. For specific references, only the cited version applies. For non-specific references, the latest version of the referenced document applies.</p>
 <blockquote class="doxtable">
-<p>NOTE: While any hyperlinks included in this clause were valid at the time of publication, O-RAN cannot guarantee their long-term validity. </p>
+<p>NOTE: While any hyperlinks included in this clause were valid at the time of publication, their long-term validity cannot be guaranteed. </p>
 </blockquote>
 <p>The following referenced documents are necessary for the application of the present document.</p>
-<p>[1] E3AP specification: "E3 Application Protocol (E3AP)", see <a class="el" href="dir_af0c76cc165e127d1e03e322192d98eb.html">the E3AP specification</a>.</p>
+<p>[1] O-RAN.XXX.TS.E3AP-R000-v00.01: "E3 Application Protocol (E3AP)", <a href="https://github.com/wineslab/libe3/tree/main/docs/e3ap">https://github.com/wineslab/libe3/tree/main/docs/e3ap</a>.</p>
 <p>[2] ITU-T Recommendation X.680 (2002-07): "Information technology: Abstract Syntax Notation One (ASN.1): Specification of basic notation".</p>
 <p>[3] ITU-T Recommendation X.681 (2002-07): "Information technology: Abstract Syntax Notation One (ASN.1): Information object specification".</p>
 <p>[4] ITU-T Recommendation X.691 (2002-07): "Information technology: ASN.1 encoding rules: Specification of Packed Encoding Rules (PER)".</p>
 <p>[5] IETF RFC 8259 (2017-12): "The JavaScript Object Notation (JSON) Data Interchange Format".</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md613"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md657"></a>
 Informative references</h2>
 <p>The following referenced documents are not necessary for the application of the present document, but they assist the user with regard to a particular subject area.</p>
 <p>[i.1] 3GPP TS 38.211: "NR; Physical channels and modulation".</p>
@@ -142,9 +143,11 @@ Informative references</h2>
 <p>[i.3] 3GPP TS 38.300: "NR; NR and NG-RAN Overall description; Stage 2".</p>
 <p>[i.4] Protocol Buffers Language Guide (proto2), <a href="https://protobuf.dev/programming-guides/proto2/">https://protobuf.dev/programming-guides/proto2/</a>.</p>
 <p>[i.5] OpenAirInterface implementation of the Spectrum service model, <a href="https://github.com/duranta-project/openairinterface5g/pull/729">https://github.com/duranta-project/openairinterface5g/pull/729</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md614"></a>
+<p>[i.6] 3GPP TS 38.331: "NR; Radio Resource Control (RRC); Protocol specification".</p>
+<p>[i.7] 3GPP TS 38.104: "NR; Base Station (BS) radio transmission and reception".</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md658"></a>
 Terms, symbols and abbreviations</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md615"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md659"></a>
 Terms</h2>
 <p>For the purposes of the present document, the terms and definitions of the E3AP specification [1] and the following apply.</p>
 <p><b>Sensing range</b>: a rectangle in the time and frequency grid of one slot. It has a first symbol, a number of symbols, a first PRB and a number of PRBs. No scheduled transmission uses the resources inside it.</p>
@@ -152,11 +155,12 @@ Terms</h2>
 <p><b>Sensing publish</b>: the moment the scheduler hands the sensing ranges of one slot to the service model.</p>
 <p><b>PRB block</b>: a set of PRBs that the scheduler treats as occupied, in uplink and in downlink, until the set is replaced or cleared.</p>
 <p><b>Sensing policy</b>: a list of symbol masks, one for each slot of a frame. The uplink scheduler prefers time domain allocations that leave the masked symbols free.</p>
+<p><b>Cell configuration</b>: the geometry and the slot structure of the uplink carrier that the sensing ranges refer to: its bandwidth, its offset in the resource grid, its subcarrier spacing, its point A and its TDD pattern.</p>
 <p><b>Apply outcome</b>: the report of the RAN on what applying a PRB block control did, and when.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md616"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md660"></a>
 Symbols</h2>
 <p>Void.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md617"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md661"></a>
 Abbreviations</h2>
 <p>For the purposes of the present document, the abbreviations of the E3AP specification [1] and the following apply. An abbreviation defined in the present document takes precedence over the definition of the same abbreviation, if any, in the E3AP specification.</p>
 <table class="markdownTable">
@@ -165,32 +169,38 @@ Abbreviations</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">APER  </td><td class="markdownTableBodyNone">Aligned Packed Encoding Rules  </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">ARFCN  </td><td class="markdownTableBodyNone">Absolute Radio Frequency Channel Number  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">FDD  </td><td class="markdownTableBodyNone">Frequency Division Duplex  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">PCI  </td><td class="markdownTableBodyNone">Physical Cell Identity  </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">PRB  </td><td class="markdownTableBodyNone">Physical Resource Block  </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">SFN  </td><td class="markdownTableBodyNone">System Frame Number  </td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">SM  </td><td class="markdownTableBodyNone">Service Model  </td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">TDA  </td><td class="markdownTableBodyNone">Time Domain Allocation  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">UL  </td><td class="markdownTableBodyNone">Uplink  </td></tr>
+<td class="markdownTableBodyNone">TDD  </td><td class="markdownTableBodyNone">Time Division Duplex  </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">UL  </td><td class="markdownTableBodyNone">Uplink  </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">DL  </td><td class="markdownTableBodyNone">Downlink  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md618"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md662"></a>
 General</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md619"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md663"></a>
 Notations</h2>
 <p>For the purposes of the present document, the following notations apply.</p>
 <p><b>Message</b>: a message is written in capital letters, for example E3 RAN FUNCTION DATA.</p>
-<p><b>Information element</b>: an information element (IE) is written in italic font with its name as in the grammar, for example <span class="tt">samplingThreshold</span>.</p>
+<p><b>Information element</b>: an information element (IE) is written in italic font with its name as in the grammar, for example <span class="tt">validityPeriod</span>.</p>
 <p><b>Value</b>: the value of an IE is written in quotation marks, for example "0".</p>
 <p><b>Clause numbers</b>: a reference to a clause of another specification names that specification, for example "E3AP [1]".</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md620"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md664"></a>
 Forwards and backwards compatibility</h2>
-<p>The grammar of the service model is version 1. Every payload alternative and every structure that can grow carries an extension marker. A receiver that meets an alternative it does not know shall reject the message as described in clause 9. A receiver shall ignore an extension field that it does not know, where the encoding allows it.</p>
+<p>The grammar of the service model is version 1. The payload choices of the dApp control, the dApp report, the xApp control and the apply outcome carry an extension marker, and so do the cell configuration indication and the apply outcome structure. The indication choice, the sensing indication and the RAN function data have none. A receiver that meets an alternative it does not know shall reject the message as described in clause 9. A receiver shall ignore an extension field that it does not know, where the encoding allows it.</p>
 <p>An extension alternative in an APER choice changes the width of the choice index. A sender and a receiver therefore need the same version of the grammar for the messages that already exist. Clause 8 gives the rule and the effect.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md621"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md665"></a>
 Where each part is specified</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -206,10 +216,10 @@ Where each part is specified</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Semantics and constraints  </td><td class="markdownTableBodyNone">units, clocks, absent versus zero, PRB limits, validation and error handling  </td><td class="markdownTableBodyNone"><a class="el" href="md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html">05-semantics-and-constraints.md</a>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Discrepancies  </td><td class="markdownTableBodyNone">where the grammar, the Protocol Buffers file and the codecs disagree, dead fields, open items  </td><td class="markdownTableBodyNone"><a class="el" href="md_docs_2e3sm_2spectrum_206-discrepancies.html">06-discrepancies.md</a>  </td></tr>
+<td class="markdownTableBodyNone">Examples  </td><td class="markdownTableBodyNone">a complete exchange in APER and JSON, from the setup to the PRB block, and an apply outcome  </td><td class="markdownTableBodyNone"><a class="el" href="md_docs_2e3sm_2spectrum_207-examples.html">07-examples.md</a>  </td></tr>
 </table>
 <p>For an engineer who adds the service model to a RAN or to a dApp there is a separate guide: <a class="el" href="md_docs_2e3sm_2spectrum_2integrator-guide.html">integrator-guide.md</a>. It is not part of the specification.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md622"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md666"></a>
 Related documents</h1>
 <ul>
 <li><a class="el" href="dir_af0c76cc165e127d1e03e322192d98eb.html">E3AP specification</a>: the protocol that carries every message of this service model.</li>

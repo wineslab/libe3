@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -94,7 +94,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_205-semantics-and-constraints.html'
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="autotoc_md108"></a></p>
 <p>This clause defines what the numbers mean, the units and clocks, the rules a message shall satisfy, and what a sender and a receiver shall do when the input is wrong or unknown.</p>
-<p>This is section 5 of the specification. The index is <a class="el" href="dir_24c5afd111e6aa944685a569bf5db165.html">README.md</a>. Where an implementation and the grammar disagree, the disagreement is in <a class="el" href="md_docs_2e2sm-dapp_206-discrepancies.html">06-discrepancies.md</a> and is only referenced here.</p>
+<p>This is section 5 of the specification. The index is <a class="el" href="dir_24c5afd111e6aa944685a569bf5db165.html">README.md</a>.</p>
 <h1 class="doxsection"><a class="anchor" id="autotoc_md109"></a>
 1. Numbering: formats and styles</h1>
 <p>Three different numberings exist. They share the digits <span class="tt">1</span> and <span class="tt">2</span> and mean different things.</p>
@@ -138,7 +138,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_205-semantics-and-constraints.html'
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">sequence-id</span>  </td><td class="markdownTableBodyNone">one detection-to-mitigation procedure  </td><td class="markdownTableBodyNone">unbounded, optional  </td><td class="markdownTableBodyNone"><span class="tt">1..4294967295</span> (<span class="tt">E3-SequenceID</span>)  </td><td class="markdownTableBodyNone"><b><span class="tt">E3-SequenceID</span> equals E2SM-DAPP <span class="tt">sequence-id</span></b>: same value, assigned by the dApp, never reassigned.  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">node-type</span>, <span class="tt">node-plmn-id</span>, <span class="tt">node-nb-id</span>, <span class="tt">node-cu-du-id</span>  </td><td class="markdownTableBodyNone">identity of the reporting node  </td><td class="markdownTableBodyNone">see 02  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">the grammar defines no enumeration and no packing. See 02.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">node-type</span>, <span class="tt">node-plmn-id</span>, <span class="tt">node-nb-id</span>, <span class="tt">node-cu-du-id</span>  </td><td class="markdownTableBodyNone">identity of the reporting node  </td><td class="markdownTableBodyNone">see <a class="el" href="md_docs_2e2sm-dapp_202-ie-mapping.html">02</a>  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">the grammar defines no enumeration and no packing. See <a class="el" href="md_docs_2e2sm-dapp_202-ie-mapping.html">02</a>.  </td></tr>
 </table>
 <p><b>A sender should keep the E2SM-DAPP ids inside the E3 ranges.</b> E2SM-DAPP can carry <span class="tt">0</span> and values above <span class="tt">65535</span>. A RAN that relays a control over E3 cannot deliver them, because <span class="tt">dAppIdentifier</span> and <span class="tt">ranFunctionIdentifier</span> are <span class="tt">1..65535</span> on E3. The reference test vectors include such values on purpose (an indication header with <span class="tt">ran-function-id</span> 0 and <span class="tt">dapp-id</span> 4294967295). They test the codec. A RAN does not send them.</p>
 <p>By convention, <span class="tt">0</span> is reserved in two other fields. One implementation treats a <span class="tt">sequence-id</span> of <span class="tt">0</span> and a timestamp of <span class="tt">0</span> as absent (section 4).</p>
@@ -231,7 +231,7 @@ Whose clock is each timestamp on</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">An indication or control payload shall have <b>at least one octet</b>  </td><td class="markdownTableBodyNone">the grammar says <span class="tt">SIZE(1..32768)</span>. One implementation drops an empty indication and aborts on an empty control message. The OpenAirInterface implementation ignores a report with no data.  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">A subscription <b>item</b> shall have 1 to 64 functions  </td><td class="markdownTableBodyNone">implementation A aborts its decoder at 64 (see <a class="el" href="md_docs_2e2sm-dapp_206-discrepancies.html">06-discrepancies.md</a>); the others reject 0 and more than 64  </td></tr>
+<td class="markdownTableBodyNone">A subscription <b>item</b> shall have 1 to 64 functions  </td><td class="markdownTableBodyNone">implementation A aborts its decoder at 64; the others reject 0 and more than 64  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">The report style list shall have 1 or 2 items and the control style list exactly 1  </td><td class="markdownTableBodyNone">implementation B rejects other sizes on encode and decode. Implementation A leaves the grammar limit to the ASN.1 runtime.  </td></tr>
 <tr class="markdownTableRowEven">
@@ -390,7 +390,7 @@ Whose clock is each timestamp on</h2>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md123"></a>
 8.3 Ordering and replacement</h2>
 <ul>
-<li>An agent cannot tell apart two controls in flight with the same <span class="tt">sequence-id</span>. Its pending table uses <span class="tt">sequence-id</span> alone as the key. A completion releases the first slot with that key. The other slot stays until a timeout sweep retires it. In implementation A, nothing runs that sweep (see <a class="el" href="md_docs_2e2sm-dapp_206-discrepancies.html">06-discrepancies.md</a>).</li>
+<li>An agent cannot tell apart two controls in flight with the same <span class="tt">sequence-id</span>. Its pending table uses <span class="tt">sequence-id</span> alone as the key. A completion releases the first slot with that key. The other slot stays until a timeout sweep retires it. In implementation A, nothing runs that sweep.</li>
 <li>A later Spectrum install replaces an earlier mask. This retires the earlier control as superseded. The RAN does not queue controls per dApp.</li>
 <li>A re-installed subscription under the same RIC request id replaces the old one.</li>
 </ul>

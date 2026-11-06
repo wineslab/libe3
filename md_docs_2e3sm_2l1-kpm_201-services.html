@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.15.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>libe3: docs/e3ap/06-discrepancies.md File Reference</title>
+<title>libe3: E3SM services</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -63,7 +63,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(function(){initNavTree('e3ap_206-discrepancies_8md.html','',''); });
+$(function(){initNavTree('md_docs_2e3sm_2l1-kpm_201-services.html','',''); });
 </script>
 <div id="container">
 <div id="doc-content">
@@ -88,11 +88,40 @@ $(function(){initNavTree('e3ap_206-discrepancies_8md.html','',''); });
 </div>
 </div>
 
-<div class="header">
-  <div class="headertitle"><div class="title">docs/e3ap/06-discrepancies.md File Reference</div></div>
+<div><div class="header">
+  <div class="headertitle"><div class="title">E3SM services </div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+<div class="textblock"><p><a class="anchor" id="autotoc_md384"></a></p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md385"></a>
+General</h1>
+<p>The present clause describes the E3 services that E3SM-L1-KPM supports. The service model supports two services:</p>
+<ul>
+<li>the telemetry service, in clause 5.2;</li>
+<li>the control service, in clause 5.3.</li>
+</ul>
+<p>The service model supports no other service. Clause 5.4 shows the messages of a typical use of both services. Clause 4.3 lists the E3AP procedures that carry them.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md386"></a>
+Telemetry service</h1>
+<p>The telemetry service delivers the data of the uplink slots of the cells that the E3 Agent serves. A dApp subscribes with the telemetry identifiers of clause 7.3. For each slot of an indication path that matches the subscription, the E3 Agent sends one INDICATION MESSAGE message that carries the values of the granted identifiers.</p>
+<p>The telemetry service is the only source of data of the service model. It plays the role that the REPORT service plays in an E2 service model.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md387"></a>
+Control service</h1>
+<p>The control service lets a dApp narrow its subscription to some cells and some UEs. It has one control action, Set Subscription Data (clause 7.5). The control service does not change the behavior of the RAN node.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md388"></a>
+Message flow</h1>
+<p>Figure 5-1 shows the messages of a typical use of the service model. The E3 Agent and the shared memory region are part of the RAN node (clause 4.2). The figure draws the dApp outside the RAN node; it may also run inside it. An arrow between the dApp and the E3 Agent is an E3AP message, and the box under it names the service model payload that the message carries. An arrow to the shared memory region is a write or a read of the region, not a message.</p>
+<p><img src="figures/message-flow.png" alt="Message flow of E3SM-L1-KPM over E3AP" class="inline"/></p>
+<p>The steps are the following.</p>
+<ol type="1">
+<li>The dApp sends a SETUP REQUEST message. The E3 Agent answers with a SETUP RESPONSE message whose RAN function list holds RAN function <span class="tt">2</span> and its RAN FUNCTION DATA IE.</li>
+<li>The dApp sends a SUBSCRIPTION REQUEST message for RAN function <span class="tt">2</span>. The E3 Agent answers with a SUBSCRIPTION RESPONSE message that lists the granted identifiers.</li>
+<li>Optionally, the dApp sends a dApp CONTROL ACTION message with control identifier <span class="tt">1</span> to select cells or UEs. The E3 Agent answers with a MESSAGE ACK message.</li>
+<li>For each matching slot of each indication path, the E3 Agent writes the rows of the slot to the region, then sends an INDICATION MESSAGE message. The dApp reads the shared memory streams from the region.</li>
+<li>The dApp sends a SUBSCRIPTION DELETE message, or a RELEASE MESSAGE message. </li>
+</ol>
+</div></div><!-- contents -->
+</div><!-- PageDoc -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
 <div id="page-nav-resize-handle"></div>
@@ -105,7 +134,6 @@ $(function(){initNavTree('e3ap_206-discrepancies_8md.html','',''); });
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="e3ap_206-discrepancies_8md.html">06-discrepancies.md</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.15.0 </li>
   </ul>
 </div>

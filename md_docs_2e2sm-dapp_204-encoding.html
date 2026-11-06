@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -120,7 +120,7 @@ What is on the wire</h1>
 <td class="markdownTableBodyNone">RIC Control Outcome (RIC Control Acknowledge)  </td><td class="markdownTableBodyNone"><span class="tt">E2SM-DAPP-ControlOutcome</span>  </td></tr>
 </table>
 <p>The grammar is in the last clause of this chapter. Its module identifier is <span class="tt">E2SM-DAPP-IEs {... oran(53148) e2(1) version1(1) e2sm(255) e2sm-DAPP-IEs (3)}</span>, so the OID is <span class="tt">1.3.6.1.4.1.53148.1.1.255.3</span>.</p>
-<p>Plain and FlatBuffers encodings <b>do not exist</b>. A conforming stack encodes APER. Some implementations ship unused stubs for the other encodings. See <a class="el" href="md_docs_2e2sm-dapp_206-discrepancies.html">06-discrepancies.md</a>.</p>
+<p>Plain and FlatBuffers encodings <b>do not exist</b>. A conforming stack encodes APER. Some implementations ship unused stubs for the other encodings.</p>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md88"></a>
 The three rules that decide almost every byte</h2>
 <ol type="1">
@@ -443,7 +443,7 @@ Two APER layers nest in the control outcome</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">5-8  </td><td class="markdownTableBodyNone"><span class="tt">de ad be ef</span>  </td><td class="markdownTableBodyNone"><span class="tt">data</span>  </td></tr>
 </table>
-<p><span class="tt">data-size</span> and the octet-string length both carry the payload size. See <a class="el" href="md_docs_2e2sm-dapp_206-discrepancies.html">06-discrepancies.md</a> for what each implementation does when the two disagree.</p>
+<p><span class="tt">data-size</span> and the octet-string length both carry the payload size.</p>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md102"></a>
 <span class="tt">im2_one</span> = <span class="tt">20 00 01 00 01 00 00 01</span> (indication message format 2, one dApp, one function)</h2>
 <p>Table: Octets of the indication message <span class="tt">im2_one</span></p>

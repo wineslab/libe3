@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -104,7 +104,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_201-identity-and-registration.html'
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>RAN function ID</b> (E2)  </td><td class="markdownTableBodyNone"><span class="tt">255</span>  </td><td class="markdownTableBodyNone">The E2AP range is 0..4095.  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>RAN function revision</b>  </td><td class="markdownTableBodyNone"><span class="tt">1</span>  </td><td class="markdownTableBodyNone">One implementation announces <span class="tt">0</span>. See <a class="el" href="md_docs_2e2sm-dapp_206-discrepancies.html">06-discrepancies.md</a>.  </td></tr>
+<td class="markdownTableBodyNone"><b>RAN function revision</b>  </td><td class="markdownTableBodyNone"><span class="tt">1</span>  </td><td class="markdownTableBodyNone">One implementation announces <span class="tt">0</span>.  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>RAN function short name</b>  </td><td class="markdownTableBodyNone"><span class="tt">E2SM-DAPP</span>  </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowEven">
@@ -124,7 +124,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_201-identity-and-registration.html'
 <div class="fragment"><div class="line">E2SM-DAPP-IEs {iso(1) identified-organization(3) dod(6) internet(1) private(4)</div>
 <div class="line">               enterprise(1) oran(53148) e2(1) version1(1) e2sm(255) e2sm-DAPP-IEs (3)}</div>
 </div><!-- fragment --><p>It reads as <span class="tt">1.3.6.1.4.1.53148.1.1.255.3</span>. The arc <span class="tt">53148</span> is the O-RAN enterprise number. The O-RAN service models use the same arc. The arc <span class="tt">255</span> is the service model number. It is deliberately the same number as the E2 RAN function ID. The final <span class="tt">3</span> is the module number inside that service model.</p>
-<p>One implementation carries a stale source comment that spells the same OID with <span class="tt">e2sm(2)</span>. The OID string and the grammar both use <span class="tt">255</span>. See <a class="el" href="md_docs_2e2sm-dapp_206-discrepancies.html">06-discrepancies.md</a>.</p>
+<p>One implementation carries a stale source comment that spells the same OID with <span class="tt">e2sm(2)</span>. The OID string and the grammar both use <span class="tt">255</span>.</p>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md31"></a>
 1.2 Two things named "RAN function ID"</h2>
 <p>E2SM-DAPP touches two identifier spaces. Both carry the words "RAN function ID". They are different. Do not mix them up.</p>
@@ -174,7 +174,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_201-identity-and-registration.html'
 <td class="markdownTableBodyNone">control style 1  </td><td class="markdownTableBodyNone">type <span class="tt">1</span>, name <span class="tt">DAPP-CONTROL-STYLE-1</span>, header, message and outcome format <span class="tt">1</span>. It carries the same map as report style 1.  </td></tr>
 </table>
 <p>The map holds one item per dApp that has at least one subscribed E3 RAN function. An item holds the <span class="tt">dapp-id</span> and the list of E3 RAN function ids. How an xApp uses the map is in <a href="03-procedure-flow.md#discovery-how-an-xapp-learns-the-dapp-ids">03-procedure-flow.md</a>.</p>
-<p>Another implementation builds a fixed definition. It has an event trigger section. Its style names are <span class="tt">E3 Data Report</span>, <span class="tt">E3 Subscription Map</span> and <span class="tt">dApp Control</span>. It has no dApp E3 subscription map. An xApp that selects the control style by the name <span class="tt">DAPP-CONTROL-STYLE-1</span> does not find that style there. The test data in the repository also uses these names. Test data is not what a RAN advertises. The content of the definition is the responsibility of the RAN. See <a class="el" href="md_docs_2e2sm-dapp_206-discrepancies.html">06-discrepancies.md</a>.</p>
+<p>Another implementation builds a fixed definition. It has an event trigger section. Its style names are <span class="tt">E3 Data Report</span>, <span class="tt">E3 Subscription Map</span> and <span class="tt">dApp Control</span>. It has no dApp E3 subscription map. An xApp that selects the control style by the name <span class="tt">DAPP-CONTROL-STYLE-1</span> does not find that style there. The test data in the repository also uses these names. Test data is not what a RAN advertises. The content of the definition is the responsibility of the RAN.</p>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md34"></a>
 2.2 Who sets the name block</h2>
 <p>An E2 agent may replace the name block of the definition. It then writes its own short name, OID and description, whatever the RAN supplied. The short name shall not be empty. All other parts of the definition, which are the styles, the formats and the map, are the responsibility of the RAN. An agent that has no RAN callback produces a definition with only the name.</p>
@@ -236,7 +236,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_201-identity-and-registration.html'
 <li>Register a RAN function with E2 RAN function ID <span class="tt">255</span>, revision <span class="tt">1</span> and OID <span class="tt">1.3.6.1.4.1.53148.1.1.255.3</span>.</li>
 <li>Put an APER <span class="tt">E2SM-DAPP-RANFunctionDefinition</span> in the RAN function definition. It shall contain at least the name. For xApps to use it, it should also contain the report section (styles 1 and 2) and the control section (style 1). The formats are listed in <a href="02-ie-mapping.md#2-which-e2-service-uses-which-format">02-ie-mapping.md</a>.</li>
 <li>Use the control style name <span class="tt">DAPP-CONTROL-STYLE-1</span>, if xApps that select the control style by name are to control the RAN.</li>
-<li>Keep every <span class="tt">DAppE3Subscription-Item</span> to <b>at least one and at most 64</b> subscribed E3 RAN functions. Keep the list to <b>at most 256</b> items. Omit the <span class="tt">dappE3Subscriptions</span> field when no dApp has a subscribed function. Some implementations cannot encode an empty list in the definition. They also cannot decode more than 255 items or 63 functions. See <a class="el" href="md_docs_2e2sm-dapp_206-discrepancies.html">06-discrepancies.md</a>.</li>
+<li>Keep every <span class="tt">DAppE3Subscription-Item</span> to <b>at least one and at most 64</b> subscribed E3 RAN functions. Keep the list to <b>at most 256</b> items. Omit the <span class="tt">dappE3Subscriptions</span> field when no dApp has a subscribed function. Some implementations cannot encode an empty list in the definition. They also cannot decode more than 255 items or 63 functions.</li>
 <li>Send a RIC Service Update with the new definition when the dApp set changes. Increase the revision each time.</li>
 <li>Accept RIC Subscription Requests with exactly one report action, event trigger format 1 and action definition style 1 or 2. Accept RIC Control Requests with an acknowledge request. </li>
 </ol>

@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e3sm_2spectrum_205-semantics-and-constraints.
   <div class="headertitle"><div class="title">E3SM-SPEC: semantics and constraints </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md572"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md614"></a></p>
 <p>Units, clocks, the meaning of absent and zero, the limits of a PRB block, the checks that a receiver makes, and what happens when a message is wrong.</p>
 <p>This is clause 9 of the specification. The fields are in <a class="el" href="md_docs_2e3sm_2spectrum_202-ie-mapping.html">clause 6</a>. The procedures are in <a class="el" href="md_docs_2e3sm_2spectrum_203-procedure-flow.html">clause 7</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md573"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md615"></a>
 Units</h1>
 <p>Table: Units of the fields</p>
 <table class="markdownTable">
@@ -104,39 +104,47 @@ Units</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">Spectrum-SensingIndication.timestamp</span>  </td><td class="markdownTableBodyNone">nanoseconds  </td><td class="markdownTableBodyNone">monotonic clock of the RAN host  </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">Spectrum-CellConfigIndication.timestamp</span>  </td><td class="markdownTableBodyNone">nanoseconds  </td><td class="markdownTableBodyNone">monotonic clock of the RAN host  </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">Spectrum-DAppReportData.timestamp</span>  </td><td class="markdownTableBodyNone">nanoseconds since the Unix epoch  </td><td class="markdownTableBodyNone">realtime clock of the dApp host  </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">Spectrum-XAppControlData.timestamp</span>  </td><td class="markdownTableBodyNone">nanoseconds since the Unix epoch  </td><td class="markdownTableBodyNone">realtime clock of the xApp host  </td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">Spectrum-ApplyOutcomeData.timestamp</span>, <span class="tt">installedTimestamp</span>, <span class="tt">onAirTimestamp</span>  </td><td class="markdownTableBodyNone">nanoseconds since the Unix epoch  </td><td class="markdownTableBodyNone">realtime clock of the RAN host  </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">sfn</span>  </td><td class="markdownTableBodyNone">frame number  </td><td class="markdownTableBodyNone">0..1023 in practice  </td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">slot</span>  </td><td class="markdownTableBodyNone">slot number  </td><td class="markdownTableBodyNone">0..159 in practice, 0..19 at 30 kHz  </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">PRB index  </td><td class="markdownTableBodyNone">PRB  </td><td class="markdownTableBodyNone">absolute in the carrier, 0..272  </td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">symbol mask  </td><td class="markdownTableBodyNone">bit field  </td><td class="markdownTableBodyNone">bit s is symbol s of the slot, 14 bits  </td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">validityPeriod</span>  </td><td class="markdownTableBodyNone">seconds  </td><td class="markdownTableBodyNone">1..3600  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">samplingThreshold</span>  </td><td class="markdownTableBodyNone">ratio  </td><td class="markdownTableBodyNone">0..100, one delivery for each value  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">ulCarrierPRBs</span>, <span class="tt">ulOffsetToCarrier</span>  </td><td class="markdownTableBodyNone">PRB  </td><td class="markdownTableBodyNone">at the subcarrier spacing of the carrier  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">periodicity</span> in E3AP  </td><td class="markdownTableBodyNone">microseconds  </td><td class="markdownTableBodyNone">selects the indication period. See the E3AP specification.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">ulSubcarrierSpacing</span>  </td><td class="markdownTableBodyNone">numerology index  </td><td class="markdownTableBodyNone">0..3, the spacing is 15 kHz times 2 to the power of the index  </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">ulArfcnPointA</span>  </td><td class="markdownTableBodyNone">NR-ARFCN  </td><td class="markdownTableBodyNone">0..3279165 [i.7]  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">slotsPerFrame</span>  </td><td class="markdownTableBodyNone">slots  </td><td class="markdownTableBodyNone">in a frame of 10 ms  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">validityPeriod</span>  </td><td class="markdownTableBodyNone">milliseconds  </td><td class="markdownTableBodyNone">1..3600000, up to one hour  </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">noiseFloorThreshold</span>  </td><td class="markdownTableBodyNone">not defined  </td><td class="markdownTableBodyNone">the dApp and the xApp agree on it  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">periodicity</span> in E3AP  </td><td class="markdownTableBodyNone">microseconds  </td><td class="markdownTableBodyNone">selects the indication period. See the E3AP specification.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md574"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md616"></a>
 Clocks</h1>
 <p>Two clocks exist in the service model. They shall not be mixed.</p>
 <ul>
-<li>The sensing indication uses the monotonic clock. It has a common origin for all processes on one host and no relation to the calendar. The indication only has a meaning on the host of the RAN, because it holds a reference to local shared memory.</li>
+<li>The sensing indication and the cell configuration indication use the monotonic clock. It has a common origin for all processes on one host and no relation to the calendar. The sensing indication only has a meaning on the host of the RAN, because it holds a reference to local shared memory.</li>
 <li>The dApp report, the xApp control and the apply outcome use the realtime clock. Each of them crosses from one host to another. The RAN relays the first two without a change.</li>
 </ul>
 <p>A receiver shall not subtract a monotonic value from a realtime value, or the reverse. The two share the field name <span class="tt">timestamp</span> in the grammar, but they are not on the same clock.</p>
 <p>An xApp can subtract the timestamp of a dApp report from <span class="tt">installedTimestamp</span> and from <span class="tt">onAirTimestamp</span>, because they are on the realtime clock. The accuracy of the result is the accuracy of the time synchronization between the hosts.</p>
 <p>The latency recorder uses the monotonic clock. See <a class="el" href="md_docs_2utilities_2latrec.html">latrec</a>. A payload timestamp and a recorder timestamp shall not be subtracted.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md575"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md617"></a>
 Absent and zero</h1>
 <p>Table: Meaning of an absent field</p>
 <table class="markdownTable">
@@ -145,23 +153,25 @@ Absent and zero</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">beam</span>  </td><td class="markdownTableBodyNone">no beam information. A RAN that does not use several beams sends "0".  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">samplingThreshold</span>  </td><td class="markdownTableBodyNone">no sampling ratio  </td></tr>
-<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">validityPeriod</span>  </td><td class="markdownTableBodyNone">no validity limit stated  </td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">deactivate</span>  </td><td class="markdownTableBodyNone">"FALSE"  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">tddSlotPattern</span>  </td><td class="markdownTableBodyNone">the cell is an FDD cell  </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">nrPci</span>  </td><td class="markdownTableBodyNone">the RAN does not give the physical cell identity  </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">report <span class="tt">timestamp</span>  </td><td class="markdownTableBodyNone">the dApp did not stamp the report. This is a normal message.  </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">xApp control <span class="tt">timestamp</span>  </td><td class="markdownTableBodyNone">the xApp did not stamp the control. This is a normal message.  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">installedTimestamp</span>  </td><td class="markdownTableBodyNone">the control did not install  </td></tr>
+<td class="markdownTableBodyNone">xApp control <span class="tt">timestamp</span>  </td><td class="markdownTableBodyNone">the xApp did not stamp the control. This is a normal message.  </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">installedTimestamp</span>  </td><td class="markdownTableBodyNone">the control did not install  </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">onAirTimestamp</span>, <span class="tt">sfn</span>, <span class="tt">slot</span> of the outcome  </td><td class="markdownTableBodyNone">no scheduler tick used the block  </td></tr>
 </table>
 <p>A receiver shall not reject a report or an xApp control only because it has no <span class="tt">timestamp</span>.</p>
 <p>A timestamp of "0" in an apply outcome is never sent. The RAN omits the field instead. A sender that has no value shall omit the field.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md576"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md618"></a>
 PRB block semantics</h1>
 <ul>
 <li>The PRB list is complete and not incremental. The RAN replaces its block with the new list.</li>
@@ -170,9 +180,9 @@ PRB block semantics</h1>
 <li>The RAN blocks all 14 symbols of every listed PRB.</li>
 <li>A PRB that appears twice in the list is blocked once.</li>
 <li>The scheduler applies the block from the start of a following slot. It marks the PRBs as occupied in its resource map, so that every allocation step schedules around them.</li>
-<li>The <span class="tt">validityPeriod</span> and the <span class="tt">samplingThreshold</span> of the control are accepted. The RAN does not use them. A dApp that needs a block to expire shall send a clearing control itself.</li>
+<li>The <span class="tt">validityPeriod</span> of the control is accepted. The RAN does not use it. A dApp that needs a block to expire shall send a clearing control itself.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md577"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md619"></a>
 Limits of a PRB block</h1>
 <p>A PRB block controls the allocation of the scheduler. It does not control the radio. The following limits apply. A dApp and an operator shall know them.</p>
 <ol type="1">
@@ -186,22 +196,23 @@ Limits of a PRB block</h1>
 <li><b>A very high subcarrier spacing needs care.</b> The cost of a block change grows with the size of the resource ring. It is small at 30 kHz. At millimeter wave spacing it can approach the slot deadline.</li>
 <li><b>Released PRBs return late.</b> After a block shrinks, freed uplink PRBs can stay marked for about one ring cycle, which is 10 to 20 ms at 30 kHz.</li>
 </ol>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md578"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md620"></a>
 Sensing policy semantics</h1>
 <ul>
 <li>A policy has one 14 bit mask for each slot of a frame. Bit s set means: the uplink scheduler prefers allocations that do not use symbol s of that slot for the UE.</li>
 <li>The policy only states a preference. The scheduler can still use a masked symbol when it has no other allocation.</li>
 <li><span class="tt">deactivate</span> "TRUE" clears the policy and the masks are ignored.</li>
 <li>The number of masks shall equal the number of slots in a frame of the RAN.</li>
+<li>The <span class="tt">validityPeriod</span> of the policy is accepted. The RAN does not use it. A policy does not expire.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md579"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md621"></a>
 What does and does not touch the radio</h1>
 <p>Table: Effect of each function on the scheduler</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Function  </th><th class="markdownTableHeadNone">Changes scheduling  </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">sensing indication and the sensing ring  </td><td class="markdownTableBodyNone">no. They only export data.  </td></tr>
+<td class="markdownTableBodyNone">sensing indication, cell configuration indication and the sensing ring  </td><td class="markdownTableBodyNone">no. They only export data.  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">PRB block control  </td><td class="markdownTableBodyNone">yes. It removes PRBs from allocation.  </td></tr>
 <tr class="markdownTableRowOdd">
@@ -211,7 +222,7 @@ What does and does not touch the radio</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">xApp control  </td><td class="markdownTableBodyNone">not directly. A dApp may turn it into a PRB block control.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md580"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md622"></a>
 Validation</h1>
 <p>A receiver validates a message before it acts. The RAN applies these checks.</p>
 <p>Table: Checks of the RAN on a control</p>
@@ -241,7 +252,7 @@ Validation</h1>
 </table>
 <p>The RAN answers every control with an E3 Message Ack. The response code is "positive" or "negative". The acknowledge says only whether the RAN applied the control to the scheduler. It does not say that the block is in the air. The apply outcome says that.</p>
 <p>A negative acknowledge does not change the state that was in force before the control.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md581"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md623"></a>
 Unknown identifiers and alternatives</h1>
 <ul>
 <li>A control identifier other than "1" or "2" is rejected with a negative acknowledge.</li>
@@ -249,14 +260,14 @@ Unknown identifiers and alternatives</h1>
 <li>A receiver ignores an extension field of a structure that it does not know, where the encoding allows it. This holds for the apply outcome and for the structures with an extension marker.</li>
 <li>A RAN function ID other than "1" in a control that reaches this service model is rejected.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md582"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md624"></a>
 Concurrency and freshness of the ring</h1>
 <ul>
 <li>The RAN has one writer for the sensing ring. No lock exists. The RAN writes a ring slot completely before it sends the indication that points to it.</li>
 <li>The RAN writes <span class="tt">sfn</span> and <span class="tt">slot</span> of the ring slot last. A dApp compares them with the indication. A mismatch means that the slot was overwritten, and the dApp shall drop it.</li>
 <li>A dApp reads the ring read only. It shall not write to it.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md583"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md625"></a>
 What is mandatory</h1>
 <p>Table: Mandatory behavior</p>
 <table class="markdownTable">

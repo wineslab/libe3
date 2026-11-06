@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e3ap_204-encoding.html','',''); });
   <div class="headertitle"><div class="title">E3AP: encoding </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md338"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md328"></a></p>
 <p>How an implementation turns an E3AP message into bytes, how the bytes cross a link, and the limits on their size. Worked examples are checked against the pinned test vectors.</p>
 <p>This is clause 8 of the specification. The index is <a class="el" href="dir_af0c76cc165e127d1e03e322192d98eb.html">README.md</a>. The messages are in <a class="el" href="md_docs_2e3ap_202-ie-mapping.html">02-ie-mapping.md</a>. The validation rules are in <a class="el" href="md_docs_2e3ap_205-semantics-and-constraints.html">05-semantics-and-constraints.md</a>. Code pointers and build switches are in <a class="el" href="md_docs_2e3ap_2integrator-guide.html">integrator-guide.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md339"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md329"></a>
 What is on the wire</h1>
 <p>Every E3AP message is one <span class="tt">E3-PDU</span>. An implementation shall encode the <span class="tt">E3-PDU</span> with one of three encodings.</p>
 <p>Table: The three encodings of an E3-PDU</p>
@@ -111,16 +111,16 @@ What is on the wire</h1>
 </table>
 <p>The encoding is not part of the message. There is no indicator on the wire. Both sides shall use the same encoding on a link. A receiver that gets bytes in another encoding cannot decode them. An E3 Agent shall answer such a SETUP REQUEST message with a negative SETUP RESPONSE message, if it can still send a response.</p>
 <p>The payloads (<span class="tt">ranFunctionData</span>, <span class="tt">protocolData</span>, <span class="tt">actionData</span>, <span class="tt">reportData</span> and <span class="tt">xAppControlData</span>) follow the encoding of the link. APER carries them as octet strings. JSON carries them as nested JSON values, not as hexadecimal text. Protobuf carries them as <span class="tt">bytes</span>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md340"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md330"></a>
 APER</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md341"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md331"></a>
 The rules that decide almost every byte</h2>
 <ol type="1">
 <li><b>Alignment.</b> In aligned PER a value that needs whole octets first skips to the next octet boundary. The skipped bits are zero. Small fields (extension bits, presence bits, choice indices, short length codes) are not aligned. They are packed from the most significant bit.</li>
-<li><b>Extension bit.</b> Every <span class="tt">SEQUENCE</span> and the <span class="tt">CHOICE</span> of <span class="tt">E3-PDU</span> has an extension marker. An encoder writes the extension bit as 0. Each marker costs one bit.</li>
+<li><b>Extension bit.</b> Every <span class="tt">SEQUENCE</span> and the <span class="tt">CHOICE</span> of <span class="tt">E3-PDU</span> has an extension marker. An encoder writes the extension bit as 0, unless the message carries an extension addition. Each marker costs one bit.</li>
 <li><b>Presence bits.</b> Each <span class="tt">OPTIONAL</span> field costs one bit. The bits come before the first field, in the order of the grammar. A cleared bit means that the field is absent and takes no more space.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md342"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md332"></a>
 Rules for each construct</h2>
 <p>Table: APER bits for each construct of the grammar</p>
 <table class="markdownTable">
@@ -154,7 +154,7 @@ Rules for each construct</h2>
 <td class="markdownTableBodyNone"><span class="tt">OCTET STRING (SIZE (1..262144))</span>  </td><td class="markdownTableBodyNone">the length in an aligned length determinant, then the octets  </td><td class="markdownTableBodyNone"><span class="tt">ranFunctionData</span>  </td></tr>
 </table>
 <p>The examples below pin the rows for the identifiers, the time limit, the interval, the response code, the choice index and the short counts. The rows for the long lists and for the payload strings come from X.691. No test vector covers them. They are not checked.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md343"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md333"></a>
 Worked examples</h2>
 <p>Each example is a complete <span class="tt">E3-PDU</span>. The message identifier is 42 and the timestamp is 1756800000123456789 nanoseconds. The bytes equal the pinned test vectors.</p>
 <p><b>Example 1: RELEASE message for dApp 7.</b></p>
@@ -216,13 +216,13 @@ Worked examples</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">00 64</span>  </td><td class="markdownTableBodyNone">length code <span class="tt">00</span> with padding, then <span class="tt">periodicity</span> 100  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md344"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md334"></a>
 Size of the encoding</h2>
 <p>The envelope with a timestamp of 1756800000123456789 takes 11 octets before the message: 1 octet for the extension, presence and length bits, 1 octet for the message identifier, 1 length octet and 8 octets of timestamp. A message without a timestamp is 9 octets shorter. A message identifier up to 256 takes 1 octet, up to 65536 takes 2, up to 16777216 takes 3, and a larger one takes 4. A long list or a payload grows the message by the size of its elements.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md345"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md335"></a>
 A receiver that sees extension additions</h2>
-<p>A decoder shall ignore an extension addition that it does not know. Two fields of <span class="tt">E3-SubscriptionResponse</span> are extension additions: <span class="tt">ranFunctionIdentifier</span> and <span class="tt">periodicity</span>. A decoder built before them skips both. A change of a constraint is not an extension addition. It changes the bytes. See <a class="el" href="md_docs_2e3ap_206-discrepancies.html">06-discrepancies.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md346"></a>
+<p>A decoder shall ignore an extension addition that it does not know. <span class="tt">cause</span> and <span class="tt">detail</span> are the first extension additions of <span class="tt">E3-SetupResponse</span>, <span class="tt">E3-SubscriptionResponse</span> and <span class="tt">E3-MessageAck</span>, in that order. In <span class="tt">E3-SubscriptionResponse</span> <span class="tt">ranFunctionIdentifier</span> and <span class="tt">periodicity</span> follow them. APER sends one presence bit for each extension addition of the grammar, so the order is part of the encoding: a decoder that has the additions in another order reads one field as another. A change of a constraint is not an extension addition either. It changes the bytes.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md336"></a>
 JSON</h1>
 <p>An implementation shall encode an <span class="tt">E3-PDU</span> as one flat JSON object. The object has the members <span class="tt">type</span>, <span class="tt">id</span> and <span class="tt">timestamp</span>. The members of the message follow at the same level.</p>
 <p>Table: Rules of the JSON encoding</p>
@@ -235,6 +235,10 @@ JSON</h1>
 <td class="markdownTableBodyNone">Keys  </td><td class="markdownTableBodyNone">the ASN.1 field names, for example <span class="tt">dAppIdentifier</span>, <span class="tt">ranFunctionIdentifier</span>, <span class="tt">telemetryIdentifierList</span>, <span class="tt">subscriptionTime</span>, <span class="tt">periodicity</span>, <span class="tt">subscriptionId</span>, <span class="tt">requestId</span>, <span class="tt">sequenceId</span>  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">responseCode</span>  </td><td class="markdownTableBodyNone">the string "positive" or the string "negative". An unknown string means "negative"  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">cause</span>  </td><td class="markdownTableBodyNone">the name of the <span class="tt">E3-Cause</span> value in camel case, for example <span class="tt">unsupportedIdentifier</span>. A name that the decoder does not know reads as <span class="tt">unspecified</span>. A decoder reads it from a SETUP RESPONSE, SUBSCRIPTION RESPONSE or MESSAGE ACK message  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">detail</span>  </td><td class="markdownTableBodyNone">the text, as a JSON string. A decoder also reads the key <span class="tt">message</span> as <span class="tt">detail</span>, when <span class="tt">detail</span> is not there  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">timestamp</span>  </td><td class="markdownTableBodyNone">written on every message. The value 0 means that there is no timestamp  </td></tr>
 <tr class="markdownTableRowOdd">
@@ -259,7 +263,7 @@ JSON</h1>
 <div class="line">  &quot;periodicity&quot;: 100</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>JSON and Protobuf do not check the ranges of the grammar. A sender shall keep every value inside the range of <a class="el" href="md_docs_2e3ap_202-ie-mapping.html">02-ie-mapping.md</a>, so that the same message can move to APER.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md347"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md337"></a>
 Protobuf</h1>
 <p>The proto3 schema of E3AP has one message for each E3AP message and one <span class="tt">E3Pdu</span> envelope. The <span class="tt">oneof</span> case of <span class="tt">E3Pdu</span> follows the order of the <span class="tt">CHOICE</span> tags.</p>
 <p>Table: Rules of the Protobuf encoding</p>
@@ -277,17 +281,19 @@ Protobuf</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Response code  </td><td class="markdownTableBodyNone">an enumeration with the values "positive" (0) and "negative" (1). A value that is not "negative" reads as "positive"  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Unknown fields  </td><td class="markdownTableBodyNone">a decoder ignores them  </td></tr>
+<td class="markdownTableBodyNone">Cause  </td><td class="markdownTableBodyNone">an enumeration <span class="tt">Cause</span> with the values of <span class="tt">E3-Cause</span>, and an <span class="tt">optional string detail</span>, on the three messages that carry them. A value that is not in the enumeration reads as unspecified  </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Unknown fields  </td><td class="markdownTableBodyNone">a decoder ignores them  </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Empty envelope  </td><td class="markdownTableBodyNone">an envelope with no <span class="tt">oneof</span> case does not decode  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md348"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md338"></a>
 Framing on each link</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md349"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md339"></a>
 ZeroMQ</h2>
 <p>One E3AP message is one ZeroMQ message. There is no extra framing. The setup channel uses the request and reply pattern, and the two other channels use publish and subscribe. A subscriber shall subscribe to every message (an empty filter).</p>
 <p>On a ZeroMQ link over TCP the E3 Agent listens on the port of each channel. The dApp connects. On a link over IPC the endpoints are the paths of <a href="01-identity-and-registration.md#default-endpoints">01-identity-and-registration.md</a>.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md350"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md340"></a>
 POSIX sockets</h2>
 <p>The POSIX link layer uses stream sockets, one for each channel. The three transport layers differ only in the socket type: Unix domain stream, TCP or SCTP in one-to-one mode.</p>
 <p>Table: Framing on the POSIX link layer</p>
@@ -300,9 +306,9 @@ POSIX sockets</h2>
 <td class="markdownTableBodyNone">dApp to E3 Agent (the setup request and the inbound channel)  </td><td class="markdownTableBodyNone">none. One send is one E3-PDU  </td></tr>
 </table>
 <p>A receiver of a framed message shall refuse a length of 0 and a length above 65536.</p>
-<p>The framing is not symmetric. A stream socket does not keep message boundaries, so a receiver of unframed messages can see two messages joined or one message split. See <a class="el" href="md_docs_2e3ap_206-discrepancies.html">06-discrepancies.md</a>.</p>
+<p>The framing is not symmetric. A stream socket does not keep message boundaries, so a receiver of unframed messages can see two messages joined or one message split.</p>
 <p>The E3 Agent sends every message of the outbound channel to every connected dApp. It closes the connection to a dApp whose socket stalls for 500 ms.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md351"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md341"></a>
 Size limits</h1>
 <p>Table: Size limits</p>
 <table class="markdownTable">
@@ -325,7 +331,7 @@ Size limits</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Framed message on POSIX  </td><td class="markdownTableBodyNone">1 to 65536 octets  </td><td class="markdownTableBodyNone">the receiver  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md352"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md342"></a>
 Abstract syntax</h1>
 <p>The ASN.1 definition of E3AP conforms to ITU-T X.680 [1] and X.681 [2]. If a table and the grammar disagree, the grammar takes precedence, except for the conditions of presence, where the table takes precedence.</p>
 <div class="fragment"><div class="line">-- ASN1START</div>
@@ -349,7 +355,9 @@ Abstract syntax</h1>
 <div class="line">        e3apProtocolVersion  E3-Version OPTIONAL,</div>
 <div class="line">        dAppIdentifier       E3-DAppID OPTIONAL,</div>
 <div class="line">        ranFunctionList      SEQUENCE (SIZE (0..64)) OF E3-RanFunctionDefinition OPTIONAL,</div>
-<div class="line">        ...</div>
+<div class="line">        ...,</div>
+<div class="line">        cause                E3-Cause OPTIONAL,</div>
+<div class="line">        detail               E3-Text OPTIONAL</div>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">    E3-SubscriptionRequest ::= SEQUENCE {</div>
@@ -377,7 +385,9 @@ Abstract syntax</h1>
 <div class="line">        telemetryIdentifierList SEQUENCE (SIZE (0..256)) OF INTEGER (1..65535) OPTIONAL,</div>
 <div class="line">        controlIdentifierList   SEQUENCE (SIZE (0..256)) OF INTEGER (1..65535) OPTIONAL,</div>
 <div class="line">        ...,</div>
-<div class="line">        -- Extension additions: decoders from before them skip both.</div>
+<div class="line">        -- Extension additions, in this order.</div>
+<div class="line">        cause                   E3-Cause OPTIONAL,</div>
+<div class="line">        detail                  E3-Text OPTIONAL,</div>
 <div class="line">        ranFunctionIdentifier   INTEGER (1..65535) OPTIONAL,</div>
 <div class="line">        -- Granted interval, same unit and range as the request.</div>
 <div class="line">        periodicity             INTEGER (0..60000000) OPTIONAL</div>
@@ -442,7 +452,9 @@ Abstract syntax</h1>
 <div class="line">    E3-MessageAck ::= SEQUENCE {</div>
 <div class="line">        requestId            E3-MessageID,</div>
 <div class="line">        responseCode         E3-ResponseCode,</div>
-<div class="line">        ...</div>
+<div class="line">        ...,</div>
+<div class="line">        cause                E3-Cause OPTIONAL,</div>
+<div class="line">        detail               E3-Text OPTIONAL</div>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">    -- Correlation identifier for one detection-to-mitigation procedure, assigned</div>
@@ -465,6 +477,22 @@ Abstract syntax</h1>
 <div class="line">    -- response-code switch in the encoders into a partial function. Adding a</div>
 <div class="line">    -- response code is a wire change we are willing to pay for explicitly.</div>
 <div class="line">    E3-ResponseCode ::= ENUMERATED { positive(0), negative(1) }</div>
+<div class="line"> </div>
+<div class="line">    -- Why a RAN refused a request. Sent with a negative response next to a</div>
+<div class="line">    -- free-text detail. The names, the values and the text bound are OCUDU&#39;s,</div>
+<div class="line">    -- so a refusal reads the same on every RAN; the enumeration is extensible</div>
+<div class="line">    -- as it is there, and a receiver reads a value it does not know as</div>
+<div class="line">    -- unspecified. A negative response is still negative without either field.</div>
+<div class="line">    E3-Cause ::= ENUMERATED {</div>
+<div class="line">        unspecified(0), protocolError(1), setupRequired(2), setupAlreadyComplete(3),</div>
+<div class="line">        unsupportedProtocolVersion(4), unsupportedRanFunction(5), unsupportedIdentifier(6),</div>
+<div class="line">        invalidRequest(7), notFound(8), duplicate(9), resourceExhausted(10),</div>
+<div class="line">        authorizationRejected(11), payloadTooLarge(12), transportOverrun(13),</div>
+<div class="line">        shuttingDown(14), ...</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    -- UTF-8 text of up to 512 bytes, carried as an OCTET STRING as E3-Name is.</div>
+<div class="line">    E3-Text ::= OCTET STRING (SIZE (0..512))</div>
 <div class="line"> </div>
 <div class="line">    -- Nanoseconds since the Unix epoch on the realtime (UTC) clock. Never</div>
 <div class="line">    -- subtract it from a monotonic stamp.</div>

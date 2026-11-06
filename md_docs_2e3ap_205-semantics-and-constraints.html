@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e3ap_205-semantics-and-constraints.html','','
   <div class="headertitle"><div class="title">E3AP: semantics and constraints </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md353"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md343"></a></p>
 <p>What the numbers mean, the units and clocks, which rules a message shall satisfy, and what each side does when the input is wrong or unknown.</p>
 <p>This is clause 9 of the specification. The index is <a class="el" href="dir_af0c76cc165e127d1e03e322192d98eb.html">README.md</a>. The fields are in <a class="el" href="md_docs_2e3ap_202-ie-mapping.html">02-ie-mapping.md</a>. The procedures are in <a class="el" href="md_docs_2e3ap_203-procedure-flow.html">03-procedure-flow.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md354"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md344"></a>
 Units and ranges</h1>
 <p>Table: Units and ranges</p>
 <table class="markdownTable">
@@ -112,14 +112,14 @@ Units and ranges</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Sequence identifier  </td><td class="markdownTableBodyNone">none  </td><td class="markdownTableBodyNone">1 to 4294967295  </td><td class="markdownTableBodyNone">not valid on a report and on an xApp control. Means "absent" on a dApp control in Protobuf  </td><td class="markdownTableBodyNone">on a dApp control: the dApp decided on its own  </td></tr>
 </table>
-<p>Some implementations read <span class="tt">periodicity</span> in milliseconds. A sender that talks to such an implementation shall convert the value. See <a class="el" href="md_docs_2e3ap_206-discrepancies.html">06-discrepancies.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md355"></a>
+<p>Some implementations read <span class="tt">periodicity</span> in milliseconds. A sender that talks to such an implementation shall convert the value.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md345"></a>
 Clocks</h1>
 <p>The <span class="tt">timestamp</span> of the <span class="tt">E3-PDU</span> uses the realtime clock (UTC). A sender stamps the message when it creates it, not when it encodes or sends it.</p>
 <p>A receiver shall not subtract a realtime timestamp from a reading of a monotonic clock, and it shall not do the reverse. The clocks have different origins. The difference has no meaning.</p>
 <p>Two hosts have different clocks. A difference of two realtime stamps from two hosts is as good as the time synchronization between the hosts.</p>
 <p>The timestamp is optional on purpose. A sender that does not want to read the clock on its data path leaves it out. A receiver shall treat a message without a timestamp as a normal message.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md356"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md346"></a>
 Absent versus zero</h1>
 <p>Table: Absent, zero and empty</p>
 <table class="markdownTable">
@@ -141,7 +141,7 @@ Absent versus zero</h1>
 <td class="markdownTableBodyNone"><span class="tt">timestamp</span> absent  </td><td class="markdownTableBodyNone">no producer reference  </td></tr>
 </table>
 <p>JSON and Protobuf cannot tell "0" from "absent" for a number that has no presence bit. For <span class="tt">timestamp</span>, <span class="tt">periodicity</span> of a response and <span class="tt">sequenceId</span> of a dApp control, the value 0 stands for "absent".</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md357"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md347"></a>
 What is mandatory</h1>
 <p>Table: Mandatory content</p>
 <table class="markdownTable">
@@ -160,7 +160,7 @@ What is mandatory</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Every name and version  </td><td class="markdownTableBodyNone">the text shall have 1 or more octets. A sender with no value sends a placeholder such as "unknown"  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md358"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md348"></a>
 Validation</h1>
 <p>Table: What a receiver checks</p>
 <table class="markdownTable">
@@ -173,40 +173,43 @@ Validation</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Subscription key  </td><td class="markdownTableBodyNone">A dApp has at most one subscription for a RAN function  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">RAN function and identifiers  </td><td class="markdownTableBodyNone">An E3 Agent should refuse a subscription to a RAN function that it does not list, and to telemetry or control identifiers that the RAN function does not offer  </td></tr>
+<td class="markdownTableBodyNone">RAN function and identifiers  </td><td class="markdownTableBodyNone">An E3 Agent shall refuse a subscription to a RAN function that it does not list, a subscription that names no identifier, and a subscription to telemetry or control identifiers that the RAN function does not offer. It shall refuse a dApp control action for a RAN function that it does not list and for a control identifier that the RAN function does not offer. The response carries the cause. See the Subscription and dApp Control procedures  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Ranges  </td><td class="markdownTableBodyNone">APER refuses a value outside its range at the encoder and the decoder. JSON and Protobuf do not. A sender shall keep every value in range  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Payload content  </td><td class="markdownTableBodyNone">E3AP does not check the payload. The service model does  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md359"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md349"></a>
 Handling of unknown, unforeseen and erroneous data</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md360"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md350"></a>
 Abstract syntax errors</h2>
 <p>A message that does not decode is an abstract syntax error. This covers wrong bytes, the wrong encoding, a value out of range for APER, an empty envelope for Protobuf and an unknown <span class="tt">type</span> for JSON.</p>
 <ul>
 <li>On the setup channel the E3 Agent shall answer with a negative SETUP RESPONSE message. The response has no dApp identifier and no RAN function list.</li>
 <li>On another channel the receiver shall drop the message. It shall not send a response.</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md361"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md351"></a>
 Unexpected messages</h2>
 <p>A receiver that gets a message that is not valid on that channel or in that direction shall drop it. Examples: an E3 Agent that gets an INDICATION message, and an E3 Agent that gets a MESSAGE ACK message from a dApp.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md362"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md352"></a>
 Unknown extension additions</h2>
 <p>A decoder shall ignore an extension addition that it does not know. A decoder shall not fail because of it.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md363"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md353"></a>
 Unknown response codes</h2>
 <p><span class="tt">E3-ResponseCode</span> has no extension marker. A value other than 0 reads as "negative" in APER and JSON. In Protobuf a value other than "negative" reads as "positive". New codes need a new version of E3AP. See <a class="el" href="dir_af0c76cc165e127d1e03e322192d98eb.html">README.md</a>.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md364"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md354"></a>
+Unknown cause</h2>
+<p><span class="tt">E3-Cause</span> has an extension marker. A value that the receiver does not know reads as "unspecified". The response stays a refusal.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md355"></a>
 Unknown RAN function or stopped service model</h2>
-<p>A dApp CONTROL ACTION message for an unknown RAN function, or for a RAN function whose service model does not run, is dropped. The E3 Agent sends no response.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md365"></a>
+<p>A dApp CONTROL ACTION message for an unknown RAN function, for a control identifier that the RAN function does not offer, or for a RAN function whose service model does not run is answered with a MESSAGE ACK message with <span class="tt">responseCode</span> "negative" and the cause. It does not reach the service model.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md356"></a>
 Queues that are full</h2>
 <p>The E3 Agent has a queue for outbound messages and a queue for reports. A full queue drops the new message. The sender gets no notice, except a failed call on the E3 Agent side.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md366"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md357"></a>
 Lost links</h2>
-<p>A dApp that loses its link reports the reason "connection lost". It does not reconnect by itself. An E3 Agent that loses a dApp should remove the registration and the subscriptions of that dApp. Some implementations do not detect this, so the registration stays. See <a class="el" href="md_docs_2e3ap_206-discrepancies.html">06-discrepancies.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md367"></a>
+<p>A dApp that loses its link reports the reason "connection lost". It does not reconnect by itself. An E3 Agent that loses a dApp should remove the registration and the subscriptions of that dApp. Some implementations do not detect this, so the registration stays.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md358"></a>
 Identifiers over time</h1>
 <ul>
 <li>A dApp identifier is free again as soon as the dApp releases. A new dApp can get the same number.</li>
@@ -214,7 +217,7 @@ Identifiers over time</h1>
 <li>A message identifier is not reused in a realistic run. A 32-bit counter does not wrap.</li>
 <li>A sequence identifier belongs to one procedure. The component that starts the procedure shall not reuse it while the procedure is open.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md368"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md359"></a>
 Subscription time</h1>
 <p>An E3 Agent that gets a <span class="tt">subscriptionTime</span> above 0 shall end the subscription when the time is up. It sends no message to the dApp. It stops the service model if that subscription was the last one for the RAN function.</p>
 <p>The dApp keeps its own deadline, counted from the SUBSCRIPTION RESPONSE message. The E3 Agent counts from the moment it handled the request, so the dApp deadline is never earlier than that of the E3 Agent. A dApp that renews the moment its deadline passes always reaches the E3 Agent after the old subscription is gone.</p>

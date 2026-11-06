@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -93,142 +93,224 @@ $(function(){initNavTree('dir_75429917a6ddd2daabca8d27e432849a.html','',''); });
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md475"></a>
-E3SM-L1KPM</h1>
-<p>E3SM-L1KPM is the E3 service model that gives a dApp the frequency domain IQ samples of each uplink slot of a RAN. The RAN does not send the samples in the E3 message. It writes them to a POSIX shared memory region on its host. Each E3 indication carries a small reference to the place in that region, plus the time, the frame number, the slot number and a few cell parameters. The dApp reads the samples from the region.</p>
-<p>This service model is telemetry only. It has no control actions.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md507"></a>
+E3SM-L1-KPM</h1>
+<p>E3SM-L1-KPM is the E3 service model for the uplink layer 1 of a RAN node. It gives a dApp the data of each uplink slot: the post-FFT IQ samples, the PUSCH channel estimates and PDUs, the PUSCH decoding and signal quality figures of each UE, and the SRS samples, estimates and measurements of each UE. Small values travel inside the E3 indication. Large arrays stay in a shared memory region on the RAN host, and the indication tells the dApp where to read them.</p>
+<p>The service model rides on the E3 Application Protocol (E3AP) [1]. Every message of this service model is an E3AP message. The service model defines only the content of the E3AP fields that E3AP leaves to the service model.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
-<th class="markdownTableHeadNone">Item  </th><th class="markdownTableHeadNone">Value  </th></tr>
+<th class="markdownTableHeadNone">Chapter  </th><th class="markdownTableHeadNone">Clause  </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">E3 RAN function ID  </td><td class="markdownTableBodyNone"><span class="tt">2</span>  </td></tr>
+<td class="markdownTableBodyNone">Scope, references, terms, general  </td><td class="markdownTableBodyNone">1 to 4 (this file)  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Short name  </td><td class="markdownTableBodyNone"><span class="tt">L1-KPM</span>  </td></tr>
+<td class="markdownTableBodyNone">E3SM services  </td><td class="markdownTableBodyNone">5, <a class="el" href="md_docs_2e3sm_2l1-kpm_201-services.html">01-services.md</a>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">RAN function revision (version in the RAN function data)  </td><td class="markdownTableBodyNone"><span class="tt">1</span>  </td></tr>
+<td class="markdownTableBodyNone">RAN function service model description  </td><td class="markdownTableBodyNone">6, <a class="el" href="md_docs_2e3sm_2l1-kpm_202-service-model-description.html">02-service-model-description.md</a>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Telemetry identifiers  </td><td class="markdownTableBodyNone"><span class="tt">1</span>, <span class="tt">4</span>, <span class="tt">5</span>, <span class="tt">6</span>  </td></tr>
+<td class="markdownTableBodyNone">RAN function description  </td><td class="markdownTableBodyNone">7, <a class="el" href="md_docs_2e3sm_2l1-kpm_203-ran-function-description.html">03-ran-function-description.md</a>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Control identifiers  </td><td class="markdownTableBodyNone">none  </td></tr>
+<td class="markdownTableBodyNone">Elements for the service model, ASN.1, JSON  </td><td class="markdownTableBodyNone">8, <a class="el" href="md_docs_2e3sm_2l1-kpm_204-elements.html">04-elements.md</a>, <a class="el" href="md_docs_2e3sm_2l1-kpm_205-abstract-syntax.html">05-abstract-syntax.md</a>, <a class="el" href="md_docs_2e3sm_2l1-kpm_206-encoding.html">06-encoding.md</a>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Shared memory region  </td><td class="markdownTableBodyNone"><span class="tt">/e3_ran_buffers</span>  </td></tr>
+<td class="markdownTableBodyNone">Handling of unknown, unforeseen and erroneous protocol data  </td><td class="markdownTableBodyNone">9, <a class="el" href="md_docs_2e3sm_2l1-kpm_207-error-handling.html">07-error-handling.md</a>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Carried in  </td><td class="markdownTableBodyNone">the <span class="tt">protocolData</span> field of the E3 indication message  </td></tr>
+<td class="markdownTableBodyNone">Shared memory region  </td><td class="markdownTableBodyNone">Annex A (normative), <a class="el" href="md_docs_2e3sm_2l1-kpm_2annex-a-shared-memory.html">annex-a-shared-memory.md</a>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Encodings  </td><td class="markdownTableBodyNone">ASN.1 APER, JSON, Protocol Buffers (the encoding of the E3AP session)  </td></tr>
+<td class="markdownTableBodyNone">Example message exchange  </td><td class="markdownTableBodyNone">Annex B (informative), <a class="el" href="md_docs_2e3sm_2l1-kpm_2annex-b-examples.html">annex-b-examples.md</a>  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Open items  </td><td class="markdownTableBodyNone">Annex C (informative), <a class="el" href="md_docs_2e3sm_2l1-kpm_2annex-c-open-items.html">annex-c-open-items.md</a>  </td></tr>
 </table>
-<p>Everything of substance is in the numbered files. This page only says where.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md476"></a>
+<p>For an engineer who adds E3SM-L1-KPM to a RAN or a dApp there is a separate guide: <a class="el" href="md_docs_2e3sm_2l1-kpm_2integrator-guide.html">integrator-guide.md</a>. It is not part of the specification.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md508"></a>
 Scope</h1>
-<p>The present document specifies the E3 service model "L1 KPM" (E3SM-L1KPM) for a RAN function that publishes the post-FFT uplink IQ samples of a cell to dApps on the same host as the RAN.</p>
-<p>The present document defines the RAN function identity and the RAN function data, the information elements of the indication, the layout of the shared memory region that the indication refers to, the procedures, the encodings and the rules for erroneous data. The E3 messages that carry these elements are defined in the E3AP specification [1].</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md477"></a>
+<p>The present document specifies the E3 Service Model "L1 KPM" (E3SM-L1-KPM). The service model lets a dApp subscribe to the uplink layer 1 data of the cells that the E3 Agent of a RAN node serves, and receive that data slot by slot.</p>
+<p>The present document defines the following:</p>
+<ul>
+<li>the RAN function identity and the RAN Function Data that an E3 Agent announces in the Setup procedure of E3AP [1];</li>
+<li>the telemetry identifiers of the service model and the meaning of each value;</li>
+<li>the information elements carried in the E3AP messages, in ASN.1 [2] and in JSON [4];</li>
+<li>the subscription data that selects cells and UEs, and the control action that applies it;</li>
+<li>the shared memory region that holds the large data arrays, in Annex A.</li>
+</ul>
+<p>The present document does not define E3AP messages or procedures. They are defined in [1]. It does not define how a RAN node computes the values that it reports. It does not define the transport between the dApp and the E3 Agent.</p>
+<p>This document is generated from the codebase and protocol definitions for the <a class="el" href="namespacelibe3.html">libe3</a> implementation in <a href="https://github.com/wineslab/libe3">https://github.com/wineslab/libe3</a>.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md509"></a>
 References</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md478"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md510"></a>
 Normative references</h2>
+<p>References are specific. Only the cited version applies.</p>
 <p>The following referenced documents are necessary for the application of the present document.</p>
-<p>[1] O-RAN.WG3.TS.E3AP-R000-v00.01, "[E3 Application Protocol (E3AP)](../../e3ap/README.md)".</p>
-<p>[2] ITU-T Recommendation X.680 (2021): "Information technology, Abstract Syntax Notation One (ASN.1): Specification of basic notation".</p>
-<p>[3] ITU-T Recommendation X.681 (2021): "Information technology, Abstract Syntax Notation One (ASN.1): Information object specification".</p>
-<p>[4] ITU-T Recommendation X.691 (2021): "Information technology, ASN.1 encoding rules: Specification of Packed Encoding Rules (PER)".</p>
-<p>[5] IETF RFC 8259: "The JavaScript Object Notation (JSON) Data Interchange Format".</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md479"></a>
+<p>[1] O-RAN.XXX.TS.E3AP-R000-v00.01: "E3 Application Protocol (E3AP)", <a href="https://github.com/wineslab/libe3/tree/main/docs/e3ap">https://github.com/wineslab/libe3/tree/main/docs/e3ap</a>.</p>
+<p>[2] ITU-T Recommendation X.680 (2002-07): "Information technology: Abstract Syntax Notation One (ASN.1): Specification of basic notation".</p>
+<p>[3] ITU-T Recommendation X.691 (2002-07): "Information technology: ASN.1 encoding rules: Specification of Packed Encoding Rules (PER)".</p>
+<p>[4] IETF RFC 8259 (2017-12): "The JavaScript Object Notation (JSON) Data Interchange Format".</p>
+<p>[5] IEEE Std 754-2019: "IEEE Standard for Floating-Point Arithmetic".</p>
+<p>[6] IEEE Std 1003.1-2017: "IEEE Standard for Information Technology, Portable Operating System Interface (POSIX) Base Specifications, Issue 7".</p>
+<p>[7] 3GPP TS 38.211: "NR; Physical channels and modulation".</p>
+<p>[8] 3GPP TS 38.212: "NR; Multiplexing and channel coding".</p>
+<p>[9] 3GPP TS 38.214: "NR; Physical layer procedures for data".</p>
+<p>[10] 3GPP TS 38.331: "NR; Radio Resource Control (RRC); Protocol specification".</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md511"></a>
 Informative references</h2>
 <p>The following referenced documents are not necessary for the application of the present document, but they assist the user with regard to a particular subject area.</p>
-<p>[i.1] 3GPP TS 38.211: "NR; Physical channels and modulation".</p>
-<p>[i.2] 3GPP TS 38.213: "NR; Physical layer procedures for control".</p>
+<p>[i.1] 3GPP TS 38.213: "NR; Physical layer procedures for control".</p>
+<p>[i.2] 3GPP TS 38.215: "NR; Physical layer measurements".</p>
 <p>[i.3] 3GPP TS 38.300: "NR; NR and NG-RAN Overall description; Stage 2".</p>
-<p>[i.4] Protocol Buffers Language Guide (proto2), <a href="https://protobuf.dev/programming-guides/proto2/">https://protobuf.dev/programming-guides/proto2/</a>.</p>
-<p>[i.5] IEEE Std 1003.1 (POSIX.1): shared memory objects (<span class="tt">shm_open</span>, <span class="tt">mmap</span>).</p>
-<p>[i.6] IEEE Std 754: "IEEE Standard for Floating-Point Arithmetic" (binary16 format).</p>
-<p>[i.7] The OpenAirInterface implementation of E3AP and of this service model, <a href="https://github.com/duranta-project/openairinterface5g/pull/729">https://github.com/duranta-project/openairinterface5g/pull/729</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md480"></a>
+<p>[i.4] Google: "Protocol Buffers, Language Guide (proto 2)".</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md512"></a>
 Terms, symbols and abbreviations</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md481"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md513"></a>
 Terms</h2>
-<p>For the purposes of the present document, the terms and definitions given in the E3AP specification [1] and the following apply.</p>
-<p><b>Indication</b>: an E3 indication message whose <span class="tt">ranFunctionIdentifier</span> is <span class="tt">2</span>. Its <span class="tt">protocolData</span> field holds one L1-KPM indication payload.</p>
-<p><b>IQ row</b>: the IQ samples of one uplink slot, stored as one row of the shared memory region.</p>
-<p><b>Producer</b>: the RAN software that writes IQ rows to the region and publishes them.</p>
-<p><b>Consumer</b>: the dApp software that reads IQ rows from the region.</p>
-<p><b>Reference</b>: the set of values (region name, buffer index, row index) that locates one IQ row.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md482"></a>
+<p>For the purposes of the present document, the terms given in [1] and the following apply.</p>
+<p><b>Blob</b>: a contiguous run of bytes in a buffer of the shared memory region that holds the data of one cell or of one UE for one slot.</p>
+<p><b>Buffer</b>: one half of a pair of equal areas of the shared memory region that hold the data of one stream. The E3 Agent writes one buffer while the dApp reads the other.</p>
+<p><b>Cell scope</b>: the place of a value in an entry of the cell list of an indication. The value describes one cell in one slot.</p>
+<p><b>E3 Agent</b>: the entity in the RAN node that terminates E3AP on the RAN side [1]. In the present document it hosts the RAN function, sends the indications and writes the shared memory region.</p>
+<p><b>Granted identifier</b>: a telemetry identifier or control identifier that the E3 Agent lists in its SUBSCRIPTION RESPONSE message for a subscription.</p>
+<p><b>Indication path</b>: the part of the uplink processing that triggers an indication. The present document defines the PUSCH path and the SRS path.</p>
+<p><b>Inline stream</b>: a stream whose value travels in the indication.</p>
+<p><b>PUSCH path</b>: the indication path that fires once for each slot with PUSCH reception in at least one cell.</p>
+<p><b>Region</b>: the POSIX shared memory object that holds the buffers of the shared memory streams.</p>
+<p><b>Row</b>: the part of a buffer that the E3 Agent writes for one slot. A row holds one blob, or the blobs of several UEs.</p>
+<p><b>Shared memory stream</b>: a stream whose value stays in the region. The indication carries a reference to it.</p>
+<p><b>Slot scope</b>: the place of a value at the root of an indication. The value describes the slot as a whole.</p>
+<p><b>SRS path</b>: the indication path that fires once for each slot with SRS reception in at least one cell.</p>
+<p><b>Stream</b>: the data that one telemetry identifier names.</p>
+<p><b>Subscription data</b>: the selection of cells and UEs that applies to the subscription of a dApp.</p>
+<p><b>UE group</b>: a set of UEs that the receiver of the RAN node processes together, for example UEs that share PRBs in MU-MIMO.</p>
+<p><b>UE scope</b>: the place of a value in an entry of the UE list of a cell. The value describes one UE in one cell in one slot.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md514"></a>
 Symbols</h2>
 <p>Void.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md483"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md515"></a>
 Abbreviations</h2>
-<p>For the purposes of the present document, the abbreviations given in the E3AP specification [1] and the following apply.</p>
+<p>For the purposes of the present document, the abbreviations given in [1] and the following apply.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Abbreviation  </th><th class="markdownTableHeadNone">Meaning  </th></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">APER  </td><td class="markdownTableBodyNone">Aligned Packed Encoding Rules  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">FFT  </td><td class="markdownTableBodyNone">Fast Fourier Transform  </td></tr>
+<td class="markdownTableBodyNone">CB  </td><td class="markdownTableBodyNone">Code Block  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">FH  </td><td class="markdownTableBodyNone">Fronthaul (the name of the IQ buffers in the region)  </td></tr>
+<td class="markdownTableBodyNone">CFO  </td><td class="markdownTableBodyNone">Carrier Frequency Offset  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">FP16  </td><td class="markdownTableBodyNone">IEEE 754 binary16 floating point number  </td></tr>
+<td class="markdownTableBodyNone">CP  </td><td class="markdownTableBodyNone">Cyclic Prefix  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">CRC  </td><td class="markdownTableBodyNone">Cyclic Redundancy Check  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">DMRS  </td><td class="markdownTableBodyNone">Demodulation Reference Signal  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">FDD  </td><td class="markdownTableBodyNone">Frequency Division Duplex  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">FDM  </td><td class="markdownTableBodyNone">Frequency Division Multiplexing  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">FFT  </td><td class="markdownTableBodyNone">Fast Fourier Transform  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">HARQ  </td><td class="markdownTableBodyNone">Hybrid Automatic Repeat Request  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">IQ  </td><td class="markdownTableBodyNone">In-phase and Quadrature  </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">KPM  </td><td class="markdownTableBodyNone">Key Performance Measurement  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">MCS  </td><td class="markdownTableBodyNone">Modulation and Coding Scheme  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">MU-MIMO  </td><td class="markdownTableBodyNone">Multi-User Multiple Input Multiple Output  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">PDU  </td><td class="markdownTableBodyNone">Protocol Data Unit  </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">PRB  </td><td class="markdownTableBodyNone">Physical Resource Block  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">PRG  </td><td class="markdownTableBodyNone">Physical Resource Block Group  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">PUSCH  </td><td class="markdownTableBodyNone">Physical Uplink Shared Channel  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">QAM  </td><td class="markdownTableBodyNone">Quadrature Amplitude Modulation  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">RNTI  </td><td class="markdownTableBodyNone">Radio Network Temporary Identifier  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">RSRP  </td><td class="markdownTableBodyNone">Reference Signal Received Power  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">RSSI  </td><td class="markdownTableBodyNone">Received Signal Strength Indicator  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">SFN  </td><td class="markdownTableBodyNone">System Frame Number  </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">SINR  </td><td class="markdownTableBodyNone">Signal to Interference plus Noise Ratio  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">SNR  </td><td class="markdownTableBodyNone">Signal to Noise Ratio  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">SRS  </td><td class="markdownTableBodyNone">Sounding Reference Signal  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">TAI  </td><td class="markdownTableBodyNone">International Atomic Time  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">TB  </td><td class="markdownTableBodyNone">Transport Block  </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">TDD  </td><td class="markdownTableBodyNone">Time Division Duplex  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">UE  </td><td class="markdownTableBodyNone">User Equipment  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">UL  </td><td class="markdownTableBodyNone">Uplink  </td></tr>
+<td class="markdownTableBodyNone">UTC  </td><td class="markdownTableBodyNone">Coordinated Universal Time  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md484"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md516"></a>
 General</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md485"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md517"></a>
 Notations</h2>
-<p>For the purposes of the present document, the following notations apply.</p>
+<p>For the purposes of the present document, the notations of [1] apply, with the following additions.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
-<th class="markdownTableHeadNone">Notation  </th><th class="markdownTableHeadNone">Use  </th></tr>
+<th class="markdownTableHeadNone">Item  </th><th class="markdownTableHeadNone">Notation  </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">Name</span>  </td><td class="markdownTableBodyNone">An information element, a field, a JSON key or a value in code.  </td></tr>
+<td class="markdownTableBodyNone">Service model IE  </td><td class="markdownTableBodyNone">The name of an information element of the present document is in capital letters and followed by "IE". Example: CELL DATA IE. Its ASN.1 type has the prefix "L1KPM-". Example: L1KPM-CellData.  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">"shall", "should", "may"  </td><td class="markdownTableBodyNone">As defined in the O-RAN drafting rules.  </td></tr>
+<td class="markdownTableBodyNone">Field  </td><td class="markdownTableBodyNone">The ASN.1 field name in a monospaced font. Example: <span class="tt">rbStart</span>.  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">a..b</span>  </td><td class="markdownTableBodyNone">An inclusive integer range.  </td></tr>
+<td class="markdownTableBodyNone">JSON key  </td><td class="markdownTableBodyNone">The key in a monospaced font and in quotation marks when it differs from the field name. Example: "`rb_start`".  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">A to B  </td><td class="markdownTableBodyNone">A segment of the control loops, named by its boxes (see the <a class="el" href="md_docs_2control-loops_2path-a-e3-loop.html">control loops</a>).  </td></tr>
+<td class="markdownTableBodyNone">Telemetry identifier  </td><td class="markdownTableBodyNone">"ID" followed by the number. Example: ID 25.  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Range  </td><td class="markdownTableBodyNone"><span class="tt">a..b</span> is an inclusive integer range.  </td></tr>
 </table>
-<p>All multi-byte values in the shared memory region use the byte order of the host.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md486"></a>
-Forwards and backwards compatibility</h2>
-<p>The ASN.1 types of this service model have no extension marker. A new field therefore changes the APER encoding, and a peer that does not know it cannot decode the message. The JSON and Protocol Buffers encodings ignore keys and fields that they do not know.</p>
-<p>The region has a version number in its header. A consumer shall check it before it reads a row. The present document defines version <span class="tt">1</span>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md487"></a>
-Where each part is specified</h1>
-<table class="markdownTable">
-<tr class="markdownTableHead">
-<th class="markdownTableHeadNone">Section  </th><th class="markdownTableHeadNone">What it covers  </th><th class="markdownTableHeadNone">File  </th></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">1. Identity and registration  </td><td class="markdownTableBodyNone">RAN function ID, telemetry identifiers, RAN function data, what a RAN shall do to offer the service model  </td><td class="markdownTableBodyNone"><a class="el" href="md_docs_2e3sm_2l1-kpm_201-identity-and-registration.html">01-identity-and-registration.md</a>  </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">2. Information elements  </td><td class="markdownTableBodyNone">the indication, the reference, the RAN function data, the layout of the shared memory region  </td><td class="markdownTableBodyNone"><a class="el" href="md_docs_2e3sm_2l1-kpm_202-ie-mapping.html">02-ie-mapping.md</a>  </td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">3. Procedure flow  </td><td class="markdownTableBodyNone">subscription, indication delivery, cadence, reading the region, overwrite detection, release  </td><td class="markdownTableBodyNone"><a class="el" href="md_docs_2e3sm_2l1-kpm_203-procedure-flow.html">03-procedure-flow.md</a>  </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">4. Encoding  </td><td class="markdownTableBodyNone">APER, JSON and Protocol Buffers rules, size limits, the ASN.1 clause  </td><td class="markdownTableBodyNone"><a class="el" href="md_docs_2e3sm_2l1-kpm_204-encoding.html">04-encoding.md</a>  </td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">5. Semantics and constraints  </td><td class="markdownTableBodyNone">units, clocks, absent versus present, lifetime of the region, mandatory behavior, errors  </td><td class="markdownTableBodyNone"><a class="el" href="md_docs_2e3sm_2l1-kpm_205-semantics-and-constraints.html">05-semantics-and-constraints.md</a>  </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">6. Discrepancies  </td><td class="markdownTableBodyNone">where grammar, codecs and behavior disagree, dead code, open items  </td><td class="markdownTableBodyNone"><a class="el" href="md_docs_2e3sm_2l1-kpm_206-discrepancies.html">06-discrepancies.md</a>  </td></tr>
-</table>
-<p>For an engineer who adds E3SM-L1KPM to a RAN or a dApp there is a separate guide: <a class="el" href="md_docs_2e3sm_2l1-kpm_2integrator-guide.html">integrator-guide.md</a>. It is not part of the specification.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md488"></a>
-Related documents</h1>
+<p>The presence column of the tables uses "M" for mandatory, "O" for optional and "C" for conditional, as in [1].</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md518"></a>
+Entities</h2>
+<p>The present document uses the entities of [1] as follows (Figure 5-1).</p>
 <ul>
-<li><a class="el" href="dir_af0c76cc165e127d1e03e322192d98eb.html">E3AP specification</a>: the protocol that carries this service model.</li>
-<li><a class="el" href="md_docs_2utilities_2latrec.html">latrec</a>: the latency recorder. Its monotonic clock shall not be mixed with the realtime timestamps of other service models.</li>
-<li><a class="el" href="md_docs_2control-loops_2path-a-e3-loop.html">Path A, the E3-only loop</a>: the boxes that this service model takes part in (A1 to A3 on the RAN, A9 and A10 in the dApp).</li>
-<li><a class="el" href="dir_bf4e70bd8af5703d8fd0ae314deb09dd.html">E3SM Spectrum</a>: the other E3 service model of the same RAN. </li>
+<li>The E3 Agent is part of the RAN node. It terminates E3AP on the RAN side and hosts the RAN function of the present document. It takes the data of each uplink slot from the layer 1 of the RAN node, writes the shared memory region of Annex A on the host of the RAN node, and sends the indications.</li>
+<li>The dApp runs in the RAN node or next to it, as [1] allows. It reaches the RAN function only through E3AP and the shared memory region. A dApp that reads shared memory streams runs on the host of the RAN node (clause 6.5).</li>
 </ul>
+<p>How the E3 Agent obtains the data from the layer 1 inside the RAN node is out of the scope of the present document.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md519"></a>
+Relation to E3AP</h2>
+<p>The present document follows [1] in every respect that [1] defines. It adds no message, no procedure and no field to E3AP. When the present document and [1] disagree on a matter that [1] defines, [1] applies.</p>
+<p>E3AP [1] offers a dApp a set of procedures to reach a RAN function. A service model gives a meaning to the payloads that those procedures carry. E3SM-L1-KPM uses the following E3AP procedures.</p>
+<p>Table: E3AP procedures used by E3SM-L1-KPM</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">E3AP procedure  </th><th class="markdownTableHeadNone">Clause of [1]  </th><th class="markdownTableHeadNone">Use in the present document  </th><th class="markdownTableHeadNone">Service model payload  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Setup  </td><td class="markdownTableBodyNone">7.3  </td><td class="markdownTableBodyNone">The E3 Agent announces the RAN function and its streams.  </td><td class="markdownTableBodyNone">RAN FUNCTION DATA IE in <span class="tt">ranFunctionData</span>  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Subscription  </td><td class="markdownTableBodyNone">7.4  </td><td class="markdownTableBodyNone">The dApp chooses the telemetry identifiers, the interval and the duration.  </td><td class="markdownTableBodyNone">none  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Subscription delete  </td><td class="markdownTableBodyNone">7.5  </td><td class="markdownTableBodyNone">The dApp ends its subscription.  </td><td class="markdownTableBodyNone">none  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Indication  </td><td class="markdownTableBodyNone">7.6  </td><td class="markdownTableBodyNone">The E3 Agent delivers the data of one slot of one indication path.  </td><td class="markdownTableBodyNone">INDICATION DATA IE in <span class="tt">protocolData</span>  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">dApp Control  </td><td class="markdownTableBodyNone">7.7  </td><td class="markdownTableBodyNone">The dApp selects cells and UEs for its subscription.  </td><td class="markdownTableBodyNone">CONTROL DATA IE in <span class="tt">actionData</span>  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Release  </td><td class="markdownTableBodyNone">7.10  </td><td class="markdownTableBodyNone">The dApp or the E3 Agent ends the association.  </td><td class="markdownTableBodyNone">none  </td></tr>
+</table>
+<p>The dApp Report procedure and the xApp Control procedure of [1] are not used by the present document.</p>
+<p>E3AP carries the payloads of the present document in its octet string fields and does not read them. The service model selects its payload by the field that carries it, as Table 4-1 lists. In an E3AP session with the JSON encoding, the payloads are JSON values nested in the E3AP message, as clause 8.3 of [1] defines.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md520"></a>
+Forwards and backwards compatibility</h2>
+<p>The service model uses these means to stay compatible when it grows.</p>
+<ol type="1">
+<li>Every SEQUENCE and every CHOICE of the grammar has an extension marker. A receiver shall ignore an extension addition that it does not know.</li>
+<li>A new telemetry identifier adds an optional field after the extension marker of the type that holds it. A receiver that does not know the identifier does not see the field.</li>
+<li>The enumerations of the grammar have no extension marker. A new value needs a new version of the service model.</li>
+<li>The <span class="tt">version</span> field of the RAN FUNCTION DATA IE carries the version of the service model. The present document defines version <span class="tt">1</span>. A dApp shall not decode the payloads of a RAN function whose version it does not support.</li>
+<li>A JSON receiver ignores keys that it does not know (clause 8.6). </li>
+</ol>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">

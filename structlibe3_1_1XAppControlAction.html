@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -101,7 +101,9 @@ $(function(){initNavTree('structlibe3_1_1XAppControlAction.html','','structlibe3
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a7eb8d89a9c820a03d2dfa929d4fb3915" id="r_a7eb8d89a9c820a03d2dfa929d4fb3915"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7eb8d89a9c820a03d2dfa929d4fb3915">dapp_identifier</a> {0}</td></tr>
+<tr class="memdesc:a7eb8d89a9c820a03d2dfa929d4fb3915"><td class="mdescLeft">&#160;</td><td class="mdescRight">dApp the control is for  <br /></td></tr>
 <tr class="memitem:ac51ad2b0656b86a90b1e90b814caab5e" id="r_ac51ad2b0656b86a90b1e90b814caab5e"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac51ad2b0656b86a90b1e90b814caab5e">ran_function_identifier</a> {0}</td></tr>
+<tr class="memdesc:ac51ad2b0656b86a90b1e90b814caab5e"><td class="mdescLeft">&#160;</td><td class="mdescRight">RAN function the control is for.  <br /></td></tr>
 <tr class="memitem:a22a1da95bc57e9f8773b36c63fb2316c" id="r_a22a1da95bc57e9f8773b36c63fb2316c"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a22a1da95bc57e9f8773b36c63fb2316c">xapp_control_data</a></td></tr>
 <tr class="memitem:acf39ad557d60200caf39eee371254fb5" id="r_acf39ad557d60200caf39eee371254fb5"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acf39ad557d60200caf39eee371254fb5">sequence_id</a> {0}</td></tr>
 <tr class="memitem:a59024a36d00aa7ae6a123ed0871b6758" id="r_a59024a36d00aa7ae6a123ed0871b6758"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a59024a36d00aa7ae6a123ed0871b6758">message_id</a> {0}</td></tr>
@@ -109,7 +111,7 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>E3AP xApp Control Action structure. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00319">319</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00365">365</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
 <a id="a7eb8d89a9c820a03d2dfa929d4fb3915" name="a7eb8d89a9c820a03d2dfa929d4fb3915"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7eb8d89a9c820a03d2dfa929d4fb3915">&#9670;&#160;</a></span>dapp_identifier</h2>
@@ -123,7 +125,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00320">320</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p>dApp the control is for </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00366">366</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -138,8 +142,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Set by the inbound loop from the wrapping E3-PDU's id field; not serialized, so it carries no ASN.1/JSON/Protobuf grammar of its own. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00328">328</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00374">374</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -155,7 +160,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00321">321</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p>RAN function the control is for. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00367">367</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -172,7 +179,7 @@ Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 <p>Correlation id copied by the RAN bridge from the E2SM-DAPP control header's sequence-id. Mandatory on the wire. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00325">325</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00371">371</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -187,8 +194,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Opaque payload of the service model </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00322">322</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00368">368</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

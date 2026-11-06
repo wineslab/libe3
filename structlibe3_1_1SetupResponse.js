@@ -1,6 +1,8 @@
 var structlibe3_1_1SetupResponse =
 [
+    [ "cause", "structlibe3_1_1SetupResponse.html#a97633b0361606229f8d630d27ec6731e", null ],
     [ "dapp_identifier", "structlibe3_1_1SetupResponse.html#a2b58e4d573e0a32ed95800082996382e", null ],
+    [ "detail", "structlibe3_1_1SetupResponse.html#ac31079a0e02a9ead3b2a51ad084be17e", null ],
     [ "e3ap_protocol_version", "structlibe3_1_1SetupResponse.html#ac87d94dd09a87f288c6c686c3b1317ed", null ],
     [ "ran_function_list", "structlibe3_1_1SetupResponse.html#a90c0f5bae5dbc4e6013203797739bd85", null ],
     [ "ran_identifier", "structlibe3_1_1SetupResponse.html#a094916c010920b6345574ccae42165c5", null ],

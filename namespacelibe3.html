@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -191,6 +191,7 @@ Typedefs</h2></td></tr>
 <tr class="memitem:acb6cb2fab0f7e949eafba33afaa4a469" id="r_acb6cb2fab0f7e949eafba33afaa4a469"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acb6cb2fab0f7e949eafba33afaa4a469">SetupRequestHandler</a> = std::function&lt;<a class="el" href="#a53bfd79bd9406bfe120864d4eb83b0d5">ResponseCode</a>(const <a class="el" href="structlibe3_1_1SetupRequest.html">SetupRequest</a>&amp;, <a class="el" href="structlibe3_1_1SetupResponse.html">SetupResponse</a>&amp;)&gt;</td></tr>
 <tr class="memdesc:acb6cb2fab0f7e949eafba33afaa4a469"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback types for <a class="el" href="classlibe3_1_1E3Interface.html" title="E3Interface - Internal protocol coordination.">E3Interface</a> events.  <br /></td></tr>
 <tr class="memitem:a94c4c6edd3f29ecaafde6d3c3ae2ba17" id="r_a94c4c6edd3f29ecaafde6d3c3ae2ba17"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a94c4c6edd3f29ecaafde6d3c3ae2ba17">SubscriptionRequestHandler</a> = std::function&lt;<a class="el" href="#a53bfd79bd9406bfe120864d4eb83b0d5">ResponseCode</a>(const <a class="el" href="structlibe3_1_1SubscriptionRequest.html">SubscriptionRequest</a>&amp;)&gt;</td></tr>
+<tr class="memdesc:a94c4c6edd3f29ecaafde6d3c3ae2ba17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called for a <a class="el" href="structlibe3_1_1SubscriptionRequest.html" title="E3AP Subscription Request structure.">SubscriptionRequest</a>; the returned code is the answer.  <br /></td></tr>
 <tr class="memitem:a2516d19ac2e187935aad4c027401e3e0" id="r_a2516d19ac2e187935aad4c027401e3e0"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2516d19ac2e187935aad4c027401e3e0">LogCallback</a> = std::function&lt;void(<a class="el" href="#a509338e1414d84a610f21816d04940a0">LogLevel</a> level, const std::string&amp; component, const std::string&amp; message)&gt;</td></tr>
 <tr class="memdesc:a2516d19ac2e187935aad4c027401e3e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Log callback function type.  <br /></td></tr>
 <tr class="memitem:a81afb109c84fa5b9837d9c509f744a9d" id="r_a81afb109c84fa5b9837d9c509f744a9d"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a81afb109c84fa5b9837d9c509f744a9d">SmFactory</a> = std::function&lt;std::unique_ptr&lt;<a class="el" href="classlibe3_1_1ServiceModel.html">ServiceModel</a>&gt;()&gt;</td></tr>
@@ -244,6 +245,28 @@ Enumerations</h2></td></tr>
 , <a class="el" href="#a53bfd79bd9406bfe120864d4eb83b0d5a50546bf973283065b6ccf09faf7a580a">NEGATIVE</a> = 1
  }</td></tr>
 <tr class="memdesc:a53bfd79bd9406bfe120864d4eb83b0d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">E3AP response codes.  <a href="#a53bfd79bd9406bfe120864d4eb83b0d5">More...</a><br /></td></tr>
+<tr class="memitem:aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" id="r_aa5a8f2c5dd74ad4e6a1e12859aa8c6c7"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a> : uint8_t { <br />
+&#160;&#160;<a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a1c04cc3823d476c3017238679a0fdf52">UNSPECIFIED</a> = 0
+, <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a23f149f0f9ae9ed9e0119e7209178a5d">PROTOCOL_ERROR</a> = 1
+, <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a041599013e82a7ccaf8ec2910da356a9">SETUP_REQUIRED</a> = 2
+, <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a3b1fc07332b77e8803fca5cecedaaf04">SETUP_ALREADY_COMPLETE</a> = 3
+, <br />
+&#160;&#160;<a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ad0bbad81de26b4f35e3e681ac73308ec">UNSUPPORTED_PROTOCOL_VERSION</a> = 4
+, <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7abe32d56dee3a6318cc92422f8e0f3e59">UNSUPPORTED_RAN_FUNCTION</a> = 5
+, <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ae64f307d4ee019c0cce6ce06779411e3">UNSUPPORTED_IDENTIFIER</a> = 6
+, <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ab8c9d7ce4c399c56136475f36309020f">INVALID_REQUEST</a> = 7
+, <br />
+&#160;&#160;<a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a8c02547a8a3b02382bac3557bcb2280d">NOT_FOUND</a> = 8
+, <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a5c57b592f6421079706484abebcab81b">DUPLICATE</a> = 9
+, <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a4a739fa42dcdbdb8dfe5a5e4d9c5a627">RESOURCE_EXHAUSTED</a> = 10
+, <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a9fdac9ed7bccc6af6b88d4e090f848f7">AUTHORIZATION_REJECTED</a> = 11
+, <br />
+&#160;&#160;<a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ac379e50491099134897f11767ac77544">PAYLOAD_TOO_LARGE</a> = 12
+, <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7afeea87fe86102a3a54f6a787e04dc58a">TRANSPORT_OVERRUN</a> = 13
+, <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a89e5325b1f9acbf5dde5c70b84bbdcb1">SHUTTING_DOWN</a> = 14
+<br />
+ }</td></tr>
+<tr class="memdesc:aa5a8f2c5dd74ad4e6a1e12859aa8c6c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why a RAN refused a request (E3-Cause).  <a href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">More...</a><br /></td></tr>
 <tr class="memitem:ac517385d2a8b182e20888ef2c3b8ca19" id="r_ac517385d2a8b182e20888ef2c3b8ca19"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac517385d2a8b182e20888ef2c3b8ca19">DisconnectReason</a> : uint8_t { <a class="el" href="#ac517385d2a8b182e20888ef2c3b8ca19a7993dab10d0452f96478365ebc3f26d1">RELEASED_BY_RAN</a> = 0
 , <a class="el" href="#ac517385d2a8b182e20888ef2c3b8ca19a6afae85c81e24d106bec978e17b89ce7">CONNECTION_LOST</a> = 1
  }</td></tr>
@@ -304,6 +327,12 @@ Functions</h2></td></tr>
 <tr class="memdesc:a73e5843bd75cd76372b7bfff4894fcf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert <a class="el" href="#ac1c5533fc81586565ca7822bf00eee90" title="E3AP action types for Setup and Subscription requests.">ActionType</a> to string representation.  <br /></td></tr>
 <tr class="memitem:a91f7245a15a8f381b892d146355c0429" id="r_a91f7245a15a8f381b892d146355c0429"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a91f7245a15a8f381b892d146355c0429">response_code_to_string</a> (<a class="el" href="#a53bfd79bd9406bfe120864d4eb83b0d5">ResponseCode</a> code) noexcept</td></tr>
 <tr class="memdesc:a91f7245a15a8f381b892d146355c0429"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert <a class="el" href="#a53bfd79bd9406bfe120864d4eb83b0d5" title="E3AP response codes.">ResponseCode</a> to string representation.  <br /></td></tr>
+<tr class="memitem:a289413885a89ed74d969b7723f8e012e" id="r_a289413885a89ed74d969b7723f8e012e"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a289413885a89ed74d969b7723f8e012e">cause_to_string</a> (<a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a> cause) noexcept</td></tr>
+<tr class="memdesc:a289413885a89ed74d969b7723f8e012e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" title="Why a RAN refused a request (E3-Cause).">Cause</a> to the name E3AP gives it in JSON and in logs.  <br /></td></tr>
+<tr class="memitem:aea5cad3e2e304461d5a38de98ca6a7bf" id="r_aea5cad3e2e304461d5a38de98ca6a7bf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aea5cad3e2e304461d5a38de98ca6a7bf">cause_from_string</a> (const std::string &amp;name) noexcept</td></tr>
+<tr class="memdesc:aea5cad3e2e304461d5a38de98ca6a7bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" title="Why a RAN refused a request (E3-Cause).">Cause</a> from its E3AP name.  <br /></td></tr>
+<tr class="memitem:ab9079f464bfd858520f4bbce5386384b" id="r_ab9079f464bfd858520f4bbce5386384b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab9079f464bfd858520f4bbce5386384b">cause_from_value</a> (long value) noexcept</td></tr>
+<tr class="memdesc:ab9079f464bfd858520f4bbce5386384b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" title="Why a RAN refused a request (E3-Cause).">Cause</a> from its wire value.  <br /></td></tr>
 <tr class="memitem:aee2a6ca3a33bc7c111aa5256811a61eb" id="r_aee2a6ca3a33bc7c111aa5256811a61eb"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aee2a6ca3a33bc7c111aa5256811a61eb">error_code_to_string</a> (<a class="el" href="#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> code) noexcept</td></tr>
 <tr class="memdesc:aee2a6ca3a33bc7c111aa5256811a61eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert <a class="el" href="#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> to string representation.  <br /></td></tr>
 <tr class="memitem:a7cd0e90b0c01822a4a7fbe5b64842fc1" id="r_a7cd0e90b0c01822a4a7fbe5b64842fc1"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7cd0e90b0c01822a4a7fbe5b64842fc1">agent_state_to_string</a> (<a class="el" href="#a3a6c3d51b9810b103e12fddf0839e1fe">AgentState</a> state) noexcept</td></tr>
@@ -320,15 +349,23 @@ Variables</h2></td></tr>
 <tr class="memitem:ab6da70ca1096634b6803d9f25120b0e3" id="r_ab6da70ca1096634b6803d9f25120b0e3"><td class="memItemLeft" align="right" valign="top">static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab6da70ca1096634b6803d9f25120b0e3">CACHE_LINE_SIZE</a> = 64</td></tr>
 <tr class="memdesc:ab6da70ca1096634b6803d9f25120b0e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assumed cache-line size (bytes) used for alignment padding.  <br /></td></tr>
 <tr class="memitem:a581a3bc9ba0fad9e97f52c00fdce32b9" id="r_a581a3bc9ba0fad9e97f52c00fdce32b9"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a581a3bc9ba0fad9e97f52c00fdce32b9">MAX_PROTOCOL_DATA_SIZE</a> = 32768</td></tr>
+<tr class="memdesc:a581a3bc9ba0fad9e97f52c00fdce32b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest <span class="tt">protocolData</span> of an indication, in bytes.  <br /></td></tr>
 <tr class="memitem:aca224e72d9af7089c4d9c1a150a705db" id="r_aca224e72d9af7089c4d9c1a150a705db"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca224e72d9af7089c4d9c1a150a705db">MAX_ACTION_DATA_SIZE</a> = 32768</td></tr>
+<tr class="memdesc:aca224e72d9af7089c4d9c1a150a705db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest <span class="tt">actionData</span> of a dApp control action, in bytes.  <br /></td></tr>
 <tr class="memitem:a1fdb0c4f4c6f3060e3b0448610c7a289" id="r_a1fdb0c4f4c6f3060e3b0448610c7a289"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1fdb0c4f4c6f3060e3b0448610c7a289">MAX_DAPP_REPORT_DATA_SIZE</a> = 32768</td></tr>
+<tr class="memdesc:a1fdb0c4f4c6f3060e3b0448610c7a289"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest <span class="tt">reportData</span> of a dApp report, in bytes.  <br /></td></tr>
 <tr class="memitem:a058435e96914a52e2830d4c403b1d541" id="r_a058435e96914a52e2830d4c403b1d541"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a058435e96914a52e2830d4c403b1d541">MAX_XAPP_CTRL_DATA_SIZE</a> = 32768</td></tr>
+<tr class="memdesc:a058435e96914a52e2830d4c403b1d541"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest <span class="tt">xAppControlData</span> of an xApp control action, in bytes.  <br /></td></tr>
 <tr class="memitem:aa385e749637e30801ce6405782b0c699" id="r_aa385e749637e30801ce6405782b0c699"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa385e749637e30801ce6405782b0c699">MAX_RAN_FUNCTIONS</a> = 64</td></tr>
 <tr class="memdesc:aa385e749637e30801ce6405782b0c699"><td class="mdescLeft">&#160;</td><td class="mdescRight">ranFunctionList SIZE (0..64)  <br /></td></tr>
 <tr class="memitem:af4b3cf6c64a692090cd6b7d26f62b6bf" id="r_af4b3cf6c64a692090cd6b7d26f62b6bf"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af4b3cf6c64a692090cd6b7d26f62b6bf">MAX_IDENTIFIER_LIST_SIZE</a> = 256</td></tr>
 <tr class="memdesc:af4b3cf6c64a692090cd6b7d26f62b6bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">telemetry and control lists SIZE (0..256)  <br /></td></tr>
 <tr class="memitem:a809598c8d63a2bdce0d447411324a2b5" id="r_a809598c8d63a2bdce0d447411324a2b5"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a809598c8d63a2bdce0d447411324a2b5">DEFAULT_BUFFER_SIZE</a> = 60000</td></tr>
+<tr class="memdesc:a809598c8d63a2bdce0d447411324a2b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default encode and receive buffer size, in bytes.  <br /></td></tr>
+<tr class="memitem:ab9fd4d0a2f9f4256043102de4b108d0b" id="r_ab9fd4d0a2f9f4256043102de4b108d0b"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab9fd4d0a2f9f4256043102de4b108d0b">MAX_DETAIL_SIZE</a> = 512</td></tr>
+<tr class="memdesc:ab9fd4d0a2f9f4256043102de4b108d0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest <span class="tt">detail</span> text of a negative response, in bytes (E3-Text).  <br /></td></tr>
 <tr class="memitem:ac69f2e5f639ef2bdb04445cf7ac2b408" id="r_ac69f2e5f639ef2bdb04445cf7ac2b408"><td class="memItemLeft" align="right" valign="top">constexpr uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac69f2e5f639ef2bdb04445cf7ac2b408">LIBE3_PROTOCOL_VERSION</a> = 1</td></tr>
+<tr class="memdesc:ac69f2e5f639ef2bdb04445cf7ac2b408"><td class="mdescLeft">&#160;</td><td class="mdescRight">Protocol version this library speaks.  <br /></td></tr>
 </table>
 <a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Typedef Documentation</h2>
 <a id="a55f022248ffc81789cb641121fea1e45" name="a55f022248ffc81789cb641121fea1e45"></a>
@@ -483,21 +520,21 @@ template&lt;typename T&gt; </div>
 <div class="line">    <a class="code hl_struct" href="structlibe3_1_1ReleaseMessage.html">ReleaseMessage</a>,</div>
 <div class="line">    <a class="code hl_struct" href="structlibe3_1_1MessageAck.html">MessageAck</a></div>
 <div class="line">&gt;</div>
-<div class="ttc" id="astructlibe3_1_1DAppControlAction_html"><div class="ttname"><a href="structlibe3_1_1DAppControlAction.html">libe3::DAppControlAction</a></div><div class="ttdoc">E3AP dApp Control Action structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00285">types.hpp:285</a></div></div>
-<div class="ttc" id="astructlibe3_1_1DAppReport_html"><div class="ttname"><a href="structlibe3_1_1DAppReport.html">libe3::DAppReport</a></div><div class="ttdoc">E3AP dApp Report structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00306">types.hpp:306</a></div></div>
-<div class="ttc" id="astructlibe3_1_1IndicationMessage_html"><div class="ttname"><a href="structlibe3_1_1IndicationMessage.html">libe3::IndicationMessage</a></div><div class="ttdoc">E3AP Indication Message structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00276">types.hpp:276</a></div></div>
-<div class="ttc" id="astructlibe3_1_1MessageAck_html"><div class="ttname"><a href="structlibe3_1_1MessageAck.html">libe3::MessageAck</a></div><div class="ttdoc">E3AP Message Acknowledgment structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00298">types.hpp:298</a></div></div>
-<div class="ttc" id="astructlibe3_1_1ReleaseMessage_html"><div class="ttname"><a href="structlibe3_1_1ReleaseMessage.html">libe3::ReleaseMessage</a></div><div class="ttdoc">E3AP Release Message structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00334">types.hpp:334</a></div></div>
-<div class="ttc" id="astructlibe3_1_1SetupRequest_html"><div class="ttname"><a href="structlibe3_1_1SetupRequest.html">libe3::SetupRequest</a></div><div class="ttdoc">E3AP Setup Request structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00210">types.hpp:210</a></div></div>
-<div class="ttc" id="astructlibe3_1_1SetupResponse_html"><div class="ttname"><a href="structlibe3_1_1SetupResponse.html">libe3::SetupResponse</a></div><div class="ttdoc">E3AP Setup Response structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00230">types.hpp:230</a></div></div>
-<div class="ttc" id="astructlibe3_1_1SubscriptionDelete_html"><div class="ttname"><a href="structlibe3_1_1SubscriptionDelete.html">libe3::SubscriptionDelete</a></div><div class="ttdoc">E3AP Subscription Delete structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00254">types.hpp:254</a></div></div>
-<div class="ttc" id="astructlibe3_1_1SubscriptionRequest_html"><div class="ttname"><a href="structlibe3_1_1SubscriptionRequest.html">libe3::SubscriptionRequest</a></div><div class="ttdoc">E3AP Subscription Request structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00242">types.hpp:242</a></div></div>
-<div class="ttc" id="astructlibe3_1_1SubscriptionResponse_html"><div class="ttname"><a href="structlibe3_1_1SubscriptionResponse.html">libe3::SubscriptionResponse</a></div><div class="ttdoc">E3AP Subscription Response structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00262">types.hpp:262</a></div></div>
-<div class="ttc" id="astructlibe3_1_1XAppControlAction_html"><div class="ttname"><a href="structlibe3_1_1XAppControlAction.html">libe3::XAppControlAction</a></div><div class="ttdoc">E3AP xApp Control Action structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00319">types.hpp:319</a></div></div>
+<div class="ttc" id="astructlibe3_1_1DAppControlAction_html"><div class="ttname"><a href="structlibe3_1_1DAppControlAction.html">libe3::DAppControlAction</a></div><div class="ttdoc">E3AP dApp Control Action structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00329">types.hpp:329</a></div></div>
+<div class="ttc" id="astructlibe3_1_1DAppReport_html"><div class="ttname"><a href="structlibe3_1_1DAppReport.html">libe3::DAppReport</a></div><div class="ttdoc">E3AP dApp Report structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00352">types.hpp:352</a></div></div>
+<div class="ttc" id="astructlibe3_1_1IndicationMessage_html"><div class="ttname"><a href="structlibe3_1_1IndicationMessage.html">libe3::IndicationMessage</a></div><div class="ttdoc">E3AP Indication Message structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00320">types.hpp:320</a></div></div>
+<div class="ttc" id="astructlibe3_1_1MessageAck_html"><div class="ttname"><a href="structlibe3_1_1MessageAck.html">libe3::MessageAck</a></div><div class="ttdoc">E3AP Message Acknowledgment structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00342">types.hpp:342</a></div></div>
+<div class="ttc" id="astructlibe3_1_1ReleaseMessage_html"><div class="ttname"><a href="structlibe3_1_1ReleaseMessage.html">libe3::ReleaseMessage</a></div><div class="ttdoc">E3AP Release Message structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00380">types.hpp:380</a></div></div>
+<div class="ttc" id="astructlibe3_1_1SetupRequest_html"><div class="ttname"><a href="structlibe3_1_1SetupRequest.html">libe3::SetupRequest</a></div><div class="ttdoc">E3AP Setup Request structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00250">types.hpp:250</a></div></div>
+<div class="ttc" id="astructlibe3_1_1SetupResponse_html"><div class="ttname"><a href="structlibe3_1_1SetupResponse.html">libe3::SetupResponse</a></div><div class="ttdoc">E3AP Setup Response structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00270">types.hpp:270</a></div></div>
+<div class="ttc" id="astructlibe3_1_1SubscriptionDelete_html"><div class="ttname"><a href="structlibe3_1_1SubscriptionDelete.html">libe3::SubscriptionDelete</a></div><div class="ttdoc">E3AP Subscription Delete structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00296">types.hpp:296</a></div></div>
+<div class="ttc" id="astructlibe3_1_1SubscriptionRequest_html"><div class="ttname"><a href="structlibe3_1_1SubscriptionRequest.html">libe3::SubscriptionRequest</a></div><div class="ttdoc">E3AP Subscription Request structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00284">types.hpp:284</a></div></div>
+<div class="ttc" id="astructlibe3_1_1SubscriptionResponse_html"><div class="ttname"><a href="structlibe3_1_1SubscriptionResponse.html">libe3::SubscriptionResponse</a></div><div class="ttdoc">E3AP Subscription Response structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00304">types.hpp:304</a></div></div>
+<div class="ttc" id="astructlibe3_1_1XAppControlAction_html"><div class="ttname"><a href="structlibe3_1_1XAppControlAction.html">libe3::XAppControlAction</a></div><div class="ttdoc">E3AP xApp Control Action structure.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00365">types.hpp:365</a></div></div>
 </div><!-- fragment -->
 <p>Generic E3AP PDU using std::variant for type-safe union. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00341">341</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00387">387</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -609,7 +646,16 @@ template&lt;typename T&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00042">42</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p>Called for a <a class="el" href="structlibe3_1_1SubscriptionRequest.html" title="E3AP Subscription Request structure.">SubscriptionRequest</a>; the returned code is the answer. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">request</td><td>The request </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>POSITIVE to grant it </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00043">43</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -643,7 +689,7 @@ template&lt;typename T&gt; </div>
 
 <p><a class="el" href="#a6dc96978d420b62130fbd1e5c17497aa" title="Timestamp type using steady_clock for monotonic time.">Timestamp</a> type using steady_clock for monotonic time. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00504">504</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00563">563</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -694,7 +740,7 @@ template&lt;typename T&gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00092">92</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00094">94</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -738,7 +784,66 @@ template&lt;typename T&gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00134">134</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00161">161</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">&#9670;&#160;</a></span>Cause</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">libe3::Cause</a> : uint8_t</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Why a RAN refused a request (E3-Cause). </p>
+<p>Carried with a negative setup response, subscription response or message acknowledgment, next to a free-text <span class="tt">detail</span>. The names and values are the ones OCUDU's E3AP grammar uses; Aerial has no code and sends only text. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a1c04cc3823d476c3017238679a0fdf52" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a1c04cc3823d476c3017238679a0fdf52"></a>UNSPECIFIED&#160;</td><td class="fielddoc"><p>No more specific cause applies. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a23f149f0f9ae9ed9e0119e7209178a5d" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a23f149f0f9ae9ed9e0119e7209178a5d"></a>PROTOCOL_ERROR&#160;</td><td class="fielddoc"><p>The message was malformed or out of sequence. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a041599013e82a7ccaf8ec2910da356a9" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a041599013e82a7ccaf8ec2910da356a9"></a>SETUP_REQUIRED&#160;</td><td class="fielddoc"><p>The dApp has not completed setup. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a3b1fc07332b77e8803fca5cecedaaf04" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a3b1fc07332b77e8803fca5cecedaaf04"></a>SETUP_ALREADY_COMPLETE&#160;</td><td class="fielddoc"><p>A second setup on one association. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ad0bbad81de26b4f35e3e681ac73308ec" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ad0bbad81de26b4f35e3e681ac73308ec"></a>UNSUPPORTED_PROTOCOL_VERSION&#160;</td><td class="fielddoc"><p>The E3AP version of the dApp is not served. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7abe32d56dee3a6318cc92422f8e0f3e59" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7abe32d56dee3a6318cc92422f8e0f3e59"></a>UNSUPPORTED_RAN_FUNCTION&#160;</td><td class="fielddoc"><p>The RAN function is not served. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ae64f307d4ee019c0cce6ce06779411e3" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ae64f307d4ee019c0cce6ce06779411e3"></a>UNSUPPORTED_IDENTIFIER&#160;</td><td class="fielddoc"><p>A telemetry or control identifier is not advertised by the RAN function. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ab8c9d7ce4c399c56136475f36309020f" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ab8c9d7ce4c399c56136475f36309020f"></a>INVALID_REQUEST&#160;</td><td class="fielddoc"><p>The request is well formed but its content is not acceptable. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a8c02547a8a3b02382bac3557bcb2280d" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a8c02547a8a3b02382bac3557bcb2280d"></a>NOT_FOUND&#160;</td><td class="fielddoc"><p>The subscription or procedure the request names does not exist. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a5c57b592f6421079706484abebcab81b" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a5c57b592f6421079706484abebcab81b"></a>DUPLICATE&#160;</td><td class="fielddoc"><p>The request repeats one that is already active. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a4a739fa42dcdbdb8dfe5a5e4d9c5a627" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a4a739fa42dcdbdb8dfe5a5e4d9c5a627"></a>RESOURCE_EXHAUSTED&#160;</td><td class="fielddoc"><p>The RAN has no room for the request. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a9fdac9ed7bccc6af6b88d4e090f848f7" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a9fdac9ed7bccc6af6b88d4e090f848f7"></a>AUTHORIZATION_REJECTED&#160;</td><td class="fielddoc"><p>The dApp is not allowed to do this. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ac379e50491099134897f11767ac77544" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7ac379e50491099134897f11767ac77544"></a>PAYLOAD_TOO_LARGE&#160;</td><td class="fielddoc"><p>The payload is over the bound the RAN accepts. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7afeea87fe86102a3a54f6a787e04dc58a" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7afeea87fe86102a3a54f6a787e04dc58a"></a>TRANSPORT_OVERRUN&#160;</td><td class="fielddoc"><p>The transport could not keep up. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a89e5325b1f9acbf5dde5c70b84bbdcb1" name="aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a89e5325b1f9acbf5dde5c70b84bbdcb1"></a>SHUTTING_DOWN&#160;</td><td class="fielddoc"><p>The RAN is stopping. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00115">115</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -770,7 +875,7 @@ template&lt;typename T&gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00109">109</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00136">136</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -802,7 +907,7 @@ template&lt;typename T&gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00060">60</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00062">62</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -836,7 +941,7 @@ template&lt;typename T&gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00075">75</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00077">77</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -870,7 +975,7 @@ template&lt;typename T&gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00083">83</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00085">85</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -904,7 +1009,7 @@ template&lt;typename T&gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00051">51</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00053">53</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -933,7 +1038,7 @@ template&lt;typename T&gt; </div>
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a0f455c3a80f115f8aa8ad664850d6bb3a4951c208dce6a888038bdc3926e5636f" name="a0f455c3a80f115f8aa8ad664850d6bb3a4951c208dce6a888038bdc3926e5636f"></a>LIBE3_ERROR_CODE_LIST&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00149">149</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00176">176</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1006,7 +1111,7 @@ template&lt;typename T&gt; </div>
 <tr><td class="fieldname"><a id="a675f37e2936d707807212fcd3cfa8185ae63ef0287e5a1f4b52c19f8f12b247ca" name="a675f37e2936d707807212fcd3cfa8185ae63ef0287e5a1f4b52c19f8f12b247ca"></a>MESSAGE_ACK&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00117">117</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00144">144</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1038,7 +1143,7 @@ template&lt;typename T&gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00101">101</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00103">103</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1067,8 +1172,15 @@ template&lt;typename T&gt; </div>
 </div><div class="memdoc">
 
 <p>Convert <a class="el" href="#ac1c5533fc81586565ca7822bf00eee90" title="E3AP action types for Setup and Subscription requests.">ActionType</a> to string representation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td>Action type </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A static name, "unknown" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00548">548</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00611">611</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1096,8 +1208,123 @@ template&lt;typename T&gt; </div>
 </div><div class="memdoc">
 
 <p>Convert <a class="el" href="#a3a6c3d51b9810b103e12fddf0839e1fe" title="Agent state machine states.">AgentState</a> to string representation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">state</td><td>Agent state </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A static name, "Unknown" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00601">601</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00719">719</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="aea5cad3e2e304461d5a38de98ca6a7bf" name="aea5cad3e2e304461d5a38de98ca6a7bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea5cad3e2e304461d5a38de98ca6a7bf">&#9670;&#160;</a></span>cause_from_string()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a> libe3::cause_from_string </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Read a <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" title="Why a RAN refused a request (E3-Cause).">Cause</a> from its E3AP name. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>camelCase name, for example "unsupportedIdentifier" </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The cause; <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a1c04cc3823d476c3017238679a0fdf52" title="No more specific cause applies.">Cause::UNSPECIFIED</a> for a name this version does not know, so a peer that adds a cause is still read as a refusal </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00665">665</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ab9079f464bfd858520f4bbce5386384b" name="ab9079f464bfd858520f4bbce5386384b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9079f464bfd858520f4bbce5386384b">&#9670;&#160;</a></span>cause_from_value()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a> libe3::cause_from_value </td>
+          <td>(</td>
+          <td class="paramtype">long</td>          <td class="paramname"><span class="paramname"><em>value</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Read a <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" title="Why a RAN refused a request (E3-Cause).">Cause</a> from its wire value. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">value</td><td>Enumeration value as APER or Protocol Buffers carries it </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The cause; <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a1c04cc3823d476c3017238679a0fdf52" title="No more specific cause applies.">Cause::UNSPECIFIED</a> for a value this version does not know </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00677">677</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a289413885a89ed74d969b7723f8e012e" name="a289413885a89ed74d969b7723f8e012e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a289413885a89ed74d969b7723f8e012e">&#9670;&#160;</a></span>cause_to_string()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * libe3::cause_to_string </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a></td>          <td class="paramname"><span class="paramname"><em>cause</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Convert <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" title="Why a RAN refused a request (E3-Cause).">Cause</a> to the name E3AP gives it in JSON and in logs. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cause</td><td><a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" title="Why a RAN refused a request (E3-Cause).">Cause</a> to name </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The camelCase name, for example "unsupportedIdentifier"; "unspecified" for a value outside the enumeration </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00638">638</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1266,8 +1493,15 @@ template&lt;typename T&gt; </div>
 </div><div class="memdoc">
 
 <p>Convert <a class="el" href="#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> to string representation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>Error code </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A short description, "Unknown error" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00571">571</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00687">687</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1295,8 +1529,16 @@ template&lt;typename T&gt; </div>
 </div><div class="memdoc">
 
 <p>Convert <a class="el" href="#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> to string name (C++ wrapper). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>Error code to name </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The enumerator's name, or "UNKNOWN_ERROR_CODE" for a value outside the list </dd></dl>
+<p>Expands one entry of the shared error-code list to a case label that returns its name.</p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00158">158</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00188">188</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1324,8 +1566,15 @@ template&lt;typename T&gt; </div>
 </div><div class="memdoc">
 
 <p>Convert <a class="el" href="#a6cf81048dab516aa29417bb0dc741d0e" title="Link layer types (matches Python E3LinkLayer).">E3LinkLayer</a> to string representation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">layer</td><td>Link layer </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>"zmq" or "posix", "unknown" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00629">629</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00751">751</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1354,9 +1603,10 @@ template&lt;typename T&gt; </div>
 
 <p>Current realtime clock reading, in nanoseconds since the Unix epoch. </p>
 <p>This is the clock behind every producer-side timestamp libE3 puts on the wire, chosen so the value stays comparable across hosts (bounded by whatever NTP or PTP discipline is in place) rather than being meaningful only within one process.</p>
-<dl class="section warning"><dt>Warning</dt><dd>This is <code>CLOCK_REALTIME</code>, not a monotonic clock. It can step backwards or jump when the system clock is adjusted, and it must never be subtracted from a monotonic reading to derive a duration. </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>This is <code>CLOCK_REALTIME</code>, not a monotonic clock. It can step backwards or jump when the system clock is adjusted, and it must never be subtracted from a monotonic reading to derive a duration.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Nanoseconds since the Unix epoch, UTC </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00041">41</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00043">43</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1384,8 +1634,15 @@ template&lt;typename T&gt; </div>
 </div><div class="memdoc">
 
 <p>Convert <a class="el" href="#a675f37e2936d707807212fcd3cfa8185" title="E3AP PDU types.">PduType</a> to string representation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td>PDU type </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A static name, "unknown" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00528">528</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00589">589</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1413,8 +1670,15 @@ template&lt;typename T&gt; </div>
 </div><div class="memdoc">
 
 <p>Convert <a class="el" href="#a53bfd79bd9406bfe120864d4eb83b0d5" title="E3AP response codes.">ResponseCode</a> to string representation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>Response code </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>"positive" or "negative", "unknown" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00560">560</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00625">625</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1442,8 +1706,15 @@ template&lt;typename T&gt; </div>
 </div><div class="memdoc">
 
 <p>Convert <a class="el" href="#a42d84c47e47cdcae78a4214ab412b2ec" title="Role this E3 endpoint plays in the protocol.">E3Role</a> to string representation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">role</td><td>Role </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>"ran" or "dapp", "unknown" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00618">618</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00738">738</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1471,8 +1742,15 @@ template&lt;typename T&gt; </div>
 </div><div class="memdoc">
 
 <p>Convert <a class="el" href="#a24bf966c6225dc47ac47d7a8a1986c40" title="Transport layer types (matches Python E3TransportLayer).">E3TransportLayer</a> to string representation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">layer</td><td>Transport layer </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>"sctp", "tcp" or "ipc", "unknown" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00640">640</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00764">764</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1600,7 +1878,9 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00174">174</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p>Default encode and receive buffer size, in bytes. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00205">205</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1624,7 +1904,9 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00177">177</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p>Protocol version this library speaks. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00209">209</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1648,7 +1930,9 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00169">169</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p>Largest <span class="tt">actionData</span> of a dApp control action, in bytes. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00200">200</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1672,7 +1956,35 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00170">170</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p>Largest <span class="tt">reportData</span> of a dApp report, in bytes. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00201">201</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ab9fd4d0a2f9f4256043102de4b108d0b" name="ab9fd4d0a2f9f4256043102de4b108d0b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9fd4d0a2f9f4256043102de4b108d0b">&#9670;&#160;</a></span>MAX_DETAIL_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t libe3::MAX_DETAIL_SIZE = 512</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Largest <span class="tt">detail</span> text of a negative response, in bytes (E3-Text). </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00206">206</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1698,7 +2010,7 @@ template&lt;typename T&gt; </div>
 
 <p>telemetry and control lists SIZE (0..256) </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00173">173</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00204">204</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1722,7 +2034,9 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00168">168</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p>Largest <span class="tt">protocolData</span> of an indication, in bytes. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00199">199</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1748,7 +2062,7 @@ template&lt;typename T&gt; </div>
 
 <p>ranFunctionList SIZE (0..64) </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00172">172</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00203">203</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1772,7 +2086,9 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00171">171</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p>Largest <span class="tt">xAppControlData</span> of an xApp control action, in bytes. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00202">202</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

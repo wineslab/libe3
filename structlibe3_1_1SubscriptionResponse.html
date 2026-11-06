@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -116,12 +116,34 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a1abb4bea69600906228598c53780c766"><td class="mdescLeft">&#160;</td><td class="mdescRight">RAN function the grant is for.  <br /></td></tr>
 <tr class="memitem:ac590bf9d5b22396af90c5bc4ca266af7" id="r_ac590bf9d5b22396af90c5bc4ca266af7"><td class="memItemLeft" align="right" valign="top">std::optional&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac590bf9d5b22396af90c5bc4ca266af7">periodicity</a></td></tr>
 <tr class="memdesc:ac590bf9d5b22396af90c5bc4ca266af7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Granted interval, same unit and range as the request.  <br /></td></tr>
+<tr class="memitem:a04ccd6a56ec8e054e0c753321a308e9d" id="r_a04ccd6a56ec8e054e0c753321a308e9d"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a04ccd6a56ec8e054e0c753321a308e9d">cause</a></td></tr>
+<tr class="memdesc:a04ccd6a56ec8e054e0c753321a308e9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why the subscription was refused (negative only).  <br /></td></tr>
+<tr class="memitem:a83007ce2a58575599224ff53c2d98fa3" id="r_a83007ce2a58575599224ff53c2d98fa3"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a83007ce2a58575599224ff53c2d98fa3">detail</a></td></tr>
+<tr class="memdesc:a83007ce2a58575599224ff53c2d98fa3"><td class="mdescLeft">&#160;</td><td class="mdescRight">UTF-8 text for the cause, up to MAX_DETAIL_SIZE bytes.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>E3AP Subscription Response structure. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00262">262</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00304">304</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a04ccd6a56ec8e054e0c753321a308e9d" name="a04ccd6a56ec8e054e0c753321a308e9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04ccd6a56ec8e054e0c753321a308e9d">&#9670;&#160;</a></span>cause</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt;<a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a>&gt; libe3::SubscriptionResponse::cause</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Why the subscription was refused (negative only). </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00313">313</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
 <a id="ac960fcb64d177ea61df38d56aec22e9e" name="ac960fcb64d177ea61df38d56aec22e9e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac960fcb64d177ea61df38d56aec22e9e">&#9670;&#160;</a></span>control_identifier_list</h2>
 
@@ -136,7 +158,7 @@ Public Attributes</h2></td></tr>
 
 <p>Granted control ids (absent = not reported, empty = none granted). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00268">268</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00310">310</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -154,7 +176,25 @@ Public Attributes</h2></td></tr>
 
 <p>dApp identifier </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00264">264</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00306">306</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a83007ce2a58575599224ff53c2d98fa3" name="a83007ce2a58575599224ff53c2d98fa3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83007ce2a58575599224ff53c2d98fa3">&#9670;&#160;</a></span>detail</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt;std::string&gt; libe3::SubscriptionResponse::detail</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>UTF-8 text for the cause, up to MAX_DETAIL_SIZE bytes. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00314">314</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -172,7 +212,7 @@ Public Attributes</h2></td></tr>
 
 <p>Granted interval, same unit and range as the request. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00270">270</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00312">312</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -190,7 +230,7 @@ Public Attributes</h2></td></tr>
 
 <p>RAN function the grant is for. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00269">269</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00311">311</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -208,7 +248,7 @@ Public Attributes</h2></td></tr>
 
 <p>ID of the corresponding <a class="el" href="structlibe3_1_1SubscriptionRequest.html" title="E3AP Subscription Request structure.">SubscriptionRequest</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00263">263</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00305">305</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -226,7 +266,7 @@ Public Attributes</h2></td></tr>
 
 <p>Response code (positive/negative). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00265">265</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00307">307</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -244,7 +284,7 @@ Public Attributes</h2></td></tr>
 
 <p>Subscription ID (optional). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00266">266</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00308">308</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -262,7 +302,7 @@ Public Attributes</h2></td></tr>
 
 <p>Granted telemetry ids (absent = not reported, empty = none granted). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00267">267</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00309">309</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e3ap_2integrator-guide.html','',''); });
   <div class="headertitle"><div class="title">E3AP: integrator guide </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md375"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md360"></a></p>
 <p>For an engineer who adds E3AP to a RAN stack (the E3 Agent side) or to a dApp (the client side). It is not part of the specification: the specification is the six numbered files in <a class="el" href="dir_af0c76cc165e127d1e03e322192d98eb.html">README.md</a>. This guide holds the code pointers, the configuration, the tests that pin the wire and a list of stale comments.</p>
 <p>Paths are in this repository. Line numbers were read from the tree on top of the interop changes that this branch builds on. They drift. Function names are the stable reference. The OpenAirInterface side is the E3 agent in <span class="tt">openair2/E3AP/</span> of the OpenAirInterface implementation.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md376"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md361"></a>
 Choose a route</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -108,7 +108,7 @@ Choose a route</h1>
 <td class="markdownTableBodyNone"><b>C. Write the codec by hand</b>  </td><td class="markdownTableBodyNone">full control  </td><td class="markdownTableBodyNone">your stack already has an APER library  </td></tr>
 </table>
 <p>Whatever you choose, the pinned APER vectors in <span class="tt">tests/test_asn1_golden.cpp</span> are the acceptance test. The same vectors are in <a href="04-encoding.md#worked-examples">04-encoding.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md377"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md362"></a>
 Configuration of the library</h1>
 <p><span class="tt">E3Config</span> in <span class="tt"><a class="el" href="types_8hpp.html" title="E3AP Protocol Types - Vendor-neutral type definitions.">include/libe3/types.hpp</a></span> selects the role, the link, the encoding and the endpoints.</p>
 <table class="markdownTable">
@@ -117,11 +117,11 @@ Configuration of the library</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">role</span>  </td><td class="markdownTableBodyNone">RAN  </td><td class="markdownTableBodyNone"><span class="tt">E3Role::DAPP</span> for a dApp  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">ran_identifier</span>  </td><td class="markdownTableBodyNone">empty  </td><td class="markdownTableBodyNone">an empty value is sent as <span class="tt">unknown</span> (<span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:137</span>)  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">ran_identifier</span>  </td><td class="markdownTableBodyNone">empty  </td><td class="markdownTableBodyNone">an empty value is sent as <span class="tt">unknown</span> (<span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:138</span>)  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">dapp_name</span>, <span class="tt">dapp_version</span>, <span class="tt">vendor</span>  </td><td class="markdownTableBodyNone"><span class="tt">libe3-dapp</span>, <span class="tt">0.0.0</span>, empty  </td><td class="markdownTableBodyNone">empty vendor is sent as <span class="tt">unknown</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">e3ap_version</span>  </td><td class="markdownTableBodyNone"><span class="tt">1.0.0</span>  </td><td class="markdownTableBodyNone">sent in every SETUP REQUEST and SETUP RESPONSE. <span class="tt">init()</span> returns <span class="tt">INVALID_PARAM</span> if it is not 1 to 32 octets (<span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:227-238</span>)  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">e3ap_version</span>  </td><td class="markdownTableBodyNone"><span class="tt">1.0.0</span>  </td><td class="markdownTableBodyNone">sent in every SETUP REQUEST and SETUP RESPONSE. <span class="tt">init()</span> returns <span class="tt">INVALID_PARAM</span> if it is not 1 to 32 octets (<span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:228-239</span>)  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">link_layer</span>  </td><td class="markdownTableBodyNone">ZMQ  </td><td class="markdownTableBodyNone">POSIX if the build has no ZeroMQ  </td></tr>
 <tr class="markdownTableRowEven">
@@ -136,17 +136,17 @@ Configuration of the library</h1>
 <td class="markdownTableBodyNone"><span class="tt">io_thread_affinity</span>, <span class="tt">io_thread_niceness</span>  </td><td class="markdownTableBodyNone">-1, 0  </td><td class="markdownTableBodyNone">Linux only. Apply to the inbound, outbound and report threads  </td></tr>
 </table>
 <p><span class="tt">connect_timeout_ms</span>, <span class="tt">recv_timeout_ms</span>, <span class="tt">send_timeout_ms</span>, <span class="tt">receive_buffer_size</span> and <span class="tt">send_buffer_size</span> are not read by any code in <span class="tt">src/</span>. The real values are constants in the connectors.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md378"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md363"></a>
 Where each claim comes from</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md379"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md364"></a>
 Identity and links (chapter 01)</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Claim  </th><th class="markdownTableHeadNone">Code pointer  </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Version string <span class="tt">1.0.0</span>  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="types_8hpp.html" title="E3AP Protocol Types - Vendor-neutral type definitions.">include/libe3/types.hpp</a>:416</span>  </td></tr>
+<td class="markdownTableBodyNone">Version string <span class="tt">1.0.0</span>  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="types_8hpp.html" title="E3AP Protocol Types - Vendor-neutral type definitions.">include/libe3/types.hpp</a>:475</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">The RAN does not check the dApp's version  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:846</span> (<span class="tt">handle_setup_request</span> only logs it)  </td></tr>
+<td class="markdownTableBodyNone">The RAN does not check the dApp's version  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:909</span> (<span class="tt">handle_setup_request</span> only logs it)  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">E3 Agent binds the three ZeroMQ sockets  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="zmq__connector_8cpp.html" title="ZeroMQ connector implementation.">src/connector/zmq_connector.cpp</a>:130-141</span>, <span class="tt">201-218</span>, <span class="tt">265-272</span>  </td></tr>
 <tr class="markdownTableRowEven">
@@ -168,65 +168,65 @@ Identity and links (chapter 01)</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Lowest free dApp identifier and subscription identifier  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="subscription__manager_8cpp.html" title="E3 Subscription Manager implementation.">src/core/subscription_manager.cpp</a>:56-78</span>, <span class="tt">207</span>  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md380"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md365"></a>
 Procedures (chapter 03)</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Claim  </th><th class="markdownTableHeadNone">Code pointer  </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Setup on the E3 Agent: decode, register, build the list, answer  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">src/core/e3_interface.cpp</a>:516-564</span>, <span class="tt">840-946</span>  </td></tr>
+<td class="markdownTableBodyNone">Setup on the E3 Agent: decode, register, build the list, answer  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">src/core/e3_interface.cpp</a>:517-565</span>, <span class="tt">903-1015</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Negative reply for garbage or a wrong PDU type  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:948-980</span>  </td></tr>
+<td class="markdownTableBodyNone">Negative reply for garbage or a wrong PDU type, with the cause protocolError  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1017-1051</span>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">RAN function list limits: data 1 to 32768 octets, 256 identifiers, 64 functions  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:865-906</span>, <span class="tt"><a class="el" href="sm__registry_8cpp.html" title="Service Model Registry implementation.">src/core/sm_registry.cpp</a>:35-57</span>  </td></tr>
+<td class="markdownTableBodyNone">RAN function list limits: data 1 to 32768 octets, 256 identifiers, 64 functions  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:932-973</span>, <span class="tt"><a class="el" href="sm__registry_8cpp.html" title="Service Model Registry implementation.">src/core/sm_registry.cpp</a>:35-57</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Encode failure of the SETUP RESPONSE ends the process  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:929-935</span>  </td></tr>
+<td class="markdownTableBodyNone">Encode failure of the SETUP RESPONSE ends the process  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:998-1004</span>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Setup on the dApp: 5 attempts, 4 receives of 500 ms each  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1153-1231</span>  </td></tr>
+<td class="markdownTableBodyNone">Setup on the dApp: 5 attempts, 4 receives of 500 ms each  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1279-1357</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">A negative response still gives "success" to the dApp  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1225</span>, <span class="tt">1389-1392</span>  </td></tr>
+<td class="markdownTableBodyNone">A negative response still gives "success" to the dApp  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1351</span>, <span class="tt">1515-1518</span>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Subscription: only the dApp registration is checked  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:982-1041</span>  </td></tr>
+<td class="markdownTableBodyNone">Subscription: the registration, the RAN function, the lists and every identifier are checked, and a refusal carries a cause  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:864-897</span>, <span class="tt">1053-1126</span>  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Repeat returns the existing identifier. Renewal after expiry keeps the identifier  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="subscription__manager_8cpp.html" title="E3 Subscription Manager implementation.">subscription_manager.cpp</a>:183-201</span>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">The response echoes the request lists and interval  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1028-1036</span>  </td></tr>
+<td class="markdownTableBodyNone">The response echoes the request lists and interval  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1110-1121</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Subscription expiry sweep every 250 ms  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:39</span>, <span class="tt">761-784</span>  </td></tr>
+<td class="markdownTableBodyNone">Subscription expiry sweep every 250 ms  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:40</span>, <span class="tt">762-785</span>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Subscription delete  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1043-1076</span>  </td></tr>
+<td class="markdownTableBodyNone">Subscription delete  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1128-1169</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">The dApp keeps its own deadline from the response  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1430-1440</span>  </td></tr>
+<td class="markdownTableBodyNone">The dApp keeps its own deadline from the response  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1556-1566</span>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Service model starts with the first subscriber and stops with the last  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="subscription__manager_8cpp.html" title="E3 Subscription Manager implementation.">subscription_manager.cpp</a>:234-237</span>, <span class="tt">372-374</span>, <span class="tt">498-517</span>; <span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1689-1703</span>  </td></tr>
+<td class="markdownTableBodyNone">Service model starts with the first subscriber and stops with the last  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="subscription__manager_8cpp.html" title="E3 Subscription Manager implementation.">subscription_manager.cpp</a>:234-237</span>, <span class="tt">372-374</span>, <span class="tt">498-517</span>; <span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1819-1833</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">dApp control: the service model has to run. Otherwise the message is dropped  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1078-1108</span>  </td></tr>
+<td class="markdownTableBodyNone">dApp control: the registration, the RAN function, the control identifier and a running service model are checked. Otherwise a negative MESSAGE ACK with a cause  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1171-1234</span>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">The core never sends a MESSAGE ACK. The service model does  </td><td class="markdownTableBodyNone"><span class="tt">examples/sm_simple/simple_service_model.hpp:167</span>  </td></tr>
+<td class="markdownTableBodyNone">The core sends a MESSAGE ACK only to refuse a control. The service model answers for the controls it takes  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1181-1194</span>, <span class="tt">examples/sm_simple/simple_service_model.hpp:167</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">The dApp handles every MESSAGE ACK, with no dApp filter  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1498-1508</span>  </td></tr>
+<td class="markdownTableBodyNone">The dApp handles every MESSAGE ACK, with no dApp filter  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1624-1638</span>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">dApp report goes through a queue of 1024 and a worker  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:626-656</span>, <span class="tt">739-760</span>, <span class="tt">1110-1118</span>  </td></tr>
+<td class="markdownTableBodyNone">dApp report goes through a queue of 1024 and a worker  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:627-657</span>, <span class="tt">740-761</span>, <span class="tt">1236-1244</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">A report with <span class="tt">sequence_id</span> 0 is refused with <span class="tt">INVALID_PARAM</span>  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1639</span>  </td></tr>
+<td class="markdownTableBodyNone">A report with <span class="tt">sequence_id</span> 0 is refused with <span class="tt">INVALID_PARAM</span>  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1769</span>  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">xApp control from the E3 Agent has no check of <span class="tt">sequence_id</span>  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__agent_8cpp.html" title="E3Agent façade implementation.">src/core/e3_agent.cpp</a>:230-251</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Release from the dApp: unregister, free identifiers, stop service models  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1120-1143</span>; <span class="tt"><a class="el" href="subscription__manager_8cpp.html" title="E3 Subscription Manager implementation.">subscription_manager.cpp</a>:80-134</span>  </td></tr>
+<td class="markdownTableBodyNone">Release from the dApp: unregister, free identifiers, stop service models  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1246-1269</span>; <span class="tt"><a class="el" href="subscription__manager_8cpp.html" title="E3 Subscription Manager implementation.">subscription_manager.cpp</a>:80-134</span>  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">No code in the E3 Agent sends a RELEASE message  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="interop_8md.html">docs/interop.md</a></span> ("When the RAN goes away")  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">RELEASE from the E3 Agent: the dApp clears its session  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1352-1384</span>  </td></tr>
+<td class="markdownTableBodyNone">RELEASE from the E3 Agent: the dApp clears its session  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:1478-1510</span>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Message identifiers: one counter, 1 to 4294967295  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:155-162</span>  </td></tr>
+<td class="markdownTableBodyNone">Message identifiers: one counter, 1 to 4294967295  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:156-163</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">A request identifier of 0 is replaced  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:177-184</span>  </td></tr>
+<td class="markdownTableBodyNone">A request identifier of 0 is replaced  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:178-185</span>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">The timestamp is set in the <span class="tt">Pdu</span> constructor  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="types_8hpp.html" title="E3AP Protocol Types - Vendor-neutral type definitions.">types.hpp</a>:379-385</span>  </td></tr>
+<td class="markdownTableBodyNone">The timestamp is set in the <span class="tt">Pdu</span> constructor  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="types_8hpp.html" title="E3AP Protocol Types - Vendor-neutral type definitions.">types.hpp</a>:426-437</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Outbound queue of 128 places, 10 ms pop  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:253</span>, <span class="tt">677-737</span>; <span class="tt"><a class="el" href="lockfree__queue_8hpp.html" title="Lock-free bounded blocking queue for the E3AP hot paths.">include/libe3/lockfree_queue.hpp</a>:55</span>  </td></tr>
+<td class="markdownTableBodyNone">Outbound queue of 128 places, 10 ms pop  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="e3__interface_8cpp.html" title="E3Interface implementation.">e3_interface.cpp</a>:254</span>, <span class="tt">678-738</span>; <span class="tt"><a class="el" href="lockfree__queue_8hpp.html" title="Lock-free bounded blocking queue for the E3AP hot paths.">include/libe3/lockfree_queue.hpp</a>:55</span>  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md381"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md366"></a>
 Encoding and framing (chapter 04)</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -246,17 +246,17 @@ Encoding and framing (chapter 04)</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">ASN.1 encoder buffer of 65536 octets  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="asn1__encoder_8hpp.html" title="ASN.1 APER Encoder for E3AP PDUs.">src/encoder/asn1_encoder.hpp</a>:39</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">An empty RAN function list is omitted  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="asn1__encoder_8cpp.html" title="ASN.1 APER Encoder implementation.">src/encoder/asn1_encoder.cpp</a>:255</span>  </td></tr>
+<td class="markdownTableBodyNone">An empty RAN function list is omitted  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="asn1__encoder_8cpp.html" title="ASN.1 APER Encoder implementation.">src/encoder/asn1_encoder.cpp</a>:315</span>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">A zero timestamp is left out in APER and Protobuf  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="asn1__encoder_8cpp.html" title="ASN.1 APER Encoder implementation.">asn1_encoder.cpp</a>:173-183</span>  </td></tr>
+<td class="markdownTableBodyNone">A zero timestamp is left out in APER and Protobuf  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="asn1__encoder_8cpp.html" title="ASN.1 APER Encoder implementation.">asn1_encoder.cpp</a>:233-243</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">JSON: flat object, payloads nested, <span class="tt">data</span> wrapper refused  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="json__encoder_8cpp.html" title="JSON Encoder implementation.">src/encoder/json_encoder.cpp</a>:171-184</span>, <span class="tt">556-657</span>, <span class="tt">704</span>  </td></tr>
+<td class="markdownTableBodyNone">JSON: flat object, payloads nested, <span class="tt">data</span> wrapper refused  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="json__encoder_8cpp.html" title="JSON Encoder implementation.">src/encoder/json_encoder.cpp</a>:171-184</span>, <span class="tt">587-688</span>, <span class="tt">735</span>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">JSON accepts <span class="tt">telemetryGrantedList</span> as an alias  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="json__encoder_8cpp.html" title="JSON Encoder implementation.">json_encoder.cpp</a>:456-464</span>  </td></tr>
+<td class="markdownTableBodyNone">JSON accepts <span class="tt">telemetryGrantedList</span> as an alias  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="json__encoder_8cpp.html" title="JSON Encoder implementation.">json_encoder.cpp</a>:485-493</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Protobuf: response code and wrapper  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="protobuf__encoder_8cpp.html" title="Protocol Buffers encoder for E3AP PDUs.">src/encoder/protobuf_encoder.cpp</a>:27-30</span>, <span class="tt">99-108</span>, <span class="tt">347</span>  </td></tr>
+<td class="markdownTableBodyNone">Protobuf: response code and wrapper  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="protobuf__encoder_8cpp.html" title="Protocol Buffers encoder for E3AP PDUs.">src/encoder/protobuf_encoder.cpp</a>:48-51</span>, <span class="tt">121-130</span>, <span class="tt">374</span>  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md382"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md367"></a>
 The pinned vectors</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -271,7 +271,7 @@ The pinned vectors</h2>
 <td class="markdownTableBodyNone"><span class="tt">tests/test_encoder_equivalence.cpp</span>  </td><td class="markdownTableBodyNone">the same PDU through the three encodings  </td></tr>
 </table>
 <p>Update the hex in <span class="tt">tests/test_asn1_golden.cpp</span> and add a row to the change ledger in <a class="el" href="md_docs_2interop.html">../interop.md</a> in the same pull request as any change of the wire.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md383"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md368"></a>
 Stale comments in the code</h1>
 <p>These comments disagree with the code. They are not discrepancies of the protocol.</p>
 <ul>
@@ -283,7 +283,7 @@ Stale comments in the code</h1>
 <li><span class="tt">LIBE3_PROTOCOL_VERSION</span>, <span class="tt">MAX_ACTION_DATA_SIZE</span>, <span class="tt">MAX_DAPP_REPORT_DATA_SIZE</span> and <span class="tt">MAX_XAPP_CTRL_DATA_SIZE</span> in <span class="tt"><a class="el" href="types_8hpp.html" title="E3AP Protocol Types - Vendor-neutral type definitions.">types.hpp</a></span> are not used.</li>
 <li>The README of the repository lists <span class="tt">send_control</span> and <span class="tt">send_report</span> without <span class="tt">sequence_id</span>, and lists the unused timeout and buffer fields.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md384"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md369"></a>
 Checklist for a new E3 Agent</h1>
 <ol type="1">
 <li>Open the three channels with the same link, transport and encoding as your dApps.</li>

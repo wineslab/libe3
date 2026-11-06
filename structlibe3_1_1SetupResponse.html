@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -112,12 +112,34 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a094916c010920b6345574ccae42165c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">RAN identifier (mandatory); 1..64 bytes over ASN.1.  <br /></td></tr>
 <tr class="memitem:a90c0f5bae5dbc4e6013203797739bd85" id="r_a90c0f5bae5dbc4e6013203797739bd85"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structlibe3_1_1RanFunctionDef.html">RanFunctionDef</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a90c0f5bae5dbc4e6013203797739bd85">ran_function_list</a></td></tr>
 <tr class="memdesc:a90c0f5bae5dbc4e6013203797739bd85"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of available RAN functions (optional).  <br /></td></tr>
+<tr class="memitem:a97633b0361606229f8d630d27ec6731e" id="r_a97633b0361606229f8d630d27ec6731e"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a97633b0361606229f8d630d27ec6731e">cause</a></td></tr>
+<tr class="memdesc:a97633b0361606229f8d630d27ec6731e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why the setup was refused (negative only).  <br /></td></tr>
+<tr class="memitem:ac31079a0e02a9ead3b2a51ad084be17e" id="r_ac31079a0e02a9ead3b2a51ad084be17e"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac31079a0e02a9ead3b2a51ad084be17e">detail</a></td></tr>
+<tr class="memdesc:ac31079a0e02a9ead3b2a51ad084be17e"><td class="mdescLeft">&#160;</td><td class="mdescRight">UTF-8 text for the cause, up to MAX_DETAIL_SIZE bytes.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>E3AP Setup Response structure. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00230">230</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00270">270</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a97633b0361606229f8d630d27ec6731e" name="a97633b0361606229f8d630d27ec6731e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a97633b0361606229f8d630d27ec6731e">&#9670;&#160;</a></span>cause</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt;<a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a>&gt; libe3::SetupResponse::cause</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Why the setup was refused (negative only). </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00277">277</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
 <a id="a2b58e4d573e0a32ed95800082996382e" name="a2b58e4d573e0a32ed95800082996382e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2b58e4d573e0a32ed95800082996382e">&#9670;&#160;</a></span>dapp_identifier</h2>
 
@@ -132,7 +154,25 @@ Public Attributes</h2></td></tr>
 
 <p>Assigned dApp identifier (optional). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00234">234</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00274">274</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ac31079a0e02a9ead3b2a51ad084be17e" name="ac31079a0e02a9ead3b2a51ad084be17e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac31079a0e02a9ead3b2a51ad084be17e">&#9670;&#160;</a></span>detail</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt;std::string&gt; libe3::SetupResponse::detail</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>UTF-8 text for the cause, up to MAX_DETAIL_SIZE bytes. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00278">278</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -150,7 +190,7 @@ Public Attributes</h2></td></tr>
 
 <p>E3AP protocol version (optional). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00233">233</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00273">273</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -168,7 +208,7 @@ Public Attributes</h2></td></tr>
 
 <p>List of available RAN functions (optional). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00236">236</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00276">276</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -186,7 +226,7 @@ Public Attributes</h2></td></tr>
 
 <p>RAN identifier (mandatory); 1..64 bytes over ASN.1. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00235">235</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00275">275</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -204,7 +244,7 @@ Public Attributes</h2></td></tr>
 
 <p>ID of the corresponding <a class="el" href="structlibe3_1_1SetupRequest.html" title="E3AP Setup Request structure.">SetupRequest</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00231">231</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00271">271</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -222,7 +262,7 @@ Public Attributes</h2></td></tr>
 
 <p>Response code (positive/negative). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00232">232</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00272">272</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

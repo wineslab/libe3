@@ -12,8 +12,9 @@ var searchData=
   ['data_5fsize_9',['data_size',['../structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__msg__format1__s.html#a85df42cacc1548ba9f1c4d4a45959346',1,'libe3::e2sm_dapp::e2sm_dapp_ind_msg_format1_s::data_size'],['../structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ctrl__msg__format1__s.html#abfaa44550c1aa37c58d72bed09256a40',1,'libe3::e2sm_dapp::e2sm_dapp_ctrl_msg_format1_s::data_size']]],
   ['default_5fbuffer_5fsize_10',['DEFAULT_BUFFER_SIZE',['../namespacelibe3.html#a809598c8d63a2bdce0d447411324a2b5',1,'libe3']]],
   ['description_11',['description',['../structlibe3__e2sm__dapp__ran__function__name__t.html#af21e01c3fec3b4d9b9472a270bdb3e2f',1,'libe3_e2sm_dapp_ran_function_name_t']]],
-  ['disabled_5fring_12',['disabled_ring',['../latrec_8c.html#aa190e5ff9a2fdfcb1997a98ca5ae5665',1,'latrec.c']]],
-  ['disconnect_5fhandler_13',['disconnect_handler',['../structlibe3_1_1E3Agent_1_1Impl.html#aeb94050d32ccd5e5d9ec1f7d66895199',1,'libe3::E3Agent::Impl']]],
-  ['disconnect_5freason_14',['disconnect_reason',['../structlibe3_1_1py_1_1E3Event.html#a64a96173f6ad562b36604c04025a21be',1,'libe3::py::E3Event']]],
-  ['dropped_15',['dropped',['../structlibe3_1_1py_1_1DAppSession_1_1Impl.html#ab95aae0df6ca13374254ba3d39e46117',1,'libe3::py::DAppSession::Impl']]]
+  ['detail_12',['detail',['../structlibe3_1_1SetupResponse.html#ac31079a0e02a9ead3b2a51ad084be17e',1,'libe3::SetupResponse::detail'],['../structlibe3_1_1SubscriptionResponse.html#a83007ce2a58575599224ff53c2d98fa3',1,'libe3::SubscriptionResponse::detail'],['../structlibe3_1_1MessageAck.html#abdd8a93de59b913f1b7b30804b6d8f12',1,'libe3::MessageAck::detail']]],
+  ['disabled_5fring_13',['disabled_ring',['../latrec_8c.html#aa190e5ff9a2fdfcb1997a98ca5ae5665',1,'latrec.c']]],
+  ['disconnect_5fhandler_14',['disconnect_handler',['../structlibe3_1_1E3Agent_1_1Impl.html#aeb94050d32ccd5e5d9ec1f7d66895199',1,'libe3::E3Agent::Impl']]],
+  ['disconnect_5freason_15',['disconnect_reason',['../structlibe3_1_1py_1_1E3Event.html#a64a96173f6ad562b36604c04025a21be',1,'libe3::py::E3Event']]],
+  ['dropped_16',['dropped',['../structlibe3_1_1py_1_1DAppSession_1_1Impl.html#ab95aae0df6ca13374254ba3d39e46117',1,'libe3::py::DAppSession::Impl']]]
 ];

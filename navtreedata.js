@@ -171,569 +171,628 @@ var NAVTREE =
       ] ],
       [ "9. Rules that cross elements", "md_docs_2e2sm-dapp_205-semantics-and-constraints.html#autotoc_md124", null ]
     ] ],
-    [ "E2SM-DAPP: implementation notes and known discrepancies", "md_docs_2e2sm-dapp_206-discrepancies.html", [
-      [ "1. Dead code", "md_docs_2e2sm-dapp_206-discrepancies.html#autotoc_md126", null ],
-      [ "2. Where the grammar and the implementations disagree", "md_docs_2e2sm-dapp_206-discrepancies.html#autotoc_md127", null ],
-      [ "3. Aborts and error handling in implementation A", "md_docs_2e2sm-dapp_206-discrepancies.html#autotoc_md128", null ],
-      [ "4. Consumers", "md_docs_2e2sm-dapp_206-discrepancies.html#autotoc_md129", null ],
-      [ "5. Differences between the implementations", "md_docs_2e2sm-dapp_206-discrepancies.html#autotoc_md130", [
-        [ "5.1 Implementation C's E2 module against implementation A and the OpenAirInterface RAN", "md_docs_2e2sm-dapp_206-discrepancies.html#autotoc_md131", null ],
-        [ "5.2 Runtime helpers of implementation C that the port works around", "md_docs_2e2sm-dapp_206-discrepancies.html#autotoc_md132", null ]
-      ] ],
-      [ "6. What the reference test vectors prove and what they do not", "md_docs_2e2sm-dapp_206-discrepancies.html#autotoc_md133", null ],
-      [ "7. Open items", "md_docs_2e2sm-dapp_206-discrepancies.html#autotoc_md134", null ]
-    ] ],
     [ "E2SM-DAPP: code pointers and evidence", "md_docs_2e2sm-dapp_2code-pointers.html", [
-      [ "Chapter README: Artifacts and code roots", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md136", [
-        [ "Where each part is specified", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md137", null ],
-        [ "Where the artifacts are", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md138", null ],
-        [ "Related documents", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md139", null ],
-        [ "Where the code references point", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md140", null ]
+      [ "Chapter README: Artifacts and code roots", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md126", [
+        [ "Where each part is specified", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md127", null ],
+        [ "Where the artifacts are", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md128", null ],
+        [ "Related documents", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md129", null ],
+        [ "Where the code references point", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md130", null ]
       ] ],
-      [ "Chapter 1: Identity and registration (code evidence)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md141", [
-        [ "Identity values and where they are defined", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md142", null ],
-        [ "The OID comment", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md143", null ],
-        [ "Two kinds of \"RAN function ID\"", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md144", null ],
-        [ "Where the identity is written down (section 1.3 of the old text)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md145", null ],
-        [ "What a real RAN sends (old section 2.1)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md146", null ],
-        [ "What flexric's agent adds or replaces (old section 2.2)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md147", null ],
-        [ "E2 Setup Request (old section 3.1)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md148", null ],
-        [ "RIC Service Update (old section 3.2)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md149", null ],
-        [ "Checklist notes (old section 4)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md150", null ]
+      [ "Chapter 1: Identity and registration (code evidence)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md131", [
+        [ "Identity values and where they are defined", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md132", null ],
+        [ "The OID comment", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md133", null ],
+        [ "Two kinds of \"RAN function ID\"", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md134", null ],
+        [ "Where the identity is written down (section 1.3 of the old text)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md135", null ],
+        [ "What a real RAN sends (old section 2.1)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md136", null ],
+        [ "What flexric's agent adds or replaces (old section 2.2)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md137", null ],
+        [ "E2 Setup Request (old section 3.1)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md138", null ],
+        [ "RIC Service Update (old section 3.2)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md139", null ],
+        [ "Checklist notes (old section 4)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md140", null ]
       ] ],
-      [ "Chapter 2: E2AP information element mapping (code evidence)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md151", [
-        [ "Style numbers, formats and names (old section 2, \"Where each fact comes from\")", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md152", null ],
-        [ "Why INSERT, POLICY and QUERY are \"not used\"", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md153", null ],
-        [ "Why there is no call process ID", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md154", null ],
-        [ "Common types", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md155", null ],
-        [ "Event trigger and action definition", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md156", null ],
-        [ "RAN function definition", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md157", null ],
-        [ "Indication header", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md158", null ],
-        [ "Control header and outcome", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md159", null ],
-        [ "The Spectrum outcome worked example (old section 8.2)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md160", null ],
-        [ "How a consumer reads the outcome (old section 8.3)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md161", null ],
-        [ "E3 RAN function id registry (old section 8.4)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md162", null ],
-        [ "Where the elements are produced and consumed (old section 9)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md163", null ],
-        [ "The same elements in libe3 and OCUDU (old section 10)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md164", null ]
+      [ "Chapter 2: E2AP information element mapping (code evidence)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md141", [
+        [ "Style numbers, formats and names (old section 2, \"Where each fact comes from\")", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md142", null ],
+        [ "Why INSERT, POLICY and QUERY are \"not used\"", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md143", null ],
+        [ "Why there is no call process ID", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md144", null ],
+        [ "Common types", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md145", null ],
+        [ "Event trigger and action definition", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md146", null ],
+        [ "RAN function definition", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md147", null ],
+        [ "Indication header", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md148", null ],
+        [ "Control header and outcome", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md149", null ],
+        [ "The Spectrum outcome worked example (old section 8.2)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md150", null ],
+        [ "How a consumer reads the outcome (old section 8.3)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md151", null ],
+        [ "E3 RAN function id registry (old section 8.4)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md152", null ],
+        [ "Where the elements are produced and consumed (old section 9)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md153", null ],
+        [ "The same elements in libe3 and OCUDU (old section 10)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md154", null ]
       ] ],
-      [ "Chapter 3: Procedure flow (code evidence moved out of 03-procedure-flow.md)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md165", [
-        [ "The cast: who is who in the code", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md166", null ],
-        [ "Every message on the flow", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md167", null ],
-        [ "Discovery: the RAN function definition (E2 Setup and RIC Service Update)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md168", null ],
-        [ "When the set of dApps changes", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md169", null ],
-        [ "Discovery in every report header", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md170", null ],
-        [ "What discovery does not do", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md171", null ],
-        [ "Subscription", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md172", null ],
-        [ "Indication delivery (report up)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md173", null ],
-        [ "Control relay: policy down", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md174", null ],
-        [ "Control relay: mitigation back to the air", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md175", null ],
-        [ "The deferred acknowledge", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md176", null ],
-        [ "The mitigation figure", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md177", null ],
-        [ "The sequence-id chain", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md178", null ],
-        [ "The same flow in each implementation", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md179", null ]
+      [ "Chapter 3: Procedure flow (code evidence moved out of 03-procedure-flow.md)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md155", [
+        [ "The cast: who is who in the code", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md156", null ],
+        [ "Every message on the flow", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md157", null ],
+        [ "Discovery: the RAN function definition (E2 Setup and RIC Service Update)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md158", null ],
+        [ "When the set of dApps changes", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md159", null ],
+        [ "Discovery in every report header", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md160", null ],
+        [ "What discovery does not do", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md161", null ],
+        [ "Subscription", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md162", null ],
+        [ "Indication delivery (report up)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md163", null ],
+        [ "Control relay: policy down", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md164", null ],
+        [ "Control relay: mitigation back to the air", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md165", null ],
+        [ "The deferred acknowledge", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md166", null ],
+        [ "The mitigation figure", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md167", null ],
+        [ "The sequence-id chain", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md168", null ],
+        [ "The same flow in each implementation", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md169", null ]
       ] ],
-      [ "Chapter 4: Encoding (code evidence moved out of 04-encoding.md)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md180", [
-        [ "What is on the wire", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md181", null ],
-        [ "Byte order, packing, length prefixes", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md182", null ],
-        [ "A receiver that sees extension additions", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md183", null ],
-        [ "Implementation limits tighter than the grammar", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md184", null ],
-        [ "Worked examples: where the bytes come from", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md185", null ],
-        [ "Golden vectors (full list)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md186", null ],
-        [ "The type map across implementations", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md187", [
-          [ "Type names", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md188", null ],
-          [ "How the same field is held", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md189", null ],
-          [ "The struct layout of flexric is an ABI", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md190", null ]
+      [ "Chapter 4: Encoding (code evidence moved out of 04-encoding.md)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md170", [
+        [ "What is on the wire", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md171", null ],
+        [ "Byte order, packing, length prefixes", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md172", null ],
+        [ "A receiver that sees extension additions", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md173", null ],
+        [ "Implementation limits tighter than the grammar", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md174", null ],
+        [ "Worked examples: where the bytes come from", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md175", null ],
+        [ "Golden vectors (full list)", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md176", null ],
+        [ "The type map across implementations", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md177", [
+          [ "Type names", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md178", null ],
+          [ "How the same field is held", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md179", null ],
+          [ "The struct layout of flexric is an ABI", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md180", null ]
         ] ],
-        [ "Build switches", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md191", [
-          [ "flexric: <span class=\"tt\">SM_ENCODING_DAPP</span>", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md192", null ],
-          [ "libe3: <span class=\"tt\">LIBE3_ENABLE_E2SM_DAPP</span>", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md193", null ],
-          [ "OCUDU: <span class=\"tt\">e2sm_dapp_enabled</span>", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md194", null ]
+        [ "Build switches", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md181", [
+          [ "flexric: <span class=\"tt\">SM_ENCODING_DAPP</span>", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md182", null ],
+          [ "libe3: <span class=\"tt\">LIBE3_ENABLE_E2SM_DAPP</span>", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md183", null ],
+          [ "OCUDU: <span class=\"tt\">e2sm_dapp_enabled</span>", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md184", null ]
         ] ],
-        [ "Reproducing and checking an encoding", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md195", null ]
+        [ "Reproducing and checking an encoding", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md185", null ]
       ] ],
-      [ "Chapter 5: Semantics and constraints", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md196", [
-        [ "1. Numbering: formats and styles", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md197", null ],
-        [ "2. Identifiers", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md198", null ],
-        [ "3. Clocks and units", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md199", null ],
-        [ "Whose clock is each timestamp on", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md200", null ],
-        [ "4. Optional fields: absent is not an error", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md201", null ],
-        [ "5. What the code treats as mandatory", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md202", null ],
-        [ "6. What each implementation checks", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md203", [
-          [ "6.1 On encode", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md204", null ],
-          [ "6.2 On decode", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md205", null ],
-          [ "6.3 Error paths in summary", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md206", null ]
+      [ "Chapter 5: Semantics and constraints", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md186", [
+        [ "1. Numbering: formats and styles", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md187", null ],
+        [ "2. Identifiers", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md188", null ],
+        [ "3. Clocks and units", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md189", null ],
+        [ "Whose clock is each timestamp on", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md190", null ],
+        [ "4. Optional fields: absent is not an error", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md191", null ],
+        [ "5. What the code treats as mandatory", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md192", null ],
+        [ "6. What each implementation checks", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md193", [
+          [ "6.1 On encode", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md194", null ],
+          [ "6.2 On decode", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md195", null ],
+          [ "6.3 Error paths in summary", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md196", null ]
         ] ],
-        [ "7. Behavior on unknown ids and formats", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md207", null ],
-        [ "8. Control semantics", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md208", [
-          [ "8.1 What \"applied\" means, and what the acknowledge says", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md209", null ],
-          [ "8.2 What a consumer must do", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md210", null ],
-          [ "8.3 Ordering and replacement", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md211", null ]
+        [ "7. Behavior on unknown ids and formats", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md197", null ],
+        [ "8. Control semantics", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md198", [
+          [ "8.1 What \"applied\" means, and what the acknowledge says", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md199", null ],
+          [ "8.2 What a consumer must do", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md200", null ],
+          [ "8.3 Ordering and replacement", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md201", null ]
         ] ],
-        [ "9. Rules that cross elements", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md212", null ]
+        [ "9. Rules that cross elements", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md202", null ]
       ] ],
-      [ "Chapter 6: Discrepancies, TODOs and dead code", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md213", [
-        [ "1. Dead code", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md214", null ],
-        [ "2. Where the grammar and the code disagree", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md215", null ],
-        [ "3. Aborts and error handling in flexric", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md216", null ],
-        [ "4. Consumers", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md217", null ],
-        [ "5. Differences between the implementations", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md218", [
-          [ "5.1 OCUDU's E2 module against flexric and OAI", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md219", null ],
-          [ "5.2 OCUDU runtime helpers the port works around", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md220", null ]
+      [ "Chapter 6: Discrepancies, TODOs and dead code", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md203", [
+        [ "1. Dead code", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md204", null ],
+        [ "2. Where the grammar and the code disagree", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md205", null ],
+        [ "3. Aborts and error handling in flexric", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md206", null ],
+        [ "4. Consumers", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md207", null ],
+        [ "5. Differences between the implementations", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md208", [
+          [ "5.1 OCUDU's E2 module against flexric and OAI", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md209", null ],
+          [ "5.2 OCUDU runtime helpers the port works around", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md210", null ]
         ] ],
-        [ "6. What the golden vectors prove and what they do not", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md221", null ],
-        [ "7. Open items", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md222", null ]
+        [ "6. What the golden vectors prove and what they do not", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md211", null ],
+        [ "7. Open items", "md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md212", null ]
       ] ]
     ] ],
     [ "E2SM-DAPP: integrator guide", "md_docs_2e2sm-dapp_2integrator-guide.html", [
-      [ "Choose a route", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md224", null ],
-      [ "Route A: link libe3", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md225", [
-        [ "Build and install libe3", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md226", null ],
-        [ "Use it from CMake", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md227", null ],
-        [ "C++: pack an indication header and indication message", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md228", null ],
-        [ "C++: unpack a control and read it", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md229", null ],
-        [ "C++: build the control outcome (the RAN side of an acknowledge)", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md230", null ],
-        [ "C: the same, from C", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md231", null ]
+      [ "Choose a route", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md214", null ],
+      [ "Route A: link libe3", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md215", [
+        [ "Build and install libe3", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md216", null ],
+        [ "Use it from CMake", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md217", null ],
+        [ "C++: pack an indication header and indication message", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md218", null ],
+        [ "C++: unpack a control and read it", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md219", null ],
+        [ "C++: build the control outcome (the RAN side of an acknowledge)", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md220", null ],
+        [ "C: the same, from C", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md221", null ]
       ] ],
-      [ "Route B: run asn1c yourself", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md232", [
-        [ "The asn1c you must use", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md233", null ],
-        [ "The exact flags", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md234", null ],
-        [ "Compile definitions and layout", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md235", null ]
+      [ "Route B: run asn1c yourself", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md222", [
+        [ "The asn1c you must use", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md223", null ],
+        [ "The exact flags", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md224", null ],
+        [ "Compile definitions and layout", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md225", null ]
       ] ],
-      [ "Route C: a hand-written codec (OCUDU)", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md236", null ],
-      [ "The OCUDU to libe3 C++ interface", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md237", null ],
-      [ "The contract: the golden vectors", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md238", [
-        [ "The shared test-fixture technique", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md239", null ],
-        [ "Reproducing the golden vectors", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md240", null ]
+      [ "Route C: a hand-written codec (OCUDU)", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md226", null ],
+      [ "The OCUDU to libe3 C++ interface", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md227", null ],
+      [ "The contract: the golden vectors", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md228", [
+        [ "The shared test-fixture technique", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md229", null ],
+        [ "Reproducing the golden vectors", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md230", null ]
       ] ],
-      [ "Checklist for a new stack", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md241", null ],
-      [ "What is deliberately not here", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md242", null ]
+      [ "Checklist for a new stack", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md231", null ],
+      [ "What is deliberately not here", "md_docs_2e2sm-dapp_2integrator-guide.html#autotoc_md232", null ]
     ] ],
     [ "E3AP: identity and registration", "md_docs_2e3ap_201-identity-and-registration.html", [
-      [ "Identity", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md259", [
-        [ "Two sides of one interface", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md260", null ],
-        [ "Identifiers", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md261", null ]
+      [ "Identity", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md249", [
+        [ "Two sides of one interface", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md250", null ],
+        [ "Identifiers", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md251", null ]
       ] ],
-      [ "Links and transports", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md262", [
-        [ "The three channels", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md263", null ],
-        [ "Default endpoints", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md264", null ]
+      [ "Links and transports", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md252", [
+        [ "The three channels", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md253", null ],
+        [ "Default endpoints", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md254", null ]
       ] ],
-      [ "How a dApp registers", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md265", [
-        [ "What the RAN function list holds", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md266", null ]
+      [ "How a dApp registers", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md255", [
+        [ "What the RAN function list holds", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md256", null ]
       ] ],
-      [ "Requirements for an E3 Agent", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md267", null ],
-      [ "Related", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md268", null ]
+      [ "Requirements for an E3 Agent", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md257", null ],
+      [ "Related", "md_docs_2e3ap_201-identity-and-registration.html#autotoc_md258", null ]
     ] ],
     [ "E3AP: information elements", "md_docs_2e3ap_202-ie-mapping.html", [
-      [ "The messages at a glance", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md270", null ],
-      [ "Common types", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md271", null ],
-      [ "E3-PDU", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md272", null ],
-      [ "E3-SetupRequest", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md273", null ],
-      [ "E3-SetupResponse", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md274", null ],
-      [ "E3-RanFunctionDefinition", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md275", null ],
-      [ "E3-SubscriptionRequest", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md276", null ],
-      [ "E3-SubscriptionResponse", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md277", null ],
-      [ "E3-SubscriptionDelete", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md278", null ],
-      [ "E3-IndicationMessage", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md279", null ],
-      [ "E3-DAppControlAction", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md280", null ],
-      [ "E3-DAppReport", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md281", null ],
-      [ "E3-XAppControlAction", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md282", null ],
-      [ "E3-ReleaseMessage", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md283", null ],
-      [ "E3-MessageAck", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md284", null ],
-      [ "Presence notation", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md285", null ]
+      [ "The messages at a glance", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md260", null ],
+      [ "Common types", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md261", null ],
+      [ "E3-PDU", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md262", null ],
+      [ "E3-SetupRequest", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md263", null ],
+      [ "E3-SetupResponse", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md264", null ],
+      [ "E3-RanFunctionDefinition", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md265", null ],
+      [ "E3-SubscriptionRequest", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md266", null ],
+      [ "E3-SubscriptionResponse", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md267", null ],
+      [ "E3-SubscriptionDelete", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md268", null ],
+      [ "E3-IndicationMessage", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md269", null ],
+      [ "E3-DAppControlAction", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md270", null ],
+      [ "E3-DAppReport", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md271", null ],
+      [ "E3-XAppControlAction", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md272", null ],
+      [ "E3-ReleaseMessage", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md273", null ],
+      [ "E3-MessageAck", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md274", null ],
+      [ "Presence notation", "md_docs_2e3ap_202-ie-mapping.html#autotoc_md275", null ]
     ] ],
     [ "E3AP: procedure flow", "md_docs_2e3ap_203-procedure-flow.html", [
-      [ "Roles", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md287", null ],
-      [ "Messages on the flow", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md288", null ],
-      [ "Setup", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md289", [
-        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md290", null ],
-        [ "Procedure", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md291", null ],
-        [ "Successful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md292", null ],
-        [ "Unsuccessful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md293", null ],
-        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md294", null ]
+      [ "Roles", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md277", null ],
+      [ "Messages on the flow", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md278", null ],
+      [ "Setup", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md279", [
+        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md280", null ],
+        [ "Procedure", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md281", null ],
+        [ "Successful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md282", null ],
+        [ "Unsuccessful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md283", null ],
+        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md284", null ]
       ] ],
-      [ "Subscription", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md295", [
-        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md296", null ],
-        [ "Procedure", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md297", null ],
-        [ "Successful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md298", null ],
-        [ "Unsuccessful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md299", null ],
-        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md300", null ]
+      [ "Subscription", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md285", [
+        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md286", null ],
+        [ "Procedure", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md287", null ],
+        [ "Successful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md288", null ],
+        [ "Unsuccessful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md289", null ],
+        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md290", null ]
       ] ],
-      [ "Subscription delete", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md301", [
-        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md302", null ],
-        [ "Procedure", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md303", null ],
-        [ "Successful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md304", null ],
-        [ "Unsuccessful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md305", null ],
-        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md306", null ]
+      [ "Subscription delete", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md291", [
+        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md292", null ],
+        [ "Procedure", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md293", null ],
+        [ "Successful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md294", null ],
+        [ "Unsuccessful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md295", null ],
+        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md296", null ]
       ] ],
-      [ "Indication", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md307", [
-        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md308", null ],
-        [ "Procedure", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md309", null ],
-        [ "Successful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md310", null ],
-        [ "Unsuccessful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md311", null ],
-        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md312", null ]
+      [ "Indication", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md297", [
+        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md298", null ],
+        [ "Procedure", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md299", null ],
+        [ "Successful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md300", null ],
+        [ "Unsuccessful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md301", null ],
+        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md302", null ]
       ] ],
-      [ "dApp Control", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md313", [
-        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md314", null ],
-        [ "Procedure", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md315", null ],
-        [ "Successful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md316", null ],
-        [ "Unsuccessful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md317", null ],
-        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md318", null ]
+      [ "dApp Control", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md303", [
+        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md304", null ],
+        [ "Procedure", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md305", null ],
+        [ "Successful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md306", null ],
+        [ "Unsuccessful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md307", null ],
+        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md308", null ]
       ] ],
-      [ "dApp Report", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md319", [
-        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md320", null ],
-        [ "Procedure", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md321", null ],
-        [ "Successful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md322", null ],
-        [ "Unsuccessful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md323", null ],
-        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md324", null ]
+      [ "dApp Report", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md309", [
+        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md310", null ],
+        [ "Procedure", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md311", null ],
+        [ "Successful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md312", null ],
+        [ "Unsuccessful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md313", null ],
+        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md314", null ]
       ] ],
-      [ "xApp Control", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md325", [
-        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md326", null ],
-        [ "Procedure", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md327", null ],
-        [ "Successful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md328", null ],
-        [ "Unsuccessful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md329", null ],
-        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md330", null ]
+      [ "xApp Control", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md315", [
+        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md316", null ],
+        [ "Procedure", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md317", null ],
+        [ "Successful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md318", null ],
+        [ "Unsuccessful operation", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md319", null ],
+        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md320", null ]
       ] ],
-      [ "Release", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md331", [
-        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md332", null ],
-        [ "Procedure from the dApp", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md333", null ],
-        [ "Procedure from the E3 Agent", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md334", null ],
-        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md335", null ]
+      [ "Release", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md321", [
+        [ "Purpose", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md322", null ],
+        [ "Procedure from the dApp", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md323", null ],
+        [ "Procedure from the E3 Agent", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md324", null ],
+        [ "Abnormal conditions", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md325", null ]
       ] ],
-      [ "The sequence identifier chain", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md336", null ],
-      [ "Threads and queues", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md337", null ]
+      [ "The sequence identifier chain", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md326", null ],
+      [ "Threads and queues", "md_docs_2e3ap_203-procedure-flow.html#autotoc_md327", null ]
     ] ],
     [ "E3AP: encoding", "md_docs_2e3ap_204-encoding.html", [
-      [ "What is on the wire", "md_docs_2e3ap_204-encoding.html#autotoc_md339", null ],
-      [ "APER", "md_docs_2e3ap_204-encoding.html#autotoc_md340", [
-        [ "The rules that decide almost every byte", "md_docs_2e3ap_204-encoding.html#autotoc_md341", null ],
-        [ "Rules for each construct", "md_docs_2e3ap_204-encoding.html#autotoc_md342", null ],
-        [ "Worked examples", "md_docs_2e3ap_204-encoding.html#autotoc_md343", null ],
-        [ "Size of the encoding", "md_docs_2e3ap_204-encoding.html#autotoc_md344", null ],
-        [ "A receiver that sees extension additions", "md_docs_2e3ap_204-encoding.html#autotoc_md345", null ]
+      [ "What is on the wire", "md_docs_2e3ap_204-encoding.html#autotoc_md329", null ],
+      [ "APER", "md_docs_2e3ap_204-encoding.html#autotoc_md330", [
+        [ "The rules that decide almost every byte", "md_docs_2e3ap_204-encoding.html#autotoc_md331", null ],
+        [ "Rules for each construct", "md_docs_2e3ap_204-encoding.html#autotoc_md332", null ],
+        [ "Worked examples", "md_docs_2e3ap_204-encoding.html#autotoc_md333", null ],
+        [ "Size of the encoding", "md_docs_2e3ap_204-encoding.html#autotoc_md334", null ],
+        [ "A receiver that sees extension additions", "md_docs_2e3ap_204-encoding.html#autotoc_md335", null ]
       ] ],
-      [ "JSON", "md_docs_2e3ap_204-encoding.html#autotoc_md346", null ],
-      [ "Protobuf", "md_docs_2e3ap_204-encoding.html#autotoc_md347", null ],
-      [ "Framing on each link", "md_docs_2e3ap_204-encoding.html#autotoc_md348", [
-        [ "ZeroMQ", "md_docs_2e3ap_204-encoding.html#autotoc_md349", null ],
-        [ "POSIX sockets", "md_docs_2e3ap_204-encoding.html#autotoc_md350", null ]
+      [ "JSON", "md_docs_2e3ap_204-encoding.html#autotoc_md336", null ],
+      [ "Protobuf", "md_docs_2e3ap_204-encoding.html#autotoc_md337", null ],
+      [ "Framing on each link", "md_docs_2e3ap_204-encoding.html#autotoc_md338", [
+        [ "ZeroMQ", "md_docs_2e3ap_204-encoding.html#autotoc_md339", null ],
+        [ "POSIX sockets", "md_docs_2e3ap_204-encoding.html#autotoc_md340", null ]
       ] ],
-      [ "Size limits", "md_docs_2e3ap_204-encoding.html#autotoc_md351", null ],
-      [ "Abstract syntax", "md_docs_2e3ap_204-encoding.html#autotoc_md352", null ]
+      [ "Size limits", "md_docs_2e3ap_204-encoding.html#autotoc_md341", null ],
+      [ "Abstract syntax", "md_docs_2e3ap_204-encoding.html#autotoc_md342", null ]
     ] ],
     [ "E3AP: semantics and constraints", "md_docs_2e3ap_205-semantics-and-constraints.html", [
-      [ "Units and ranges", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md354", null ],
-      [ "Clocks", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md355", null ],
-      [ "Absent versus zero", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md356", null ],
-      [ "What is mandatory", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md357", null ],
-      [ "Validation", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md358", null ],
-      [ "Handling of unknown, unforeseen and erroneous data", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md359", [
-        [ "Abstract syntax errors", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md360", null ],
-        [ "Unexpected messages", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md361", null ],
-        [ "Unknown extension additions", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md362", null ],
-        [ "Unknown response codes", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md363", null ],
-        [ "Unknown RAN function or stopped service model", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md364", null ],
-        [ "Queues that are full", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md365", null ],
-        [ "Lost links", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md366", null ]
+      [ "Units and ranges", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md344", null ],
+      [ "Clocks", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md345", null ],
+      [ "Absent versus zero", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md346", null ],
+      [ "What is mandatory", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md347", null ],
+      [ "Validation", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md348", null ],
+      [ "Handling of unknown, unforeseen and erroneous data", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md349", [
+        [ "Abstract syntax errors", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md350", null ],
+        [ "Unexpected messages", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md351", null ],
+        [ "Unknown extension additions", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md352", null ],
+        [ "Unknown response codes", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md353", null ],
+        [ "Unknown cause", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md354", null ],
+        [ "Unknown RAN function or stopped service model", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md355", null ],
+        [ "Queues that are full", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md356", null ],
+        [ "Lost links", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md357", null ]
       ] ],
-      [ "Identifiers over time", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md367", null ],
-      [ "Subscription time", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md368", null ]
-    ] ],
-    [ "E3AP: implementation notes and known discrepancies", "md_docs_2e3ap_206-discrepancies.html", [
-      [ "Setup", "md_docs_2e3ap_206-discrepancies.html#autotoc_md370", null ],
-      [ "Subscription and control", "md_docs_2e3ap_206-discrepancies.html#autotoc_md371", null ],
-      [ "Release and link loss", "md_docs_2e3ap_206-discrepancies.html#autotoc_md372", null ],
-      [ "Encoding and framing", "md_docs_2e3ap_206-discrepancies.html#autotoc_md373", null ],
-      [ "Where to look", "md_docs_2e3ap_206-discrepancies.html#autotoc_md374", null ]
+      [ "Identifiers over time", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md358", null ],
+      [ "Subscription time", "md_docs_2e3ap_205-semantics-and-constraints.html#autotoc_md359", null ]
     ] ],
     [ "E3AP: integrator guide", "md_docs_2e3ap_2integrator-guide.html", [
-      [ "Choose a route", "md_docs_2e3ap_2integrator-guide.html#autotoc_md376", null ],
-      [ "Configuration of the library", "md_docs_2e3ap_2integrator-guide.html#autotoc_md377", null ],
-      [ "Where each claim comes from", "md_docs_2e3ap_2integrator-guide.html#autotoc_md378", [
-        [ "Identity and links (chapter 01)", "md_docs_2e3ap_2integrator-guide.html#autotoc_md379", null ],
-        [ "Procedures (chapter 03)", "md_docs_2e3ap_2integrator-guide.html#autotoc_md380", null ],
-        [ "Encoding and framing (chapter 04)", "md_docs_2e3ap_2integrator-guide.html#autotoc_md381", null ],
-        [ "The pinned vectors", "md_docs_2e3ap_2integrator-guide.html#autotoc_md382", null ]
+      [ "Choose a route", "md_docs_2e3ap_2integrator-guide.html#autotoc_md361", null ],
+      [ "Configuration of the library", "md_docs_2e3ap_2integrator-guide.html#autotoc_md362", null ],
+      [ "Where each claim comes from", "md_docs_2e3ap_2integrator-guide.html#autotoc_md363", [
+        [ "Identity and links (chapter 01)", "md_docs_2e3ap_2integrator-guide.html#autotoc_md364", null ],
+        [ "Procedures (chapter 03)", "md_docs_2e3ap_2integrator-guide.html#autotoc_md365", null ],
+        [ "Encoding and framing (chapter 04)", "md_docs_2e3ap_2integrator-guide.html#autotoc_md366", null ],
+        [ "The pinned vectors", "md_docs_2e3ap_2integrator-guide.html#autotoc_md367", null ]
       ] ],
-      [ "Stale comments in the code", "md_docs_2e3ap_2integrator-guide.html#autotoc_md383", null ],
-      [ "Checklist for a new E3 Agent", "md_docs_2e3ap_2integrator-guide.html#autotoc_md384", null ]
+      [ "Stale comments in the code", "md_docs_2e3ap_2integrator-guide.html#autotoc_md368", null ],
+      [ "Checklist for a new E3 Agent", "md_docs_2e3ap_2integrator-guide.html#autotoc_md369", null ]
     ] ],
-    [ "E3SM-L1KPM: identity and registration", "md_docs_2e3sm_2l1-kpm_201-identity-and-registration.html", [
-      [ "Identity", "md_docs_2e3sm_2l1-kpm_201-identity-and-registration.html#autotoc_md400", null ],
-      [ "Telemetry identifiers", "md_docs_2e3sm_2l1-kpm_201-identity-and-registration.html#autotoc_md401", null ],
-      [ "RAN function data", "md_docs_2e3sm_2l1-kpm_201-identity-and-registration.html#autotoc_md402", null ],
-      [ "What a RAN shall do to offer the service model", "md_docs_2e3sm_2l1-kpm_201-identity-and-registration.html#autotoc_md403", null ],
-      [ "What a dApp shall do to use the service model", "md_docs_2e3sm_2l1-kpm_201-identity-and-registration.html#autotoc_md404", null ]
+    [ "E3SM services", "md_docs_2e3sm_2l1-kpm_201-services.html", [
+      [ "General", "md_docs_2e3sm_2l1-kpm_201-services.html#autotoc_md385", null ],
+      [ "Telemetry service", "md_docs_2e3sm_2l1-kpm_201-services.html#autotoc_md386", null ],
+      [ "Control service", "md_docs_2e3sm_2l1-kpm_201-services.html#autotoc_md387", null ],
+      [ "Message flow", "md_docs_2e3sm_2l1-kpm_201-services.html#autotoc_md388", null ]
     ] ],
-    [ "E3SM-L1KPM: information elements", "md_docs_2e3sm_2l1-kpm_202-ie-mapping.html", [
-      [ "The elements at a glance", "md_docs_2e3sm_2l1-kpm_202-ie-mapping.html#autotoc_md406", null ],
-      [ "L1KPM-Indication", "md_docs_2e3sm_2l1-kpm_202-ie-mapping.html#autotoc_md407", null ],
-      [ "L1KPM-ShmRef", "md_docs_2e3sm_2l1-kpm_202-ie-mapping.html#autotoc_md408", null ],
-      [ "L1KPM-RanFunctionData", "md_docs_2e3sm_2l1-kpm_202-ie-mapping.html#autotoc_md409", null ],
-      [ "The shared memory region", "md_docs_2e3sm_2l1-kpm_202-ie-mapping.html#autotoc_md410", [
-        [ "Region layout", "md_docs_2e3sm_2l1-kpm_202-ie-mapping.html#autotoc_md411", null ],
-        [ "Header", "md_docs_2e3sm_2l1-kpm_202-ie-mapping.html#autotoc_md412", null ],
-        [ "IQ row", "md_docs_2e3sm_2l1-kpm_202-ie-mapping.html#autotoc_md413", null ],
-        [ "Sample format", "md_docs_2e3sm_2l1-kpm_202-ie-mapping.html#autotoc_md414", null ]
+    [ "RAN function service model description", "md_docs_2e3sm_2l1-kpm_202-service-model-description.html", [
+      [ "RAN function overview", "md_docs_2e3sm_2l1-kpm_202-service-model-description.html#autotoc_md390", null ],
+      [ "Supported E3 services", "md_docs_2e3sm_2l1-kpm_202-service-model-description.html#autotoc_md391", [
+        [ "Telemetry", "md_docs_2e3sm_2l1-kpm_202-service-model-description.html#autotoc_md392", null ],
+        [ "Control", "md_docs_2e3sm_2l1-kpm_202-service-model-description.html#autotoc_md393", null ]
+      ] ],
+      [ "Indication paths", "md_docs_2e3sm_2l1-kpm_202-service-model-description.html#autotoc_md394", null ],
+      [ "Structure of an indication", "md_docs_2e3sm_2l1-kpm_202-service-model-description.html#autotoc_md395", null ],
+      [ "Data delivery", "md_docs_2e3sm_2l1-kpm_202-service-model-description.html#autotoc_md396", null ],
+      [ "Procedures", "md_docs_2e3sm_2l1-kpm_202-service-model-description.html#autotoc_md397", [
+        [ "Setup", "md_docs_2e3sm_2l1-kpm_202-service-model-description.html#autotoc_md398", null ],
+        [ "Subscription", "md_docs_2e3sm_2l1-kpm_202-service-model-description.html#autotoc_md399", null ],
+        [ "Indication", "md_docs_2e3sm_2l1-kpm_202-service-model-description.html#autotoc_md400", null ],
+        [ "Set Subscription Data", "md_docs_2e3sm_2l1-kpm_202-service-model-description.html#autotoc_md401", null ],
+        [ "Subscription delete and release", "md_docs_2e3sm_2l1-kpm_202-service-model-description.html#autotoc_md402", null ]
       ] ]
     ] ],
-    [ "E3SM-L1KPM: procedure flow", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html", [
-      [ "Overview", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md416", null ],
-      [ "Setup", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md417", [
-        [ "Purpose", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md418", null ],
-        [ "Procedure text", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md419", null ],
-        [ "Abnormal conditions", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md420", null ]
+    [ "RAN function description", "md_docs_2e3sm_2l1-kpm_203-ran-function-description.html", [
+      [ "Description", "md_docs_2e3sm_2l1-kpm_203-ran-function-description.html#autotoc_md404", null ],
+      [ "RAN function identity", "md_docs_2e3sm_2l1-kpm_203-ran-function-description.html#autotoc_md405", null ],
+      [ "Telemetry identifiers", "md_docs_2e3sm_2l1-kpm_203-ran-function-description.html#autotoc_md406", [
+        [ "General", "md_docs_2e3sm_2l1-kpm_203-ran-function-description.html#autotoc_md407", null ],
+        [ "Shared identifiers", "md_docs_2e3sm_2l1-kpm_203-ran-function-description.html#autotoc_md408", null ],
+        [ "PUSCH path identifiers", "md_docs_2e3sm_2l1-kpm_203-ran-function-description.html#autotoc_md409", null ],
+        [ "SRS path identifiers", "md_docs_2e3sm_2l1-kpm_203-ran-function-description.html#autotoc_md410", null ],
+        [ "Additional identifiers", "md_docs_2e3sm_2l1-kpm_203-ran-function-description.html#autotoc_md411", null ]
       ] ],
-      [ "Subscription", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md421", [
-        [ "Purpose", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md422", null ],
-        [ "Procedure text", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md423", null ],
-        [ "Successful operation", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md424", null ],
-        [ "Unsuccessful operation", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md425", null ],
-        [ "Abnormal conditions", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md426", null ]
-      ] ],
-      [ "Indication", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md427", [
-        [ "Purpose", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md428", null ],
-        [ "Procedure text on the RAN side", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md429", null ],
-        [ "Procedure text on the dApp side", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md430", null ],
-        [ "Successful operation", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md431", null ],
-        [ "Unsuccessful operation", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md432", null ],
-        [ "Abnormal conditions", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md433", null ]
-      ] ],
-      [ "Overwrite detection", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md434", null ],
-      [ "Release", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md435", [
-        [ "Purpose", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md436", null ],
-        [ "Procedure text", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md437", null ],
-        [ "Successful operation", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md438", null ]
-      ] ],
-      [ "Unsupported control", "md_docs_2e3sm_2l1-kpm_203-procedure-flow.html#autotoc_md439", null ]
+      [ "Shared memory streams", "md_docs_2e3sm_2l1-kpm_203-ran-function-description.html#autotoc_md412", null ],
+      [ "Control identifiers", "md_docs_2e3sm_2l1-kpm_203-ran-function-description.html#autotoc_md413", null ],
+      [ "Supported E3AP messages and service model IEs", "md_docs_2e3sm_2l1-kpm_203-ran-function-description.html#autotoc_md414", null ]
     ] ],
-    [ "E3SM-L1KPM: encoding", "md_docs_2e3sm_2l1-kpm_204-encoding.html", [
-      [ "Choice of encoding", "md_docs_2e3sm_2l1-kpm_204-encoding.html#autotoc_md441", null ],
-      [ "ASN.1 APER", "md_docs_2e3sm_2l1-kpm_204-encoding.html#autotoc_md442", null ],
-      [ "JSON", "md_docs_2e3sm_2l1-kpm_204-encoding.html#autotoc_md443", null ],
-      [ "Protocol Buffers", "md_docs_2e3sm_2l1-kpm_204-encoding.html#autotoc_md444", null ],
-      [ "Size limits", "md_docs_2e3sm_2l1-kpm_204-encoding.html#autotoc_md445", null ],
-      [ "Abstract syntax", "md_docs_2e3sm_2l1-kpm_204-encoding.html#autotoc_md446", null ]
-    ] ],
-    [ "E3SM-L1KPM: semantics and constraints", "md_docs_2e3sm_2l1-kpm_205-semantics-and-constraints.html", [
-      [ "Units and clocks", "md_docs_2e3sm_2l1-kpm_205-semantics-and-constraints.html#autotoc_md448", null ],
-      [ "Optional and absent values", "md_docs_2e3sm_2l1-kpm_205-semantics-and-constraints.html#autotoc_md449", null ],
-      [ "The shared memory region", "md_docs_2e3sm_2l1-kpm_205-semantics-and-constraints.html#autotoc_md450", [
-        [ "Lifetime", "md_docs_2e3sm_2l1-kpm_205-semantics-and-constraints.html#autotoc_md451", null ],
-        [ "Same host rule", "md_docs_2e3sm_2l1-kpm_205-semantics-and-constraints.html#autotoc_md452", null ],
-        [ "Rows and overwrite", "md_docs_2e3sm_2l1-kpm_205-semantics-and-constraints.html#autotoc_md453", null ],
-        [ "Antennas and subcarriers", "md_docs_2e3sm_2l1-kpm_205-semantics-and-constraints.html#autotoc_md454", null ],
-        [ "Scale factor", "md_docs_2e3sm_2l1-kpm_205-semantics-and-constraints.html#autotoc_md455", null ]
+    [ "Elements for E3SM service model", "md_docs_2e3sm_2l1-kpm_204-elements.html", [
+      [ "General", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md416", null ],
+      [ "Message functional definition and content", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md417", [
+        [ "Messages for E3 functional procedures", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md418", [
+          [ "INDICATION DATA IE", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md419", null ],
+          [ "CELL DATA IE", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md420", null ],
+          [ "UE DATA IE", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md421", null ],
+          [ "CONTROL DATA IE", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md422", null ],
+          [ "SUBSCRIPTION DATA IE", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md423", null ]
+        ] ],
+        [ "Messages for E3 global procedures", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md424", [
+          [ "RAN FUNCTION DATA IE", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md425", null ],
+          [ "STREAM DESCRIPTOR IE", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md426", null ]
+        ] ]
       ] ],
-      [ "Mandatory behavior", "md_docs_2e3sm_2l1-kpm_205-semantics-and-constraints.html#autotoc_md456", null ],
-      [ "Validation", "md_docs_2e3sm_2l1-kpm_205-semantics-and-constraints.html#autotoc_md457", null ],
-      [ "Error handling", "md_docs_2e3sm_2l1-kpm_205-semantics-and-constraints.html#autotoc_md458", null ],
-      [ "Extensibility", "md_docs_2e3sm_2l1-kpm_205-semantics-and-constraints.html#autotoc_md459", null ]
+      [ "Information element definitions", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md427", [
+        [ "General", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md428", null ],
+        [ "Float32", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md429", null ],
+        [ "Complex32", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md430", null ],
+        [ "Uint32", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md431", null ],
+        [ "RNTI", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md432", null ],
+        [ "Physical Cell ID", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md433", null ],
+        [ "Symbol Bitmap", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md434", null ],
+        [ "Telemetry Identifier", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md435", null ],
+        [ "Timestamp", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md436", null ],
+        [ "Shared Memory Reference", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md437", null ],
+        [ "UE Reference", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md438", null ],
+        [ "Stream Status", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md439", null ],
+        [ "Delivery", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md440", null ],
+        [ "Shared Memory Information", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md441", null ],
+        [ "Inline Information", "md_docs_2e3sm_2l1-kpm_204-elements.html#autotoc_md442", null ]
+      ] ]
     ] ],
-    [ "E3SM-L1KPM: discrepancies, TODOs and dead code", "md_docs_2e3sm_2l1-kpm_206-discrepancies.html", [
-      [ "Where the grammar and the behavior disagree", "md_docs_2e3sm_2l1-kpm_206-discrepancies.html#autotoc_md461", null ],
-      [ "Where the encodings disagree", "md_docs_2e3sm_2l1-kpm_206-discrepancies.html#autotoc_md462", null ],
-      [ "Shared memory", "md_docs_2e3sm_2l1-kpm_206-discrepancies.html#autotoc_md463", null ],
-      [ "Dead and unused code", "md_docs_2e3sm_2l1-kpm_206-discrepancies.html#autotoc_md464", null ],
-      [ "Could not be tied to code", "md_docs_2e3sm_2l1-kpm_206-discrepancies.html#autotoc_md465", null ],
-      [ "Open items", "md_docs_2e3sm_2l1-kpm_206-discrepancies.html#autotoc_md466", null ]
+    [ "Information element abstract syntax (with ASN.1)", "md_docs_2e3sm_2l1-kpm_205-abstract-syntax.html", [
+      [ "General", "md_docs_2e3sm_2l1-kpm_205-abstract-syntax.html#autotoc_md444", null ],
+      [ "Information element definitions", "md_docs_2e3sm_2l1-kpm_205-abstract-syntax.html#autotoc_md445", null ]
     ] ],
-    [ "E3SM-L1KPM: integrator guide", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html", [
-      [ "Code roots", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html#autotoc_md468", null ],
-      [ "Where the pieces are", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html#autotoc_md469", null ],
-      [ "For a RAN", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html#autotoc_md470", [
-        [ "Steps", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html#autotoc_md471", null ],
-        [ "Things that bite", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html#autotoc_md472", null ]
+    [ "Encoding of the service model IEs", "md_docs_2e3sm_2l1-kpm_206-encoding.html", [
+      [ "Encoding", "md_docs_2e3sm_2l1-kpm_206-encoding.html#autotoc_md447", [
+        [ "Choice of encoding", "md_docs_2e3sm_2l1-kpm_206-encoding.html#autotoc_md448", null ],
+        [ "APER", "md_docs_2e3sm_2l1-kpm_206-encoding.html#autotoc_md449", null ]
       ] ],
-      [ "For a dApp", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html#autotoc_md473", null ],
-      [ "Evidence for the discrepancies", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html#autotoc_md474", null ]
+      [ "JSON encoding", "md_docs_2e3sm_2l1-kpm_206-encoding.html#autotoc_md450", [
+        [ "General", "md_docs_2e3sm_2l1-kpm_206-encoding.html#autotoc_md451", null ],
+        [ "INDICATION DATA, CELL DATA and UE DATA", "md_docs_2e3sm_2l1-kpm_206-encoding.html#autotoc_md452", null ],
+        [ "RAN FUNCTION DATA", "md_docs_2e3sm_2l1-kpm_206-encoding.html#autotoc_md453", null ],
+        [ "SUBSCRIPTION DATA and CONTROL DATA", "md_docs_2e3sm_2l1-kpm_206-encoding.html#autotoc_md454", null ]
+      ] ],
+      [ "Size limits", "md_docs_2e3sm_2l1-kpm_206-encoding.html#autotoc_md455", [
+        [ "Limits", "md_docs_2e3sm_2l1-kpm_206-encoding.html#autotoc_md456", null ],
+        [ "Indications above the limits", "md_docs_2e3sm_2l1-kpm_206-encoding.html#autotoc_md457", null ],
+        [ "Typical sizes", "md_docs_2e3sm_2l1-kpm_206-encoding.html#autotoc_md458", null ]
+      ] ]
+    ] ],
+    [ "Handling of unknown, unforeseen and erroneous protocol data", "md_docs_2e3sm_2l1-kpm_207-error-handling.html", [
+      [ "General", "md_docs_2e3sm_2l1-kpm_207-error-handling.html#autotoc_md460", null ],
+      [ "Abstract syntax errors", "md_docs_2e3sm_2l1-kpm_207-error-handling.html#autotoc_md461", null ],
+      [ "Unknown fields and values", "md_docs_2e3sm_2l1-kpm_207-error-handling.html#autotoc_md462", null ],
+      [ "Fields that do not match the subscription", "md_docs_2e3sm_2l1-kpm_207-error-handling.html#autotoc_md463", null ],
+      [ "Erroneous control actions", "md_docs_2e3sm_2l1-kpm_207-error-handling.html#autotoc_md464", null ],
+      [ "Erroneous shared memory references", "md_docs_2e3sm_2l1-kpm_207-error-handling.html#autotoc_md465", null ],
+      [ "Indications that arrive late", "md_docs_2e3sm_2l1-kpm_207-error-handling.html#autotoc_md466", null ]
+    ] ],
+    [ "Shared memory region", "md_docs_2e3sm_2l1-kpm_2annex-a-shared-memory.html", [
+      [ "General", "md_docs_2e3sm_2l1-kpm_2annex-a-shared-memory.html#autotoc_md468", null ],
+      [ "Region layout", "md_docs_2e3sm_2l1-kpm_2annex-a-shared-memory.html#autotoc_md469", null ],
+      [ "Header", "md_docs_2e3sm_2l1-kpm_2annex-a-shared-memory.html#autotoc_md470", null ],
+      [ "Rows, buffers and reuse", "md_docs_2e3sm_2l1-kpm_2annex-a-shared-memory.html#autotoc_md471", null ],
+      [ "Location of the data", "md_docs_2e3sm_2l1-kpm_2annex-a-shared-memory.html#autotoc_md472", null ],
+      [ "Data formats", "md_docs_2e3sm_2l1-kpm_2annex-a-shared-memory.html#autotoc_md473", [
+        [ "IQ samples", "md_docs_2e3sm_2l1-kpm_2annex-a-shared-memory.html#autotoc_md474", null ],
+        [ "PUSCH PDU data", "md_docs_2e3sm_2l1-kpm_2annex-a-shared-memory.html#autotoc_md475", null ],
+        [ "PUSCH channel estimates", "md_docs_2e3sm_2l1-kpm_2annex-a-shared-memory.html#autotoc_md476", null ],
+        [ "SRS IQ samples", "md_docs_2e3sm_2l1-kpm_2annex-a-shared-memory.html#autotoc_md477", null ],
+        [ "SRS channel estimates", "md_docs_2e3sm_2l1-kpm_2annex-a-shared-memory.html#autotoc_md478", null ],
+        [ "SRS SNR of each PRG", "md_docs_2e3sm_2l1-kpm_2annex-a-shared-memory.html#autotoc_md479", null ]
+      ] ]
+    ] ],
+    [ "Example message exchange", "md_docs_2e3sm_2l1-kpm_2annex-b-examples.html", [
+      [ "General", "md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md481", null ],
+      [ "IQ samples of one cell", "md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md482", null ],
+      [ "UE metrics with a UE filter", "md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md483", [
+        [ "Step 1: SETUP REQUEST", "md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md484", null ],
+        [ "Step 2: SETUP RESPONSE", "md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md485", null ],
+        [ "Step 3: SUBSCRIPTION REQUEST", "md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md486", null ],
+        [ "Step 4: SUBSCRIPTION RESPONSE", "md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md487", null ],
+        [ "Step 5: INDICATION MESSAGE", "md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md488", null ],
+        [ "Step 6: dApp CONTROL ACTION", "md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md489", null ],
+        [ "Step 7: MESSAGE ACK", "md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md490", null ],
+        [ "Step 8: INDICATION MESSAGE", "md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md491", null ]
+      ] ]
+    ] ],
+    [ "Open items", "md_docs_2e3sm_2l1-kpm_2annex-c-open-items.html", [
+      [ "General", "md_docs_2e3sm_2l1-kpm_2annex-c-open-items.html#autotoc_md493", null ],
+      [ "Interaction with E3AP", "md_docs_2e3sm_2l1-kpm_2annex-c-open-items.html#autotoc_md494", null ],
+      [ "Content of the service model", "md_docs_2e3sm_2l1-kpm_2annex-c-open-items.html#autotoc_md495", null ],
+      [ "Shared memory region", "md_docs_2e3sm_2l1-kpm_2annex-c-open-items.html#autotoc_md496", null ],
+      [ "Protocol Buffers form of existing E3 Agents", "md_docs_2e3sm_2l1-kpm_2annex-c-open-items.html#autotoc_md497", null ]
+    ] ],
+    [ "E3SM-L1-KPM: integrator guide", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html", [
+      [ "Code roots", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html#autotoc_md499", null ],
+      [ "Where the pieces are", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html#autotoc_md500", null ],
+      [ "For a RAN", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html#autotoc_md501", [
+        [ "Steps", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html#autotoc_md502", null ],
+        [ "Things that bite", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html#autotoc_md503", null ]
+      ] ],
+      [ "For a dApp", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html#autotoc_md504", null ],
+      [ "Evidence for the items of Annex C", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html#autotoc_md505", null ],
+      [ "Code notes", "md_docs_2e3sm_2l1-kpm_2integrator-guide.html#autotoc_md506", null ]
     ] ],
     [ "E3SM-SPEC: identity and registration", "md_docs_2e3sm_2spectrum_201-identity-and-registration.html", [
-      [ "Identity", "md_docs_2e3sm_2spectrum_201-identity-and-registration.html#autotoc_md493", null ],
-      [ "Telemetry and control identifiers", "md_docs_2e3sm_2spectrum_201-identity-and-registration.html#autotoc_md494", null ],
-      [ "The RAN function data", "md_docs_2e3sm_2spectrum_201-identity-and-registration.html#autotoc_md495", null ],
-      [ "How a dApp finds the service model", "md_docs_2e3sm_2spectrum_201-identity-and-registration.html#autotoc_md496", null ],
-      [ "What a RAN shall provide", "md_docs_2e3sm_2spectrum_201-identity-and-registration.html#autotoc_md497", null ],
-      [ "Lifecycle", "md_docs_2e3sm_2spectrum_201-identity-and-registration.html#autotoc_md498", null ]
+      [ "Identity", "md_docs_2e3sm_2spectrum_201-identity-and-registration.html#autotoc_md525", null ],
+      [ "Telemetry and control identifiers", "md_docs_2e3sm_2spectrum_201-identity-and-registration.html#autotoc_md526", null ],
+      [ "The RAN function data", "md_docs_2e3sm_2spectrum_201-identity-and-registration.html#autotoc_md527", null ],
+      [ "How a dApp finds the service model", "md_docs_2e3sm_2spectrum_201-identity-and-registration.html#autotoc_md528", null ],
+      [ "What a RAN shall provide", "md_docs_2e3sm_2spectrum_201-identity-and-registration.html#autotoc_md529", null ],
+      [ "Lifecycle", "md_docs_2e3sm_2spectrum_201-identity-and-registration.html#autotoc_md530", null ]
     ] ],
     [ "E3SM-SPEC: information elements", "md_docs_2e3sm_2spectrum_202-ie-mapping.html", [
-      [ "Overview", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md500", null ],
-      [ "RAN function data", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md501", null ],
-      [ "Sensing indication", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md502", null ],
-      [ "dApp control", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md503", [
-        [ "Envelope", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md504", null ],
-        [ "PRB block control", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md505", null ],
-        [ "Sensing policy control", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md506", null ]
+      [ "Overview", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md532", null ],
+      [ "RAN function data", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md533", null ],
+      [ "Indication", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md534", [
+        [ "Sensing indication", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md535", null ],
+        [ "Cell configuration indication", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md536", null ]
       ] ],
-      [ "dApp report", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md507", null ],
-      [ "xApp control", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md508", null ],
-      [ "Apply outcome", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md509", null ],
-      [ "Constants", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md510", null ],
-      [ "The sensing ring", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md511", null ]
+      [ "dApp control", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md537", [
+        [ "Envelope", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md538", null ],
+        [ "PRB block control", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md539", null ],
+        [ "Sensing policy control", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md540", null ]
+      ] ],
+      [ "dApp report", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md541", null ],
+      [ "xApp control", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md542", null ],
+      [ "Apply outcome", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md543", null ],
+      [ "Constants", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md544", null ],
+      [ "The sensing ring", "md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md545", null ]
     ] ],
     [ "E3SM-SPEC: procedures", "md_docs_2e3sm_2spectrum_203-procedure-flow.html", [
-      [ "Overview", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md513", null ],
-      [ "Subscription", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md514", [
-        [ "Purpose", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md515", null ],
-        [ "Procedure text", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md516", null ],
-        [ "Successful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md517", null ],
-        [ "Unsuccessful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md518", null ],
-        [ "Abnormal conditions", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md519", null ]
+      [ "Overview", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md547", null ],
+      [ "Subscription", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md548", [
+        [ "Purpose", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md549", null ],
+        [ "Procedure text", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md550", null ],
+        [ "Successful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md551", null ],
+        [ "Unsuccessful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md552", null ],
+        [ "Abnormal conditions", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md553", null ]
       ] ],
-      [ "Sensing indication", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md520", [
-        [ "Purpose", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md521", null ],
-        [ "Procedure text", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md522", null ],
-        [ "Successful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md523", null ],
-        [ "Unsuccessful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md524", null ],
-        [ "Abnormal conditions", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md525", null ]
+      [ "Sensing indication", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md554", [
+        [ "Purpose", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md555", null ],
+        [ "Procedure text", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md556", null ],
+        [ "Successful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md557", null ],
+        [ "Unsuccessful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md558", null ],
+        [ "Abnormal conditions", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md559", null ]
       ] ],
-      [ "PRB block control", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md526", [
-        [ "Purpose", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md527", null ],
-        [ "Procedure text", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md528", null ],
-        [ "Successful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md529", null ],
-        [ "Unsuccessful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md530", null ],
-        [ "Abnormal conditions", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md531", null ]
+      [ "Cell configuration indication", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md560", [
+        [ "Purpose", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md561", null ],
+        [ "Procedure text", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md562", null ],
+        [ "Successful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md563", null ],
+        [ "Unsuccessful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md564", null ],
+        [ "Abnormal conditions", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md565", null ]
       ] ],
-      [ "Sensing policy control", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md532", [
-        [ "Purpose", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md533", null ],
-        [ "Procedure text", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md534", null ],
-        [ "Successful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md535", null ],
-        [ "Unsuccessful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md536", null ],
-        [ "Abnormal conditions", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md537", null ]
+      [ "PRB block control", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md566", [
+        [ "Purpose", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md567", null ],
+        [ "Procedure text", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md568", null ],
+        [ "Successful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md569", null ],
+        [ "Unsuccessful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md570", null ],
+        [ "Abnormal conditions", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md571", null ]
       ] ],
-      [ "dApp report", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md538", [
-        [ "Purpose", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md539", null ],
-        [ "Procedure text", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md540", null ],
-        [ "Successful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md541", null ],
-        [ "Unsuccessful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md542", null ],
-        [ "Abnormal conditions", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md543", null ]
+      [ "Sensing policy control", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md572", [
+        [ "Purpose", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md573", null ],
+        [ "Procedure text", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md574", null ],
+        [ "Successful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md575", null ],
+        [ "Unsuccessful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md576", null ],
+        [ "Abnormal conditions", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md577", null ]
       ] ],
-      [ "xApp control relay", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md544", [
-        [ "Purpose", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md545", null ],
-        [ "Procedure text", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md546", null ],
-        [ "Successful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md547", null ],
-        [ "Unsuccessful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md548", null ],
-        [ "Abnormal conditions", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md549", null ]
+      [ "dApp report", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md578", [
+        [ "Purpose", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md579", null ],
+        [ "Procedure text", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md580", null ],
+        [ "Successful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md581", null ],
+        [ "Unsuccessful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md582", null ],
+        [ "Abnormal conditions", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md583", null ]
       ] ],
-      [ "Apply outcome", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md550", [
-        [ "Purpose", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md551", null ],
-        [ "Procedure text", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md552", null ],
-        [ "Successful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md553", null ],
-        [ "Unsuccessful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md554", null ],
-        [ "Abnormal conditions", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md555", null ]
+      [ "xApp control relay", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md584", [
+        [ "Purpose", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md585", null ],
+        [ "Procedure text", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md586", null ],
+        [ "Successful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md587", null ],
+        [ "Unsuccessful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md588", null ],
+        [ "Abnormal conditions", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md589", null ]
       ] ],
-      [ "Service model stop", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md556", null ],
-      [ "The loop from end to end", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md557", null ]
+      [ "Apply outcome", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md590", [
+        [ "Purpose", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md591", null ],
+        [ "Procedure text", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md592", null ],
+        [ "Successful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md593", null ],
+        [ "Unsuccessful operation", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md594", null ],
+        [ "Abnormal conditions", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md595", null ]
+      ] ],
+      [ "Service model stop", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md596", null ],
+      [ "The loop from end to end", "md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md597", null ]
     ] ],
     [ "E3SM-SPEC: encoding", "md_docs_2e3sm_2spectrum_204-encoding.html", [
-      [ "Principles", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md559", null ],
-      [ "APER", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md560", [
-        [ "Extension marker and extension alternative", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md561", null ]
+      [ "Principles", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md599", null ],
+      [ "APER", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md600", [
+        [ "Extension marker and extension alternative", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md601", null ]
       ] ],
-      [ "JSON", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md562", [
-        [ "RAN function data", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md563", null ],
-        [ "Sensing indication", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md564", null ],
-        [ "dApp control", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md565", null ],
-        [ "Unknown keys and ranges", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md566", null ],
-        [ "dApp report and xApp control", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md567", null ]
+      [ "JSON", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md602", [
+        [ "RAN function data", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md603", null ],
+        [ "Indication", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md604", null ],
+        [ "Sensing indication", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md605", null ],
+        [ "Cell configuration indication", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md606", null ],
+        [ "dApp control", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md607", null ],
+        [ "Unknown keys and ranges", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md608", null ],
+        [ "dApp report and xApp control", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md609", null ]
       ] ],
-      [ "Protocol Buffers", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md568", null ],
-      [ "Carrying in E3AP", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md569", null ],
-      [ "Size limits", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md570", null ],
-      [ "Abstract syntax with ASN.1", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md571", null ]
+      [ "Protocol Buffers", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md610", null ],
+      [ "Carrying in E3AP", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md611", null ],
+      [ "Size limits", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md612", null ],
+      [ "Abstract syntax with ASN.1", "md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md613", null ]
     ] ],
     [ "E3SM-SPEC: semantics and constraints", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html", [
-      [ "Units", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md573", null ],
-      [ "Clocks", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md574", null ],
-      [ "Absent and zero", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md575", null ],
-      [ "PRB block semantics", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md576", null ],
-      [ "Limits of a PRB block", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md577", null ],
-      [ "Sensing policy semantics", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md578", null ],
-      [ "What does and does not touch the radio", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md579", null ],
-      [ "Validation", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md580", null ],
-      [ "Unknown identifiers and alternatives", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md581", null ],
-      [ "Concurrency and freshness of the ring", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md582", null ],
-      [ "What is mandatory", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md583", null ]
+      [ "Units", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md615", null ],
+      [ "Clocks", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md616", null ],
+      [ "Absent and zero", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md617", null ],
+      [ "PRB block semantics", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md618", null ],
+      [ "Limits of a PRB block", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md619", null ],
+      [ "Sensing policy semantics", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md620", null ],
+      [ "What does and does not touch the radio", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md621", null ],
+      [ "Validation", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md622", null ],
+      [ "Unknown identifiers and alternatives", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md623", null ],
+      [ "Concurrency and freshness of the ring", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md624", null ],
+      [ "What is mandatory", "md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html#autotoc_md625", null ]
     ] ],
-    [ "E3SM-SPEC: discrepancies, dead fields and open items", "md_docs_2e3sm_2spectrum_206-discrepancies.html", [
-      [ "Two copies of the grammar", "md_docs_2e3sm_2spectrum_206-discrepancies.html#autotoc_md585", null ],
-      [ "The sensing indication has three spellings", "md_docs_2e3sm_2spectrum_206-discrepancies.html#autotoc_md586", null ],
-      [ "Fields that the RAN decodes and does not use", "md_docs_2e3sm_2spectrum_206-discrepancies.html#autotoc_md587", null ],
-      [ "The three decoders have different strictness", "md_docs_2e3sm_2spectrum_206-discrepancies.html#autotoc_md588", null ],
-      [ "The sensing policy needs a mask to be cleared", "md_docs_2e3sm_2spectrum_206-discrepancies.html#autotoc_md589", null ],
-      [ "Fields that are wider than their values", "md_docs_2e3sm_2spectrum_206-discrepancies.html#autotoc_md590", null ],
-      [ "Fields and alternatives without a codec", "md_docs_2e3sm_2spectrum_206-discrepancies.html#autotoc_md591", null ],
-      [ "The xApp leg has no JSON codec", "md_docs_2e3sm_2spectrum_206-discrepancies.html#autotoc_md592", null ],
-      [ "Dead code", "md_docs_2e3sm_2spectrum_206-discrepancies.html#autotoc_md593", null ],
-      [ "Revisions that do not match", "md_docs_2e3sm_2spectrum_206-discrepancies.html#autotoc_md594", null ],
-      [ "Open items", "md_docs_2e3sm_2spectrum_206-discrepancies.html#autotoc_md595", null ]
+    [ "E3SM-SPEC: example message exchange", "md_docs_2e3sm_2spectrum_207-examples.html", [
+      [ "General", "md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md627", null ],
+      [ "PRB block loop with an xApp", "md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md628", [
+        [ "Step 1: E3 SETUP REQUEST", "md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md629", null ],
+        [ "Step 2: E3 SETUP RESPONSE", "md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md630", null ],
+        [ "Step 3: E3 SUBSCRIPTION REQUEST", "md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md631", null ],
+        [ "Step 4: E3 SUBSCRIPTION RESPONSE", "md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md632", null ],
+        [ "Step 5: E3 INDICATION MESSAGE, cell configuration", "md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md633", null ],
+        [ "Step 6: E3 INDICATION MESSAGE, sensing", "md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md634", null ],
+        [ "Step 7: E3 dApp REPORT", "md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md635", null ],
+        [ "Step 8: E3 xApp CONTROL ACTION", "md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md636", null ],
+        [ "Step 9: E3 dApp CONTROL ACTION", "md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md637", null ],
+        [ "Step 10: E3 MESSAGE ACK", "md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md638", null ]
+      ] ],
+      [ "Apply outcome", "md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md639", null ]
     ] ],
     [ "E3SM-SPEC: integrator guide", "md_docs_2e3sm_2spectrum_2integrator-guide.html", [
-      [ "Where the code references point", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md597", null ],
-      [ "Artifacts", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md598", null ],
-      [ "The RAN side", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md599", [
-        [ "Register the service model", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md600", null ],
-        [ "Telemetry", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md601", null ],
-        [ "Controls", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md602", null ],
-        [ "The report and the xApp control", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md603", null ],
-        [ "The apply outcome", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md604", null ]
+      [ "Where the code references point", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md641", null ],
+      [ "Artifacts", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md642", null ],
+      [ "The RAN side", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md643", [
+        [ "Register the service model", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md644", null ],
+        [ "Telemetry", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md645", null ],
+        [ "Controls", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md646", null ],
+        [ "The report and the xApp control", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md647", null ],
+        [ "The apply outcome", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md648", null ]
       ] ],
-      [ "The dApp side", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md605", null ],
-      [ "The xApp side", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md606", null ],
-      [ "Evidence for the discrepancies", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md607", null ],
-      [ "Tests", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md608", null ]
+      [ "The dApp side", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md649", null ],
+      [ "The xApp side", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md650", null ],
+      [ "Evidence for the discrepancies", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md651", null ],
+      [ "Tests", "md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md652", null ]
     ] ],
     [ "Interoperability", "md_docs_2interop.html", [
-      [ "What pairs with what", "md_docs_2interop.html#autotoc_md624", null ],
-      [ "JSON as libe3 speaks it", "md_docs_2interop.html#autotoc_md625", null ],
-      [ "Field contracts", "md_docs_2interop.html#autotoc_md626", null ],
-      [ "Conformance fixtures", "md_docs_2interop.html#autotoc_md627", null ],
-      [ "When the RAN goes away", "md_docs_2interop.html#autotoc_md628", null ],
-      [ "Known differences", "md_docs_2interop.html#autotoc_md629", null ],
-      [ "Found while writing the specifications", "md_docs_2interop.html#autotoc_md630", null ],
-      [ "Aerial: what to change to align", "md_docs_2interop.html#autotoc_md631", null ],
-      [ "OCUDU: what to change to align", "md_docs_2interop.html#autotoc_md632", null ],
-      [ "Change ledger", "md_docs_2interop.html#autotoc_md633", null ]
+      [ "What pairs with what", "md_docs_2interop.html#autotoc_md668", null ],
+      [ "JSON as libe3 speaks it", "md_docs_2interop.html#autotoc_md669", null ],
+      [ "Field contracts", "md_docs_2interop.html#autotoc_md670", null ],
+      [ "RAN function ids", "md_docs_2interop.html#autotoc_md671", null ],
+      [ "Conformance fixtures", "md_docs_2interop.html#autotoc_md672", null ],
+      [ "When the RAN goes away", "md_docs_2interop.html#autotoc_md673", null ],
+      [ "Known differences", "md_docs_2interop.html#autotoc_md674", null ],
+      [ "Found while writing the specifications", "md_docs_2interop.html#autotoc_md675", [
+        [ "E3AP", "md_docs_2interop.html#autotoc_md676", null ],
+        [ "E3 service models", "md_docs_2interop.html#autotoc_md677", null ],
+        [ "E2SM-DAPP", "md_docs_2interop.html#autotoc_md678", null ]
+      ] ],
+      [ "Aerial: what to change to align", "md_docs_2interop.html#autotoc_md679", null ],
+      [ "OCUDU: what to change to align", "md_docs_2interop.html#autotoc_md680", null ],
+      [ "Change ledger", "md_docs_2interop.html#autotoc_md681", null ]
     ] ],
     [ "Latency recording (latrec)", "md_docs_2utilities_2latrec.html", [
-      [ "Why a ring, and why one gate", "md_docs_2utilities_2latrec.html#autotoc_md635", [
-        [ "Matching the flag downstream", "md_docs_2utilities_2latrec.html#autotoc_md636", null ],
-        [ "Python (libe3py)", "md_docs_2utilities_2latrec.html#autotoc_md637", null ],
-        [ "Where the rings go", "md_docs_2utilities_2latrec.html#autotoc_md638", null ]
+      [ "Why a ring, and why one gate", "md_docs_2utilities_2latrec.html#autotoc_md683", [
+        [ "Matching the flag downstream", "md_docs_2utilities_2latrec.html#autotoc_md684", null ],
+        [ "Python (libe3py)", "md_docs_2utilities_2latrec.html#autotoc_md685", null ],
+        [ "Where the rings go", "md_docs_2utilities_2latrec.html#autotoc_md686", null ]
       ] ],
-      [ "Clock model", "md_docs_2utilities_2latrec.html#autotoc_md639", null ],
-      [ "Ring naming and sizing", "md_docs_2utilities_2latrec.html#autotoc_md640", null ],
-      [ "Stage catalog", "md_docs_2utilities_2latrec.html#autotoc_md641", [
-        [ "Joining across components", "md_docs_2utilities_2latrec.html#autotoc_md642", null ],
-        [ "Attribution, and where the ring name stops being enough", "md_docs_2utilities_2latrec.html#autotoc_md643", [
-          [ "Possible follow-up: tier-aware attribution", "md_docs_2utilities_2latrec.html#autotoc_md644", null ]
+      [ "Clock model", "md_docs_2utilities_2latrec.html#autotoc_md687", null ],
+      [ "Ring naming and sizing", "md_docs_2utilities_2latrec.html#autotoc_md688", null ],
+      [ "Stage catalog", "md_docs_2utilities_2latrec.html#autotoc_md689", [
+        [ "Joining across components", "md_docs_2utilities_2latrec.html#autotoc_md690", null ],
+        [ "Attribution, and where the ring name stops being enough", "md_docs_2utilities_2latrec.html#autotoc_md691", [
+          [ "Possible follow-up: tier-aware attribution", "md_docs_2utilities_2latrec.html#autotoc_md692", null ]
         ] ],
-        [ "Granularity, and adding an identifier", "md_docs_2utilities_2latrec.html#autotoc_md645", null ]
+        [ "Granularity, and adding an identifier", "md_docs_2utilities_2latrec.html#autotoc_md693", null ]
       ] ],
-      [ "Capture → CSV workflow", "md_docs_2utilities_2latrec.html#autotoc_md646", null ],
-      [ "CI overhead gate", "md_docs_2utilities_2latrec.html#autotoc_md647", null ]
+      [ "Capture → CSV workflow", "md_docs_2utilities_2latrec.html#autotoc_md694", null ],
+      [ "CI overhead gate", "md_docs_2utilities_2latrec.html#autotoc_md695", null ]
     ] ],
     [ "Contributing", "md_CONTRIBUTING.html", [
-      [ "Pull Request Process", "md_CONTRIBUTING.html#autotoc_md679", null ],
-      [ "Development Workflow", "md_CONTRIBUTING.html#autotoc_md680", [
-        [ "For maintainers and existing collaborators", "md_CONTRIBUTING.html#autotoc_md681", null ],
-        [ "For external contributors", "md_CONTRIBUTING.html#autotoc_md682", null ],
-        [ "Merging (maintainers)", "md_CONTRIBUTING.html#autotoc_md683", null ]
+      [ "Pull Request Process", "md_CONTRIBUTING.html#autotoc_md727", null ],
+      [ "Development Workflow", "md_CONTRIBUTING.html#autotoc_md728", [
+        [ "For maintainers and existing collaborators", "md_CONTRIBUTING.html#autotoc_md729", null ],
+        [ "For external contributors", "md_CONTRIBUTING.html#autotoc_md730", null ],
+        [ "Merging (maintainers)", "md_CONTRIBUTING.html#autotoc_md731", null ]
       ] ],
-      [ "Mandatory checks", "md_CONTRIBUTING.html#autotoc_md684", [
-        [ "Issues", "md_CONTRIBUTING.html#autotoc_md685", null ],
-        [ "Pull requests", "md_CONTRIBUTING.html#autotoc_md686", null ],
-        [ "Licensing headers", "md_CONTRIBUTING.html#autotoc_md687", null ],
-        [ "AI assistants", "md_CONTRIBUTING.html#autotoc_md688", null ],
-        [ "Service Models and twin-repo coordination", "md_CONTRIBUTING.html#autotoc_md689", null ],
-        [ "Specifications and their Word editions", "md_CONTRIBUTING.html#autotoc_md690", null ]
+      [ "Mandatory checks", "md_CONTRIBUTING.html#autotoc_md732", [
+        [ "Issues", "md_CONTRIBUTING.html#autotoc_md733", null ],
+        [ "Pull requests", "md_CONTRIBUTING.html#autotoc_md734", null ],
+        [ "Licensing headers", "md_CONTRIBUTING.html#autotoc_md735", null ],
+        [ "AI assistants", "md_CONTRIBUTING.html#autotoc_md736", null ],
+        [ "Service Models and twin-repo coordination", "md_CONTRIBUTING.html#autotoc_md737", null ],
+        [ "Specifications and their Word editions", "md_CONTRIBUTING.html#autotoc_md738", null ]
       ] ],
-      [ "Code of Conduct", "md_CONTRIBUTING.html#autotoc_md691", [
-        [ "Our Pledge", "md_CONTRIBUTING.html#autotoc_md692", null ],
-        [ "Our Standards", "md_CONTRIBUTING.html#autotoc_md693", null ],
-        [ "Our Responsibilities", "md_CONTRIBUTING.html#autotoc_md694", null ],
-        [ "Scope", "md_CONTRIBUTING.html#autotoc_md695", null ],
-        [ "Enforcement", "md_CONTRIBUTING.html#autotoc_md696", null ],
-        [ "Attribution", "md_CONTRIBUTING.html#autotoc_md697", null ]
+      [ "Code of Conduct", "md_CONTRIBUTING.html#autotoc_md739", [
+        [ "Our Pledge", "md_CONTRIBUTING.html#autotoc_md740", null ],
+        [ "Our Standards", "md_CONTRIBUTING.html#autotoc_md741", null ],
+        [ "Our Responsibilities", "md_CONTRIBUTING.html#autotoc_md742", null ],
+        [ "Scope", "md_CONTRIBUTING.html#autotoc_md743", null ],
+        [ "Enforcement", "md_CONTRIBUTING.html#autotoc_md744", null ],
+        [ "Attribution", "md_CONTRIBUTING.html#autotoc_md745", null ]
       ] ]
     ] ],
     [ "Topics", "topics.html", "topics" ],
@@ -786,12 +845,12 @@ var NAVTREEINDEX =
 "functions_f.html",
 "md_docs_2e2sm-dapp_202-ie-mapping.html",
 "md_docs_2e3ap_203-procedure-flow.html#autotoc_md304",
-"md_docs_2e3sm_2spectrum_206-discrepancies.html#autotoc_md585",
-"structe3__service__model__handle__s.html#ad9725ffd222d071abb7a158aade904da",
-"structlibe3_1_1SubscriptionDelete.html#ad1cd6bc2b44243778e336bd954c2af72",
-"structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ctrl__outcome__s.html",
-"structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__msg__s_1_1ric__ind__msg__formats__c___1_1types__opts.html#aa8fcc226fee30cf9c917df96329a2a9a",
-"structlibe3__e2sm__dapp__report__style__t.html#ac54625f62b533d0b65265e08e7e0c73c"
+"md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md585",
+"protobuf__encoder_8cpp.html",
+"structlibe3_1_1Pdu.html",
+"structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ctrl__hdr__s_1_1ric__ctrl__hdr__formats__c___1_1types__opts.html#a89895fff752dd2587ae52b25bc56fe67",
+"structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__hdr__s_1_1ric__ind__hdr__formats__c___1_1types__opts.html",
+"structlibe3__e2sm__dapp__ctrl__hdr__t.html#a418613b99e4d53bebf91bb8f5c7a9c07"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';
