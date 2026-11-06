@@ -39,6 +39,17 @@ constexpr const char* LOG_TAG = "E3Iface";
 // its SM is stopped and the status handler told.
 constexpr auto EXPIRY_SWEEP_INTERVAL = std::chrono::milliseconds(250);
 
+/// The dApp that sent @p pdu, or 0 for a PDU that names none (a setup request,
+/// or a type a dApp does not send).
+uint32_t dapp_id_of(const Pdu& pdu) {
+    if (const auto* m = std::get_if<SubscriptionRequest>(&pdu.choice)) return m->dapp_identifier;
+    if (const auto* m = std::get_if<SubscriptionDelete>(&pdu.choice)) return m->dapp_identifier;
+    if (const auto* m = std::get_if<DAppControlAction>(&pdu.choice)) return m->dapp_identifier;
+    if (const auto* m = std::get_if<DAppReport>(&pdu.choice)) return m->dapp_identifier;
+    if (const auto* m = std::get_if<ReleaseMessage>(&pdu.choice)) return m->dapp_identifier;
+    return 0;
+}
+
 /**
  * @brief Build the default log-file path for a given role/identifier.
  *
@@ -599,6 +610,11 @@ void E3Interface::inbound_loop_ran() {
         Pdu& pdu = *decode_result;
         latrec_tstamp(seq, LATREC_DECODE_E3AP_DONE, pdu.message_id, static_cast<uint64_t>(pdu.type));
         
+        // Before the dispatch, so a report that the queue then drops still counts.
+        if (const uint32_t sender = dapp_id_of(pdu); sender != 0) {
+            subscription_manager_->touch_dapp(sender);
+        }
+
         switch (pdu.type) {
             case PduType::SUBSCRIPTION_REQUEST: {
                 auto* request = std::get_if<SubscriptionRequest>(&pdu.choice);
@@ -772,6 +788,7 @@ void E3Interface::subscription_expiry_loop() {
             if (!subscription_manager_->expire_subscriptions().empty()) {
                 notify_dapp_status_changed();
             }
+            remove_idle_dapps();
         } else if (dapp_state_) {
             for (uint32_t ran_function_id :
                  dapp_state_->expire_subscriptions(std::chrono::steady_clock::now())) {
@@ -1265,6 +1282,28 @@ void E3Interface::handle_dapp_disconnection(uint32_t dapp_id) {
     } else {
         E3_LOG_ERROR(LOG_TAG) << "Failed to unregister dApp " << dapp_id << ": "
                               << error_code_to_string(result);
+    }
+}
+
+void E3Interface::remove_idle_dapps() {
+    if (config_.dapp_idle_timeout_s == 0) {
+        return;
+    }
+    const std::chrono::seconds idle_for(config_.dapp_idle_timeout_s);
+    for (uint32_t dapp_id : subscription_manager_->idle_dapps(idle_for)) {
+        E3_LOG_INFO(LOG_TAG) << "dApp " << dapp_id << " sent nothing for "
+                             << config_.dapp_idle_timeout_s << " s, releasing it";
+
+        // The release goes first. Freeing the id lets the next setup take it, and
+        // a dApp filters a release by its own id, so it must name the old owner.
+        Pdu pdu(PduType::RELEASE_MESSAGE);
+        ReleaseMessage release;
+        release.dapp_identifier = dapp_id;
+        pdu.choice = release;
+        pdu.message_id = generate_message_id();
+        queue_outbound(std::move(pdu));
+
+        handle_dapp_disconnection(dapp_id);
     }
 }
 

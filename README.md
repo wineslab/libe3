@@ -416,6 +416,7 @@ for local development (IPC) or production deployments.
 | `connect_timeout_ms` | uint32_t | Connect timeout (ms) |
 | `recv_timeout_ms` | uint32_t | Receive timeout (ms) |
 | `send_timeout_ms` | uint32_t | Send timeout (ms) |
+| `dapp_idle_timeout_s` | uint32_t | RAN: seconds without a message from a dApp before it is released and removed (default 1800, 0 never). Only what the dApp sends counts. In the C API, `e3_config_t` has `dapp_idle_timeout_s` and the flag `set_dapp_idle_timeout`, since 0 is a legitimate value |
 | `receive_buffer_size` | size_t | Receive buffer size (bytes) |
 | `send_buffer_size` | size_t | Send buffer size (bytes) |
 | `io_threads` | size_t | Number of I/O threads |

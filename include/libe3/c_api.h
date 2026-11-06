@@ -164,6 +164,7 @@ e3_error_t e3_service_model_emit_message_ack(
  * Enum values: link_layer: 0=ZMQ, 1=POSIX. transport_layer: 0=SCTP, 1=TCP, 2=IPC.
  * encoding: 0=ASN1, 1=JSON. Use -1 for link_layer, transport_layer, encoding, log_level
  * to keep defaults. Use 0 for setup_port, subscriber_port, publisher_port to keep defaults.
+ * Set `set_dapp_idle_timeout` to apply `dapp_idle_timeout_s`; a zeroed struct keeps the default.
  */
 typedef struct {
     const char* ran_identifier;
@@ -182,6 +183,9 @@ typedef struct {
     /* A flag rather than a sentinel: core 0 is a legitimate target. */
     int pin_io_threads;      /* 0=no pinning */
     int io_thread_affinity;  /* logical core; Linux only, best-effort */
+    /* A flag too, because 0 is a legitimate timeout: it never removes a dApp. */
+    int set_dapp_idle_timeout;   /* 0=keep the library default (1800 s) */
+    uint32_t dapp_idle_timeout_s; /* seconds without a message from a dApp before the RAN releases and removes it; 0=never */
 } e3_config_t;
 
 /**

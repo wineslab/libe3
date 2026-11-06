@@ -508,6 +508,18 @@ struct E3Config {
     uint32_t connect_timeout_ms{5000}; ///< Connection establishment timeout in milliseconds
     uint32_t recv_timeout_ms{1000};    ///< Receive operation timeout in milliseconds
     uint32_t send_timeout_ms{1000};    ///< Send operation timeout in milliseconds
+
+    /**
+     * @brief Seconds a RAN waits for a message from a dApp before it removes the dApp.
+     *
+     * RAN role only. A dApp that sends nothing for this long is told with a
+     * ReleaseMessage, then its registration and subscriptions are dropped and
+     * a RAN function it was the last subscriber of is stopped. Only what the
+     * dApp sends counts, never what the RAN sends to it. A dApp that registered
+     * and never spoke counts from its registration. 0 never removes a dApp for
+     * being quiet. The default is Aerial's 1800 s.
+     */
+    uint32_t dapp_idle_timeout_s{1800};
     
     // Buffer sizes
     size_t receive_buffer_size{DEFAULT_BUFFER_SIZE}; ///< Size of the receive buffer in bytes
@@ -568,6 +580,7 @@ using Timestamp = std::chrono::time_point<std::chrono::steady_clock>;
 struct DAppEntry {
     uint32_t dapp_identifier{0};  ///< Assigned dApp identifier (1–100)
     Timestamp registered_time;     ///< Monotonic timestamp of when the dApp registered
+    Timestamp last_seen;           ///< Monotonic timestamp of the last message from the dApp, or of its registration
 };
 
 /**

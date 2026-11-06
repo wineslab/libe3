@@ -210,6 +210,9 @@ e3_agent_handle_t* e3_agent_create_with_config(const e3_config_t* config) {
             // Gated by the flag, not a sentinel: core 0 is a real target.
             if (config->pin_io_threads)
                 cfg.io_thread_affinity = config->io_thread_affinity;
+            // Gated by the flag, not a sentinel: 0 means "never remove a quiet dApp".
+            if (config->set_dapp_idle_timeout)
+                cfg.dapp_idle_timeout_s = config->dapp_idle_timeout_s;
         }
         e3_agent_handle_t* h = new e3_agent_handle_s();
         h->agent = std::make_unique<E3Agent>(std::move(cfg));
