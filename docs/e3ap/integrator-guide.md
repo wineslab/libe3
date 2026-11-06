@@ -84,7 +84,7 @@ in the connectors.
 | The dApp handles every MESSAGE ACK, with no dApp filter | `e3_interface.cpp:1812-1826` |
 | dApp report goes through a queue of 1024 and a worker | `e3_interface.cpp:687-717`, `800-821`, `1297-1305` |
 | A report with `sequence_id` 0 is refused with `INVALID_PARAM` | `e3_interface.cpp:1957` |
-| xApp control from the E3 Agent has no check of `sequence_id` | `src/core/e3_agent.cpp:230-251` |
+| xApp control from the E3 Agent has no check of `sequence_id` | `src/core/e3_agent.cpp:234-255` |
 | Release from the dApp: unregister, free identifiers, stop service models | `e3_interface.cpp:1307-1330`; `subscription_manager.cpp:84-138` |
 | RELEASE from the E3 Agent to a dApp that sent nothing for `dapp_idle_timeout_s` (default 1800 s, 0 is off): queued first, then the removal a release from the dApp gets. Only what the dApp sends resets the time | `e3_interface.cpp:1428-1448`; `subscription_manager.cpp:403-410`, `422-434` |
 | RELEASE from the E3 Agent: the dApp clears its session | `e3_interface.cpp:1665-1698` |
@@ -97,7 +97,7 @@ in the connectors.
 
 | Claim | Code pointer |
 |---|---|
-| POSIX framing: 4 octets, network order, chunks of 8192 | `posix_connector.cpp:937-973`, `posix_connector.hpp:121` |
+| POSIX framing: 4 octets, network order, chunks of 8192 | `posix_connector.cpp:937-973`, `posix_connector.hpp:133` |
 | Framed receive refuses 0 and more than 65536 | `posix_connector.cpp:999` |
 | The dApp sends unframed | `posix_connector.cpp:681`, `798` |
 | The E3 Agent reads one raw `recv()` of up to 60000 octets | `posix_connector.cpp:355`, `537` |
@@ -129,7 +129,7 @@ Update the hex in `tests/test_asn1_golden.cpp` and add a row to the change ledge
 These comments disagree with the code. They are not discrepancies of the protocol.
 
 * `include/libe3/types.hpp:538` says dApp identifiers are 1 to 100. The range is 1 to 65535.
-* `include/libe3/subscription_manager.hpp:114` says at most 101 dApps. `:148` says RAN function identifiers 0 to 255. `:34` and `:151` say that periodicity 0 means "the service model default".
+* `include/libe3/subscription_manager.hpp:115` says at most 101 dApps. `:148` says RAN function identifiers 0 to 255. `:34` and `:151` say that periodicity 0 means "the service model default".
 * `types.hpp:211` and `e3_encoder.hpp:81` use `0.0.0` as the version example. The default is `1.0.0`.
 * `types.hpp:442` and `include/libe3/c_api.h:166` leave Protobuf out of the encoding comments.
 * `include/libe3/e3_agent.hpp` says `register_sm` returns `STATE_ERROR` when the agent runs. It does not.

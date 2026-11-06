@@ -33,6 +33,17 @@ namespace libe3 {
  */
 class PosixE3Connector : public E3Connector {
 public:
+    /**
+     * @brief Create a POSIX connector
+     *
+     * @param transport_layer SCTP, TCP or IPC
+     * @param setup_endpoint Endpoint of the setup channel
+     * @param inbound_endpoint Endpoint of the inbound channel
+     * @param outbound_endpoint Endpoint of the outbound channel
+     * @param setup_port Port of the setup channel (SCTP and TCP)
+     * @param inbound_port Port of the inbound channel (SCTP and TCP)
+     * @param outbound_port Port of the outbound channel (SCTP and TCP)
+     */
     PosixE3Connector(
         E3TransportLayer transport_layer,
         const std::string& setup_endpoint,
@@ -43,6 +54,7 @@ public:
         uint16_t outbound_port
     );
     
+    /** @brief Close every socket. */
     ~PosixE3Connector() override;
 
     ErrorCode setup_initial_connection() override;
