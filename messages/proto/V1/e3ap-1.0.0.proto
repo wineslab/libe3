@@ -99,7 +99,7 @@ message SubscriptionResponse {
   IdentifierList telemetry_identifier_list = 5;
   IdentifierList control_identifier_list = 6;
   optional uint32 ran_function_identifier = 7;
-  // Granted interval, same unit as the request.
+  // Least microseconds the RAN keeps between two indications; absent: not reported.
   optional uint32 periodicity = 8;
   // Why the subscription was refused, and a text for it of up to 512 bytes.
   optional Cause cause = 9;
