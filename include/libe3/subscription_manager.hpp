@@ -29,8 +29,8 @@ namespace libe3 {
  * @brief Per-subscription metadata stored by the SubscriptionManager.
  */
 struct SubscriptionDetails {
-    std::vector<uint32_t> telemetry_ids;
-    std::vector<uint32_t> control_ids;
+    std::vector<uint32_t> telemetry_ids;  ///< Telemetry identifiers the dApp asked for
+    std::vector<uint32_t> control_ids;    ///< Control identifiers the dApp asked for
     uint32_t periodicity_us{0};  ///< 0 = use SM default
     uint32_t subscription_time_s{0};  ///< How long the subscription lasts, 0 = no limit
     /// When the subscription ends. Unset when `subscription_time_s` is 0.
@@ -96,6 +96,7 @@ public:
 
     /**
      * @brief Set callback for SM lifecycle events
+     * @param callback Called when a RAN function gains its first or loses its last subscriber
      */
     void set_sm_lifecycle_callback(SmLifecycleCallback callback);
 
@@ -134,6 +135,7 @@ public:
 
     /**
      * @brief Get list of registered dApp IDs
+     * @return The dApp IDs
      */
     std::vector<uint32_t> get_registered_dapps() const;
 
@@ -202,11 +204,16 @@ public:
 
     /**
      * @brief Check if dApp is subscribed to a RAN function
+     * @param dapp_id The dApp
+     * @param ran_function_id The RAN function
+     * @return true if the dApp is subscribed to the RAN function
      */
     bool is_subscribed(uint32_t dapp_id, uint32_t ran_function_id) const;
 
     /**
      * @brief Get all RAN functions a dApp is subscribed to
+     * @param dapp_id The dApp
+     * @return The RAN function IDs
      */
     std::vector<uint32_t> get_dapp_subscriptions(uint32_t dapp_id) const;
 
@@ -228,6 +235,7 @@ public:
      * generation next to the id and compare before acting on it.
      *
      * @return The registration's generation, or nothing if the id is not registered
+     * @param dapp_id The dApp
      */
     std::optional<uint64_t> dapp_generation(uint32_t dapp_id) const;
 
@@ -266,6 +274,8 @@ public:
 
     /**
      * @brief Get count of subscribers for a RAN function
+     * @param ran_function_id The RAN function
+     * @return The number of dApps subscribed to it
      */
     size_t get_subscriber_count(uint32_t ran_function_id) const;
 
@@ -275,11 +285,14 @@ public:
 
     /**
      * @brief Get all RAN functions that have at least one subscriber
+     * @return The RAN function IDs with a subscriber
      */
     std::vector<uint32_t> get_active_ran_functions() const;
 
     /**
      * @brief Check if any dApp is subscribed to a RAN function
+     * @param ran_function_id The RAN function
+     * @return true if a dApp is subscribed to it
      */
     bool has_subscribers(uint32_t ran_function_id) const;
 
@@ -289,11 +302,13 @@ public:
 
     /**
      * @brief Get total number of registered dApps
+     * @return The number of registered dApps
      */
     size_t dapp_count() const;
 
     /**
      * @brief Get total number of active subscriptions
+     * @return The number of subscriptions
      */
     size_t subscription_count() const;
 

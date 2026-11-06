@@ -23,31 +23,37 @@ namespace {
 constexpr const char* LOG_TAG = "CApi";
 }
 
+/// What `e3_agent_handle_t` points to: the agent a C caller holds.
 struct e3_agent_handle_s {
-    std::unique_ptr<E3Agent> agent;
+    std::unique_ptr<E3Agent> agent;  ///< The agent the handle owns
 };
 
+/// What `e3_service_model_handle_t` points to: a ServiceModel that calls back into C.
 struct e3_service_model_handle_s : public ServiceModel {
     // store copied values
-    std::string name_s;
-    uint32_t version_s;
-    uint32_t ran_function_id_s;
-    std::vector<uint32_t> telemetry_ids_s;
-    std::vector<uint32_t> control_ids_s;
-    std::vector<uint8_t> ran_function_data_s; // store ran_function_data
+    std::string name_s;                          ///< Service Model name
+    uint32_t version_s;                          ///< Service Model version
+    uint32_t ran_function_id_s;                  ///< RAN function identifier
+    std::vector<uint32_t> telemetry_ids_s;       ///< Telemetry identifiers it supports
+    std::vector<uint32_t> control_ids_s;         ///< Control identifiers it supports
+    std::vector<uint8_t> ran_function_data_s;    ///< Opaque RAN function data
 
     // callbacks
-    e3_sm_init_cb sm_init = nullptr;
-    e3_sm_destroy_cb sm_destroy = nullptr;
-    e3_sm_start_cb sm_start = nullptr;
-    e3_sm_stop_cb sm_stop = nullptr;
-    e3_sm_is_running_cb sm_is_running = nullptr;
-    e3_sm_process_control_cb sm_process_control = nullptr;
-    void* sm_context = nullptr;
+    e3_sm_init_cb sm_init = nullptr;                    ///< Called on registration
+    e3_sm_destroy_cb sm_destroy = nullptr;              ///< Called on destruction
+    e3_sm_start_cb sm_start = nullptr;                  ///< Called when the SM should start
+    e3_sm_stop_cb sm_stop = nullptr;                    ///< Called when the SM should stop
+    e3_sm_is_running_cb sm_is_running = nullptr;        ///< Called to ask whether the SM runs
+    e3_sm_process_control_cb sm_process_control = nullptr; ///< Called for each control action
+    void* sm_context = nullptr;                         ///< Passed to every callback
 
-    // mark if ownership was transferred to an agent
+    /// Whether ownership was transferred to an agent.
     bool transferred_to_agent = false;
 
+    /**
+     * @brief Copy a descriptor
+     * @param desc What the C caller described
+     */
     explicit e3_service_model_handle_s(const e3_c_service_model_desc_t& desc) {
         if (desc.name) name_s = desc.name;
         version_s = desc.version;
@@ -117,6 +123,11 @@ struct e3_service_model_handle_s : public ServiceModel {
         ));
     }
 
+    /**
+     * @brief Queue a PDU the SM emits
+     * @param pdu The PDU
+     * @return ErrorCode::SUCCESS if it was queued
+     */
     ErrorCode emit_pdu(Pdu&& pdu) {
         return emit_outbound(std::move(pdu));
     }

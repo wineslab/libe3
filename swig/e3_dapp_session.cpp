@@ -29,23 +29,33 @@ inline std::optional<uint32_t> opt_u32(int v) {
 }
 }  // namespace
 
+/// What a DAppSession holds: the agent, the event queue and the setup snapshot.
 struct DAppSession::Impl {
+    /**
+     * @brief Create the agent and the event queue
+     * @param config The agent's configuration
+     * @param queue_capacity Number of events the queue holds
+     */
     explicit Impl(libe3::E3Config config, std::size_t queue_capacity)
         : agent(std::make_unique<libe3::E3Agent>(std::move(config))),
           queue(queue_capacity) {}
 
-    std::unique_ptr<libe3::E3Agent> agent;
+    std::unique_ptr<libe3::E3Agent> agent;  ///< The dApp agent
     // Stable object (never moved) so a poll_events() reference stays valid; a
     // prior stop() shut it down, and start() re-arms it in place (LockFreeQueue's
     // shutdown is one-way, E3Agent itself is restartable).
-    libe3::LockFreeQueue<E3Event> queue;
-    std::atomic<unsigned long long> dropped{0};
+    libe3::LockFreeQueue<E3Event> queue;                  ///< Events waiting for poll_events()
+    std::atomic<unsigned long long> dropped{0};          ///< Events dropped because the queue was full
 
     // SetupResponse snapshot for the setup accessors (written once on setup).
-    mutable std::mutex setup_mu;
-    bool have_setup{false};
-    libe3::SetupResponse setup;
+    mutable std::mutex setup_mu;       ///< Guards have_setup and setup
+    bool have_setup{false};            ///< Whether a setup response has been seen
+    libe3::SetupResponse setup;        ///< The latest setup response
 
+    /**
+     * @brief Queue an event for poll_events()
+     * @param ev The event; it is dropped, and counted, if the queue is full
+     */
     void enqueue(E3Event ev) {
         const uint64_t seq = latrec_seq_next();
         ev.trace_seq = seq;
@@ -139,6 +149,7 @@ DAppSession::DAppSession(libe3::E3Config config, std::size_t queue_capacity) {
     });
 }
 
+/// Stops the agent and drops the queue.
 DAppSession::~DAppSession() {
     if (impl_) {
         impl_->queue.shutdown();
