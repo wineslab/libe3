@@ -15,6 +15,7 @@
 
 #include "types.hpp"
 #include <memory>
+#include <optional>
 #include <functional>
 #include <vector>
 #include <string>
@@ -87,6 +88,24 @@ public:
      *         the vector is empty or oversized.
      */
     virtual std::vector<uint8_t> ran_function_data() const { return {}; }
+
+    /**
+     * @brief The least time between two indications that this SM keeps for a subscription
+     *
+     * Sent to the dApp as the granted periodicity of its SubscriptionResponse.
+     * Override it only when the SM itself keeps its indications at least that
+     * far apart. The base implementation reports nothing, so the response then
+     * carries no periodicity ("not reported").
+     *
+     * @param requested_us Periodicity the dApp asked for, in microseconds. 0 when
+     *        it asked for none or for one indication per event.
+     * @return Microseconds between two indications, or std::nullopt when the SM
+     *         keeps no interval or does not say.
+     */
+    virtual std::optional<uint32_t> granted_periodicity(uint32_t requested_us) const {
+        (void)requested_us;
+        return std::nullopt;
+    }
 
     /**
      * @brief Initialize the SM
