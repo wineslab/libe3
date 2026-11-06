@@ -425,6 +425,14 @@ private:
     void handle_dapp_disconnection(uint32_t dapp_id);
 
     /**
+     * @brief Release and remove every dApp that has been quiet for dapp_idle_timeout_s
+     *
+     * Runs on the expiry thread. Each dApp gets a ReleaseMessage first, then the
+     * same removal a release from the dApp gets.
+     */
+    void remove_idle_dapps();
+
+    /**
      * @brief Reply to a setup request that cannot be answered positively.
      *
      * The RAN side of the setup channel is a REQ/REP exchange: exactly one
