@@ -126,7 +126,7 @@ public:
     /** @brief Start the agent, re-arming the inbound ring so a stop()->start()
      *  cycle works again. @return ErrorCode as int. */
     int start();
-    /** @brief Block until the setup handshake completes. @return ErrorCode as int. */
+    /** @brief Block until the setup handshake completes. @param timeout_ms longest wait, in milliseconds. @return ErrorCode as int. */
     int wait_for_setup(int timeout_ms);
     /** @brief Send a ReleaseMessage (session keeps running until @ref stop). @return ErrorCode as int. */
     int release();
@@ -135,22 +135,22 @@ public:
      *  via @ref start. */
     void stop();
 
-    /** @brief dApp id assigned at setup, or -1 if not yet assigned. */
+    /** @brief dApp id assigned at setup. @return the id, or -1 if not yet assigned. */
     long dapp_id() const;
-    /** @brief RAN identifier from the SetupResponse, or "" if none. */
+    /** @brief RAN identifier from the SetupResponse. @return the identifier, or "" if none. */
     std::string ran_identifier() const;
 
-    /** @brief SetupResponse code: 0=positive, 1=negative, -1=not received. */
+    /** @brief SetupResponse code. @return 0=positive, 1=negative, -1=not received. */
     int setup_response_code() const;
-    /** @brief Number of RAN functions advertised in the SetupResponse. */
+    /** @brief Number of RAN functions advertised in the SetupResponse. @return the count. */
     std::size_t setup_ran_function_count() const;
-    /** @brief RAN function id of advertised entry @p i (0 if out of range). */
+    /** @brief RAN function id of an advertised entry. @param i index of the entry. @return the id, 0 if out of range. */
     uint32_t setup_ran_function_id(std::size_t i) const;
-    /** @brief Telemetry ids of advertised entry @p i. */
+    /** @brief Telemetry ids of an advertised entry. @param i index of the entry. @return the ids. */
     std::vector<uint32_t> setup_ran_function_telemetry(std::size_t i) const;
-    /** @brief Control ids of advertised entry @p i. */
+    /** @brief Control ids of an advertised entry. @param i index of the entry. @return the ids. */
     std::vector<uint32_t> setup_ran_function_control(std::size_t i) const;
-    /** @brief Opaque ranFunctionData bytes of advertised entry @p i. */
+    /** @brief Opaque ranFunctionData bytes of an advertised entry. @param i index of the entry. @return the bytes. */
     std::vector<uint8_t> setup_ran_function_data(std::size_t i) const;
 
     /**
@@ -172,7 +172,7 @@ public:
                   std::vector<uint32_t> control_ids,
                   int sub_time_ms,
                   int periodicity);
-    /** @brief Delete a previously created subscription. @return ErrorCode as int. */
+    /** @brief Delete a previously created subscription. @param ran_function_id RAN function it was for. @return ErrorCode as int. */
     int unsubscribe(uint32_t ran_function_id);
 
     /**
@@ -216,10 +216,13 @@ public:
      * @p timeout_ms <= 0 polls non-blocking (does not busy-wait). Returns an
      * empty vector on a quiet tick or after @ref stop. The SWIG wrapper releases
      * the GIL for the whole call so libe3's threads run freely while Python waits.
+     * @param max_batch most events to return
+     * @param timeout_ms longest wait for the first event, in milliseconds
+     * @return the events, empty on a quiet tick or after stop
      */
     std::vector<E3Event> poll_events(std::size_t max_batch, int timeout_ms);
 
-    /** @brief Total inbound events dropped due to ring overflow (backpressure). */
+    /** @brief Total inbound events dropped due to ring overflow (backpressure). @return the count. */
     unsigned long long dropped_events() const;
 
 private:
