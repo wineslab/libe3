@@ -671,6 +671,26 @@ TEST(SubscriptionManager_unregistered_dapp_is_no_longer_idle) {
     ASSERT_TRUE(mgr.idle_dapps(60s).empty());
 }
 
+TEST(SubscriptionManager_an_id_handed_out_again_has_a_new_generation) {
+    SubscriptionManager mgr;
+    auto [r1, first] = mgr.register_dapp();
+    const auto before = mgr.dapp_generation(first);
+    ASSERT_TRUE(before.has_value());
+
+    mgr.unregister_dapp(first);
+    ASSERT_FALSE(mgr.dapp_generation(first).has_value());
+
+    auto [r2, again] = mgr.register_dapp();
+    ASSERT_EQ(again, first);
+    ASSERT_TRUE(mgr.dapp_generation(again).has_value());
+    ASSERT_TRUE(*mgr.dapp_generation(again) > *before);
+}
+
+TEST(SubscriptionManager_generation_of_an_unknown_dapp_is_nothing) {
+    SubscriptionManager mgr;
+    ASSERT_FALSE(mgr.dapp_generation(5).has_value());
+}
+
 int main() {
     return RUN_ALL_TESTS();
 }

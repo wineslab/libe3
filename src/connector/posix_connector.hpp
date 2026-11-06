@@ -12,6 +12,7 @@
 #include "libe3/e3_connector.hpp"
 #include <atomic>
 #include <cstddef>
+#include <unordered_map>
 #include <vector>
 
 namespace libe3 {
@@ -61,6 +62,8 @@ public:
 
     void dispose() override;
     void shutdown() override;
+    uint64_t last_peer_token() const override;
+    std::vector<uint64_t> take_closed_peers() override;
     
     E3LinkLayer link_layer() const noexcept override {
         return E3LinkLayer::POSIX;
@@ -93,6 +96,14 @@ private:
     // dispose(). A caller that disposes without joining those threads first
     // would race on these vectors.
     std::vector<int> inbound_peer_sockets_;
+
+    // Inbound peers are named by a token that is never reused, because a file
+    // descriptor is (see E3Connector::last_peer_token). Owned by the inbound
+    // thread, like inbound_peer_sockets_.
+    std::unordered_map<int, uint64_t> inbound_peer_tokens_;
+    uint64_t next_peer_token_{1};
+    uint64_t last_peer_token_{0};
+    std::vector<uint64_t> closed_peers_;
     std::vector<int> outbound_peer_sockets_;
 
     // Rotating start index for the inbound peer scan in receive(), so no single

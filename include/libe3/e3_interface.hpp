@@ -433,6 +433,45 @@ private:
     void remove_idle_dapps();
 
     /**
+     * @brief Which connection each dApp id belongs to, on a RAN that can tell its peers apart.
+     *
+     * A dApp id belongs to the connection that first sent a message naming it, for as
+     * long as that registration lasts. Each entry carries the generation of the
+     * registration (see SubscriptionManager::dapp_generation), because an id is handed
+     * out again after its dApp is removed. Only the inbound thread uses it.
+     */
+    struct PeerBindings {
+        /// Connection token, then the dApps seen on it, each with its registration's generation.
+        std::unordered_map<uint64_t, std::unordered_map<uint32_t, uint64_t>> by_peer;
+        /// dApp id, then its connection token and its registration's generation.
+        std::unordered_map<uint32_t, std::pair<uint64_t, uint64_t>> owner;
+    };
+
+    /**
+     * @brief Decide whether a message that names a dApp may be acted on, and bind the dApp to its connection
+     *
+     * The first message that names a registered dApp binds the dApp to the connection it
+     * came on. Later messages that name it must come on that connection: the E3AP messages
+     * carry no authentication, so without this any dApp could release or control another.
+     *
+     * @param bindings The inbound thread's bindings
+     * @param peer Token of the connection the message came on, 0 if the connector cannot tell
+     * @param dapp_id The dApp the message names
+     * @return false if the dApp is bound to another connection, so the message is to be dropped
+     */
+    bool admit_dapp_message(PeerBindings& bindings, uint64_t peer, uint32_t dapp_id);
+
+    /**
+     * @brief Remove every dApp that was seen on a connection that has since closed
+     *
+     * No release is sent, there is nobody to send it to. A dApp whose id was
+     * removed and handed out again since it was seen is left alone.
+     *
+     * @param bindings The inbound thread's bindings
+     */
+    void remove_dapps_of_closed_peers(PeerBindings& bindings);
+
+    /**
      * @brief Reply to a setup request that cannot be answered positively.
      *
      * The RAN side of the setup channel is a REQ/REP exchange: exactly one

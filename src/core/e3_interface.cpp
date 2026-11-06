@@ -586,9 +586,13 @@ void E3Interface::inbound_loop_ran() {
     }
     
     std::vector<uint8_t> buffer;
+    PeerBindings peer_bindings;
     
     while (!should_stop_.load()) {
         int ret = connector_->receive(buffer);
+
+        // After the receive, which delivers what a peer sent before it closed.
+        remove_dapps_of_closed_peers(peer_bindings);
         
         if (ret <= 0) {
             if (should_stop_.load()) break;
@@ -612,6 +616,13 @@ void E3Interface::inbound_loop_ran() {
         
         // Before the dispatch, so a report that the queue then drops still counts.
         if (const uint32_t sender = dapp_id_of(pdu); sender != 0) {
+            if (!admit_dapp_message(peer_bindings, connector_->last_peer_token(), sender)) {
+                E3_LOG_WARN(LOG_TAG) << "Dropping " << pdu_type_to_string(pdu.type)
+                                     << " that names dApp " << sender
+                                     << ", which belongs to another connection";
+                latrec_tstamp(seq, LATREC_DROP, 0, LATREC_DROP_FILTERED);
+                continue;
+            }
             subscription_manager_->touch_dapp(sender);
         }
 
@@ -1282,6 +1293,51 @@ void E3Interface::handle_dapp_disconnection(uint32_t dapp_id) {
     } else {
         E3_LOG_ERROR(LOG_TAG) << "Failed to unregister dApp " << dapp_id << ": "
                               << error_code_to_string(result);
+    }
+}
+
+bool E3Interface::admit_dapp_message(PeerBindings& bindings, uint64_t peer, uint32_t dapp_id) {
+    if (peer == 0) {
+        return true;  // a connector that cannot tell its peers apart
+    }
+    const auto generation = subscription_manager_->dapp_generation(dapp_id);
+    if (!generation) {
+        return true;  // not registered: the handler refuses it, as for any unknown id
+    }
+    auto owner = bindings.owner.find(dapp_id);
+    if (owner != bindings.owner.end()) {
+        if (owner->second.second == *generation) {
+            return owner->second.first == peer;
+        }
+        // The id was handed out again: the record is of the registration before.
+        auto old = bindings.by_peer.find(owner->second.first);
+        if (old != bindings.by_peer.end()) {
+            old->second.erase(dapp_id);
+        }
+    }
+    bindings.owner[dapp_id] = {peer, *generation};
+    bindings.by_peer[peer][dapp_id] = *generation;
+    return true;
+}
+
+void E3Interface::remove_dapps_of_closed_peers(PeerBindings& bindings) {
+    for (uint64_t peer : connector_->take_closed_peers()) {
+        auto bound = bindings.by_peer.find(peer);
+        if (bound == bindings.by_peer.end()) {
+            continue;  // it never sent a message that names a dApp
+        }
+        for (const auto& [dapp_id, generation] : bound->second) {
+            auto owner = bindings.owner.find(dapp_id);
+            if (owner != bindings.owner.end() && owner->second.first == peer) {
+                bindings.owner.erase(owner);
+            }
+            if (subscription_manager_->dapp_generation(dapp_id) != generation) {
+                continue;  // released, removed as idle, or the id is someone else's now
+            }
+            E3_LOG_INFO(LOG_TAG) << "Connection of dApp " << dapp_id << " closed without a release";
+            handle_dapp_disconnection(dapp_id);
+        }
+        bindings.by_peer.erase(bound);
     }
 }
 
