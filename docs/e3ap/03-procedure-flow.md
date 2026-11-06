@@ -236,6 +236,13 @@ The service model applies the action. If it sends a MESSAGE ACK message, `reques
 holds the message identifier of the dApp CONTROL ACTION message and `responseCode`
 holds the result.
 
+The MESSAGE ACK message is the only answer that E3AP defines to a dApp CONTROL ACTION
+message, and it carries no outcome of the control. When the service model sends it is the
+choice of the service model. A service model that has more to report puts it in its own
+payloads. An implementation that sends an acknowledge when it accepts a control and the
+result later, in a message that this version of E3AP does not define, is not understood by a
+dApp of this version: the dApp does not decode that message.
+
 ### Unsuccessful operation
 
 The service model may send a MESSAGE ACK message with `responseCode` "negative".
