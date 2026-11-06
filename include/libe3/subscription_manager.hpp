@@ -221,6 +221,17 @@ public:
     void touch_dapp(uint32_t dapp_id);
 
     /**
+     * @brief Which registration of a dApp id is current
+     *
+     * An id is handed out again after its dApp is removed, so a record that
+     * names a dApp by id alone can end up naming a later one. Remember the
+     * generation next to the id and compare before acting on it.
+     *
+     * @return The registration's generation, or nothing if the id is not registered
+     */
+    std::optional<uint64_t> dapp_generation(uint32_t dapp_id) const;
+
+    /**
      * @brief Registered dApps that have not sent a message for at least @p idle_for
      *
      * A dApp that registered and never spoke counts from its registration.
@@ -297,6 +308,7 @@ private:
     
     // dApp ID -> registration entry
     std::unordered_map<uint32_t, DAppEntry> registered_dapps_;
+    uint64_t last_generation_{0};  ///< Generation of the latest registration, under mutex_
     
     // dApp ID -> set of subscribed RAN function IDs
     std::unordered_map<uint32_t, std::unordered_set<uint32_t>> dapp_subscriptions_;
