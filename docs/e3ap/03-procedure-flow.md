@@ -121,7 +121,12 @@ grants nothing.
 
 A second SUBSCRIPTION REQUEST message for the same RAN function from the same dApp
 returns the existing subscription identifier and "positive". It does not create a
-second subscription.
+second subscription and it does not change the existing one: the grant lists and the
+interval in the response are those that the E3 Agent holds, not those of the second
+request. A dApp that wants other lists or another interval sends a SUBSCRIPTION DELETE
+message and then a new SUBSCRIPTION REQUEST message. That is the only way that all
+known E3 Agents handle alike. A second request that the E3 Agent refuses leaves the
+existing subscription as it was.
 
 The E3 Agent sends the interval in microseconds. The value 0 means one indication for
 each event. A missing interval means that the service model sets the rate.
