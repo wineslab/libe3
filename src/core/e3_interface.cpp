@@ -1119,6 +1119,9 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
     ResponseCode response_code = ResponseCode::NEGATIVE;
     uint32_t subscription_id = 1;
     std::optional<Refusal> refusal;
+    // What the RAN holds when the request repeats a subscription it already has.
+    std::optional<SubscriptionDetails> held;
+    bool repeated = false;
     
     // Check if dApp is registered
     if (!subscription_manager_->is_dapp_registered(request.dapp_identifier)) {
@@ -1149,6 +1152,10 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
                                  << " (subscription_id=" << subscription_id << ")";
             if (result == ErrorCode::SUCCESS) {
                 notify_dapp_status_changed();
+            } else {
+                repeated = true;
+                held = subscription_manager_->get_subscription_details(
+                    request.dapp_identifier, request.ran_function_identifier);
             }
         } else {
             E3_LOG_ERROR(LOG_TAG) << "Failed to add subscription: " 
@@ -1170,11 +1177,18 @@ void E3Interface::handle_subscription_request(const SubscriptionRequest& request
     resp.response_code = response_code;
     if (response_code == ResponseCode::POSITIVE) {
         resp.subscription_id = subscription_id;
-        // Core grants exactly what was asked; only the SM sets the real rate.
-        resp.telemetry_identifier_list = request.telemetry_identifier_list;
-        resp.control_identifier_list = request.control_identifier_list;
         resp.ran_function_identifier = request.ran_function_identifier;
-        resp.periodicity = request.periodicity;
+        if (!repeated) {
+            // Core grants exactly what was asked; only the SM sets the real rate.
+            resp.telemetry_identifier_list = request.telemetry_identifier_list;
+            resp.control_identifier_list = request.control_identifier_list;
+            resp.periodicity = request.periodicity;
+        } else if (held) {
+            // A repeat keeps the subscription it repeats, so say what that holds.
+            resp.telemetry_identifier_list = held->telemetry_ids;
+            resp.control_identifier_list = held->control_ids;
+            if (held->periodicity_us != 0) resp.periodicity = held->periodicity_us;
+        }
     } else if (refusal) {
         resp.cause = refusal->cause;
         resp.detail = refusal->detail;
