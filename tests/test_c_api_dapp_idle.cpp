@@ -98,6 +98,7 @@ E3Config dapp_config(const Endpoints& ep) {
     c.log_level           = 0;
     c.dapp_name           = "CApiIdleDApp";
     c.dapp_version        = "1.0.0";
+    c.reconnect_interval_ms = 0;
     return c;
 }
 

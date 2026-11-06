@@ -336,8 +336,9 @@ int main(int argc, char* argv[]) {
                       << " rc=" << libe3::response_code_to_string(ack.response_code) << "\n";
         });
 
-        // The session is over: dApp id and subscriptions are already cleared. A
-        // real dApp would stop() then start() to register again; this one stops.
+        // The session is over: dApp id and subscriptions are already cleared. The
+        // library registers again by itself (E3Config::reconnect_interval_ms); this
+        // one stops instead.
         p->agent->set_disconnect_handler([p](libe3::DisconnectReason reason) {
             std::cout << "[DISCONNECT] peer=" << p->label << " reason="
                       << (reason == libe3::DisconnectReason::RELEASED_BY_RAN

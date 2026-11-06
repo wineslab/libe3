@@ -137,6 +137,9 @@ E3Config make_config(E3Role role, const Endpoints& ep, uint32_t idle_s) {
     c.dapp_name           = "IdleDApp";
     c.dapp_version        = "1.0.0";
     c.dapp_idle_timeout_s = idle_s;
+    // A released dApp would register again and be counted again;
+    // test_dapp_reconnect.cpp covers that.
+    c.reconnect_interval_ms = 0;
     return c;
 }
 

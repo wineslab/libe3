@@ -248,7 +248,9 @@ public:
     /**
      * Set callback for the end of the dApp's session with the RAN: a release for
      * this dApp, or a closed or failed connection. Fires once, after dapp_id()
-     * has been cleared. The dApp does not reconnect; call stop() then start().
+     * has been cleared. Unless E3Config::reconnect_interval_ms is 0 the dApp then
+     * registers again by itself, with a new dapp_id() and no subscriptions: subscribe
+     * again from the setup response handler. It does not after release() or stop().
      */
     void set_disconnect_handler(DisconnectHandler handler);
 

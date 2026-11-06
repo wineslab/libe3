@@ -102,7 +102,9 @@ public:
     /**
      * @brief Stop the interface
      *
-     * Signals all threads to stop and waits for them to finish.
+     * Signals all threads to stop and waits for them to finish. It also ends
+     * the dApp's reconnecting, so the dApp stays down. Not to be called from
+     * the disconnect handler, which runs on a thread stop() joins.
      */
     void stop();
 
@@ -322,6 +324,17 @@ private:
     std::unique_ptr<std::thread> expiry_thread_;
     std::mutex expiry_mu_;
     std::condition_variable expiry_cv_;  // woken by stop() so the thread exits at once
+
+    // dApp reconnect. reconnect_thread_ restarts the interface (stop_locked, then
+    // start_locked) when the RAN is gone or setup failed. lifecycle_mu_ keeps
+    // that from overlapping a start() or stop() of the application;
+    // reconnect_mu_ guards the two flags below and is never held across either.
+    std::mutex lifecycle_mu_;
+    std::mutex reconnect_mu_;
+    std::condition_variable reconnect_cv_;
+    bool reconnect_pending_{false};  ///< a restart has been asked for
+    bool user_stopped_{false};       ///< stop() was called and start() has not been since
+    std::unique_ptr<std::thread> reconnect_thread_;
 #ifdef LIBE3_ENABLE_LATREC
     // ~1 Hz slow-lane sampler stamping LATREC_CONTEXT (involuntary context
     // switches, current CPU frequency), to explain p99 tails. Exists only in
@@ -431,6 +444,19 @@ private:
      * same removal a release from the dApp gets.
      */
     void remove_idle_dapps();
+
+    /// start() and stop() without the lifecycle lock or the reconnect thread.
+    ErrorCode start_locked();
+    void stop_locked();
+
+    /// Ask the reconnect thread for a restart, unless it is off or stop() was called.
+    void request_reconnect();
+
+    /// Body of reconnect_thread_: wait for a request, pause, restart, repeat.
+    void reconnect_loop();
+
+    /// stop_locked() then start_locked() under the lifecycle lock, unless stop() was called.
+    void restart_session();
 
     /**
      * @brief Which connection each dApp id belongs to, on a RAN that can tell its peers apart.

@@ -189,8 +189,8 @@ Not covered: anything from OAI, and any live Aerial or OCUDU agent.
 ## When the RAN goes away
 
 What a libe3 dApp sees, and what each peer does to cause it. Added in
-[#120](https://github.com/wineslab/libe3/pull/120), extended for a libe3 RAN by
-[#93](https://github.com/wineslab/libe3/issues/93).
+[#120](https://github.com/wineslab/libe3/pull/120), extended for a libe3 RAN and for the dApp's retry
+by [#93](https://github.com/wineslab/libe3/issues/93) and [#121](https://github.com/wineslab/libe3/issues/121).
 
 | Peer | What it does | What the libe3 dApp reports |
 |---|---|---|
@@ -214,9 +214,15 @@ longer end or control another. The first message wins: nothing on the wire says 
 belongs to when it opens, so a connection that names an id before its dApp has spoken takes it. A
 dApp that crashes before its first message is left to the idle time.
 
-The dApp does not reconnect. The program calls `stop()` then `start()`, or exits
-([#121](https://github.com/wineslab/libe3/issues/121)). A dApp that sent its own `release()` gets no
-event when the RAN then closes.
+After a release, a lost link, or a setup that no RAN answered or that the RAN refused, a libe3 dApp
+registers again by itself every `reconnect_interval_ms` (default 1000, 0 never) until the RAN
+answers, as Aerial's manager does. The new session has a new dApp id and none of the old
+subscriptions: the application subscribes again, and learns that the dApp is back from the setup
+response handler. A dApp that sent its own `release()` gets no event when the RAN then closes and is
+not registered again; nor is one that called `stop()`.
+
+Against OCUDU, which closes the association after 30 s without traffic, a dApp that sends nothing is
+closed and registers again about every 30 s, and loses its subscriptions each time.
 
 ## Known differences
 
@@ -243,7 +249,7 @@ libe3, the grammar and the three encodings. The last column is what the specific
 
 | Where | What differs | Effect | Expected resolution |
 |---|---|---|---|
-| Setup, dApp side | A negative `E3-SetupResponse` still counts as a finished setup. `wait_for_setup` returns success and the dApp has no id. The response's `requestId` is not compared with the request | The application sends messages the RAN cannot match to a dApp. A late response to an older attempt completes the current one | Report a failed setup on a negative response. Compare the two ids and drop a response that does not match |
+| Setup, dApp side | A negative `E3-SetupResponse` still counts as a finished setup. `wait_for_setup` returns success and the dApp has no id. The response's `requestId` is not compared with the request. A dApp with no id after setup tries again every `reconnect_interval_ms` | The application sends messages the RAN cannot match to a dApp. A late response to an older attempt completes the current one | Report a failed setup on a negative response. Compare the two ids and drop a response that does not match |
 | Setup, RAN side | The dApp's `e3apProtocolVersion` is logged and never compared. Aerial accepts only the exact string `1.0.0`, OCUDU any string that starts with `1.` | A version string cannot flag a wire change. A dApp that works with libe3 can fail against Aerial | Accept any string that starts with `1.`. Use the string to flag a wire change |
 | Setup, RAN side | A second request from the same dApp registers a new dApp. The RAN has no identity check | A retry after a slow reply leaves an id with no owner. One id leaks until a release names it, or until the idle time removes it | Let the dApp send a release for an id it did not use, or give the dApp an identity in the request |
 | Setup, RAN side | A negative reply for "no free dApp id" carries `ranFunctionList`. A negative reply for a bad request does not | Two shapes of "negative" | Send no `ranFunctionList` in any negative reply |
@@ -561,6 +567,7 @@ the same PR as the change. Newest first.
 
 | Change | PR | Kind | Who has to act | Status |
 |---|---|---|---|---|
+| After a release, a lost link, or a setup that no RAN answered or that the RAN refused, a libe3 dApp registers again by itself every `reconnect_interval_ms` (default 1000, `0` never), with a new dApp id and none of its old subscriptions, as Aerial's manager does. `release()` and `stop()` end it. The setup response handler runs on every setup, so the application learns it is back there and subscribes again ([#121](https://github.com/wineslab/libe3/issues/121)) | | Behavior | A dApp that waited for the program to call `stop()` then `start()` now registers by itself; one that does so too races with the library, so set `reconnect_interval_ms` to 0 or leave it to the library. The Python dApp framework has to subscribe again on the setup response event. OAI's E3 agent and the dApp library rebuilt together with the new `E3Config`. Nothing on the wire | unmerged |
 | A POSIX libe3 RAN (TCP, SCTP, IPC) removes a dApp whose connection closes without a release, at once and with nothing sent, if the dApp had sent a message that names it on that connection. It also binds a dApp id to the connection that first named it and drops a later message that names it on another connection, so one dApp can no longer release or control another ([#93](https://github.com/wineslab/libe3/issues/93)) | | Behavior | A dApp that relied on naming another dApp's id from its own connection on POSIX is now dropped. A dApp that closes before its first message, and every ZeroMQ dApp, are still left to the idle time. OAI's E3 agent and the dApp library rebuilt together with the new `E3Connector`, which gains two virtual functions. Nothing on the wire | unmerged |
 | A libe3 RAN removes a dApp that has vanished. After `dapp_idle_timeout_s` (default 1800 s, `0` never) without a message from the dApp it sends a `releaseMessage` naming it, then drops its registration and subscriptions, stops a RAN function it was the last subscriber of and calls the dApp status handler. Only what the dApp sends resets the time, never what the RAN sends it. A RAN built through the C API sets the time with `set_dapp_idle_timeout` and `dapp_idle_timeout_s` in `e3_config_t` ([#93](https://github.com/wineslab/libe3/issues/93)) | | Behavior | A dApp that only listens, or is subscribed and never sends, is released after 30 minutes and has to be started again by the program (`stop()` then `start()`), or the RAN sets `dapp_idle_timeout_s` to 0 for the old behavior. A libe3-compatible peer must handle a release that names it: OCUDU's does not send one and Aerial's agent does. OAI's E3 agent and the dApp library rebuilt together with the new `E3Config` and `e3_config_t`, which grows by two fields. Nothing on the wire, the release is the existing message | unmerged |
 | A negative setup response, subscription response and message ack carry a `cause` and a `detail` ([#100](https://github.com/wineslab/libe3/issues/100)), and a RAN refuses a subscription to an unknown RAN function, with no identifier or with an identifier the function does not advertise, and a control for an unknown function, an unknown control id or a function with no subscription, where it answered positive or not at all ([#96](https://github.com/wineslab/libe3/issues/96)). `cause` is OCUDU's `E3-Cause`, 15 values, extensible. `detail` is UTF-8 text of up to 512 bytes. JSON writes `cause` as its camel case name and `detail`, and reads Aerial's `message` as `detail`. ASN.1: `cause` and `detail` are the first extension additions of the three responses, as in OCUDU's grammar | | ASN.1 wire, JSON and Protobuf extension, behavior | libe3, OAI's E3 agent and the dApp library rebuilt together: in the subscription response `cause` and `detail` now come before `ranFunctionIdentifier` and `periodicity`, so every subscription response that carries those has other bytes, and an older libe3 reads `cause` as the RAN function. Setup response and ack bytes change only when a reason is present. A dApp that subscribes to an id its RAN function does not advertise is refused now, so one that relied on the positive answer has to name the advertised ids. OCUDU's libe3-compatible mode has to re-vendor the grammar. Aerial sends `message`, which libe3 reads | unmerged |
