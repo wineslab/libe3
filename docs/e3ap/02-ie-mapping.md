@@ -161,7 +161,7 @@ Table: E3-SubscriptionResponse
 | `cause` | O | | E3-Cause | Why the E3 Agent refused the request. It is present only when the response code is "negative". This field is an extension addition. |
 | `detail` | O | | E3-Text | Text for the cause. This field is an extension addition. |
 | `ranFunctionIdentifier` | O | | INTEGER (1 to 65535) | The RAN function that the grant is for. This field is an extension addition. |
-| `periodicity` | O | 0 to 60000000 | INTEGER | The interval that the E3 Agent grants, in microseconds. Same unit and range as in the request. This field is an extension addition. |
+| `periodicity` | O | 0 to 60000000 | INTEGER | The least time, in microseconds, that the E3 Agent keeps between two indications of the subscription. Same unit and range as in the request. It is not a copy of the request: the E3 Agent reports it only when it keeps such an interval, and a missing value means that it does not report one. This field is an extension addition. |
 
 ## E3-SubscriptionDelete
 

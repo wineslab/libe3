@@ -114,7 +114,7 @@ starts the service model of the RAN function if the dApp is its first subscriber
 
 The SUBSCRIPTION RESPONSE message has `responseCode` "positive" and holds
 `subscriptionId`. It also lists the telemetry identifiers and control identifiers that
-the E3 Agent grants, the RAN function identifier and the interval that it grants.
+the E3 Agent grants, the RAN function identifier and the interval that it keeps.
 The dApp keeps the subscription identifier. A grant list that is missing means that
 the E3 Agent does not report the grant. A grant list that is empty means that it
 grants nothing.
@@ -128,8 +128,13 @@ message and then a new SUBSCRIPTION REQUEST message. That is the only way that a
 known E3 Agents handle alike. A second request that the E3 Agent refuses leaves the
 existing subscription as it was.
 
-The E3 Agent sends the interval in microseconds. The value 0 means one indication for
-each event. A missing interval means that the service model sets the rate.
+The interval in the response is in microseconds. It is the least time that the E3 Agent
+keeps between two indications of the subscription. Indications can be further apart,
+because the E3 Agent sends them when it has data. It is not a copy of the interval in the
+request: a service model that keeps a larger interval reports that one. A missing
+interval means that the E3 Agent does not report one, which does not mean that it keeps
+none. The value 0 means that it keeps none and is sent as a missing interval. The RAN
+function identifier in the response is for information, and a dApp shall not depend on it.
 
 ### Unsuccessful operation
 
