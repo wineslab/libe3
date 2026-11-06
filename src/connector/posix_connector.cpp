@@ -508,8 +508,14 @@ int PosixE3Connector::receive(std::vector<uint8_t>& buffer) {
     }
 
     if (pfds[0].revents & POLLIN) {
-        drain_accept(inbound_socket_, transport_layer_, inbound_peer_sockets_,
-                     "Inbound (subscriber)");
+        if (drain_accept(inbound_socket_, transport_layer_, inbound_peer_sockets_,
+                         "Inbound (subscriber)") > 0) {
+            for (int fd : inbound_peer_sockets_) {
+                if (inbound_peer_tokens_.count(fd) == 0) {
+                    inbound_peer_tokens_[fd] = next_peer_token_++;
+                }
+            }
+        }
     }
 
     // Read from the next ready peer, returning its data (remaining ready peers
@@ -547,6 +553,7 @@ int PosixE3Connector::receive(std::vector<uint8_t>& buffer) {
             buffer.resize(static_cast<size_t>(ret));
             E3_LOG_TRACE(LOG_TAG) << "Received: " << ret << " bytes";
             inbound_rr_ = idx + 1;  // next call starts after the peer we just served
+            last_peer_token_ = inbound_peer_tokens_[fd];
             return static_cast<int>(ret);
         }
         if (broken) {
@@ -558,6 +565,10 @@ int PosixE3Connector::receive(std::vector<uint8_t>& buffer) {
                 std::remove(inbound_peer_sockets_.begin(),
                             inbound_peer_sockets_.end(), fd),
                 inbound_peer_sockets_.end());
+            if (auto token = inbound_peer_tokens_.find(fd); token != inbound_peer_tokens_.end()) {
+                closed_peers_.push_back(token->second);
+                inbound_peer_tokens_.erase(token);
+            }
             E3_LOG_INFO(LOG_TAG) << "Inbound (subscriber) peer disconnected ("
                                  << inbound_peer_sockets_.size() << " remain)";
             continue;
@@ -568,6 +579,16 @@ int PosixE3Connector::receive(std::vector<uint8_t>& buffer) {
         inbound_rr_ = (inbound_rr_ + 1) % n_peers;
     }
     return 0;
+}
+
+uint64_t PosixE3Connector::last_peer_token() const {
+    return last_peer_token_;
+}
+
+std::vector<uint64_t> PosixE3Connector::take_closed_peers() {
+    std::vector<uint64_t> closed;
+    closed.swap(closed_peers_);
+    return closed;
 }
 
 ErrorCode PosixE3Connector::setup_outbound_connection() {
@@ -871,6 +892,8 @@ void PosixE3Connector::dispose() {
         close(fd);
     }
     inbound_peer_sockets_.clear();
+    inbound_peer_tokens_.clear();
+    closed_peers_.clear();
     for (int fd : outbound_peer_sockets_) {
         close(fd);
     }

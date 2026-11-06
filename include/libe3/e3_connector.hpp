@@ -157,6 +157,28 @@ public:
     virtual void shutdown() {}
 
     /**
+     * @brief Which peer supplied the bytes the last receive() returned (RAN role)
+     *
+     * Call it on the thread that calls receive(), right after a receive() that
+     * returned bytes. A token names one accepted connection and is never reused
+     * by the same connector, so a closed peer's token cannot name a later one.
+     *
+     * @return The peer's token, or 0 for a connector that cannot tell its
+     *         peers apart (the default, and ZeroMQ)
+     */
+    virtual uint64_t last_peer_token() const { return 0; }
+
+    /**
+     * @brief Peers whose connection has closed since the last call (RAN role)
+     *
+     * Call it on the thread that calls receive(). Each token is returned once,
+     * and only after the bytes that peer sent before closing were delivered.
+     * The default returns nothing: a connector that cannot tell its peers apart
+     * cannot tell that one left.
+     */
+    virtual std::vector<uint64_t> take_closed_peers() { return {}; }
+
+    /**
      * @brief Get the link layer type
      */
     virtual E3LinkLayer link_layer() const noexcept = 0;

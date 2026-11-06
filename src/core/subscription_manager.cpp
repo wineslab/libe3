@@ -71,6 +71,7 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::register_dapp() {
     entry.dapp_identifier = assigned_id;
     entry.registered_time = now();
     entry.last_seen = entry.registered_time;
+    entry.generation = ++last_generation_;
     registered_dapps_[assigned_id] = entry;
 
     // Initialize empty subscription set for this dApp
@@ -406,6 +407,16 @@ void SubscriptionManager::touch_dapp(uint32_t dapp_id) {
     if (it != registered_dapps_.end()) {
         it->second.last_seen = now();
     }
+}
+
+std::optional<uint64_t> SubscriptionManager::dapp_generation(uint32_t dapp_id) const {
+    std::shared_lock lock(mutex_);
+
+    auto it = registered_dapps_.find(dapp_id);
+    if (it == registered_dapps_.end()) {
+        return std::nullopt;
+    }
+    return it->second.generation;
 }
 
 std::vector<uint32_t> SubscriptionManager::idle_dapps(std::chrono::seconds idle_for) const {

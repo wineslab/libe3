@@ -581,6 +581,7 @@ struct DAppEntry {
     uint32_t dapp_identifier{0};  ///< Assigned dApp identifier (1–100)
     Timestamp registered_time;     ///< Monotonic timestamp of when the dApp registered
     Timestamp last_seen;           ///< Monotonic timestamp of the last message from the dApp, or of its registration
+    uint64_t generation{0};        ///< Counts registrations: an id handed out again gets a higher one
 };
 
 /**
