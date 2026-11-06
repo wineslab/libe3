@@ -382,6 +382,7 @@ The single entry-point class for both roles. Configure `E3Config.role = E3Role::
 | `set_setup_response_handler(handler)` | (dApp) Callback for incoming `SetupResponse` |
 | `set_xapp_control_handler(handler)` | (dApp) Callback for incoming `XAppControlAction` |
 | `set_message_ack_handler(handler)` | (dApp) Callback for incoming `MessageAck` |
+| `set_disconnect_handler(handler)` | (dApp) Callback when the RAN released the dApp or the connection to it was lost. The dApp then registers again by itself unless `reconnect_interval_ms` is 0 |
 | `wait_for_setup(timeout)` | (dApp) Block until setup handshake completes |
 | `subscribe(ran_function_id, telemetry, control, ...)` | (dApp) Subscribe to a RAN function |
 | `unsubscribe(ran_function_id)` | (dApp) Tear down a subscription |
@@ -417,6 +418,7 @@ for local development (IPC) or production deployments.
 | `recv_timeout_ms` | uint32_t | Receive timeout (ms) |
 | `send_timeout_ms` | uint32_t | Send timeout (ms) |
 | `dapp_idle_timeout_s` | uint32_t | RAN: seconds without a message from a dApp before it is released and removed (default 1800, 0 never). Only what the dApp sends counts. In the C API, `e3_config_t` has `dapp_idle_timeout_s` and the flag `set_dapp_idle_timeout`, since 0 is a legitimate value |
+| `reconnect_interval_ms` | uint32_t | dApp: milliseconds between attempts to register again after a release, a lost link or a failed setup (default 1000, 0 never). The new session has a new dApp id and no subscriptions |
 | `receive_buffer_size` | size_t | Receive buffer size (bytes) |
 | `send_buffer_size` | size_t | Send buffer size (bytes) |
 | `io_threads` | size_t | Number of I/O threads |

@@ -300,6 +300,21 @@ ErrorCode E3Interface::create_connector_from_config() {
 }
 
 ErrorCode E3Interface::start() {
+    std::lock_guard<std::mutex> lifecycle(lifecycle_mu_);
+    {
+        std::lock_guard<std::mutex> lk(reconnect_mu_);
+        user_stopped_ = false;
+        reconnect_pending_ = false;
+    }
+    const ErrorCode rc = start_locked();
+    if (rc == ErrorCode::SUCCESS && config_.role == E3Role::DAPP &&
+        config_.reconnect_interval_ms > 0 && !reconnect_thread_) {
+        reconnect_thread_ = std::make_unique<std::thread>(&E3Interface::reconnect_loop, this);
+    }
+    return rc;
+}
+
+ErrorCode E3Interface::start_locked() {
     AgentState expected = AgentState::INITIALIZED;
     if (!state_.compare_exchange_strong(expected, AgentState::CONNECTING)) {
         E3_LOG_ERROR(LOG_TAG) << "Cannot start from state: " 
@@ -374,6 +389,24 @@ ErrorCode E3Interface::start() {
 }
 
 void E3Interface::stop() {
+    // The reconnect thread goes first. It takes the lifecycle lock to restart, so
+    // it is joined before this takes the lock, and it does not restart once
+    // user_stopped_ is set.
+    {
+        std::lock_guard<std::mutex> lk(reconnect_mu_);
+        user_stopped_ = true;
+    }
+    reconnect_cv_.notify_all();
+    if (reconnect_thread_ && reconnect_thread_->joinable()) {
+        reconnect_thread_->join();
+    }
+    reconnect_thread_.reset();
+
+    std::lock_guard<std::mutex> lifecycle(lifecycle_mu_);
+    stop_locked();
+}
+
+void E3Interface::stop_locked() {
     if (state_.load() == AgentState::UNINITIALIZED ||
         state_.load() == AgentState::STOPPING) {
         return;
@@ -1341,6 +1374,57 @@ void E3Interface::remove_dapps_of_closed_peers(PeerBindings& bindings) {
     }
 }
 
+void E3Interface::request_reconnect() {
+    if (config_.role != E3Role::DAPP || config_.reconnect_interval_ms == 0) {
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> lk(reconnect_mu_);
+        if (user_stopped_) {
+            return;
+        }
+        reconnect_pending_ = true;
+    }
+    reconnect_cv_.notify_all();
+}
+
+void E3Interface::reconnect_loop() {
+    const std::chrono::milliseconds interval(config_.reconnect_interval_ms);
+    std::unique_lock<std::mutex> lk(reconnect_mu_);
+    for (;;) {
+        reconnect_cv_.wait(lk, [this] { return user_stopped_ || reconnect_pending_; });
+        if (user_stopped_) {
+            return;
+        }
+        reconnect_pending_ = false;
+
+        // The pause is the retry interval too: a restart that fails asks again.
+        if (reconnect_cv_.wait_for(lk, interval, [this] { return user_stopped_; })) {
+            return;
+        }
+        lk.unlock();
+        restart_session();
+        lk.lock();
+    }
+}
+
+void E3Interface::restart_session() {
+    std::lock_guard<std::mutex> lifecycle(lifecycle_mu_);
+    {
+        std::lock_guard<std::mutex> lk(reconnect_mu_);
+        if (user_stopped_) {
+            return;
+        }
+    }
+    E3_LOG_INFO(LOG_TAG) << "Registering with the RAN again";
+    stop_locked();
+    const ErrorCode rc = start_locked();
+    if (rc != ErrorCode::SUCCESS) {
+        E3_LOG_WARN(LOG_TAG) << "Could not reach the RAN: " << error_code_to_string(rc);
+        request_reconnect();
+    }
+}
+
 void E3Interface::remove_idle_dapps() {
     if (config_.dapp_idle_timeout_s == 0) {
         return;
@@ -1449,6 +1533,11 @@ void E3Interface::setup_loop_dapp() {
 
     E3_LOG_INFO(LOG_TAG) << "Setup loop (dApp) finished, success="
                          << (got_response ? "yes" : "no");
+
+    // Nothing answered, or the RAN refused: try again, as for a RAN that left.
+    if (!should_stop_.load() && !dapp_id().has_value()) {
+        request_reconnect();
+    }
 }
 
 void E3Interface::inbound_loop_dapp() {
@@ -1459,6 +1548,8 @@ void E3Interface::inbound_loop_dapp() {
     if (result != ErrorCode::SUCCESS) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to setup inbound (dApp) connection: "
                               << error_code_to_string(result);
+        // A RAN that left before this thread connected is gone like any other.
+        if (!should_stop_.load()) on_ran_gone(DisconnectReason::CONNECTION_LOST);
         return;
     }
 
@@ -1534,6 +1625,7 @@ void E3Interface::outbound_loop_dapp() {
     if (result != ErrorCode::SUCCESS) {
         E3_LOG_ERROR(LOG_TAG) << "Failed to setup outbound (dApp) connection: "
                               << error_code_to_string(result);
+        if (!should_stop_.load()) on_ran_gone(DisconnectReason::CONNECTION_LOST);
         return;
     }
 
@@ -1589,6 +1681,7 @@ void E3Interface::on_ran_gone(DisconnectReason reason) {
     if (disconnect_handler_) {
         disconnect_handler_(reason);
     }
+    request_reconnect();
 }
 
 void E3Interface::handle_release_from_ran(const ReleaseMessage& release) {

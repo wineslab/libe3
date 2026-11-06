@@ -111,6 +111,7 @@ E3Config make_config(E3Role role, const Endpoints& ep) {
     c.dapp_name           = "BoundDApp";
     c.dapp_version        = "1.0.0";
     c.dapp_idle_timeout_s = 0;
+    c.reconnect_interval_ms = 0;
     return c;
 }
 
