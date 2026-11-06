@@ -327,7 +327,8 @@ the link.
 
 ### Abnormal conditions
 
-* The link is lost with no RELEASE message. The dApp reports the reason "connection lost". The dApp does not reconnect by itself. The application stops the session and starts it again.
+* The link is lost with no RELEASE message. The dApp reports the reason "connection lost".
+* After a RELEASE message from the E3 Agent or a lost link, a dApp may run the Setup procedure again by itself. It gets a new dApp identifier and none of its earlier subscriptions. The application subscribes again. A dApp that sent its own RELEASE message does not.
 * An E3 Agent that does not detect the end of a dApp keeps its dApp identifier, its subscriptions and its running service models. An E3 Agent detects it from a closed connection, or from a dApp that has sent nothing for a long time. Only what the dApp sends shows that the dApp is there: a message the E3 Agent sends to a dApp is broadcast and proves nothing.
 * A RELEASE message from a dApp that names another dApp identifier is not authenticated by the protocol. An E3 Agent that can tell its connections apart should bind each dApp identifier to the connection that first sent a message naming it, and ignore a message that names the identifier on another connection. An E3 Agent that does not bind removes the named dApp.
 

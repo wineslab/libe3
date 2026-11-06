@@ -50,7 +50,7 @@ in the connectors.
 | Claim | Code pointer |
 |---|---|
 | Version string `1.0.0` | `include/libe3/types.hpp:475` |
-| The RAN does not check the dApp's version | `e3_interface.cpp:937` (`handle_setup_request` only logs it) |
+| The RAN does not check the dApp's version | `e3_interface.cpp:970` (`handle_setup_request` only logs it) |
 | E3 Agent binds the three ZeroMQ sockets | `src/connector/zmq_connector.cpp:130-141`, `201-218`, `265-272` |
 | dApp connects: REQ, SUB, PUB | `zmq_connector.cpp:356-367`, `449-470`, `484-492` |
 | dApp waits 200 ms after connecting the PUB socket (slow joiner) | `zmq_connector.cpp:505` |
@@ -66,32 +66,32 @@ in the connectors.
 
 | Claim | Code pointer |
 |---|---|
-| Setup on the E3 Agent: decode, register, build the list, answer | `src/core/e3_interface.cpp:528-576`, `931-1043` |
-| Negative reply for garbage or a wrong PDU type, with the cause protocolError | `e3_interface.cpp:1045-1079` |
-| RAN function list limits: data 1 to 32768 octets, 256 identifiers, 64 functions | `e3_interface.cpp:960-1001`, `src/core/sm_registry.cpp:35-57` |
-| Encode failure of the SETUP RESPONSE ends the process | `e3_interface.cpp:1026-1032` |
-| Setup on the dApp: 5 attempts, 4 receives of 500 ms each | `e3_interface.cpp:1374-1452` |
-| A negative response still gives "success" to the dApp | `e3_interface.cpp:1446`, `1610-1613` |
-| Subscription: the registration, the RAN function, the lists and every identifier are checked, and a refusal carries a cause | `e3_interface.cpp:892-925`, `1081-1154` |
+| Setup on the E3 Agent: decode, register, build the list, answer | `src/core/e3_interface.cpp:561-609`, `964-1076` |
+| Negative reply for garbage or a wrong PDU type, with the cause protocolError | `e3_interface.cpp:1078-1112` |
+| RAN function list limits: data 1 to 32768 octets, 256 identifiers, 64 functions | `e3_interface.cpp:993-1034`, `src/core/sm_registry.cpp:35-57` |
+| Encode failure of the SETUP RESPONSE ends the process | `e3_interface.cpp:1059-1065` |
+| Setup on the dApp: 5 attempts, 4 receives of 500 ms each | `e3_interface.cpp:1458-1541` |
+| A negative response still gives "success" to the dApp | `e3_interface.cpp:1530`, `1703-1706` |
+| Subscription: the registration, the RAN function, the lists and every identifier are checked, and a refusal carries a cause | `e3_interface.cpp:925-958`, `1114-1187` |
 | Repeat returns the existing identifier. Renewal after expiry keeps the identifier | `subscription_manager.cpp:187-205` |
-| The response echoes the request lists and interval | `e3_interface.cpp:1138-1149` |
-| Subscription expiry sweep every 250 ms | `e3_interface.cpp:40`, `789-813` |
-| Subscription delete | `e3_interface.cpp:1156-1197` |
-| The dApp keeps its own deadline from the response | `e3_interface.cpp:1651-1661` |
-| Service model starts with the first subscriber and stops with the last | `subscription_manager.cpp:238-241`, `376-378`, `535-554`; `e3_interface.cpp:1914-1928` |
-| dApp control: the registration, the RAN function, the control identifier and a running service model are checked. Otherwise a negative MESSAGE ACK with a cause | `e3_interface.cpp:1199-1262` |
-| The core sends a MESSAGE ACK only to refuse a control. The service model answers for the controls it takes | `e3_interface.cpp:1209-1222`, `examples/sm_simple/simple_service_model.hpp:167` |
-| The dApp handles every MESSAGE ACK, with no dApp filter | `e3_interface.cpp:1719-1733` |
-| dApp report goes through a queue of 1024 and a worker | `e3_interface.cpp:654-684`, `767-788`, `1264-1272` |
-| A report with `sequence_id` 0 is refused with `INVALID_PARAM` | `e3_interface.cpp:1864` |
+| The response echoes the request lists and interval | `e3_interface.cpp:1171-1182` |
+| Subscription expiry sweep every 250 ms | `e3_interface.cpp:40`, `822-846` |
+| Subscription delete | `e3_interface.cpp:1189-1230` |
+| The dApp keeps its own deadline from the response | `e3_interface.cpp:1744-1754` |
+| Service model starts with the first subscriber and stops with the last | `subscription_manager.cpp:238-241`, `376-378`, `535-554`; `e3_interface.cpp:2007-2021` |
+| dApp control: the registration, the RAN function, the control identifier and a running service model are checked. Otherwise a negative MESSAGE ACK with a cause | `e3_interface.cpp:1232-1295` |
+| The core sends a MESSAGE ACK only to refuse a control. The service model answers for the controls it takes | `e3_interface.cpp:1242-1255`, `examples/sm_simple/simple_service_model.hpp:167` |
+| The dApp handles every MESSAGE ACK, with no dApp filter | `e3_interface.cpp:1812-1826` |
+| dApp report goes through a queue of 1024 and a worker | `e3_interface.cpp:687-717`, `800-821`, `1297-1305` |
+| A report with `sequence_id` 0 is refused with `INVALID_PARAM` | `e3_interface.cpp:1957` |
 | xApp control from the E3 Agent has no check of `sequence_id` | `src/core/e3_agent.cpp:230-251` |
-| Release from the dApp: unregister, free identifiers, stop service models | `e3_interface.cpp:1274-1297`; `subscription_manager.cpp:84-138` |
-| RELEASE from the E3 Agent to a dApp that sent nothing for `dapp_idle_timeout_s` (default 1800 s, 0 is off): queued first, then the removal a release from the dApp gets. Only what the dApp sends resets the time | `e3_interface.cpp:1344-1364`; `subscription_manager.cpp:403-410`, `422-434` |
-| RELEASE from the E3 Agent: the dApp clears its session | `e3_interface.cpp:1573-1605` |
+| Release from the dApp: unregister, free identifiers, stop service models | `e3_interface.cpp:1307-1330`; `subscription_manager.cpp:84-138` |
+| RELEASE from the E3 Agent to a dApp that sent nothing for `dapp_idle_timeout_s` (default 1800 s, 0 is off): queued first, then the removal a release from the dApp gets. Only what the dApp sends resets the time | `e3_interface.cpp:1428-1448`; `subscription_manager.cpp:403-410`, `422-434` |
+| RELEASE from the E3 Agent: the dApp clears its session | `e3_interface.cpp:1665-1698` |
 | Message identifiers: one counter, 1 to 4294967295 | `e3_interface.cpp:167-174` |
 | A request identifier of 0 is replaced | `e3_interface.cpp:189-196` |
 | The timestamp is set in the `Pdu` constructor | `types.hpp:426-437` |
-| Outbound queue of 128 places, 10 ms pop | `e3_interface.cpp:265`, `705-765`; `include/libe3/lockfree_queue.hpp:55` |
+| Outbound queue of 128 places, 10 ms pop | `e3_interface.cpp:265`, `738-798`; `include/libe3/lockfree_queue.hpp:55` |
 
 ### Encoding and framing (chapter 04)
 
@@ -102,8 +102,9 @@ in the connectors.
 | The dApp sends unframed | `posix_connector.cpp:681`, `798` |
 | The E3 Agent reads one raw `recv()` of up to 60000 octets | `posix_connector.cpp:355`, `537` |
 | Per-peer send timeout 500 ms | `posix_connector.cpp:41`, `181` |
-| A POSIX E3 Agent removes a dApp whose connection closed, if the dApp had sent a message that names it on that connection. ZeroMQ cannot tell its peers apart, so there the idle time removes the dApp | `posix_connector.cpp:515`, `556`, `565-574`, `584-592`; `e3_interface.cpp:1323-1342` |
-| A POSIX E3 Agent binds a dApp identifier to the connection that first named it, and drops a later message that names it on another connection. A dApp that has not spoken yet is not bound: the first message wins | `e3_interface.cpp:619`, `1299-1321` |
+| A POSIX E3 Agent removes a dApp whose connection closed, if the dApp had sent a message that names it on that connection. ZeroMQ cannot tell its peers apart, so there the idle time removes the dApp | `posix_connector.cpp:515`, `556`, `565-574`, `584-592`; `e3_interface.cpp:1356-1375` |
+| A POSIX E3 Agent binds a dApp identifier to the connection that first named it, and drops a later message that names it on another connection. A dApp that has not spoken yet is not bound: the first message wins | `e3_interface.cpp:652`, `1332-1354` |
+| A dApp that lost the E3 Agent registers again every `reconnect_interval_ms` (default 1000, 0 is off), with a new identifier and no subscriptions. `release()` and `stop()` end it | `e3_interface.cpp:1377-1426` |
 | ASN.1 encoder buffer of 65536 octets | `src/encoder/asn1_encoder.hpp:39` |
 | An empty RAN function list is omitted | `src/encoder/asn1_encoder.cpp:315` |
 | A zero timestamp is left out in APER and Protobuf | `asn1_encoder.cpp:233-243` |
@@ -127,7 +128,7 @@ Update the hex in `tests/test_asn1_golden.cpp` and add a row to the change ledge
 
 These comments disagree with the code. They are not discrepancies of the protocol.
 
-* `include/libe3/types.hpp:523` says dApp identifiers are 1 to 100. The range is 1 to 65535.
+* `include/libe3/types.hpp:538` says dApp identifiers are 1 to 100. The range is 1 to 65535.
 * `include/libe3/subscription_manager.hpp:114` says at most 101 dApps. `:148` says RAN function identifiers 0 to 255. `:34` and `:151` say that periodicity 0 means "the service model default".
 * `types.hpp:211` and `e3_encoder.hpp:81` use `0.0.0` as the version example. The default is `1.0.0`.
 * `types.hpp:442` and `include/libe3/c_api.h:166` leave Protobuf out of the encoding comments.

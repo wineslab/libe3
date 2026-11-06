@@ -520,6 +520,21 @@ struct E3Config {
      * being quiet. The default is Aerial's 1800 s.
      */
     uint32_t dapp_idle_timeout_s{1800};
+
+    /**
+     * @brief Milliseconds a dApp waits before it registers with the RAN again (dApp role).
+     *
+     * When the RAN releases the dApp or the connection to it is lost, or setup
+     * did not complete, a dApp that was started with start() stops and starts
+     * itself again after this long, and again every this long until the RAN
+     * answers. The new session has a new dApp id and none of the subscriptions
+     * of the old one: the application subscribes again, and learns that the
+     * dApp is back from the setup response handler. A dApp that called
+     * release(), or stop(), is not restarted. 0 turns it off, so a dApp stays
+     * down until the program calls stop() and start(). The default is
+     * Aerial's one second.
+     */
+    uint32_t reconnect_interval_ms{1000};
     
     // Buffer sizes
     size_t receive_buffer_size{DEFAULT_BUFFER_SIZE}; ///< Size of the receive buffer in bytes
