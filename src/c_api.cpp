@@ -45,6 +45,7 @@ struct e3_service_model_handle_s : public ServiceModel {
     e3_sm_stop_cb sm_stop = nullptr;                    ///< Called when the SM should stop
     e3_sm_is_running_cb sm_is_running = nullptr;        ///< Called to ask whether the SM runs
     e3_sm_process_control_cb sm_process_control = nullptr; ///< Called for each control action
+    e3_sm_granted_periodicity_cb sm_granted_periodicity = nullptr; ///< Asked for the interval it keeps
     void* sm_context = nullptr;                         ///< Passed to every callback
 
     /// Whether ownership was transferred to an agent.
@@ -103,6 +104,11 @@ struct e3_service_model_handle_s : public ServiceModel {
         return false;
     }
 
+    std::optional<uint32_t> granted_periodicity(uint32_t requested_us) const override {
+        if (!sm_granted_periodicity) return std::nullopt;
+        return sm_granted_periodicity(sm_context, requested_us);
+    }
+
     ErrorCode handle_control_action(
         uint32_t request_message_id,
         const DAppControlAction& action
@@ -142,6 +148,16 @@ e3_service_model_handle_t* e3_service_model_create_from_c(const e3_c_service_mod
     } catch (...) {
         return nullptr;
     }
+}
+
+e3_error_t e3_service_model_set_granted_periodicity_cb(
+    e3_service_model_handle_t* sm,
+    e3_sm_granted_periodicity_cb cb
+) {
+    // Once registered the agent's threads may be reading the callback.
+    if (!sm || sm->transferred_to_agent) return static_cast<int>(ErrorCode::INVALID_PARAM);
+    sm->sm_granted_periodicity = cb;
+    return static_cast<int>(ErrorCode::SUCCESS);
 }
 
 void e3_service_model_destroy(e3_service_model_handle_t* sm) {

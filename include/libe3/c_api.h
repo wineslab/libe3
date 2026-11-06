@@ -28,6 +28,25 @@ typedef void      (*e3_sm_destroy_cb)(void* sm_context);
 typedef e3_error_t (*e3_sm_start_cb)(void* sm_context);
 typedef void      (*e3_sm_stop_cb)(void* sm_context);
 typedef int       (*e3_sm_is_running_cb)(void* sm_context); /* returns 0/1 */
+/**
+ * @brief Interval a C Service Model keeps between two indications of a subscription.
+ *
+ * Called when the RAN answers a subscription request, with the periodicity the
+ * subscription holds. Return the least time, in microseconds, the SM keeps between
+ * two indications. Return 0 when the SM keeps no interval or does not say: the
+ * response then carries no periodicity. A value above 60000000, the most the
+ * grammar carries, is treated as 0.
+ *
+ * The value is a floor taken when the response is built; the response is not
+ * sent again if the SM later speeds up.
+ *
+ * @param sm_context The `sm_context` of the descriptor
+ * @param requested_us Periodicity of the subscription in microseconds; 0 when
+ *        the dApp asked for none or for one indication per event
+ * @return Microseconds between two indications, or 0 for "not reported"
+ */
+typedef uint32_t (*e3_sm_granted_periodicity_cb)(void* sm_context, uint32_t requested_us);
+
 typedef e3_error_t (*e3_sm_process_control_cb)(
     e3_service_model_handle_t* sm_handle,
     void* sm_context,
@@ -122,6 +141,23 @@ typedef struct {
  */
 e3_service_model_handle_t* e3_service_model_create_from_c(
     const e3_c_service_model_desc_t* desc
+);
+
+/**
+ * @brief Let a C-backed ServiceModel report the interval it keeps between indications.
+ *
+ * Without it the subscription response carries no periodicity ("not reported").
+ * Call it between e3_service_model_create_from_c() and e3_agent_register_sm();
+ * once the model is registered the agent owns it and this fails.
+ *
+ * @param sm Handle returned by e3_service_model_create_from_c()
+ * @param cb Callback, or NULL to clear it
+ * @return ErrorCode::SUCCESS (0), or ErrorCode::INVALID_PARAM if \p sm is NULL
+ *         or already registered
+ */
+e3_error_t e3_service_model_set_granted_periodicity_cb(
+    e3_service_model_handle_t* sm,
+    e3_sm_granted_periodicity_cb cb
 );
 
 /**

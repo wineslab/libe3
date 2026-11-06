@@ -436,6 +436,7 @@ Interface for implementing custom service models.
 | `telemetry_ids()` | Telemetry identifiers provided by the SM |
 | `control_ids()` | Control identifiers accepted by the SM |
 | `ran_function_data()` | Optional opaque bytes included in SetupResponse |
+| `granted_periodicity(requested_us)` | Optional: the least time between two indications the SM keeps for a subscription, reported in the SubscriptionResponse. Absent by default. A C Service Model sets it with `e3_service_model_set_granted_periodicity_cb()` before registering |
 | `init()` | Initialize the SM (register callbacks) |
 | `destroy()` | Destroy the SM and release resources |
 | `start()` | Start SM processing (on first subscription) |
