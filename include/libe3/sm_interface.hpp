@@ -45,26 +45,31 @@ public:
 
     /**
      * @brief Get SM name
+     * @return The name of the SM
      */
     virtual std::string name() const = 0;
 
     /**
      * @brief Get SM version
+     * @return The version number of the SM
      */
     virtual uint32_t version() const = 0;
 
     /**
      * @brief Get RAN function ID for this SM
+     * @return The RAN function this SM serves
      */
     virtual uint32_t ran_function_id() const = 0;
 
     /**
      * @brief Get telemetry IDs supported by this SM
+     * @return The telemetry identifiers the SM supports
      */
     virtual std::vector<uint32_t> telemetry_ids() const = 0;
 
     /**
      * @brief Get control IDs supported by this SM
+     * @return The control identifiers the SM supports
      */
     virtual std::vector<uint32_t> control_ids() const = 0;
 
@@ -139,6 +144,7 @@ public:
 
     /**
      * @brief Check if SM is currently running
+     * @return True while the SM is processing
      */
     virtual bool is_running() const = 0;
 
@@ -148,6 +154,9 @@ public:
      * Called by the E3 interface when a DAppControlAction is received for this
      * service model. Implementations can emit outbound PDUs (e.g. MessageAck,
      * IndicationMessage) via emit_outbound().
+     * @param request_message_id Message identifier of the DAppControlAction
+     * @param action The control action
+     * @return ErrorCode::SUCCESS if the SM took the action
      */
     virtual ErrorCode handle_control_action(
         uint32_t request_message_id,
@@ -162,6 +171,9 @@ protected:
      *
      * This helper only builds the PDU. Implementations can decide whether to
      * emit it with emit_outbound() or suppress it when protocol semantics allow.
+     * @param request_message_id Message identifier of the message acknowledged
+     * @param response_code Result to report
+     * @return The PDU
      */
     static Pdu make_message_ack_pdu(
         uint32_t request_message_id,
@@ -180,6 +192,10 @@ protected:
      *
      * This helper only builds the PDU. Implementations can emit it with
      * emit_outbound() when appropriate.
+     * @param dapp_id dApp the indication is for
+     * @param ran_function_id RAN function the indication comes from
+     * @param protocol_data Opaque payload of the SM
+     * @return The PDU
      */
     static Pdu make_indication_pdu(
         uint32_t dapp_id,
@@ -197,6 +213,8 @@ protected:
 
     /**
      * @brief Emit an outbound PDU produced by the SM.
+     * @param pdu The PDU to send
+     * @return ErrorCode::SUCCESS if it was queued, ErrorCode::NOT_INITIALIZED if no emitter is set
      */
     ErrorCode emit_outbound(Pdu&& pdu) {
         if (!outbound_emitter_) {
@@ -207,6 +225,7 @@ protected:
 
     /**
      * @brief Get currently subscribed dApps for this SM's RAN function.
+     * @return The identifiers of the subscribed dApps, empty when no provider is set
      */
     std::vector<uint32_t> get_subscribers() const {
         if (!subscribers_provider_) {
@@ -217,6 +236,7 @@ protected:
 
     /**
      * @brief Set the outbound PDU emitter callback (used by E3Interface).
+     * @param emitter Callback that queues a PDU
      */
     void set_outbound_emitter(std::function<ErrorCode(Pdu&&)> emitter) {
         outbound_emitter_ = std::move(emitter);
@@ -224,6 +244,7 @@ protected:
 
     /**
      * @brief Set subscriber provider callback (used by E3Interface).
+     * @param provider Callback that lists the subscribed dApps
      */
     void set_subscribers_provider(std::function<std::vector<uint32_t>()> provider) {
         subscribers_provider_ = std::move(provider);
@@ -251,6 +272,7 @@ class SmRegistry {
 public:
     /**
      * @brief Get the singleton instance
+     * @return The registry
      */
     static SmRegistry& instance();
 
@@ -269,11 +291,16 @@ public:
      * @brief Register a Service Model factory
      *
      * Use this to defer SM creation until needed.
+     * @param ran_function_id RAN function the factory serves
+     * @param factory Creates the SM
+     * @return ErrorCode::SUCCESS on success
      */
     ErrorCode register_sm_factory(uint32_t ran_function_id, SmFactory factory);
 
     /**
      * @brief Unregister a Service Model by RAN function ID
+     * @param ran_function_id RAN function of the SM to remove
+     * @return ErrorCode::SUCCESS on success, an error code otherwise
      */
     ErrorCode unregister_sm(uint32_t ran_function_id);
 
@@ -287,21 +314,28 @@ public:
 
     /**
      * @brief Get all available RAN function IDs
+     * @return The RAN functions that have an SM or a factory
      */
     std::vector<uint32_t> get_available_ran_functions() const;
 
     /**
      * @brief Start SM for a RAN function
+     * @param ran_function_id RAN function whose SM is started
+     * @return ErrorCode::SUCCESS on success, an error code otherwise
      */
     ErrorCode start_sm(uint32_t ran_function_id);
 
     /**
      * @brief Stop SM for a RAN function
+     * @param ran_function_id RAN function whose SM is stopped
+     * @return ErrorCode::SUCCESS on success, an error code otherwise
      */
     ErrorCode stop_sm(uint32_t ran_function_id);
 
     /**
      * @brief Check if SM is running
+     * @param ran_function_id RAN function whose SM is asked about
+     * @return True if its SM is running
      */
     bool is_sm_running(uint32_t ran_function_id) const;
 

@@ -74,7 +74,7 @@ in the connectors.
 | A negative response still gives "success" to the dApp | `e3_interface.cpp:1553`, `1726-1729` |
 | Subscription: the registration, the RAN function, the lists and every identifier are checked, and a refusal carries a cause | `e3_interface.cpp:928-961`, `1117-1210` |
 | Repeat returns the existing identifier. Renewal after expiry keeps the identifier | `subscription_manager.cpp:187-205` |
-| The response lists the request lists for a new subscription and the lists the E3 Agent holds for a repeat. Its interval is the one the service model reports with `granted_periodicity()`, and none when it reports 0, nothing, or more than 60000000 | `e3_interface.cpp:1158-1161`, `1181-1201`; `sm_interface.hpp:92-108` |
+| The response lists the request lists for a new subscription and the lists the E3 Agent holds for a repeat. Its interval is the one the service model reports with `granted_periodicity()`, and none when it reports 0, nothing, or more than 60000000 | `e3_interface.cpp:1158-1161`, `1181-1201`; `sm_interface.hpp:97-113` |
 | Subscription expiry sweep every 250 ms | `e3_interface.cpp:40`, `825-849` |
 | Subscription delete | `e3_interface.cpp:1212-1253` |
 | The dApp keeps its own deadline from the response | `e3_interface.cpp:1767-1777` |
