@@ -230,6 +230,37 @@ not registered again; nor is one that called `stop()`.
 Against OCUDU, which closes the association after 30 s without traffic, a dApp that sends nothing is
 closed and registers again about every 30 s, and loses its subscriptions each time.
 
+<a id="control-answer"></a>
+## The answer to a dApp control
+
+A dApp control gets one `messageAck` from a libe3 RAN and from Aerial's agent, and two messages
+from OCUDU. What the ack means differs ([#111](https://github.com/wineslab/libe3/issues/111)).
+
+| RAN | When the ack is sent | A positive ack means | Where the result is |
+|---|---|---|---|
+| libe3 | The core sends a negative ack when it cannot hand the control to a Service Model: no setup, unknown function, unknown control id, no subscription. Otherwise the Service Model sends it, when it chooses. OAI's does so once it has applied the control | The Service Model answered. In OAI's, that the control was applied | The `responseCode` of the ack, and the Service Model's own payloads |
+| Aerial, agent | Always, negative: "control actions not implemented". Aerial's dApp manager ignores acks | Never sent | None. No control is executed |
+| OCUDU, native | At once and positive, before the Service Model runs. An `E3-ControlResponse` follows | Accepted | The `E3-ControlResponse`: response code, optional cause and detail, `controlOutcome` (the service model's payload) and the same `requestId`, fragmented like other payloads |
+| OCUDU, libe3-compatible mode | After the Service Model ran, one `messageAck` | Executed | The `responseCode` of that ack. The cause and the detail text are not sent |
+
+libe3 keeps `messageAck` as the one answer to a control and does not carry `E3-ControlResponse`. A
+dApp written against libe3 reads a positive ack as "the RAN answered", and cannot tell accepted from
+executed from the ack alone. Against OCUDU in libe3-compatible mode that reading is right. Against
+Aerial every control is refused. A libe3 dApp cannot read OCUDU's `E3-ControlResponse`: it is the 12th
+alternative of OCUDU's PDU choice and libe3's has eleven, so a libe3 decoder is expected to fail on it
+(not run).
+
+Adding the message to libe3 would not give a result end to end with native OCUDU while the rest of
+the envelope differs: the payload limit and fragments ([#110](https://github.com/wineslab/libe3/issues/110)),
+the timestamp ([#114](https://github.com/wineslab/libe3/issues/114)), the response code
+([#115](https://github.com/wineslab/libe3/issues/115)), `sequenceId`
+([#116](https://github.com/wineslab/libe3/issues/116)) and the asn1c versions
+([#109](https://github.com/wineslab/libe3/issues/109)). If it is added, it should take OCUDU's field
+layout, so that the fragment fields of #110 do not change a message that is already released, and a
+RAN should send it only when its Service Model has an outcome, so that a RAN that only acks changes
+nothing on the wire. Whether to add it, or to carry the outcome in an optional field of the ack, is
+open with the other stacks.
+
 ## Known differences
 
 All open ones are sub-issues of [#84](https://github.com/wineslab/libe3/issues/84), which also holds
@@ -555,7 +586,7 @@ what it has where the row says so.
 | Compiles libe3's grammar with a different asn1c, so Setup encodes differently and the two cannot share a process ([#109](https://github.com/wineslab/libe3/issues/109)) | Build libe3's grammar with the asn1c commit `build_libe3` pins, then compare Setup again. With `OCTET STRING` setup strings the `UTF8String` part of the difference should be gone | Same bytes from the same grammar |
 | One SCTP association per dApp, one PDU per SCTP message; payload protocol id, streams and buffers differ ([#104](https://github.com/wineslab/libe3/issues/104) to [#107](https://github.com/wineslab/libe3/issues/107)) | Open. libe3 uses three associations and a length-prefixed stream, and will propose one mapping on those issues | No change to either side is made here |
 | `E3-DAppReport`, `E3-XAppControlAction` and `E3-DAppControlAction` have no `sequenceId` ([#116](https://github.com/wineslab/libe3/issues/116)) | Add `sequenceId` to the three messages, as libe3 0.2.0 has it: mandatory on the report and the xApp control, optional on the dApp control | It joins a report, the xApp control it provoked and the control the dApp re-issued into one E2-E3 procedure, which is what end-to-end loop tracing needs. Today neither side can decode the other's version of these messages: a libe3 report carries a field OCUDU's grammar does not know, and an OCUDU report lacks one libe3 requires. OCUDU's libe3-compatible mode is the 0.1.3 grammar, which predates the field ([#89](https://github.com/wineslab/libe3/issues/89)) |
-| Fragments payloads up to 16 MiB ([#110](https://github.com/wineslab/libe3/issues/110)), answers a control with an `E3-ControlResponse` ([#111](https://github.com/wineslab/libe3/issues/111)), and has bulk-data and instance fields ([#112](https://github.com/wineslab/libe3/issues/112)) | Keep these optional and negotiated at setup, so a peer without them still interoperates | Aerial and libe3 send none of these and must not fail on their absence |
+| Fragments payloads up to 16 MiB ([#110](https://github.com/wineslab/libe3/issues/110)), answers a control with an `E3-ControlResponse` ([#111](https://github.com/wineslab/libe3/issues/111), see [the answer to a dApp control](#control-answer)), and has bulk-data and instance fields ([#112](https://github.com/wineslab/libe3/issues/112)) | Keep these optional and negotiated at setup, so a peer without them still interoperates | Aerial and libe3 send none of these and must not fail on their absence |
 | Closes the association after 30 s idle and never sends a `releaseMessage` to a dApp ([#90](https://github.com/wineslab/libe3/issues/90), [#93](https://github.com/wineslab/libe3/issues/93)) | Send a `releaseMessage` before closing | A libe3 dApp then reports `RELEASED_BY_RAN`, not `CONNECTION_LOST`, as it does with Aerial |
 | Decodes `subscriptionTime` and never acts on it ([#95](https://github.com/wineslab/libe3/issues/95)) | End the subscription when the time is up (0 is no limit), without a message to the dApp, as libe3 and Aerial's agent now do | A dApp that sends a time gets the same result from all three RANs and need not delete the subscription itself. Until then it must, against OCUDU |
 | Adds a new subscription for every repeat, up to a limit per dApp, then refuses with `resourceExhausted` ([#97](https://github.com/wineslab/libe3/issues/97)). This is a defect: the dApp asked for the same thing again, not for another subscription | Return the existing subscription on a repeat | libe3 returns the existing one, with what it holds. A dApp that retries or subscribes twice uses up its limit, and the refusal that follows does not say what went wrong. Aerial's agent adds one per request too, with no limit. A libe3 RAN now refuses an unknown function or id with a `cause`, as OCUDU does ([#96](https://github.com/wineslab/libe3/issues/96)) |
@@ -572,6 +603,7 @@ the same PR as the change. Newest first.
 
 | Change | PR | Kind | Who has to act | Status |
 |---|---|---|---|---|
+| The interop page says what a `messageAck` on a dApp control means on libe3, Aerial's agent and OCUDU, and what has to move before E3AP carries a control outcome. The specification says that `messageAck` is the only answer E3AP defines to a control and carries no outcome ([#111](https://github.com/wineslab/libe3/issues/111)) | | Documentation | Nobody. libe3 does not change: a dApp keeps reading the ack as the answer. OCUDU and the other stacks are asked whether E3AP should carry an outcome | unmerged |
 | The `periodicity` of a libe3 RAN's subscription response is the least time its Service Model keeps between two indications, in microseconds, and is present only when the SM reports it through the new `ServiceModel::granted_periodicity()`. A value of 0, or above 60000000, is left out. It was the periodicity of the request, whatever the SM did with it ([#119](https://github.com/wineslab/libe3/issues/119)) | | Behavior, C++ API | A dApp that read the response's periodicity as the one it asked for sees none now (`E3Event.periodicity` is -1 in libe3py), until the SM reports one. An SM that keeps an interval overrides the hook. OAI's SMs go through the C API, which has no hook yet, so OAI dApps see none. A C++ Service Model built against an older header is rebuilt. ASN.1, JSON and Protobuf are unchanged and so is the C API: the bytes of a response lose a field that is optional | unmerged |
 | A libe3 RAN answers a repeated subscription (same dApp, same RAN function) with the subscription it holds: the same identifier and the telemetry and control lists and interval it stores. It answered with the lists and interval of the repeat, which it had dropped ([#97](https://github.com/wineslab/libe3/issues/97)) | | Behavior | A dApp that subscribed again to change lists or the interval and read them from the response sees the old ones now, and has to delete the subscription and subscribe again. Nothing on the wire, in the C API or in libe3py, and nothing to rebuild in OAI's E3 agent | unmerged |
 | After a release, a lost link, or a setup that no RAN answered or that the RAN refused, a libe3 dApp registers again by itself every `reconnect_interval_ms` (default 1000, `0` never), with a new dApp id and none of its old subscriptions, as Aerial's manager does. `release()` and `stop()` end it. The setup response handler runs on every setup, so the application learns it is back there and subscribes again ([#121](https://github.com/wineslab/libe3/issues/121)) | | Behavior | A dApp that waited for the program to call `stop()` then `start()` now registers by itself; one that does so too races with the library, so set `reconnect_interval_ms` to 0 or leave it to the library. The Python dApp framework has to subscribe again on the setup response event. OAI's E3 agent and the dApp library rebuilt together with the new `E3Config`. Nothing on the wire | unmerged |
