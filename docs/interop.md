@@ -79,7 +79,12 @@ third and fourth were hex strings; see the ledger.
 **Granted values.** A subscription response carries `telemetryIdentifierList`,
 `controlIdentifierList`, `ranFunctionIdentifier` and `periodicity` when the RAN reports them.
 Absent means not reported; an empty list means none granted. libe3 also reads Aerial's
-`telemetryGrantedList` and `controlGrantedList` as aliases.
+`telemetryGrantedList` and `controlGrantedList` as aliases. The `periodicity` of a response is
+the least time the RAN keeps between two indications of the subscription, in microseconds: Aerial's
+agent returns the value it was asked for and skips an indication that comes sooner, and a libe3 Service
+Model says what it keeps. A libe3 RAN does not echo the request, so a response without
+`periodicity` means the RAN did not say, not that it keeps none. `ranFunctionIdentifier` is for
+information and a dApp already has it from its own request. OCUDU's response carries neither.
 
 **The `timestamp` key** is written on every message. It is not in Aerial's schema. Aerial's parsers
 read by key, so it is expected to be ignored (not run).
@@ -94,6 +99,7 @@ Where one field means different things to different peers. Add a row when a fiel
 | `periodicity` range | 0 to 60000000 over ASN.1; any `uint32` over JSON and Protobuf | 0 and up, no maximum | 0 to 60000 |
 | `periodicity` 0 | every event | as fast as possible, every SRS slot | every event |
 | `periodicity` default when unset | the Service Model's own rate | 100000 | not stated |
+| `periodicity` in a subscription response | the least time the Service Model keeps between two indications, when it says so; absent otherwise | the requested value (100000 when none), which the agent also uses as a gate | not carried |
 | dApp id and subscription id | 1..65535; the RAN hands out the lowest free one | counts up from 1, no cap | dApp ids 1..100 reserved for libe3-compatible peers, 101..65535 native |
 | Message id | 1..4294967295; a peer's id in a setup request is echoed unless it is 0 | one counter from 1, shared by every message type | 1..4294967295 (its libe3-compatible codec: 1..1000) |
 | Setup names (`dAppName`, `vendor`, `ranIdentifier`) | `OCTET STRING`, 1..64 bytes over ASN.1; any length over JSON and Protobuf | JSON string | `OCTET STRING`, 1..64 bytes |
@@ -566,6 +572,7 @@ the same PR as the change. Newest first.
 
 | Change | PR | Kind | Who has to act | Status |
 |---|---|---|---|---|
+| The `periodicity` of a libe3 RAN's subscription response is the least time its Service Model keeps between two indications, in microseconds, and is present only when the SM reports it through the new `ServiceModel::granted_periodicity()`. A value of 0, or above 60000000, is left out. It was the periodicity of the request, whatever the SM did with it ([#119](https://github.com/wineslab/libe3/issues/119)) | | Behavior, C++ API | A dApp that read the response's periodicity as the one it asked for sees none now (`E3Event.periodicity` is -1 in libe3py), until the SM reports one. An SM that keeps an interval overrides the hook. OAI's SMs go through the C API, which has no hook yet, so OAI dApps see none. A C++ Service Model built against an older header is rebuilt. ASN.1, JSON and Protobuf are unchanged and so is the C API: the bytes of a response lose a field that is optional | unmerged |
 | A libe3 RAN answers a repeated subscription (same dApp, same RAN function) with the subscription it holds: the same identifier and the telemetry and control lists and interval it stores. It answered with the lists and interval of the repeat, which it had dropped ([#97](https://github.com/wineslab/libe3/issues/97)) | | Behavior | A dApp that subscribed again to change lists or the interval and read them from the response sees the old ones now, and has to delete the subscription and subscribe again. Nothing on the wire, in the C API or in libe3py, and nothing to rebuild in OAI's E3 agent | unmerged |
 | After a release, a lost link, or a setup that no RAN answered or that the RAN refused, a libe3 dApp registers again by itself every `reconnect_interval_ms` (default 1000, `0` never), with a new dApp id and none of its old subscriptions, as Aerial's manager does. `release()` and `stop()` end it. The setup response handler runs on every setup, so the application learns it is back there and subscribes again ([#121](https://github.com/wineslab/libe3/issues/121)) | | Behavior | A dApp that waited for the program to call `stop()` then `start()` now registers by itself; one that does so too races with the library, so set `reconnect_interval_ms` to 0 or leave it to the library. The Python dApp framework has to subscribe again on the setup response event. OAI's E3 agent and the dApp library rebuilt together with the new `E3Config`. Nothing on the wire | unmerged |
 | A POSIX libe3 RAN (TCP, SCTP, IPC) removes a dApp whose connection closes without a release, at once and with nothing sent, if the dApp had sent a message that names it on that connection. It also binds a dApp id to the connection that first named it and drops a later message that names it on another connection, so one dApp can no longer release or control another ([#93](https://github.com/wineslab/libe3/issues/93)) | | Behavior | A dApp that relied on naming another dApp's id from its own connection on POSIX is now dropped. A dApp that closes before its first message, and every ZeroMQ dApp, are still left to the idle time. OAI's E3 agent and the dApp library rebuilt together with the new `E3Connector`, which gains two virtual functions. Nothing on the wire | unmerged |

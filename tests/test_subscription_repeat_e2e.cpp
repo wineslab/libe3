@@ -4,13 +4,14 @@
  *
  * A real RAN E3Agent and a real dApp E3Agent over ZMQ IPC. Properties verified:
  *   (1) a dApp that subscribes again to a RAN function gets the same
- *       subscription id, with the lists and the periodicity the RAN holds, not
- *       the ones of the second request; the RAN still has one subscription and
- *       its SM was started once;
+ *       subscription id, with the lists the RAN holds, not the ones of the
+ *       second request; the RAN still holds the first periodicity, and has one
+ *       subscription, and its SM was started once;
  *   (2) a repeat the RAN refuses (an identifier the function does not
  *       advertise) leaves the subscription as it was;
  *   (3) a dApp that registers again gets a new registration, not the old
- *       subscription: its first request is answered with what it asked for.
+ *       subscription: its first request is answered with what it asked for and
+ *       the RAN holds what it asked for.
  *
  * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
@@ -168,8 +169,6 @@ TEST(SubscriptionRepeat_zmq_ranAnswersWithTheSubscriptionItHolds) {
     ASSERT_EQ(again.telemetry_identifier_list->size(), 2u);
     ASSERT_EQ((*again.telemetry_identifier_list)[0], 1u);
     ASSERT_EQ((*again.telemetry_identifier_list)[1], 2u);
-    ASSERT_TRUE(again.periodicity.has_value());
-    ASSERT_EQ(*again.periodicity, 5000u);
 
     const uint32_t dapp_id = *dapp.dapp_id();
     ASSERT_EQ(ran.subscription_count(), 1u);
@@ -201,8 +200,7 @@ TEST(SubscriptionRepeat_zmq_ranAnswersWithTheSubscriptionItHolds) {
     ASSERT_TRUE(fresh.telemetry_identifier_list.has_value());
     ASSERT_EQ(fresh.telemetry_identifier_list->size(), 1u);
     ASSERT_EQ((*fresh.telemetry_identifier_list)[0], 3u);
-    ASSERT_TRUE(fresh.periodicity.has_value());
-    ASSERT_EQ(*fresh.periodicity, 9000u);
+    ASSERT_EQ(ran.get_subscription_periodicity(*dapp.dapp_id(), RF), 9000u);
 
     dapp.stop();
     ran.stop();
