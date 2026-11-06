@@ -211,6 +211,27 @@ public:
     std::vector<uint32_t> get_dapp_subscriptions(uint32_t dapp_id) const;
 
     /**
+     * @brief Record that a message from a dApp has just arrived
+     *
+     * Only messages the dApp sends count. A message to the dApp proves nothing:
+     * the RAN broadcasts, so it is sent whether or not the dApp is still there.
+     *
+     * @param dapp_id dApp identifier; an id that is not registered is ignored
+     */
+    void touch_dapp(uint32_t dapp_id);
+
+    /**
+     * @brief Registered dApps that have not sent a message for at least @p idle_for
+     *
+     * A dApp that registered and never spoke counts from its registration.
+     * Nothing is removed; the caller decides, then calls unregister_dapp().
+     *
+     * @param idle_for Time without a message from the dApp
+     * @return Identifiers of the idle dApps, lowest first
+     */
+    std::vector<uint32_t> idle_dapps(std::chrono::seconds idle_for) const;
+
+    /**
      * @brief Get all dApps subscribed to a RAN function
      *
      * Leaves out a dApp whose subscription time has run out, even before

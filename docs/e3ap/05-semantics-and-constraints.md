@@ -131,8 +131,9 @@ side.
 ### Lost links
 
 A dApp that loses its link reports the reason "connection lost". It does not
-reconnect by itself. An E3 Agent that loses a dApp should remove the registration and
-the subscriptions of that dApp. Some implementations do not detect this, so the
+reconnect by itself. An E3 Agent that loses a dApp, or that has heard nothing from it for a long
+time, should send a RELEASE message where the link is still there, and should remove the
+registration and the subscriptions of that dApp. Some implementations do not detect this, so the
 registration stays.
 
 ## Identifiers over time

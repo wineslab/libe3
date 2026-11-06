@@ -11,6 +11,8 @@
 #include "libe3/subscription_manager.hpp"
 #include "libe3/logger.hpp"
 
+#include <algorithm>
+
 namespace libe3 {
 
 namespace {
@@ -67,7 +69,8 @@ std::pair<ErrorCode, uint32_t> SubscriptionManager::register_dapp() {
 
     DAppEntry entry;
     entry.dapp_identifier = assigned_id;
-    entry.registered_time = std::chrono::steady_clock::now();
+    entry.registered_time = now();
+    entry.last_seen = entry.registered_time;
     registered_dapps_[assigned_id] = entry;
 
     // Initialize empty subscription set for this dApp
@@ -394,6 +397,29 @@ std::vector<uint32_t> SubscriptionManager::get_dapp_subscriptions(uint32_t dapp_
         return {};
     }
     return std::vector<uint32_t>(it->second.begin(), it->second.end());
+}
+
+void SubscriptionManager::touch_dapp(uint32_t dapp_id) {
+    std::unique_lock lock(mutex_);
+
+    auto it = registered_dapps_.find(dapp_id);
+    if (it != registered_dapps_.end()) {
+        it->second.last_seen = now();
+    }
+}
+
+std::vector<uint32_t> SubscriptionManager::idle_dapps(std::chrono::seconds idle_for) const {
+    std::vector<uint32_t> idle;
+    std::shared_lock lock(mutex_);
+
+    const auto at = now();
+    for (const auto& [dapp_id, entry] : registered_dapps_) {
+        if (at - entry.last_seen >= idle_for) {
+            idle.push_back(dapp_id);
+        }
+    }
+    std::sort(idle.begin(), idle.end());
+    return idle;
 }
 
 std::vector<uint32_t> SubscriptionManager::get_subscribed_dapps(uint32_t ran_function_id) const {

@@ -328,7 +328,7 @@ the link.
 ### Abnormal conditions
 
 * The link is lost with no RELEASE message. The dApp reports the reason "connection lost". The dApp does not reconnect by itself. The application stops the session and starts it again.
-* An E3 Agent that does not detect the end of a dApp keeps its dApp identifier, its subscriptions and its running service models.
+* An E3 Agent that does not detect the end of a dApp keeps its dApp identifier, its subscriptions and its running service models. An E3 Agent detects it from a dApp that has sent nothing for a long time. Only what the dApp sends shows that the dApp is there: a message the E3 Agent sends to a dApp is broadcast and proves nothing.
 * A RELEASE message from a dApp that names another dApp identifier is not authenticated. The E3 Agent removes that dApp.
 
 ## The sequence identifier chain
