@@ -165,6 +165,9 @@ TEST(E3Config_defaults) {
     ASSERT_EQ(config.setup_port, 9990u);
     ASSERT_EQ(config.subscriber_port, 9999u);
     ASSERT_EQ(config.publisher_port, 9991u);
+    // A RAN drops a dApp quiet for 30 minutes, as Aerial's agent does; a dApp retries every second.
+    ASSERT_EQ(config.dapp_idle_timeout_s, 1800u);
+    ASSERT_EQ(config.reconnect_interval_ms, 1000u);
 }
 
 TEST(E3Config_zmq) {
