@@ -85,6 +85,49 @@ private:
     std::atomic<bool> running_{false};
 };
 
+/// Indicates to every subscribed dApp every 100 ms, so the RAN is sending to a dApp that may be gone.
+class StreamingSM : public ServiceModel {
+public:
+    explicit StreamingSM(uint32_t rf) : rf_(rf) {}
+    ~StreamingSM() override { halt(); }
+    std::string name() const override { return "StreamingSM"; }
+    uint32_t version() const override { return 1; }
+    uint32_t ran_function_id() const override { return rf_; }
+    std::vector<uint32_t> telemetry_ids() const override { return {1}; }
+    std::vector<uint32_t> control_ids() const override { return {}; }
+    std::vector<uint8_t> ran_function_data() const override { return {'{', '}'}; }
+    ErrorCode init() override { return ErrorCode::SUCCESS; }
+    void destroy() override { halt(); }
+    ErrorCode start() override {
+        if (running_.exchange(true)) return ErrorCode::SUCCESS;
+        worker_ = std::thread([this] {
+            while (running_) {
+                for (uint32_t dapp : get_subscribers()) {
+                    emit_outbound(make_indication_pdu(dapp, rf_, {'{', '}'}));
+                }
+                std::this_thread::sleep_for(100ms);
+            }
+        });
+        return ErrorCode::SUCCESS;
+    }
+    // Not joined here: the RAN may stop an SM while it holds the lock get_subscribers() takes.
+    void stop() override { running_ = false; }
+    bool is_running() const override { return running_; }
+    ErrorCode handle_control_action(uint32_t, const DAppControlAction&) override {
+        return ErrorCode::SUCCESS;
+    }
+
+private:
+    void halt() {
+        running_ = false;
+        if (worker_.joinable()) worker_.join();
+    }
+
+    uint32_t rf_;
+    std::atomic<bool> running_{false};
+    std::thread worker_;
+};
+
 /// Records disconnect callbacks and lets the test wait for them.
 struct DisconnectLog {
     std::mutex mu;
@@ -251,6 +294,45 @@ TEST(DAppIdle_zmq_zeroNeverRemovesAQuietDApp) {
     ASSERT_EQ(ran.subscription_count(), 1u);
     ASSERT_TRUE(rf->is_running());
     ASSERT_TRUE(dapp.dapp_id().has_value());
+
+    dapp.stop();
+    ran.stop();
+}
+
+TEST(DAppIdle_zmq_indicationsSentToAQuietDAppDoNotKeepItAlive) {
+    mkdir("/tmp/dapps", 0777);
+    const Endpoints ep;
+
+    E3Agent ran(make_config(E3Role::RAN, ep, 3));
+    ASSERT_EQ(static_cast<int>(ran.register_sm(std::make_unique<StreamingSM>(QUIET_RF))),
+              static_cast<int>(ErrorCode::SUCCESS));
+    ASSERT_EQ(static_cast<int>(ran.start()), static_cast<int>(ErrorCode::SUCCESS));
+    std::this_thread::sleep_for(100ms);
+
+    E3Agent dapp(make_config(E3Role::DAPP, ep, 0));
+    DisconnectLog log;
+    std::atomic<int> indications{0};
+    dapp.set_disconnect_handler([&](DisconnectReason r) { log.record(r); });
+    dapp.set_indication_handler([&](const IndicationMessage&) { ++indications; });
+    ASSERT_EQ(static_cast<int>(dapp.start()), static_cast<int>(ErrorCode::SUCCESS));
+    ASSERT_EQ(static_cast<int>(dapp.wait_for_setup(15000ms)), static_cast<int>(ErrorCode::SUCCESS));
+    ASSERT_EQ(static_cast<int>(dapp.subscribe(QUIET_RF, {1}, {})), static_cast<int>(ErrorCode::SUCCESS));
+    const auto last_message = std::chrono::steady_clock::now();
+    ASSERT_TRUE(wait_until([&] { return ran.subscription_count() == 1u; }, 15000ms));
+
+    // The RAN keeps sending to it, and it keeps receiving, but it sends nothing.
+    ASSERT_TRUE(wait_until([&] { return indications.load() >= 5; }, 10000ms));
+    const int received_early = indications.load();
+
+    // What the RAN sends does not count: the dApp is still released after the idle time.
+    const bool released = log.wait_for(1, 30000ms);
+    const auto released_after = std::chrono::steady_clock::now() - last_message;
+    ASSERT_TRUE(released);
+    ASSERT_TRUE(released_after >= 3s);
+    ASSERT_TRUE(log.last == DisconnectReason::RELEASED_BY_RAN);
+    ASSERT_TRUE(indications.load() > received_early);
+    ASSERT_TRUE(wait_until([&] { return ran.dapp_count() == 0u; }, 2000ms));
+    ASSERT_EQ(ran.subscription_count(), 0u);
 
     dapp.stop();
     ran.stop();

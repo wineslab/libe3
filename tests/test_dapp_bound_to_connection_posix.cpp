@@ -63,7 +63,7 @@ public:
     uint32_t version() const override { return 1; }
     uint32_t ran_function_id() const override { return rf_; }
     std::vector<uint32_t> telemetry_ids() const override { return {1}; }
-    std::vector<uint32_t> control_ids() const override { return {}; }
+    std::vector<uint32_t> control_ids() const override { return {1}; }
     // The JSON encoder carries ranFunctionData as a JSON value, so it must be one.
     std::vector<uint8_t> ran_function_data() const override { return {'{', '}'}; }
     ErrorCode init() override { return ErrorCode::SUCCESS; }
@@ -72,10 +72,12 @@ public:
     void stop() override { running_ = false; ++stops; }
     bool is_running() const override { return running_; }
     ErrorCode handle_control_action(uint32_t, const DAppControlAction&) override {
+        ++controls;
         return ErrorCode::SUCCESS;
     }
 
     std::atomic<int> stops{0};
+    std::atomic<int> controls{0};
 
 private:
     uint32_t rf_;
@@ -152,6 +154,28 @@ Pdu delete_naming(uint32_t dapp_id, uint32_t subscription_id) {
     return pdu;
 }
 
+Pdu control_naming(uint32_t dapp_id, uint32_t ran_function_id, uint32_t control_id) {
+    Pdu pdu(PduType::DAPP_CONTROL_ACTION);
+    DAppControlAction action;
+    action.dapp_identifier = dapp_id;
+    action.ran_function_identifier = ran_function_id;
+    action.control_identifier = control_id;
+    action.action_data = {'{', '}'};
+    pdu.choice = action;
+    return pdu;
+}
+
+Pdu report_naming(uint32_t dapp_id, uint32_t ran_function_id, uint32_t sequence_id) {
+    Pdu pdu(PduType::DAPP_REPORT);
+    DAppReport report;
+    report.dapp_identifier = dapp_id;
+    report.ran_function_identifier = ran_function_id;
+    report.report_data = {'{', '}'};
+    report.sequence_id = sequence_id;
+    pdu.choice = report;
+    return pdu;
+}
+
 }  // namespace
 
 TEST(DAppBound_posix_aMessageFromAnotherConnectionIsDropped) {
@@ -205,6 +229,48 @@ TEST(DAppBound_posix_aMessageFromAnotherConnectionIsDropped) {
     ASSERT_EQ(static_cast<int>(dapp.release()), static_cast<int>(ErrorCode::SUCCESS));
     ASSERT_TRUE(wait_until([&] { return ran.dapp_count() == 0u; }, 10000ms));
     ASSERT_TRUE(wait_until([&] { return !first->is_running() && !second->is_running(); }, 10000ms));
+
+    dapp.stop();
+    ran.stop();
+}
+
+TEST(DAppBound_posix_aControlAndAReportFromAnotherConnectionAreDropped) {
+    mkdir("/tmp/dapps", 0777);
+    const Endpoints ep;
+    E3Agent ran(make_config(E3Role::RAN, ep));
+    auto sm = std::make_unique<CountingSM>(FIRST_RF);
+    CountingSM* rf = sm.get();
+    ran.register_sm(std::move(sm));
+    std::atomic<int> reports{0};
+    ran.set_dapp_report_handler([&](const DAppReport&) { ++reports; });
+    ASSERT_EQ(static_cast<int>(ran.start()), static_cast<int>(ErrorCode::SUCCESS));
+    std::this_thread::sleep_for(100ms);
+
+    E3Agent dapp(make_config(E3Role::DAPP, ep));
+    ASSERT_EQ(static_cast<int>(dapp.start()), static_cast<int>(ErrorCode::SUCCESS));
+    ASSERT_EQ(static_cast<int>(dapp.wait_for_setup(15000ms)), static_cast<int>(ErrorCode::SUCCESS));
+    const uint32_t id = *dapp.dapp_id();
+
+    ASSERT_EQ(static_cast<int>(dapp.subscribe(FIRST_RF, {1}, {1})), static_cast<int>(ErrorCode::SUCCESS));
+    ASSERT_TRUE(wait_until([&] { return ran.subscription_count() == 1u; }, 15000ms));
+
+    OtherConnection other(ep);
+    ASSERT_TRUE(other.open());
+
+    // One message per read, as in the test above.
+    ASSERT_TRUE(other.send(control_naming(id, FIRST_RF, 1)));
+    std::this_thread::sleep_for(300ms);
+    ASSERT_TRUE(other.send(report_naming(id, FIRST_RF, 7)));
+    std::this_thread::sleep_for(1500ms);
+    ASSERT_EQ(rf->controls.load(), 0);
+    ASSERT_EQ(reports.load(), 0);
+    ASSERT_EQ(ran.dapp_count(), 1u);
+
+    // The same two from the dApp's own connection are taken.
+    ASSERT_EQ(static_cast<int>(dapp.send_control(FIRST_RF, 1, {'{', '}'})), static_cast<int>(ErrorCode::SUCCESS));
+    ASSERT_TRUE(wait_until([&] { return rf->controls.load() == 1; }, 10000ms));
+    ASSERT_EQ(static_cast<int>(dapp.send_report(FIRST_RF, {'{', '}'}, 1)), static_cast<int>(ErrorCode::SUCCESS));
+    ASSERT_TRUE(wait_until([&] { return reports.load() == 1; }, 10000ms));
 
     dapp.stop();
     ran.stop();
