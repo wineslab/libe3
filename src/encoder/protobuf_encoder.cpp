@@ -148,6 +148,7 @@ bool ProtobufE3Encoder::pdu_to_proto(const Pdu& pdu, pb::E3Pdu& out) const {
             m->set_ran_function_identifier(s->ran_function_identifier);
             m->set_control_identifier(s->control_identifier);
             m->set_sequence_id(s->sequence_id);
+            m->set_request_ack(s->request_ack);
             m->set_action_data(s->action_data.data(), s->action_data.size());
             return true;
         }
@@ -168,6 +169,7 @@ bool ProtobufE3Encoder::pdu_to_proto(const Pdu& pdu, pb::E3Pdu& out) const {
             m->set_dapp_identifier(s->dapp_identifier);
             m->set_ran_function_identifier(s->ran_function_identifier);
             m->set_sequence_id(s->sequence_id);
+            m->set_request_ack(s->request_ack);
             m->set_xapp_control_data(s->xapp_control_data.data(), s->xapp_control_data.size());
             return true;
         }
@@ -178,13 +180,28 @@ bool ProtobufE3Encoder::pdu_to_proto(const Pdu& pdu, pb::E3Pdu& out) const {
             m->set_dapp_identifier(s->dapp_identifier);
             return true;
         }
-        case PduType::MESSAGE_ACK: {
+        case PduType::MESSAGE_ACK: {  // DEPRECATED TO BE REMOVED
             const auto* s = pdu.get_if<MessageAck>();
             if (!s) return false;
             auto* m = out.mutable_message_ack();
             m->set_request_id(s->request_id);
             m->set_response_code(to_pb_response_code(s->response_code));
             set_reason(m, *s);
+            return true;
+        }
+        case PduType::CONTROL_RESPONSE: {
+            const auto* s = pdu.get_if<ControlResponse>();
+            if (!s) return false;
+            auto* m = out.mutable_control_response();
+            m->set_request_id(s->request_id);
+            m->set_dapp_identifier(s->dapp_identifier);
+            m->set_ran_function_identifier(s->ran_function_identifier);
+            m->set_control_identifier(s->control_identifier);
+            m->set_response_code(to_pb_response_code(s->response_code));
+            set_reason(m, *s);
+            if (s->control_outcome && !s->control_outcome->empty()) {
+                m->set_control_outcome(s->control_outcome->data(), s->control_outcome->size());
+            }
             return true;
         }
     }
@@ -295,6 +312,7 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
             s.ran_function_identifier = m.ran_function_identifier();
             s.control_identifier = m.control_identifier();
             s.sequence_id = m.sequence_id();
+            s.request_ack = m.request_ack();
             s.action_data = to_bytes(m.action_data());
             pdu.type = PduType::DAPP_CONTROL_ACTION;
             pdu.choice = std::move(s);
@@ -317,6 +335,7 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
             s.dapp_identifier = m.dapp_identifier();
             s.ran_function_identifier = m.ran_function_identifier();
             s.sequence_id = m.sequence_id();
+            s.request_ack = m.request_ack();
             s.xapp_control_data = to_bytes(m.xapp_control_data());
             pdu.type = PduType::XAPP_CONTROL_ACTION;
             pdu.choice = std::move(s);
@@ -330,13 +349,27 @@ Pdu ProtobufE3Encoder::proto_to_pdu(const pb::E3Pdu& proto) const {
             pdu.choice = std::move(s);
             break;
         }
-        case pb::E3Pdu::kMessageAck: {
+        case pb::E3Pdu::kMessageAck: {  // DEPRECATED TO BE REMOVED
             const auto& m = proto.message_ack();
             MessageAck s;
             s.request_id = m.request_id();
             s.response_code = from_pb_response_code(m.response_code());
             get_reason(m, s);
             pdu.type = PduType::MESSAGE_ACK;
+            pdu.choice = std::move(s);
+            break;
+        }
+        case pb::E3Pdu::kControlResponse: {
+            const auto& m = proto.control_response();
+            ControlResponse s;
+            s.request_id = m.request_id();
+            s.dapp_identifier = m.dapp_identifier();
+            s.ran_function_identifier = m.ran_function_identifier();
+            s.control_identifier = m.control_identifier();
+            s.response_code = from_pb_response_code(m.response_code());
+            get_reason(m, s);
+            if (m.has_control_outcome()) s.control_outcome = to_bytes(m.control_outcome());
+            pdu.type = PduType::CONTROL_RESPONSE;
             pdu.choice = std::move(s);
             break;
         }

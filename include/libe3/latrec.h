@@ -294,8 +294,9 @@ enum {
                                          that installed the mask. A clear with
                                          no control behind it carries seq 0 */
 
-    /* --- Acknowledgment tail. Either direction: the receiver emits an ack,
-     * the sender observes it. seq = the acknowledged message's id. */
+    /* --- Acknowledgment tail. Either direction: the receiver emits the
+     * ControlResponse that answers a control, the sender observes it.
+     * seq = the answered control's message id. */
     LATREC_ACK_SENT          = 0x4A, /* aux = response code, aux2 = reject
                                         reason, 0 when accepted */
     LATREC_ACK_RECV          = 0x4B,

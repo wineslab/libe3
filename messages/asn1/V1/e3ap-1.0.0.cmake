@@ -57,6 +57,12 @@ set(e3ap_source
     constr_SET_OF_uper.c
     constr_SET_OF_xer.c
     constr_TYPE.c
+    BOOLEAN.c
+    BOOLEAN_aper.c
+    BOOLEAN_print.c
+    BOOLEAN_rfill.c
+    BOOLEAN_uper.c
+    BOOLEAN_xer.c
     ENUMERATED_aper.c
     ENUMERATED.c
     ENUMERATED_uper.c
@@ -110,6 +116,7 @@ set(e3ap_source
     E3-DAppID.c
     E3-DAppReport.c
     E3-IndicationMessage.c
+    E3-ControlResponse.c
     E3-MessageAck.c
     E3-MessageID.c
     E3-Name.c
@@ -156,6 +163,7 @@ set(e3ap_headers
     constr_SEQUENCE_OF.h
     constr_SET_OF.h
     constr_TYPE.h
+    BOOLEAN.h
     ENUMERATED.h
     EXTERNAL.h
     GraphicString.h
@@ -183,6 +191,7 @@ set(e3ap_headers
     E3-DAppID.h
     E3-DAppReport.h
     E3-IndicationMessage.h
+    E3-ControlResponse.h
     E3-MessageAck.h
     E3-MessageID.h
     E3-Name.h

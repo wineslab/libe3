@@ -47,6 +47,7 @@ uint32_t dapp_id_of(const Pdu& pdu) {
     if (const auto* m = std::get_if<DAppControlAction>(&pdu.choice)) return m->dapp_identifier;
     if (const auto* m = std::get_if<DAppReport>(&pdu.choice)) return m->dapp_identifier;
     if (const auto* m = std::get_if<ReleaseMessage>(&pdu.choice)) return m->dapp_identifier;
+    if (const auto* m = std::get_if<ControlResponse>(&pdu.choice)) return m->dapp_identifier;
     return 0;
 }
 
@@ -548,6 +549,9 @@ ErrorCode E3Interface::register_sm(std::unique_ptr<ServiceModel> sm) {
         latrec_tstamp(pdu.enqueue_seq, LATREC_EMIT_ENTER, latrec_ctx(), ran_function_id);
         return queue_outbound(std::move(pdu));
     });
+    sm->set_control_responder([this](uint32_t dapp_id, uint32_t request_id, const ControlResult& result) {
+        return respond_to_control(dapp_id, request_id, result);
+    });
     return SmRegistry::instance().register_sm(std::move(sm));
 }
 
@@ -723,6 +727,14 @@ void E3Interface::inbound_loop_ran() {
                 auto* release = std::get_if<ReleaseMessage>(&pdu.choice);
                 if (release) {
                     handle_release_message(*release);
+                }
+                break;
+            }
+
+            case PduType::CONTROL_RESPONSE: {
+                auto* response = std::get_if<ControlResponse>(&pdu.choice);
+                if (response) {
+                    handle_control_response_from_dapp(*response);
                 }
                 break;
             }
@@ -920,6 +932,11 @@ struct Refusal {
     Cause cause;
     std::string detail;
 };
+
+/// Key of a control that waits for an answer: the dApp that sent it and its message id.
+uint64_t pending_key(uint32_t dapp_id, uint32_t request_id) {
+    return (static_cast<uint64_t>(dapp_id) << 32) | request_id;
+}
 
 bool contains(const std::vector<uint32_t>& ids, uint32_t id) {
     return std::find(ids.begin(), ids.end(), id) != ids.end();
@@ -1252,6 +1269,25 @@ void E3Interface::handle_subscription_delete(const SubscriptionDelete& del, uint
     queue_outbound(std::move(response_pdu));
 }
 
+void E3Interface::refuse_control(const DAppControlAction& action, uint32_t request_message_id,
+                                 Cause cause, std::string detail) {
+    E3_LOG_WARN(LOG_TAG) << "Refusing control of dApp " << action.dapp_identifier
+                         << " for RAN function " << action.ran_function_identifier << ": "
+                         << cause_to_string(cause) << " (" << detail << ")";
+    Pdu pdu(PduType::CONTROL_RESPONSE);
+    ControlResponse resp;
+    resp.request_id = sanitize_request_message_id(request_message_id);
+    resp.dapp_identifier = action.dapp_identifier;
+    resp.ran_function_identifier = action.ran_function_identifier;
+    resp.control_identifier = action.control_identifier;
+    resp.response_code = ResponseCode::NEGATIVE;
+    resp.cause = cause;
+    resp.detail = std::move(detail);
+    pdu.message_id = generate_message_id();
+    pdu.choice = std::move(resp);
+    queue_outbound(std::move(pdu));
+}
+
 void E3Interface::handle_control_action(const DAppControlAction& action, uint32_t request_message_id,
                                         uint64_t latrec_seq) {
     E3_LOG_INFO(LOG_TAG) << "Handling control action from dApp " << action.dapp_identifier
@@ -1260,50 +1296,51 @@ void E3Interface::handle_control_action(const DAppControlAction& action, uint32_
                          << " (" << action.action_data.size() << " bytes)";
 
     // The RAN answers a control it cannot hand to a Service Model with a negative
-    // acknowledgment, as Aerial's and OCUDU's agents do, so the dApp is not left
-    // waiting for one. An SM that takes the control answers for itself.
-    auto refuse = [&](Cause cause, std::string detail) {
-        E3_LOG_WARN(LOG_TAG) << "Refusing control of dApp " << action.dapp_identifier
-                             << " for RAN function " << action.ran_function_identifier << ": "
-                             << cause_to_string(cause) << " (" << detail << ")";
-        Pdu ack_pdu(PduType::MESSAGE_ACK);
-        MessageAck ack;
-        ack.request_id = sanitize_request_message_id(request_message_id);
-        ack.response_code = ResponseCode::NEGATIVE;
-        ack.cause = cause;
-        ack.detail = std::move(detail);
-        ack_pdu.message_id = generate_message_id();
-        ack_pdu.choice = std::move(ack);
-        queue_outbound(std::move(ack_pdu));
-    };
-
+    // ControlResponse, whether the dApp asked for an answer or not, so a mistake of
+    // the dApp does not pass unseen. A Service Model answers for what it takes, and
+    // only when asked.
     if (!subscription_manager_->is_dapp_registered(action.dapp_identifier)) {
-        refuse(Cause::SETUP_REQUIRED, "complete setup before sending a control");
+        refuse_control(action, request_message_id, Cause::SETUP_REQUIRED,
+                       "complete setup before sending a control");
         return;
     }
     ServiceModel* sm = SmRegistry::instance().get_by_ran_function(action.ran_function_identifier);
     if (sm == nullptr) {
-        refuse(Cause::UNSUPPORTED_RAN_FUNCTION,
-               "RAN function " + std::to_string(action.ran_function_identifier) + " is not served");
+        refuse_control(action, request_message_id, Cause::UNSUPPORTED_RAN_FUNCTION,
+                       "RAN function " + std::to_string(action.ran_function_identifier) + " is not served");
         return;
     }
     {
         const std::vector<uint32_t> controls = sm->control_ids();
         if (!contains(controls, action.control_identifier)) {
-            refuse(Cause::UNSUPPORTED_IDENTIFIER,
-                   "unknown control identifier " + std::to_string(action.control_identifier));
+            refuse_control(action, request_message_id, Cause::UNSUPPORTED_IDENTIFIER,
+                           "unknown control identifier " + std::to_string(action.control_identifier));
             return;
         }
     }
     if (!sm->is_running()) {
-        refuse(Cause::NOT_FOUND, "no subscription to this RAN function");
+        refuse_control(action, request_message_id, Cause::NOT_FOUND, "no subscription to this RAN function");
         return;
+    }
+
+    // Remember a control that asked for an answer before the SM sees it: it may answer
+    // from another thread before handle_control_action returns.
+    const uint64_t key = pending_key(action.dapp_identifier, request_message_id);
+    if (action.request_ack) {
+        std::unique_lock<std::mutex> lk(pending_controls_mu_);
+        if (pending_controls_.size() >= MAX_PENDING_CONTROLS && pending_controls_.count(key) == 0) {
+            lk.unlock();
+            refuse_control(action, request_message_id, Cause::RESOURCE_EXHAUSTED,
+                           "too many controls wait for an answer");
+            return;
+        }
+        pending_controls_[key] = PendingControl{action.ran_function_identifier, action.control_identifier};
     }
 
     // The SM's own DECODE_E3SM_BEGIN/DONE already marks the library-to-SM
     // boundary, keyed on the SM's own inflight counter -- that pair needs
     // no bridge. What has none is whatever the SM emits in response
-    // (typically a MessageAck): its EMIT_ENTER has nothing to read unless
+    // (typically a ControlResponse): its EMIT_ENTER has nothing to read unless
     // this inbound leg's key is published first, the same bridge
     // handle_indication and handle_xapp_control_action publish on the
     // dApp role.
@@ -1312,9 +1349,53 @@ void E3Interface::handle_control_action(const DAppControlAction& action, uint32_
     if (result != ErrorCode::SUCCESS) {
         E3_LOG_ERROR(LOG_TAG) << "SM failed to process control action: "
                               << error_code_to_string(result);
+        if (action.request_ack) {
+            bool unanswered = false;
+            {
+                std::lock_guard<std::mutex> lk(pending_controls_mu_);
+                unanswered = pending_controls_.erase(key) != 0;
+            }
+            if (unanswered) {
+                refuse_control(action, request_message_id, Cause::UNSPECIFIED,
+                               "the service model could not take the control");
+            }
+        }
         return;
     }
     E3_LOG_INFO(LOG_TAG) << "Control action processed by SM";
+}
+
+ErrorCode E3Interface::respond_to_control(uint32_t dapp_id, uint32_t request_id,
+                                          const ControlResult& result) {
+    if (result.outcome.size() > MAX_CONTROL_OUTCOME_SIZE) {
+        return ErrorCode::INVALID_PARAM;
+    }
+    PendingControl pending;
+    {
+        std::lock_guard<std::mutex> lk(pending_controls_mu_);
+        auto it = pending_controls_.find(pending_key(dapp_id, request_id));
+        if (it == pending_controls_.end()) {
+            return ErrorCode::NOT_FOUND;
+        }
+        pending = it->second;
+        pending_controls_.erase(it);
+    }
+    Pdu pdu(PduType::CONTROL_RESPONSE);
+    ControlResponse resp;
+    resp.request_id = sanitize_request_message_id(request_id);
+    resp.dapp_identifier = dapp_id;
+    resp.ran_function_identifier = pending.ran_function_id;
+    resp.control_identifier = pending.control_id;
+    resp.response_code = result.response_code;
+    resp.cause = result.cause;
+    resp.detail = result.detail;
+    if (!result.outcome.empty()) resp.control_outcome = result.outcome;
+    pdu.message_id = generate_message_id();
+    pdu.choice = std::move(resp);
+    // An emit path, like the SM's outbound emitter: it stamps EMIT_ENTER itself.
+    pdu.enqueue_seq = latrec_seq_next();
+    latrec_tstamp(pdu.enqueue_seq, LATREC_EMIT_ENTER, latrec_ctx(), pending.ran_function_id);
+    return queue_outbound(std::move(pdu));
 }
 
 void E3Interface::handle_dapp_report(const DAppReport& report) {
@@ -1336,6 +1417,14 @@ void E3Interface::handle_release_message(const ReleaseMessage& release) {
 void E3Interface::handle_dapp_disconnection(uint32_t dapp_id) {
     E3_LOG_INFO(LOG_TAG) << "Handling dApp disconnection: " << dapp_id;
     
+    // Nobody is left to answer to.
+    {
+        std::lock_guard<std::mutex> lk(pending_controls_mu_);
+        for (auto it = pending_controls_.begin(); it != pending_controls_.end();) {
+            it = (it->first >> 32) == dapp_id ? pending_controls_.erase(it) : std::next(it);
+        }
+    }
+
     // Get subscriptions before unregistering
     auto subscriptions = subscription_manager_->get_dapp_subscriptions(dapp_id);
     
@@ -1617,9 +1706,14 @@ void E3Interface::inbound_loop_dapp() {
                 }
                 break;
             }
-            case PduType::MESSAGE_ACK: {
+            case PduType::MESSAGE_ACK: {  // DEPRECATED TO BE REMOVED
                 auto* a = std::get_if<MessageAck>(&pdu.choice);
                 if (a) handle_message_ack(*a);
+                break;
+            }
+            case PduType::CONTROL_RESPONSE: {
+                auto* r = std::get_if<ControlResponse>(&pdu.choice);
+                if (r) handle_control_response_from_ran(*r, seq);
                 break;
             }
             case PduType::RELEASE_MESSAGE: {
@@ -1828,23 +1922,76 @@ void E3Interface::handle_xapp_control_action(const XAppControlAction& action,
     latrec_ctx_set(latrec_seq);
     if (xapp_control_handler_) {
         xapp_control_handler_(action);
+    } else if (action.request_ack) {
+        // The control asked for an answer and nothing here acts on it. The control
+        // names no control identifier, so use the first the RAN function advertises.
+        uint32_t control_id = 1;
+        for (const auto& fn : remote_ran_functions()) {
+            if (fn.ran_function_identifier == action.ran_function_identifier &&
+                !fn.control_identifier_list.empty()) {
+                control_id = fn.control_identifier_list.front();
+            }
+        }
+        ControlResult refused;
+        refused.response_code = ResponseCode::NEGATIVE;
+        refused.cause = Cause::UNSUPPORTED_RAN_FUNCTION;
+        refused.detail = "this dApp does not act on xApp controls";
+        queue_control_response(action.message_id, action.ran_function_identifier, control_id, refused);
     }
     latrec_tstamp(latrec_seq, LATREC_DELIVER_DONE, action.sequence_id, 0);
 }
 
+// DEPRECATED TO BE REMOVED. libe3 sends no MessageAck; another RAN may, and the
+// handler hears it. It names no dApp, so on a link that broadcasts every dApp hears it.
 void E3Interface::handle_message_ack(const MessageAck& ack) {
     if (ack.response_code == ResponseCode::NEGATIVE) {
         E3_LOG_WARN(LOG_TAG) << "MessageAck for request " << ack.request_id << " is negative"
                              << reason_suffix(ack);
     }
-    // Closes the acknowledgment tail. Keyed on the acknowledged message's id,
-    // matching the LATREC_ACK_SENT the RAN-side Service Model stamps, so the
-    // leg joins on a libe3 build the way it already did on backends that
-    // stamped this themselves.
     latrec_tstamp(ack.request_id, LATREC_ACK_RECV,
                   static_cast<uint64_t>(ack.response_code), 0);
     if (message_ack_handler_) {
         message_ack_handler_(ack);
+    }
+}
+
+void E3Interface::handle_control_response_from_ran(const ControlResponse& resp, uint64_t latrec_seq) {
+    // A ControlResponse names its dApp, so on a link that broadcasts a dApp reads
+    // only the ones that are its own.
+    if (dapp_state_) {
+        std::lock_guard<std::mutex> lk(dapp_state_->mu);
+        if (!dapp_state_->assigned_dapp_id.has_value() ||
+            *dapp_state_->assigned_dapp_id != resp.dapp_identifier) {
+            latrec_tstamp(latrec_seq, LATREC_DROP, 0, LATREC_DROP_FILTERED);
+            return;
+        }
+    }
+    if (resp.response_code == ResponseCode::NEGATIVE) {
+        E3_LOG_WARN(LOG_TAG) << "ControlResponse for request " << resp.request_id << " is negative"
+                             << reason_suffix(resp);
+    }
+    // Closes the acknowledgment tail. Keyed on the answered control's id,
+    // matching the LATREC_ACK_SENT the RAN-side Service Model stamps, so the
+    // leg joins on a libe3 build the way it already did on backends that
+    // stamped this themselves.
+    latrec_tstamp(resp.request_id, LATREC_ACK_RECV,
+                  static_cast<uint64_t>(resp.response_code), 0);
+    if (control_response_handler_) {
+        control_response_handler_(resp);
+    }
+}
+
+void E3Interface::handle_control_response_from_dapp(const ControlResponse& resp) {
+    if (!subscription_manager_->is_dapp_registered(resp.dapp_identifier)) {
+        E3_LOG_WARN(LOG_TAG) << "Dropping ControlResponse of unregistered dApp " << resp.dapp_identifier;
+        return;
+    }
+    if (resp.response_code == ResponseCode::NEGATIVE) {
+        E3_LOG_WARN(LOG_TAG) << "ControlResponse of dApp " << resp.dapp_identifier << " for request "
+                             << resp.request_id << " is negative" << reason_suffix(resp);
+    }
+    if (control_response_handler_) {
+        control_response_handler_(resp);
     }
 }
 
@@ -1941,7 +2088,8 @@ ErrorCode E3Interface::queue_dapp_control_action(
     uint32_t control_id,
     std::vector<uint8_t> action_data,
     uint32_t sequence_id,
-    uint32_t* out_message_id
+    uint32_t* out_message_id,
+    bool request_ack
 ) {
     if (!dapp_state_) return ErrorCode::STATE_ERROR;
     auto id = dapp_id();
@@ -1953,6 +2101,7 @@ ErrorCode E3Interface::queue_dapp_control_action(
     a.ran_function_identifier = ran_function_id;
     a.control_identifier = control_id;
     a.sequence_id = sequence_id;
+    a.request_ack = request_ack;
     a.action_data = std::move(action_data);
     pdu.choice = std::move(a);
     const uint32_t mid = generate_message_id();
@@ -1967,6 +2116,34 @@ ErrorCode E3Interface::queue_dapp_control_action(
         *out_message_id = mid;
     }
     return rc;
+}
+
+ErrorCode E3Interface::queue_control_response(
+    uint32_t request_id,
+    uint32_t ran_function_id,
+    uint32_t control_id,
+    const ControlResult& result
+) {
+    if (!dapp_state_) return ErrorCode::STATE_ERROR;
+    auto id = dapp_id();
+    if (!id) return ErrorCode::NOT_INITIALIZED;
+    if (result.outcome.size() > MAX_CONTROL_OUTCOME_SIZE) return ErrorCode::INVALID_PARAM;
+
+    Pdu pdu(PduType::CONTROL_RESPONSE);
+    ControlResponse resp;
+    resp.request_id = sanitize_request_message_id(request_id);
+    resp.dapp_identifier = *id;
+    resp.ran_function_identifier = ran_function_id;
+    resp.control_identifier = control_id;
+    resp.response_code = result.response_code;
+    resp.cause = result.cause;
+    resp.detail = result.detail;
+    if (!result.outcome.empty()) resp.control_outcome = result.outcome;
+    pdu.choice = std::move(resp);
+    pdu.message_id = generate_message_id();
+    pdu.enqueue_seq = latrec_seq_next();
+    latrec_tstamp(pdu.enqueue_seq, LATREC_EMIT_ENTER, latrec_ctx(), ran_function_id);
+    return queue_outbound(std::move(pdu));
 }
 
 ErrorCode E3Interface::queue_dapp_report(

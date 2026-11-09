@@ -41,8 +41,10 @@ using SubscriptionResponseHandler = std::function<void(const SubscriptionRespons
 using IndicationHandler = std::function<void(const IndicationMessage&)>;
 /** Callback for an XAppControlAction (xApp → dApp via the RAN). */
 using XAppControlHandler = std::function<void(const XAppControlAction&)>;
-/** Callback for a MessageAck (RAN → dApp). */
+/** Callback for a MessageAck (RAN → dApp). DEPRECATED TO BE REMOVED: libe3 does not send one. */
 using MessageAckHandler = std::function<void(const MessageAck&)>;
+/** Callback for a ControlResponse: the RAN's answer to a dApp control (RAN → dApp), or a dApp's answer to an xApp control (dApp → RAN). */
+using ControlResponseHandler = std::function<void(const ControlResponse&)>;
 /** Callback for the end of the dApp's session with the RAN, with the reason. */
 using DisconnectHandler = std::function<void(DisconnectReason)>;
 
@@ -225,18 +227,27 @@ public:
      * @param control_data E3SM-encoded control payload
      * @param sequence_id Correlation id from the E2SM-DAPP control header, so
      *        the dApp can carry it back on the control it re-issues.
+     * @param out_message_id When non-null, receives the E3-MessageID of the control on
+     *        success: the `request_id` of the ControlResponse that answers it.
+     * @param request_ack True to ask the dApp for a ControlResponse; it reaches the
+     *        handler of set_control_response_handler().
      * @return ErrorCode::SUCCESS on success
      */
     ErrorCode send_xapp_control(
         uint32_t dapp_id,
         uint32_t ran_function_id,
         const std::vector<uint8_t>& control_data,
-        uint32_t sequence_id
+        uint32_t sequence_id,
+        uint32_t* out_message_id = nullptr,
+        bool request_ack = false
     );
 
     /**
-     * @brief Send a message acknowledgment (e.g. ack a control/request from dApp).
+     * @brief Send a message acknowledgment.
      *
+     * DEPRECATED TO BE REMOVED. The answer to a control is a ControlResponse, which a
+     * Service Model sends with ServiceModel::respond_to_control(). A libe3 RAN does not
+     * read a MessageAck from a dApp.
      * @param request_id ID of the request being acknowledged
      * @param response_code ResponseCode::POSITIVE (0) or NEGATIVE (1)
      * @return ErrorCode::SUCCESS on success
@@ -272,10 +283,18 @@ public:
      */
     void set_xapp_control_handler(XAppControlHandler handler);
     /**
-     * Set callback for incoming MessageAck (RAN → dApp).
+     * Set callback for incoming MessageAck (RAN → dApp). DEPRECATED TO BE REMOVED:
+     * libe3 does not send one; another RAN may.
      * @param handler Called with each acknowledgement
      */
     void set_message_ack_handler(MessageAckHandler handler);
+    /**
+     * Set callback for incoming ControlResponse, in either role. On a dApp it is the
+     * RAN's answer to a control that asked for one, or the RAN's refusal of any control;
+     * on a RAN it is a dApp's answer to an xApp control that asked for one.
+     * @param handler Called with each response
+     */
+    void set_control_response_handler(ControlResponseHandler handler);
     /**
      * Set callback for the end of the dApp's session with the RAN: a release for
      * this dApp, or a closed or failed connection. Fires once, after dapp_id()
@@ -355,15 +374,34 @@ public:
      * @param sequence_id correlation id of the xApp procedure this control
      *        re-issues; leave 0 for a control the dApp decided on its own.
      * @param out_message_id when non-null, receives the assigned E3-MessageID on
-     *        success, so the caller can correlate a later ack/response back to
-     *        this send.
+     *        success: the `request_id` of the ControlResponse that answers it.
+     * @param request_ack true to ask the RAN for a ControlResponse when the control
+     *        has been dealt with. Without it the RAN answers only a control that it
+     *        refuses itself (no setup, unknown function or control, no subscription).
      * @return ErrorCode::SUCCESS if the control was queued, an error code otherwise
      */
     ErrorCode send_control(uint32_t ran_function_id,
                            uint32_t control_id,
                            std::vector<uint8_t> action_data,
                            uint32_t sequence_id = 0,
-                           uint32_t* out_message_id = nullptr);
+                           uint32_t* out_message_id = nullptr,
+                           bool request_ack = false);
+
+    /**
+     * @brief Answer an xApp control that asked for an answer (`XAppControlAction::request_ack`).
+     *
+     * @param request_id `XAppControlAction::message_id` of the control being answered
+     * @param ran_function_id RAN function of the control
+     * @param control_id control the dApp applied, from the list the RAN advertised for the function
+     * @param result Whether the dApp applied the control, why not, and what it reports about it
+     * @return ErrorCode::SUCCESS if the answer was queued; STATE_ERROR on a RAN-role agent;
+     *         NOT_INITIALIZED if the agent is not running or setup has not completed;
+     *         INVALID_PARAM if the outcome is over MAX_CONTROL_OUTCOME_SIZE
+     */
+    ErrorCode send_control_response(uint32_t request_id,
+                                    uint32_t ran_function_id,
+                                    uint32_t control_id,
+                                    const ControlResult& result);
 
     /**
      * @brief Send a dApp report to the RAN.

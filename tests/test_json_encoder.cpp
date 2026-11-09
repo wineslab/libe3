@@ -145,11 +145,14 @@ TEST(JsonEncoder_negative_response_writes_cause_and_detail) {
 TEST(JsonEncoder_positive_response_writes_no_reason) {
     auto encoder = create_encoder();
 
-    Pdu pdu(PduType::MESSAGE_ACK);
-    MessageAck ack;
-    ack.request_id = 5;
-    ack.response_code = ResponseCode::POSITIVE;
-    pdu.choice = ack;
+    Pdu pdu(PduType::CONTROL_RESPONSE);
+    ControlResponse resp;
+    resp.request_id = 5;
+    resp.dapp_identifier = 1;
+    resp.ran_function_identifier = 2;
+    resp.control_identifier = 3;
+    resp.response_code = ResponseCode::POSITIVE;
+    pdu.choice = resp;
 
     auto encoded = encoder->encode(pdu);
     ASSERT_TRUE(encoded.has_value());
@@ -161,14 +164,14 @@ TEST(JsonEncoder_positive_response_writes_no_reason) {
 TEST(JsonEncoder_decode_reads_aerials_message_as_detail) {
     auto encoder = create_encoder();
     const std::string wire = R"JSON({
-        "type": "messageAck", "id": 1, "requestId": 4, "dAppIdentifier": 1,
-        "responseCode": "negative", "message": "control actions not implemented"})JSON";
+        "type": "subscriptionResponse", "id": 1, "requestId": 4, "dAppIdentifier": 1,
+        "responseCode": "negative", "message": "unknown telemetry identifier"})JSON";
     auto decoded = encoder->decode(reinterpret_cast<const uint8_t*>(wire.data()), wire.size());
     ASSERT_TRUE(decoded.has_value());
-    auto& ack = std::get<MessageAck>(decoded->choice);
-    ASSERT_TRUE(ack.detail.has_value());
-    ASSERT_STREQ(ack.detail->c_str(), "control actions not implemented");
-    ASSERT_FALSE(ack.cause.has_value());
+    auto& resp = std::get<SubscriptionResponse>(decoded->choice);
+    ASSERT_TRUE(resp.detail.has_value());
+    ASSERT_STREQ(resp.detail->c_str(), "unknown telemetry identifier");
+    ASSERT_FALSE(resp.cause.has_value());
 }
 
 TEST(JsonEncoder_decode_prefers_detail_over_message_and_reads_unknown_cause) {
@@ -558,24 +561,169 @@ TEST(JsonEncoder_encode_non_json_payloads_fail) {
     ASSERT_FALSE(encoder->encode(empty).has_value());
 }
 
-TEST(JsonEncoder_encode_decode_message_ack) {
+namespace {
+ControlResponse sample_response() {
+    ControlResponse resp;
+    resp.request_id = 54321;
+    resp.dapp_identifier = 7;
+    resp.ran_function_identifier = 8;
+    resp.control_identifier = 9;
+    resp.response_code = ResponseCode::NEGATIVE;
+    resp.cause = Cause::NOT_FOUND;
+    resp.detail = "no subscription to this RAN function";
+    resp.control_outcome = std::vector<uint8_t>{'{', '"', 'o', 'k', '"', ':', '1', '}'};
+    return resp;
+}
+}  // namespace
+
+TEST(JsonEncoder_control_response_round_trip) {
     auto encoder = create_encoder();
-    
+
+    Pdu original(PduType::CONTROL_RESPONSE);
+    original.choice = sample_response();
+
+    auto encoded = encoder->encode(original);
+    ASSERT_TRUE(encoded.has_value());
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+
+    auto& restored = std::get<ControlResponse>(decoded->choice);
+    ASSERT_EQ(restored.request_id, 54321u);
+    ASSERT_EQ(restored.dapp_identifier, 7u);
+    ASSERT_EQ(restored.ran_function_identifier, 8u);
+    ASSERT_EQ(restored.control_identifier, 9u);
+    ASSERT_TRUE(restored.response_code == ResponseCode::NEGATIVE);
+    ASSERT_TRUE(restored.cause == Cause::NOT_FOUND);
+    ASSERT_STREQ(restored.detail->c_str(), "no subscription to this RAN function");
+    ASSERT_TRUE(restored.control_outcome.has_value());
+    ASSERT_TRUE(*restored.control_outcome == *sample_response().control_outcome);
+}
+
+TEST(JsonEncoder_control_response_names_on_the_wire) {
+    auto encoder = create_encoder();
+
+    Pdu pdu(PduType::CONTROL_RESPONSE);
+    pdu.choice = sample_response();
+    auto encoded = encoder->encode(pdu);
+    ASSERT_TRUE(encoded.has_value());
+    auto wire = nlohmann::json::parse(encoded->buffer);
+
+    ASSERT_STREQ(wire["type"].get<std::string>().c_str(), "controlResponse");
+    ASSERT_EQ(wire["requestId"].get<uint32_t>(), 54321u);
+    ASSERT_EQ(wire["dAppIdentifier"].get<uint32_t>(), 7u);
+    ASSERT_EQ(wire["ranFunctionIdentifier"].get<uint32_t>(), 8u);
+    ASSERT_EQ(wire["controlIdentifier"].get<uint32_t>(), 9u);
+    ASSERT_STREQ(wire["responseCode"].get<std::string>().c_str(), "negative");
+    ASSERT_STREQ(wire["cause"].get<std::string>().c_str(), "notFound");
+    ASSERT_STREQ(wire["detail"].get<std::string>().c_str(), "no subscription to this RAN function");
+    // The outcome is nested, as actionData is, not a string of hex.
+    ASSERT_TRUE(wire["controlOutcome"].is_object());
+    ASSERT_EQ(wire["controlOutcome"]["ok"].get<int>(), 1);
+}
+
+TEST(JsonEncoder_control_response_without_an_outcome_writes_none) {
+    auto encoder = create_encoder();
+
+    Pdu pdu(PduType::CONTROL_RESPONSE);
+    ControlResponse resp = sample_response();
+    resp.control_outcome.reset();
+    pdu.choice = resp;
+    auto encoded = encoder->encode(pdu);
+    ASSERT_TRUE(encoded.has_value());
+    ASSERT_FALSE(nlohmann::json::parse(encoded->buffer).contains("controlOutcome"));
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+    ASSERT_FALSE(std::get<ControlResponse>(decoded->choice).control_outcome.has_value());
+}
+
+TEST(JsonEncoder_control_response_outcome_must_be_json) {
+    auto encoder = create_encoder();
+
+    Pdu pdu(PduType::CONTROL_RESPONSE);
+    ControlResponse resp = sample_response();
+    resp.control_outcome = std::vector<uint8_t>{0xde, 0xad};
+    pdu.choice = resp;
+    ASSERT_FALSE(encoder->encode(pdu).has_value());
+}
+
+TEST(JsonEncoder_request_ack_is_written_only_when_true) {
+    auto encoder = create_encoder();
+
+    DAppControlAction dapp;
+    dapp.dapp_identifier = 1;
+    dapp.ran_function_identifier = 2;
+    dapp.control_identifier = 3;
+    dapp.action_data = {'{', '}'};
+    XAppControlAction xapp;
+    xapp.dapp_identifier = 1;
+    xapp.ran_function_identifier = 2;
+    xapp.sequence_id = 4;
+    xapp.xapp_control_data = {'{', '}'};
+
+    for (bool ask : {false, true}) {
+        dapp.request_ack = ask;
+        xapp.request_ack = ask;
+        Pdu d(PduType::DAPP_CONTROL_ACTION);
+        d.choice = dapp;
+        Pdu x(PduType::XAPP_CONTROL_ACTION);
+        x.choice = xapp;
+        for (const Pdu* pdu : {&d, &x}) {
+            auto encoded = encoder->encode(*pdu);
+            ASSERT_TRUE(encoded.has_value());
+            auto wire = nlohmann::json::parse(encoded->buffer);
+            ASSERT_EQ(wire.contains("requestAck"), ask);
+            auto decoded = encoder->decode(*encoded);
+            ASSERT_TRUE(decoded.has_value());
+            const bool got = pdu->type == PduType::DAPP_CONTROL_ACTION
+                                 ? std::get<DAppControlAction>(decoded->choice).request_ack
+                                 : std::get<XAppControlAction>(decoded->choice).request_ack;
+            ASSERT_EQ(got, ask);
+        }
+    }
+}
+
+TEST(JsonEncoder_request_ack_false_on_the_wire_reads_as_false) {
+    auto encoder = create_encoder();
+    const std::string wire = R"JSON({
+        "type": "dAppControlAction", "id": 1, "dAppIdentifier": 1, "ranFunctionIdentifier": 2,
+        "controlIdentifier": 3, "requestAck": false, "actionData": {}})JSON";
+    auto decoded = encoder->decode(reinterpret_cast<const uint8_t*>(wire.data()), wire.size());
+    ASSERT_TRUE(decoded.has_value());
+    ASSERT_FALSE(std::get<DAppControlAction>(decoded->choice).request_ack);
+}
+
+TEST(JsonEncoder_encode_decode_message_ack) {
+    // Deprecated and kept: libe3 sends none, and reads one from another RAN.
+    auto encoder = create_encoder();
+
     Pdu original(PduType::MESSAGE_ACK);
     MessageAck ack;
     ack.request_id = 54321;
     ack.response_code = ResponseCode::POSITIVE;
     original.choice = ack;
-    
+
     auto encoded = encoder->encode(original);
     ASSERT_TRUE(encoded.has_value());
-    
+    ASSERT_STREQ(nlohmann::json::parse(encoded->buffer)["type"].get<std::string>().c_str(), "messageAck");
+
     auto decoded = encoder->decode(*encoded);
     ASSERT_TRUE(decoded.has_value());
-    
+
     auto& restored = std::get<MessageAck>(decoded->choice);
     ASSERT_EQ(restored.request_id, 54321u);
     ASSERT_TRUE(restored.response_code == ResponseCode::POSITIVE);
+}
+
+TEST(JsonEncoder_decode_reads_aerials_message_ack_with_its_text_as_detail) {
+    auto encoder = create_encoder();
+    const std::string wire = R"JSON({
+        "type": "messageAck", "id": 1, "requestId": 4, "dAppIdentifier": 1,
+        "responseCode": "negative", "message": "control actions not implemented"})JSON";
+    auto decoded = encoder->decode(reinterpret_cast<const uint8_t*>(wire.data()), wire.size());
+    ASSERT_TRUE(decoded.has_value());
+    auto& ack = std::get<MessageAck>(decoded->choice);
+    ASSERT_STREQ(ack.detail->c_str(), "control actions not implemented");
+    ASSERT_FALSE(ack.cause.has_value());
 }
 
 TEST(JsonEncoder_decode_invalid_json) {

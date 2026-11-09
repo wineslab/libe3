@@ -240,6 +240,8 @@ public:
 
     /**
      * @brief Create and encode a Message Acknowledgment PDU
+     *
+     * DEPRECATED TO BE REMOVED. libe3 does not send one; use encode_control_response().
      * @param message_id Unique message ID
      * @param request_id Message ID of the request being acknowledged
      * @param response_code Positive or negative
@@ -253,6 +255,17 @@ public:
         ResponseCode response_code,
         const std::optional<Cause>& cause = std::nullopt,
         const std::optional<std::string>& detail = std::nullopt
+    );
+
+    /**
+     * @brief Create and encode a Control Response PDU
+     * @param message_id Unique message ID
+     * @param response The response; its `request_id` is the message ID of the control it answers
+     * @return Encoded message on success, error code on failure
+     */
+    EncodeResult<EncodedMessage> encode_control_response(
+        uint32_t message_id,
+        const ControlResponse& response
     );
 
 protected:

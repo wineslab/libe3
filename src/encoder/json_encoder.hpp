@@ -48,7 +48,8 @@ private:
     nlohmann::json encode_dapp_report(const DAppReport& report) const;
     nlohmann::json encode_xapp_control_action(const XAppControlAction& action) const;
     nlohmann::json encode_release_message(const ReleaseMessage& msg) const;
-    nlohmann::json encode_message_ack(const MessageAck& ack) const;
+    nlohmann::json encode_message_ack(const MessageAck& ack) const;  // DEPRECATED TO BE REMOVED
+    nlohmann::json encode_control_response(const ControlResponse& resp) const;
 
     // Helper methods for decoding JSON to PDU types
     SetupRequest decode_setup_request(const nlohmann::json& j) const;
@@ -61,7 +62,8 @@ private:
     DAppReport decode_dapp_report(const nlohmann::json& j, const std::string& raw_json) const;
     XAppControlAction decode_xapp_control_action(const nlohmann::json& j, const std::string& raw_json) const;
     ReleaseMessage decode_release_message(const nlohmann::json& j) const;
-    MessageAck decode_message_ack(const nlohmann::json& j) const;
+    MessageAck decode_message_ack(const nlohmann::json& j) const;  // DEPRECATED TO BE REMOVED
+    ControlResponse decode_control_response(const nlohmann::json& j, const std::string& raw_json) const;
 
     // Opaque payload from a nested object or array, dumped to bytes
     static std::vector<uint8_t> payload_from_json(const nlohmann::json& value);

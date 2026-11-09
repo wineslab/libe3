@@ -78,7 +78,11 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         -- it. Absent on a control the dApp decided on its own.
         sequenceId              E3-SequenceID OPTIONAL,
         actionData              OCTET STRING (SIZE (1..32768)),
-        ...
+        ...,
+        -- True when the dApp wants an E3-ControlResponse for this control. Absent
+        -- reads as false. An extension addition, so a control that does not ask
+        -- is encoded as it always was.
+        requestAck              BOOLEAN OPTIONAL
     }
 
     E3-DAppReport ::= SEQUENCE {
@@ -101,7 +105,10 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         -- never be matched to the control acknowledge the RAN owes the xApp.
         sequenceId              E3-SequenceID,
         xAppControlData         OCTET STRING (SIZE (1..32768)),
-        ...
+        ...,
+        -- True when the RAN wants an E3-ControlResponse from the dApp for this
+        -- control. Absent reads as false.
+        requestAck              BOOLEAN OPTIONAL
     }
 
     E3-ReleaseMessage ::= SEQUENCE {
@@ -109,12 +116,35 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         ...
     }
 
+    -- DEPRECATED TO BE REMOVED. libe3 no longer sends it: the answer to a control
+    -- is E3-ControlResponse. It stays in the grammar so that its index, and with it
+    -- the index of controlResponse, is the one OCUDU's grammar has, and so that a
+    -- libe3 dApp still reads the one that another RAN sends.
     E3-MessageAck ::= SEQUENCE {
         requestId            E3-MessageID,
         responseCode         E3-ResponseCode,
         ...,
         cause                E3-Cause OPTIONAL,
         detail               E3-Text OPTIONAL
+    }
+
+    -- The answer to a dApp control or an xApp control that carried requestAck
+    -- true, sent by the receiver of the control: the RAN for a dApp control, the
+    -- dApp for an xApp control. requestId is the id of the control's E3-PDU.
+    -- The fields and their order are those of OCUDU's E3-ControlResponse minus
+    -- fragmentIndex, fragmentCount and payloadBytes, which libe3 does not carry,
+    -- so the encoding differs from OCUDU's. controlOutcome is service-model
+    -- content and opaque here.
+    E3-ControlResponse ::= SEQUENCE {
+        requestId             E3-MessageID,
+        dAppIdentifier        E3-DAppID,
+        ranFunctionIdentifier INTEGER (1..65535),
+        controlIdentifier     INTEGER (1..65535),
+        responseCode          E3-ResponseCode,
+        cause                 E3-Cause OPTIONAL,
+        detail                E3-Text OPTIONAL,
+        controlOutcome        OCTET STRING (SIZE (1..32768)) OPTIONAL,
+        ...
     }
 
     -- Correlation identifier for one detection-to-mitigation procedure, assigned
@@ -138,7 +168,7 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     -- response code is a wire change we are willing to pay for explicitly.
     E3-ResponseCode ::= ENUMERATED { positive(0), negative(1) }
 
-    -- Why a RAN refused a request. Sent with a negative response next to a
+    -- Why a request was refused. Sent with a negative response next to a
     -- free-text detail. The names, the values and the text bound are OCUDU's,
     -- so a refusal reads the same on every RAN; the enumeration is extensible
     -- as it is there, and a receiver reads a value it does not know as
@@ -186,7 +216,8 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
             dAppReport            [7]  E3-DAppReport,
             xAppControlAction     [8]  E3-XAppControlAction,
             releaseMessage        [9]  E3-ReleaseMessage,
-            messageAck            [10] E3-MessageAck,
+            messageAck            [10] E3-MessageAck,   -- DEPRECATED TO BE REMOVED
+            controlResponse       [11] E3-ControlResponse,
             ...
         },
         ...

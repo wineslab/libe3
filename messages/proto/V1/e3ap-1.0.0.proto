@@ -124,6 +124,8 @@ message DAppControlAction {
   // (absent, under proto3 implicit presence) on a control the dApp decided on
   // its own. Matches the ASN.1 field's OPTIONAL.
   uint32 sequence_id = 5;
+  // True when the dApp wants a ControlResponse. False is absent, as in ASN.1.
+  bool request_ack = 6;
 }
 
 // dApp Report (dApp -> RAN). report_data is Service Model opaque.
@@ -145,6 +147,8 @@ message XAppControlAction {
   // Copied by the RAN's E2-E3 bridge from the E2SM-DAPP control header's
   // sequence-id. Mandatory in the ASN.1 grammar.
   uint32 sequence_id = 4;
+  // True when the RAN wants a ControlResponse. False is absent, as in ASN.1.
+  bool request_ack = 5;
 }
 
 // Release Message (dApp -> RAN).
@@ -152,7 +156,8 @@ message ReleaseMessage {
   uint32 dapp_identifier = 1;
 }
 
-// Generic message acknowledgment.
+// Generic message acknowledgment. DEPRECATED TO BE REMOVED: libe3 no longer sends
+// it, the answer to a control is ControlResponse.
 message MessageAck {
   uint32 request_id = 1;
   ResponseCode response_code = 2;
@@ -161,8 +166,23 @@ message MessageAck {
   optional string detail = 4;
 }
 
+// The answer to a dApp control or an xApp control that asked for one. The
+// fields are OCUDU's E3-ControlResponse without fragmentIndex, fragmentCount
+// and payloadBytes. control_outcome is Service Model opaque, 1..32768 bytes.
+message ControlResponse {
+  uint32 request_id = 1;
+  uint32 dapp_identifier = 2;
+  uint32 ran_function_identifier = 3;
+  uint32 control_identifier = 4;
+  ResponseCode response_code = 5;
+  // Why the control was refused, and a text for it of up to 512 bytes.
+  optional Cause cause = 6;
+  optional string detail = 7;
+  optional bytes control_outcome = 8;
+}
+
 // Top-level E3AP PDU envelope. The oneof case identifies the PDU type; its
-// ordering matches the E3AP PDU type enumeration (SETUP_REQUEST=0 .. MESSAGE_ACK=10).
+// ordering matches the E3AP PDU type enumeration (SETUP_REQUEST=0 .. CONTROL_RESPONSE=11).
 message E3Pdu {
   uint32 id = 1;         // message identifier
   // Producer timestamp: nanoseconds since the Unix epoch, realtime (UTC)
@@ -180,6 +200,7 @@ message E3Pdu {
     DAppReport dapp_report = 10;
     XAppControlAction xapp_control_action = 11;
     ReleaseMessage release_message = 12;
-    MessageAck message_ack = 13;
+    MessageAck message_ack = 13;  // DEPRECATED TO BE REMOVED
+    ControlResponse control_response = 14;
   }
 }

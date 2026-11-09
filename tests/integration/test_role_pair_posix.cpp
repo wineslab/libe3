@@ -85,8 +85,9 @@ public:
     ErrorCode handle_control_action(uint32_t request_message_id,
                                     const DAppControlAction& a) override {
         ++control_count;
-        Pdu ack = make_message_ack_pdu(request_message_id, ResponseCode::POSITIVE);
-        return emit_outbound(std::move(ack));
+        // Sent only when the dApp asked for it; NOT_FOUND means nobody waits.
+        (void)respond_to_control(a.dapp_identifier, request_message_id, ControlResult{});
+        return ErrorCode::SUCCESS;
     }
     std::atomic<int> control_count{0};
 

@@ -116,7 +116,7 @@ constexpr size_t kU32 = sizeof(uint32_t);
 constexpr size_t kEnum = 1;  // ResponseCode fits one byte of information
 constexpr size_t kMsgId = kU32;
 
-// Build the 11 sample PDUs. json_payloads: when true, use a JSON-formatted
+// Build the 12 sample PDUs. json_payloads: when true, use a JSON-formatted
 // payload instead of raw bytes for every opaque field (the JSON encoder
 // embeds them as nested JSON objects).
 std::vector<Sample> make_samples(bool json_payloads) {
@@ -275,7 +275,7 @@ std::vector<Sample> make_samples(bool json_payloads) {
         samples.push_back(std::move(s));
     }
 
-    // 11. MessageAck
+    // 11. MessageAck (deprecated)
     {
         Sample s("MessageAck", PduType::MESSAGE_ACK);
         MessageAck ack;
@@ -284,6 +284,21 @@ std::vector<Sample> make_samples(bool json_payloads) {
         s.pdu.choice = ack;
         s.pdu.message_id = 11;
         s.info_bytes = kMsgId + kU32 + kEnum;
+        samples.push_back(std::move(s));
+    }
+
+    // 12. ControlResponse
+    {
+        Sample s("ControlResponse", PduType::CONTROL_RESPONSE);
+        ControlResponse resp;
+        resp.request_id              = 1;
+        resp.dapp_identifier         = 1;
+        resp.ran_function_identifier = 1;
+        resp.control_identifier      = 1;
+        resp.response_code           = ResponseCode::POSITIVE;
+        s.pdu.choice = resp;
+        s.pdu.message_id = 12;
+        s.info_bytes = kMsgId + 4 * kU32 + kEnum;
         samples.push_back(std::move(s));
     }
 
@@ -312,7 +327,7 @@ struct Cell {
     size_t encoded_bytes = 0;
     size_t info_bytes = 0;
     E3Encoder* enc = nullptr;
-    Pdu pdu{PduType::MESSAGE_ACK};
+    Pdu pdu{PduType::CONTROL_RESPONSE};
     EncodedMessage encoded;
 };
 

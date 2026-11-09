@@ -86,7 +86,7 @@ def main() -> int:
     # ------------------------------------------------------------------
     for k in ("E3_EVENT_NONE", "E3_EVENT_INDICATION", "E3_EVENT_XAPP_CONTROL",
               "E3_EVENT_SUBSCRIPTION_RESPONSE", "E3_EVENT_SETUP_RESPONSE",
-              "E3_EVENT_MESSAGE_ACK", "E3_EVENT_DISCONNECT"):
+              "E3_EVENT_MESSAGE_ACK", "E3_EVENT_CONTROL_RESPONSE", "E3_EVENT_DISCONNECT"):
         if not hasattr(libe3py, k):
             print(f"FAIL: libe3py.{k} event kind not exposed", file=sys.stderr)
             return 1
@@ -97,7 +97,7 @@ def main() -> int:
         return 1
 
     for verb in ("start", "wait_for_setup", "subscribe", "unsubscribe",
-                 "send_control", "send_report", "send_message_ack", "release",
+                 "send_control", "send_report", "send_control_response", "send_message_ack", "release",
                  "stop", "dapp_id", "ran_identifier", "poll_events",
                  "dropped_events", "setup_response_code",
                  "setup_ran_function_count", "setup_ran_function_id",
@@ -126,6 +126,8 @@ def main() -> int:
         agent.send_indication(1, 1, payload)          # const-ref in-typemap
         session.send_control(1, 1, payload)           # by-value in-typemap
         session.send_report(1, payload, 1)            # sequence_id is mandatory here
+        session.send_control(1, 1, payload, 0, True)  # request_ack
+        session.send_control_response(1, 1, 1, 1, 6, "no such control", payload)
     except TypeError as e:
         print(f"FAIL: bytes typemap rejected a bytes argument: {e}", file=sys.stderr)
         return 1
@@ -147,6 +149,16 @@ def main() -> int:
     if ev.disconnect_reason != -1:
         print("FAIL: fresh E3Event should report no disconnect reason", file=sys.stderr)
         return 1
+    if ev.cause != -1 or ev.detail != "" or ev.control_id != 0:
+        print("FAIL: fresh E3Event should carry no control response reason", file=sys.stderr)
+        return 1
+    if ev.request_ack or ev.has_outcome:
+        print("FAIL: fresh E3Event should not claim request_ack or an outcome", file=sys.stderr)
+        return 1
+    if libe3py.E3_EVENT_CONTROL_RESPONSE != 7:
+        print("FAIL: E3_EVENT_CONTROL_RESPONSE should be 7", file=sys.stderr)
+        return 1
+
     for getter in ("get_telemetry_granted", "get_control_granted"):
         if len(getattr(ev, getter)()) != 0:
             print(f"FAIL: fresh E3Event.{getter}() should be empty", file=sys.stderr)
