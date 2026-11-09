@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
+# The dApp image: just example_simple_dapp and the libraries it loads.
+#
+#   docker build -f docker/Dockerfile.dapp-sim -t libe3-dapp-sim .
+
+ARG BUILD_IMAGE=libe3-build:local
+FROM ${BUILD_IMAGE} AS build
+
+FROM ubuntu:24.04
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends libzmq5 libsctp1 libprotobuf32t64 \
+ && rm -rf /var/lib/apt/lists/* \
+ && mkdir -p -m 0777 /tmp/dapps
+COPY --from=build /src/build/example_simple_dapp /usr/local/bin/example_simple_dapp
+ENTRYPOINT ["/usr/local/bin/example_simple_dapp"]

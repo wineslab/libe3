@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
+.git
+build
+build-*
+cmake-build-*
+out
+dist
+**/__pycache__

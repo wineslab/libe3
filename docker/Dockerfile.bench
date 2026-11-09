@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
+# The benchmark image: just test_bench_full_loop_latency and the libraries it loads.
+#
+#   docker build -f docker/Dockerfile.bench -t libe3-bench .
+
+ARG BUILD_IMAGE=libe3-build:local
+FROM ${BUILD_IMAGE} AS build
+
+FROM ubuntu:24.04
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends libzmq5 libsctp1 libprotobuf32t64 \
+ && rm -rf /var/lib/apt/lists/* \
+ && mkdir -p -m 0777 /tmp/dapps
+COPY --from=build /src/build/test_bench_full_loop_latency /usr/local/bin/test_bench_full_loop_latency
+ENTRYPOINT ["/usr/local/bin/test_bench_full_loop_latency"]

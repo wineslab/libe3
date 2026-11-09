@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
+# Builds libe3, the examples, the integration tests and the latency benchmark
+# with every encoding and SCTP. The other images copy their binaries from it.
+#
+#   docker build -f docker/Dockerfile.build -t libe3-build .
+
+FROM ubuntu:24.04 AS deps
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends sudo ca-certificates libsctp-dev \
+ && rm -rf /var/lib/apt/lists/*
+WORKDIR /src
+# Only these two files, so the dependency layer is reused until build_libe3 changes.
+COPY build_libe3 VERSION ./
+RUN ./build_libe3 -I
+
+FROM deps AS build
+COPY . /src
+RUN ./build_libe3 -r --all-encodings --enable-sctp \
+    --cmake-opt "-DLIBE3_BUILD_INTEGRATION_TESTS=ON -DLIBE3_ENABLE_LATREC=ON"
