@@ -68,17 +68,18 @@ shall use the same choice. There is no negotiation.
 
 Table: Link layers and transport layers
 
-| Link layer | Transport layer | Channels | Message boundary |
+| Link layer | Transport layer | Connections | Message boundary |
 |---|---|---|---|
 | ZeroMQ | IPC | 3 | one E3AP PDU is one ZeroMQ message |
 | ZeroMQ | TCP | 3 | one E3AP PDU is one ZeroMQ message |
-| POSIX | IPC | 3 | length prefix on messages from the E3 Agent. None in the other direction. See [04-encoding.md](04-encoding.md#framing-on-each-link) |
-| POSIX | TCP | 3 | the same as POSIX over IPC |
-| POSIX | SCTP | 3 | the same as POSIX over IPC |
+| POSIX | IPC | 1 | one E3AP PDU is one message, with no length prefix. See [04-encoding.md](04-encoding.md#framing-on-each-link) |
+| POSIX | TCP | 1 | a length prefix on every E3AP PDU, in both directions |
+| POSIX | SCTP | 1 | one E3AP PDU is one SCTP message, with no length prefix |
 
 ### The three channels
 
-A dApp uses three channels to one E3 Agent.
+A dApp uses three channels to one E3 Agent. On a ZeroMQ link each channel has a
+connection of its own. On a POSIX link all three travel on one connection.
 
 Table: Channels between a dApp and an E3 Agent
 
@@ -88,21 +89,14 @@ Table: Channels between a dApp and an E3 Agent
 | Inbound to the E3 Agent | dApp to E3 Agent | SUBSCRIPTION REQUEST, SUBSCRIPTION DELETE, dApp CONTROL ACTION, dApp REPORT, CONTROL RESPONSE (the answer to an xApp CONTROL ACTION) and RELEASE messages | PUB on the dApp, SUB on the E3 Agent |
 | Outbound from the E3 Agent | E3 Agent to dApp | SUBSCRIPTION RESPONSE, INDICATION, xApp CONTROL ACTION, CONTROL RESPONSE (the answer to a dApp CONTROL ACTION) and RELEASE messages. A deprecated MESSAGE ACK message is no longer sent | PUB on the E3 Agent, SUB on the dApp |
 
-The E3 Agent opens the three endpoints and waits. The dApp connects to them. On a
-ZeroMQ link the E3 Agent binds all three sockets.
+The E3 Agent opens its endpoints and waits. The dApp connects to them. On a ZeroMQ link
+the E3 Agent binds all three sockets. On a POSIX link it listens on one endpoint.
 
 ### Default endpoints
 
-Table: Default endpoints
-
-| Channel | Default port (TCP, SCTP) | Default IPC endpoint |
-|---|---|---|
-| Setup | 9990 | `ipc:///tmp/dapps/setup` |
-| Inbound to the E3 Agent | 9999 | `ipc:///tmp/dapps/dapp_socket` |
-| Outbound from the E3 Agent | 9991 | `ipc:///tmp/dapps/e3_socket` |
-
-An implementation may use other values. Both sides shall use the same values. On a TCP
-or SCTP link the E3 Agent listens on all addresses of the host on these ports.
+The default endpoints and ports of every link are in
+[04-encoding.md](04-encoding.md#framing-on-each-link), with the framing of the link. An
+implementation may use other values. Both sides shall use the same values.
 
 ## How a dApp registers
 
@@ -112,7 +106,8 @@ with a SETUP RESPONSE message. On success the response holds the dApp identifier
 and the list of RAN functions. See [03-procedure-flow.md](03-procedure-flow.md#setup).
 
 Until the dApp has a dApp identifier, it shall not send any message on the other two
-channels.
+channels. On a POSIX link the SETUP REQUEST is the first message of the connection, and
+the dApp identifier belongs to that connection.
 
 ### What the RAN function list holds
 
@@ -131,7 +126,7 @@ leave such a RAN function out of the list.
 
 An implementation of the E3 Agent shall:
 
-1. open the three channels and answer the Setup procedure before it accepts any other message,
+1. open its channels (on a POSIX link, one endpoint) and answer the Setup procedure before it accepts any other message,
 2. assign a dApp identifier that no other registered dApp holds,
 3. return its RAN identifier in every SETUP RESPONSE message,
 4. list only RAN functions whose data is 1 to 262144 octets and whose identifier lists fit in 256 entries,
