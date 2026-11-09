@@ -79,9 +79,8 @@ if(LIBE3_ENABLE_E2SM_DAPP)
         src/e2sm_dapp/e2sm_dapp.cpp
         src/e2sm_dapp/e2sm_dapp_c.cpp
     )
-    # Export lists for the shared library: only the public API leaves it.
+    # Export list for the shared library: only the public API leaves it.
     set(LIBE3_E2SM_DAPP_VERSION_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/src/e2sm_dapp/e2sm_dapp.map")
-    set(LIBE3_E2SM_DAPP_EXPORTS_LIST "${CMAKE_CURRENT_SOURCE_DIR}/src/e2sm_dapp/e2sm_dapp.exp")
     # The grammar is installed beside the headers (see libe3Install.cmake).
     set(LIBE3_E2SM_DAPP_GRAMMAR_FILE
         "${CMAKE_CURRENT_SOURCE_DIR}/messages/asn1/e2sm_dapp/V1/e2sm_dapp-1.0.0.asn")

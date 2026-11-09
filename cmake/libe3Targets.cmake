@@ -230,12 +230,7 @@ if(LIBE3_ENABLE_E2SM_DAPP)
 
     # Export only the public API from the shared library; the asn1c runtime inside
     # it (already hidden at compile time) must not leak or be interposed.
-    if(APPLE)
-        target_link_options(libe3_e2sm_dapp_shared PRIVATE
-            "LINKER:-exported_symbols_list,${LIBE3_E2SM_DAPP_EXPORTS_LIST}")
-        set_property(TARGET libe3_e2sm_dapp_shared APPEND PROPERTY
-            LINK_DEPENDS "${LIBE3_E2SM_DAPP_EXPORTS_LIST}")
-    elseif(UNIX)
+    if(UNIX)
         target_link_options(libe3_e2sm_dapp_shared PRIVATE
             "LINKER:--version-script=${LIBE3_E2SM_DAPP_VERSION_SCRIPT}")
         set_property(TARGET libe3_e2sm_dapp_shared APPEND PROPERTY
