@@ -57,13 +57,13 @@ flowchart LR
     A20["A20 E2-E3 bridge<br/>(hands to Path B)"]
     A19b --> A20
 
-    A19a -.->|ack tail| A11
+    A19a -.->|response tail| A11
 ```
 
 `A19a` and `A19b` fork from `A18`. They are not a sequence. See
 [Two distinct terminations](#two-distinct-terminations) below. The dotted
 edges are cross-boundary hops (the two E3 wire crossings, and the
-acknowledgment tail running back from RAN to the dApp), not pipeline boxes.
+acknowledgment tail, the `ControlResponse` running back from RAN to the dApp), not pipeline boxes.
 
 **E3SM and E3AP are always separate boxes.** The Service Model codec runs in the
 RAN stack or in the dApp; the E3AP codec runs inside libE3. They are never
@@ -128,7 +128,7 @@ connectors, and any comparison between the two shall say so.
 | A19a | Apply control | the RAN stack | `DECODE_E3SM_DONE` to `APPLY_CONTROL_DONE`, then `LIVE_ON_AIR` |
 | A19b | Queue report | **libe3** report worker | `REPORT_QUEUED` to `REPORT_DONE` |
 | A20 | E2-E3 bridge | the RAN's dApp function | `BRIDGE_IN` to `BRIDGE_OUT`. Hands over to Path B. |
-| none | Acknowledgment tail | RAN and dApp | `ACK_SENT` to `ACK_RECV` |
+| none | Acknowledgment tail | RAN and dApp | `ACK_SENT` to `ACK_RECV`. The `ControlResponse` that answers a control closes it |
 
 A12 and A3 share one identifier pair, and A18 and A9 share another: encoding a
 Service Model payload is the same operation whichever direction it travels in,

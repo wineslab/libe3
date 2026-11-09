@@ -25,6 +25,20 @@ Python. `libe3py` never touches SM contents.
 See [`e3_dapp_session.hpp`](e3_dapp_session.hpp) for the authoritative,
 Doxygen-documented API.
 
+## Answers to controls
+
+`send_control(..., request_ack)` asks the RAN for an `E3_EVENT_CONTROL_RESPONSE` (7). It
+carries `request_id` (the id `send_control` returned), `ran_function_id`, `control_id`,
+`response_code`, `cause` (-1 for none), `detail` and, when the Service Model gave one,
+`has_outcome` with the bytes in `get_payload()`. The RAN also answers a control that it
+refuses itself, with a negative response, whether the control asked or not.
+
+`E3_EVENT_MESSAGE_ACK` (5) and `send_message_ack` are DEPRECATED TO BE REMOVED: libe3 sends no `MessageAck`, and the event reports one that another RAN sends.
+
+An `E3_EVENT_XAPP_CONTROL` event carries `request_ack`. When it is true, answer with
+`send_control_response(request_id, ran_function_id, control_id, response_code, cause, detail, outcome)`,
+where `request_id` is the event's `request_id`.
+
 ## Why batched drain + GIL release (not callbacks)
 
 E3AP runs at real-time sub-millisecond cadence with very high message
@@ -62,7 +76,7 @@ DAppSession(cfg)          # ctor registers all inbound handlers
   → loop:
       for ev in poll_events(max_batch, timeout_ms):
           dispatch(ev)                 # E3_EVENT_INDICATION / _XAPP_CONTROL / ...
-      send_control(rfid, cid, payload_bytes)   # or send_report(...)
+      send_control(rfid, cid, payload_bytes, sequence_id, request_ack)   # or send_report(...)
   → release()             # tell the RAN we are leaving
   → stop()                # tear down; unblocks any poll_events
 ```
@@ -106,7 +120,7 @@ while True:
         elif ev.kind == e3.E3_EVENT_SUBSCRIPTION_RESPONSE:
             ...
     # send an SM-encoded control back when needed:
-    # s.send_control(1, 1, sm_encode(...))
+    # s.send_control(1, 1, sm_encode(...), 0, True)   # True: ask for an E3_EVENT_CONTROL_RESPONSE
 ```
 
 ## Build & install

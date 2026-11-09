@@ -140,26 +140,28 @@ Table: Checks of the RAN on a control
 
 | Check | Result when it fails |
 |---|---|
-| the service model runs | negative acknowledge |
-| the control has at least one octet | negative acknowledge |
-| the control identifier is "1" or "2" | negative acknowledge |
-| the MAC scheduler exists | negative acknowledge |
-| the payload decodes in the encoding of the run | negative acknowledge |
-| the payload holds the alternative that matches the control identifier | negative acknowledge |
-| the PRB list has at most 273 entries and every index is at most 272 | negative acknowledge |
-| `maskPerSlot` has 1 to 160 entries, and every value is at most 16383 | negative acknowledge |
-| the number of masks equals the slots in a frame of the RAN | negative acknowledge |
-| the scheduler accepts the new block or policy | negative acknowledge |
+| the service model runs | negative response |
+| the control has at least one octet | negative response |
+| the control identifier is "1" or "2" | negative response |
+| the MAC scheduler exists | negative response |
+| the payload decodes in the encoding of the run | negative response |
+| the payload holds the alternative that matches the control identifier | negative response |
+| the PRB list has at most 273 entries and every index is at most 272 | negative response |
+| `maskPerSlot` has 1 to 160 entries, and every value is at most 16383 | negative response |
+| the number of masks equals the slots in a frame of the RAN | negative response |
+| the scheduler accepts the new block or policy | negative response |
 
-The RAN answers every control with an E3 Message Ack. The response code is "positive" or "negative". The
-acknowledge says only whether the RAN applied the control to the scheduler. It does not say that the
+The RAN answers a control with an E3 Control Response. The response code is "positive" or "negative". A
+control that the RAN refuses before the service model sees it is answered "negative" whether the dApp asked
+for an answer or not. The service model answers the others when the dApp set `requestAck`. The response
+says only whether the RAN applied the control to the scheduler. It does not say that the
 block is in the air. The apply outcome says that.
 
-A negative acknowledge does not change the state that was in force before the control.
+A negative response does not change the state that was in force before the control.
 
 ## Unknown identifiers and alternatives
 
-* A control identifier other than "1" or "2" is rejected with a negative acknowledge.
+* A control identifier other than "1" or "2" is rejected with a negative response.
 * A choice alternative that the receiver does not know is rejected. The receiver shall not guess what it
   means. In APER, a receiver that does not know an extension alternative cannot read its content.
 * A receiver ignores an extension field of a structure that it does not know, where the encoding allows
@@ -184,7 +186,7 @@ Table: Mandatory behavior
 | RAN | send a valid RAN function data |
 | RAN | create the sensing ring before the first indication |
 | RAN | write the ring before it sends the indication that points to it |
-| RAN | answer every control with an E3 Message Ack |
+| RAN | answer a control with an E3 Control Response when the dApp set `requestAck`, and answer a control that it refuses before the service model with a negative one |
 | RAN | clear the block and the policy when the service model stops |
 | dApp | check `sfn` and `slot` of the ring slot against the indication |
 | dApp | check the ring layout fields against its own |

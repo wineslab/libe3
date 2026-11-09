@@ -126,4 +126,4 @@ The service model has two states: running and stopped.
 While the service model runs, the RAN publishes indications and accepts controls.
 When it stops, the RAN stops the telemetry workers, removes the sensing ring, and
 clears the PRB block and the sensing policy. A control that arrives while the service
-model is stopped gets a negative message acknowledge.
+model is stopped gets a negative E3 Control Response.
