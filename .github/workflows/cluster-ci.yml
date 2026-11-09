@@ -1,0 +1,83 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
+name: Cluster stage
+
+# Second stage of CI: after the other workflows pass, builds the commit on the cluster and
+# runs the end-to-end tests and the latency benchmark there, so numbers come from the same
+# machines. A fork PR skips it and CI report fails until a maintainer runs this workflow on a
+# branch of this repository that holds the reviewed commit. A stage that did not run never
+# reads as passed.
+
+on:
+  pull_request:
+    # Started only when a changed file is code; the last pattern brings back this file.
+    paths:
+      - '**'
+      - '!**.md'
+      - '!**.docx'
+      - '!docs/**'
+      - '!.github/**'
+      - '!tools/oran_docx/**'
+      - '!tools/e3sm_l1kpm_v2/**'
+      - '!LICENSE'
+      - '!NOTICE'
+      - '!CONTRIBUTORS'
+      - '!CITATION.cff'
+      - '!REUSE.toml'
+      - '!.gitignore'
+      - '.github/workflows/cluster-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cluster-stage-${{ github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  cluster:
+    name: Cluster stage
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: wineslab-arc-runner-set
+    timeout-minutes: 150
+    env:
+      BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+      SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      TAG: ${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || format('run-{0}', github.run_id) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ env.SHA }}
+
+      - name: Wait for the other workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/scripts/cluster_stage.py gate --repo "$GITHUB_REPOSITORY" --sha "$SHA" --self-run-id "$GITHUB_RUN_ID"
+
+      - name: Build and test on the cluster
+        env:
+          OPENSHIFT_SA_TOKEN: ${{ secrets.OPENSHIFT_SA_TOKEN }}
+          CLUSTER_API_URL: ${{ secrets.CLUSTER_API_URL }}
+          TEKTON_NAMESPACE: ${{ secrets.TEKTON_NAMESPACE }}
+          CLUSTER_NODE: ${{ secrets.CLUSTER_NODE }}
+        run: python3 .github/scripts/cluster_stage.py run --branch "$BRANCH" --tag "$TAG" --fragment cluster-fragment.md --results cluster-results.json
+
+      - name: Upload report fragment
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ci-report-cluster
+          path: cluster-fragment.md
+          if-no-files-found: warn
+
+      - name: Upload the benchmark numbers
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: cluster-results
+          path: cluster-results.json
+          if-no-files-found: ignore

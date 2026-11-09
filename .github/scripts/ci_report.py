@@ -44,6 +44,14 @@ SELF_CONTEXT = "CI report"
 BAD_CONCLUSIONS = ("failure", "cancelled", "timed_out", "startup_failure",
                    "action_required", "stale")
 
+# Workflows that must run on every code PR: skipped is a problem here (a fork PR skips the
+# cluster stage, which has to read as "waiting for a maintainer", never as green).
+MANDATORY = {
+    "cluster-ci.yml": "the cluster stage was skipped; for a pull request from a fork a "
+                      "maintainer has to run it (Actions, Cluster stage, Run workflow) on a "
+                      "branch of this repository that holds the reviewed commit",
+}
+
 # The per-workflow comments this report replaces. Removed from the thread on
 # first run so a migrating PR does not keep six comments alive.
 LEGACY_MARKERS = (
@@ -319,6 +327,9 @@ def find_problems(runs: list[dict], expected: list[workflow_triggers.Trigger],
     started = {os.path.basename(run["path"]) for run in runs}
     problems = [f"{run['name']} {run['conclusion'].replace('_', ' ')}" for run in runs
                 if run["status"] == "completed" and run.get("conclusion") in BAD_CONCLUSIONS]
+    problems += [f"{run['name']}: {MANDATORY[os.path.basename(run['path'])]}" for run in runs
+                 if run["status"] == "completed" and run.get("conclusion") == "skipped"
+                 and os.path.basename(run["path"]) in MANDATORY]
     problems += [f"{t.name} should have started and did not" for t in expected
                  if t.file not in started]
     if not complete:
