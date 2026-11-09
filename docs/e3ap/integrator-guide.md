@@ -34,8 +34,12 @@ the endpoints.
 | `e3ap_version` | `1.0.0` | sent in every SETUP REQUEST and SETUP RESPONSE. `init()` returns `INVALID_PARAM` if it is not 1 to 32 octets (`e3_interface.cpp:243-254`) |
 | `link_layer` | ZMQ | POSIX if the build has no ZeroMQ |
 | `transport_layer` | IPC | SCTP only with `LIBE3_ENABLE_SCTP` |
-| `setup_port`, `subscriber_port`, `publisher_port` | 9990, 9999, 9991 | `subscriber_*` is the channel into the E3 Agent. `publisher_*` is the channel out of it |
-| endpoints | `ipc:///tmp/dapps/setup`, `dapp_socket`, `e3_socket` | TCP and SCTP ignore the strings and use the ports |
+| `setup_port`, `subscriber_port`, `publisher_port` | 9990, 9999, 9991 | The POSIX link uses `setup_port` alone. ZeroMQ uses all three: `subscriber_*` is the channel into the E3 Agent, `publisher_*` the channel out of it |
+| `setup_endpoint`, `subscriber_endpoint`, `publisher_endpoint` | `ipc:///tmp/dapps/setup`, `dapp_socket`, `e3_socket` | The POSIX link uses `setup_endpoint` alone, and its IPC path is `/tmp/dapps/e3` while the field holds the default string (ZeroMQ shares the string, so it is mapped and not changed). For TCP and SCTP a `tcp://host:port` or `sctp://host:port` endpoint (a host in brackets for IPv6) names the host and the port; any other value means every address to listen on, `127.0.0.1` to connect to, and `setup_port` |
+| `socket_buffer_bytes` | 2 MiB | POSIX over SCTP only. `SO_SNDBUF` and `SO_RCVBUF`, set on both peers before the association exists. The kernel clamps them to `net.core.wmem_max` and `net.core.rmem_max`. 0 keeps the kernel's size |
+| `sctp_delayed_sack` | false | POSIX over SCTP only. false turns delayed SACK off on both peers |
+| `allowed_peers` | empty | POSIX over TCP and SCTP, E3 Agent. Literal addresses a dApp may connect from; an IPv4 address is written in dotted form. Empty accepts every address. A connection from any other is closed at once |
+| `maximum_associations` | 0 | POSIX, E3 Agent. Most dApps connected at once; a connection beyond it is closed at once. 0 is unlimited |
 | `encoding` | ASN.1 if built, else JSON, else ASN.1 | a build with only Protobuf defaults to ASN.1 and fails to start |
 | `io_thread_affinity`, `io_thread_niceness` | -1, 0 | Linux only. Apply to the inbound, outbound and report threads |
 
@@ -57,9 +61,9 @@ in the connectors.
 | dApp opens a fresh REQ socket for each setup attempt | `zmq_connector.cpp:376-380` |
 | ZeroMQ heartbeat 1000 ms, timeout 3000 ms, on the dApp SUB socket only | `zmq_connector.cpp:30-31`, `460-466` |
 | IPC directory `/tmp/dapps` is created with mode 0777 | `zmq_connector.cpp:102-127` |
-| TCP and SCTP: E3 Agent binds on all addresses (IPv4), backlog 5. The dApp connects to 127.0.0.1 only | `posix_connector.cpp:258-304`, `762` |
-| SCTP is a one-to-one stream socket with `SCTP_NODELAY` and no stream or payload protocol identifier | `posix_connector.cpp:81-100` |
-| The dApp retries each channel 10 times at 200 ms intervals | `posix_connector.cpp:775-779`, `821`, `841` |
+| TCP and SCTP: the E3 Agent listens on all addresses, IPv4 and IPv6, backlog 64, unless the endpoint names a host. The dApp connects to `127.0.0.1` unless the endpoint names a host | `PosixE3Connector::listen_on`, `connect_to` |
+| SCTP is a one-to-one stream socket with two streams requested, `SCTP_NODELAY`, buffers and delayed SACK set before the association exists, payload protocol identifier `0x00E3A001` and a stream chosen from the kind of PDU | `PosixE3Connector::tune_socket`, `write_pdu`, `read_one` |
+| The dApp retries its connection 10 times at 200 ms intervals, and opens a new connection for each setup attempt | `PosixE3Connector::setup_initial_connection_client`, `send_setup_request_client` |
 | Lowest free dApp identifier and subscription identifier | `src/core/subscription_manager.cpp:58-82`, `211` |
 
 ### Procedures (chapter 03)
@@ -99,13 +103,13 @@ in the connectors.
 
 | Claim | Code pointer |
 |---|---|
-| POSIX framing: 4 octets, network order, chunks of 8192 | `posix_connector.cpp:937-973`, `posix_connector.hpp:133` |
-| Framed receive refuses 0 and more than 65536 | `posix_connector.cpp:999` |
-| The dApp sends unframed | `posix_connector.cpp:681`, `798` |
-| The E3 Agent reads one raw `recv()` of up to 60000 octets | `posix_connector.cpp:355`, `537` |
-| Per-peer send timeout 500 ms | `posix_connector.cpp:41`, `181` |
-| A POSIX E3 Agent removes a dApp whose connection closed, if the dApp had sent a message that names it on that connection. ZeroMQ cannot tell its peers apart, so there the idle time removes the dApp | `posix_connector.cpp:515`, `556`, `565-574`, `584-592`; `e3_interface.cpp:1468-1487` |
-| A POSIX E3 Agent binds a dApp identifier to the connection that first named it, and drops a later message that names it on another connection. A dApp that has not spoken yet is not bound: the first message wins | `e3_interface.cpp:659`, `1444-1466` |
+| POSIX over TCP: 4 octets of length in network order, then the E3-PDU, in both directions. A receiver refuses 0 and more than 65536 | `write_pdu`, `pop_stream_frame` in `posix_connector.cpp` |
+| POSIX over IPC (a sequenced-packet socket) and over SCTP: one E3-PDU is one message, with no prefix. A message longer than 65536 octets is an error on IPC and on SCTP | `write_pdu`, `read_one` |
+| The first E3-PDU of a POSIX connection goes to the setup path, every later one to `receive` | `PosixE3Connector::pump` |
+| Per-peer send timeout 500 ms | `PosixE3Connector::tune_socket` |
+| A POSIX E3 Agent removes a dApp whose connection closed, with or without a message after its setup request. ZeroMQ cannot tell its peers apart, so there the idle time removes the dApp | `PosixE3Connector::drop_peer`, `take_closed_peers`; `E3Interface::remove_dapps_of_closed_peers` |
+| A POSIX E3 Agent binds a dApp identifier to the connection of the setup request it answered, and drops a later message that names it on another connection | `E3Interface::bind_dapp_to_connection`, `admit_dapp_message`, `last_setup_peer_token` |
+| A POSIX E3 Agent sends each PDU on the connection of the dApp it names, and a PDU for a dApp it cannot tie to a connection to every connection | `E3Interface::outbound_loop_ran` (`target_dapp_of`), `PosixE3Connector::send_to` |
 | A dApp that lost the E3 Agent registers again every `reconnect_interval_ms` (default 1000, 0 is off), with a new identifier and no subscriptions. `release()` and `stop()` end it | `e3_interface.cpp:1489-1538` |
 | ASN.1 encoder buffer of 65536 octets | `src/encoder/asn1_encoder.hpp:39` |
 | An empty RAN function list is omitted | `src/encoder/asn1_encoder.cpp:316` |
@@ -140,7 +144,7 @@ These comments disagree with the code. They are not discrepancies of the protoco
 
 ## Checklist for a new E3 Agent
 
-1. Open the three channels with the same link, transport and encoding as your dApps.
+1. Open the channels with the same link, transport and encoding as your dApps. On a POSIX link that is one endpoint, and a dApp sent by an earlier layout of libe3 (three connections, no length prefix over IPC and SCTP) cannot connect to it.
 2. Answer a bad SETUP REQUEST with a negative response, or the setup channel stalls.
 3. Never end the process on a response that fails to encode. Leave the offending RAN function out.
 4. Refuse a subscription to an unknown RAN function or identifier. Keep the repeat idempotent, and answer it with what the subscription holds.

@@ -215,7 +215,7 @@ drops the message.
 
 ### Abnormal conditions
 
-* On a link that broadcasts, every dApp receives every INDICATION message. The check of `dAppIdentifier` is the only filter.
+* On a link that broadcasts (ZeroMQ), every dApp receives every INDICATION message, and the check of `dAppIdentifier` is the only filter. On a POSIX link the E3 Agent sends an INDICATION message on the connection of the dApp it is for.
 * The E3 Agent may send an INDICATION message to a dApp that did not subscribe. A dApp should ignore an indication for a RAN function that it did not subscribe to.
 
 ## dApp Control
@@ -276,7 +276,7 @@ A message that the E3 Agent refuses does not reach the service model.
 
 * The service model takes the control and fails to apply it without an answer. If the dApp asked, the E3 Agent answers as described above. If the dApp did not ask, there is no answer.
 * A dApp may get a MESSAGE ACK message from another E3 Agent. The message is deprecated and an E3 Agent of this version sends none. It names no dApp, so on a link that broadcasts every dApp gets it, and a dApp that reads it shall compare `requestId` with the identifiers of the messages that it sent.
-* A CONTROL RESPONSE message names its dApp. On a link that broadcasts, every dApp receives it, and a dApp shall ignore a CONTROL RESPONSE message whose `dAppIdentifier` is not its own.
+* A CONTROL RESPONSE message names its dApp. On a link that broadcasts (ZeroMQ), every dApp receives it. On a POSIX link only the dApp it names does. A dApp shall ignore a CONTROL RESPONSE message whose `dAppIdentifier` is not its own.
 * The E3 Agent keeps at most 1024 controls that wait for an answer, and forgets those of a dApp that leaves. It refuses a further control that asks for an answer with the cause resourceExhausted.
 
 ## dApp Report
@@ -367,8 +367,8 @@ the link.
 
 * The link is lost with no RELEASE message. The dApp reports the reason "connection lost".
 * After a RELEASE message from the E3 Agent or a lost link, a dApp may run the Setup procedure again by itself. It gets a new dApp identifier and none of its earlier subscriptions. The application subscribes again. A dApp that sent its own RELEASE message does not.
-* An E3 Agent that does not detect the end of a dApp keeps its dApp identifier, its subscriptions and its running service models. An E3 Agent detects it from a closed connection, or from a dApp that has sent nothing for a long time. Only what the dApp sends shows that the dApp is there: a message the E3 Agent sends to a dApp is broadcast and proves nothing.
-* A RELEASE message from a dApp that names another dApp identifier is not authenticated by the protocol. An E3 Agent that can tell its connections apart should bind each dApp identifier to the connection that first sent a message naming it, and ignore a message that names the identifier on another connection. An E3 Agent that does not bind removes the named dApp.
+* An E3 Agent that does not detect the end of a dApp keeps its dApp identifier, its subscriptions and its running service models. An E3 Agent detects it from a closed connection, or from a dApp that has sent nothing for a long time. Only what the dApp sends shows that the dApp is there: a message the E3 Agent sends to a dApp proves nothing. On a POSIX link the dApp is tied to its connection when it registers, so a dApp that never sent anything after its SETUP REQUEST is removed as soon as its connection closes.
+* A RELEASE message from a dApp that names another dApp identifier is not authenticated by the protocol. An E3 Agent that can tell its connections apart should bind each dApp identifier to the connection of the SETUP REQUEST that was answered with it, and ignore a message that names the identifier on another connection. An E3 Agent that does not bind removes the named dApp.
 
 ## The sequence identifier chain
 

@@ -412,9 +412,14 @@ for local development (IPC) or production deployments.
 | `e3ap_version` | string | E3AP protocol version string |
 | `link_layer` | E3LinkLayer | ZMQ or POSIX |
 | `transport_layer` | E3TransportLayer | SCTP, TCP, IPC |
-| `setup_endpoint` | string | Setup connection endpoint (default: ipc:///tmp/dapps/setup) |
-| `subscriber_endpoint` | string | Subscriber endpoint (default: ipc:///tmp/dapps/dapp_socket) |
-| `publisher_endpoint` | string | Publisher endpoint (default: ipc:///tmp/dapps/e3_socket) |
+| `setup_endpoint` | string | Setup connection endpoint (default: ipc:///tmp/dapps/setup). The POSIX link serves everything on this one endpoint, with the IPC path /tmp/dapps/e3 while the field keeps its default; for TCP and SCTP `tcp://host:port` or `sctp://host:port` names the host and port |
+| `subscriber_endpoint` | string | Subscriber endpoint, ZeroMQ only (default: ipc:///tmp/dapps/dapp_socket) |
+| `publisher_endpoint` | string | Publisher endpoint, ZeroMQ only (default: ipc:///tmp/dapps/e3_socket) |
+| `setup_port` | uint16_t | Port of the setup channel (default 9990); the one port of the POSIX link. `subscriber_port` (9999) and `publisher_port` (9991) are ZeroMQ only |
+| `socket_buffer_bytes` | size_t | POSIX over SCTP: `SO_SNDBUF` and `SO_RCVBUF` of both peers (default 2 MiB, 0 keeps the kernel's) |
+| `sctp_delayed_sack` | bool | POSIX over SCTP: whether delayed SACK stays on (default false, off) |
+| `allowed_peers` | vector<string> | POSIX over TCP and SCTP, RAN: literal addresses a dApp may connect from (default empty, any) |
+| `maximum_associations` | size_t | POSIX, RAN: most dApps connected at once (default 0, unlimited) |
 | `encoding` | EncodingFormat | ASN1, JSON, or PROTOBUF |
 | `connect_timeout_ms` | uint32_t | Connect timeout (ms) |
 | `recv_timeout_ms` | uint32_t | Receive timeout (ms) |
