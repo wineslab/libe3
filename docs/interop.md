@@ -233,21 +233,24 @@ closed and registers again about every 30 s, and loses its subscriptions each ti
 <a id="control-answer"></a>
 ## The answer to a dApp control
 
-A dApp control gets one `messageAck` from a libe3 RAN and from Aerial's agent, and two messages
-from OCUDU. What the ack means differs ([#111](https://github.com/wineslab/libe3/issues/111)).
+A dApp control gets one `messageAck` from a libe3 RAN and from Aerial's 26.2 agent, one
+`e3_control_response` from Aerial's 25.3 agent, and two messages from OCUDU. What the answer means
+differs ([#111](https://github.com/wineslab/libe3/issues/111)).
 
 | RAN | When the ack is sent | A positive ack means | Where the result is |
 |---|---|---|---|
 | libe3 | The core sends a negative ack when it cannot hand the control to a Service Model: no setup, unknown function, unknown control id, no subscription. Otherwise the Service Model sends it, when it chooses. OAI's does so once it has applied the control | The Service Model answered. In OAI's, that the control was applied | The `responseCode` of the ack, and the Service Model's own payloads |
-| Aerial, agent | Always, negative: "control actions not implemented", because no Service Model or application uses controls yet. Aerial's dApp manager ignores acks | Never sent | None. No control is executed |
+| Aerial, agent 26.2 | Always, negative: "control actions not implemented" ([`handleControlMessage`](https://github.com/NVIDIA/aerial-cuda-accelerated-ran/blob/4f65f97c1d5f701ce911f7dda8f1b1f3f0c7693c/cuPHY-CP/data_lake/e3_agent.cpp#L1627-L1655)), because no Service Model or application uses controls yet ([comment](https://github.com/NVIDIA/aerial-cuda-accelerated-ran/blob/4f65f97c1d5f701ce911f7dda8f1b1f3f0c7693c/cuPHY-CP/data_lake/e3_agent.cpp#L1501)). Aerial's dApp manager ignores acks | Never sent | None. No control is executed |
+| Aerial, agent 25.3 | An `e3_control_response` with status `success` once it has read the `sfn` and `slot` the control carries, or `error` if the control does not parse ([`handleControlMessage`](https://github.com/NVIDIA/aerial-cuda-accelerated-ran/blob/654c2491461e8073321ef472b68deb116241e8a6/cuPHY-CP/data_lake/e3_agent.cpp#L978-L1022)) | The agent read the control | The `status` of that response, with the dApp id and the transaction id |
 | OCUDU, native | At once and positive, before the Service Model runs. An `E3-ControlResponse` follows | Accepted | The `E3-ControlResponse`: response code, optional cause and detail, `controlOutcome` (the service model's payload) and the same `requestId`, fragmented like other payloads |
 | OCUDU, libe3-compatible mode | After the Service Model ran, one `messageAck` | Executed | The `responseCode` of that ack. The cause and the detail text are not sent |
 
 libe3 keeps `messageAck` as the one answer to a control and does not carry `E3-ControlResponse`. A
 dApp written against libe3 reads a positive ack as "the RAN answered", and cannot tell accepted from
 executed from the ack alone. Against OCUDU in libe3-compatible mode that reading is right. Against
-Aerial's agent every control gets a negative ack because controls are not implemented there yet, not
-because the RAN refuses them. A libe3 dApp cannot read OCUDU's `E3-ControlResponse`: it is the 12th
+Aerial's 26.2 agent every control gets a negative ack because controls are not implemented there
+yet, not because the RAN refuses them. Aerial's 25.3 agent answered with a response message of its
+own, which libe3 has no type for either. A libe3 dApp cannot read OCUDU's `E3-ControlResponse`: it is the 12th
 alternative of OCUDU's PDU choice and libe3's has eleven, so a libe3 decoder is expected to fail on it
 (not run).
 
