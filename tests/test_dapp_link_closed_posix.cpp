@@ -10,8 +10,9 @@
  *       no subscription, its RAN function stopped, the status handler told;
  *   (2) a second dApp on the same RAN keeps its subscription and its RAN
  *       function;
- *   (3) a dApp that sent no message that names it has nothing the RAN can tie
- *       to the closed connection, so it is left to the idle time;
+ *   (3) a dApp that sent nothing after its setup request is removed at once as
+ *       well, because it is tied to its connection at setup and not by its
+ *       first message;
  *   (4) a dApp that released first is not removed again;
  *   (5) a dApp that took the id of one that is gone is not removed when the
  *       old connection finally closes.
@@ -188,25 +189,19 @@ TEST(DAppLinkClosed_posix_aStoppedDAppIsRemovedAtOnceAndANeighbourStays) {
     stays->stop();
 }
 
-TEST(DAppLinkClosed_posix_aDAppThatNeverSpokeIsLeftToTheIdleTime) {
+TEST(DAppLinkClosed_posix_aDAppThatNeverSpokeIsRemovedAtOnce) {
     mkdir("/tmp/dapps", 0777);
     const Endpoints ep;
-    Ran ran(ep, 3);
+    Ran ran(ep, 0);  // idle limit off: only the closed connection can remove a dApp
     ASSERT_TRUE(ran.started);
 
     auto silent = start_dapp(ep);
     ASSERT_TRUE(silent != nullptr);
     ASSERT_EQ(ran.agent.dapp_count(), 1u);
-    const auto registered = std::chrono::steady_clock::now();
 
-    // (3) Nothing it sent names it, so the closed connection tells the RAN nothing.
+    // (3) It sent only its setup request, and the RAN tied it to that connection.
     silent->stop();
-    std::this_thread::sleep_for(1500ms);
-    ASSERT_EQ(ran.agent.dapp_count(), 1u);
-
-    // The idle time still removes it, counted from its registration.
-    ASSERT_TRUE(wait_until([&] { return ran.agent.dapp_count() == 0u; }, 20000ms));
-    ASSERT_TRUE(std::chrono::steady_clock::now() - registered >= 3s);
+    ASSERT_TRUE(wait_until([&] { return ran.agent.dapp_count() == 0u; }, 10000ms));
 }
 
 TEST(DAppLinkClosed_posix_aDAppThatReleasedIsNotRemovedAgainAndAnIdIsNotTakenOver) {
@@ -226,8 +221,8 @@ TEST(DAppLinkClosed_posix_aDAppThatReleasedIsNotRemovedAgainAndAnIdIsNotTakenOve
     ASSERT_TRUE(wait_until([&] { return ran.agent.dapp_count() == 0u; }, 10000ms));
     ASSERT_TRUE(wait_until([&] { return !ran.first->is_running(); }, 10000ms));
 
-    // (5) The next dApp is handed the same id, and speaks, so it is tied to its
-    // own connection. The old connection closing must not touch it.
+    // (5) The next dApp is handed the same id and tied to its own connection at
+    // setup. The old connection closing must not touch it.
     auto next = start_dapp(ep);
     ASSERT_TRUE(next != nullptr);
     ASSERT_EQ(*next->dapp_id(), id);
