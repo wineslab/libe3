@@ -85,8 +85,8 @@ Table: Channels between a dApp and an E3 Agent
 | Channel | Direction | Carries | ZeroMQ socket pair |
 |---|---|---|---|
 | Setup | dApp to E3 Agent, then back | the SETUP REQUEST and SETUP RESPONSE messages | REQ on the dApp, REP on the E3 Agent |
-| Inbound to the E3 Agent | dApp to E3 Agent | SUBSCRIPTION REQUEST, SUBSCRIPTION DELETE, dApp CONTROL ACTION, dApp REPORT and RELEASE messages | PUB on the dApp, SUB on the E3 Agent |
-| Outbound from the E3 Agent | E3 Agent to dApp | SUBSCRIPTION RESPONSE, INDICATION, xApp CONTROL ACTION, MESSAGE ACK and RELEASE messages | PUB on the E3 Agent, SUB on the dApp |
+| Inbound to the E3 Agent | dApp to E3 Agent | SUBSCRIPTION REQUEST, SUBSCRIPTION DELETE, dApp CONTROL ACTION, dApp REPORT, CONTROL RESPONSE (the answer to an xApp CONTROL ACTION) and RELEASE messages | PUB on the dApp, SUB on the E3 Agent |
+| Outbound from the E3 Agent | E3 Agent to dApp | SUBSCRIPTION RESPONSE, INDICATION, xApp CONTROL ACTION, CONTROL RESPONSE (the answer to a dApp CONTROL ACTION) and RELEASE messages. A deprecated MESSAGE ACK message is no longer sent | PUB on the E3 Agent, SUB on the dApp |
 
 The E3 Agent opens the three endpoints and waits. The dApp connects to them. On a
 ZeroMQ link the E3 Agent binds all three sockets.

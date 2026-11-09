@@ -180,7 +180,7 @@ for RAN function `2`. The pair of `dAppIdentifier` and `ranFunctionIdentifier` n
 subscription. The new subscription data replaces the old one as a whole. A SUBSCRIPTION
 DATA IE without filters selects every cell and every UE again.
 
-The E3 Agent shall answer with a MESSAGE ACK message (clause 6.15 of [1]):
+When the dApp set `requestAck` in the dApp CONTROL ACTION message, the E3 Agent shall answer with a CONTROL RESPONSE message. Its `requestId` holds the message identifier of the dApp CONTROL ACTION message. The service model defines no content for `controlOutcome`, so the field is absent. The `responseCode` is:
 
 - "positive" when it applies the subscription data. It applies it from the next indication that it builds.
 - "negative" when the dApp holds no subscription for RAN function `2`, when control identifier `1` is not granted to the subscription, when the payload cannot be decoded, or when the E3 Agent cannot apply a filter. The previous subscription data then stays in force.

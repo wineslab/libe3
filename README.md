@@ -372,8 +372,7 @@ The single entry-point class for both roles. Configure `E3Config.role = E3Role::
 | `set_dapp_report_handler(handler)` | Set callback for incoming dApp reports (dApp → RAN) |
 | `set_dapp_status_changed_handler(handler)` | Set callback for dApp status changes (connect, disconnect, subscribe, unsubscribe) |
 | `send_indication(dapp_id, ran_function_id, data)` | (RAN) Send an indication to a specific dApp |
-| `send_xapp_control(dapp_id, ran_function_id, data)` | (RAN) Forward an xApp control action to a specific dApp |
-| `send_message_ack(request_id, response_code)` | (RAN) Send a message acknowledgment to a dApp |
+| `send_xapp_control(dapp_id, ran_function_id, data, sequence_id, out_message_id, request_ack)` | (RAN) Forward an xApp control action to a specific dApp. `out_message_id` receives the id of the control, the `request_id` of the answer. `request_ack` asks the dApp for a `ControlResponse` |
 | `get_registered_dapps()` | (RAN) Get list of registered dApp IDs |
 | `get_dapp_subscriptions(dapp_id)` | (RAN) Get subscriptions for a dApp |
 | `get_ran_function_subscribers(ran_function_id)` | (RAN) Get subscribers for a RAN function |
@@ -381,12 +380,15 @@ The single entry-point class for both roles. Configure `E3Config.role = E3Role::
 | `set_subscription_response_handler(handler)` | (dApp) Callback for incoming `SubscriptionResponse` |
 | `set_setup_response_handler(handler)` | (dApp) Callback for incoming `SetupResponse` |
 | `set_xapp_control_handler(handler)` | (dApp) Callback for incoming `XAppControlAction` |
-| `set_message_ack_handler(handler)` | (dApp) Callback for incoming `MessageAck` |
+| `send_message_ack(request_id, response_code)` | DEPRECATED TO BE REMOVED. libe3 sends no `MessageAck` for a control; use the `ControlResponse` |
+| `set_message_ack_handler(handler)` | (dApp) DEPRECATED TO BE REMOVED. Callback for an incoming `MessageAck` that another RAN sends |
+| `set_control_response_handler(handler)` | Callback for incoming `ControlResponse`. (dApp) The RAN's answer to a control. (RAN) A dApp's answer to an xApp control |
 | `set_disconnect_handler(handler)` | (dApp) Callback when the RAN released the dApp or the connection to it was lost. The dApp then registers again by itself unless `reconnect_interval_ms` is 0 |
 | `wait_for_setup(timeout)` | (dApp) Block until setup handshake completes |
 | `subscribe(ran_function_id, telemetry, control, ...)` | (dApp) Subscribe to a RAN function |
 | `unsubscribe(ran_function_id)` | (dApp) Tear down a subscription |
-| `send_control(ran_function_id, control_id, data)` | (dApp) Send a control action to the RAN |
+| `send_control(ran_function_id, control_id, data, sequence_id, out_message_id, request_ack)` | (dApp) Send a control action to the RAN. `request_ack` asks for a `ControlResponse` when the control has been dealt with. The RAN answers a control that it refuses itself either way |
+| `send_control_response(request_id, ran_function_id, control_id, result)` | (dApp) Answer an xApp control whose `request_ack` is set |
 | `send_report(ran_function_id, data)` | (dApp) Send a dApp report to the RAN |
 | `release()` | (dApp) Send `ReleaseMessage` to the RAN |
 | `dapp_id()` | (dApp) Identifier assigned by the RAN in `SetupResponse` |

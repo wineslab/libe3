@@ -65,6 +65,7 @@ Table: Mandatory content
 |---|---|
 | E3-DAppReport | `sequenceId` shall be present and not 0 |
 | E3-XAppControlAction | `sequenceId` shall be present and not 0. A relayed control without one cannot be matched to the acknowledge that the RIC owes the xApp |
+| E3-ControlResponse | `requestId`, `dAppIdentifier`, `ranFunctionIdentifier`, `controlIdentifier` and `responseCode` shall be present. A `controlOutcome` shall have 1 or more octets, and a sender that has none leaves the field out. `cause` and `detail` are for a response whose code is "negative" |
 | E3-SetupResponse | `ranIdentifier` shall be present. `dAppIdentifier` shall be present when `responseCode` is "positive" |
 | E3-SubscriptionResponse | `subscriptionId` shall be present when the request succeeded |
 | Every payload field | the payload shall have 1 or more octets |
@@ -98,7 +99,7 @@ an unknown `type` for JSON.
 
 A receiver that gets a message that is not valid on that channel or in that direction
 shall drop it. Examples: an E3 Agent that gets an INDICATION message, and an E3
-Agent that gets a MESSAGE ACK message from a dApp.
+Agent that gets a MESSAGE ACK message from a dApp, and a dApp that gets a CONTROL RESPONSE message that names another dApp.
 
 ### Unknown extension additions
 
@@ -120,8 +121,8 @@ New codes need a new version of E3AP. See [README.md](../e3ap/README.md).
 
 A dApp CONTROL ACTION message for an unknown RAN function, for a control identifier
 that the RAN function does not offer, or for a RAN function whose service model does
-not run is answered with a MESSAGE ACK message with `responseCode` "negative" and
-the cause. It does not reach the service model.
+not run is answered with a CONTROL RESPONSE message with `responseCode` "negative" and
+the cause, whether the dApp asked for an answer or not. It does not reach the service model.
 
 ### Queues that are full
 

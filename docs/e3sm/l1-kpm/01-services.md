@@ -42,6 +42,6 @@ The steps are the following.
 
 1. The dApp sends a SETUP REQUEST message. The E3 Agent answers with a SETUP RESPONSE message whose RAN function list holds RAN function `2` and its RAN FUNCTION DATA IE.
 2. The dApp sends a SUBSCRIPTION REQUEST message for RAN function `2`. The E3 Agent answers with a SUBSCRIPTION RESPONSE message that lists the granted identifiers.
-3. Optionally, the dApp sends a dApp CONTROL ACTION message with control identifier `1` to select cells or UEs. The E3 Agent answers with a MESSAGE ACK message.
+3. Optionally, the dApp sends a dApp CONTROL ACTION message with control identifier `1` to select cells or UEs. If the dApp set `requestAck` in the message, the E3 Agent answers with a CONTROL RESPONSE message.
 4. For each matching slot of each indication path, the E3 Agent writes the rows of the slot to the region, then sends an INDICATION MESSAGE message. The dApp reads the shared memory streams from the region.
 5. The dApp sends a SUBSCRIPTION DELETE message, or a RELEASE MESSAGE message.

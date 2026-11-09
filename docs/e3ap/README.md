@@ -140,7 +140,7 @@ E3AP uses these means to stay compatible when it grows.
 |---|---|---|
 | 1. Identity and registration | version, roles, link layers, transports, endpoints, identifiers, how a dApp registers | [01-identity-and-registration.md](01-identity-and-registration.md) |
 | 2. IE mapping | every message and information element: fields, types, ranges, presence, meaning | [02-ie-mapping.md](02-ie-mapping.md) |
-| 3. Procedure flow | Setup, Subscription, Indication, Control, Report, Release, acknowledgement and the sequence identifier chain | [03-procedure-flow.md](03-procedure-flow.md) |
+| 3. Procedure flow | Setup, Subscription, Indication, Control, Report, Release, the answer to a control and the sequence identifier chain | [03-procedure-flow.md](03-procedure-flow.md) |
 | 4. Encoding | APER, JSON and Protobuf rules, framing on each link, size limits, the ASN.1 grammar | [04-encoding.md](04-encoding.md) |
 | 5. Semantics and constraints | units, clocks, absent versus zero, validation, error paths, what is mandatory | [05-semantics-and-constraints.md](05-semantics-and-constraints.md) |
 

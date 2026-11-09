@@ -41,7 +41,7 @@ Line numbers drift. Function names are the stable reference. Paths under `oai/` 
 
 ### Steps
 
-1. Build a service model descriptor with RAN function ID `2`, the telemetry identifiers `1`, `4`, `5`, `6`, no control identifiers and no `sm_process_control` (`l1_kpm_sm.c`, `create_l1_kpm_sm_model`). libe3 answers a control action with a negative acknowledgment when the callback is not set.
+1. Build a service model descriptor with RAN function ID `2`, the telemetry identifiers `1`, `4`, `5`, `6`, no control identifiers and no `sm_process_control` (`l1_kpm_sm.c`, `create_l1_kpm_sm_model`). libe3 refuses a control for it with a negative CONTROL RESPONSE, because the RAN function lists no control identifier.
 2. Encode the RAN function data at registration, once (`l1_kpm_enc_ran_function_data`). If the encoder fails, do not register the service model. An empty `ranFunctionData` fails the APER encoding of the setup response.
 3. Create the region lazily, at the first row. `e3_ran_buffers_init_from_phy` removes a stale object, opens a new one with mode `0644`, sets the size and maps it. It then writes the header (`e3_ran_buffers.c:196-270`).
 4. Write the row. The loop in `e3_ran_buffers_push_rxdataF` (`e3_ran_buffers.c:287-392`) reads the `rxdataF` of the slot, shifts the carrier to start at subcarrier 0, converts to FP16 and zero fills above the PRBs of the cell. It takes the row from the cursor.

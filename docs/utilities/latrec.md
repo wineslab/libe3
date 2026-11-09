@@ -187,7 +187,7 @@ The identifiers name the boxes of the two documented loops:
 | Bootstrap | `SETUP_*`, `SUB_*`, `SM_START`, `SM_STOP`, `SM_STATUS_*` | precede the loop |
 | Receiving application (dApp) | `PROCESS_DONE`, `CREATE_OUTPUT`, `APPLY_POLICY_DONE`, `ADMITTED` | A10, A11, B15 |
 | Receiving application (RAN) | `APPLY_CONTROL_DONE`, `LIVE_ON_AIR` | A19a |
-| Acknowledgment tail | `ACK_SENT`, `ACK_RECV` | none |
+| Acknowledgment tail (the `ControlResponse` that answers a control) | `ACK_SENT`, `ACK_RECV` | none |
 | E2-E3 bridge | `BRIDGE_IN`, `BRIDGE_OUT` | A20, B9 |
 | E2AP codec and transport | `ENCODE_E2AP_*`, `DECODE_E2AP_*` | B1, B2, B6, B7 |
 | E2SM codec and xApp decision | `DECODE_E2SM_*`, `XAPP_PROCESS_DONE`, `ENCODE_E2SM_*` | B3, B4, B5, B8 |

@@ -26,8 +26,8 @@ Table: Messages of the example
 | 6 | RAN to dApp | E3 INDICATION MESSAGE, sensing | 50 | indication, 32 octets |
 | 7 | dApp to RAN | E3 dApp REPORT | 41 | dApp report, 21 octets |
 | 8 | RAN to dApp | E3 xApp CONTROL ACTION | 41 | xApp control, 21 octets |
-| 9 | dApp to RAN | E3 dApp CONTROL ACTION | 33 | dApp control, 11 octets |
-| 10 | RAN to dApp | E3 MESSAGE ACK | 14 | none |
+| 9 | dApp to RAN | E3 dApp CONTROL ACTION | 36 | dApp control, 11 octets |
+| 10 | RAN to dApp | E3 CONTROL RESPONSE | 21 | none |
 
 ### Step 1: E3 SETUP REQUEST
 
@@ -374,6 +374,7 @@ The message in JSON:
   "ranFunctionIdentifier": 1,
   "controlIdentifier": 1,
   "sequenceId": 41,
+  "requestAck": true,
   "actionData": {
     "controlType": "prbBlacklist",
     "controlPayload": {
@@ -385,36 +386,40 @@ The message in JSON:
 }
 ```
 
-The message in APER has 33 octets:
+The message in APER has 36 octets:
 
 ```
-0000  40 0d 08 18 74 2a 6c 9a ed 8b 00 32 00 02 00 00
+0000  40 0d 08 18 74 2a 6c 9a ed 8b 00 36 00 02 00 00
 0010  00 00 00 28 00 0a 00 00 04 00 78 00 79 00 7a 00
-0020  7b
+0020  7b 01 01 80
 ```
 
-The octets 22 to 32 of the message are the dApp control, unchanged.
+The octets 22 to 32 of the message are the dApp control, unchanged. The octets 33 to 35 are the extension addition `requestAck`: the extension bitmap, the length of the addition and the value "true". A control that does not ask for an answer ends at the octet 32.
 
-### Step 10: E3 MESSAGE ACK
+### Step 10: E3 CONTROL RESPONSE
 
-The RAN has installed the block in the scheduler.
+The RAN has installed the block in the scheduler. The dApp asked for an answer in step 9. The `requestId` is the `id` of the control in step 9.
 
 The message in JSON:
 
 ```json
 {
-  "type": "messageAck",
+  "type": "controlResponse",
   "id": 56,
   "timestamp": 1762080000153500000,
   "requestId": 14,
+  "dAppIdentifier": 3,
+  "ranFunctionIdentifier": 1,
+  "controlIdentifier": 1,
   "responseCode": "positive"
 }
 ```
 
-The message in APER has 14 octets:
+The message in APER has 21 octets:
 
 ```
-0000  40 37 08 18 74 2a 6c 9a f8 39 60 50 0d 00
+0000  40 37 08 18 74 2a 6c 9a f8 39 60 58 00 0d 00 02
+0010  00 00 00 00 00
 ```
 
 ## Apply outcome
