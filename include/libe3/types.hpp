@@ -152,7 +152,8 @@ enum class PduType : uint8_t {
     DAPP_REPORT = 7,
     XAPP_CONTROL_ACTION = 8,
     RELEASE_MESSAGE = 9,
-    MESSAGE_ACK = 10
+    MESSAGE_ACK = 10,  ///< DEPRECATED TO BE REMOVED: libe3 no longer sends it, see CONTROL_RESPONSE
+    CONTROL_RESPONSE = 11
 };
 
 /**
@@ -200,6 +201,8 @@ constexpr size_t MAX_PROTOCOL_DATA_SIZE = 32768;     ///< Largest `protocolData`
 constexpr size_t MAX_ACTION_DATA_SIZE = 32768;       ///< Largest `actionData` of a dApp control action, in bytes
 constexpr size_t MAX_DAPP_REPORT_DATA_SIZE = 32768;  ///< Largest `reportData` of a dApp report, in bytes
 constexpr size_t MAX_XAPP_CTRL_DATA_SIZE = 32768;    ///< Largest `xAppControlData` of an xApp control action, in bytes
+constexpr size_t MAX_PENDING_CONTROLS = 1024;        ///< Most dApp controls a RAN holds an answer for at once
+constexpr size_t MAX_CONTROL_OUTCOME_SIZE = 32768;  ///< Largest `controlOutcome` of a control response, in bytes
 constexpr size_t MAX_RAN_FUNCTIONS = 64;           ///< ranFunctionList SIZE (0..64)
 constexpr size_t MAX_IDENTIFIER_LIST_SIZE = 256;   ///< telemetry and control lists SIZE (0..256)
 constexpr size_t DEFAULT_BUFFER_SIZE = 60000;      ///< Default encode and receive buffer size, in bytes
@@ -334,16 +337,53 @@ struct DAppControlAction {
     /// Correlation id of the xApp procedure this control re-issues; 0 when the
     /// dApp decided on its own. Optional on the wire, absent when 0.
     uint32_t sequence_id{0};
+    /// True when the dApp wants a ControlResponse for this control. Written on
+    /// the wire only when true, so false and absent are the same.
+    bool request_ack{false};
 };
 
 /**
  * @brief E3AP Message Acknowledgment structure
+ *
+ * DEPRECATED TO BE REMOVED. libe3 no longer sends it: the answer to a control is
+ * ControlResponse. It is still decoded, so a dApp reads the one that another RAN sends.
  */
 struct MessageAck {
     uint32_t request_id{0};              ///< ID of the request being acknowledged
     ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
     std::optional<Cause> cause;          ///< Why the request was refused (negative only)
     std::optional<std::string> detail;   ///< UTF-8 text for the cause, up to MAX_DETAIL_SIZE bytes
+};
+
+/**
+ * @brief E3AP Control Response structure
+ *
+ * The answer to a dApp control or an xApp control that asked for one
+ * (`request_ack`). The RAN sends it for a dApp control, the dApp for an xApp
+ * control. It also carries the refusals the RAN makes before a Service Model
+ * sees a control, whether the control asked for an answer or not.
+ */
+struct ControlResponse {
+    uint32_t request_id{0};              ///< Message id of the control this answers
+    uint32_t dapp_identifier{0};         ///< dApp the control belongs to
+    uint32_t ran_function_identifier{0}; ///< RAN function of the control
+    uint32_t control_identifier{0};      ///< Control the answer is about
+    ResponseCode response_code{ResponseCode::NEGATIVE}; ///< Response code (positive/negative)
+    std::optional<Cause> cause;          ///< Why the control was refused (negative only)
+    std::optional<std::string> detail;   ///< UTF-8 text for the cause, up to MAX_DETAIL_SIZE bytes
+    /// What the Service Model reports about applying the control: opaque
+    /// service-model content, 1..MAX_CONTROL_OUTCOME_SIZE bytes, absent when it has none.
+    std::optional<std::vector<uint8_t>> control_outcome;
+};
+
+/**
+ * @brief What a Service Model answers to a control (see ServiceModel::respond_to_control)
+ */
+struct ControlResult {
+    ResponseCode response_code{ResponseCode::POSITIVE}; ///< Whether the control was applied
+    std::optional<Cause> cause;          ///< Why not (negative only)
+    std::optional<std::string> detail;   ///< UTF-8 text for the cause, up to MAX_DETAIL_SIZE bytes
+    std::vector<uint8_t> outcome;        ///< Opaque service-model content; empty for none
 };
 
 /**
@@ -372,6 +412,9 @@ struct XAppControlAction {
     /// Set by the inbound loop from the wrapping E3-PDU's id field; not
     /// serialized, so it carries no ASN.1/JSON/Protobuf grammar of its own.
     uint32_t message_id{0};
+    /// True when the RAN wants a ControlResponse from the dApp for this control.
+    /// Written on the wire only when true.
+    bool request_ack{false};
 };
 
 /**
@@ -395,7 +438,8 @@ using PduChoice = std::variant<
     DAppReport,
     XAppControlAction,
     ReleaseMessage,
-    MessageAck
+    MessageAck,
+    ControlResponse
 >;
 
 /**
@@ -628,6 +672,7 @@ inline const char* pdu_type_to_string(PduType type) noexcept {
         case PduType::XAPP_CONTROL_ACTION: return "XAppControlAction";
         case PduType::RELEASE_MESSAGE: return "ReleaseMessage";
         case PduType::MESSAGE_ACK: return "MessageAck";
+        case PduType::CONTROL_RESPONSE: return "ControlResponse";
         default: return "unknown";
     }
 }

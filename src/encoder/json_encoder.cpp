@@ -201,7 +201,8 @@ std::optional<PduType> JsonE3Encoder::string_to_pdu_type(const std::string& s) c
     if (s == "dAppReport")            return PduType::DAPP_REPORT;
     if (s == "xAppControlAction")     return PduType::XAPP_CONTROL_ACTION;
     if (s == "releaseMessage")        return PduType::RELEASE_MESSAGE;
-    if (s == "messageAck")            return PduType::MESSAGE_ACK;
+    if (s == "messageAck")            return PduType::MESSAGE_ACK;  // DEPRECATED TO BE REMOVED
+    if (s == "controlResponse")       return PduType::CONTROL_RESPONSE;
     return std::nullopt;
 }
 
@@ -380,6 +381,8 @@ nlohmann::json JsonE3Encoder::encode_dapp_control_action(const DAppControlAction
     j["controlIdentifier"] = action.control_identifier;
     // OPTIONAL: omitted entirely when unset, mirroring the ASN.1 absent field.
     if (action.sequence_id != 0) j["sequenceId"] = action.sequence_id;
+    // OPTIONAL, written only when true: false and absent are the same.
+    if (action.request_ack) j["requestAck"] = true;
     return j;
 }
 
@@ -396,14 +399,28 @@ nlohmann::json JsonE3Encoder::encode_xapp_control_action(const XAppControlAction
     j["dAppIdentifier"] = action.dapp_identifier;
     j["ranFunctionIdentifier"] = action.ran_function_identifier;
     j["sequenceId"] = action.sequence_id;
+    if (action.request_ack) j["requestAck"] = true;
     return j;
 }
 
+// DEPRECATED TO BE REMOVED: libe3 does not send a messageAck; it reads one.
 nlohmann::json JsonE3Encoder::encode_message_ack(const MessageAck& ack) const {
     nlohmann::json j;
     j["requestId"] = ack.request_id;
     j["responseCode"] = (ack.response_code == ResponseCode::POSITIVE) ? "positive" : "negative";
     write_reason(j, ack);
+    return j;
+}
+
+nlohmann::json JsonE3Encoder::encode_control_response(const ControlResponse& resp) const {
+    nlohmann::json j;
+    j["requestId"] = resp.request_id;
+    j["dAppIdentifier"] = resp.dapp_identifier;
+    j["ranFunctionIdentifier"] = resp.ran_function_identifier;
+    j["controlIdentifier"] = resp.control_identifier;
+    j["responseCode"] = (resp.response_code == ResponseCode::POSITIVE) ? "positive" : "negative";
+    write_reason(j, resp);
+    // controlOutcome is spliced in by encode(), like actionData.
     return j;
 }
 
@@ -534,6 +551,7 @@ DAppControlAction JsonE3Encoder::decode_dapp_control_action(const nlohmann::json
     action.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
     action.control_identifier = j.value("controlIdentifier", 0u);
     action.sequence_id = j.value("sequenceId", 0u);
+    action.request_ack = j.value("requestAck", false);
     action.action_data = payload_member(j, raw_json, "actionData");
     return action;
 }
@@ -554,10 +572,12 @@ XAppControlAction JsonE3Encoder::decode_xapp_control_action(const nlohmann::json
     action.dapp_identifier = j.value("dAppIdentifier", 0u);
     action.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
     action.sequence_id = j.value("sequenceId", 0u);
+    action.request_ack = j.value("requestAck", false);
     action.xapp_control_data = payload_member(j, raw_json, "xAppControlData");
     return action;
 }
 
+// DEPRECATED TO BE REMOVED.
 MessageAck JsonE3Encoder::decode_message_ack(const nlohmann::json& j) const {
     MessageAck ack;
     ack.request_id = j.value("requestId", 0u);
@@ -565,6 +585,23 @@ MessageAck JsonE3Encoder::decode_message_ack(const nlohmann::json& j) const {
     ack.response_code = (response_code_str == "positive") ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
     read_reason(j, ack);
     return ack;
+}
+
+ControlResponse JsonE3Encoder::decode_control_response(const nlohmann::json& j,
+                                                        const std::string& raw_json) const {
+    ControlResponse resp;
+    resp.request_id = j.value("requestId", 0u);
+    resp.dapp_identifier = j.value("dAppIdentifier", 0u);
+    resp.ran_function_identifier = j.value("ranFunctionIdentifier", 0u);
+    resp.control_identifier = j.value("controlIdentifier", 0u);
+    std::string response_code_str = j.value("responseCode", "negative");
+    resp.response_code = (response_code_str == "positive") ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
+    read_reason(j, resp);
+    if (j.contains("controlOutcome")) {
+        std::vector<uint8_t> outcome = payload_member(j, raw_json, "controlOutcome");
+        if (!outcome.empty()) resp.control_outcome = std::move(outcome);
+    }
+    return resp;
 }
 
 // ReleaseMessage encode/decode
@@ -653,6 +690,15 @@ EncodeResult<EncodedMessage> JsonE3Encoder::encode(const Pdu& pdu) {
             }
             else if constexpr (std::is_same_v<T, MessageAck>) {
                 fields = encode_message_ack(arg);
+            }
+            else if constexpr (std::is_same_v<T, ControlResponse>) {
+                fields = encode_control_response(arg);
+                if (arg.control_outcome && !arg.control_outcome->empty()) {
+                    require_json_container(*arg.control_outcome, "controlOutcome");
+                    raw_members.emplace_back("controlOutcome",
+                                             std::string(arg.control_outcome->begin(),
+                                                         arg.control_outcome->end()));
+                }
             }
             root.update(fields);
         }, pdu.choice);
@@ -771,6 +817,9 @@ EncodeResult<Pdu> JsonE3Encoder::decode(const uint8_t* data, size_t size) {
                 break;
             case PduType::MESSAGE_ACK:
                 pdu.choice = decode_message_ack(root);
+                break;
+            case PduType::CONTROL_RESPONSE:
+                pdu.choice = decode_control_response(root, json_str);
                 break;
             default:
                 E3_LOG_ERROR(LOG_TAG) << "Unknown PDU type: " << pdu_type_str;

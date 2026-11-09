@@ -152,8 +152,8 @@ public:
      * @brief Process a control action from a dApp
      *
      * Called by the E3 interface when a DAppControlAction is received for this
-     * service model. Implementations can emit outbound PDUs (e.g. MessageAck,
-     * IndicationMessage) via emit_outbound().
+     * service model. Implementations answer it with respond_to_control() and can emit
+     * outbound PDUs (e.g. IndicationMessage) via emit_outbound().
      * @param request_message_id Message identifier of the DAppControlAction
      * @param action The control action
      * @return ErrorCode::SUCCESS if the SM took the action
@@ -169,8 +169,8 @@ protected:
     /**
      * @brief Build a MessageAck PDU for a control/request message.
      *
-     * This helper only builds the PDU. Implementations can decide whether to
-     * emit it with emit_outbound() or suppress it when protocol semantics allow.
+     * DEPRECATED TO BE REMOVED. A Service Model answers a control with
+     * respond_to_control(). This helper only builds the PDU.
      * @param request_message_id Message identifier of the message acknowledged
      * @param response_code Result to report
      * @return The PDU
@@ -185,6 +185,34 @@ protected:
         ack.response_code = response_code;
         pdu.choice = ack;
         return pdu;
+    }
+
+    /**
+     * @brief Answer a dApp control
+     *
+     * Call it once per control, from any thread, when the outcome is known: from
+     * handle_control_action() or later, as an SM that applies the control
+     * asynchronously does. It sends a ControlResponse only when the dApp asked for
+     * one (`request_ack`), so an SM can call it for every control. The RAN function
+     * and the control identifier are filled in from the control. An SM that never
+     * answers sends nothing: the library does not invent an answer for a control
+     * that may still be applied.
+     * @param dapp_id dApp that sent the control (`DAppControlAction::dapp_identifier`)
+     * @param request_message_id Message identifier of the control, as passed to handle_control_action()
+     * @param result Whether the control was applied, why not, and what the SM reports about it
+     * @return ErrorCode::SUCCESS if the answer was queued; ErrorCode::NOT_FOUND if none is owed (the
+     *         dApp did not ask, or the control was answered already); ErrorCode::INVALID_PARAM if the
+     *         outcome is over MAX_CONTROL_OUTCOME_SIZE; ErrorCode::NOT_INITIALIZED if no agent runs the SM
+     */
+    ErrorCode respond_to_control(
+        uint32_t dapp_id,
+        uint32_t request_message_id,
+        const ControlResult& result
+    ) {
+        if (!control_responder_) {
+            return ErrorCode::NOT_INITIALIZED;
+        }
+        return control_responder_(dapp_id, request_message_id, result);
     }
 
     /**
@@ -243,6 +271,14 @@ protected:
     }
 
     /**
+     * @brief Set the control responder callback (used by E3Interface).
+     * @param responder Callback that answers a dApp control
+     */
+    void set_control_responder(std::function<ErrorCode(uint32_t, uint32_t, const ControlResult&)> responder) {
+        control_responder_ = std::move(responder);
+    }
+
+    /**
      * @brief Set subscriber provider callback (used by E3Interface).
      * @param provider Callback that lists the subscribed dApps
      */
@@ -252,6 +288,7 @@ protected:
 
 private:
     std::function<ErrorCode(Pdu&&)> outbound_emitter_;
+    std::function<ErrorCode(uint32_t, uint32_t, const ControlResult&)> control_responder_;
     std::function<std::vector<uint32_t>()> subscribers_provider_;
 
     friend class E3Interface;

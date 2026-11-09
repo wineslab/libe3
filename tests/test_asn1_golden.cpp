@@ -150,6 +150,28 @@ std::vector<Golden> goldens() {
     ack.response_code = ResponseCode::NEGATIVE;
     out.push_back({"MessageAck", make(PduType::MESSAGE_ACK, ack), "4029081861684accc3cd15502980"});
 
+    ControlResponse response;
+    response.request_id = kMessageId;
+    response.dapp_identifier = 7;
+    response.ran_function_identifier = 1;
+    response.control_identifier = 1;
+    response.response_code = ResponseCode::POSITIVE;
+    out.push_back({"ControlResponse", make(PduType::CONTROL_RESPONSE, response), "4029081861684accc3cd1558002900060000000000"});
+
+    ControlResponse response_with_outcome = response;
+    response_with_outcome.control_outcome = std::vector<uint8_t>{0xca, 0xfe};
+    out.push_back({"ControlResponseWithOutcome", make(PduType::CONTROL_RESPONSE, response_with_outcome), "4029081861684accc3cd15588029000600000000000001cafe"});
+
+    // requestAck is the first extension addition of both controls. A control that
+    // does not ask is the DAppControlAction and XAppControlAction above, unchanged.
+    DAppControlAction control_asking = control;
+    control_asking.request_ack = true;
+    out.push_back({"DAppControlActionRequestAck", make(PduType::DAPP_CONTROL_ACTION, control_asking), "4029081861684accc3cd15340006000000000001aabb010180"});
+
+    XAppControlAction xapp_asking = xapp;
+    xapp_asking.request_ack = true;
+    out.push_back({"XAppControlActionRequestAck", make(PduType::XAPP_CONTROL_ACTION, xapp_asking), "4029081861684accc3cd15440006000000080001eeff010180"});
+
     // The reason a RAN gives with a refusal. cause and detail are the first
     // extension additions of all three responses.
     SetupResponse setup_refused;
@@ -190,6 +212,16 @@ std::vector<Golden> goldens() {
     ack_refused.cause = Cause::NOT_FOUND;
     ack_refused.detail = "no subscription to this RAN function";
     out.push_back({"MessageAckRefused", make(PduType::MESSAGE_ACK, ack_refused), "4029081861684accc3cd15542981c001402600246e6f20737562736372697074696f6e20746f20746869732052414e2066756e6374696f6e"});
+
+    ControlResponse response_refused;
+    response_refused.request_id = kMessageId;
+    response_refused.dapp_identifier = 7;
+    response_refused.ran_function_identifier = 1;
+    response_refused.control_identifier = 1;
+    response_refused.response_code = ResponseCode::NEGATIVE;
+    response_refused.cause = Cause::NOT_FOUND;
+    response_refused.detail = "no subscription to this RAN function";
+    out.push_back({"ControlResponseRefused", make(PduType::CONTROL_RESPONSE, response_refused), "4029081861684accc3cd155b0029000600000000a000246e6f20737562736372697074696f6e20746f20746869732052414e2066756e6374696f6e"});
 
     return out;
 }
@@ -269,21 +301,45 @@ TEST(Asn1Golden_libe3_0_1_3_pdusAreRefused) {
     ASSERT_STREQ(accepted, "");
 }
 
+TEST(Asn1Golden_aMessageAckIsStillReadAndIsNotAControlResponse) {
+    // E3-MessageAck is deprecated and stays at index 10, so controlResponse is at 11 as
+    // in OCUDU's grammar. The bytes of an ack decode as an ack, and the bytes of a
+    // response as a response: neither can be read as the other.
+    auto encoder = create_encoder(EncodingFormat::ASN1);
+    ASSERT_TRUE(encoder != nullptr);
+    const std::vector<uint8_t> ack_wire = from_hex("4029081861684accc3cd15502980");
+    auto ack = encoder->decode(ack_wire.data(), ack_wire.size());
+    ASSERT_TRUE(ack.has_value());
+    ASSERT_TRUE(ack->type == PduType::MESSAGE_ACK);
+    ASSERT_EQ(std::get<MessageAck>(ack->choice).request_id, kMessageId);
+
+    for (const auto& g : goldens()) {
+        if (g.pdu.type != PduType::CONTROL_RESPONSE) continue;
+        const std::vector<uint8_t> wire = from_hex(g.hex);
+        auto decoded = encoder->decode(wire.data(), wire.size());
+        ASSERT_TRUE(decoded.has_value());
+        ASSERT_TRUE(decoded->type == PduType::CONTROL_RESPONSE);
+    }
+}
+
 TEST(Asn1Golden_detailIsCutAtACharacterBoundary) {
     auto encoder = create_encoder(EncodingFormat::ASN1);
     ASSERT_TRUE(encoder != nullptr);
 
     // 511 bytes, then a two-byte character that would end at byte 513.
-    MessageAck ack;
-    ack.request_id = kMessageId;
-    ack.response_code = ResponseCode::NEGATIVE;
-    ack.detail = std::string(511, 'a') + "\xC3\xA9" + "tail";
+    ControlResponse response;
+    response.request_id = kMessageId;
+    response.dapp_identifier = 7;
+    response.ran_function_identifier = 1;
+    response.control_identifier = 1;
+    response.response_code = ResponseCode::NEGATIVE;
+    response.detail = std::string(511, 'a') + "\xC3\xA9" + "tail";
 
-    auto encoded = encoder->encode(make(PduType::MESSAGE_ACK, ack));
+    auto encoded = encoder->encode(make(PduType::CONTROL_RESPONSE, response));
     ASSERT_TRUE(encoded.has_value());
     auto decoded = encoder->decode(*encoded);
     ASSERT_TRUE(decoded.has_value());
-    const auto& got = std::get<MessageAck>(decoded->choice);
+    const auto& got = std::get<ControlResponse>(decoded->choice);
     ASSERT_TRUE(got.detail.has_value());
     // The text is shortened to 511 bytes and not left as half a character.
     ASSERT_EQ(got.detail->size(), 511u);
@@ -294,17 +350,20 @@ TEST(Asn1Golden_detailThatIsNotUtf8IsDroppedOnDecode) {
     auto encoder = create_encoder(EncodingFormat::ASN1);
     ASSERT_TRUE(encoder != nullptr);
 
-    MessageAck ack;
-    ack.request_id = kMessageId;
-    ack.response_code = ResponseCode::NEGATIVE;
-    ack.cause = Cause::INVALID_REQUEST;
-    ack.detail = std::string("bad \xFF\xFE bytes");
+    ControlResponse response;
+    response.request_id = kMessageId;
+    response.dapp_identifier = 7;
+    response.ran_function_identifier = 1;
+    response.control_identifier = 1;
+    response.response_code = ResponseCode::NEGATIVE;
+    response.cause = Cause::INVALID_REQUEST;
+    response.detail = std::string("bad \xFF\xFE bytes");
 
-    auto encoded = encoder->encode(make(PduType::MESSAGE_ACK, ack));
+    auto encoded = encoder->encode(make(PduType::CONTROL_RESPONSE, response));
     ASSERT_TRUE(encoded.has_value());
     auto decoded = encoder->decode(*encoded);
     ASSERT_TRUE(decoded.has_value());
-    const auto& got = std::get<MessageAck>(decoded->choice);
+    const auto& got = std::get<ControlResponse>(decoded->choice);
     // The refusal and its cause survive; the text is not passed on.
     ASSERT_TRUE(got.response_code == ResponseCode::NEGATIVE);
     ASSERT_TRUE(got.cause.has_value());

@@ -199,4 +199,14 @@ EncodeResult<EncodedMessage> E3Encoder::encode_message_ack(
     return encode(pdu);
 }
 
+EncodeResult<EncodedMessage> E3Encoder::encode_control_response(
+    uint32_t message_id,
+    const ControlResponse& response
+) {
+    Pdu pdu(PduType::CONTROL_RESPONSE);
+    pdu.message_id = message_id;
+    pdu.choice = response;
+    return encode(pdu);
+}
+
 } // namespace libe3

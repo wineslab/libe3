@@ -107,8 +107,9 @@ public:
         last_control_id = action.control_identifier;
         last_action_size = action.action_data.size();
         last_request_message_id = request_message_id;
-        Pdu ack = make_message_ack_pdu(request_message_id, ResponseCode::POSITIVE);
-        return emit_outbound(std::move(ack));
+        // Sent only when the dApp asked for it; NOT_FOUND means nobody waits.
+        (void)respond_to_control(action.dapp_identifier, request_message_id, ControlResult{});
+        return ErrorCode::SUCCESS;
     }
 
     std::atomic<int> control_count{0};

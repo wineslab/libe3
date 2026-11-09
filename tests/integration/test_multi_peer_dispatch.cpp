@@ -152,8 +152,9 @@ public:
         if (libe3_examples::decode_simple_control(a.action_data, sampling)) {
             last_action_tag = static_cast<uint32_t>(sampling);
         }
-        Pdu ack = make_message_ack_pdu(request_message_id, ResponseCode::POSITIVE);
-        return emit_outbound(std::move(ack));
+        // Sent only when the dApp asked for it; NOT_FOUND means nobody waits.
+        (void)respond_to_control(a.dapp_identifier, request_message_id, ControlResult{});
+        return ErrorCode::SUCCESS;
     }
     std::atomic<int> control_count{0};
     std::atomic<uint32_t> last_action_tag{0};
@@ -352,9 +353,10 @@ public:
         if (worker_.joinable()) worker_.join();
     }
     ErrorCode handle_control_action(uint32_t request_message_id,
-                                    const DAppControlAction&) override {
-        Pdu ack = make_message_ack_pdu(request_message_id, ResponseCode::POSITIVE);
-        return emit_outbound(std::move(ack));
+                                    const DAppControlAction& a) override {
+        // Sent only when the dApp asked for it; NOT_FOUND means nobody waits.
+        (void)respond_to_control(a.dapp_identifier, request_message_id, ControlResult{});
+        return ErrorCode::SUCCESS;
     }
 
 private:

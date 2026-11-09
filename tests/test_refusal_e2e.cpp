@@ -10,8 +10,8 @@
  *       with the cause Aerial's and OCUDU's agents give, and leaves no
  *       subscription behind and the Service Model stopped;
  *   (2) a control for an unknown RAN function or control id, or with no
- *       subscription behind it, is answered with a negative acknowledgment
- *       and does not reach the Service Model;
+ *       subscription behind it, is answered with a negative ControlResponse,
+ *       though the dApp did not ask for one, and does not reach the Service Model;
  *   (3) a subscription that names what the function advertises is granted and
  *       a control for it reaches the Service Model with no refusal.
  *
@@ -91,23 +91,23 @@ bool wait_until(const std::function<bool()>& pred, std::chrono::milliseconds tim
 struct Heard {
     std::mutex mu;
     std::vector<SubscriptionResponse> subscriptions;
-    std::vector<MessageAck> acks;
+    std::vector<ControlResponse> responses;
 
     size_t subscription_count() {
         std::lock_guard<std::mutex> lk(mu);
         return subscriptions.size();
     }
-    size_t ack_count() {
+    size_t response_count() {
         std::lock_guard<std::mutex> lk(mu);
-        return acks.size();
+        return responses.size();
     }
     SubscriptionResponse subscription(size_t i) {
         std::lock_guard<std::mutex> lk(mu);
         return subscriptions.at(i);
     }
-    MessageAck ack(size_t i) {
+    ControlResponse response(size_t i) {
         std::lock_guard<std::mutex> lk(mu);
-        return acks.at(i);
+        return responses.at(i);
     }
 };
 
@@ -154,9 +154,9 @@ static void run_refusals(EncodingFormat encoding, const char* tag) {
         std::lock_guard<std::mutex> lk(heard.mu);
         heard.subscriptions.push_back(r);
     });
-    dapp.set_message_ack_handler([&heard](const MessageAck& a) {
+    dapp.set_control_response_handler([&heard](const ControlResponse& r) {
         std::lock_guard<std::mutex> lk(heard.mu);
-        heard.acks.push_back(a);
+        heard.responses.push_back(r);
     });
     ASSERT_EQ(static_cast<int>(dapp.start()), static_cast<int>(ErrorCode::SUCCESS));
     ASSERT_EQ(static_cast<int>(dapp.wait_for_setup(5000ms)),
@@ -171,10 +171,11 @@ static void run_refusals(EncodingFormat encoding, const char* tag) {
         ASSERT_TRUE(wait_until([&] { return heard.subscription_count() > before; }, 5000ms));
     };
     auto control = [&](uint32_t rf, uint32_t control_id) {
-        const size_t before = heard.ack_count();
+        const size_t before = heard.response_count();
+        // No requestAck: the RAN answers a control it refuses itself all the same.
         ASSERT_EQ(static_cast<int>(dapp.send_control(rf, control_id, {'{', '}'})),
                   static_cast<int>(ErrorCode::SUCCESS));
-        ASSERT_TRUE(wait_until([&] { return heard.ack_count() > before; }, 5000ms));
+        ASSERT_TRUE(wait_until([&] { return heard.response_count() > before; }, 5000ms));
     };
 
     // (1) Subscriptions the RAN cannot serve.
@@ -214,19 +215,19 @@ static void run_refusals(EncodingFormat encoding, const char* tag) {
 
     // (2) Controls the RAN cannot hand on.
     control(999, SERVED_CONTROL);
-    auto control_unknown_function = heard.ack(0);
+    auto control_unknown_function = heard.response(0);
     ASSERT_TRUE(control_unknown_function.response_code == ResponseCode::NEGATIVE);
     ASSERT_TRUE(control_unknown_function.cause.has_value());
     ASSERT_TRUE(*control_unknown_function.cause == Cause::UNSUPPORTED_RAN_FUNCTION);
 
     control(SERVED_RF, 55);
-    auto control_unknown_id = heard.ack(1);
+    auto control_unknown_id = heard.response(1);
     ASSERT_TRUE(control_unknown_id.response_code == ResponseCode::NEGATIVE);
     ASSERT_TRUE(control_unknown_id.cause.has_value());
     ASSERT_TRUE(*control_unknown_id.cause == Cause::UNSUPPORTED_IDENTIFIER);
 
     control(SERVED_RF, SERVED_CONTROL);  // no subscription, so the SM is not running
-    auto control_without_subscription = heard.ack(2);
+    auto control_without_subscription = heard.response(2);
     ASSERT_TRUE(control_without_subscription.response_code == ResponseCode::NEGATIVE);
     ASSERT_TRUE(control_without_subscription.cause.has_value());
     ASSERT_TRUE(*control_without_subscription.cause == Cause::NOT_FOUND);
@@ -242,13 +243,13 @@ static void run_refusals(EncodingFormat encoding, const char* tag) {
     ASSERT_TRUE(wait_until([&] { return sm->is_running(); }, 2000ms));
     ASSERT_EQ(ran.subscription_count(), 1u);
 
-    const size_t acks_before = heard.ack_count();
+    const size_t responses_before = heard.response_count();
     ASSERT_EQ(static_cast<int>(dapp.send_control(SERVED_RF, SERVED_CONTROL, {'{', '}'})),
               static_cast<int>(ErrorCode::SUCCESS));
     ASSERT_TRUE(wait_until([&] { return sm->controls.load() == 1; }, 5000ms));
-    // The SM took it and sent no ack of its own, and the RAN refused nothing.
+    // The SM took it, the dApp did not ask for an answer, and the RAN refused nothing.
     std::this_thread::sleep_for(200ms);
-    ASSERT_EQ(heard.ack_count(), acks_before);
+    ASSERT_EQ(heard.response_count(), responses_before);
 
     dapp.stop();
     ran.stop();

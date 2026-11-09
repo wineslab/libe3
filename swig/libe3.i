@@ -115,6 +115,8 @@ namespace std {
 %ignore libe3::XAppControlAction;
 %ignore libe3::ReleaseMessage;
 %ignore libe3::MessageAck;
+%ignore libe3::ControlResponse;
+%ignore libe3::ControlResult;
 %ignore libe3::EncodedMessage;
 %ignore libe3::Pdu::get_if;
 %ignore libe3::RanFunctionDef;

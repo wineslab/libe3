@@ -96,6 +96,7 @@ DAppSession::DAppSession(libe3::E3Config config, std::size_t queue_capacity) {
         ev.payload = a.xapp_control_data;
         ev.request_id = a.message_id;
         ev.sequence_id = a.sequence_id;
+        ev.request_ack = a.request_ack;
         impl->enqueue(std::move(ev));
     });
 
@@ -140,11 +141,28 @@ DAppSession::DAppSession(libe3::E3Config config, std::size_t queue_capacity) {
         impl->enqueue(std::move(ev));
     });
 
-    agent.set_message_ack_handler([impl](const libe3::MessageAck& ack) {
+    agent.set_message_ack_handler([impl](const libe3::MessageAck& ack) {  // DEPRECATED TO BE REMOVED
         E3Event ev;
         ev.kind = E3_EVENT_MESSAGE_ACK;
         ev.request_id = ack.request_id;
         ev.response_code = static_cast<int>(ack.response_code);
+        impl->enqueue(std::move(ev));
+    });
+
+    agent.set_control_response_handler([impl](const libe3::ControlResponse& r) {
+        E3Event ev;
+        ev.kind = E3_EVENT_CONTROL_RESPONSE;
+        ev.dapp_id = r.dapp_identifier;
+        ev.ran_function_id = r.ran_function_identifier;
+        ev.control_id = r.control_identifier;
+        ev.request_id = r.request_id;
+        ev.response_code = static_cast<int>(r.response_code);
+        ev.cause = r.cause ? static_cast<int>(*r.cause) : -1;
+        if (r.detail) ev.detail = *r.detail;
+        if (r.control_outcome && !r.control_outcome->empty()) {
+            ev.has_outcome = true;
+            ev.payload = *r.control_outcome;
+        }
         impl->enqueue(std::move(ev));
     });
 }
@@ -248,12 +266,13 @@ int DAppSession::unsubscribe(uint32_t ran_function_id) {
 
 int64_t DAppSession::send_control(uint32_t ran_function_id, uint32_t control_id,
                                   std::vector<uint8_t> action_data,
-                                  uint32_t sequence_id) {
+                                  uint32_t sequence_id,
+                                  bool request_ack) {
     uint32_t message_id = 0;
     ErrorCode rc = impl_->agent->send_control(
-        ran_function_id, control_id, std::move(action_data), sequence_id, &message_id);
+        ran_function_id, control_id, std::move(action_data), sequence_id, &message_id, request_ack);
     // On success return the assigned message id so Python can correlate a later
-    // ack/response by id; on failure return the ErrorCode (all error codes are
+    // response by id; on failure return the ErrorCode (all error codes are
     // negative, SUCCESS is 0).
     if (rc == ErrorCode::SUCCESS) {
         return static_cast<int64_t>(message_id);
@@ -273,9 +292,22 @@ int64_t DAppSession::send_report(uint32_t ran_function_id, std::vector<uint8_t> 
     return static_cast<int64_t>(rc);
 }
 
-int DAppSession::send_message_ack(uint32_t request_id, int response_code) {
+int DAppSession::send_message_ack(uint32_t request_id, int response_code) {  // DEPRECATED TO BE REMOVED
     return static_cast<int>(impl_->agent->send_message_ack(
         request_id, static_cast<libe3::ResponseCode>(response_code)));
+}
+
+int DAppSession::send_control_response(uint32_t request_id, uint32_t ran_function_id,
+                                       uint32_t control_id, int response_code, int cause,
+                                       std::string detail, std::vector<uint8_t> outcome) {
+    libe3::ControlResult result;
+    result.response_code = (response_code == 0) ? libe3::ResponseCode::POSITIVE
+                                                : libe3::ResponseCode::NEGATIVE;
+    if (cause >= 0) result.cause = libe3::cause_from_value(cause);
+    if (!detail.empty()) result.detail = std::move(detail);
+    result.outcome = std::move(outcome);
+    return static_cast<int>(
+        impl_->agent->send_control_response(request_id, ran_function_id, control_id, result));
 }
 
 std::vector<E3Event> DAppSession::poll_events(std::size_t max_batch, int timeout_ms) {
