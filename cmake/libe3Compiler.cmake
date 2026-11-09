@@ -8,7 +8,7 @@
 # ============================================================================
 add_library(libe3_warnings INTERFACE)
 target_compile_options(libe3_warnings INTERFACE
-    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:
+    $<$<CXX_COMPILER_ID:GNU,Clang>:
         -Wall
         -Wextra
         -Wpedantic
@@ -20,7 +20,7 @@ target_compile_options(libe3_warnings INTERFACE
         -Werror=return-type
     >
     # C++-only warnings: the target also compiles C sources.
-    $<$<AND:$<CXX_COMPILER_ID:GNU,Clang,AppleClang>,$<COMPILE_LANGUAGE:CXX>>:
+    $<$<AND:$<CXX_COMPILER_ID:GNU,Clang>,$<COMPILE_LANGUAGE:CXX>>:
         -Wnon-virtual-dtor
         -Woverloaded-virtual
         -Wold-style-cast

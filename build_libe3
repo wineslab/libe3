@@ -352,9 +352,6 @@ install_dependencies() {
             protobuf \
             swig \
             python
-    elif check_command brew; then
-        echo_info "Detected macOS with Homebrew"
-        brew install cmake pkg-config zeromq ninja asn1c nlohmann-json protobuf swig python
     else
         echo_error "Unsupported package manager. Please install dependencies manually:"
         echo "  - cmake (>= 3.16)"
