@@ -22,7 +22,7 @@ Table: Handling of abstract syntax errors
 |---|---|---|
 | dApp | INDICATION DATA IE | Discard the indication. Keep the subscription. |
 | dApp | RAN FUNCTION DATA IE | Do not use RAN function `2` in this association. |
-| E3 Agent | CONTROL DATA IE | Answer with a MESSAGE ACK message "negative". Keep the previous subscription data. |
+| E3 Agent | CONTROL DATA IE | Answer with a CONTROL RESPONSE message "negative", if the dApp asked for an answer. Keep the previous subscription data. |
 
 ## Unknown fields and values
 
@@ -30,7 +30,7 @@ Table: Handling of abstract syntax errors
 - A JSON receiver shall ignore a member that it does not know.
 - A JSON receiver that finds a value outside the range of clause 8.4 shall treat the field as absent.
 - A dApp that receives a RAN FUNCTION DATA IE whose `version` it does not support shall not decode the payloads of RAN function `2`.
-- An E3 Agent that receives a CONTROL DATA IE with an alternative that it does not know shall answer with a MESSAGE ACK message "negative".
+- An E3 Agent that receives a CONTROL DATA IE with an alternative that it does not know shall answer with a CONTROL RESPONSE message "negative", if the dApp asked for an answer.
 
 ## Fields that do not match the subscription
 
@@ -40,7 +40,7 @@ Table: Handling of abstract syntax errors
 
 ## Erroneous control actions
 
-The E3 Agent shall answer with a MESSAGE ACK message "negative", and keep the previous
+The E3 Agent shall answer with a CONTROL RESPONSE message "negative", if the dApp asked for an answer, and keep the previous
 subscription data, in each of the following cases.
 
 - The `controlIdentifier` is not `1`.
