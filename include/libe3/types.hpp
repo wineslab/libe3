@@ -529,15 +529,54 @@ struct E3Config {
 #endif
     E3TransportLayer transport_layer{E3TransportLayer::IPC}; ///< Transport-layer protocol (SCTP, TCP, IPC)
     
-    // Ports
-    uint16_t setup_port{9990};       ///< Port used for E3AP setup channel
-    uint16_t subscriber_port{9999};  ///< Port used for inbound control/subscription channel
-    uint16_t publisher_port{9991};   ///< Port used for outbound indication/publication channel
+    // Ports. The POSIX link serves everything on setup_port and ignores the other two;
+    // the ZeroMQ link uses all three.
+    uint16_t setup_port{9990};       ///< Port of the setup channel; the one port of the POSIX link
+    uint16_t subscriber_port{9999};  ///< Port of the inbound control/subscription channel (ZeroMQ)
+    uint16_t publisher_port{9991};   ///< Port of the outbound indication/publication channel (ZeroMQ)
 
-    // Endpoints
-    std::string setup_endpoint{"ipc:///tmp/dapps/setup"};            ///< Endpoint URI for setup channel
-    std::string subscriber_endpoint{"ipc:///tmp/dapps/dapp_socket"}; ///< Endpoint URI for inbound channel
-    std::string publisher_endpoint{"ipc:///tmp/dapps/e3_socket"};    ///< Endpoint URI for outbound channel
+    // Endpoints. The POSIX link serves everything on setup_endpoint and ignores the other two.
+    // Its IPC path is /tmp/dapps/e3 unless setup_endpoint is set to something else; for TCP and
+    // SCTP, "tcp://host:port" or "sctp://host:port" (a host in brackets for IPv6) names the host
+    // and, if given, the port, and anything else means every address to listen on and
+    // 127.0.0.1 to connect to.
+    std::string setup_endpoint{"ipc:///tmp/dapps/setup"};            ///< Endpoint URI of the setup channel; the one endpoint of the POSIX link
+    std::string subscriber_endpoint{"ipc:///tmp/dapps/dapp_socket"}; ///< Endpoint URI of the inbound channel (ZeroMQ)
+    std::string publisher_endpoint{"ipc:///tmp/dapps/e3_socket"};    ///< Endpoint URI of the outbound channel (ZeroMQ)
+
+    /**
+     * @brief SO_SNDBUF and SO_RCVBUF of the SCTP sockets of the POSIX link, in bytes.
+     *
+     * Set on both peers before the association exists. With the Linux defaults an
+     * SCTP message of megabytes waits seconds for the send buffer and the delayed
+     * SACK; the library caps a PDU well below that today, so the setting shows only
+     * once it grows. 0 keeps the kernel's size. Ignored by TCP, IPC and ZeroMQ.
+     */
+    size_t socket_buffer_bytes{2 * 1024 * 1024};
+
+    /**
+     * @brief Whether SCTP may delay the SACK of a message (POSIX link).
+     *
+     * false, the default, turns delayed SACK off, which is what OCUDU does on both
+     * peers. Ignored by TCP, IPC and ZeroMQ.
+     */
+    bool sctp_delayed_sack{false};
+
+    /**
+     * @brief Literal addresses a dApp may connect from (POSIX link, RAN role, TCP and SCTP).
+     *
+     * A connection from any other address is closed at once. Empty accepts every
+     * address, which is the default. An IPv4 address is written in dotted form
+     * whether the RAN listens on IPv4 or on both families.
+     */
+    std::vector<std::string> allowed_peers;
+
+    /**
+     * @brief Most dApps connected at once (POSIX link, RAN role).
+     *
+     * A connection beyond it is closed at once. 0 is unlimited, the default.
+     */
+    size_t maximum_associations{0};
     
     // Encoding format
 #if defined(LIBE3_ENABLE_ASN1)

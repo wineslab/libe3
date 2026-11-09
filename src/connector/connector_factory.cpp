@@ -25,7 +25,8 @@ std::unique_ptr<E3Connector> create_connector(
     uint16_t inbound_port,
     uint16_t outbound_port,
     size_t io_threads,
-    E3Role role
+    E3Role role,
+    const PosixOptions& posix
 ) {
     std::unique_ptr<E3Connector> conn;
     switch (link_layer) {
@@ -48,10 +49,8 @@ std::unique_ptr<E3Connector> create_connector(
 #endif
 
         case E3LinkLayer::POSIX:
-            conn = std::make_unique<PosixE3Connector>(
-                transport_layer, setup_endpoint, inbound_endpoint, outbound_endpoint,
-                setup_port, inbound_port, outbound_port
-            );
+            // One endpoint serves setup, inbound and outbound traffic.
+            conn = std::make_unique<PosixE3Connector>(transport_layer, setup_endpoint, setup_port, posix);
             break;
 
         default:

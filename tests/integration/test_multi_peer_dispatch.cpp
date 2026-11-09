@@ -24,6 +24,7 @@
 
 #include "test_framework.hpp"
 #include <libe3/libe3.hpp>
+#include <libe3/e3_encoder.hpp>
 #include "sm_simple/e3sm_simple_wrapper.hpp"
 
 #include <atomic>
@@ -31,6 +32,7 @@
 #include <condition_variable>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -38,6 +40,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <sys/stat.h>
 #include <thread>
 #include <unistd.h>
@@ -88,6 +91,75 @@ int connect_with_retry(uint16_t port, std::chrono::milliseconds timeout) {
         if (std::chrono::steady_clock::now() >= deadline) return -1;
         std::this_thread::sleep_for(20ms);
     }
+}
+
+// A raw TCP client that registers as a dApp and subscribes, then never reads again, so the
+// RAN's sends to it back up. The POSIX link frames each PDU with a four byte length.
+bool send_frame(int fd, const std::vector<uint8_t>& payload) {
+    const uint32_t prefix = htonl(static_cast<uint32_t>(payload.size()));
+    std::vector<uint8_t> out(sizeof(prefix) + payload.size());
+    std::memcpy(out.data(), &prefix, sizeof(prefix));
+    std::memcpy(out.data() + sizeof(prefix), payload.data(), payload.size());
+    return ::send(fd, out.data(), out.size(), MSG_NOSIGNAL) == static_cast<ssize_t>(out.size());
+}
+
+bool read_exact(int fd, uint8_t* into, size_t size) {
+    size_t got = 0;
+    while (got < size) {
+        const ssize_t n = ::recv(fd, into + got, size - got, 0);
+        if (n <= 0) return false;
+        got += static_cast<size_t>(n);
+    }
+    return true;
+}
+
+int stalled_subscriber(uint16_t port, uint32_t ran_function) {
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0) return -1;
+    int rcvbuf = 2048;
+    setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
+    struct timeval timeout{2, 0};
+    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+    struct sockaddr_in addr{};
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    const auto deadline = std::chrono::steady_clock::now() + 2s;
+    while (connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) != 0) {
+        if (std::chrono::steady_clock::now() >= deadline) { close(fd); return -1; }
+        std::this_thread::sleep_for(20ms);
+    }
+    auto encoder = create_encoder(EncodingFormat::ASN1);
+
+    Pdu setup(PduType::SETUP_REQUEST);
+    SetupRequest request;
+    request.e3ap_protocol_version = "1.0.0";
+    request.dapp_name = "StalledDApp";
+    request.dapp_version = "1.0.0";
+    request.vendor = "test";
+    setup.choice = request;
+    setup.message_id = 1;
+    auto encoded = encoder->encode(setup);
+    if (!encoded || !send_frame(fd, encoded->buffer)) { close(fd); return -1; }
+
+    uint32_t size = 0;
+    if (!read_exact(fd, reinterpret_cast<uint8_t*>(&size), sizeof(size))) { close(fd); return -1; }
+    std::vector<uint8_t> body(ntohl(size));
+    if (!read_exact(fd, body.data(), body.size())) { close(fd); return -1; }
+    auto decoded = encoder->decode(body.data(), body.size());
+    const auto* response = decoded ? std::get_if<SetupResponse>(&decoded->choice) : nullptr;
+    if (!response || !response->dapp_identifier) { close(fd); return -1; }
+
+    Pdu subscribe(PduType::SUBSCRIPTION_REQUEST);
+    SubscriptionRequest subscription;
+    subscription.dapp_identifier = *response->dapp_identifier;
+    subscription.ran_function_identifier = ran_function;
+    subscription.telemetry_identifier_list = {1};
+    subscribe.choice = subscription;
+    subscribe.message_id = 2;
+    encoded = encoder->encode(subscribe);
+    if (!encoded || !send_frame(fd, encoded->buffer)) { close(fd); return -1; }
+    return fd;  // nothing is read from it from here on
 }
 
 struct Endpoints {
@@ -383,11 +455,10 @@ TEST(multi_peer_two_dapps_distinct_rfs_no_crosstalk_posix_tcp) {
                              /*base_port=*/unique_base_port(25990));
 }
 
-// Regression test for the multi-peer broadcast blocker: a dApp that connects
-// to the indication channel and then stops reading must NOT stall delivery to
-// the other peers, and must NOT hang stop(). Before the SO_SNDTIMEO fix, the
-// RAN's outbound thread blocked forever in send() once the stalled peer's TCP
-// buffer filled, starving every other peer and wedging stop().
+// Regression test for the multi-peer blocker: a dApp that registers, subscribes and then
+// stops reading must NOT stall delivery to the other peers, and must NOT hang stop().
+// Before the SO_SNDTIMEO fix, the RAN's outbound thread blocked forever in send() once the
+// stalled peer's TCP buffer filled, starving every other peer and wedging stop().
 TEST(multi_peer_slow_peer_does_not_stall_others_posix_tcp) {
     // distinct from the port triples above; unique_base_port() also keeps it
     // distinct across concurrent runs on a shared machine.
@@ -420,18 +491,13 @@ TEST(multi_peer_slow_peer_does_not_stall_others_posix_tcp) {
     ASSERT_TRUE(good.start() == ErrorCode::SUCCESS);
     ASSERT_TRUE(good.wait_for_setup(5000ms) == ErrorCode::SUCCESS);
 
-    // A raw "stalled" peer: connect to the RAN's indication (publisher) port,
-    // shrink its receive buffer, and never read. The RAN broadcasts to it too.
-    // Retried: wait_for_setup() above only confirms the SETUP socket, not
-    // this one, so the publisher's listener may not be bound yet.
-    int stalled = connect_with_retry(static_cast<uint16_t>(base + 2), 2s);
+    // A raw "stalled" dApp: it registers and subscribes to the same RAN function over its own
+    // connection, shrinks its receive buffer, and never reads. The RAN sends its indications to
+    // that connection, which backs up.
+    int stalled = stalled_subscriber(base, 1);
     ASSERT_TRUE(stalled >= 0);
-    int rcvbuf = 2048;
-    setsockopt(stalled, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
 
-    // Subscribe so the SM starts broadcasting; the RAN accepts both the good
-    // dApp and the stalled raw peer on its next send().
-    std::this_thread::sleep_for(300ms);
+    // Subscribe so the SM starts sending to the good dApp as well.
     ASSERT_TRUE(good.subscribe(1, {1}, {1}) == ErrorCode::SUCCESS);
 
     // Despite the stalled peer filling its buffer, the good dApp must keep

@@ -503,41 +503,61 @@ private:
     /**
      * @brief Which connection each dApp id belongs to, on a RAN that can tell its peers apart.
      *
-     * A dApp id belongs to the connection that first sent a message naming it, for as
-     * long as that registration lasts. Each entry carries the generation of the
-     * registration (see SubscriptionManager::dapp_generation), because an id is handed
-     * out again after its dApp is removed. Only the inbound thread uses it.
+     * A dApp id belongs to the connection that sent its setup request, for as long as
+     * that registration lasts. Each entry carries the generation of the registration
+     * (see SubscriptionManager::dapp_generation), because an id is handed out again
+     * after its dApp is removed. The setup thread adds entries and the inbound thread
+     * reads and removes them, under bindings_mu_.
      */
     struct PeerBindings {
-        /// Connection token, then the dApps seen on it, each with its registration's generation.
+        /// Connection token, then the dApps bound to it, each with its registration's generation.
         std::unordered_map<uint64_t, std::unordered_map<uint32_t, uint64_t>> by_peer;
         /// dApp id, then its connection token and its registration's generation.
         std::unordered_map<uint32_t, std::pair<uint64_t, uint64_t>> owner;
     };
 
+    /// Guards peer_bindings_.
+    std::mutex bindings_mu_;
+    /// The connection of each registered dApp, on a connector that names its peers.
+    PeerBindings peer_bindings_;
+
     /**
-     * @brief Decide whether a message that names a dApp may be acted on, and bind the dApp to its connection
+     * @brief Bind a dApp that has just registered to the connection that sent its setup request
      *
-     * The first message that names a registered dApp binds the dApp to the connection it
-     * came on. Later messages that name it must come on that connection: the E3AP messages
-     * carry no authentication, so without this any dApp could release or control another.
+     * @param dapp_id The identifier the dApp was given
+     * @param peer Token of the connection, 0 if the connector cannot tell its peers apart (then nothing is bound)
+     */
+    void bind_dapp_to_connection(uint32_t dapp_id, uint64_t peer);
+
+    /**
+     * @brief The connection a dApp is bound to
      *
-     * @param bindings The inbound thread's bindings
+     * @param dapp_id The dApp
+     * @return The connection's token, or 0 if the dApp is not bound
+     */
+    uint64_t connection_of(uint32_t dapp_id);
+
+    /**
+     * @brief Decide whether a message that names a dApp may be acted on
+     *
+     * A dApp is bound to the connection of its setup request. A message that names it
+     * must come on that connection: the E3AP messages carry no authentication, so
+     * without this any dApp could release or control another. A message that names a
+     * dApp that is not registered, or one that is not bound, is let through.
+     *
      * @param peer Token of the connection the message came on, 0 if the connector cannot tell
      * @param dapp_id The dApp the message names
      * @return false if the dApp is bound to another connection, so the message is to be dropped
      */
-    bool admit_dapp_message(PeerBindings& bindings, uint64_t peer, uint32_t dapp_id);
+    bool admit_dapp_message(uint64_t peer, uint32_t dapp_id);
 
     /**
-     * @brief Remove every dApp that was seen on a connection that has since closed
+     * @brief Remove every dApp that was bound to a connection that has since closed
      *
      * No release is sent, there is nobody to send it to. A dApp whose id was
-     * removed and handed out again since it was seen is left alone.
-     *
-     * @param bindings The inbound thread's bindings
+     * removed and handed out again since it was bound is left alone.
      */
-    void remove_dapps_of_closed_peers(PeerBindings& bindings);
+    void remove_dapps_of_closed_peers();
 
     /**
      * @brief Reply to a setup request that cannot be answered positively.
