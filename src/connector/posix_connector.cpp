@@ -2,86 +2,85 @@
  * @file posix_connector.cpp
  * @brief POSIX socket connector implementation
  *
- * Ported from the original C implementation's posix_* functions in e3_connector.c
- *
  * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 
 #include "posix_connector.hpp"
-#include "libe3/latrec.h"
 #include "libe3/logger.hpp"
 #include <sys/socket.h>
-#include <sys/uio.h>
-#include <sys/un.h>
 #include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/un.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #ifdef LIBE3_ENABLE_SCTP
 #include <netinet/sctp.h>
 #endif
 #include <arpa/inet.h>
-#include <unistd.h>
-#include <grp.h>
 #include <fcntl.h>
-#include <sys/time.h>
-#include <algorithm>
-#include <cstring>
-#include <cerrno>
 #include <poll.h>
-#include <thread>
+#include <unistd.h>
+#include <algorithm>
+#include <array>
+#include <cerrno>
 #include <chrono>
+#include <cstring>
+#include <thread>
 
 namespace libe3 {
 
 namespace {
 constexpr const char* LOG_TAG = "PosixConn";
 constexpr const char* IPC_BASE_DIR = "/tmp/dapps";
-constexpr int POLL_TIMEOUT_MS = 500;   // Timeout for graceful shutdown
-constexpr int SEND_TIMEOUT_MS = 500;   // Per-peer broadcast send timeout (drop a stalled peer)
-constexpr int SETUP_RECV_TIMEOUT_MS = 2000;  // Give up on a silent setup peer (bounded, not forever)
+// What E3Config holds for setup_endpoint unless the program sets it. The ZeroMQ link
+// shares the string, so the POSIX link maps it to its own default instead of changing it.
+constexpr const char* SHARED_DEFAULT_ENDPOINT = "ipc:///tmp/dapps/setup";
+constexpr const char* DEFAULT_IPC_PATH = "/tmp/dapps/e3";
+constexpr int POLL_TIMEOUT_MS = 500;          // How long one read waits, so shutdown is noticed
+constexpr int SEND_TIMEOUT_MS = 500;          // Per-peer send timeout (drop a stalled peer)
+constexpr int CONNECT_ATTEMPTS = 10;          // The dApp waits for a RAN that is not up yet
+constexpr int CONNECT_PAUSE_MS = 200;
+constexpr int LISTEN_BACKLOG = 64;
+constexpr size_t MAX_PDU = MAX_PROTOCOL_DATA_SIZE * 2;   // One limit for every transport and direction
+constexpr uint32_t SCTP_PPID = 0x00E3A001;    // Project-private; no payload protocol id is registered for E3AP
+constexpr int SCTP_PROCEDURE_STREAM = 0;
+constexpr int SCTP_INDICATION_STREAM = 1;
+constexpr int64_t SETUP_PUMP_AFTER_NS = 1'000'000'000;   // The setup thread reads if receive() has been idle this long
 
-/**
- * @brief Wait for socket to become ready with timeout
- * @param sockfd Socket file descriptor
- * @param timeout_ms Timeout in milliseconds
- * @return 1 if ready, 0 if timeout, -1 on error
- */
-int wait_for_socket(int sockfd, int timeout_ms) {
-    struct pollfd pfd;
-    pfd.fd = sockfd;
-    pfd.events = POLLIN;
-    pfd.revents = 0;
+int64_t now_ns() {
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
+}
+
+/** @brief Wait for a socket to become readable: 1 if ready, 0 on timeout, -1 on error. */
+int wait_readable(int fd, int timeout_ms) {
+    struct pollfd pfd{fd, POLLIN, 0};
     return poll(&pfd, 1, timeout_ms);
 }
 
 /**
- * @brief Disable Nagle-style segment bundling on a connected data socket.
- *
- * Without this every framed message (small length prefix + payload) stalls
- * roughly one RTT waiting for the previous segment's SACK/ACK: measured as a
- * hard ~214 msg/s ceiling on SCTP regardless of offered rate. Real-time
- * control-loop traffic must be flushed per message, so NODELAY is set on
- * every accepted and connected TCP/SCTP data socket (Linux does not reliably
- * inherit it from the listener). No-op for UNIX-domain (IPC) sockets.
+ * @brief Strip a URI scheme ("ipc://", "tcp://") from an endpoint, leaving a path.
  */
+std::string strip_scheme(const std::string& endpoint) {
+    auto pos = endpoint.find("://");
+    return pos == std::string::npos ? endpoint : endpoint.substr(pos + 3);
+}
+
 /**
- * @brief Create the AF_INET stream socket for an SCTP endpoint.
+ * @brief Create a socket of the SCTP protocol.
  *
- * SCTP is optional at build time (LIBE3_ENABLE_SCTP, off by default): it is the
- * only transport needing a kernel module and a distro -dev package for one
- * header, and the deployed E3 links are IPC or TCP. The enumerator stays in the
- * ABI either way, so a caller can still ask for SCTP against a build without it
- * -- that has to fail loudly here rather than quietly fall through to TCP, which
- * would look like it worked while putting traffic on the wrong protocol.
- *
- * Returns -1 with errno set, matching socket(), so every existing caller's error
- * path already handles it.
+ * SCTP is optional at build time (LIBE3_ENABLE_SCTP, off by default). The enumerator
+ * stays in the ABI either way, so asking for SCTP against a build without it has to
+ * fail loudly here rather than fall through to TCP, which would look as if it worked
+ * while putting traffic on the wrong protocol. Returns -1 with errno set, like socket().
  */
-int sctp_stream_socket() {
+int sctp_socket(int family) {
 #ifdef LIBE3_ENABLE_SCTP
-    return socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+    return socket(family, SOCK_STREAM, IPPROTO_SCTP);
 #else
+    (void)family;
     E3_LOG_ERROR(LOG_TAG) << "SCTP transport requested but libe3 was built without it. "
                              "Rebuild with -DLIBE3_ENABLE_SCTP=ON (needs libsctp-dev), "
                              "or use the TCP or IPC transport.";
@@ -90,935 +89,1084 @@ int sctp_stream_socket() {
 #endif
 }
 
-void set_nodelay(int sockfd, E3TransportLayer transport) {
-    int one = 1;
-    int ret = 0;
-    if (transport == E3TransportLayer::TCP) {
-        ret = setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
-    } else if (transport == E3TransportLayer::SCTP) {
-#ifdef LIBE3_ENABLE_SCTP
-        ret = setsockopt(sockfd, IPPROTO_SCTP, SCTP_NODELAY, &one, sizeof(one));
-#else
-        // Unreachable: sctp_stream_socket() already failed for this transport.
-        (void)one;
-#endif
-    }
-    if (ret != 0) {
-        E3_LOG_WARN(LOG_TAG) << "Failed to set NODELAY: " << strerror(errno);
-    }
-}
-
-/**
- * @brief Bound how long a broadcast send() blocks on a single peer socket.
- *
- * A dApp that connects and then stops reading fills its socket buffer.
- * Without a send timeout the RAN's outbound I/O thread would block forever in
- * send_in_chunks, stalling delivery to every other peer and hanging stop().
- * With SO_SNDTIMEO a stalled send fails with EAGAIN/EWOULDBLOCK, the peer is
- * dropped, and the rest keep receiving, mirroring ZMQ PUB's "drop the slow
- * subscriber" behavior.
- */
-void set_send_timeout(int sockfd, int timeout_ms) {
+void set_timeout(int fd, int option, int timeout_ms, const char* name) {
     struct timeval tv;
     tv.tv_sec = timeout_ms / 1000;
     tv.tv_usec = (timeout_ms % 1000) * 1000;
-    if (setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv)) != 0) {
-        E3_LOG_WARN(LOG_TAG) << "Failed to set SO_SNDTIMEO: " << strerror(errno);
+    if (setsockopt(fd, SOL_SOCKET, option, &tv, sizeof(tv)) != 0) {
+        E3_LOG_WARN(LOG_TAG) << "Failed to set " << name << ": " << strerror(errno);
     }
 }
 
-/**
- * @brief Bound how long a blocking recv() waits on a socket.
- *
- * Used on the accepted setup connection: without it a peer that connects to
- * the setup port and never sends would wedge the setup thread in recv()
- * forever, blocking every later handshake and hanging stop() on the join
- * (shutdown() only unblocks the listeners). On timeout recv() returns
- * EAGAIN/EWOULDBLOCK and the caller drops the stale connection.
- */
-void set_recv_timeout(int sockfd, int timeout_ms) {
-    struct timeval tv;
-    tv.tv_sec = timeout_ms / 1000;
-    tv.tv_usec = (timeout_ms % 1000) * 1000;
-    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) != 0) {
-        E3_LOG_WARN(LOG_TAG) << "Failed to set SO_RCVTIMEO: " << strerror(errno);
-    }
-}
-
-/**
- * @brief Put a listening socket in non-blocking mode.
- *
- * If a client resets the connection between the poll() that reported the
- * listener readable and the following accept(), a blocking listener makes
- * accept() wait for the next connection and stalls the whole I/O thread. A
- * non-blocking listener returns EAGAIN instead, which the accept sites treat
- * as "nothing to accept right now".
- */
-void set_nonblocking(int sockfd) {
-    int flags = fcntl(sockfd, F_GETFL, 0);
-    if (flags < 0 || fcntl(sockfd, F_SETFL, flags | O_NONBLOCK) < 0) {
+void set_nonblocking(int fd) {
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (flags < 0 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0) {
         E3_LOG_WARN(LOG_TAG) << "Failed to set O_NONBLOCK: " << strerror(errno);
     }
 }
 
+// ---------------------------------------------------------------------------
+// One PDU per message
+// ---------------------------------------------------------------------------
+
+/** @brief The outcome of looking for the next PDU on a connection. */
+enum class Read { PDU, NONE, CLOSED, ERROR };
+
 /**
- * @brief Accept every connection currently pending on a listener.
+ * @brief Take a length-prefixed PDU off the front of buffered stream bytes (TCP).
  *
- * Non-blocking (0-timeout poll before each accept, and the listener itself is
- * O_NONBLOCK). Each accepted peer socket gets NODELAY and a bounded send
- * timeout, then is appended to @p peers. Returns the number of peers accepted
- * in this call.
+ * The prefix is four bytes in network order; zero and more than MAX_PDU are refused.
  */
-int drain_accept(int listener, E3TransportLayer transport,
-                 std::vector<int>& peers, const char* label) {
-    int accepted = 0;
-    while (listener >= 0 && wait_for_socket(listener, 0) == 1) {
-        int fd = accept(listener, nullptr, nullptr);
-        if (fd < 0) {
-            break;  // EAGAIN/EINTR/shutdown: nothing more to accept now
-        }
-        set_nodelay(fd, transport);
-        set_send_timeout(fd, SEND_TIMEOUT_MS);
-        peers.push_back(fd);
-        ++accepted;
-        E3_LOG_INFO(LOG_TAG) << label << " peer connected ("
-                             << peers.size() << " total)";
+Read pop_stream_frame(std::vector<uint8_t>& rx, std::vector<uint8_t>& out) {
+    if (rx.size() < sizeof(uint32_t)) {
+        return Read::NONE;
     }
-    return accepted;
-}
+    uint32_t size = 0;
+    std::memcpy(&size, rx.data(), sizeof(size));
+    size = ntohl(size);
+    if (size == 0 || size > MAX_PDU) {
+        E3_LOG_ERROR(LOG_TAG) << "Invalid PDU length " << size;
+        return Read::ERROR;
+    }
+    if (rx.size() < sizeof(uint32_t) + size) {
+        return Read::NONE;
+    }
+    out.assign(rx.begin() + sizeof(uint32_t), rx.begin() + sizeof(uint32_t) + size);
+    rx.erase(rx.begin(), rx.begin() + sizeof(uint32_t) + size);
+    return Read::PDU;
 }
 
-namespace {
+bool would_block(int error) {
+    return error == EINTR || error == EAGAIN || error == EWOULDBLOCK;
+}
+
 /**
- * @brief Strip ZMQ-style URI prefix (e.g. "ipc://", "tcp://") from endpoint strings
+ * @brief Read from @p fd once and say whether a whole PDU is now available in @p out.
  *
- * POSIX sockets need plain filesystem paths or addresses, not ZMQ URIs.
- * For IPC: "ipc:///tmp/dapps/setup" -> "/tmp/dapps/setup"
- * For TCP: "tcp://127.0.0.1:9990" -> "127.0.0.1:9990"
+ * @p rx holds what an earlier call read and did not yet make a PDU. TCP: stream bytes,
+ * parsed by the length prefix. IPC: one recv is one PDU, and a PDU longer than the
+ * buffer is an error rather than a silent cut. SCTP: one recvmsg is one fragment of a
+ * message, joined up to MSG_EOR; notifications are skipped, and a payload protocol id
+ * other than 0 and the one libe3 stamps is an error.
  */
-std::string strip_uri_prefix(const std::string& endpoint) {
-    auto pos = endpoint.find("://");
-    if (pos != std::string::npos) {
-        return endpoint.substr(pos + 3);
+Read read_one(int fd, E3TransportLayer transport, std::vector<uint8_t>& rx, std::vector<uint8_t>& out) {
+    if (transport == E3TransportLayer::TCP) {
+        if (Read buffered = pop_stream_frame(rx, out); buffered != Read::NONE) {
+            return buffered;
+        }
+        std::array<uint8_t, 16384> chunk;
+        ssize_t n = ::recv(fd, chunk.data(), chunk.size(), 0);
+        if (n > 0) {
+            rx.insert(rx.end(), chunk.begin(), chunk.begin() + n);
+            return pop_stream_frame(rx, out);
+        }
+        if (n == 0) {
+            return Read::CLOSED;
+        }
+        return would_block(errno) ? Read::NONE : Read::ERROR;
     }
-    return endpoint;
+
+    if (transport == E3TransportLayer::IPC) {
+        out.resize(MAX_PDU);
+        struct iovec iov{out.data(), out.size()};
+        struct msghdr msg{};
+        msg.msg_iov = &iov;
+        msg.msg_iovlen = 1;
+        ssize_t n = ::recvmsg(fd, &msg, 0);
+        if (n < 0) {
+            return would_block(errno) ? Read::NONE : Read::ERROR;
+        }
+        if (n == 0) {
+            return Read::CLOSED;
+        }
+        if (msg.msg_flags & MSG_TRUNC) {
+            E3_LOG_ERROR(LOG_TAG) << "PDU longer than " << MAX_PDU << " bytes";
+            return Read::ERROR;
+        }
+        out.resize(static_cast<size_t>(n));
+        return Read::PDU;
+    }
+
+#ifdef LIBE3_ENABLE_SCTP
+    static thread_local std::array<uint8_t, MAX_PDU> chunk;
+    alignas(struct cmsghdr) char control[CMSG_SPACE(sizeof(struct sctp_rcvinfo))];
+    struct iovec iov{chunk.data(), chunk.size()};
+    struct msghdr msg{};
+    msg.msg_iov = &iov;
+    msg.msg_iovlen = 1;
+    msg.msg_control = control;
+    msg.msg_controllen = sizeof(control);
+    ssize_t n = ::recvmsg(fd, &msg, 0);
+    if (n < 0) {
+        return would_block(errno) ? Read::NONE : Read::ERROR;
+    }
+    if (n == 0) {
+        return Read::CLOSED;
+    }
+    if (msg.msg_flags & MSG_NOTIFICATION) {
+        return Read::NONE;
+    }
+    if (rx.empty()) {
+        for (struct cmsghdr* c = CMSG_FIRSTHDR(&msg); c != nullptr; c = CMSG_NXTHDR(&msg, c)) {
+            if (c->cmsg_level == IPPROTO_SCTP && c->cmsg_type == SCTP_RCVINFO) {
+                struct sctp_rcvinfo info;
+                std::memcpy(&info, CMSG_DATA(c), sizeof(info));
+                const uint32_t ppid = ntohl(info.rcv_ppid);
+                if (ppid != 0 && ppid != SCTP_PPID) {
+                    E3_LOG_ERROR(LOG_TAG) << "Message with payload protocol id 0x" << std::hex << ppid;
+                    return Read::ERROR;
+                }
+            }
+        }
+    }
+    rx.insert(rx.end(), chunk.begin(), chunk.begin() + n);
+    if (rx.size() > MAX_PDU) {
+        E3_LOG_ERROR(LOG_TAG) << "PDU longer than " << MAX_PDU << " bytes";
+        return Read::ERROR;
+    }
+    if (msg.msg_flags & MSG_EOR) {
+        out = std::move(rx);
+        rx.clear();
+        return Read::PDU;
+    }
+    return Read::NONE;
+#else
+    (void)rx;
+    (void)out;
+    return Read::ERROR;
+#endif
+}
+
+/**
+ * @brief Send one PDU as one message.
+ *
+ * TCP writes the length prefix and the payload together. IPC and SCTP send the payload
+ * alone: a sequenced-packet message and an SCTP message each keep their boundary. SCTP
+ * stamps the payload protocol id and picks the stream from @p kind.
+ */
+ErrorCode write_pdu(int fd, E3TransportLayer transport, const std::vector<uint8_t>& data, PduClass kind) {
+    if (data.empty() || data.size() > MAX_PDU) {
+        E3_LOG_ERROR(LOG_TAG) << "PDU of " << data.size() << " bytes cannot be sent";
+        return ErrorCode::INVALID_PARAM;
+    }
+
+    if (transport == E3TransportLayer::TCP) {
+        uint32_t prefix = htonl(static_cast<uint32_t>(data.size()));
+        struct iovec iov[2];
+        iov[0].iov_base = &prefix;
+        iov[0].iov_len = sizeof(prefix);
+        iov[1].iov_base = const_cast<uint8_t*>(data.data());
+        iov[1].iov_len = data.size();
+        size_t first = 0;
+        const size_t total = sizeof(prefix) + data.size();
+        size_t sent = 0;
+        while (sent < total) {
+            struct iovec cur[2] = {iov[0], iov[1]};
+            size_t skip = sent;
+            first = 0;
+            while (first < 2 && skip >= cur[first].iov_len) {
+                skip -= cur[first].iov_len;
+                ++first;
+            }
+            cur[first].iov_base = static_cast<uint8_t*>(cur[first].iov_base) + skip;
+            cur[first].iov_len -= skip;
+            struct msghdr msg{};
+            msg.msg_iov = cur + first;
+            msg.msg_iovlen = 2 - first;
+            ssize_t n = ::sendmsg(fd, &msg, MSG_NOSIGNAL);
+            if (n < 0) {
+                if (errno == EINTR) {
+                    continue;
+                }
+                E3_LOG_ERROR(LOG_TAG) << "Failed to send: " << strerror(errno);
+                return ErrorCode::TRANSPORT_ERROR;
+            }
+            sent += static_cast<size_t>(n);
+        }
+        return ErrorCode::SUCCESS;
+    }
+
+    if (transport == E3TransportLayer::IPC) {
+        ssize_t n;
+        do {
+            n = ::send(fd, data.data(), data.size(), MSG_NOSIGNAL);
+        } while (n < 0 && errno == EINTR);
+        if (n < 0 || static_cast<size_t>(n) != data.size()) {
+            E3_LOG_ERROR(LOG_TAG) << "Failed to send: " << strerror(errno);
+            return ErrorCode::TRANSPORT_ERROR;
+        }
+        return ErrorCode::SUCCESS;
+    }
+
+#ifdef LIBE3_ENABLE_SCTP
+    alignas(struct cmsghdr) char control[CMSG_SPACE(sizeof(struct sctp_sndinfo))]{};
+    struct iovec iov{const_cast<uint8_t*>(data.data()), data.size()};
+    struct msghdr msg{};
+    msg.msg_iov = &iov;
+    msg.msg_iovlen = 1;
+    msg.msg_control = control;
+    msg.msg_controllen = sizeof(control);
+    struct cmsghdr* c = CMSG_FIRSTHDR(&msg);
+    c->cmsg_level = IPPROTO_SCTP;
+    c->cmsg_type = SCTP_SNDINFO;
+    c->cmsg_len = CMSG_LEN(sizeof(struct sctp_sndinfo));
+    struct sctp_sndinfo info{};
+    info.snd_sid = kind == PduClass::INDICATION ? SCTP_INDICATION_STREAM : SCTP_PROCEDURE_STREAM;
+    info.snd_ppid = htonl(SCTP_PPID);
+    std::memcpy(CMSG_DATA(c), &info, sizeof(info));
+    ssize_t n;
+    do {
+        n = ::sendmsg(fd, &msg, MSG_NOSIGNAL);
+    } while (n < 0 && errno == EINTR);
+    if (n < 0 || static_cast<size_t>(n) != data.size()) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to send: " << strerror(errno);
+        return ErrorCode::TRANSPORT_ERROR;
+    }
+    return ErrorCode::SUCCESS;
+#else
+    (void)kind;
+    return ErrorCode::TRANSPORT_ERROR;
+#endif
+}
+
+/** @brief The text of a peer's address, with an IPv4-mapped IPv6 address shown as IPv4. */
+std::string address_text(const sockaddr_storage& ss) {
+    char text[INET6_ADDRSTRLEN] = {};
+    if (ss.ss_family == AF_INET) {
+        const auto* in = reinterpret_cast<const sockaddr_in*>(&ss);
+        inet_ntop(AF_INET, &in->sin_addr, text, sizeof(text));
+    } else if (ss.ss_family == AF_INET6) {
+        const auto* in6 = reinterpret_cast<const sockaddr_in6*>(&ss);
+        if (IN6_IS_ADDR_V4MAPPED(&in6->sin6_addr)) {
+            inet_ntop(AF_INET, &in6->sin6_addr.s6_addr[12], text, sizeof(text));
+        } else {
+            inet_ntop(AF_INET6, &in6->sin6_addr, text, sizeof(text));
+        }
+    }
+    return text;
 }
 } // anonymous namespace
 
+/** @brief One accepted connection of a RAN. Closes its socket when the last reference goes. */
+struct PosixE3Connector::Peer {
+    int fd;                            ///< The connection
+    uint64_t token;                    ///< Never reused by this connector
+    std::vector<uint8_t> rx;           ///< Bytes read and not yet a whole PDU; the reader's alone
+    bool seen_first{false};            ///< The first PDU, the setup request, was read; the reader's alone
+    std::mutex write_mutex;            ///< One writer at a time
+
+    /**
+     * @brief Take over an accepted connection.
+     * @param f The connected socket, which this object closes
+     * @param t The token that names the connection
+     */
+    Peer(int f, uint64_t t) : fd(f), token(t) {}
+
+    /** @brief Close the socket. */
+    ~Peer() {
+        if (fd >= 0) {
+            ::close(fd);
+        }
+    }
+};
+
+/** @brief A PDU read from a peer and waiting for the thread that takes it. */
+struct PosixE3Connector::Queued {
+    std::shared_ptr<Peer> peer;        ///< Who sent it
+    uint64_t token{0};                 ///< The sender's token
+    std::vector<uint8_t> data;         ///< The PDU
+};
+
 PosixE3Connector::PosixE3Connector(
     E3TransportLayer transport_layer,
-    const std::string& setup_endpoint,
-    const std::string& inbound_endpoint,
-    const std::string& outbound_endpoint,
-    uint16_t setup_port,
-    uint16_t inbound_port,
-    uint16_t outbound_port
+    const std::string& endpoint,
+    uint16_t port,
+    const PosixOptions& options
 )
     : transport_layer_(transport_layer)
-    , setup_connection_socket_(UNUSED_SOCKET)
-    , inbound_connection_socket_(UNUSED_SOCKET)
-    , outbound_connection_socket_(UNUSED_SOCKET)
-    , setup_port_(setup_port)
-    , inbound_port_(inbound_port)
-    , outbound_port_(outbound_port)
+    , endpoint_uri_(endpoint)
+    , port_(port)
+    , options_(options)
 {
-    setup_endpoint_ = strip_uri_prefix(setup_endpoint);
-    inbound_endpoint_ = strip_uri_prefix(inbound_endpoint);
-    outbound_endpoint_ = strip_uri_prefix(outbound_endpoint);
-
-    E3_LOG_INFO(LOG_TAG) << "Creating POSIX connector";
-    E3_LOG_DEBUG(LOG_TAG) << "  Setup endpoint: " << setup_endpoint_;
-    E3_LOG_DEBUG(LOG_TAG) << "  Inbound endpoint: " << inbound_endpoint_;
-    E3_LOG_DEBUG(LOG_TAG) << "  Outbound endpoint: " << outbound_endpoint_;
-    E3_LOG_DEBUG(LOG_TAG) << "  Setup port: " << setup_port_;
-    E3_LOG_DEBUG(LOG_TAG) << "  Inbound port: " << inbound_port_;
-    E3_LOG_DEBUG(LOG_TAG) << "  Outbound port: " << outbound_port_;
+    if (transport_layer == E3TransportLayer::IPC) {
+        setup_endpoint_ = endpoint == SHARED_DEFAULT_ENDPOINT ? DEFAULT_IPC_PATH : strip_scheme(endpoint);
+    } else {
+        setup_endpoint_ = endpoint;
+    }
+    E3_LOG_INFO(LOG_TAG) << "Creating POSIX connector, one endpoint: " << setup_endpoint_
+                         << " port " << port_;
 }
 
 PosixE3Connector::~PosixE3Connector() {
     dispose();
 }
 
-ErrorCode PosixE3Connector::setup_initial_connection() {
-    int sock;
-    int ret;
-    
-    // Create IPC directory if needed
+PosixE3Connector::Target PosixE3Connector::target() const {
+    Target where{"", std::to_string(port_)};
+    std::string rest;
+    for (const char* scheme : {"tcp://", "sctp://"}) {
+        if (endpoint_uri_.rfind(scheme, 0) == 0) {
+            rest = endpoint_uri_.substr(std::strlen(scheme));
+            break;
+        }
+    }
+    if (rest.empty()) {
+        return where;
+    }
+    if (rest[0] == '[') {
+        const auto close = rest.find(']');
+        if (close == std::string::npos) {
+            return where;
+        }
+        where.host = rest.substr(1, close - 1);
+        if (close + 1 < rest.size() && rest[close + 1] == ':') {
+            where.port = rest.substr(close + 2);
+        }
+    } else {
+        const auto colon = rest.rfind(':');
+        if (colon != std::string::npos && rest.find(':') == colon) {
+            where.host = rest.substr(0, colon);
+            where.port = rest.substr(colon + 1);
+        } else {
+            where.host = rest;
+        }
+    }
+    if (where.port.empty()) {
+        where.port = std::to_string(port_);
+    }
+    return where;
+}
+
+int PosixE3Connector::make_socket(int family) const {
+    switch (transport_layer_) {
+        case E3TransportLayer::IPC:
+            return socket(AF_UNIX, SOCK_SEQPACKET, 0);
+        case E3TransportLayer::SCTP:
+            return sctp_socket(family);
+        default:
+            return socket(family, SOCK_STREAM, 0);
+    }
+}
+
+void PosixE3Connector::tune_socket(int fd, SocketKind kind) const {
     if (transport_layer_ == E3TransportLayer::IPC) {
-        struct stat st{};
-        if (stat(IPC_BASE_DIR, &st) == -1) {
-            if (mkdir(IPC_BASE_DIR, 0777) == -1 && errno != EEXIST) {
-                E3_LOG_ERROR(LOG_TAG) << "Failed to create IPC directory: " << strerror(errno);
-                return ErrorCode::CONNECTION_FAILED;
+        if (kind == SocketKind::ACCEPTED) {
+            set_timeout(fd, SO_SNDTIMEO, SEND_TIMEOUT_MS, "SO_SNDTIMEO");
+        }
+        return;
+    }
+    const int one = 1;
+    if (kind == SocketKind::LISTENER) {
+        setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+    }
+    if (kind != SocketKind::LISTENER) {
+        set_timeout(fd, SO_SNDTIMEO, SEND_TIMEOUT_MS, "SO_SNDTIMEO");
+    }
+    if (transport_layer_ == E3TransportLayer::TCP) {
+        if (kind != SocketKind::LISTENER && setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one)) != 0) {
+            E3_LOG_WARN(LOG_TAG) << "Failed to set TCP_NODELAY: " << strerror(errno);
+        }
+        return;
+    }
+#ifdef LIBE3_ENABLE_SCTP
+    if (kind != SocketKind::ACCEPTED) {
+        // Before the association exists, on both peers: two streams, and buffers and
+        // delayed SACK that do not stall a message larger than the Linux defaults allow.
+        struct sctp_initmsg init{};
+        init.sinit_num_ostreams = 2;
+        init.sinit_max_instreams = 2;
+        if (setsockopt(fd, IPPROTO_SCTP, SCTP_INITMSG, &init, sizeof(init)) != 0) {
+            E3_LOG_WARN(LOG_TAG) << "Failed to request two SCTP streams: " << strerror(errno);
+        }
+        if (options_.socket_buffer_bytes > 0) {
+            const int size = static_cast<int>(options_.socket_buffer_bytes);
+            setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &size, sizeof(size));
+            setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
+        }
+        if (!options_.sctp_delayed_sack) {
+            struct sctp_sack_info sack{};
+            sack.sack_assoc_id = 0;
+            sack.sack_delay = 0;
+            sack.sack_freq = 1;
+            if (setsockopt(fd, IPPROTO_SCTP, SCTP_DELAYED_SACK, &sack, sizeof(sack)) != 0) {
+                E3_LOG_WARN(LOG_TAG) << "Failed to turn delayed SACK off: " << strerror(errno);
             }
         }
+    }
+    if (kind != SocketKind::LISTENER) {
+        if (setsockopt(fd, IPPROTO_SCTP, SCTP_NODELAY, &one, sizeof(one)) != 0) {
+            E3_LOG_WARN(LOG_TAG) << "Failed to set SCTP_NODELAY: " << strerror(errno);
+        }
+        if (setsockopt(fd, IPPROTO_SCTP, SCTP_RECVRCVINFO, &one, sizeof(one)) != 0) {
+            E3_LOG_WARN(LOG_TAG) << "Failed to ask for the SCTP receive info: " << strerror(errno);
+        }
+    }
+#endif
+}
+
+int PosixE3Connector::listen_on(const Target& where) {
+    int fd = -1;
+    int result = -1;
+    if (transport_layer_ == E3TransportLayer::IPC) {
+        struct stat st{};
+        if (stat(IPC_BASE_DIR, &st) == -1 && mkdir(IPC_BASE_DIR, 0777) == -1 && errno != EEXIST) {
+            E3_LOG_ERROR(LOG_TAG) << "Failed to create IPC directory: " << strerror(errno);
+            return -1;
+        }
         chmod(IPC_BASE_DIR, 0777);
-    }
-    
-    if (transport_layer_ == E3TransportLayer::SCTP) {
-        sock = sctp_stream_socket();
-        int reuse = 1;
-        setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
-        struct sockaddr_in addr{};
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(setup_port_);
-        addr.sin_addr.s_addr = INADDR_ANY;
-        ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
-    }
-    else if (transport_layer_ == E3TransportLayer::TCP) {
-        sock = socket(AF_INET, SOCK_STREAM, 0);
-        int reuse = 1;
-        setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
-        struct sockaddr_in addr{};
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(setup_port_);
-        addr.sin_addr.s_addr = INADDR_ANY;
-        ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
-    }
-    else { // IPC
-        sock = socket(AF_UNIX, SOCK_STREAM, 0);
+        if (setup_endpoint_.size() >= sizeof(sockaddr_un::sun_path)) {
+            E3_LOG_ERROR(LOG_TAG) << "IPC path is too long: " << setup_endpoint_;
+            return -1;
+        }
+        fd = make_socket(AF_UNIX);
+        if (fd < 0) {
+            return -1;
+        }
         struct sockaddr_un addr{};
         addr.sun_family = AF_UNIX;
-        strncpy(addr.sun_path, setup_endpoint_.c_str(), sizeof(addr.sun_path) - 1);
-        unlink(setup_endpoint_.c_str()); // Remove existing socket file
-        ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
+        std::memcpy(addr.sun_path, setup_endpoint_.c_str(), setup_endpoint_.size());
+        unlink(setup_endpoint_.c_str());
+        result = bind(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
+    } else if (where.host.empty()) {
+        // Any address, both families: a dual-stack socket, or IPv4 alone where there is no IPv6.
+        fd = make_socket(AF_INET6);
+        if (fd >= 0) {
+            const int off = 0;
+            setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &off, sizeof(off));
+            tune_socket(fd, SocketKind::LISTENER);
+            struct sockaddr_in6 addr{};
+            addr.sin6_family = AF_INET6;
+            addr.sin6_addr = in6addr_any;
+            addr.sin6_port = htons(static_cast<uint16_t>(std::stoi(where.port)));
+            result = bind(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
+            if (result < 0) {
+                close(fd);
+                fd = -1;
+            }
+        }
+        if (fd < 0) {
+            fd = make_socket(AF_INET);
+            if (fd < 0) {
+                return -1;
+            }
+            tune_socket(fd, SocketKind::LISTENER);
+            struct sockaddr_in addr{};
+            addr.sin_family = AF_INET;
+            addr.sin_addr.s_addr = INADDR_ANY;
+            addr.sin_port = htons(static_cast<uint16_t>(std::stoi(where.port)));
+            result = bind(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
+        }
+    } else {
+        struct addrinfo hints{};
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_flags = AI_PASSIVE;
+        struct addrinfo* found = nullptr;
+        if (getaddrinfo(where.host.c_str(), where.port.c_str(), &hints, &found) != 0 || found == nullptr) {
+            E3_LOG_ERROR(LOG_TAG) << "Cannot resolve " << where.host;
+            return -1;
+        }
+        fd = make_socket(found->ai_family);
+        if (fd >= 0) {
+            tune_socket(fd, SocketKind::LISTENER);
+            result = bind(fd, found->ai_addr, found->ai_addrlen);
+        }
+        freeaddrinfo(found);
+        if (fd < 0) {
+            return -1;
+        }
     }
-    
-    if (sock < 0) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to create setup socket: " << strerror(errno);
-        return ErrorCode::CONNECTION_FAILED;
+    if (result < 0 || listen(fd, LISTEN_BACKLOG) < 0) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to listen on " << setup_endpoint_ << ": " << strerror(errno);
+        close(fd);
+        return -1;
     }
-    
-    if (ret < 0) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to bind setup socket: " << strerror(errno);
-        close(sock);
-        return ErrorCode::CONNECTION_FAILED;
-    }
-    
-    ret = listen(sock, 5);
-    if (ret < 0) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to listen on setup socket: " << strerror(errno);
-        close(sock);
-        return ErrorCode::CONNECTION_FAILED;
-    }
-    set_nonblocking(sock);  // accept() must not block the setup thread on a client RST
+    set_nonblocking(fd);
+    return fd;
+}
 
-    setup_socket_ = sock;
+int PosixE3Connector::connect_to(const Target& where) {
+    if (transport_layer_ == E3TransportLayer::IPC) {
+        if (setup_endpoint_.size() >= sizeof(sockaddr_un::sun_path)) {
+            errno = ENAMETOOLONG;
+            return -1;
+        }
+        int fd = make_socket(AF_UNIX);
+        if (fd < 0) {
+            return -1;
+        }
+        struct sockaddr_un addr{};
+        addr.sun_family = AF_UNIX;
+        std::memcpy(addr.sun_path, setup_endpoint_.c_str(), setup_endpoint_.size());
+        if (connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) < 0) {
+            const int saved = errno;
+            close(fd);
+            errno = saved;
+            return -1;
+        }
+        tune_socket(fd, SocketKind::CLIENT);
+        return fd;
+    }
+    struct addrinfo hints{};
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    struct addrinfo* found = nullptr;
+    const std::string host = where.host.empty() ? "127.0.0.1" : where.host;
+    if (getaddrinfo(host.c_str(), where.port.c_str(), &hints, &found) != 0 || found == nullptr) {
+        errno = EHOSTUNREACH;
+        return -1;
+    }
+    int fd = -1;
+    int saved = ECONNREFUSED;
+    for (struct addrinfo* a = found; a != nullptr && fd < 0; a = a->ai_next) {
+        int candidate = make_socket(a->ai_family);
+        if (candidate < 0) {
+            saved = errno;
+            continue;
+        }
+        tune_socket(candidate, SocketKind::CLIENT);
+        if (connect(candidate, a->ai_addr, a->ai_addrlen) == 0) {
+            fd = candidate;
+        } else {
+            saved = errno;
+            close(candidate);
+        }
+    }
+    freeaddrinfo(found);
+    if (fd < 0) {
+        errno = saved;
+    }
+    return fd;
+}
+
+bool PosixE3Connector::admit(const void* address) const {
+    if (transport_layer_ == E3TransportLayer::IPC) {
+        return true;
+    }
+    const auto& ss = *static_cast<const sockaddr_storage*>(address);
+    if (!options_.allowed_peers.empty()) {
+        const std::string text = address_text(ss);
+        if (std::find(options_.allowed_peers.begin(), options_.allowed_peers.end(), text)
+                == options_.allowed_peers.end()) {
+            E3_LOG_WARN(LOG_TAG) << "Refused a connection from " << text << ": not in the allowed peers";
+            return false;
+        }
+    }
+    if (options_.maximum_associations > 0) {
+        std::lock_guard<std::mutex> lock(peers_mutex_);
+        if (peers_.size() >= options_.maximum_associations) {
+            E3_LOG_WARN(LOG_TAG) << "Refused a connection from " << address_text(ss)
+                                 << ": " << options_.maximum_associations << " peers are connected";
+            return false;
+        }
+    }
+    return true;
+}
+
+// ===========================================================================
+// RAN role
+// ===========================================================================
+
+ErrorCode PosixE3Connector::setup_initial_connection() {
+    listener_ = listen_on(target());
+    if (listener_ < 0) {
+        return ErrorCode::CONNECTION_FAILED;
+    }
     connected_ = true;
-    
-    E3_LOG_INFO(LOG_TAG) << "Setup socket listening on " << setup_endpoint_;
-    return ErrorCode::SUCCESS;
-}
-
-int PosixE3Connector::recv_setup_request(std::vector<uint8_t>& buffer) {
-    if (setup_socket_ < 0) {
-        return static_cast<int>(ErrorCode::NOT_CONNECTED);
-    }
-    
-    // Wait for incoming connection with timeout
-    int poll_ret = wait_for_socket(setup_socket_, POLL_TIMEOUT_MS);
-    if (poll_ret == 0) {
-        // Timeout - return 0 to allow shutdown check
-        return 0;
-    }
-    if (poll_ret < 0) {
-        if (errno == EINTR) {
-            return 0;  // Interrupted, allow shutdown check
-        }
-        E3_LOG_ERROR(LOG_TAG) << "Poll failed on setup socket: " << strerror(errno);
-        return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
-    }
-    
-    // Close the previous accepted setup connection before accepting a new one;
-    // otherwise every dApp after the first leaks one fd. The prior setup
-    // exchange's send_response has already completed by the time the setup
-    // loop calls recv_setup_request again.
-    if (setup_connection_socket_ >= 0) {
-        close(setup_connection_socket_);
-        setup_connection_socket_ = -1;
-    }
-
-    // Accept connection
-    setup_connection_socket_ = accept(setup_socket_, nullptr, nullptr);
-    if (setup_connection_socket_ < 0) {
-        if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK || shutdown_requested_.load()) {
-            return 0;  // Allow shutdown check
-        }
-        E3_LOG_ERROR(LOG_TAG) << "Failed to accept setup connection: " << strerror(errno);
-        return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
-    }
-    set_nodelay(setup_connection_socket_, transport_layer_);
-    // Bound the blocking recv below so a peer that connects and never sends
-    // cannot wedge the setup thread (and hang stop()) or block later handshakes.
-    set_recv_timeout(setup_connection_socket_, SETUP_RECV_TIMEOUT_MS);
-
-    buffer.resize(DEFAULT_BUFFER_SIZE);
-    ssize_t ret = recv(setup_connection_socket_, buffer.data(), buffer.size(), 0);
-    if (ret < 0) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
-            // Silent (or interrupted) peer: drop this connection and let the
-            // setup loop re-poll the listener / observe shutdown, rather than
-            // blocking here and starving other dApps' handshakes.
-            close(setup_connection_socket_);
-            setup_connection_socket_ = -1;
-            return 0;
-        }
-        E3_LOG_ERROR(LOG_TAG) << "Failed to receive setup request: " << strerror(errno);
-        return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
-    }
-    
-    buffer.resize(static_cast<size_t>(ret));
-    E3_LOG_DEBUG(LOG_TAG) << "Received setup request: " << ret << " bytes";
-    return static_cast<int>(ret);
-}
-
-ErrorCode PosixE3Connector::send_response(const std::vector<uint8_t>& data) {
-    if (setup_connection_socket_ < 0) {
-        return ErrorCode::NOT_CONNECTED;
-    }
-    
-    int ret = send_in_chunks(setup_connection_socket_, data.data(), data.size());
-    if (ret < 0) {
-        return ErrorCode::TRANSPORT_ERROR;
-    }
-    
-    E3_LOG_DEBUG(LOG_TAG) << "Sent response: " << data.size() << " bytes";
+    E3_LOG_INFO(LOG_TAG) << "Listening on " << setup_endpoint_ << " port " << port_;
     return ErrorCode::SUCCESS;
 }
 
 ErrorCode PosixE3Connector::setup_inbound_connection() {
-    int sock;
-    int ret;
-    
-    // Ensure IPC directory exists (defensive — setup_initial_connection normally creates it)
-    if (transport_layer_ == E3TransportLayer::IPC) {
-        struct stat st{};
-        if (stat(IPC_BASE_DIR, &st) == -1) {
-            if (mkdir(IPC_BASE_DIR, 0777) == -1 && errno != EEXIST) {
-                E3_LOG_ERROR(LOG_TAG) << "Failed to create IPC directory: " << strerror(errno);
-                return ErrorCode::CONNECTION_FAILED;
-            }
-        }
-        chmod(IPC_BASE_DIR, 0777);
-    }
-    
-    if (transport_layer_ == E3TransportLayer::SCTP) {
-        sock = sctp_stream_socket();
-        int reuse = 1;
-        setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
-        struct sockaddr_in addr{};
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(inbound_port_);
-        addr.sin_addr.s_addr = INADDR_ANY;
-        ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
-    }
-    else if (transport_layer_ == E3TransportLayer::TCP) {
-        sock = socket(AF_INET, SOCK_STREAM, 0);
-        int reuse = 1;
-        setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
-        struct sockaddr_in addr{};
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(inbound_port_);
-        addr.sin_addr.s_addr = INADDR_ANY;
-        ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
-    }
-    else { // IPC
-        sock = socket(AF_UNIX, SOCK_STREAM, 0);
-        struct sockaddr_un addr{};
-        addr.sun_family = AF_UNIX;
-        strncpy(addr.sun_path, inbound_endpoint_.c_str(), sizeof(addr.sun_path) - 1);
-        unlink(inbound_endpoint_.c_str());
-        ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
-    }
-    
-    if (sock < 0) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to create inbound socket: " << strerror(errno);
-        return ErrorCode::CONNECTION_FAILED;
-    }
-    
-    if (ret < 0) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to bind inbound socket: " << strerror(errno);
-        close(sock);
-        return ErrorCode::CONNECTION_FAILED;
-    }
-    
-    ret = listen(sock, 5);
-    if (ret < 0) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to listen on inbound socket: " << strerror(errno);
-        close(sock);
-        return ErrorCode::CONNECTION_FAILED;
-    }
-    set_nonblocking(sock);  // drain_accept() must not block the inbound thread on a client RST
-
-    inbound_socket_ = sock;
-
-    // Multi-peer: do not block waiting for the first dApp here. receive()
-    // polls the listener alongside every accepted peer socket, so peers can
-    // attach (and re-attach) at any point in the connector's lifetime.
-    E3_LOG_INFO(LOG_TAG) << "Inbound listener ready (multi-peer)";
-    return ErrorCode::SUCCESS;
+    // The endpoint that setup_initial_connection() opened carries the inbound traffic too.
+    return listener_ >= 0 ? ErrorCode::SUCCESS : ErrorCode::NOT_INITIALIZED;
 }
 
-int PosixE3Connector::receive(std::vector<uint8_t>& buffer) {
-    // On the dApp role our peer (RAN) uses send() = send_in_chunks() which
-    // emits a 4-byte length-prefix frame, so we decode it accordingly. The
-    // dApp keeps its original single-socket path.
-    if (role_ == E3Role::DAPP) {
-        if (inbound_connection_socket_ < 0) {
-            return static_cast<int>(ErrorCode::NOT_CONNECTED);
+ErrorCode PosixE3Connector::setup_outbound_connection() {
+    // The same connections carry the outbound traffic.
+    return listener_ >= 0 ? ErrorCode::SUCCESS : ErrorCode::NOT_INITIALIZED;
+}
+
+void PosixE3Connector::accept_pending() {
+    while (listener_ >= 0 && wait_readable(listener_, 0) == 1) {
+        sockaddr_storage address{};
+        socklen_t length = sizeof(address);
+        int fd = accept(listener_, reinterpret_cast<struct sockaddr*>(&address), &length);
+        if (fd < 0) {
+            break;  // Nothing more to accept now
         }
-        int poll_ret = wait_for_socket(inbound_connection_socket_, POLL_TIMEOUT_MS);
-        if (poll_ret == 0) {
-            return 0;  // Timeout - allow shutdown check
+        if (!admit(&address)) {
+            close(fd);
+            continue;
         }
-        if (poll_ret < 0) {
-            if (errno == EINTR) {
-                return 0;  // Interrupted, allow shutdown check
-            }
-            E3_LOG_ERROR(LOG_TAG) << "Poll failed on receive: " << strerror(errno);
-            return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
+        tune_socket(fd, SocketKind::ACCEPTED);
+        auto peer = std::make_shared<Peer>(fd, next_token_++);
+        size_t count;
+        {
+            std::lock_guard<std::mutex> lock(peers_mutex_);
+            peers_.push_back(peer);
+            count = peers_.size();
         }
-        return recv_with_size(inbound_connection_socket_, buffer);
+        E3_LOG_INFO(LOG_TAG) << "Peer connected (" << count << " total)";
+    }
+}
+
+std::shared_ptr<PosixE3Connector::Peer> PosixE3Connector::find_peer(uint64_t token) {
+    std::lock_guard<std::mutex> lock(peers_mutex_);
+    for (const auto& peer : peers_) {
+        if (peer->token == token) {
+            return peer;
+        }
+    }
+    return nullptr;
+}
+
+void PosixE3Connector::drop_peer(const std::shared_ptr<Peer>& peer) {
+    ::shutdown(peer->fd, SHUT_RDWR);
+    size_t remaining;
+    {
+        std::lock_guard<std::mutex> lock(peers_mutex_);
+        peers_.erase(std::remove(peers_.begin(), peers_.end(), peer), peers_.end());
+        remaining = peers_.size();
+    }
+    {
+        std::lock_guard<std::mutex> lock(closed_mutex_);
+        closed_peers_.push_back(peer->token);
+    }
+    if (!peer->seen_first) {
+        E3_LOG_INFO(LOG_TAG) << "A connection closed before it sent a complete setup request. A dApp built "
+                                "before libe3 0.6 uses three connections and unframed messages, which "
+                                "this endpoint does not serve.";
+    }
+    E3_LOG_INFO(LOG_TAG) << "Peer disconnected (" << remaining << " remain)";
+}
+
+void PosixE3Connector::push_setup(const std::shared_ptr<Peer>& peer, std::vector<uint8_t>&& pdu) {
+    {
+        std::lock_guard<std::mutex> lock(queue_mutex_);
+        setup_queue_.push_back(Queued{peer, peer->token, std::move(pdu)});
+    }
+    setup_ready_.notify_one();
+}
+
+bool PosixE3Connector::receiver_idle() const {
+    return now_ns() - last_receive_ns_.load() > SETUP_PUMP_AFTER_NS;
+}
+
+/**
+ * Look for one PDU for the inbound path, for at most @p timeout_ms. Whoever calls this
+ * holds reader_mutex_. The first PDU of a connection is the setup request and is queued
+ * for recv_setup_request() instead. A connection that closed is dropped only after every
+ * PDU it had sent was handed on.
+ */
+bool PosixE3Connector::pump(std::vector<uint8_t>& out, uint64_t& token, int timeout_ms) {
+    std::vector<std::shared_ptr<Peer>> snapshot;
+    {
+        std::lock_guard<std::mutex> lock(peers_mutex_);
+        snapshot = peers_;
     }
 
-    // RAN role, multi-peer: poll the listener (new peers) plus every
-    // accepted subscriber socket. Raw (unframed) recv per peer is preserved
-    // for compatibility with the Python dApp framework's framing convention.
-    if (inbound_socket_ < 0) {
-        return static_cast<int>(ErrorCode::NOT_CONNECTED);
+    // Stream bytes read earlier may already hold a whole PDU.
+    for (const auto& peer : snapshot) {
+        if (transport_layer_ != E3TransportLayer::TCP) {
+            break;
+        }
+        while (!peer->rx.empty()) {
+            Read r = pop_stream_frame(peer->rx, out);
+            if (r == Read::ERROR) {
+                drop_peer(peer);
+                break;
+            }
+            if (r != Read::PDU) {
+                break;
+            }
+            if (!peer->seen_first) {
+                peer->seen_first = true;
+                push_setup(peer, std::move(out));
+                continue;
+            }
+            token = peer->token;
+            return true;
+        }
     }
 
     std::vector<struct pollfd> pfds;
-    pfds.reserve(1 + inbound_peer_sockets_.size());
-    pfds.push_back({inbound_socket_, POLLIN, 0});
-    for (int fd : inbound_peer_sockets_) {
-        pfds.push_back({fd, POLLIN, 0});
+    pfds.reserve(1 + snapshot.size());
+    pfds.push_back({listener_, POLLIN, 0});
+    for (const auto& peer : snapshot) {
+        pfds.push_back({peer->fd, POLLIN, 0});
     }
-
-    int poll_ret = poll(pfds.data(), pfds.size(), POLL_TIMEOUT_MS);
-    if (poll_ret == 0) {
-        return 0;  // Timeout - allow shutdown check
+    int ready = poll(pfds.data(), pfds.size(), timeout_ms);
+    if (ready <= 0) {
+        return false;
     }
-    if (poll_ret < 0) {
-        if (errno == EINTR) {
-            return 0;  // Interrupted, allow shutdown check
-        }
-        E3_LOG_ERROR(LOG_TAG) << "Poll failed on receive: " << strerror(errno);
-        return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
-    }
-
     if (pfds[0].revents & POLLIN) {
-        if (drain_accept(inbound_socket_, transport_layer_, inbound_peer_sockets_,
-                         "Inbound (subscriber)") > 0) {
-            for (int fd : inbound_peer_sockets_) {
-                if (inbound_peer_tokens_.count(fd) == 0) {
-                    inbound_peer_tokens_[fd] = next_peer_token_++;
-                }
-            }
-        }
+        accept_pending();
     }
 
-    // Read from the next ready peer, returning its data (remaining ready peers
-    // stay readable and are picked up on the next call; the inbound loop calls
-    // receive() continuously). The scan starts from a rotating cursor so a peer
-    // with continuously-queued data cannot starve the others.
-    const size_t n_peers = pfds.size() - 1;  // pfds[0] is the listener
-    for (size_t k = 0; k < n_peers; ++k) {
-        const size_t idx = (inbound_rr_ + k) % n_peers;  // 0-based peer index
-        const size_t i = idx + 1;                        // pfds index (0 == listener)
-        const short re = pfds[i].revents;
-        if (!(re & (POLLIN | POLLHUP | POLLERR | POLLNVAL))) {
+    const size_t count = snapshot.size();
+    for (size_t k = 0; k < count; ++k) {
+        const size_t index = (round_robin_ + k) % count;
+        const auto& peer = snapshot[index];
+        if (!(pfds[index + 1].revents & (POLLIN | POLLHUP | POLLERR | POLLNVAL))) {
             continue;
         }
-        const int fd = pfds[i].fd;
-        bool broken = (re & (POLLHUP | POLLERR | POLLNVAL)) != 0;
-        ssize_t ret = -1;
-        if (re & POLLIN) {
-            buffer.resize(DEFAULT_BUFFER_SIZE);
-            ret = recv(fd, buffer.data(), buffer.size(), 0);
-            if (ret == 0) {
-                broken = true;
-            } else if (ret < 0 && errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK) {
-                broken = true;
+        Read r = read_one(peer->fd, transport_layer_, peer->rx, out);
+        if (r == Read::PDU) {
+            if (!peer->seen_first) {
+                peer->seen_first = true;
+                push_setup(peer, std::move(out));
+                continue;
             }
+            round_robin_ = index + 1;
+            token = peer->token;
+            return true;
         }
-        // Deliver any bytes we actually read before acting on a broken flag: on
-        // AF_UNIX/IPC a clean disconnect after a final message (control, report,
-        // release) arrives as POLLIN|POLLHUP on the same poll, so dropping first
-        // would silently lose that last message. A broken peer with nothing left
-        // to read is dropped on the next call, where recv() returns 0/EAGAIN and
-        // ret > 0 is false (this also keeps the 100% CPU busy-loop guarded: a
-        // half-broken socket with no data drops immediately below).
-        if (ret > 0) {
-            buffer.resize(static_cast<size_t>(ret));
-            E3_LOG_TRACE(LOG_TAG) << "Received: " << ret << " bytes";
-            inbound_rr_ = idx + 1;  // next call starts after the peer we just served
-            last_peer_token_ = inbound_peer_tokens_[fd];
-            return static_cast<int>(ret);
+        if (r == Read::ERROR && !peer->seen_first && transport_layer_ == E3TransportLayer::TCP) {
+            E3_LOG_INFO(LOG_TAG) << "The first message is not a length-prefixed PDU. A dApp built before "
+                                    "libe3 0.6 sends its setup request without a prefix.";
         }
-        if (broken) {
-            // Peer closed or hard error and nothing left to deliver: drop it and
-            // keep serving the rest. pfds is a local copy, so continuing to scan
-            // its other fds is safe.
-            close(fd);
-            inbound_peer_sockets_.erase(
-                std::remove(inbound_peer_sockets_.begin(),
-                            inbound_peer_sockets_.end(), fd),
-                inbound_peer_sockets_.end());
-            if (auto token = inbound_peer_tokens_.find(fd); token != inbound_peer_tokens_.end()) {
-                closed_peers_.push_back(token->second);
-                inbound_peer_tokens_.erase(token);
-            }
-            E3_LOG_INFO(LOG_TAG) << "Inbound (subscriber) peer disconnected ("
-                                 << inbound_peer_sockets_.size() << " remain)";
-            continue;
+        if (r == Read::CLOSED || r == Read::ERROR
+            || (r == Read::NONE && (pfds[index + 1].revents & (POLLERR | POLLNVAL)))) {
+            drop_peer(peer);
         }
     }
-    // Nothing read this round: advance the cursor so the start point keeps rotating.
-    if (n_peers > 0) {
-        inbound_rr_ = (inbound_rr_ + 1) % n_peers;
+    if (count > 0) {
+        round_robin_ = (round_robin_ + 1) % count;
+    }
+    return false;
+}
+
+int PosixE3Connector::receive(std::vector<uint8_t>& buffer) {
+    if (role_ == E3Role::DAPP) {
+        return receive_client(buffer);
+    }
+    if (listener_ < 0) {
+        return static_cast<int>(ErrorCode::NOT_CONNECTED);
+    }
+    last_receive_ns_.store(now_ns());
+    {
+        std::lock_guard<std::mutex> lock(queue_mutex_);
+        if (!inbound_queue_.empty()) {
+            Queued item = std::move(inbound_queue_.front());
+            inbound_queue_.pop_front();
+            buffer = std::move(item.data);
+            last_peer_token_ = item.token;
+            return static_cast<int>(buffer.size());
+        }
+    }
+    std::lock_guard<std::mutex> reader(reader_mutex_);
+    uint64_t token = 0;
+    if (pump(buffer, token, POLL_TIMEOUT_MS)) {
+        last_peer_token_ = token;
+        return static_cast<int>(buffer.size());
     }
     return 0;
+}
+
+int PosixE3Connector::recv_setup_request(std::vector<uint8_t>& buffer) {
+    if (listener_ < 0) {
+        return static_cast<int>(ErrorCode::NOT_CONNECTED);
+    }
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(POLL_TIMEOUT_MS);
+    for (;;) {
+        {
+            std::unique_lock<std::mutex> lock(queue_mutex_);
+            if (!setup_queue_.empty()) {
+                Queued item = std::move(setup_queue_.front());
+                setup_queue_.pop_front();
+                buffer = std::move(item.data);
+                setup_peer_ = item.peer;
+                last_setup_token_ = item.token;
+                return static_cast<int>(buffer.size());
+            }
+        }
+        if (shutdown_requested_.load() || std::chrono::steady_clock::now() >= deadline) {
+            return 0;
+        }
+        // The inbound thread is the reader. When nothing calls receive() (a caller that only
+        // serves setup), this thread reads instead.
+        if (receiver_idle() && reader_mutex_.try_lock()) {
+            std::vector<uint8_t> pdu;
+            uint64_t token = 0;
+            if (pump(pdu, token, 100)) {
+                std::lock_guard<std::mutex> lock(queue_mutex_);
+                inbound_queue_.push_back(Queued{nullptr, token, std::move(pdu)});
+            }
+            reader_mutex_.unlock();
+        } else {
+            std::unique_lock<std::mutex> lock(queue_mutex_);
+            setup_ready_.wait_for(lock, std::chrono::milliseconds(50),
+                                  [this] { return !setup_queue_.empty() || shutdown_requested_.load(); });
+        }
+    }
+}
+
+ErrorCode PosixE3Connector::send_response(const std::vector<uint8_t>& data) {
+    std::shared_ptr<Peer> peer = setup_peer_;
+    if (!peer) {
+        return ErrorCode::NOT_CONNECTED;
+    }
+    std::lock_guard<std::mutex> lock(peer->write_mutex);
+    return write_pdu(peer->fd, transport_layer_, data, PduClass::PROCEDURE);
+}
+
+ErrorCode PosixE3Connector::send(const std::vector<uint8_t>& data) {
+    return send_to(0, data, PduClass::PROCEDURE);
+}
+
+ErrorCode PosixE3Connector::send_to(uint64_t peer_token, const std::vector<uint8_t>& data, PduClass kind) {
+    // Checked first: shutdown() leaves the fd valid until dispose(), so a send racing it
+    // would otherwise be a real EPIPE, indistinguishable from a transport failure.
+    if (shutdown_requested_.load()) {
+        return ErrorCode::CANCELLED;
+    }
+    if (role_ == E3Role::DAPP) {
+        if (client_fd_ < 0) {
+            return ErrorCode::NOT_CONNECTED;
+        }
+        std::lock_guard<std::mutex> lock(client_write_mutex_);
+        return write_pdu(client_fd_, transport_layer_, data, PduClass::PROCEDURE);
+    }
+    if (listener_ < 0) {
+        return ErrorCode::NOT_CONNECTED;
+    }
+
+    std::vector<std::shared_ptr<Peer>> targets;
+    if (peer_token == 0) {
+        std::lock_guard<std::mutex> lock(peers_mutex_);
+        targets = peers_;
+    } else if (auto peer = find_peer(peer_token)) {
+        targets.push_back(peer);
+    } else {
+        return ErrorCode::NOT_CONNECTED;
+    }
+
+    bool failed = false;
+    size_t sent = 0;
+    for (const auto& peer : targets) {
+        std::lock_guard<std::mutex> lock(peer->write_mutex);
+        if (write_pdu(peer->fd, transport_layer_, data, kind) != ErrorCode::SUCCESS) {
+            // Dead or stalled: closing it makes the reader drop it and report it closed.
+            ::shutdown(peer->fd, SHUT_RDWR);
+            failed = true;
+        } else {
+            ++sent;
+        }
+    }
+    if (failed && sent == 0) {
+        return ErrorCode::TRANSPORT_ERROR;
+    }
+    return ErrorCode::SUCCESS;
 }
 
 uint64_t PosixE3Connector::last_peer_token() const {
     return last_peer_token_;
 }
 
+uint64_t PosixE3Connector::last_setup_peer_token() const {
+    return last_setup_token_;
+}
+
 std::vector<uint64_t> PosixE3Connector::take_closed_peers() {
+    std::lock_guard<std::mutex> lock(closed_mutex_);
     std::vector<uint64_t> closed;
     closed.swap(closed_peers_);
     return closed;
 }
 
-ErrorCode PosixE3Connector::setup_outbound_connection() {
-    int sock;
-    int ret;
-    
-    // Ensure IPC directory exists (defensive — setup_initial_connection normally creates it)
-    if (transport_layer_ == E3TransportLayer::IPC) {
-        struct stat st{};
-        if (stat(IPC_BASE_DIR, &st) == -1) {
-            if (mkdir(IPC_BASE_DIR, 0777) == -1 && errno != EEXIST) {
-                E3_LOG_ERROR(LOG_TAG) << "Failed to create IPC directory: " << strerror(errno);
-                return ErrorCode::CONNECTION_FAILED;
-            }
-        }
-        chmod(IPC_BASE_DIR, 0777);
-    }
-    
-    if (transport_layer_ == E3TransportLayer::SCTP) {
-        sock = sctp_stream_socket();
-        struct sockaddr_in addr{};
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(outbound_port_);
-        addr.sin_addr.s_addr = INADDR_ANY;
-        ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
-    }
-    else if (transport_layer_ == E3TransportLayer::TCP) {
-        sock = socket(AF_INET, SOCK_STREAM, 0);
-        struct sockaddr_in addr{};
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(outbound_port_);
-        addr.sin_addr.s_addr = INADDR_ANY;
-        ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
-    }
-    else { // IPC
-        sock = socket(AF_UNIX, SOCK_STREAM, 0);
-        struct sockaddr_un addr{};
-        addr.sun_family = AF_UNIX;
-        strncpy(addr.sun_path, outbound_endpoint_.c_str(), sizeof(addr.sun_path) - 1);
-        unlink(outbound_endpoint_.c_str());
-        ret = bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr));
-    }
-    
-    if (sock < 0) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to create outbound socket: " << strerror(errno);
-        return ErrorCode::CONNECTION_FAILED;
-    }
-    
-    if (ret < 0) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to bind outbound socket: " << strerror(errno);
-        close(sock);
-        return ErrorCode::CONNECTION_FAILED;
-    }
-    
-    ret = listen(sock, 5);
-    if (ret < 0) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to listen on outbound socket: " << strerror(errno);
-        close(sock);
-        return ErrorCode::CONNECTION_FAILED;
-    }
-    set_nonblocking(sock);  // drain_accept() must not block the outbound thread on a client RST
-
-    outbound_socket_ = sock;
-
-    // Multi-peer: no blocking accept here. send() drains the listener before
-    // each broadcast, so peers can attach at any time; with no peer attached
-    // a send is dropped, mirroring ZMQ PUB semantics with no subscriber.
-    E3_LOG_INFO(LOG_TAG) << "Outbound listener ready (multi-peer)";
-    return ErrorCode::SUCCESS;
-}
-
-ErrorCode PosixE3Connector::send(const std::vector<uint8_t>& data) {
-    // Checked first, same as the recv() paths: shutdown() only calls
-    // ::shutdown(SHUT_RDWR) on the socket (the fd itself stays valid until
-    // dispose() closes it), so a send racing a concurrent shutdown() would
-    // otherwise hit a real EPIPE/ECONNRESET and be indistinguishable from a
-    // genuine transport failure. Narrows, but does not eliminate, that race:
-    // this check and the syscall below are not atomic with shutdown_requested_
-    // being set.
-    if (shutdown_requested_.load()) {
-        return ErrorCode::CANCELLED;
-    }
-
-    // dApp role sends to RAN's receive() which uses raw recv. Use a raw
-    // send to match. The dApp keeps its original single-socket path.
-    if (role_ == E3Role::DAPP) {
-        if (outbound_connection_socket_ < 0) {
-            return ErrorCode::NOT_CONNECTED;
-        }
-        ssize_t sent = ::send(outbound_connection_socket_, data.data(), data.size(), 0);
-        if (sent < 0 || static_cast<size_t>(sent) != data.size()) {
-            E3_LOG_ERROR(LOG_TAG) << "Failed to send dApp outbound: " << strerror(errno);
-            return ErrorCode::TRANSPORT_ERROR;
-        }
-        E3_LOG_TRACE(LOG_TAG) << "Sent (dApp raw): " << data.size() << " bytes";
-        return ErrorCode::SUCCESS;
-    }
-
-    // RAN role, multi-peer: accept any newly connected peers, then broadcast
-    // the framed message to all of them. Delivery mirrors ZMQ PUB/SUB: every
-    // peer gets every message and each dApp filters by its own identifier;
-    // with no peer attached the message is dropped (PUB with no subscriber).
-    if (outbound_socket_ < 0) {
-        return ErrorCode::NOT_CONNECTED;
-    }
-    drain_accept(outbound_socket_, transport_layer_, outbound_peer_sockets_,
-                 "Outbound (indication)");
-
-    bool any_failed = false;
-    for (auto it = outbound_peer_sockets_.begin();
-         it != outbound_peer_sockets_.end();) {
-        if (send_in_chunks(*it, data.data(), data.size()) < 0) {
-            // Dead peer: drop it and keep serving the rest.
-            close(*it);
-            it = outbound_peer_sockets_.erase(it);
-            any_failed = true;
-            E3_LOG_INFO(LOG_TAG) << "Outbound (indication) peer disconnected ("
-                                 << outbound_peer_sockets_.size() << " remain)";
-        } else {
-            ++it;
-        }
-    }
-
-    if (any_failed && outbound_peer_sockets_.empty()) {
-        return ErrorCode::TRANSPORT_ERROR;
-    }
-    E3_LOG_TRACE(LOG_TAG) << "Sent: " << data.size() << " bytes to "
-                          << outbound_peer_sockets_.size() << " peer(s)";
-    return ErrorCode::SUCCESS;
-}
-
 // ===========================================================================
-// Client-side (dApp role) implementations
-//
-// Mirrors of the server-side methods but with connect() in place of
-// bind()/listen()/accept(). For IPC the dApp connects to setup_endpoint_
-// (same as RAN binds). For TCP the dApp connects to 127.0.0.1:port. For
-// SCTP the same TCP-style address is used; ubuntu-latest runners lack
-// the sctp kernel module so SCTP client creation may fail at socket()
-// time — callers should treat that as "transport not supported".
+// dApp role: one connection
 // ===========================================================================
-
-namespace {
-// Connect a fresh socket to (addr, port_or_path) for the given transport.
-// Returns the fd on success or -1 on error.
-int posix_connect_for(E3TransportLayer transport,
-                      const std::string& endpoint,
-                      uint16_t port) {
-    if (transport == E3TransportLayer::IPC) {
-        int sock = socket(AF_UNIX, SOCK_STREAM, 0);
-        if (sock < 0) return -1;
-        struct sockaddr_un addr{};
-        addr.sun_family = AF_UNIX;
-        strncpy(addr.sun_path, endpoint.c_str(), sizeof(addr.sun_path) - 1);
-        if (connect(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) < 0) {
-            close(sock);
-            return -1;
-        }
-        return sock;
-    }
-    int sock;
-    if (transport == E3TransportLayer::SCTP) {
-        sock = sctp_stream_socket();
-    } else {
-        sock = socket(AF_INET, SOCK_STREAM, 0);
-    }
-    if (sock < 0) return -1;
-    struct sockaddr_in addr{};
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);  // 127.0.0.1
-    if (connect(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) < 0) {
-        close(sock);
-        return -1;
-    }
-    set_nodelay(sock, transport);
-    return sock;
-}
-}  // anonymous namespace
 
 ErrorCode PosixE3Connector::setup_initial_connection_client() {
-    // Retry with a short backoff so we don't race the RAN's bind on startup.
-    int sock = -1;
-    for (int retry = 0; retry < 10 && sock < 0; ++retry) {
-        sock = posix_connect_for(transport_layer_, setup_endpoint_, setup_port_);
-        if (sock < 0) {
-            if (shutdown_requested_.load()) return ErrorCode::CANCELLED;
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    const Target where = target();
+    int fd = -1;
+    for (int attempt = 0; attempt < CONNECT_ATTEMPTS && fd < 0; ++attempt) {
+        fd = connect_to(where);
+        if (fd < 0) {
+            if (shutdown_requested_.load()) {
+                return ErrorCode::CANCELLED;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(CONNECT_PAUSE_MS));
         }
     }
-    if (sock < 0) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to connect setup socket: " << strerror(errno);
+    if (fd < 0) {
+        E3_LOG_ERROR(LOG_TAG) << "Failed to connect to " << setup_endpoint_ << " port " << where.port
+                              << ": " << strerror(errno);
         return ErrorCode::CONNECTION_FAILED;
     }
-    setup_connection_socket_ = sock;
+    client_fd_ = fd;
+    client_rx_.clear();
+    // Until the setup response is read, the setup thread is the only reader: the inbound
+    // thread must not take it for an indication.
+    awaiting_setup_response_.store(true);
     connected_ = true;
-    E3_LOG_INFO(LOG_TAG) << "Setup socket connected (client) to "
-                         << setup_endpoint_ << " port=" << setup_port_;
+    E3_LOG_INFO(LOG_TAG) << "Connected to " << setup_endpoint_ << " port " << where.port;
     return ErrorCode::SUCCESS;
+}
+
+ErrorCode PosixE3Connector::reconnect_client() {
+    if (client_fd_ >= 0) {
+        close(client_fd_);
+        client_fd_ = -1;
+    }
+    return setup_initial_connection_client();
 }
 
 ErrorCode PosixE3Connector::send_setup_request_client(const std::vector<uint8_t>& data) {
-    if (setup_connection_socket_ < 0) return ErrorCode::NOT_CONNECTED;
-    // The RAN's recv_setup_request reads via raw recv() (no length prefix),
-    // so the dApp must send the SetupRequest the same way. The setup
-    // channel doesn't carry chunked messages so a single send() is fine.
-    ssize_t sent = ::send(setup_connection_socket_, data.data(), data.size(), 0);
-    if (sent < 0 || static_cast<size_t>(sent) != data.size()) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to send setup request: " << strerror(errno);
-        return ErrorCode::TRANSPORT_ERROR;
+    if (client_fd_ < 0) {
+        return ErrorCode::NOT_CONNECTED;
     }
-    E3_LOG_DEBUG(LOG_TAG) << "Sent SetupRequest: " << data.size() << " bytes";
-    return ErrorCode::SUCCESS;
+    // The RAN takes the first PDU of a connection for the setup request, so a second
+    // attempt needs a connection of its own, as a ZeroMQ request socket is reopened.
+    if (setup_request_sent_) {
+        ErrorCode rc = reconnect_client();
+        if (rc != ErrorCode::SUCCESS) {
+            return rc;
+        }
+    }
+    setup_request_sent_ = true;
+    std::lock_guard<std::mutex> lock(client_write_mutex_);
+    return write_pdu(client_fd_, transport_layer_, data, PduClass::PROCEDURE);
 }
 
 int PosixE3Connector::recv_setup_response_client(std::vector<uint8_t>& buffer) {
-    if (setup_connection_socket_ < 0) return static_cast<int>(ErrorCode::NOT_CONNECTED);
-
-    // Wait for data with timeout to allow cooperative shutdown.
-    int poll_ret = wait_for_socket(setup_connection_socket_, POLL_TIMEOUT_MS);
-    if (poll_ret == 0) return 0;
-    if (poll_ret < 0) return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
-
-    return recv_with_size(setup_connection_socket_, buffer);
+    if (client_fd_ < 0) {
+        return static_cast<int>(ErrorCode::NOT_CONNECTED);
+    }
+    if (!awaiting_setup_response_.load()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        return 0;
+    }
+    std::lock_guard<std::mutex> reader(reader_mutex_);
+    Read r = Read::NONE;
+    if (transport_layer_ == E3TransportLayer::TCP) {
+        r = pop_stream_frame(client_rx_, buffer);
+    }
+    if (r == Read::NONE) {
+        const int ready = wait_readable(client_fd_, POLL_TIMEOUT_MS);
+        if (ready == 0) {
+            return 0;
+        }
+        if (ready < 0) {
+            return errno == EINTR ? 0 : static_cast<int>(ErrorCode::TRANSPORT_ERROR);
+        }
+        r = read_one(client_fd_, transport_layer_, client_rx_, buffer);
+    }
+    if (r == Read::PDU) {
+        awaiting_setup_response_.store(false);
+        await_cv_.notify_all();
+        return static_cast<int>(buffer.size());
+    }
+    if (r == Read::CLOSED) {
+        return static_cast<int>(ErrorCode::NOT_CONNECTED);
+    }
+    return r == Read::ERROR ? static_cast<int>(ErrorCode::TRANSPORT_ERROR) : 0;
 }
 
 ErrorCode PosixE3Connector::setup_inbound_connection_client() {
-    // dApp inbound = RAN's outbound endpoint (publisher).
-    int sock = -1;
-    for (int retry = 0; retry < 10 && sock < 0; ++retry) {
-        sock = posix_connect_for(transport_layer_, outbound_endpoint_, outbound_port_);
-        if (sock < 0) {
-            if (shutdown_requested_.load()) return ErrorCode::CANCELLED;
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
-        }
-    }
-    if (sock < 0) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to connect inbound socket: " << strerror(errno);
-        return ErrorCode::CONNECTION_FAILED;
-    }
-    inbound_connection_socket_ = sock;
-    E3_LOG_INFO(LOG_TAG) << "Inbound socket connected (client) to "
-                         << outbound_endpoint_ << " port=" << outbound_port_;
-    return ErrorCode::SUCCESS;
+    return client_fd_ >= 0 ? ErrorCode::SUCCESS : ErrorCode::NOT_CONNECTED;
 }
 
 ErrorCode PosixE3Connector::setup_outbound_connection_client() {
-    // dApp outbound = RAN's inbound endpoint (subscriber).
-    int sock = -1;
-    for (int retry = 0; retry < 10 && sock < 0; ++retry) {
-        sock = posix_connect_for(transport_layer_, inbound_endpoint_, inbound_port_);
-        if (sock < 0) {
-            if (shutdown_requested_.load()) return ErrorCode::CANCELLED;
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    return client_fd_ >= 0 ? ErrorCode::SUCCESS : ErrorCode::NOT_CONNECTED;
+}
+
+int PosixE3Connector::receive_client(std::vector<uint8_t>& buffer) {
+    if (client_fd_ < 0) {
+        return static_cast<int>(ErrorCode::NOT_CONNECTED);
+    }
+    if (awaiting_setup_response_.load()) {
+        std::unique_lock<std::mutex> lock(await_mutex_);
+        await_cv_.wait_for(lock, std::chrono::milliseconds(POLL_TIMEOUT_MS), [this] {
+            return !awaiting_setup_response_.load() || shutdown_requested_.load();
+        });
+        if (awaiting_setup_response_.load()) {
+            return 0;
         }
     }
-    if (sock < 0) {
-        E3_LOG_ERROR(LOG_TAG) << "Failed to connect outbound socket: " << strerror(errno);
-        return ErrorCode::CONNECTION_FAILED;
+    std::lock_guard<std::mutex> reader(reader_mutex_);
+    Read r = Read::NONE;
+    if (transport_layer_ == E3TransportLayer::TCP) {
+        r = pop_stream_frame(client_rx_, buffer);
     }
-    outbound_connection_socket_ = sock;
-    E3_LOG_INFO(LOG_TAG) << "Outbound socket connected (client) to "
-                         << inbound_endpoint_ << " port=" << inbound_port_;
-    return ErrorCode::SUCCESS;
+    if (r == Read::NONE) {
+        const int ready = wait_readable(client_fd_, POLL_TIMEOUT_MS);
+        if (ready == 0) {
+            return 0;
+        }
+        if (ready < 0) {
+            return errno == EINTR ? 0 : static_cast<int>(ErrorCode::TRANSPORT_ERROR);
+        }
+        r = read_one(client_fd_, transport_layer_, client_rx_, buffer);
+    }
+    switch (r) {
+        case Read::PDU:
+            return static_cast<int>(buffer.size());
+        case Read::CLOSED:
+            return static_cast<int>(ErrorCode::NOT_CONNECTED);
+        case Read::ERROR:
+            return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
+        default:
+            return 0;
+    }
 }
+
+// ===========================================================================
+// Shutdown
+// ===========================================================================
 
 void PosixE3Connector::shutdown() {
     E3_LOG_DEBUG(LOG_TAG) << "Shutting down POSIX connector";
     shutdown_requested_.store(true);
-    
-    // Close listening sockets to interrupt blocking accept() calls
-    if (setup_socket_ >= 0) {
-        ::shutdown(setup_socket_, SHUT_RDWR);
+    setup_ready_.notify_all();
+    await_cv_.notify_all();
+    if (listener_ >= 0) {
+        ::shutdown(listener_, SHUT_RDWR);
     }
-    if (inbound_socket_ >= 0) {
-        ::shutdown(inbound_socket_, SHUT_RDWR);
+    {
+        std::lock_guard<std::mutex> lock(peers_mutex_);
+        for (const auto& peer : peers_) {
+            ::shutdown(peer->fd, SHUT_RDWR);
+        }
     }
-    // The outbound listener was missing here, so a RAN whose outbound
-    // accept() was still waiting for a dApp could never be joined by stop().
-    if (outbound_socket_ >= 0) {
-        ::shutdown(outbound_socket_, SHUT_RDWR);
+    if (client_fd_ >= 0) {
+        ::shutdown(client_fd_, SHUT_RDWR);
     }
 }
 
 void PosixE3Connector::dispose() {
     E3_LOG_DEBUG(LOG_TAG) << "Disposing POSIX connector";
-    
-    if (inbound_connection_socket_ != UNUSED_SOCKET && inbound_connection_socket_ >= 0) {
-        close(inbound_connection_socket_);
+    {
+        std::lock_guard<std::mutex> lock(peers_mutex_);
+        peers_.clear();
     }
-    
-    if (setup_connection_socket_ != UNUSED_SOCKET && setup_connection_socket_ >= 0) {
-        close(setup_connection_socket_);
+    {
+        std::lock_guard<std::mutex> lock(queue_mutex_);
+        setup_queue_.clear();
+        inbound_queue_.clear();
     }
-    
-    if (outbound_connection_socket_ != UNUSED_SOCKET && outbound_connection_socket_ >= 0) {
-        close(outbound_connection_socket_);
+    setup_peer_.reset();
+    {
+        std::lock_guard<std::mutex> lock(closed_mutex_);
+        closed_peers_.clear();
     }
-
-    for (int fd : inbound_peer_sockets_) {
-        close(fd);
+    if (client_fd_ >= 0) {
+        close(client_fd_);
+        client_fd_ = -1;
     }
-    inbound_peer_sockets_.clear();
-    inbound_peer_tokens_.clear();
-    closed_peers_.clear();
-    for (int fd : outbound_peer_sockets_) {
-        close(fd);
+    if (listener_ >= 0) {
+        close(listener_);
+        listener_ = -1;
+        // Only the RAN, which binds, has a socket file to remove. The directory is shared
+        // between agents and tests and stays, so that removing it cannot race a bind in it.
+        if (transport_layer_ == E3TransportLayer::IPC) {
+            unlink(setup_endpoint_.c_str());
+        }
     }
-    outbound_peer_sockets_.clear();
-
-    if (inbound_socket_ >= 0) {
-        close(inbound_socket_);
-    }
-    
-    if (outbound_socket_ >= 0) {
-        close(outbound_socket_);
-    }
-    
-    if (setup_socket_ >= 0) {
-        close(setup_socket_);
-    }
-    
-    // Clean up IPC socket files only if we created them (RAN side binds).
-    // The dApp side connects, so it has nothing to unlink.
-    if (transport_layer_ == E3TransportLayer::IPC && role_ == E3Role::RAN) {
-        unlink(setup_endpoint_.c_str());
-        unlink(inbound_endpoint_.c_str());
-        unlink(outbound_endpoint_.c_str());
-        // Deliberately do NOT rmdir(IPC_BASE_DIR): it is shared across agents
-        // and tests. Removing it races with another agent binding a socket
-        // inside it (ENOENT). Leaving the empty directory behind is harmless.
-    }
-    
-    setup_socket_ = -1;
-    setup_connection_socket_ = UNUSED_SOCKET;
-    inbound_socket_ = -1;
-    inbound_connection_socket_ = UNUSED_SOCKET;
-    outbound_socket_ = -1;
-    outbound_connection_socket_ = UNUSED_SOCKET;
     connected_ = false;
-    
     E3_LOG_INFO(LOG_TAG) << "POSIX connector disposed";
-}
-
-int PosixE3Connector::send_in_chunks(int sockfd, const uint8_t* buffer, size_t buffer_size) {
-    // Coalesce the 4-byte length prefix (network byte order) and the payload
-    // into a single writev() so each message costs one syscall and one wire
-    // segment instead of two. The old separate send() for the prefix produced
-    // a tiny segment per message, which interacted badly with Nagle-style
-    // bundling (see set_nodelay) and doubled the syscall cost of the data path.
-    uint32_t network_order_size = htonl(static_cast<uint32_t>(buffer_size));
-    struct iovec iov[2];
-    iov[0].iov_base = &network_order_size;
-    iov[0].iov_len = sizeof(network_order_size);
-    iov[1].iov_base = const_cast<uint8_t*>(buffer);
-    iov[1].iov_len = buffer_size;
-
-    size_t total_len = sizeof(network_order_size) + buffer_size;
-    size_t total_sent = 0;
-    while (total_sent < total_len) {
-        ssize_t sent;
-        if (total_sent < sizeof(network_order_size)) {
-            // First pass (or short write inside the prefix): send prefix +
-            // payload together, skipping whatever already went out.
-            struct iovec cur[2];
-            cur[0].iov_base = reinterpret_cast<uint8_t*>(&network_order_size) + total_sent;
-            cur[0].iov_len = sizeof(network_order_size) - total_sent;
-            cur[1] = iov[1];
-            sent = ::writev(sockfd, cur, 2);
-        } else {
-            size_t payload_sent = total_sent - sizeof(network_order_size);
-            size_t to_send = std::min(static_cast<size_t>(CHUNK_SIZE),
-                                      buffer_size - payload_sent);
-            sent = ::send(sockfd, buffer + payload_sent, to_send, 0);
-        }
-        if (sent < 0) {
-            if (errno == EINTR) continue;
-            E3_LOG_ERROR(LOG_TAG) << "Failed to send data: " << strerror(errno);
-            return -1;
-        }
-        total_sent += static_cast<size_t>(sent);
-    }
-
-    return 0;
-}
-
-int PosixE3Connector::recv_with_size(int sockfd, std::vector<uint8_t>& buffer) {
-    // Read the 4-byte size prefix (network byte order) — mirrors send_in_chunks
-    uint32_t network_order_size = 0;
-    size_t header_received = 0;
-    while (header_received < sizeof(network_order_size)) {
-        ssize_t ret = ::recv(sockfd,
-                             reinterpret_cast<uint8_t*>(&network_order_size) + header_received,
-                             sizeof(network_order_size) - header_received, 0);
-        if (ret <= 0) {
-            if (ret == 0) {
-                // 0 would read as a timeout and spin on the closed socket.
-                E3_LOG_DEBUG(LOG_TAG) << "Connection closed while reading size header";
-                return static_cast<int>(ErrorCode::NOT_CONNECTED);
-            }
-            E3_LOG_ERROR(LOG_TAG) << "Failed to receive size header: " << strerror(errno);
-            return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
-        }
-        header_received += static_cast<size_t>(ret);
-    }
-
-    uint32_t payload_size = ntohl(network_order_size);
-    if (payload_size == 0 || payload_size > MAX_PROTOCOL_DATA_SIZE * 2) {
-        E3_LOG_ERROR(LOG_TAG) << "Invalid payload size: " << payload_size;
-        return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
-    }
-
-    buffer.resize(payload_size);
-    size_t total_received = 0;
-    while (total_received < payload_size) {
-        size_t to_read = std::min(static_cast<size_t>(CHUNK_SIZE), payload_size - total_received);
-        ssize_t ret = ::recv(sockfd, buffer.data() + total_received, to_read, 0);
-        if (ret <= 0) {
-            if (ret == 0) {
-                E3_LOG_ERROR(LOG_TAG) << "Connection closed during chunked receive";
-            } else {
-                E3_LOG_ERROR(LOG_TAG) << "Failed to receive chunk: " << strerror(errno);
-            }
-            return static_cast<int>(ErrorCode::TRANSPORT_ERROR);
-        }
-        total_received += static_cast<size_t>(ret);
-    }
-
-    E3_LOG_TRACE(LOG_TAG) << "recv_with_size: " << payload_size << " bytes";
-    return static_cast<int>(payload_size);
 }
 
 } // namespace libe3

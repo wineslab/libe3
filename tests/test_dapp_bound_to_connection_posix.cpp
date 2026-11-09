@@ -3,7 +3,7 @@
  * @brief A POSIX RAN acts on a message that names a dApp only if it came on that dApp's connection.
  *
  * A real RAN E3Agent and a real dApp E3Agent over POSIX IPC, and a second,
- * bare connection that plays another dApp. Properties verified:
+ * bare connection that registers as another dApp. Properties verified:
  *   (1) a release that names the dApp but comes on another connection is
  *       dropped: the dApp keeps its registration, its subscription and its
  *       RAN function, and is told nothing;
@@ -117,14 +117,32 @@ E3Config make_config(E3Role role, const Endpoints& ep) {
     return c;
 }
 
-/// A second connection to the RAN's inbound side that sends what it is told to.
+/// A second connection to the RAN that registers as a dApp of its own, then sends what it is told to.
 struct OtherConnection {
     explicit OtherConnection(const Endpoints& ep)
         : encoder(create_encoder(pick_encoding())),
           connector(create_connector(E3LinkLayer::POSIX, E3TransportLayer::IPC, ep.setup, ep.sub,
                                      ep.pub, 0, 0, 0, 1, E3Role::DAPP)) {}
 
-    bool open() { return connector && connector->setup_outbound_connection_client() == ErrorCode::SUCCESS; }
+    bool open() {
+        if (!connector || connector->setup_initial_connection_client() != ErrorCode::SUCCESS) return false;
+        Pdu request(PduType::SETUP_REQUEST);
+        SetupRequest setup;
+        setup.e3ap_protocol_version = "1.0.0";
+        setup.dapp_name = "OtherDApp";
+        setup.dapp_version = "1.0.0";
+        setup.vendor = "test";
+        request.choice = setup;
+        request.message_id = ++next_message_id;
+        auto encoded = encoder->encode(request);
+        if (!encoded || connector->send_setup_request_client(encoded->buffer) != ErrorCode::SUCCESS) return false;
+        std::vector<uint8_t> response;
+        for (int i = 0; i < 20; ++i) {
+            const int n = connector->recv_setup_response_client(response);
+            if (n != 0) return n > 0;
+        }
+        return false;
+    }
 
     bool send(Pdu pdu) {
         pdu.message_id = ++next_message_id;
@@ -198,21 +216,20 @@ TEST(DAppBound_posix_aMessageFromAnotherConnectionIsDropped) {
     ASSERT_EQ(static_cast<int>(dapp.wait_for_setup(15000ms)), static_cast<int>(ErrorCode::SUCCESS));
     const uint32_t id = *dapp.dapp_id();
 
-    // Its first message binds it to its own connection.
+    // It was tied to its own connection when it registered.
     ASSERT_EQ(static_cast<int>(dapp.subscribe(FIRST_RF, {1}, {})), static_cast<int>(ErrorCode::SUCCESS));
     ASSERT_TRUE(wait_until([&] { return ran.subscription_count() == 1u; }, 15000ms));
     ASSERT_TRUE(first->is_running());
 
     OtherConnection other(ep);
     ASSERT_TRUE(other.open());
+    ASSERT_EQ(ran.dapp_count(), 2u);  // the first dApp and the other one
 
     // (1) and (2) From the other connection: neither takes effect.
-    // One message per read: the RAN reads this link as a stream and decodes what one read returns.
     ASSERT_TRUE(other.send(release_naming(id)));
-    std::this_thread::sleep_for(300ms);
     ASSERT_TRUE(other.send(delete_naming(id, 1)));  // the first subscription the RAN granted
     std::this_thread::sleep_for(1500ms);
-    ASSERT_EQ(ran.dapp_count(), 1u);
+    ASSERT_EQ(ran.dapp_count(), 2u);
     ASSERT_EQ(ran.subscription_count(), 1u);
     ASSERT_EQ(ran.get_ran_function_subscribers(FIRST_RF).size(), 1u);
     ASSERT_TRUE(first->is_running());
@@ -227,7 +244,7 @@ TEST(DAppBound_posix_aMessageFromAnotherConnectionIsDropped) {
 
     // (4) And it can still release itself.
     ASSERT_EQ(static_cast<int>(dapp.release()), static_cast<int>(ErrorCode::SUCCESS));
-    ASSERT_TRUE(wait_until([&] { return ran.dapp_count() == 0u; }, 10000ms));
+    ASSERT_TRUE(wait_until([&] { return ran.dapp_count() == 1u; }, 10000ms));  // the other one stays
     ASSERT_TRUE(wait_until([&] { return !first->is_running() && !second->is_running(); }, 10000ms));
 
     dapp.stop();
@@ -257,14 +274,12 @@ TEST(DAppBound_posix_aControlAndAReportFromAnotherConnectionAreDropped) {
     OtherConnection other(ep);
     ASSERT_TRUE(other.open());
 
-    // One message per read, as in the test above.
     ASSERT_TRUE(other.send(control_naming(id, FIRST_RF, 1)));
-    std::this_thread::sleep_for(300ms);
     ASSERT_TRUE(other.send(report_naming(id, FIRST_RF, 7)));
     std::this_thread::sleep_for(1500ms);
     ASSERT_EQ(rf->controls.load(), 0);
     ASSERT_EQ(reports.load(), 0);
-    ASSERT_EQ(ran.dapp_count(), 1u);
+    ASSERT_EQ(ran.dapp_count(), 2u);
 
     // The same two from the dApp's own connection are taken.
     ASSERT_EQ(static_cast<int>(dapp.send_control(FIRST_RF, 1, {'{', '}'})), static_cast<int>(ErrorCode::SUCCESS));

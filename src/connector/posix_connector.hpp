@@ -11,25 +11,33 @@
 
 #include "libe3/e3_connector.hpp"
 #include <atomic>
+#include <condition_variable>
 #include <cstddef>
-#include <unordered_map>
+#include <deque>
+#include <memory>
+#include <mutex>
 #include <vector>
 
 namespace libe3 {
 
 /**
- * @brief POSIX socket-based E3 connector
+ * @brief POSIX socket-based E3 connector: one endpoint per dApp
  *
- * Provides transport using POSIX sockets. Supports TCP, SCTP, and IPC transports.
- * Ported from the original C implementation's posix_* functions.
+ * Supports TCP, SCTP and IPC. A dApp opens one connection to the RAN's single
+ * endpoint and the setup, inbound and outbound traffic all use it; the three
+ * channels of E3Connector are logical. The first PDU on a connection is the
+ * dApp's setup request and goes to recv_setup_request(); every later PDU goes
+ * to receive(). The inbound thread is the only reader of the sockets, so the
+ * receive path costs the same as with one channel per socket.
  *
- * RAN role serves multiple dApp peers: both data listeners keep accepting
- * for the connector's lifetime, receive() polls every accepted subscriber
- * socket, and send() broadcasts each framed message to every accepted
- * indication socket (mirroring the ZMQ PUB/SUB semantics, where the RAN
- * broadcasts and each dApp filters by its own dApp identifier). Peer
- * sockets are only touched by their owning I/O thread: inbound sockets by
- * the inbound loop, outbound sockets by the outbound loop.
+ * Each PDU is one message. SCTP and IPC (a sequenced-packet socket) keep message
+ * boundaries and carry no prefix. TCP is a byte stream and prefixes each PDU
+ * with its length as four bytes in network order, in both directions. SCTP
+ * stamps payload protocol id 0x00E3A001 and sends indications on stream 1,
+ * everything else on stream 0.
+ *
+ * The RAN names each accepted connection with a token that is never reused
+ * (see E3Connector::last_peer_token) and can send to one peer or to all.
  */
 class PosixE3Connector : public E3Connector {
 public:
@@ -37,23 +45,20 @@ public:
      * @brief Create a POSIX connector
      *
      * @param transport_layer SCTP, TCP or IPC
-     * @param setup_endpoint Endpoint of the setup channel
-     * @param inbound_endpoint Endpoint of the inbound channel
-     * @param outbound_endpoint Endpoint of the outbound channel
-     * @param setup_port Port of the setup channel (SCTP and TCP)
-     * @param inbound_port Port of the inbound channel (SCTP and TCP)
-     * @param outbound_port Port of the outbound channel (SCTP and TCP)
+     * @param endpoint Endpoint of the link. IPC: a path, "ipc://" prefix optional,
+     *        and the library's shared default is replaced by /tmp/dapps/e3.
+     *        TCP and SCTP: "tcp://host:port" or "sctp://host:port" (a host in
+     *        brackets for IPv6); anything else means the default host and @p port
+     * @param port Port of the link (SCTP and TCP) when the endpoint names none
+     * @param options Socket and admission options
      */
     PosixE3Connector(
         E3TransportLayer transport_layer,
-        const std::string& setup_endpoint,
-        const std::string& inbound_endpoint,
-        const std::string& outbound_endpoint,
-        uint16_t setup_port,
-        uint16_t inbound_port,
-        uint16_t outbound_port
+        const std::string& endpoint,
+        uint16_t port,
+        const PosixOptions& options
     );
-    
+
     /** @brief Close every socket. */
     ~PosixE3Connector() override;
 
@@ -64,6 +69,7 @@ public:
     int receive(std::vector<uint8_t>& buffer) override;
     ErrorCode setup_outbound_connection() override;
     ErrorCode send(const std::vector<uint8_t>& data) override;
+    ErrorCode send_to(uint64_t peer_token, const std::vector<uint8_t>& data, PduClass kind) override;
 
     // Client-side (dApp role) operations.
     ErrorCode setup_initial_connection_client() override;
@@ -75,66 +81,87 @@ public:
     void dispose() override;
     void shutdown() override;
     uint64_t last_peer_token() const override;
+    uint64_t last_setup_peer_token() const override;
     std::vector<uint64_t> take_closed_peers() override;
-    
+
     E3LinkLayer link_layer() const noexcept override {
         return E3LinkLayer::POSIX;
     }
-    
+
     E3TransportLayer transport_layer() const noexcept override {
         return transport_layer_;
     }
-    
+
     bool is_connected() const noexcept override {
         return connected_;
     }
 
 private:
+    struct Peer;
+    struct Queued;
+
+    /// Which end of a connection a socket is, as the options it needs differ.
+    enum class SocketKind {
+        LISTENER,  ///< A RAN's listening socket
+        CLIENT,    ///< A dApp's socket, before it connects
+        ACCEPTED   ///< A RAN's socket for one accepted connection
+    };
+
+    /// Where the endpoint string says to listen or connect.
+    struct Target {
+        std::string host;  ///< Empty: the default (any address to listen, loopback to connect)
+        std::string port;  ///< Decimal port
+    };
+
+    Target target() const;
+    int make_socket(int family) const;
+    void tune_socket(int fd, SocketKind kind) const;
+    int listen_on(const Target& where);
+    int connect_to(const Target& where);
+    bool admit(const void* address) const;
+    void accept_pending();
+    std::shared_ptr<Peer> find_peer(uint64_t token);
+    bool pump(std::vector<uint8_t>& out, uint64_t& token, int timeout_ms);
+    void drop_peer(const std::shared_ptr<Peer>& peer);
+    void push_setup(const std::shared_ptr<Peer>& peer, std::vector<uint8_t>&& pdu);
+    bool receiver_idle() const;
+    int receive_client(std::vector<uint8_t>& buffer);
+    ErrorCode reconnect_client();
+
     E3TransportLayer transport_layer_;
-    
-    int setup_socket_{-1};
-    int setup_connection_socket_{-1};
-    int inbound_socket_{-1};
-    int inbound_connection_socket_{-1};
-    int outbound_socket_{-1};
-    int outbound_connection_socket_{-1};
+    std::string endpoint_uri_;   ///< The endpoint as given, to read a host and port from
+    uint16_t port_;
+    PosixOptions options_;
 
-    // RAN-role peer sockets (multi-peer). During normal operation each vector
-    // is touched only by its owning I/O thread: inbound_peer_sockets_ by the
-    // inbound (receive) loop, outbound_peer_sockets_ by the outbound (send)
-    // loop. dispose() and the destructor also iterate and clear both vectors
-    // from the caller's thread; that is race-free ONLY because
-    // E3Interface::stop() joins the inbound and outbound threads before calling
-    // dispose(). A caller that disposes without joining those threads first
-    // would race on these vectors.
-    std::vector<int> inbound_peer_sockets_;
+    int listener_{-1};
+    mutable std::mutex peers_mutex_;               ///< Guards peers_
+    std::vector<std::shared_ptr<Peer>> peers_;     ///< RAN role: accepted connections
+    uint64_t next_token_{1};                       ///< Only the reader takes tokens
+    size_t round_robin_{0};                        ///< Reader's rotating start, so no peer starves the rest
 
-    // Inbound peers are named by a token that is never reused, because a file
-    // descriptor is (see E3Connector::last_peer_token). Owned by the inbound
-    // thread, like inbound_peer_sockets_.
-    std::unordered_map<int, uint64_t> inbound_peer_tokens_;
-    uint64_t next_peer_token_{1};
+    std::mutex reader_mutex_;                      ///< Held by whoever reads the sockets
+    std::atomic<int64_t> last_receive_ns_{0};      ///< When receive() was last called
+
+    std::mutex queue_mutex_;                       ///< Guards setup_queue_ and inbound_queue_
+    std::condition_variable setup_ready_;          ///< Signals setup_queue_ and shutdown
+    std::deque<Queued> setup_queue_;               ///< First PDUs of connections
+    std::deque<Queued> inbound_queue_;             ///< PDUs read while the setup thread was the reader
+    std::shared_ptr<Peer> setup_peer_;             ///< Sender of the last setup request, for send_response
+    uint64_t last_setup_token_{0};
     uint64_t last_peer_token_{0};
+    std::mutex closed_mutex_;
     std::vector<uint64_t> closed_peers_;
-    std::vector<int> outbound_peer_sockets_;
 
-    // Rotating start index for the inbound peer scan in receive(), so no single
-    // peer with continuously-queued data can starve the others. Owned by the
-    // inbound thread; taken modulo the current peer count on each use.
-    size_t inbound_rr_{0};
+    int client_fd_{-1};                            ///< dApp role: the one connection
+    std::vector<uint8_t> client_rx_;               ///< Stream bytes or message fragments not yet a PDU
+    std::mutex client_write_mutex_;
+    bool setup_request_sent_{false};
+    std::atomic<bool> awaiting_setup_response_{false};
+    std::mutex await_mutex_;
+    std::condition_variable await_cv_;
 
-    uint16_t setup_port_;
-    uint16_t inbound_port_;
-    uint16_t outbound_port_;
-    
     bool connected_{false};
     std::atomic<bool> shutdown_requested_{false};
-    
-    static constexpr int CHUNK_SIZE = 8192;
-    static constexpr int UNUSED_SOCKET = -2;
-    
-    int send_in_chunks(int sockfd, const uint8_t* buffer, size_t buffer_size);
-    int recv_with_size(int sockfd, std::vector<uint8_t>& buffer);
 };
 
 } // namespace libe3

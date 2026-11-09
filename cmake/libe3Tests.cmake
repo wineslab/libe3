@@ -195,6 +195,11 @@ if(LIBE3_BUILD_INTEGRATION_TESTS AND LIBE3_ENABLE_ASN1)
         endif()
         add_test(NAME ${target_name} COMMAND ${target_name} ${_test_args})
         set_tests_properties(${target_name} PROPERTIES LABELS "integration")
+        # A test that needs the sctp kernel module exits with 77 when the host has none, which
+        # CTest reports as skipped; LIBE3_REQUIRE_SCTP makes it fail there instead.
+        if(simple_name MATCHES "sctp")
+            set_tests_properties(${target_name} PROPERTIES SKIP_RETURN_CODE 77)
+        endif()
     endforeach()
 endif()
 

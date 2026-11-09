@@ -13,11 +13,41 @@
 #define LIBE3_E3_CONNECTOR_HPP
 
 #include "types.hpp"
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <functional>
+#include <vector>
 
 namespace libe3 {
+
+/**
+ * @brief What a PDU is for, so that a link that has streams can pick one
+ *
+ * A connector does not decode the PDUs it carries. The caller says which kind
+ * a PDU is, and a link with more than one stream (SCTP) sends indications on
+ * one and everything else on the other.
+ */
+enum class PduClass : uint8_t {
+    PROCEDURE = 0,   ///< A request, a response, a control, a release: anything but an indication
+    INDICATION = 1   ///< An indication message
+};
+
+/**
+ * @brief Socket and admission options of the POSIX link
+ *
+ * The ZeroMQ link ignores all of them. The defaults are those of E3Config.
+ */
+struct PosixOptions {
+    /// SO_SNDBUF and SO_RCVBUF of SCTP sockets, set before the association exists; 0 keeps the kernel's
+    size_t socket_buffer_bytes{2 * 1024 * 1024};
+    /// SCTP delayed SACK; false turns it off, on both peers, as OCUDU does
+    bool sctp_delayed_sack{false};
+    /// RAN role: literal addresses a peer may connect from (TCP and SCTP); empty accepts any
+    std::vector<std::string> allowed_peers;
+    /// RAN role: most peers connected at once; 0 is unlimited
+    size_t maximum_associations{0};
+};
 
 /**
  * @brief Abstract base class for E3AP transport connectors
@@ -27,7 +57,8 @@ namespace libe3 {
  * function pointer approach, but uses virtual methods for type safety.
  *
  * Derived classes:
- * - PosixE3Connector: POSIX socket-based transport (TCP, SCTP, IPC)
+ * - PosixE3Connector: POSIX socket-based transport (TCP, SCTP, IPC); one
+ *   endpoint per dApp carries the setup, inbound and outbound traffic
  * - ZmqE3Connector: ZeroMQ-based transport
  */
 class E3Connector {
@@ -100,6 +131,23 @@ public:
      * @return ErrorCode::SUCCESS on success, error code otherwise
      */
     virtual ErrorCode send(const std::vector<uint8_t>& data) = 0;
+
+    /**
+     * @brief Send data to one peer, or to all of them (RAN role)
+     *
+     * The default broadcasts with send(), which is what a connector that cannot
+     * tell its peers apart does.
+     *
+     * @param peer_token The peer named by last_peer_token() or last_setup_peer_token(); 0 sends to every peer
+     * @param data Data to send
+     * @param kind What the PDU is for
+     * @return ErrorCode::SUCCESS on success, an error code otherwise
+     */
+    virtual ErrorCode send_to(uint64_t peer_token, const std::vector<uint8_t>& data, PduClass kind) {
+        (void)peer_token;
+        (void)kind;
+        return send(data);
+    }
 
     // =========================================================================
     // Client-side (dApp role) operations
@@ -177,6 +225,18 @@ public:
      *         peers apart (the default, and ZeroMQ)
      */
     virtual uint64_t last_peer_token() const { return 0; }
+
+    /**
+     * @brief Which peer sent the setup request the last recv_setup_request() returned (RAN role)
+     *
+     * Call it on the thread that calls recv_setup_request(), right after a call
+     * that returned bytes. The token is the one last_peer_token() gives for the
+     * same peer's later bytes, so a RAN can tie a dApp to its connection at setup.
+     *
+     * @return The peer's token, or 0 for a connector that cannot tell its peers
+     *         apart (the default, and ZeroMQ)
+     */
+    virtual uint64_t last_setup_peer_token() const { return 0; }
 
     /**
      * @brief Peers whose connection has closed since the last call (RAN role)
@@ -263,7 +323,11 @@ protected:
  * @param outbound_port Port of the outbound channel (SCTP and TCP)
  * @param io_threads Number of I/O threads (for ZMQ)
  * @param role Role of the peer (RAN or dApp)
+ * @param posix Socket and admission options of the POSIX link (ignored by ZMQ)
  * @return Unique pointer to created connector, nullptr on failure
+ *
+ * The POSIX link serves everything on the setup endpoint and port, and ignores
+ * the inbound and outbound ones.
  */
 std::unique_ptr<E3Connector> create_connector(
     E3LinkLayer link_layer,
@@ -275,7 +339,8 @@ std::unique_ptr<E3Connector> create_connector(
     uint16_t inbound_port,
     uint16_t outbound_port,
     size_t io_threads = 2,
-    E3Role role = E3Role::RAN
+    E3Role role = E3Role::RAN,
+    const PosixOptions& posix = PosixOptions{}
 );
 
 } // namespace libe3
