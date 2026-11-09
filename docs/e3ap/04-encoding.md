@@ -237,35 +237,94 @@ Table: Rules of the Protobuf encoding
 
 ## Framing on each link
 
+Table: Connections, endpoints and message boundaries of each link
+
+| Link and transport | Connections of a dApp | Default endpoint | One E3-PDU is | Length prefix |
+|---|---|---|---|---|
+| ZeroMQ over IPC | 3, one for each channel | `ipc:///tmp/dapps/setup`, `ipc:///tmp/dapps/dapp_socket`, `ipc:///tmp/dapps/e3_socket` | one ZeroMQ message | none |
+| ZeroMQ over TCP | 3, one for each channel | port 9990 (setup), port 9999 (inbound to the E3 Agent), port 9991 (outbound from the E3 Agent) | one ZeroMQ message | none |
+| POSIX over IPC | 1 | `ipc:///tmp/dapps/e3` | one message of a sequenced-packet Unix domain socket | **none** |
+| POSIX over TCP | 1 | port 9990 | the length prefix and the E3-PDU, on a byte stream | **4 octets, in both directions** |
+| POSIX over SCTP | 1 | port 9990 | one SCTP message | **none** |
+
+**The length prefix differs between the POSIX transports.** TCP is a byte stream, so
+every E3-PDU on it starts with its length. IPC and SCTP keep message boundaries, so
+nothing is added. A sender shall not add a prefix on IPC or on SCTP, and a receiver
+shall not look for one.
+
+An implementation may use other endpoints and ports. Both sides shall use the same
+values. On a TCP or SCTP link the E3 Agent listens on all addresses of the host, on
+IPv4 and on IPv6, unless it is told one. The three channels of
+[01-identity-and-registration.md](01-identity-and-registration.md#links-and-transports)
+are the same on every link; what differs is how many connections carry them.
+
 ### ZeroMQ
 
 One E3AP message is one ZeroMQ message. There is no extra framing. The setup channel
 uses the request and reply pattern, and the two other channels use publish and
 subscribe. A subscriber shall subscribe to every message (an empty filter).
 
-On a ZeroMQ link over TCP the E3 Agent listens on the port of each channel. The
-dApp connects. On a link over IPC the endpoints are the paths of [01-identity-and-registration.md](01-identity-and-registration.md#default-endpoints).
+On a ZeroMQ link the E3 Agent binds all three sockets and the dApp connects to them.
+On a link over TCP the E3 Agent listens on the port of each channel. On a link over
+IPC the endpoints are the paths of the table above. Every message of the outbound
+channel reaches every dApp, and each dApp keeps the messages that name its own dApp
+identifier.
 
 ### POSIX sockets
 
-The POSIX link layer uses stream sockets, one for each channel. The three transport
-layers differ only in the socket type: Unix domain stream, TCP or SCTP in one-to-one
-mode.
+The POSIX link layer uses one connection for each dApp, to one endpoint. The setup
+channel, the inbound channel and the outbound channel all travel on it. The E3 Agent
+listens, and the dApp connects.
 
-Table: Framing on the POSIX link layer
+The first E3-PDU of a connection is the SETUP REQUEST message of the dApp. Every
+later E3-PDU of the connection belongs to the dApp that sent it. A dApp that sends
+its SETUP REQUEST again, after a refusal, uses a new connection. The E3 Agent ties the
+dApp identifier it assigns to the connection of the SETUP REQUEST. It acts on a
+message that names a dApp only if the message came on the connection of that dApp,
+and it removes a dApp whose connection has closed without a RELEASE message.
 
-| Direction | Framing |
+The E3 Agent sends each E3-PDU on the connection of the dApp the E3-PDU is for. An
+E3-PDU that names no dApp that the E3 Agent can tie to a connection goes to every
+connection, and each dApp keeps the ones that name its own identifier. The E3 Agent
+closes the connection to a dApp whose socket stalls for 500 ms.
+
+An E3 Agent may close, at once, a connection from an address that is not on a list
+that it holds, and a connection that would exceed a limit of connections that it
+holds. Neither is a part of E3AP.
+
+#### IPC
+
+The socket is a sequenced-packet Unix domain socket. One send is one E3-PDU and one
+receive is one E3-PDU. A receiver shall refuse an E3-PDU that does not fit in 65536
+octets, and shall treat an empty message as the end of the connection.
+
+#### TCP
+
+Every E3-PDU is the length of the E3-PDU in 4 octets, in network byte order, then the
+E3-PDU. This holds in both directions and for the SETUP REQUEST and the SETUP
+RESPONSE. A receiver shall refuse a length of 0 and a length above 65536. TCP does not
+keep message boundaries, so a sender may write the prefix and the E3-PDU together, and
+a receiver shall expect two E3-PDUs in one read and one E3-PDU in two.
+
+#### SCTP
+
+The socket is an SCTP socket in one-to-one mode, and one E3-PDU is one SCTP message.
+A sender shall not split an E3-PDU over messages. A receiver joins the partial
+deliveries of a message up to the end of the message.
+
+Table: What a sender sets on an SCTP message
+
+| Item | Value |
 |---|---|
-| E3 Agent to dApp (the setup response and the outbound channel) | 4 octets of length in network byte order, then the E3-PDU. The payload goes out in chunks of at most 8192 octets |
-| dApp to E3 Agent (the setup request and the inbound channel) | none. One send is one E3-PDU |
+| Payload protocol identifier | `0x00E3A001` on every message. The value is private to this specification: no payload protocol identifier is registered for E3AP |
+| Stream, from the E3 Agent | 1 for an INDICATION message, 0 for every other message |
+| Stream, from the dApp | 0 for every message |
 
-A receiver of a framed message shall refuse a length of 0 and a length above 65536.
-
-The framing is not symmetric. A stream socket does not keep message boundaries, so a
-receiver of unframed messages can see two messages joined or one message split.
-
-The E3 Agent sends every message of the outbound channel to every connected dApp.
-It closes the connection to a dApp whose socket stalls for 500 ms.
+Both peers shall request two streams when they set up the association. A receiver
+accepts the payload protocol identifier 0 on stream 0, so that a sender that stamps
+nothing is served. A receiver shall close the association when a message carries
+another payload protocol identifier. A receiver does not use the stream number of a
+message to tell one E3-PDU from another.
 
 ## Size limits
 
@@ -279,8 +338,8 @@ Table: Size limits
 | Version | 1 to 32 octets | APER |
 | Telemetry list, control list | 0 to 256 entries | APER |
 | RAN function list | 0 to 64 entries | APER |
-| Encoded E3-PDU | at most 65536 octets for an encoder buffer. A receiver reads 60000 octets from a ZeroMQ message or from an unframed stream | implementation |
-| Framed message on POSIX | 1 to 65536 octets | the receiver |
+| Encoded E3-PDU | at most 65536 octets for an encoder buffer | implementation |
+| E3-PDU on POSIX | 1 to 65536 octets, on every transport and in both directions | the receiver |
 
 ## Abstract syntax
 
