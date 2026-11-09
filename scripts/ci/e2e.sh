@@ -2,9 +2,9 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
 # SPDX-License-Identifier: Apache-2.0
 #
-# End-to-end run for the cluster stage, inside the libe3-build image: one RAN and
-# one dApp process per (link, transport) cell, then the integration tests.
-# Prints one PASS or FAIL line per cell and exits non-zero if any cell failed.
+# End-to-end run for the cluster stage, in the libe3-build image: a RAN and a dApp process per
+# (link, transport, encoding) cell, then the integration tests. One PASS or FAIL line per cell;
+# the lines and the ctest summary also go to the file named by REPORT.
 #
 #   scripts/ci/e2e.sh [BUILD_DIR]
 
@@ -15,6 +15,8 @@ build=${1:-build}
 export LIBE3_REQUIRE_SCTP=1
 log_dir=$(mktemp -d)
 failed=0
+report=${REPORT:-/dev/null}
+: >"$report"
 
 run_pair() {
     local link=$1 transport=$2 encoding=$3
@@ -38,14 +40,16 @@ run_pair() {
 
     local indications
     indications=$(grep -c "Indication #" "$dapp_log" || true)
+    local verdict
     if [ "$exit_code" -ne 0 ]; then
-        echo "FAIL $cell: dApp exit code $exit_code"
+        verdict="FAIL $cell: dApp exit code $exit_code"
     elif [ "$indications" -eq 0 ]; then
-        echo "FAIL $cell: no indication reached the dApp"
+        verdict="FAIL $cell: no indication reached the dApp"
     else
-        echo "PASS $cell: $indications indications"
-        return 0
+        verdict="PASS $cell: $indications indications"
     fi
+    echo "$verdict" | tee -a "$report"
+    [[ $verdict == PASS* ]] && return 0
     tail -20 "$agent_log" "$dapp_log"
     failed=1
 }
@@ -57,6 +61,8 @@ for cell in "zmq ipc" "zmq tcp" "posix ipc" "posix tcp" "posix sctp"; do
     done
 done
 
-ctest --test-dir "$build" -L integration --output-on-failure --timeout 300 || failed=1
+ctest --test-dir "$build" -L integration --output-on-failure --timeout 300 \
+    | tee "$log_dir/ctest.log" || failed=1
+grep -E "tests passed|tests failed" "$log_dir/ctest.log" >>"$report"
 
 exit "$failed"
