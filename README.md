@@ -115,7 +115,7 @@ cd libe3
 # Documentation 
 ./build_libe3 --docs
 
-# Install dependencies first (Ubuntu/Fedora/Arch/macOS)
+# Install dependencies first (Ubuntu/Fedora/Arch)
 ./build_libe3 -I
 
 # See all options
