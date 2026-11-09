@@ -52,6 +52,20 @@ typedef void (*e3_dapp_report_cb)(
     uint32_t sequence_id
 );
 
+/* Callback for incoming control responses (dApp -> RAN). Pointers are valid only
+   during the call. */
+typedef void (*e3_control_response_cb)(
+    uint32_t dapp_id,
+    uint32_t request_id,       /* message id of the xApp control this answers */
+    uint32_t ran_function_id,
+    uint32_t control_id,
+    int response_code,         /* 0 = positive, 1 = negative */
+    int cause,                 /* libe3's Cause value, 0 to 14, or -1 for none */
+    const char* detail,        /* NUL-terminated UTF-8, or NULL for none */
+    const uint8_t* outcome,    /* service-model content, or NULL for none */
+    size_t outcome_len
+);
+
 /** Callback when dApp status changes (connect, disconnect, subscribe, unsubscribe). */
 typedef void (*e3_dapp_status_changed_cb)(void);
 
@@ -148,11 +162,42 @@ e3_error_t e3_service_model_emit_indication(
 
 /**
  * @brief Emit a message acknowledgment from a ServiceModel.
+ *
+ * DEPRECATED TO BE REMOVED. Answer a control with e3_service_model_emit_control_response.
  */
 e3_error_t e3_service_model_emit_message_ack(
     e3_service_model_handle_t* sm,
     uint32_t request_id,
     int response_code
+);
+
+/**
+ * @brief Answer a dApp control from a ServiceModel.
+ *
+ * Call it once per control, when the outcome is known: from the process-control
+ * callback or later, from any thread. A ControlResponse goes out only when the dApp
+ * asked for one; the RAN function and the control identifier come from the control.
+ *
+ * @param sm Service Model handle
+ * @param dapp_id dApp that sent the control (the `dapp_id` the process-control callback received)
+ * @param request_id Message id of the control (the callback's `request_message_id`)
+ * @param response_code 0 = positive (applied), 1 = negative
+ * @param cause Why the control was refused (negative only): the value of libe3's Cause, 0 to 14, or -1 for none
+ * @param detail UTF-8 text for the cause, up to 512 bytes, or NULL for none
+ * @param outcome What the Service Model reports about the control, or NULL for none
+ * @param outcome_len Length of \p outcome in bytes, at most 32768
+ * @return \ref e3_error_t (0 == SUCCESS). NOT_FOUND when no answer is owed: the dApp did not ask for one, or
+ *         the control was answered already. INVALID_PARAM for a NULL handle or an outcome that is too long
+ */
+e3_error_t e3_service_model_emit_control_response(
+    e3_service_model_handle_t* sm,
+    uint32_t dapp_id,
+    uint32_t request_id,
+    int response_code,
+    int cause,
+    const char* detail,
+    const uint8_t* outcome,
+    size_t outcome_len
 );
 
 /**
@@ -273,6 +318,37 @@ int e3_agent_is_running(e3_agent_handle_t* agent);
 e3_error_t e3_agent_set_dapp_report_handler(
     e3_agent_handle_t* agent,
     e3_dapp_report_cb handler
+);
+
+/**
+ * @brief Send a message acknowledgment (e.g. ack a control/request from dApp).
+ *
+ * DEPRECATED TO BE REMOVED. A libe3 RAN does not read it, and a dApp does not need it.
+ *
+ * @param agent Agent handle
+ * @param request_id ID of the request being acknowledged
+ * @param response_code 0 = positive (success), 1 = negative (failure)
+ * @return \ref e3_error_t (see \ref libe3::ErrorCode; 0 == SUCCESS)
+ */
+e3_error_t e3_agent_send_message_ack(
+    e3_agent_handle_t* agent,
+    uint32_t request_id,
+    int response_code
+);
+
+/**
+ * @brief Set callback for incoming control responses (dApp -> RAN): a dApp's answer
+ *        to an xApp control that asked for one.
+ *
+ * Pass NULL as \p handler to clear the callback.
+ *
+ * @param agent Agent handle
+ * @param handler Callback invoked for each incoming response
+ * @return \ref e3_error_t (see \ref libe3::ErrorCode; 0 == SUCCESS)
+ */
+e3_error_t e3_agent_set_control_response_handler(
+    e3_agent_handle_t* agent,
+    e3_control_response_cb handler
 );
 
 /* Helpers to return arrays allocated by the library. Caller must free with
@@ -402,6 +478,10 @@ e3_error_t e3_agent_send_indication(
  * @param sequence_id Correlation id from the E2SM-DAPP control header; the dApp
  *        carries it back on the control it re-issues, which is how the RAN
  *        matches the applied control to the xApp procedure that asked for it.
+ * @param out_message_id When non-NULL, receives the message id of the control on success:
+ *        the `request_id` of the ControlResponse that answers it.
+ * @param request_ack Non-zero to ask the dApp for a ControlResponse; it reaches the
+ *        callback of \ref e3_agent_set_control_response_handler.
  * @return \ref e3_error_t (see \ref libe3::ErrorCode; 0 == SUCCESS)
  */
 e3_error_t e3_agent_send_xapp_control(
@@ -410,21 +490,9 @@ e3_error_t e3_agent_send_xapp_control(
     uint32_t ran_function_id,
     const uint8_t* control_data,
     size_t control_data_len,
-    uint32_t sequence_id
-);
-
-/**
- * @brief Send a message acknowledgment (e.g. ack a control/request from dApp).
- *
- * @param agent Agent handle
- * @param request_id ID of the request being acknowledged
- * @param response_code 0 = positive (success), 1 = negative (failure)
- * @return \ref e3_error_t (see \ref libe3::ErrorCode; 0 == SUCCESS)
- */
-e3_error_t e3_agent_send_message_ack(
-    e3_agent_handle_t* agent,
-    uint32_t request_id,
-    int response_code
+    uint32_t sequence_id,
+    uint32_t* out_message_id,
+    int request_ack
 );
 
 /* Simple stats */

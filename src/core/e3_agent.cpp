@@ -33,7 +33,8 @@ struct E3Agent::Impl {
     SubscriptionResponseHandler subscription_response_handler;  ///< Called with each subscription response
     IndicationHandler indication_handler;                       ///< Called with each indication
     XAppControlHandler xapp_control_handler;                    ///< Called with each xApp control action
-    MessageAckHandler message_ack_handler;                      ///< Called with each message ack
+    MessageAckHandler message_ack_handler;                      ///< Called with each message ack (DEPRECATED TO BE REMOVED)
+    ControlResponseHandler control_response_handler;            ///< Called with each control response
     DisconnectHandler disconnect_handler;                       ///< Called when the session with the RAN ends
 
     /**
@@ -101,6 +102,9 @@ ErrorCode E3Agent::init() {
     }
     if (impl_->message_ack_handler) {
         impl_->interface->set_message_ack_handler(impl_->message_ack_handler);
+    }
+    if (impl_->control_response_handler) {
+        impl_->interface->set_control_response_handler(impl_->control_response_handler);
     }
     if (impl_->disconnect_handler) {
         impl_->interface->set_disconnect_handler(impl_->disconnect_handler);
@@ -235,7 +239,9 @@ ErrorCode E3Agent::send_xapp_control(
     uint32_t dapp_id,
     uint32_t ran_function_id,
     const std::vector<uint8_t>& control_data,
-    uint32_t sequence_id
+    uint32_t sequence_id,
+    uint32_t* out_message_id,
+    bool request_ack
 ) {
     if (impl_->config.role != E3Role::RAN) {
         return ErrorCode::STATE_ERROR;
@@ -250,11 +256,17 @@ ErrorCode E3Agent::send_xapp_control(
     action.ran_function_identifier = ran_function_id;
     action.xapp_control_data = control_data;
     action.sequence_id = sequence_id;
+    action.request_ack = request_ack;
     pdu.choice = action;
-    return impl_->interface->queue_outbound(std::move(pdu));
+    const uint32_t message_id = pdu.message_id;
+    ErrorCode rc = impl_->interface->queue_outbound(std::move(pdu));
+    if (rc == ErrorCode::SUCCESS && out_message_id) {
+        *out_message_id = message_id;
+    }
+    return rc;
 }
 
-ErrorCode E3Agent::send_message_ack(uint32_t request_id, ResponseCode response_code) {
+ErrorCode E3Agent::send_message_ack(uint32_t request_id, ResponseCode response_code) {  // DEPRECATED TO BE REMOVED
     if (!impl_->interface || !impl_->interface->is_running()) {
         return ErrorCode::NOT_INITIALIZED;
     }
@@ -388,10 +400,17 @@ void E3Agent::set_xapp_control_handler(XAppControlHandler handler) {
     }
 }
 
-void E3Agent::set_message_ack_handler(MessageAckHandler handler) {
+void E3Agent::set_message_ack_handler(MessageAckHandler handler) {  // DEPRECATED TO BE REMOVED
     impl_->message_ack_handler = std::move(handler);
     if (impl_->interface && impl_->message_ack_handler) {
         impl_->interface->set_message_ack_handler(impl_->message_ack_handler);
+    }
+}
+
+void E3Agent::set_control_response_handler(ControlResponseHandler handler) {
+    impl_->control_response_handler = std::move(handler);
+    if (impl_->interface && impl_->control_response_handler) {
+        impl_->interface->set_control_response_handler(impl_->control_response_handler);
     }
 }
 
@@ -446,11 +465,21 @@ ErrorCode E3Agent::send_control(uint32_t ran_function_id,
                                 uint32_t control_id,
                                 std::vector<uint8_t> action_data,
                                 uint32_t sequence_id,
-                                uint32_t* out_message_id) {
+                                uint32_t* out_message_id,
+                                bool request_ack) {
     if (impl_->config.role != E3Role::DAPP) return ErrorCode::STATE_ERROR;
     if (!impl_->interface || !impl_->interface->is_running()) return ErrorCode::NOT_INITIALIZED;
     return impl_->interface->queue_dapp_control_action(
-        ran_function_id, control_id, std::move(action_data), sequence_id, out_message_id);
+        ran_function_id, control_id, std::move(action_data), sequence_id, out_message_id, request_ack);
+}
+
+ErrorCode E3Agent::send_control_response(uint32_t request_id,
+                                         uint32_t ran_function_id,
+                                         uint32_t control_id,
+                                         const ControlResult& result) {
+    if (impl_->config.role != E3Role::DAPP) return ErrorCode::STATE_ERROR;
+    if (!impl_->interface || !impl_->interface->is_running()) return ErrorCode::NOT_INITIALIZED;
+    return impl_->interface->queue_control_response(request_id, ran_function_id, control_id, result);
 }
 
 ErrorCode E3Agent::send_report(uint32_t ran_function_id,

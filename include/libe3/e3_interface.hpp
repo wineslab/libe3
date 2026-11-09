@@ -49,7 +49,10 @@ using SetupResponseHandler = std::function<void(const SetupResponse&)>;
 using SubscriptionResponseHandler = std::function<void(const SubscriptionResponse&)>;
 using IndicationHandler = std::function<void(const IndicationMessage&)>;
 using XAppControlHandler = std::function<void(const XAppControlAction&)>;
+/// Called for a MessageAck. DEPRECATED TO BE REMOVED: libe3 does not send one, it reads one from another RAN.
 using MessageAckHandler = std::function<void(const MessageAck&)>;
+/// Called for a ControlResponse: on a dApp, the RAN's answer to its control; on a RAN, the dApp's answer to an xApp control.
+using ControlResponseHandler = std::function<void(const ControlResponse&)>;
 using DisconnectHandler = std::function<void(DisconnectReason)>;
 
 /**
@@ -189,9 +192,13 @@ public:
     void set_xapp_control_handler(XAppControlHandler handler) {
         xapp_control_handler_ = std::move(handler);
     }
-    /// Set the callback for a MessageAck. @param handler Callback to call
+    /// Set the callback for a MessageAck. DEPRECATED TO BE REMOVED. @param handler Callback to call
     void set_message_ack_handler(MessageAckHandler handler) {
         message_ack_handler_ = std::move(handler);
+    }
+    /// Set the callback for a ControlResponse (either role). @param handler Callback to call
+    void set_control_response_handler(ControlResponseHandler handler) {
+        control_response_handler_ = std::move(handler);
     }
     /// Called once when the dApp's session with the RAN ends (see E3Agent::set_disconnect_handler).
     /// @param handler Callback to call
@@ -240,13 +247,33 @@ public:
     /// @param action_data opaque payload of the Service Model
     /// @param sequence_id correlation id of the xApp procedure this control re-issues; 0 for none
     /// @param out_message_id when non-null, receives the assigned E3-MessageID on
-    ///        success, so the caller can correlate a later ack/response back to this send
+    ///        success, so the caller can correlate a later response back to this send
+    /// @param request_ack true to ask the RAN for a ControlResponse
     /// @return SUCCESS once queued; otherwise the queueing error
     ErrorCode queue_dapp_control_action(uint32_t ran_function_id,
                                         uint32_t control_id,
                                         std::vector<uint8_t> action_data,
                                         uint32_t sequence_id = 0,
-                                        uint32_t* out_message_id = nullptr);
+                                        uint32_t* out_message_id = nullptr,
+                                        bool request_ack = false);
+    /// Queue a ControlResponse that answers an xApp control (dApp role).
+    /// @param request_id message id of the xApp control this answers
+    /// @param ran_function_id RAN function of the control
+    /// @param control_id control the answer is about
+    /// @param result code, reason and outcome to send
+    /// @return SUCCESS once queued; STATE_ERROR on a RAN-role agent; NOT_INITIALIZED before setup has
+    ///         assigned a dApp id; INVALID_PARAM for an outcome over MAX_CONTROL_OUTCOME_SIZE; otherwise the queueing error
+    ErrorCode queue_control_response(uint32_t request_id,
+                                     uint32_t ran_function_id,
+                                     uint32_t control_id,
+                                     const ControlResult& result);
+    /// Answer a dApp control the RAN holds an answer for (RAN role, called by Service Models).
+    /// @param dapp_id dApp whose control is answered
+    /// @param request_id message id of the dApp control
+    /// @param result code, reason and outcome to send
+    /// @return SUCCESS once queued; NOT_FOUND when no answer is owed: the dApp did not ask for one, or
+    ///         the control was answered already; INVALID_PARAM for an outcome over MAX_CONTROL_OUTCOME_SIZE
+    ErrorCode respond_to_control(uint32_t dapp_id, uint32_t request_id, const ControlResult& result);
     /// Queue a dApp report for the outbound loop to send.
     /// @param ran_function_id RAN function the report is for
     /// @param report_data opaque payload of the Service Model
@@ -351,8 +378,19 @@ private:
     SubscriptionResponseHandler subscription_response_handler_;
     IndicationHandler indication_handler_;
     XAppControlHandler xapp_control_handler_;
-    MessageAckHandler message_ack_handler_;
+    MessageAckHandler message_ack_handler_;  // DEPRECATED TO BE REMOVED
+    ControlResponseHandler control_response_handler_;
     DisconnectHandler disconnect_handler_;
+
+    /// A dApp control that asked for an answer and has none yet: where the RAN function and the
+    /// control are found when a Service Model answers. At most MAX_PENDING_CONTROLS; an entry
+    /// goes when it is answered or when its dApp leaves.
+    struct PendingControl {
+        uint32_t ran_function_id{0};  ///< RAN function of the control
+        uint32_t control_id{0};       ///< Control identifier of the control
+    };
+    std::mutex pending_controls_mu_;
+    std::unordered_map<uint64_t, PendingControl> pending_controls_;  ///< Keyed by dApp id and request id
 
     // dApp-only: the RAN is gone (set once per session) / we sent our own release.
     std::atomic<bool> ran_gone_{false};
@@ -436,6 +474,10 @@ private:
     void handle_dapp_report(const DAppReport& report);
     void handle_release_message(const ReleaseMessage &release);
     void handle_dapp_disconnection(uint32_t dapp_id);
+    void handle_control_response_from_dapp(const ControlResponse& response);
+    /// Queue a negative ControlResponse for a dApp control the RAN refuses itself.
+    void refuse_control(const DAppControlAction& action, uint32_t request_message_id,
+                        Cause cause, std::string detail);
 
     /**
      * @brief Release and remove every dApp that has been quiet for dapp_idle_timeout_s
@@ -522,7 +564,8 @@ private:
     void handle_subscription_response(const SubscriptionResponse& response);
     void handle_indication(const IndicationMessage& msg, uint64_t latrec_seq);
     void handle_xapp_control_action(const XAppControlAction& action, uint64_t latrec_seq);
-    void handle_message_ack(const MessageAck& ack);
+    void handle_message_ack(const MessageAck& ack);  // DEPRECATED TO BE REMOVED
+    void handle_control_response_from_ran(const ControlResponse& response, uint64_t latrec_seq);
     void handle_release_from_ran(const ReleaseMessage& release);
 
     /// End the dApp session: clear its state and tell the application, once.

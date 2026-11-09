@@ -153,6 +153,7 @@ static bool equals(const DAppControlAction& a, const DAppControlAction& b) {
         && a.ran_function_identifier == b.ran_function_identifier
         && a.control_identifier == b.control_identifier
         && a.sequence_id == b.sequence_id
+        && a.request_ack == b.request_ack
         && a.action_data == b.action_data;
 }
 
@@ -167,6 +168,7 @@ static bool equals(const XAppControlAction& a, const XAppControlAction& b) {
     return a.dapp_identifier == b.dapp_identifier
         && a.ran_function_identifier == b.ran_function_identifier
         && a.sequence_id == b.sequence_id
+        && a.request_ack == b.request_ack
         && a.xapp_control_data == b.xapp_control_data;
 }
 
@@ -181,10 +183,21 @@ static bool equals(const MessageAck& a, const MessageAck& b) {
         && a.detail == b.detail;
 }
 
+static bool equals(const ControlResponse& a, const ControlResponse& b) {
+    return a.request_id == b.request_id
+        && a.dapp_identifier == b.dapp_identifier
+        && a.ran_function_identifier == b.ran_function_identifier
+        && a.control_identifier == b.control_identifier
+        && a.response_code == b.response_code
+        && a.cause == b.cause
+        && a.detail == b.detail
+        && a.control_outcome == b.control_outcome;
+}
+
 // Adding an alternative to PduChoice without adding a comparator above (and a
 // sample below) would leave that PDU type silently unguarded. Break the build
 // instead.
-static_assert(std::variant_size_v<PduChoice> == 11,
+static_assert(std::variant_size_v<PduChoice> == 12,
               "PduChoice gained or lost an alternative: add the matching "
               "equals() overload and sample PDU to this suite");
 
@@ -296,6 +309,7 @@ static std::vector<Sample> sample_pdus() {
     control.ran_function_identifier = 5;
     control.control_identifier = 9;
     control.sequence_id = 77;   // set: exercises the OPTIONAL-present branch
+    control.request_ack = true;
     const std::string control_json = R"({"mcs":12,"prb":[1,2,3]})";
     control.action_data.assign(control_json.begin(), control_json.end());
     add("DAppControlAction", PduType::DAPP_CONTROL_ACTION, control);
@@ -312,6 +326,7 @@ static std::vector<Sample> sample_pdus() {
     xapp.dapp_identifier = 42;
     xapp.ran_function_identifier = 5;
     xapp.sequence_id = 77;
+    xapp.request_ack = true;
     const std::string xapp_json = R"({"policy":"hold"})";
     xapp.xapp_control_data.assign(xapp_json.begin(), xapp_json.end());
     add("XAppControlAction", PduType::XAPP_CONTROL_ACTION, xapp);
@@ -320,11 +335,56 @@ static std::vector<Sample> sample_pdus() {
     release.dapp_identifier = 42;
     add("ReleaseMessage", PduType::RELEASE_MESSAGE, release);
 
-    MessageAck ack;
+    MessageAck ack;  // deprecated, still read
     ack.request_id = 917;
     ack.response_code = ResponseCode::POSITIVE;
     add("MessageAck", PduType::MESSAGE_ACK, ack);
 
+    // An outcome is Service Model content; valid JSON so the JSON encoder can nest it.
+    ControlResponse response;
+    response.request_id = 917;
+    response.dapp_identifier = 42;
+    response.ran_function_identifier = 5;
+    response.control_identifier = 9;
+    response.response_code = ResponseCode::POSITIVE;
+    const std::string outcome_json = R"({"applied":true,"slot":3})";
+    response.control_outcome = std::vector<uint8_t>(outcome_json.begin(), outcome_json.end());
+    add("ControlResponse", PduType::CONTROL_RESPONSE, response);
+
+    return samples;
+}
+
+/// The two controls with and without requestAck, which the one-per-type list
+/// above carries only set. False and absent are the same on every encoding.
+static std::vector<Sample> request_ack_pdus() {
+    std::vector<Sample> samples;
+    for (bool ask : {false, true}) {
+        DAppControlAction control;
+        control.dapp_identifier = 42;
+        control.ran_function_identifier = 5;
+        control.control_identifier = 9;
+        control.request_ack = ask;
+        const std::string control_json = R"({"mcs":12})";
+        control.action_data.assign(control_json.begin(), control_json.end());
+        Pdu d(PduType::DAPP_CONTROL_ACTION);
+        d.choice = control;
+        d.message_id = 919;
+        d.timestamp = kStamp;
+        samples.push_back(Sample{ask ? "DAppControlAction asks" : "DAppControlAction does not ask", std::move(d)});
+
+        XAppControlAction xapp;
+        xapp.dapp_identifier = 42;
+        xapp.ran_function_identifier = 5;
+        xapp.sequence_id = 78;
+        xapp.request_ack = ask;
+        const std::string xapp_json = R"({"policy":"hold"})";
+        xapp.xapp_control_data.assign(xapp_json.begin(), xapp_json.end());
+        Pdu x(PduType::XAPP_CONTROL_ACTION);
+        x.choice = xapp;
+        x.message_id = 919;
+        x.timestamp = kStamp;
+        samples.push_back(Sample{ask ? "XAppControlAction asks" : "XAppControlAction does not ask", std::move(x)});
+    }
     return samples;
 }
 
@@ -364,13 +424,23 @@ static std::vector<Sample> refusal_pdus() {
     ack.detail = "no subscription to this RAN function";
     add("MessageAck refused", PduType::MESSAGE_ACK, ack);
 
+    ControlResponse response;
+    response.request_id = 918;
+    response.dapp_identifier = 42;
+    response.ran_function_identifier = 5;
+    response.control_identifier = 9;
+    response.response_code = ResponseCode::NEGATIVE;
+    response.cause = Cause::NOT_FOUND;
+    response.detail = "no subscription to this RAN function";
+    add("ControlResponse refused", PduType::CONTROL_RESPONSE, response);
+
     // A cause with no text, and a text with no cause, are both legal.
-    MessageAck bare = ack;
+    ControlResponse bare = response;
     bare.detail.reset();
-    add("MessageAck cause only", PduType::MESSAGE_ACK, bare);
+    add("ControlResponse cause only", PduType::CONTROL_RESPONSE, bare);
     bare.cause.reset();
     bare.detail = "text only";
-    add("MessageAck text only", PduType::MESSAGE_ACK, bare);
+    add("ControlResponse text only", PduType::CONTROL_RESPONSE, bare);
 
     return samples;
 }
@@ -442,6 +512,47 @@ TEST(EncoderEquivalence_all_encoders_decode_to_the_same_pdu) {
                              sample.name);
             }
             ASSERT_TRUE(agree);
+        }
+    }
+}
+
+TEST(EncoderEquivalence_request_ack_true_false_and_absent_survive_every_encoder) {
+    const auto formats = available_encoders();
+    ASSERT_FALSE(formats.empty());
+
+    for (auto format : formats) {
+        auto encoder = create_encoder(format);
+        ASSERT_TRUE(encoder != nullptr);
+
+        std::vector<Pdu> decoded_asking;
+        for (const auto& sample : request_ack_pdus()) {
+            auto encoded = encoder->encode(sample.pdu);
+            report_if(!encoded.has_value(), format, sample.name, "encode failed");
+            ASSERT_TRUE(encoded.has_value());
+            auto decoded = encoder->decode(*encoded);
+            report_if(!decoded.has_value(), format, sample.name, "decode failed");
+            ASSERT_TRUE(decoded.has_value());
+            const bool same = equals(sample.pdu, *decoded);
+            report_if(!same, format, sample.name, "requestAck changed on the wire");
+            ASSERT_TRUE(same);
+        }
+    }
+}
+
+TEST(EncoderEquivalence_a_control_that_does_not_ask_is_encoded_as_if_the_field_did_not_exist) {
+    // False is not written, so the bytes of a control that does not ask are the bytes
+    // of every control before the field: the claim a peer that does not know it relies on.
+    for (auto format : available_encoders()) {
+        auto encoder = create_encoder(format);
+        ASSERT_TRUE(encoder != nullptr);
+        auto samples = request_ack_pdus();  // [dapp false, xapp false, dapp true, xapp true]
+        for (size_t i = 0; i < 2; ++i) {
+            Pdu absent = samples[i].pdu;  // request_ack is false; asking would add bytes
+            auto without = encoder->encode(absent);
+            auto with = encoder->encode(samples[i + 2].pdu);
+            ASSERT_TRUE(without.has_value());
+            ASSERT_TRUE(with.has_value());
+            ASSERT_TRUE(without->buffer.size() < with->buffer.size());
         }
     }
 }
