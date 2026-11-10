@@ -24,6 +24,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <map>
 #include <memory>
 #include <string>
@@ -48,7 +49,13 @@ struct Combo {
     EncodingFormat encoding;
 };
 
-struct ComboResult { std::string name; bool ran{false}; size_t records{0}; };
+struct ComboResult { std::string name; bool ran{false}; size_t records{0}; uint64_t t0{0}, t1{0}; };
+
+uint64_t monotonic_ns() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return static_cast<uint64_t>(ts.tv_sec) * 1000000000ull + static_cast<uint64_t>(ts.tv_nsec);
+}
 std::vector<ComboResult> g_combos;
 
 /* Base of the fake producer trace seqs the driver publishes with
@@ -275,6 +282,23 @@ TEST(no_drops_were_recorded) {
     for (const auto& [reason, n] : by_reason) {
         if (reason != LATREC_DROP_SHUTDOWN) capacity_drops += n;
     }
+    // A failure has to explain itself: which combination, and every stage the PDU got through.
+    for (const auto& r : g_recs) {
+        if (stage_of(r) != LATREC_DROP || r.aux2 == LATREC_DROP_SHUTDOWN) continue;
+        const char* combo = "?";
+        for (const auto& c : g_combos) if (r.t_ns >= c.t0 && r.t_ns <= c.t1) combo = c.name.c_str();
+        std::printf("      DROP reason %llu seq %llu in combo %s, %.1f ms before that combo ended; stages of the seq:",
+                    static_cast<unsigned long long>(r.aux2), static_cast<unsigned long long>(seq_of(r)), combo,
+                    [&] { for (const auto& c : g_combos) if (r.t_ns >= c.t0 && r.t_ns <= c.t1)
+                              return static_cast<double>(c.t1 - r.t_ns) / 1e6; return -1.0; }());
+        for (const auto& q : g_recs) {
+            if (seq_of(q) == seq_of(r)) std::printf(" %02x(aux=%llu,aux2=%llu)@%lld", static_cast<unsigned>(stage_of(q)),
+                                                    static_cast<unsigned long long>(q.aux),
+                                                    static_cast<unsigned long long>(q.aux2),
+                                                    static_cast<long long>(q.t_ns) - static_cast<long long>(r.t_ns));
+        }
+        std::printf("\n");
+    }
     ASSERT_EQ(capacity_drops, 0u);
 }
 
@@ -335,7 +359,18 @@ bool run_combo(const Combo& c, const std::string& trace_dir) {
     E3Agent dapp(dapp_cfg);
     if (dapp.start() != ErrorCode::SUCCESS) { ran.stop(); return false; }
     dapp.wait_for_setup(std::chrono::seconds(5));
+    // Wait until the dApp holds its subscription: under load a fixed pause was not always enough.
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     dapp.subscribe(/*ran_function_id=*/1, {1}, {1});
+    for (int i = 0; i < 500 && dapp.subscribed_ran_functions().empty(); i++) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    if (dapp.subscribed_ran_functions().empty()) {
+        std::printf("NOTE combo %s: the dApp holds no subscription 5 s after it asked for one "
+                    "(dApp id %s, RAN holds %zu)\n", c.name,
+                    dapp.dapp_id() ? std::to_string(*dapp.dapp_id()).c_str() : "none",
+                    ran.get_ran_function_subscribers(1).size());
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     // Drives the dApp -> RAN direction alongside the indication flow, so the
@@ -372,6 +407,19 @@ bool run_combo(const Combo& c, const std::string& trace_dir) {
     std::this_thread::sleep_for(std::chrono::seconds(2));
     stop.store(true);
     driver.join();
+
+    // Quiesce first. A service model still emitting while the dApp's connection closes made a
+    // send fail (LATREC_DROP_SEND) or left a PDU neither sent nor dropped.
+    const ErrorCode unsub = dapp.unsubscribe(/*ran_function_id=*/1);
+    for (int i = 0; i < 300 && !ran.get_ran_function_subscribers(1).empty(); i++) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    if (unsub != ErrorCode::SUCCESS || !ran.get_ran_function_subscribers(1).empty()) {
+        std::printf("NOTE combo %s: unsubscribe rc=%d, %zu subscriber(s) left on the RAN\n", c.name,
+                    static_cast<int>(unsub), ran.get_ran_function_subscribers(1).size());
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+
     dapp.stop();
     ran.stop();
     (void)trace_dir;
@@ -399,9 +447,11 @@ int main() {
 
     for (const Combo& c : combos) {
         const size_t before = read_ring_dir(trace_dir).size();
+        const uint64_t t0 = monotonic_ns();
         const bool ran = run_combo(c, trace_dir);
+        const uint64_t t1 = monotonic_ns();
         const size_t after = read_ring_dir(trace_dir).size();
-        g_combos.push_back({c.name, ran, ran ? after - before : 0});
+        g_combos.push_back({c.name, ran, ran ? after - before : 0, t0, t1});
         std::printf("combo %-18s %s\n", c.name,
                     ran ? "ok" : "skipped (encoder not built)");
     }
