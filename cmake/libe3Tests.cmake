@@ -23,7 +23,9 @@ file(GLOB LIBE3_TEST_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "tests/*.cpp")
 # LIBE3_ENABLE_ASN1=OFF the encoder factory cannot create an ASN.1 encoder,
 # so these tests can only fail; exclude them instead of weakening them.
 set(LIBE3_ASN1_ONLY_TESTS
+    asn1_boundary
     asn1_golden
+    asn1_host_interposer
     asn1_size
     e2e_report_path
 )
@@ -109,6 +111,25 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
         endif()
         continue()
     endif()
+    # A host that exports asn1c functions of its own and links libe3's shared library.
+    if(simple_name STREQUAL "asn1_host_interposer")
+        if(NOT (UNIX AND NOT APPLE))
+            message(STATUS "Skipping test_asn1_host_interposer: needs ELF symbol interposition")
+            continue()
+        endif()
+        add_executable(${target_name} "${CMAKE_CURRENT_SOURCE_DIR}/${test_src}")
+        target_link_libraries(${target_name}
+            PRIVATE
+                libe3::shared
+                libe3_test_framework
+                libe3_warnings
+                libe3_sanitizers
+                ${CMAKE_DL_LIBS}
+        )
+        set_target_properties(${target_name} PROPERTIES ENABLE_EXPORTS ON)
+        add_test(NAME ${target_name} COMMAND ${target_name})
+        continue()
+    endif()
     # test_latrec.cpp exercises latrec.h's TLS convenience layer
     # (latrec_tls_open_as/latrec_tstamp/latrec_seq_next/latrec_ctx*) directly,
     # which are true no-op inline stubs -- not the real symbols -- unless the
@@ -145,6 +166,18 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
 
     add_test(NAME ${target_name} COMMAND ${target_name})
 endforeach()
+
+# No shared library exports a symbol of the asn1c runtime (cmake/libe3CheckAsn1Exports.cmake reads
+# the dynamic symbol table, so it needs an ELF platform).
+if(LIBE3_ENABLE_ASN1 AND UNIX AND NOT APPLE)
+    set(_libe3_exports "$<TARGET_FILE:libe3_shared>")
+    if(LIBE3_ENABLE_E2SM_DAPP)
+        string(APPEND _libe3_exports "|$<TARGET_FILE:libe3_e2sm_dapp_shared>")
+    endif()
+    add_test(NAME test_asn1_exports
+        COMMAND ${CMAKE_COMMAND} "-DLIBRARIES=${_libe3_exports}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/libe3CheckAsn1Exports.cmake")
+endif()
 
 # Integration tests in tests/integration/ are opt-in via
 # LIBE3_BUILD_INTEGRATION_TESTS=ON. They require ASN.1 encoding and the

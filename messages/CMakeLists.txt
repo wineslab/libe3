@@ -56,8 +56,14 @@ if(LIBE3_ENABLE_ASN1)
     endif()
 
     # Create ASN.1 library
+    # The runtime is private to whatever links it: libe3's shared library must not export it, or
+    # a host with an asn1c runtime of its own (OAI links -rdynamic) would be called instead of it.
     add_library(asn1_e3ap ${e3ap_source})
-    set_target_properties(asn1_e3ap PROPERTIES LINKER_LANGUAGE C)
+    set_target_properties(asn1_e3ap PROPERTIES
+        LINKER_LANGUAGE C
+        POSITION_INDEPENDENT_CODE ON
+        C_VISIBILITY_PRESET hidden
+    )
     target_include_directories(asn1_e3ap
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
