@@ -27,6 +27,7 @@ set(LIBE3_ASN1_ONLY_TESTS
     asn1_golden
     asn1_host_interposer
     asn1_size
+    sm_jer_roundtrip
     e2e_report_path
 )
 
@@ -34,6 +35,7 @@ set(LIBE3_ASN1_ONLY_TESTS
 set(LIBE3_JSON_ONLY_TESTS
     interop_aerial
     json_encoder
+    sm_jer_roundtrip
 )
 
 # Tests that drive a raw ZMQ peer against the agent: they include <zmq.h> and
@@ -74,6 +76,11 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
     # Skip tests that require optional components when those components are disabled
     if(NOT LIBE3_ENABLE_JSON AND simple_name IN_LIST LIBE3_JSON_ONLY_TESTS)
         message(STATUS "Skipping test_${simple_name}: JSON support disabled")
+        continue()
+    endif()
+    # Its service model is the Simple example's, whose types are built with the examples.
+    if(NOT LIBE3_BUILD_EXAMPLES AND simple_name STREQUAL "sm_jer_roundtrip")
+        message(STATUS "Skipping test_sm_jer_roundtrip: examples not built")
         continue()
     endif()
     if(NOT LIBE3_ENABLE_PROTOBUF AND simple_name STREQUAL "protobuf_encoder")
