@@ -75,7 +75,7 @@
 - C++17 compiler (GCC 7+, Clang 5+, MSVC 2017+)
 - CMake 3.16+
 - pthreads
-- `asn1c` — ASN.1 APER encoder, required by `messages/`
+- `asn1c` — ASN.1 APER encoder, required by `messages/`: the `mouse07410/asn1c` fork, v1.5.1-44 or newer. `./build_libe3 -I` installs the tested one under `/opt/libe3/asn1c`; the distribution's package (0.9.29) is refused at configure time
 - `nlohmann-json3-dev` — Header-only JSON library; CMake expects the `nlohmann_json` target
 - `protobuf-compiler` + `libprotobuf-dev` — `protoc` and the Protocol Buffers runtime (only when `LIBE3_ENABLE_PROTOBUF=ON`)
 - `libzmq3-dev` for ZMQ transport
@@ -91,7 +91,7 @@ Install all required packages using the project's installer (recommended) or man
 
 # Manual (Debian/Ubuntu)
 sudo apt update
-sudo apt install -y build-essential cmake pkg-config libzmq3-dev ninja-build git asn1c nlohmann-json3-dev protobuf-compiler libprotobuf-dev dpkg-dev debhelper fakeroot
+sudo apt install -y build-essential cmake pkg-config libzmq3-dev ninja-build git nlohmann-json3-dev protobuf-compiler libprotobuf-dev dpkg-dev debhelper fakeroot
 ```
 
 The packaging tools (`dpkg-dev`, `debhelper`, `fakeroot`) are only needed by `scripts/create_deb.sh`.

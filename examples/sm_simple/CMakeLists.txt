@@ -22,33 +22,11 @@ endif()
 set(E3SM_SIMPLE_GRAMMAR "${CMAKE_CURRENT_LIST_DIR}/e3sm_simple.asn")
 
 # Output directory: use the messages binary dir (the including CMake sets this as CMAKE_CURRENT_BINARY_DIR)
-set(E3SM_SIMPLE_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+libe3_asn1c_generate(e3sm_simple GRAMMAR ${E3SM_SIMPLE_GRAMMAR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+    SHARE_WITH e3ap)
 
-set(E3SM_SIMPLE_GENERATED_SRCS
-    ${E3SM_SIMPLE_OUT_DIR}/Simple-Indication.c
-    ${E3SM_SIMPLE_OUT_DIR}/Simple-Control.c
-    ${E3SM_SIMPLE_OUT_DIR}/Simple-ConfigControl.c
-    ${E3SM_SIMPLE_OUT_DIR}/Simple-DAppReport.c
-    ${E3SM_SIMPLE_OUT_DIR}/Simple-RanFunctionData.c
-    # The BOOLEAN skeleton files are listed with the core E3AP grammar, which uses the
-    # ASN.1 BOOLEAN type for requestAck, so they are not listed here again.
-)
-
-set(E3SM_SIMPLE_GENERATED_HDRS
-    ${E3SM_SIMPLE_OUT_DIR}/Simple-Indication.h
-    ${E3SM_SIMPLE_OUT_DIR}/Simple-Control.h
-    ${E3SM_SIMPLE_OUT_DIR}/Simple-ConfigControl.h
-    ${E3SM_SIMPLE_OUT_DIR}/Simple-DAppReport.h
-    ${E3SM_SIMPLE_OUT_DIR}/Simple-RanFunctionData.h
-)
-
-add_custom_command(OUTPUT ${E3SM_SIMPLE_GENERATED_SRCS} ${E3SM_SIMPLE_GENERATED_HDRS}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${E3SM_SIMPLE_OUT_DIR}
-    COMMAND ${ASN1C_EXEC} -pdu=all -gen-APER -gen-UPER -no-gen-JER -no-gen-BER -no-gen-OER -fno-include-deps -fcompound-names -findirect-choice -no-gen-example -D ${E3SM_SIMPLE_OUT_DIR} ${E3SM_SIMPLE_GRAMMAR}
-    DEPENDS ${E3SM_SIMPLE_GRAMMAR}
-    COMMENT "Generating Simple ASN.1 source files from ${E3SM_SIMPLE_GRAMMAR}"
-)
-
-# Export lists to the parent scope so messages/CMakeLists can append them
+# Export the lists, here and to the parent scope, so messages/CMakeLists can append them
+set(E3SM_SIMPLE_GENERATED_SRCS ${e3sm_simple_SOURCES})
+set(E3SM_SIMPLE_GENERATED_HDRS ${e3sm_simple_HEADERS})
 set(E3SM_SIMPLE_GENERATED_SRCS ${E3SM_SIMPLE_GENERATED_SRCS} PARENT_SCOPE)
 set(E3SM_SIMPLE_GENERATED_HDRS ${E3SM_SIMPLE_GENERATED_HDRS} PARENT_SCOPE)
