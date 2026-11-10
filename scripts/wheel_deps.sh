@@ -38,11 +38,13 @@ rm -rf /tmp/protobuf-3.21.12 /tmp/protobuf-build
 # asn1c, at the commit build_libe3 pins (one place for the pin).
 pinned="$(sed -n 's/^ *local pinned_commit="\(.*\)"/\1/p' "${HERE}/build_libe3" | head -1)"
 [ -n "${pinned}" ] || { echo "no asn1c pin found in build_libe3" >&2; exit 1; }
+prefix="$(sed -n 's/^ *local asn1c_prefix="\(.*\)"/\1/p' "${HERE}/build_libe3" | head -1)"
+[ -n "${prefix}" ] || { echo "no asn1c prefix found in build_libe3" >&2; exit 1; }
 git clone https://github.com/mouse07410/asn1c /tmp/asn1c
 cd /tmp/asn1c
 git checkout "${pinned}"
 autoreconf -iv
-./configure --prefix /opt/asn1c
+CFLAGS="-O2 -fno-strict-aliasing" ./configure --prefix "${prefix}"
 make -j"$(nproc)"
 make install
 rm -rf /tmp/asn1c

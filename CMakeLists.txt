@@ -38,6 +38,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 # ============================================================================
 include(libe3Options)
 include(libe3Compiler)
+include(libe3Asn1c)
 include(libe3Dependencies)
 include(libe3Version)
 

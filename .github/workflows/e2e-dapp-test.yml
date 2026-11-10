@@ -46,17 +46,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Prepare /opt/asn1c for caching
+      - name: Prepare /opt/libe3/asn1c for caching
         run: |
-          sudo mkdir -p /opt/asn1c
-          sudo chown "$(id -u):$(id -g)" /opt/asn1c
+          sudo mkdir -p /opt/libe3/asn1c
+          sudo chown "$(id -u):$(id -g)" /opt/libe3/asn1c
 
       - name: Cache asn1c build
         # Exact-match only: a hit must imply the pinned commit inside
         # build_libe3 is unchanged. Do not add restore-keys here.
         uses: actions/cache@v5
         with:
-          path: /opt/asn1c
+          path: /opt/libe3/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
 
       - name: Install build dependencies
@@ -83,15 +83,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Prepare /opt/asn1c for caching
+      - name: Prepare /opt/libe3/asn1c for caching
         run: |
-          sudo mkdir -p /opt/asn1c
-          sudo chown "$(id -u):$(id -g)" /opt/asn1c
+          sudo mkdir -p /opt/libe3/asn1c
+          sudo chown "$(id -u):$(id -g)" /opt/libe3/asn1c
 
       - name: Cache asn1c build
         uses: actions/cache@v5
         with:
-          path: /opt/asn1c
+          path: /opt/libe3/asn1c
           key: asn1c-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('build_libe3') }}
 
       - name: Install build dependencies

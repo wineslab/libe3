@@ -24,7 +24,7 @@ if(LIBE3_ENABLE_ASN1)
     endif()
 
     # Find asn1c compiler
-    find_program(ASN1C_EXEC asn1c HINTS /opt/asn1c/bin)
+    libe3_find_asn1c()
     if(NOT ASN1C_EXEC)
         message(FATAL_ERROR "asn1c not found! ASN.1 encoding is required.\n"
             "Install with: sudo apt install asn1c\n"
