@@ -6,7 +6,9 @@
 Run: python3 -m unittest discover -s .github/scripts
 """
 import os
+import shutil
 import sys
+import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -75,9 +77,44 @@ class Manifest(unittest.TestCase):
         self.assertEqual(set(self.keys(run["spec"]["taskRunTemplate"])),
                          {"kubernetes.io/arch", "node-role.kubernetes.io/master"})
 
-    def test_branch_and_tag_reach_the_pipeline(self):
-        params = {p["name"]: p["value"] for p in cs.render_run("feat/x", "pr-7")["spec"]["params"]}
-        self.assertEqual(params, {"GIT_REPO_BRANCH": "feat/x", "IMAGE_TAG": "pr-7"})
+    def test_branch_tag_and_deps_tag_reach_the_pipeline(self):
+        params = {p["name"]: p["value"] for p in cs.render_run("feat/x", "pr-7", deps="abc123")["spec"]["params"]}
+        self.assertEqual(params, {"GIT_REPO_BRANCH": "feat/x", "IMAGE_TAG": "pr-7", "DEPS_TAG": "abc123"})
+
+
+class DepsTag(unittest.TestCase):
+    def tree(self, **files):
+        root = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, root, ignore_errors=True)
+        os.makedirs(os.path.join(root, "docker"))
+        defaults = {"build_libe3": "script", "docker/Dockerfile.deps": "image", "VERSION": "1.0.0"}
+        defaults.update(files)
+        for name, text in defaults.items():
+            with open(os.path.join(root, name), "w", encoding="utf-8") as handle:
+                handle.write(text)
+        return root
+
+    def test_the_same_files_give_the_same_tag(self):
+        self.assertEqual(cs.deps_tag(self.tree()), cs.deps_tag(self.tree()))
+
+    def test_a_change_to_either_file_changes_the_tag(self):
+        base = cs.deps_tag(self.tree())
+        self.assertNotEqual(base, cs.deps_tag(self.tree(build_libe3="script v2")))
+        self.assertNotEqual(base, cs.deps_tag(self.tree(**{"docker/Dockerfile.deps": "image v2"})))
+
+    def test_the_version_does_not_change_the_tag(self):
+        self.assertEqual(cs.deps_tag(self.tree()), cs.deps_tag(self.tree(VERSION="2.0.0")))
+
+    def test_the_tag_is_a_valid_image_tag(self):
+        tag = cs.deps_tag(self.tree())
+        self.assertRegex(tag, r"^[0-9a-f]{16}$")
+
+    def test_a_missing_file_is_a_named_failure(self):
+        root = self.tree()
+        os.remove(os.path.join(root, "build_libe3"))
+        with self.assertRaises(cs.StageError) as caught:
+            cs.deps_tag(root)
+        self.assertIn("build_libe3", str(caught.exception))
 
 
 class Judging(unittest.TestCase):

@@ -19,6 +19,7 @@ Usage:
   cluster_stage.py gate --repo OWNER/NAME --sha SHA --self-run-id ID [--pr N]
 """
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -29,6 +30,11 @@ import urllib.request
 BENCH_GROUPS = ("zmq-ipc", "zmq-tcp", "posix-ipc", "posix-tcp", "posix-sctp")
 RUN_TASKS = ("e2e",) + tuple(f"bench-{group}" for group in BENCH_GROUPS)
 REPORT_ROWS = {"6": "wire RAN to dApp", "15": "wire dApp to RAN", "Total": "round trip"}
+
+
+# What the image of the build's packages depends on. VERSION is left out: it changes with every
+# release and nothing in the packages depends on it.
+DEPS_FILES = ("build_libe3", "docker/Dockerfile.deps")
 
 
 class StageError(Exception):
@@ -51,7 +57,20 @@ def pod_template(terms: list) -> dict:
         "nodeSelectorTerms": terms}}}}
 
 
-def render_run(branch: str, tag: str, node: str = "") -> dict:
+def deps_tag(root: str = ".") -> str:
+    """The tag of the packages image for the checkout in `root`: a hash of the files it is built from."""
+    digest = hashlib.sha256()
+    for name in DEPS_FILES:
+        try:
+            with open(os.path.join(root, name), "rb") as handle:
+                data = handle.read()
+        except OSError as exc:
+            raise StageError(f"cannot read {name} to tag the packages image: {exc}")
+        digest.update(name.encode() + b"\0" + data + b"\0")
+    return digest.hexdigest()[:16]
+
+
+def render_run(branch: str, tag: str, node: str = "", deps: str = "") -> dict:
     """The PipelineRun for `branch`.
 
     The build may run on any amd64 worker that is not a control-plane node. With
@@ -66,7 +85,8 @@ def render_run(branch: str, tag: str, node: str = "") -> dict:
         "pipelineRef": {"name": "libe3-ci"},
         "taskRunTemplate": {"serviceAccountName": "pipeline", "podTemplate": pod_template(anywhere)},
         "params": [{"name": "GIT_REPO_BRANCH", "value": branch},
-                   {"name": "IMAGE_TAG", "value": tag}],
+                   {"name": "IMAGE_TAG", "value": tag},
+                   {"name": "DEPS_TAG", "value": deps}],
     }
     if node:
         pinned = pod_template([{"matchExpressions": [
@@ -172,7 +192,7 @@ def command_run(args: argparse.Namespace) -> int:
     try:
         token, api, namespace = settings(os.environ)
         url = f"{api}/apis/tekton.dev/v1/namespaces/{namespace}/pipelineruns"
-        manifest = render_run(args.branch, args.tag, os.environ.get("CLUSTER_NODE", ""))
+        manifest = render_run(args.branch, args.tag, os.environ.get("CLUSTER_NODE", ""), deps_tag())
         name = request("POST", url, token, manifest)["metadata"]["name"]
         print(f"created PipelineRun {name}")
         deadline = time.time() + args.minutes * 60

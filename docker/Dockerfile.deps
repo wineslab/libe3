@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
+# The packages and asn1c that libe3 builds with, and nothing of libe3 itself. Dockerfile.build
+# starts from it. UBUNTU_MIRROR replaces archive.ubuntu.com in apt's sources.
+#
+#   docker build -f docker/Dockerfile.deps -t libe3-deps:local .
+
+FROM ubuntu:24.04
+ARG UBUNTU_MIRROR=
+ENV DEBIAN_FRONTEND=noninteractive
+RUN if [ -n "$UBUNTU_MIRROR" ]; then \
+      sed -i "s|http://archive.ubuntu.com/ubuntu/|$UBUNTU_MIRROR|g" /etc/apt/sources.list.d/ubuntu.sources; \
+    fi \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends sudo ca-certificates libsctp-dev \
+ && rm -rf /var/lib/apt/lists/*
+WORKDIR /src
+COPY build_libe3 VERSION ./
+RUN ./build_libe3 -I
