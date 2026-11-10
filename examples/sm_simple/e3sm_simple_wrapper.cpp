@@ -13,6 +13,7 @@
 extern "C" {
 #endif
 
+#include "libe3/asn1_layout_check.h"
 #include "Simple-Indication.h"
 #include "Simple-Control.h"
 #include "Simple-ConfigControl.h"

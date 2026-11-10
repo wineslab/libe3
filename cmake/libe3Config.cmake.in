@@ -27,6 +27,10 @@ endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/libe3Targets.cmake")
 
+# 1 when the asn1c runtime of this libe3 has JER: a service model that links libe3::asn1_e3ap is
+# generated with -gen-JER then, with -no-gen-JER otherwise (libe3/asn1_layout_check.h refuses a mismatch).
+set(LIBE3_ASN1_JER @LIBE3_ASN1_JER@)
+
 # Optional components. `find_package(libe3 REQUIRED COMPONENTS e2sm_dapp)` finds
 # the E2SM-DAPP codec (libe3::e2sm_dapp, libe3::e2sm_dapp_shared); it is "found"
 # exactly when this install was built with LIBE3_ENABLE_E2SM_DAPP. Without

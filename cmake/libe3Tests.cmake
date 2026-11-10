@@ -27,6 +27,7 @@ set(LIBE3_ASN1_ONLY_TESTS
     asn1_golden
     asn1_host_interposer
     asn1_size
+    sm_jer_roundtrip
     e2e_report_path
 )
 
@@ -34,6 +35,7 @@ set(LIBE3_ASN1_ONLY_TESTS
 set(LIBE3_JSON_ONLY_TESTS
     interop_aerial
     json_encoder
+    sm_jer_roundtrip
 )
 
 # Tests that drive a raw ZMQ peer against the agent: they include <zmq.h> and
@@ -74,6 +76,11 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
     # Skip tests that require optional components when those components are disabled
     if(NOT LIBE3_ENABLE_JSON AND simple_name IN_LIST LIBE3_JSON_ONLY_TESTS)
         message(STATUS "Skipping test_${simple_name}: JSON support disabled")
+        continue()
+    endif()
+    # Its service model is the Simple example's, whose types are built with the examples.
+    if(NOT LIBE3_BUILD_EXAMPLES AND simple_name STREQUAL "sm_jer_roundtrip")
+        message(STATUS "Skipping test_sm_jer_roundtrip: examples not built")
         continue()
     endif()
     if(NOT LIBE3_ENABLE_PROTOBUF AND simple_name STREQUAL "protobuf_encoder")
@@ -177,6 +184,27 @@ if(LIBE3_ENABLE_ASN1 AND UNIX AND NOT APPLE)
     add_test(NAME test_asn1_exports
         COMMAND ${CMAKE_COMMAND} "-DLIBRARIES=${_libe3_exports}"
             -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/libe3CheckAsn1Exports.cmake")
+endif()
+
+# libe3/asn1_layout_check.h refuses a unit generated with the other JER setting. The matching unit
+# is part of every build. The mismatching one is a unit that says it was generated with
+# -no-gen-JER (the macro asn1c writes into asn_config.h, here given on the command line) against a
+# runtime that has JER; the test builds it and passes when the compiler stops at the #error. It is
+# registered for a libe3 built with JSON, whose runtime has JER.
+if(LIBE3_ENABLE_ASN1 AND UNIX)
+    add_library(libe3_layout_guard_match OBJECT tests/layout_guard_check.c)
+    target_link_libraries(libe3_layout_guard_match PRIVATE asn1_e3ap)
+    target_include_directories(libe3_layout_guard_match PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/include")
+    if(LIBE3_ASN1_JER)
+        add_library(libe3_layout_guard_mismatch OBJECT EXCLUDE_FROM_ALL tests/layout_guard_check.c)
+        target_link_libraries(libe3_layout_guard_mismatch PRIVATE asn1_e3ap)
+        target_include_directories(libe3_layout_guard_mismatch PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/include")
+        target_compile_definitions(libe3_layout_guard_mismatch PRIVATE ASN_DISABLE_JER_SUPPORT=1)
+        add_test(NAME test_asn1_layout_guard_refuses_mismatch
+            COMMAND ${CMAKE_COMMAND} --build "${CMAKE_BINARY_DIR}" --target libe3_layout_guard_mismatch)
+        set_tests_properties(test_asn1_layout_guard_refuses_mismatch PROPERTIES
+            PASS_REGULAR_EXPRESSION "libe3's asn1c runtime has JER on")
+    endif()
 endif()
 
 # libe3_check_asn1c_version() against stand-in compilers that print the banner of the pin, of the
