@@ -213,6 +213,13 @@ flexric uses a slightly different line, with `-no-gen-UPER` and without `-pdu=al
 (`src/sm/dapp_sm/ie/asn/CMakeLists.txt`). The APER rules are the same; confirm with the
 golden vectors.
 
+libe3 passes `-gen-JER` instead of `-no-gen-JER` when it is built with JSON, which is the
+default of `build_libe3`, so that the codec and libe3's own runtime have one layout when both
+are linked statically into one executable. flexric's line has `-no-gen-JER`. The layout of the
+type descriptors depends on it, and the runtime symbols of two static archives merge, so a
+program that links the static codec next to flexric's own runtime has to use
+`libe3::e2sm_dapp_shared`, or libe3 has to be built with `--disable-json`.
+
 ### Compile definitions and layout
 
 Compile the generated `*.c` files and the asn1c runtime it emits (libe3 takes the files

@@ -32,7 +32,19 @@ if(LIBE3_ENABLE_ASN1)
     endif()
     libe3_check_asn1c_version()
 
-    set(LIBE3_ASN1C_JER_FLAG -no-gen-JER)
+    # The runtime carries the JSON encoding rules (JER) whenever libe3 carries JSON, so that a service
+    # model that links libe3::asn1_e3ap gets its JSON codec from its grammar as well as its APER codec.
+    # The E2SM-DAPP codec below follows the same setting.
+    # The layout of the type descriptors depends on it: see libe3/asn1_layout_check.h.
+    if(LIBE3_ENABLE_JSON)
+        set(LIBE3_ASN1C_JER_FLAG -gen-JER)
+        set(LIBE3_ASN1_JER 1)
+    else()
+        set(LIBE3_ASN1C_JER_FLAG -no-gen-JER)
+        set(LIBE3_ASN1_JER 0)
+    endif()
+    set(LIBE3_ASN1_JER "${LIBE3_ASN1_JER}" PARENT_SCOPE)
+    message(STATUS "asn1c: JER ${LIBE3_ASN1C_JER_FLAG} (follows LIBE3_ENABLE_JSON)")
 
     # asn1c writes the C code now, at configure time: which files it writes depends on its version.
     libe3_asn1c_generate(e3ap GRAMMAR ${CMAKE_CURRENT_SOURCE_DIR}/${E3AP_GRAMMAR}
@@ -75,6 +87,11 @@ if(LIBE3_ENABLE_ASN1)
     )
     target_compile_options(asn1_e3ap PRIVATE -DASN_DISABLE_OER_SUPPORT -w)
 
+    # For the service models that link this library: a unit generated with the other JER setting
+    # is refused at compile time (the file is in the install).
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../include/libe3/asn1_layout_check.h.in"
+        "${PROJECT_BINARY_DIR}/include/libe3/asn1_layout_check.h" @ONLY)
+
     # Export the generated directory for parent to use
     set(ASN1_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}" PARENT_SCOPE)
 
@@ -96,6 +113,8 @@ if(LIBE3_ENABLE_E2SM_DAPP)
     set(E2SM_DAPP_GENERATED_DIR "${PROJECT_BINARY_DIR}/generated/e2sm_dapp")
     include(asn1/e2sm_dapp/V1/e2sm_dapp-1.0.0.cmake)
 
+    # Same JER setting as asn1_e3ap: when libe3.a and the static codec are linked into one executable
+    # their runtime symbols merge, which works only while the two runtimes have one layout.
     libe3_asn1c_generate(e2sm_dapp GRAMMAR ${CMAKE_CURRENT_SOURCE_DIR}/${E2SM_DAPP_GRAMMAR}
         DESTINATION ${E2SM_DAPP_GENERATED_DIR})
     set(e2sm_dapp_source ${e2sm_dapp_SOURCES})
