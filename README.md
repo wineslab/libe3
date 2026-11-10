@@ -164,7 +164,7 @@ pkg-config --modversion libe3
 | `LIBE3_ENABLE_ZMQ` | ON | Enable ZeroMQ transport |
 | `LIBE3_ENABLE_ASN1` | ON | Enable ASN.1 encoding |
 | `LIBE3_ENABLE_E2SM_DAPP` | ON | Build the E2SM-DAPP codec libraries (needs `LIBE3_ENABLE_ASN1`, see [docs/e2sm-dapp](docs/e2sm-dapp/README.md)) |
-| `LIBE3_ENABLE_JSON` | OFF | Enable JSON encoding support |
+| `LIBE3_ENABLE_JSON` | OFF | Enable JSON encoding support. It also builds the JSON encoding rules (JER) into the asn1c runtime, so a service model that links `libe3::asn1_e3ap` is generated with `-gen-JER` (`LIBE3_ASN1_JER` in `find_package(libe3)` says so; `libe3/asn1_layout_check.h` refuses a unit generated the other way) |
 | `LIBE3_ENABLE_PROTOBUF` | OFF | Enable Protocol Buffers encoding support |
 | `LIBE3_ENABLE_ASAN` | OFF | Enable AddressSanitizer |
 | `LIBE3_ENABLE_TSAN` | OFF | Enable ThreadSanitizer |

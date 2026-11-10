@@ -1,0 +1,37 @@
+/**
+ * @file asn1_layout_check.h
+ * @brief Refuses, at compile time, a unit whose asn1c output disagrees with libe3's runtime.
+ *
+ * Whether the asn1c runtime has the JSON encoding rules (JER) changes the layout of its type
+ * descriptors. A service model that links libe3::asn1_e3ap has to be generated with the same
+ * setting: libe3 builds the runtime with JER whenever it is built with JSON. A unit generated
+ * the other way compiles, links, and crashes on the first encode.
+ *
+ * Include this header in one translation unit of such a service model, after generating it
+ * with `-gen-JER` when LIBE3_ASN1_JER is 1 and with `-no-gen-JER` when it is 0. The asn_config.h
+ * that asn1c wrote with the unit says which one it was. A service model that carries a runtime
+ * of its own does not need this header.
+ *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#ifndef LIBE3_ASN1_LAYOUT_CHECK_H
+#define LIBE3_ASN1_LAYOUT_CHECK_H
+
+#include <asn_application.h>
+
+/// 1 when the asn1c runtime of this libe3 has JER, 0 when it has not.
+#define LIBE3_ASN1_JER @LIBE3_ASN1_JER@
+
+#if defined(ASN_DISABLE_JER_SUPPORT)
+#if LIBE3_ASN1_JER
+#error "libe3's asn1c runtime has JER on, but this unit was generated with -no-gen-JER: generate it with -gen-JER"
+#endif
+#else
+#if !LIBE3_ASN1_JER
+#error "libe3's asn1c runtime has JER off, but this unit was generated with JER on: generate it with -no-gen-JER"
+#endif
+#endif
+
+#endif /* LIBE3_ASN1_LAYOUT_CHECK_H */
