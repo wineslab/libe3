@@ -22,8 +22,8 @@ jobs:
 
       - name: Install the aarch64 cross toolchain
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq gcc-aarch64-linux-gnu
+          sudo apt-get -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update -qq
+          sudo apt-get -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y -qq gcc-aarch64-linux-gnu
 
       - name: Compile latrec for aarch64 and x86-64, C and C++, strict dialects
         run: |

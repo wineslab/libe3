@@ -215,7 +215,7 @@ jobs:
 
       - name: Install Doxygen and Graphviz
         run: |
-          sudo apt-get install -y doxygen graphviz
+          sudo apt-get -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y doxygen graphviz
 
       - name: Build library and documentation
         run: |
