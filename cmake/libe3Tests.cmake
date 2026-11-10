@@ -23,7 +23,9 @@ file(GLOB LIBE3_TEST_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "tests/*.cpp")
 # LIBE3_ENABLE_ASN1=OFF the encoder factory cannot create an ASN.1 encoder,
 # so these tests can only fail; exclude them instead of weakening them.
 set(LIBE3_ASN1_ONLY_TESTS
+    asn1_boundary
     asn1_golden
+    asn1_host_interposer
     asn1_size
     e2e_report_path
 )
@@ -109,6 +111,25 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
         endif()
         continue()
     endif()
+    # A host that exports asn1c functions of its own and links libe3's shared library.
+    if(simple_name STREQUAL "asn1_host_interposer")
+        if(NOT (UNIX AND NOT APPLE))
+            message(STATUS "Skipping test_asn1_host_interposer: needs ELF symbol interposition")
+            continue()
+        endif()
+        add_executable(${target_name} "${CMAKE_CURRENT_SOURCE_DIR}/${test_src}")
+        target_link_libraries(${target_name}
+            PRIVATE
+                libe3::shared
+                libe3_test_framework
+                libe3_warnings
+                libe3_sanitizers
+                ${CMAKE_DL_LIBS}
+        )
+        set_target_properties(${target_name} PROPERTIES ENABLE_EXPORTS ON)
+        add_test(NAME ${target_name} COMMAND ${target_name})
+        continue()
+    endif()
     # test_latrec.cpp exercises latrec.h's TLS convenience layer
     # (latrec_tls_open_as/latrec_tstamp/latrec_seq_next/latrec_ctx*) directly,
     # which are true no-op inline stubs -- not the real symbols -- unless the
@@ -137,8 +158,50 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
             LIBE3_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures")
     endif()
 
+    # The grammars it reads.
+    if(simple_name STREQUAL "grammar_no_utf8string")
+        target_compile_definitions(${target_name} PRIVATE
+            LIBE3_GRAMMAR_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
+    endif()
+
     add_test(NAME ${target_name} COMMAND ${target_name})
 endforeach()
+
+# No shared library exports a symbol of the asn1c runtime (cmake/libe3CheckAsn1Exports.cmake reads
+# the dynamic symbol table, so it needs an ELF platform).
+if(LIBE3_ENABLE_ASN1 AND UNIX AND NOT APPLE)
+    set(_libe3_exports "$<TARGET_FILE:libe3_shared>")
+    if(LIBE3_ENABLE_E2SM_DAPP)
+        string(APPEND _libe3_exports "|$<TARGET_FILE:libe3_e2sm_dapp_shared>")
+    endif()
+    add_test(NAME test_asn1_exports
+        COMMAND ${CMAKE_COMMAND} "-DLIBRARIES=${_libe3_exports}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/libe3CheckAsn1Exports.cmake")
+endif()
+
+# libe3_check_asn1c_version() against stand-in compilers that print the banner of the pin, of the
+# next release, of OCUDU's commit and of the commit libe3 pinned before. The pin and the release are
+# accepted without a word, OCUDU's with a warning, the old one refused.
+if(LIBE3_ENABLE_ASN1 AND UNIX)
+    set(_asn1c_banner_pin "ASN.1 Compiler, v1.5.3-124-ge4ee5e48-2026-11-02 (/tmp/asn1c) Copyright (c) 2003-2017 Lev Walkin")
+    set(_asn1c_banner_release "ASN.1 Compiler, v1.5.4 (/tmp/asn1c) Copyright (c) 2003-2017 Lev Walkin")
+    set(_asn1c_banner_ocudu "ASN.1 Compiler, v1.5.1-44-g844f9caa-2026-07-24 (/tmp/asn1c) Copyright (c) 2003-2017 Lev Walkin")
+    set(_asn1c_banner_old "ASN.1 Compiler, v0.9.29 Copyright (c) 2003-2017 Lev Walkin")
+    foreach(_case pin release ocudu old)
+        add_test(NAME test_asn1c_version_${_case}
+            COMMAND ${CMAKE_COMMAND}
+                "-DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
+                "-DWORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/asn1c_version_${_case}"
+                "-DBANNER=${_asn1c_banner_${_case}}"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/libe3CheckAsn1cVersion.cmake")
+    endforeach()
+    set_tests_properties(test_asn1c_version_pin test_asn1c_version_release PROPERTIES
+        FAIL_REGULAR_EXPRESSION "CMake Warning|CMake Error|older than")
+    set_tests_properties(test_asn1c_version_ocudu PROPERTIES
+        PASS_REGULAR_EXPRESSION "older than[ \n]+1.5.3-124")
+    set_tests_properties(test_asn1c_version_old PROPERTIES
+        PASS_REGULAR_EXPRESSION "older than[ \n]+1.5.1-44")
+endif()
 
 # Integration tests in tests/integration/ are opt-in via
 # LIBE3_BUILD_INTEGRATION_TESTS=ON. They require ASN.1 encoding and the

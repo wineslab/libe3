@@ -200,23 +200,30 @@ EOF
 
 # Install ASN.1 compiler from source (used on Debian where package may be outdated)
 install_asn1c_from_source() {
-    local pinned_commit="940dd5fa9f3917913fd487b13dfddfacd0ded06e"
+    local pinned_commit="e4ee5e4832b51e6284f0a8ebf6e78dd7260e1dfb"
+    # What `asn1c -version` prints for the pin (v1.5.3-124-ge4ee5e48-2026-11-02), and the oldest asn1c
+    # libe3 builds with. CMake reads both, as scripts/wheel_deps.sh reads the pin.
+    local asn1c_pin_version="1.5.3-124"
+    local asn1c_min_version="1.5.1-44"
+    # Its own prefix, so that a compiler another project keeps in /opt/asn1c (OAI does) is not replaced.
+    # CMake and scripts/wheel_deps.sh read this line, as the pin above.
+    local asn1c_prefix="/opt/libe3/asn1c"
     local build_id="$pinned_commit+nsa"
-    local stamp="/opt/asn1c/.installed-commit"
+    local stamp="$asn1c_prefix/.installed-commit"
 
     # Already installed for this exact pinned commit (e.g. restored from a CI
     # cache) - nothing to do. Checking the stamp, not just the binary's
     # presence, matters for commit-trailers.yml's per-commit-build job: it
     # checks out several commits in the same container, and an earlier commit
     # could pin a different asn1c revision than the one already on disk.
-    if [[ -x /opt/asn1c/bin/asn1c ]] && [[ "$(cat "$stamp" 2>/dev/null)" == "$build_id" ]]; then
-        echo_info "asn1c already installed at /opt/asn1c for commit $pinned_commit, skipping rebuild"
+    if [[ -x $asn1c_prefix/bin/asn1c ]] && [[ "$(cat "$stamp" 2>/dev/null)" == "$build_id" ]]; then
+        echo_info "asn1c already installed at $asn1c_prefix for commit $pinned_commit, skipping rebuild"
         return 0
     fi
 
     local asn1_install_log="$SCRIPT_DIR/build/log/asn1c_install_log.txt"
     mkdir -p "$SCRIPT_DIR/build/log"
-    echo_info "\nInstalling ASN1 from source. Log: $asn1_install_log"
+    echo_info "\nInstalling asn1c from source into $asn1c_prefix. Log: $asn1_install_log"
     # set +e around the subshell: without it, this function's inherited `set -e`
     # would abort here on a non-zero subshell exit before `status=$?` below ever
     # runs, skipping the diagnostics entirely. The inner `set -e` is still needed
@@ -233,7 +240,7 @@ install_asn1c_from_source() {
         git log -n1 || true
         autoreconf -iv
         # asn1c breaks C99 aliasing rules; gcc >= 15 at -O2 miscompiles it (vlm/asn1c#509)
-        CFLAGS="-O2 -fno-strict-aliasing" ./configure --prefix /opt/asn1c/
+        CFLAGS="-O2 -fno-strict-aliasing" ./configure --prefix "$asn1c_prefix"
         make -j"$(nproc)"
         sudo make install
     ) > "$asn1_install_log" 2>&1
@@ -332,12 +339,14 @@ install_dependencies() {
             zeromq-devel \
             ninja-build \
             git \
-            asn1c \
             nlohmann-json-devel \
             protobuf-compiler \
             protobuf-devel \
             swig \
             python3-devel
+        # The distribution's asn1c (0.9.29) is older than libe3 builds with
+        INSTALLER="dnf"
+        install_asn1c_from_source
     elif check_command pacman; then
         echo_info "Detected Arch Linux system"
         sudo pacman -Sy --noconfirm \
@@ -347,11 +356,11 @@ install_dependencies() {
             zeromq \
             ninja \
             git \
-            asn1c \
             nlohmann-json \
             protobuf \
             swig \
             python
+        echo_warning "asn1c: the distribution's (0.9.29) is too old. Build mouse07410/asn1c v1.5.1-44 or newer, or pass -DASN1C_EXEC."
     else
         echo_error "Unsupported package manager. Please install dependencies manually:"
         echo "  - cmake (>= 3.16)"

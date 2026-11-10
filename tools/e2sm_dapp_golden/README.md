@@ -23,7 +23,7 @@ With no output file the header is written to stdout. To check that the committed
 header is reproducible:
 
 ```sh
-tools/e2sm_dapp_golden/regen.sh ~/flexric /opt/asn1c/bin/asn1c gcc-15 /tmp/golden.hpp
+tools/e2sm_dapp_golden/regen.sh ~/flexric /opt/libe3/asn1c/bin/asn1c gcc-15 /tmp/golden.hpp
 cmp /tmp/golden.hpp tests/e2sm_dapp_golden.hpp
 ```
 
