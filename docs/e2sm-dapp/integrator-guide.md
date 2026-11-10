@@ -181,13 +181,14 @@ and `share/libe3/e2sm_dapp/e2sm_dapp-1.0.0.asn` in an install
 ### The asn1c you must use
 
 libe3 builds with the fork `mouse07410/asn1c`, pinned to commit
-`940dd5fa9f3917913fd487b13dfddfacd0ded06e` (`build_libe3:195-227`, function
-`install_asn1c_from_source`):
+`940dd5fa9f3917913fd487b13dfddfacd0ded06e` (function `install_asn1c_from_source`
+in `build_libe3`), installed under `/opt/libe3/asn1c` so that it does not replace an asn1c
+another project keeps in `/opt/asn1c`:
 
 ```sh
 git clone https://github.com/mouse07410/asn1c /tmp/asn1c
 cd /tmp/asn1c && git checkout 940dd5fa9f3917913fd487b13dfddfacd0ded06e
-./configure --prefix /opt/asn1c/ && make && sudo make install
+./configure --prefix /opt/libe3/asn1c/ && make && sudo make install
 ```
 
 (`build_libe3` does this for you when the pinned commit is not installed.) A different
@@ -341,7 +342,7 @@ with `gen_header.py`.
 To check the committed header is reproducible:
 
 ```sh
-tools/e2sm_dapp_golden/regen.sh ~/flexric /opt/asn1c/bin/asn1c gcc-15 /tmp/golden.hpp
+tools/e2sm_dapp_golden/regen.sh ~/flexric /opt/libe3/asn1c/bin/asn1c gcc-15 /tmp/golden.hpp
 cmp /tmp/golden.hpp tests/e2sm_dapp_golden.hpp
 ```
 

@@ -12,7 +12,7 @@ if(NOT LIBE3_BUILD_EXAMPLES)
 endif()
 
 if(NOT ASN1C_EXEC)
-    find_program(ASN1C_EXEC asn1c HINTS /opt/asn1c/bin)
+    libe3_find_asn1c()
 endif()
 if(NOT ASN1C_EXEC)
     message(FATAL_ERROR "asn1c not found; required to generate e3sm_simple ASN.1 sources")
