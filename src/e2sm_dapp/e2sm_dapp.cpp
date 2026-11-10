@@ -423,7 +423,8 @@ bool build(const ran_function_definition_ctrl_s& s, RANFunctionDefinition_Contro
 
 bool build(const e2sm_dapp_ran_function_definition_s& s, E2SM_DAPP_RANFunctionDefinition_t& d)
 {
-    if (!build(s.ran_function_name, d.ranFunction_Name)) {
+    d.ranFunction_Name = zalloc<RANfunction_Name_t>();
+    if (d.ranFunction_Name == nullptr || !build(s.ran_function_name, *d.ranFunction_Name)) {
         return false;
     }
     if (s.ran_function_definition_event_trigger_present) {
@@ -729,7 +730,7 @@ bool from_asn(const RANFunctionDefinition_Control_Item_t& s, ran_function_defini
 
 bool from_asn(const E2SM_DAPP_RANFunctionDefinition_t& s, e2sm_dapp_ran_function_definition_s& d)
 {
-    if (!from_asn(s.ranFunction_Name, d.ran_function_name)) {
+    if (s.ranFunction_Name == nullptr || !from_asn(*s.ranFunction_Name, d.ran_function_name)) {
         return false;
     }
     d.ran_function_definition_event_trigger_present = (s.ranFunctionDefinition_EventTrigger != nullptr);
@@ -978,9 +979,13 @@ asn_code e2sm_dapp_ind_msg_s::pack(std::vector<uint8_t>& out) const
                     d.ric_indicationMessage_formats.present =
                         E2SM_DAPP_IndicationMessage__ric_indicationMessage_formats_PR_indicationMessage_Format2;
                     d.ric_indicationMessage_formats.choice.indicationMessage_Format2 = f;
-                    return f != nullptr &&
+                    if (f == nullptr) {
+                        return false;
+                    }
+                    f->dappE3Subscriptions = zalloc<DAppE3Subscription_List_t>();
+                    return f->dappE3Subscriptions != nullptr &&
                            build_subs(ric_ind_msg_formats.ind_msg_format2().dapp_e3_subscriptions,
-                                      f->dappE3Subscriptions);
+                                      *f->dappE3Subscriptions);
                 }
                 default:
                     return false;
@@ -1005,7 +1010,8 @@ asn_code e2sm_dapp_ind_msg_s::unpack(const uint8_t* data, size_t len)
                 case E2SM_DAPP_IndicationMessage__ric_indicationMessage_formats_PR_indicationMessage_Format2: {
                     const auto* f = s.ric_indicationMessage_formats.choice.indicationMessage_Format2;
                     auto&       c = d.ric_ind_msg_formats.set_ind_msg_format2();
-                    return f != nullptr && get_subs(f->dappE3Subscriptions, c.dapp_e3_subscriptions);
+                    return f != nullptr && f->dappE3Subscriptions != nullptr &&
+                           get_subs(*f->dappE3Subscriptions, c.dapp_e3_subscriptions);
                 }
                 default:
                     return false;

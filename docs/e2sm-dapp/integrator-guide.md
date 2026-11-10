@@ -181,27 +181,30 @@ and `share/libe3/e2sm_dapp/e2sm_dapp-1.0.0.asn` in an install
 ### The asn1c you must use
 
 libe3 builds with the fork `mouse07410/asn1c`, pinned to commit
-`940dd5fa9f3917913fd487b13dfddfacd0ded06e` (function `install_asn1c_from_source`
+`e4ee5e4832b51e6284f0a8ebf6e78dd7260e1dfb` (v1.5.3-124; function `install_asn1c_from_source`
 in `build_libe3`), installed under `/opt/libe3/asn1c` so that it does not replace an asn1c
 another project keeps in `/opt/asn1c`:
 
 ```sh
 git clone https://github.com/mouse07410/asn1c /tmp/asn1c
-cd /tmp/asn1c && git checkout 940dd5fa9f3917913fd487b13dfddfacd0ded06e
+cd /tmp/asn1c && git checkout e4ee5e4832b51e6284f0a8ebf6e78dd7260e1dfb
 ./configure --prefix /opt/libe3/asn1c/ && make && sudo make install
 ```
 
 (`build_libe3` does this for you when the pinned commit is not installed.) A different
 asn1c can produce a different APER encoding for the same grammar, in particular for
 extension handling and unconstrained integers. Check against the golden vectors if you
-use another.
+use another. libe3's configure accepts asn1c from 1.5.1-44, warns below 1.5.3-124 and
+refuses anything older, which includes the asn1c of apt (0.9.29) and the commit libe3
+pinned before (940dd5fa, which also prints v0.9.29): a developer who still has it in
+`/opt/asn1c` gets that error and has to run `./build_libe3 -I`.
 
 ### The exact flags
 
-From `messages/CMakeLists.txt:91`:
+From `libe3_asn1c_generate` in `cmake/libe3Asn1c.cmake`:
 
 ```sh
-asn1c -pdu=all -gen-APER -gen-UPER -no-gen-JER -no-gen-BER -no-gen-OER \
+asn1c -pdu=all -gen-APER -gen-UPER -no-gen-JER -no-gen-BER -no-gen-OER -no-gen-CBOR \
       -fno-include-deps -fcompound-names -findirect-choice -no-gen-example \
       -D <output-dir> e2sm_dapp-1.0.0.asn
 ```
@@ -212,9 +215,8 @@ golden vectors.
 
 ### Compile definitions and layout
 
-Compile the generated `*.c` files and the asn1c runtime it emits (the list is in
-`messages/asn1/e2sm_dapp/V1/e2sm_dapp-1.0.0.cmake`: runtime support first, then the
-protocol types) with `-DASN_DISABLE_OER_SUPPORT`. libe3 also compiles them `-w`
+Compile the generated `*.c` files and the asn1c runtime it emits (libe3 takes the files
+asn1c wrote; which files that is depends on the asn1c version) with `-DASN_DISABLE_OER_SUPPORT`. libe3 also compiles them `-w`
 and with hidden symbol visibility, so the runtime does not clash with another asn1c in
 the process. Encode with `ATS_ALIGNED_BASIC_PER` and decode with `aper_decode`.
 

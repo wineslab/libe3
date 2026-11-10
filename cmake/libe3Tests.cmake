@@ -179,6 +179,30 @@ if(LIBE3_ENABLE_ASN1 AND UNIX AND NOT APPLE)
             -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/libe3CheckAsn1Exports.cmake")
 endif()
 
+# libe3_check_asn1c_version() against stand-in compilers that print the banner of the pin, of the
+# next release, of OCUDU's commit and of the commit libe3 pinned before. The pin and the release are
+# accepted without a word, OCUDU's with a warning, the old one refused.
+if(LIBE3_ENABLE_ASN1 AND UNIX)
+    set(_asn1c_banner_pin "ASN.1 Compiler, v1.5.3-124-ge4ee5e48-2026-11-02 (/tmp/asn1c) Copyright (c) 2003-2017 Lev Walkin")
+    set(_asn1c_banner_release "ASN.1 Compiler, v1.5.4 (/tmp/asn1c) Copyright (c) 2003-2017 Lev Walkin")
+    set(_asn1c_banner_ocudu "ASN.1 Compiler, v1.5.1-44-g844f9caa-2026-07-24 (/tmp/asn1c) Copyright (c) 2003-2017 Lev Walkin")
+    set(_asn1c_banner_old "ASN.1 Compiler, v0.9.29 Copyright (c) 2003-2017 Lev Walkin")
+    foreach(_case pin release ocudu old)
+        add_test(NAME test_asn1c_version_${_case}
+            COMMAND ${CMAKE_COMMAND}
+                "-DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
+                "-DWORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/asn1c_version_${_case}"
+                "-DBANNER=${_asn1c_banner_${_case}}"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/libe3CheckAsn1cVersion.cmake")
+    endforeach()
+    set_tests_properties(test_asn1c_version_pin test_asn1c_version_release PROPERTIES
+        FAIL_REGULAR_EXPRESSION "CMake Warning|CMake Error|older than")
+    set_tests_properties(test_asn1c_version_ocudu PROPERTIES
+        PASS_REGULAR_EXPRESSION "older than[ \n]+1.5.3-124")
+    set_tests_properties(test_asn1c_version_old PROPERTIES
+        PASS_REGULAR_EXPRESSION "older than[ \n]+1.5.1-44")
+endif()
+
 # Integration tests in tests/integration/ are opt-in via
 # LIBE3_BUILD_INTEGRATION_TESTS=ON. They require ASN.1 encoding and the
 # example_simple_agent/example_simple_dapp executables for cross-process
