@@ -137,6 +137,12 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
             LIBE3_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures")
     endif()
 
+    # The grammars it reads.
+    if(simple_name STREQUAL "grammar_no_utf8string")
+        target_compile_definitions(${target_name} PRIVATE
+            LIBE3_GRAMMAR_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
+    endif()
+
     add_test(NAME ${target_name} COMMAND ${target_name})
 endforeach()
 

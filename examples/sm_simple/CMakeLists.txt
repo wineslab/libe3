@@ -32,9 +32,6 @@ set(E3SM_SIMPLE_GENERATED_SRCS
     ${E3SM_SIMPLE_OUT_DIR}/Simple-RanFunctionData.c
     # The BOOLEAN skeleton files are listed with the core E3AP grammar, which uses the
     # ASN.1 BOOLEAN type for requestAck, so they are not listed here again.
-    ${E3SM_SIMPLE_OUT_DIR}/UTF8String.c
-    ${E3SM_SIMPLE_OUT_DIR}/UTF8String_print.c
-    ${E3SM_SIMPLE_OUT_DIR}/UTF8String_rfill.c
 )
 
 set(E3SM_SIMPLE_GENERATED_HDRS
@@ -43,7 +40,6 @@ set(E3SM_SIMPLE_GENERATED_HDRS
     ${E3SM_SIMPLE_OUT_DIR}/Simple-ConfigControl.h
     ${E3SM_SIMPLE_OUT_DIR}/Simple-DAppReport.h
     ${E3SM_SIMPLE_OUT_DIR}/Simple-RanFunctionData.h
-    ${E3SM_SIMPLE_OUT_DIR}/UTF8String.h
 )
 
 add_custom_command(OUTPUT ${E3SM_SIMPLE_GENERATED_SRCS} ${E3SM_SIMPLE_GENERATED_HDRS}
