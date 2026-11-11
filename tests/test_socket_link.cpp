@@ -115,6 +115,32 @@ TEST(the_shared_default_ipc_endpoint_maps_to_e3) {
     ASSERT_EQ(link_endpoint(E3TransportLayer::TCP, "tcp://h:1"), std::string("tcp://h:1"));
 }
 
+TEST(an_sctp_socket_gets_the_bounded_retransmission_timeout) {
+#ifdef LIBE3_ENABLE_SCTP
+    for (SocketKind kind : {SocketKind::LISTENER, SocketKind::CLIENT, SocketKind::ACCEPTED}) {
+        SocketSpec spec{E3TransportLayer::SCTP, "", Target{"", "1"}, PosixOptions{}, "test"};
+        const int fd = make_socket(spec, AF_INET);
+        if (fd < 0) {
+            std::cout << "      SCTP NOT RUN: this host cannot open an SCTP socket\n";
+            const char* require = std::getenv("LIBE3_REQUIRE_SCTP");
+            ASSERT_FALSE(require != nullptr && *require != '\0' && *require != '0');
+            return;
+        }
+        tune_socket(spec, fd, kind);
+        struct sctp_rtoinfo rto{};
+        socklen_t length = sizeof(rto);
+        ASSERT_EQ(getsockopt(fd, IPPROTO_SCTP, SCTP_RTOINFO, &rto, &length), 0);
+        ASSERT_EQ(rto.srto_initial, SCTP_RTO_INITIAL_MS);
+        ASSERT_EQ(rto.srto_min, SCTP_RTO_MIN_MS);
+        ASSERT_EQ(rto.srto_max, SCTP_RTO_MAX_MS);
+        ASSERT_TRUE(SCTP_RTO_MAX_MS < static_cast<uint32_t>(SEND_TIMEOUT_MS));
+        close(fd);
+    }
+#else
+    std::cout << "      SCTP NOT RUN: built without LIBE3_ENABLE_SCTP\n";
+#endif
+}
+
 int main() {
     return RUN_ALL_TESTS();
 }
