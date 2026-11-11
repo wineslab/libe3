@@ -216,4 +216,4 @@ Table: E3AP fields that carry the IEs of the present document
 | dApp CONTROL ACTION | `actionData` | CONTROL DATA IE | 8.2.1.4 |
 | SUBSCRIPTION REQUEST | none | none | 6.6.2 |
 | SUBSCRIPTION RESPONSE | none | none | 6.6.2 |
-| MESSAGE ACK | none | none | 6.6.4 |
+| CONTROL RESPONSE | none | none | 6.6.4 |

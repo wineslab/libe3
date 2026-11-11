@@ -164,11 +164,17 @@ public:
             }
         }
 
-        libe3::Pdu ack_pdu = make_message_ack_pdu(
-            request_message_id,
-            decode_ok ? libe3::ResponseCode::POSITIVE : libe3::ResponseCode::NEGATIVE
-        );
-        libe3::ErrorCode rc = emit_outbound(std::move(ack_pdu));
+        // The answer goes out only when the dApp asked for one, so this can
+        // be called for every control. NOT_FOUND means nobody is waiting.
+        libe3::ControlResult result;
+        result.response_code = decode_ok ? libe3::ResponseCode::POSITIVE
+                                         : libe3::ResponseCode::NEGATIVE;
+        if (!decode_ok) {
+            result.cause = libe3::Cause::INVALID_REQUEST;
+            result.detail = "the control does not decode";
+        }
+        libe3::ErrorCode rc = respond_to_control(action.dapp_identifier, request_message_id, result);
+        if (rc == libe3::ErrorCode::NOT_FOUND) rc = libe3::ErrorCode::SUCCESS;
 
         // Closed-loop pacing: releasing the next emission only after the control
         // action lands keeps exactly one indication in flight.

@@ -17,8 +17,8 @@ Table: Procedures and the E3AP message that carries each
 | Subscription | dApp | E3 Subscription Request and Response | none | none |
 | Sensing indication | RAN | E3 Indication Message | `Spectrum-Indication`, alternative `sensingIndication` | A1 to A10 |
 | Cell configuration indication | RAN | E3 Indication Message | `Spectrum-Indication`, alternative `cellConfigIndication` | none |
-| PRB block control | dApp | E3 dApp Control Action, answered by E3 Message Ack | `Spectrum-DAppControlData` | A11 to A19a |
-| Sensing policy control | dApp | E3 dApp Control Action, answered by E3 Message Ack | `Spectrum-DAppControlData` | A11 to A19a |
+| PRB block control | dApp | E3 dApp Control Action, answered by E3 Control Response | `Spectrum-DAppControlData` | A11 to A19a |
+| Sensing policy control | dApp | E3 dApp Control Action, answered by E3 Control Response | `Spectrum-DAppControlData` | A11 to A19a |
 | dApp report | dApp | E3 dApp Report | `Spectrum-DAppReportData` | A11 to A20 |
 | xApp control relay | xApp, through the RAN | E3 xApp Control Action | `Spectrum-XAppControlData` | B7 to B15 |
 | Apply outcome | RAN | none on E3. The E2 control outcome carries it. | `Spectrum-ApplyOutcomeData` | B16 to B19 |
@@ -53,7 +53,7 @@ accepts the controls of the dApp.
 ### Unsuccessful operation
 
 If the E3 Subscription Response is negative, the dApp has no subscription. The dApp shall not send
-controls. A control without a running service model gets a negative E3 Message Ack.
+controls. A control without a running service model gets a negative E3 Control Response.
 
 ### Abnormal conditions
 
@@ -146,13 +146,13 @@ A dApp, or an xApp decision that the dApp re-issues, asks the RAN to stop using 
 4. If the list is empty, the RAN clears the PRB block. Otherwise the RAN installs the block. It marks
    every listed PRB as occupied for all 14 symbols, in uplink and in downlink. The new list replaces
    the old one.
-5. The RAN sends an E3 Message Ack with the response code of the result.
+5. If the dApp set `requestAck` to "true", the RAN sends an E3 Control Response with the response code of the result.
 6. The scheduler applies the block from the start of a following slot. Every allocation step then
    treats the blocked PRBs as occupied.
 
 ### Successful operation
 
-The response code of the E3 Message Ack is "positive". The scheduler uses the block from the next
+The response code of the E3 Control Response is "positive". The scheduler uses the block from the next
 slot start.
 
 ### Unsuccessful operation
@@ -167,7 +167,7 @@ The response code is "negative" when any of these is true.
   PRB index above 272.
 * The scheduler refuses to install the block.
 
-A negative acknowledge leaves the previous block as it was.
+A negative response leaves the previous block as it was.
 
 ### Abnormal conditions
 
@@ -192,7 +192,7 @@ clean spectrum.
 4. If `deactivate` is "TRUE", the RAN clears the policy. Otherwise it installs the masks in the uplink
    scheduler. The uplink scheduler then prefers time domain allocations that do not use the masked
    symbols.
-5. The RAN sends an E3 Message Ack.
+5. If the dApp set `requestAck` to "true", the RAN sends an E3 Control Response with the response code of the result.
 
 ### Successful operation
 
@@ -201,7 +201,7 @@ The response code is "positive". The uplink scheduler follows the policy from th
 ### Unsuccessful operation
 
 The response code is "negative" for the cases of the PRB block control. It is also "negative" when the
-number of masks differs from the number of slots in a frame of the RAN. A negative acknowledge leaves
+number of masks differs from the number of slots in a frame of the RAN. A negative response leaves
 the previous policy as it was.
 
 ### Abnormal conditions
@@ -318,7 +318,7 @@ When the last subscription to RAN function 1 ends, the RAN shall:
 3. clear the PRB block in uplink and downlink.
 
 A held block or policy would otherwise stay in force when no dApp is there to manage it. A control
-that arrives after the stop gets a negative E3 Message Ack.
+that arrives after the stop gets a negative E3 Control Response.
 
 ## The loop from end to end
 
@@ -333,4 +333,4 @@ control loop pages.
    Control Action to the dApp (B7 to B15).
 5. The dApp sends a PRB block control with the same `sequenceId` (B16, then A12 to A18).
 6. The RAN installs the block (B17) and the scheduler puts it on air (B18).
-7. The RAN sends an E3 Message Ack to the dApp and the E2 control outcome to the xApp (B19).
+7. The RAN sends an E3 Control Response to the dApp, if it asked for one, and the E2 control outcome to the xApp (B19).

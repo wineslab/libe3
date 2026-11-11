@@ -140,7 +140,7 @@ Table: `Spectrum-SensingPolicyControl`
 | `validityPeriod` | INTEGER | 1..3600000 | O | milliseconds that the policy stays valid, up to one hour. The RAN decodes it and uses it only in a log line. |
 
 The length of `maskPerSlot` shall equal the number of slots in a frame of the RAN. That number is 20
-at 30 kHz subcarrier spacing. A list with another length gets a negative acknowledge. A message that
+at 30 kHz subcarrier spacing. A list with another length gets a negative E3 Control Response. A message that
 only clears the policy shall still carry at least one mask value.
 
 ## dApp report

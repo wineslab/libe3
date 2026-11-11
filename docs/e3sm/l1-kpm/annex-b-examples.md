@@ -97,8 +97,8 @@ Table: Messages of the UE metrics example
 | 3 | dApp to E3 Agent | SUBSCRIPTION REQUEST | 55 | none |
 | 4 | E3 Agent to dApp | SUBSCRIPTION RESPONSE | 60 | none |
 | 5 | E3 Agent to dApp | INDICATION MESSAGE | 85 | INDICATION DATA IE, 67 octets |
-| 6 | dApp to E3 Agent | dApp CONTROL ACTION | 26 | CONTROL DATA IE, 6 octets |
-| 7 | E3 Agent to dApp | MESSAGE ACK | 14 | none |
+| 6 | dApp to E3 Agent | dApp CONTROL ACTION | 29 | CONTROL DATA IE, 6 octets |
+| 7 | E3 Agent to dApp | CONTROL RESPONSE | 21 | none |
 | 8 | E3 Agent to dApp | INDICATION MESSAGE | 61 | INDICATION DATA IE, 43 octets |
 
 ### Step 1: SETUP REQUEST
@@ -380,6 +380,7 @@ The message in JSON:
   "dAppIdentifier": 2,
   "ranFunctionIdentifier": 2,
   "controlIdentifier": 1,
+  "requestAck": true,
   "actionData": {
     "set_subscription_data": {
       "ue_filter": [
@@ -393,35 +394,39 @@ The message in JSON:
 }
 ```
 
-The message in APER has 26 octets:
+The message in APER has 29 octets:
 
 ```
-0000  40 08 08 18 74 2a 6c 9a 2a 3b 00 30 00 01 00 01
-0010  00 00 00 05 10 10 00 01 46 01
+0000  40 08 08 18 74 2a 6c 9a 2a 3b 00 34 00 01 00 01
+0010  00 00 00 05 10 10 00 01 46 01 01 01 80
 ```
 
-The octets 20 to 25 of the message are the CONTROL DATA IE, unchanged.
+The octets 20 to 25 of the message are the CONTROL DATA IE, unchanged. The octets 26 to 28 are the extension addition `requestAck`: the extension bitmap, the length of the addition and the value "true".
 
-### Step 7: MESSAGE ACK
+### Step 7: CONTROL RESPONSE
 
-The E3 Agent applies the subscription data.
+The E3 Agent applies the subscription data. The `requestId` is the `id` of the control in step 6.
 
 The message in JSON:
 
 ```json
 {
-  "type": "messageAck",
+  "type": "controlResponse",
   "id": 32,
   "timestamp": 1762080000140200000,
   "requestId": 9,
+  "dAppIdentifier": 2,
+  "ranFunctionIdentifier": 2,
+  "controlIdentifier": 1,
   "responseCode": "positive"
 }
 ```
 
-The message in APER has 14 octets:
+The message in APER has 21 octets:
 
 ```
-0000  40 1f 08 18 74 2a 6c 9a 2d 48 40 50 08 00
+0000  40 1f 08 18 74 2a 6c 9a 2d 48 40 58 00 08 00 01
+0010  00 01 00 00 00
 ```
 
 ### Step 8: INDICATION MESSAGE

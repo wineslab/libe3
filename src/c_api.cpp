@@ -131,6 +131,17 @@ struct e3_service_model_handle_s : public ServiceModel {
     ErrorCode emit_pdu(Pdu&& pdu) {
         return emit_outbound(std::move(pdu));
     }
+
+    /**
+     * @brief Answer a dApp control
+     * @param dapp_id dApp that sent the control
+     * @param request_id Message id of the control
+     * @param result The answer
+     * @return What ServiceModel::respond_to_control returns
+     */
+    ErrorCode answer_control(uint32_t dapp_id, uint32_t request_id, const ControlResult& result) {
+        return respond_to_control(dapp_id, request_id, result);
+    }
 };
 
 extern "C" {
@@ -178,7 +189,7 @@ e3_error_t e3_service_model_emit_indication(
     return static_cast<int>(sm->emit_pdu(std::move(pdu)));
 }
 
-e3_error_t e3_service_model_emit_message_ack(
+e3_error_t e3_service_model_emit_message_ack(  // DEPRECATED TO BE REMOVED
     e3_service_model_handle_t* sm,
     uint32_t request_id,
     int response_code
@@ -192,6 +203,28 @@ e3_error_t e3_service_model_emit_message_ack(
     pdu.choice = ack;
 
     return static_cast<int>(sm->emit_pdu(std::move(pdu)));
+}
+
+e3_error_t e3_service_model_emit_control_response(
+    e3_service_model_handle_t* sm,
+    uint32_t dapp_id,
+    uint32_t request_id,
+    int response_code,
+    int cause,
+    const char* detail,
+    const uint8_t* outcome,
+    size_t outcome_len
+) {
+    if (!sm) return static_cast<int>(ErrorCode::INVALID_PARAM);
+    if (outcome_len > MAX_CONTROL_OUTCOME_SIZE) return static_cast<int>(ErrorCode::INVALID_PARAM);
+
+    ControlResult result;
+    result.response_code = (response_code == 0) ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
+    if (cause >= 0) result.cause = cause_from_value(cause);
+    if (detail) result.detail = std::string(detail);
+    if (outcome && outcome_len) result.outcome.assign(outcome, outcome + outcome_len);
+
+    return static_cast<int>(sm->answer_control(dapp_id, request_id, result));
 }
 
 e3_agent_handle_t* e3_agent_create_default() {
@@ -410,16 +443,19 @@ e3_error_t e3_agent_set_dapp_report_handler(
         uint32_t ran_function_id,
         const uint8_t* control_data,
         size_t control_data_len,
-        uint32_t sequence_id
+        uint32_t sequence_id,
+        uint32_t* out_message_id,
+        int request_ack
     ) {
         if (!agent || !agent->agent) return static_cast<int>(ErrorCode::INVALID_PARAM);
         std::vector<uint8_t> buf;
         if (control_data && control_data_len) buf.assign(control_data, control_data + control_data_len);
         return static_cast<int>(
-            agent->agent->send_xapp_control(dapp_id, ran_function_id, buf, sequence_id));
+            agent->agent->send_xapp_control(dapp_id, ran_function_id, buf, sequence_id,
+                                            out_message_id, request_ack != 0));
     }
 
-    e3_error_t e3_agent_send_message_ack(
+    e3_error_t e3_agent_send_message_ack(  // DEPRECATED TO BE REMOVED
         e3_agent_handle_t* agent,
         uint32_t request_id,
         int response_code
@@ -427,6 +463,39 @@ e3_error_t e3_agent_set_dapp_report_handler(
         if (!agent || !agent->agent) return static_cast<int>(ErrorCode::INVALID_PARAM);
         ResponseCode rc = (response_code == 0) ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
         return static_cast<int>(agent->agent->send_message_ack(request_id, rc));
+    }
+
+    e3_error_t e3_agent_set_control_response_handler(
+        e3_agent_handle_t* agent,
+        e3_control_response_cb handler
+    ) {
+        if (!agent || !agent->agent) return static_cast<int>(ErrorCode::INVALID_PARAM);
+
+        if (!handler) {
+            agent->agent->set_control_response_handler(ControlResponseHandler{});
+            return static_cast<int>(ErrorCode::SUCCESS);
+        }
+
+        agent->agent->set_control_response_handler(
+            [handler](const ControlResponse& resp) {
+                const uint8_t* outcome = (resp.control_outcome && !resp.control_outcome->empty())
+                                             ? resp.control_outcome->data() : nullptr;
+                const size_t outcome_len = resp.control_outcome ? resp.control_outcome->size() : 0;
+                handler(
+                    resp.dapp_identifier,
+                    resp.request_id,
+                    resp.ran_function_identifier,
+                    resp.control_identifier,
+                    resp.response_code == ResponseCode::POSITIVE ? 0 : 1,
+                    resp.cause ? static_cast<int>(*resp.cause) : -1,
+                    resp.detail ? resp.detail->c_str() : nullptr,
+                    outcome,
+                    outcome_len
+                );
+            }
+        );
+
+        return static_cast<int>(ErrorCode::SUCCESS);
     }
 
     size_t e3_agent_dapp_count(e3_agent_handle_t* agent) {

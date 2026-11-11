@@ -293,7 +293,10 @@ int main(int argc, char* argv[]) {
                 const int sampling = static_cast<int>(seq % 101);
                 std::vector<uint8_t> encoded;
                 if (libe3_examples::encode_simple_control(sampling, encoded, encoding)) {
-                    auto rc = p->agent->send_control(/*ran_function_id=*/1, /*control_id=*/1, encoded);
+                    // request_ack asks the RAN for a ControlResponse once it has dealt with the control.
+                    auto rc = p->agent->send_control(/*ran_function_id=*/1, /*control_id=*/1, encoded,
+                                                     /*sequence_id=*/0, /*out_message_id=*/nullptr,
+                                                     /*request_ack=*/true);
                     if (rc == libe3::ErrorCode::SUCCESS) {
                         if (!quiet) {
                             std::cout << "  -> [" << p->label << "] Sent Simple-Control samplingThreshold="
@@ -331,9 +334,12 @@ int main(int argc, char* argv[]) {
             std::cout << "\n";
         });
 
-        p->agent->set_message_ack_handler([p](const libe3::MessageAck& ack) {
-            std::cout << "[ACK] peer=" << p->label << " request_id=" << ack.request_id
-                      << " rc=" << libe3::response_code_to_string(ack.response_code) << "\n";
+        p->agent->set_control_response_handler([p](const libe3::ControlResponse& r) {
+            std::cout << "[RESPONSE] peer=" << p->label << " request_id=" << r.request_id
+                      << " rc=" << libe3::response_code_to_string(r.response_code);
+            if (r.cause) std::cout << " cause=" << libe3::cause_to_string(*r.cause);
+            if (r.detail) std::cout << " detail=\"" << *r.detail << "\"";
+            std::cout << "\n";
         });
 
         // The session is over: dApp id and subscriptions are already cleared. The

@@ -8,11 +8,11 @@
  * and hook behavior are exercised without a real transport. Covers:
  *   - FixedRate flood (period 0) emits without pacing,
  *   - FixedRate paces at ~1/period,
- *   - PingPong is closed-loop (gated, not flooding) with no control acks,
- *   - each control ack releases the next PingPong emission, acks a valid
+ *   - PingPong is closed-loop (gated, not flooding) with no control answers,
+ *   - each control answer releases the next PingPong emission, answers a valid
  *     control with a POSITIVE response code, and emits indications whose
  *     payload carries the monotonic seq in data1 with a populated timestamp,
- *   - an undecodable control payload is acked NEGATIVE (decode-failure branch),
+ *   - an undecodable control payload is answered NEGATIVE (decode-failure branch),
  *   - the trace hook fires the RAN-side phases in order for a round trip.
  *
  * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
@@ -50,18 +50,19 @@ public:
     using SimpleServiceModel::SimpleServiceModel;  // inherit constructors
     using ServiceModel::set_outbound_emitter;
     using ServiceModel::set_subscribers_provider;
+    using ServiceModel::set_control_responder;
 };
 
 // Counts outbound PDUs by type and notifies waiters on each indication. Also
 // captures the raw indication payloads (in emit order) and the response code of
-// each ack, so tests can verify payload shape and POSITIVE/NEGATIVE acking.
+// each answer to a control, so tests can verify payload shape and POSITIVE/NEGATIVE answers.
 struct EmitterCounts {
     std::mutex mu;
     std::condition_variable cv;
     int indications = 0;
-    int acks = 0;
+    int responses = 0;
     std::vector<std::vector<uint8_t>> indication_payloads;  // SM payload bytes
-    std::vector<ResponseCode> ack_codes;                    // one per MESSAGE_ACK
+    std::vector<ResponseCode> response_codes;               // one per answer to a control
 };
 
 // Wire a harness to a counting emitter with a single subscriber (dApp id 1).
@@ -75,12 +76,14 @@ void wire(Harness& sm, EmitterCounts& c) {
             }
             ++c.indications;
             c.cv.notify_all();
-        } else if (pdu.type == PduType::MESSAGE_ACK) {
-            if (const auto* ack = pdu.get_if<MessageAck>()) {
-                c.ack_codes.push_back(ack->response_code);
-            }
-            ++c.acks;
         }
+        return ErrorCode::SUCCESS;
+    });
+    // The answer to a control, as the RAN would send it to a dApp that asked.
+    sm.set_control_responder([&c](uint32_t, uint32_t, const ControlResult& result) -> ErrorCode {
+        std::lock_guard<std::mutex> lk(c.mu);
+        c.response_codes.push_back(result.response_code);
+        ++c.responses;
         return ErrorCode::SUCCESS;
     });
 }
@@ -163,7 +166,7 @@ TEST(fixed_rate_stop_returns_promptly) {
 }
 
 TEST(pingpong_is_gated_not_flooding) {
-    // PingPong with no control acks: the loop is closed, so emissions are
+    // PingPong with no control answers: the loop is closed, so emissions are
     // bounded by the 50 ms liveness fallback (+ bootstrap), never a flood.
     EmitterCounts c;
     Harness sm(/*period_us=*/0, EncodingFormat::ASN1,
@@ -206,9 +209,9 @@ TEST(pingpong_ack_releases_each_emission) {
 
     std::lock_guard<std::mutex> lk(c.mu);
     // Every valid control action was acked POSITIVE.
-    ASSERT_EQ(c.acks, K);
-    ASSERT_EQ(c.ack_codes.size(), static_cast<size_t>(K));
-    for (ResponseCode rc : c.ack_codes) {
+    ASSERT_EQ(c.responses, K);
+    ASSERT_EQ(c.response_codes.size(), static_cast<size_t>(K));
+    for (ResponseCode rc : c.response_codes) {
         ASSERT_TRUE(rc == ResponseCode::POSITIVE);
     }
     // Each emitted indication carries the monotonic seq in data1 and a
@@ -222,8 +225,8 @@ TEST(pingpong_ack_releases_each_emission) {
     }
 }
 
-TEST(control_decode_failure_yields_negative_ack) {
-    // The SM acks every control action: POSITIVE when the Simple-Control
+TEST(control_decode_failure_yields_negative_answer) {
+    // The SM answers every control action: POSITIVE when the Simple-Control
     // payload decodes, NEGATIVE when it does not. handle_control_action is
     // synchronous and needs only the outbound emitter, so both branches are
     // exercised without starting the worker thread.
@@ -236,10 +239,10 @@ TEST(control_decode_failure_yields_negative_ack) {
     ASSERT_TRUE(feed_control_bad(sm) == ErrorCode::SUCCESS);  // undecodable -> NEGATIVE
 
     std::lock_guard<std::mutex> lk(c.mu);
-    ASSERT_EQ(c.acks, 2);
-    ASSERT_EQ(c.ack_codes.size(), 2u);
-    ASSERT_TRUE(c.ack_codes[0] == ResponseCode::POSITIVE);
-    ASSERT_TRUE(c.ack_codes[1] == ResponseCode::NEGATIVE);
+    ASSERT_EQ(c.responses, 2);
+    ASSERT_EQ(c.response_codes.size(), 2u);
+    ASSERT_TRUE(c.response_codes[0] == ResponseCode::POSITIVE);
+    ASSERT_TRUE(c.response_codes[1] == ResponseCode::NEGATIVE);
 }
 
 TEST(trace_hook_phase_order) {

@@ -13,7 +13,7 @@ This is clause 8 of the specification. The fields are in
 2. The RAN serves one encoding for each run. The service model messages use the same encoding as the
    E3AP messages of that run. The encodings are APER (ASN.1), JSON and Protocol Buffers.
 3. A receiver decodes only the encoding of the run. A control in another encoding fails to decode, and
-   the RAN sends a negative E3 Message Ack.
+   the RAN sends a negative E3 Control Response.
 4. One exception exists. The apply outcome is encoded with APER in every run, because it travels on the
    E2 interface, which has no JSON or Protocol Buffers form of it.
 

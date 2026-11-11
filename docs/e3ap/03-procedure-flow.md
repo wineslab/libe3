@@ -15,8 +15,8 @@ Table: Roles in the procedures
 
 | Role | Who | What it does |
 |---|---|---|
-| dApp | an application next to the RAN | starts Setup, Subscription, dApp Control, dApp Report and Release. Receives Indication, xApp Control and Release. |
-| E3 Agent | the E3 entity in the RAN node | answers Setup and Subscription. Sends Indication, xApp Control and Acknowledgement. Hosts the RAN functions. |
+| dApp | an application next to the RAN | starts Setup, Subscription, dApp Control, dApp Report and Release. Receives Indication, xApp Control, Release and the answer to a dApp Control. Answers an xApp Control that asks for it. |
+| E3 Agent | the E3 entity in the RAN node | answers Setup and Subscription. Sends Indication, xApp Control and the answer to a dApp Control. Hosts the RAN functions. |
 | Service model | the definition of one RAN function | gives meaning to the payloads. Starts and stops with the first and the last subscriber. |
 | RIC side | an xApp and the E2 interface | sends xApp Control through the E3 Agent. Receives dApp Report through the E3 Agent. See [E2SM-DAPP](../e2sm-dapp/README.md). |
 
@@ -30,9 +30,9 @@ Table: Which message starts which procedure
 | Subscription | SUBSCRIPTION REQUEST | SUBSCRIPTION RESPONSE | inbound to the E3 Agent |
 | Subscription delete | SUBSCRIPTION DELETE | SUBSCRIPTION RESPONSE | inbound to the E3 Agent |
 | Indication | INDICATION | none | outbound from the E3 Agent |
-| dApp Control | dApp CONTROL ACTION | MESSAGE ACK, if the service model sends one | inbound to the E3 Agent |
+| dApp Control | dApp CONTROL ACTION | CONTROL RESPONSE, when the dApp asks for it, and always for a refusal by the E3 Agent | inbound to the E3 Agent |
 | dApp Report | dApp REPORT | none | inbound to the E3 Agent |
-| xApp Control | xApp CONTROL ACTION | none | outbound from the E3 Agent |
+| xApp Control | xApp CONTROL ACTION | CONTROL RESPONSE from the dApp, when the E3 Agent asks for it | outbound from the E3 Agent |
 | Release | RELEASE | none | either direction |
 
 ```mermaid
@@ -45,10 +45,11 @@ sequenceDiagram
     A-->>D: SUBSCRIPTION RESPONSE (subscription id)
     loop while subscribed
         A-->>D: INDICATION
-        D->>A: dApp CONTROL ACTION
-        A-->>D: MESSAGE ACK
+        D->>A: dApp CONTROL ACTION (requestAck)
+        A-->>D: CONTROL RESPONSE
         D->>A: dApp REPORT
-        A-->>D: xApp CONTROL ACTION
+        A-->>D: xApp CONTROL ACTION (requestAck)
+        D->>A: CONTROL RESPONSE
     end
     D->>A: SUBSCRIPTION DELETE
     A-->>D: SUBSCRIPTION RESPONSE
@@ -225,24 +226,39 @@ The dApp Control procedure lets a dApp ask a RAN function to do something.
 
 ### Procedure
 
-1. The dApp sends a dApp CONTROL ACTION message on the inbound channel. It names the RAN function and the control identifier. It carries the payload in `actionData`.
+1. The dApp sends a dApp CONTROL ACTION message on the inbound channel. It names the RAN function and the control identifier. It carries the payload in `actionData`. It sets `requestAck` to "true" if it wants a CONTROL RESPONSE message and leaves the field out otherwise.
 2. If the dApp acts on an xApp CONTROL ACTION message, it puts that message's `sequenceId` in the new message. If the dApp decided on its own, it leaves `sequenceId` out.
 3. The E3 Agent finds the service model of the RAN function and checks the control identifier against the control identifiers that the RAN function advertises. If the service model runs, the E3 Agent gives it the payload and the message identifier.
-4. The service model applies the action. It may send a MESSAGE ACK message.
+4. The service model applies the action. When it knows the result it answers the E3 Agent, which sends a CONTROL RESPONSE message if the dApp asked for one.
 
 ### Successful operation
 
-The service model applies the action. If it sends a MESSAGE ACK message, `requestId`
-holds the message identifier of the dApp CONTROL ACTION message and `responseCode`
-holds the result.
+The service model applies the action. If `requestAck` was "true", the E3 Agent sends one
+CONTROL RESPONSE message: `requestId` holds the message identifier of the dApp CONTROL
+ACTION message, `dAppIdentifier`, `ranFunctionIdentifier` and `controlIdentifier` repeat
+those of the control, `responseCode` holds the result and `controlOutcome` holds what the
+service model reports about the control, if it reports anything. When the service model
+answers is the choice of the service model: a service model that applies the action later
+answers later. A service model that has more to report than the outcome puts it in its own
+payloads.
+
+If `requestAck` is missing or "false", the E3 Agent sends no CONTROL RESPONSE message for a
+control that reaches the service model, whatever the service model answers.
+
+A service model that never answers sends nothing. The E3 Agent does not make up an
+answer for a control that the service model may still apply, so a dApp that asked
+needs its own time limit.
 
 ### Unsuccessful operation
 
-The service model may send a MESSAGE ACK message with `responseCode` "negative".
+The service model may answer with `responseCode` "negative", with a `cause` and a
+`detail`. The E3 Agent sends it if the dApp asked. If the service model fails to take the
+control and has not answered, the E3 Agent sends a CONTROL RESPONSE message with
+`responseCode` "negative" and the cause unspecified, if the dApp asked.
 
-The E3 Agent shall answer with a MESSAGE ACK message with `responseCode` "negative"
-when it cannot hand the control to a service model. `requestId` holds the message
-identifier of the dApp CONTROL ACTION message.
+The E3 Agent shall answer with a CONTROL RESPONSE message with `responseCode` "negative"
+when it cannot hand the control to a service model, whether the dApp asked for an answer
+or not. `requestId` holds the message identifier of the dApp CONTROL ACTION message.
 
 Table: Reasons to refuse a dApp CONTROL ACTION message
 
@@ -252,13 +268,16 @@ Table: Reasons to refuse a dApp CONTROL ACTION message
 | the RAN function identifier is not in its RAN function list | unsupportedRanFunction |
 | the control identifier is not offered by the RAN function | unsupportedIdentifier |
 | the service model does not run, because no dApp has a subscription to the RAN function | notFound |
+| too many controls wait for an answer | resourceExhausted |
 
 A message that the E3 Agent refuses does not reach the service model.
 
 ### Abnormal conditions
 
-* The service model takes the control and fails to apply it. The E3 Agent sends no response of its own. The service model answers, or does not.
-* A MESSAGE ACK message has no dApp identifier. On a link that broadcasts, every dApp receives it. A dApp shall ignore a MESSAGE ACK message whose `requestId` is not the identifier of a message that it sent.
+* The service model takes the control and fails to apply it without an answer. If the dApp asked, the E3 Agent answers as described above. If the dApp did not ask, there is no answer.
+* A dApp may get a MESSAGE ACK message from another E3 Agent. The message is deprecated and an E3 Agent of this version sends none. It names no dApp, so on a link that broadcasts every dApp gets it, and a dApp that reads it shall compare `requestId` with the identifiers of the messages that it sent.
+* A CONTROL RESPONSE message names its dApp. On a link that broadcasts, every dApp receives it, and a dApp shall ignore a CONTROL RESPONSE message whose `dAppIdentifier` is not its own.
+* The E3 Agent keeps at most 1024 controls that wait for an answer, and forgets those of a dApp that leaves. It refuses a further control that asks for an answer with the cause resourceExhausted.
 
 ## dApp Report
 
@@ -298,22 +317,31 @@ The xApp Control procedure hands a decision of an xApp to a dApp.
 ### Procedure
 
 1. The RIC side receives a decision for a dApp. Its E2SM-DAPP control header holds a sequence identifier.
-2. The E3 Agent sends an xApp CONTROL ACTION message with that sequence identifier unchanged and the payload in `xAppControlData`.
+2. The E3 Agent sends an xApp CONTROL ACTION message with that sequence identifier unchanged and the payload in `xAppControlData`. It sets `requestAck` to "true" if it wants a CONTROL RESPONSE message from the dApp.
 3. The dApp ignores the message if the dApp identifier is not its own.
 4. The dApp gives the payload to its handler. It may act on it. If it re-issues the action to the RAN, it follows the dApp Control procedure with the same sequence identifier.
+5. If `requestAck` is "true", the dApp sends a CONTROL RESPONSE message.
 
 ### Successful operation
 
-The dApp handler receives the payload. There is no response in E3AP. The RIC side
-learns the result from the control outcome of E2SM-DAPP.
+The dApp handler receives the payload. If `requestAck` was "true", the dApp sends one
+CONTROL RESPONSE message: `requestId` holds the message identifier of the xApp CONTROL
+ACTION message, `dAppIdentifier` is its own, `ranFunctionIdentifier` repeats that of the
+control, `controlIdentifier` is the control that the dApp applied, from the list that the
+RAN function advertises, and `responseCode` holds the result. The RIC side learns the
+result from the control outcome of E2SM-DAPP.
 
 ### Unsuccessful operation
 
 An E3 Agent shall not send an xApp CONTROL ACTION message with `sequenceId` 0.
 
+A dApp that does not act on xApp controls answers a message that asks with
+`responseCode` "negative" and the cause unsupportedRanFunction.
+
 ### Abnormal conditions
 
 * The dApp is not registered. The E3 Agent has no one to send to. The message is lost.
+* A dApp that asked and gets no answer from the dApp application is not told. The E3 Agent has no time limit for it.
 
 ## Release
 

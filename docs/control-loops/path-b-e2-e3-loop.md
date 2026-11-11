@@ -97,7 +97,7 @@ however many places call that codec, and the ring says which side called it.
 | B12 | Recv | **libe3** (dApp role) | `RECV` |
 | B13 | **Decode E3AP** | **libe3** | `RECV` to `DECODE_E3AP_DONE`, plus `SESSION_QUEUED` to `SESSION_POLLED` on a language-binding seam |
 | B14 | **Decode E3SM** | dApp application | `DECODE_E3SM_BEGIN` to `DECODE_E3SM_DONE` |
-| B15 | Apply policy | dApp application | `DECODE_E3SM_DONE` to `APPLY_POLICY_DONE`, then `ACK_SENT` |
+| B15 | Apply policy | dApp application | `DECODE_E3SM_DONE` to `APPLY_POLICY_DONE`, then `ACK_SENT` when the xApp control asked for an answer |
 
 `BRIDGE_IN`/`BRIDGE_OUT` serve both B9 here and A20 in Path A, with `aux2`
 carrying the direction.
@@ -116,11 +116,12 @@ installed it, and the xApp is not told until then.
 | none | **Path A return leg** | none | A12-A18: the re-issued control travels dApp to RAN exactly as any dApp control does |
 | B17 | Apply control | the RAN stack | `DECODE_E3SM_DONE` to `APPLY_CONTROL_DONE`. The mask is in the MAC |
 | B18 | Live on air | the RAN's MAC | `APPLY_CONTROL_DONE` to `LIVE_ON_AIR`. The first scheduler tick that put it on air |
-| B19 | Acknowledge | the RAN | two independent acks: `ACK_SENT` on E3 to the dApp, and the deferred E2 control acknowledge to the xApp |
+| B19 | Acknowledge | the RAN | two independent answers: `ACK_SENT` for the E3 `ControlResponse` to the dApp, sent when the dApp asked for one, and the deferred E2 control acknowledge to the xApp |
 
-The two acks at B19 carry **different** content and are not two views of one
-message. The dApp gets `E3-MessageAck`, which is a delivery receipt: request id
-and a response code, nothing more. The xApp gets the E2SM-DAPP control outcome,
+The two answers at B19 carry **different** content and are not two views of one
+message. The dApp gets an `E3-ControlResponse` when its control carried `requestAck`:
+the id of the control, the response code and cause of the Service Model, and an
+outcome when the Service Model has one. The xApp gets the E2SM-DAPP control outcome,
 which carries the procedure's `sequence-id` and the Service-Model-owned apply
 outcome. For the spectrum SM, the outcome is the realtime timestamps at B17 and B18.
 

@@ -349,6 +349,7 @@ TEST(ProtobufEncoder_release_roundtrip) {
 }
 
 TEST(ProtobufEncoder_message_ack_roundtrip) {
+    // Deprecated and kept: libe3 sends none, and reads one from another RAN.
     auto encoder = make_encoder();
     Pdu original(PduType::MESSAGE_ACK);
     MessageAck ack;
@@ -364,6 +365,89 @@ TEST(ProtobufEncoder_message_ack_roundtrip) {
     auto& r = std::get<MessageAck>(decoded->choice);
     ASSERT_EQ(r.request_id, 123u);
     ASSERT_TRUE(r.response_code == ResponseCode::NEGATIVE);
+}
+
+TEST(ProtobufEncoder_control_response_roundtrip) {
+    auto encoder = make_encoder();
+    Pdu original(PduType::CONTROL_RESPONSE);
+    ControlResponse resp;
+    resp.request_id = 123;
+    resp.dapp_identifier = 4;
+    resp.ran_function_identifier = 5;
+    resp.control_identifier = 6;
+    resp.response_code = ResponseCode::NEGATIVE;
+    resp.cause = Cause::UNSUPPORTED_IDENTIFIER;
+    resp.detail = "unknown control identifier 6";
+    resp.control_outcome = std::vector<uint8_t>{0x00, 0x01, 0xfe};
+    original.choice = resp;
+
+    auto encoded = encoder->encode(original);
+    ASSERT_TRUE(encoded.has_value());
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+
+    auto& r = std::get<ControlResponse>(decoded->choice);
+    ASSERT_EQ(r.request_id, 123u);
+    ASSERT_EQ(r.dapp_identifier, 4u);
+    ASSERT_EQ(r.ran_function_identifier, 5u);
+    ASSERT_EQ(r.control_identifier, 6u);
+    ASSERT_TRUE(r.response_code == ResponseCode::NEGATIVE);
+    ASSERT_TRUE(r.cause == Cause::UNSUPPORTED_IDENTIFIER);
+    ASSERT_STREQ(r.detail->c_str(), "unknown control identifier 6");
+    ASSERT_TRUE(r.control_outcome.has_value());
+    ASSERT_EQ(r.control_outcome->size(), 3u);
+    ASSERT_EQ((*r.control_outcome)[2], 0xfe);
+}
+
+TEST(ProtobufEncoder_control_response_without_reason_or_outcome) {
+    auto encoder = make_encoder();
+    Pdu original(PduType::CONTROL_RESPONSE);
+    ControlResponse resp;
+    resp.request_id = 1;
+    resp.dapp_identifier = 2;
+    resp.ran_function_identifier = 3;
+    resp.control_identifier = 4;
+    resp.response_code = ResponseCode::POSITIVE;
+    original.choice = resp;
+
+    auto encoded = encoder->encode(original);
+    ASSERT_TRUE(encoded.has_value());
+    auto decoded = encoder->decode(*encoded);
+    ASSERT_TRUE(decoded.has_value());
+    auto& r = std::get<ControlResponse>(decoded->choice);
+    ASSERT_TRUE(r.response_code == ResponseCode::POSITIVE);
+    ASSERT_FALSE(r.cause.has_value());
+    ASSERT_FALSE(r.detail.has_value());
+    ASSERT_FALSE(r.control_outcome.has_value());
+}
+
+TEST(ProtobufEncoder_request_ack_roundtrip) {
+    auto encoder = make_encoder();
+    for (bool ask : {false, true}) {
+        DAppControlAction dapp;
+        dapp.dapp_identifier = 1;
+        dapp.ran_function_identifier = 2;
+        dapp.control_identifier = 3;
+        dapp.action_data = {1};
+        dapp.request_ack = ask;
+        Pdu d(PduType::DAPP_CONTROL_ACTION);
+        d.choice = dapp;
+        auto dd = encoder->decode(*encoder->encode(d));
+        ASSERT_TRUE(dd.has_value());
+        ASSERT_EQ(std::get<DAppControlAction>(dd->choice).request_ack, ask);
+
+        XAppControlAction xapp;
+        xapp.dapp_identifier = 1;
+        xapp.ran_function_identifier = 2;
+        xapp.sequence_id = 5;
+        xapp.xapp_control_data = {1};
+        xapp.request_ack = ask;
+        Pdu x(PduType::XAPP_CONTROL_ACTION);
+        x.choice = xapp;
+        auto xd = encoder->decode(*encoder->encode(x));
+        ASSERT_TRUE(xd.has_value());
+        ASSERT_EQ(std::get<XAppControlAction>(xd->choice).request_ack, ask);
+    }
 }
 
 TEST(ProtobufEncoder_envelope_preserved) {

@@ -62,8 +62,9 @@ enum E3EventKind {
     E3_EVENT_XAPP_CONTROL = 2,          ///< xApp → dApp XAppControlAction
     E3_EVENT_SUBSCRIPTION_RESPONSE = 3, ///< RAN → dApp SubscriptionResponse
     E3_EVENT_SETUP_RESPONSE = 4,        ///< RAN → dApp SetupResponse
-    E3_EVENT_MESSAGE_ACK = 5,           ///< RAN → dApp MessageAck
-    E3_EVENT_DISCONNECT = 6             ///< the RAN is gone; see E3Event::disconnect_reason
+    E3_EVENT_MESSAGE_ACK = 5,           ///< RAN → dApp MessageAck. DEPRECATED TO BE REMOVED: libe3 does not send one
+    E3_EVENT_DISCONNECT = 6,            ///< the RAN is gone; see E3Event::disconnect_reason
+    E3_EVENT_CONTROL_RESPONSE = 7       ///< RAN → dApp ControlResponse
 };
 
 /**
@@ -71,7 +72,7 @@ enum E3EventKind {
  *
  * `payload` carries the opaque E3SM bytes for indications
  * (protocol_data) and xApp controls (xapp_control_data); it is empty for
- * subscription/setup responses and acks. Fields not relevant to a given
+ * subscription/setup responses. Fields not relevant to a given
  * `kind` are left zero, except where noted.
  *
  * A subscription response also carries the grant: `ran_function_id` (0 = not
@@ -82,8 +83,13 @@ struct E3Event {
     uint32_t dapp_id{0};            ///< dApp identifier the message targets
     uint32_t ran_function_id{0};    ///< RAN function (indication / xApp control / subscription response)
     uint32_t subscription_id{0};    ///< subscription id (subscription response)
-    uint32_t request_id{0};         ///< request/message id (subscription response / ack / xApp control)
+    uint32_t request_id{0};         ///< request/message id (subscription response / control response / xApp control); for a control response, the id `send_control` returned
     uint32_t sequence_id{0};        ///< loop correlation id (xApp control); echo it on the control you re-issue
+    uint32_t control_id{0};         ///< control identifier (control response)
+    int cause{-1};                  ///< control response: why it was refused, a libe3 Cause value 0 to 14, -1 = none
+    std::string detail;             ///< control response: text for the cause, empty = none
+    bool request_ack{false};        ///< xApp control: the RAN wants a control response; answer it with send_control_response
+    bool has_outcome{false};        ///< control response: `payload` is the Service Model's outcome
     int response_code{-1};          ///< 0=positive, 1=negative, -1=n/a
     int disconnect_reason{-1};      ///< disconnect: 0=released by RAN, 1=connection lost, -1=n/a
     std::vector<uint8_t> payload;   ///< opaque E3SM bytes (indication / xApp control)
@@ -182,15 +188,19 @@ public:
      * @param action_data opaque E3SM control payload
      * @param sequence_id correlation id of the xApp procedure this control
      *        re-issues; 0 when the dApp decided on its own.
+     * @param request_ack true to ask the RAN for a control response (an
+     *        E3_EVENT_CONTROL_RESPONSE event) once it has dealt with the control.
+     *        The RAN answers a control it refuses itself either way.
      * @return the assigned message id (positive, 1..4294967295) on success, so
-     *         the caller can correlate a later ack/response by id; a negative
+     *         the caller can correlate a later response by id; a negative
      *         ErrorCode on failure. Returned as int64_t because a message id
      *         now spans the full uint32 range and would alias onto the negative
      *         error codes if narrowed to int.
      */
     int64_t send_control(uint32_t ran_function_id, uint32_t control_id,
                          std::vector<uint8_t> action_data,
-                         uint32_t sequence_id = 0);
+                         uint32_t sequence_id = 0,
+                         bool request_ack = false);
     /**
      * @brief Send a dApp report to the RAN.
      * @param ran_function_id RAN function the report is for
@@ -199,13 +209,28 @@ public:
      *        mandatory on the wire, 1..4294967295 (0 is refused with
      *        INVALID_PARAM).
      * @return the assigned message id (positive, 1..4294967295) on success, so
-     *         the caller can correlate a later ack/response by id; a negative
+     *         the caller can correlate a later response by id; a negative
      *         ErrorCode on failure.
      */
     int64_t send_report(uint32_t ran_function_id, std::vector<uint8_t> report_data,
                         uint32_t sequence_id);
-    /** @brief Acknowledge a request. @param request_id request being acknowledged. @param response_code 0=positive,1=negative. @return ErrorCode as int. */
+    /** @brief Acknowledge a request. DEPRECATED TO BE REMOVED: answer an xApp control with send_control_response. @param request_id request being acknowledged. @param response_code 0=positive,1=negative. @return ErrorCode as int. */
     int send_message_ack(uint32_t request_id, int response_code);
+
+    /**
+     * @brief Answer an xApp control that has `request_ack` (E3_EVENT_XAPP_CONTROL).
+     * @param request_id the event's `request_id`
+     * @param ran_function_id the event's `ran_function_id`
+     * @param control_id the control the dApp applied, from the list the RAN advertised for the function
+     * @param response_code 0=applied (positive), 1=not applied (negative)
+     * @param cause why not, a libe3 Cause value 0 to 14, or -1 for none
+     * @param detail text for the cause, up to 512 bytes, empty for none
+     * @param outcome what the dApp reports about the control, up to 32768 bytes, empty for none
+     * @return ErrorCode as int.
+     */
+    int send_control_response(uint32_t request_id, uint32_t ran_function_id, uint32_t control_id,
+                              int response_code, int cause, std::string detail,
+                              std::vector<uint8_t> outcome);
 
     /**
      * @brief Drain up to @p max_batch inbound events, waiting up to

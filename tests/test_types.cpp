@@ -227,9 +227,51 @@ TEST(MessageAck_fields) {
     MessageAck ack;
     ack.request_id = 12345;
     ack.response_code = ResponseCode::POSITIVE;
-    
+
     ASSERT_EQ(ack.request_id, 12345u);
     ASSERT_TRUE(ack.response_code == ResponseCode::POSITIVE);
+    ASSERT_FALSE(ack.cause.has_value());
+}
+
+TEST(ControlResponse_fields) {
+    ControlResponse resp;
+    resp.request_id = 12345;
+    resp.dapp_identifier = 7;
+    resp.ran_function_identifier = 8;
+    resp.control_identifier = 9;
+    resp.response_code = ResponseCode::POSITIVE;
+    resp.control_outcome = std::vector<uint8_t>{1, 2, 3};
+
+    ASSERT_EQ(resp.request_id, 12345u);
+    ASSERT_EQ(resp.dapp_identifier, 7u);
+    ASSERT_EQ(resp.ran_function_identifier, 8u);
+    ASSERT_EQ(resp.control_identifier, 9u);
+    ASSERT_TRUE(resp.response_code == ResponseCode::POSITIVE);
+    ASSERT_EQ(resp.control_outcome->size(), 3u);
+}
+
+TEST(ControlResponse_is_a_refusal_until_it_says_otherwise) {
+    ControlResponse resp;
+    ASSERT_TRUE(resp.response_code == ResponseCode::NEGATIVE);
+    ASSERT_FALSE(resp.cause.has_value());
+    ASSERT_FALSE(resp.detail.has_value());
+    ASSERT_FALSE(resp.control_outcome.has_value());
+    ASSERT_TRUE(ControlResult{}.response_code == ResponseCode::POSITIVE);
+    ASSERT_TRUE(ControlResult{}.outcome.empty());
+}
+
+TEST(A_control_does_not_ask_for_an_answer_by_default) {
+    ASSERT_FALSE(DAppControlAction{}.request_ack);
+    ASSERT_FALSE(XAppControlAction{}.request_ack);
+}
+
+TEST(ControlResponse_is_the_pdu_type_after_the_deprecated_message_ack) {
+    ASSERT_EQ(static_cast<int>(PduType::MESSAGE_ACK), 10);
+    ASSERT_EQ(static_cast<int>(PduType::CONTROL_RESPONSE), 11);
+    ASSERT_STREQ(pdu_type_to_string(PduType::CONTROL_RESPONSE), "ControlResponse");
+    Pdu pdu(PduType::CONTROL_RESPONSE);
+    pdu.choice = ControlResponse{};
+    ASSERT_TRUE(pdu.get_if<ControlResponse>() != nullptr);
 }
 
 TEST(Cause_names_and_values_match_the_grammar) {
@@ -258,7 +300,7 @@ TEST(Cause_unknown_reads_as_unspecified) {
 TEST(NegativeResponses_carry_no_reason_by_default) {
     ASSERT_FALSE(SetupResponse{}.cause.has_value());
     ASSERT_FALSE(SubscriptionResponse{}.detail.has_value());
-    ASSERT_FALSE(MessageAck{}.cause.has_value());
+    ASSERT_FALSE(ControlResponse{}.cause.has_value());
 }
 
 int main() {

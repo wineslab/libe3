@@ -27,8 +27,8 @@ sides shall use the same encoding on a link. A receiver that gets bytes in anoth
 encoding cannot decode them. An E3 Agent shall answer such a SETUP REQUEST message
 with a negative SETUP RESPONSE message, if it can still send a response.
 
-The payloads (`ranFunctionData`, `protocolData`, `actionData`, `reportData` and
-`xAppControlData`) follow the encoding of the link. APER carries them as octet strings.
+The payloads (`ranFunctionData`, `protocolData`, `actionData`, `reportData`,
+`xAppControlData` and `controlOutcome`) follow the encoding of the link. APER carries them as octet strings.
 JSON carries them as nested JSON values, not as hexadecimal text. Protobuf carries
 them as `bytes`.
 
@@ -52,7 +52,7 @@ Table: APER bits for each construct of the grammar
 | `INTEGER (0..60000000)` | a 2 bit length code, padding, then the value in 1 to 4 octets | `periodicity` |
 | `INTEGER` with no constraint | a length octet, then the value in the fewest octets | `timestamp` |
 | `ENUMERATED` with two values and no extension | 1 bit | `E3-ResponseCode` |
-| `CHOICE` with 11 alternatives and an extension marker | 1 extension bit, then the index in 4 bits | `msg` |
+| `CHOICE` with 12 alternatives and an extension marker | 1 extension bit, then the index in 4 bits | `msg` |
 | `SEQUENCE (SIZE (0..256)) OF` | the count in 16 bits, aligned, then the elements | identifier lists |
 | `SEQUENCE (SIZE (0..64)) OF` | the count in 7 bits, then the elements | RAN function list |
 | `OCTET STRING (SIZE (1..64))` | the length minus 1 in 6 bits, padding, then the octets | `E3-Name` |
@@ -87,22 +87,50 @@ Table: Release message, byte by byte
 | `48` | `msg` extension bit 0, index `1001` (9, the RELEASE message), message extension bit 0, 2 padding bits |
 | `00 06` | dApp identifier 7, sent as 6 |
 
-**Example 2: MESSAGE ACK with request identifier 42 and "negative".**
+**Example 2: CONTROL RESPONSE, "positive", for the control with message identifier 42,
+from dApp 7, RAN function 1, control 1.** No cause, no detail and no outcome.
 
 ```text
-40 29 08 18 61 68 4a cc c3 cd 15 50 29 80
+40 29 08 18 61 68 4a cc c3 cd 15 58 00 29 00 06 00 00 00 00 00
 ```
 
-Table: Message acknowledgement, byte by byte
+Table: Control response, byte by byte
 
 | Bytes | Meaning |
 |---|---|
 | `40 29 08 18 61 68 4a cc c3 cd 15` | the envelope, as in example 1 |
-| `50` | `msg` extension bit 0, index `1010` (10, the MESSAGE ACK message), message extension bit 0, length code `00` |
+| `58` | `msg` extension bit 0, index `1011` (11, the CONTROL RESPONSE message), message extension bit 0, presence bits `00` for `cause` and `detail` |
+| `00` | presence bit `0` for `controlOutcome`, length code `00` (one octet), 5 padding bits |
 | `29` | `requestId` 42, sent as 41 |
-| `80` | `responseCode` "negative" as bit 1, 7 padding bits |
+| `00 06` | `dAppIdentifier` 7, sent as 6 |
+| `00 00` | `ranFunctionIdentifier` 1, sent as 0 |
+| `00 00` | `controlIdentifier` 1, sent as 0 |
+| `00` | `responseCode` "positive" as bit 0, 7 padding bits |
 
-**Example 3: SUBSCRIPTION REQUEST.** dApp 7, RAN function 1, telemetry identifiers 1
+**Example 3: dApp CONTROL ACTION with `requestAck`.** dApp 7, RAN function 1, control 1,
+payload `aa bb`, no sequence identifier.
+
+```text
+40 29 08 18 61 68 4a cc c3 cd 15 34 00 06 00 00 00 00 00 01 aa bb 01 01 80
+```
+
+Table: Control action that asks for an answer, byte by byte
+
+| Bytes | Meaning |
+|---|---|
+| `40 29 08 18 61 68 4a cc c3 cd 15` | the envelope, as in example 1 |
+| `34` | `msg` extension bit 0, index `0110` (6, the dApp CONTROL ACTION message), message extension bit `1` (an extension addition is present), presence bit `0` for `sequenceId`, 1 padding bit |
+| `00 06`, `00 00`, `00 00` | dApp 7, RAN function 1 and control 1 |
+| `00 01` | `actionData` is 2 octets long, sent as 1 |
+| `aa bb` | the payload |
+| `01` | the number of extension additions minus 1, as 7 bits `0000000`, then presence bit `1` for `requestAck` |
+| `01` | `requestAck` is 1 octet long |
+| `80` | `requestAck` "true" as bit 1, 7 padding bits |
+
+A control that does not ask ends after `aa bb` and starts with `30`: its bytes are the bytes
+of a control before `requestAck` existed.
+
+**Example 4: SUBSCRIPTION REQUEST.** dApp 7, RAN function 1, telemetry identifiers 1
 and 2, no control identifiers, time limit 60 seconds, interval 100 microseconds.
 
 ```text
@@ -135,9 +163,11 @@ message by the size of its elements.
 ### A receiver that sees extension additions
 
 A decoder shall ignore an extension addition that it does not know. `cause` and
-`detail` are the first extension additions of `E3-SetupResponse`,
-`E3-SubscriptionResponse` and `E3-MessageAck`, in that order. In
-`E3-SubscriptionResponse` `ranFunctionIdentifier` and `periodicity` follow them. APER
+`detail` are the first extension additions of `E3-SetupResponse` and
+`E3-SubscriptionResponse` and `E3-MessageAck`, in that order. In `E3-SubscriptionResponse`
+`ranFunctionIdentifier` and `periodicity` follow them. `requestAck` is the first and only
+extension addition of `E3-DAppControlAction` and `E3-XAppControlAction`. A sender writes it
+only when it is "true", so the bytes of a control that does not ask do not change. APER
 sends one presence bit for each extension addition of the grammar, so the order is
 part of the encoding: a decoder that has the additions in another order reads one
 field as another. A change of a constraint is not an extension addition either. It
@@ -153,13 +183,14 @@ Table: Rules of the JSON encoding
 
 | Rule | Value |
 |---|---|
-| `type` | the name of the message in camel case: `setupRequest`, `setupResponse`, `subscriptionRequest`, `subscriptionDelete`, `subscriptionResponse`, `indicationMessage`, `dAppControlAction`, `dAppReport`, `xAppControlAction`, `releaseMessage`, `messageAck` |
-| Keys | the ASN.1 field names, for example `dAppIdentifier`, `ranFunctionIdentifier`, `telemetryIdentifierList`, `subscriptionTime`, `periodicity`, `subscriptionId`, `requestId`, `sequenceId` |
+| `type` | the name of the message in camel case: `setupRequest`, `setupResponse`, `subscriptionRequest`, `subscriptionDelete`, `subscriptionResponse`, `indicationMessage`, `dAppControlAction`, `dAppReport`, `xAppControlAction`, `releaseMessage`, `messageAck` (deprecated), `controlResponse` |
+| Keys | the ASN.1 field names, for example `dAppIdentifier`, `ranFunctionIdentifier`, `telemetryIdentifierList`, `subscriptionTime`, `periodicity`, `subscriptionId`, `requestId`, `sequenceId`, `controlIdentifier`, `requestAck` |
 | `responseCode` | the string "positive" or the string "negative". An unknown string means "negative" |
-| `cause` | the name of the `E3-Cause` value in camel case, for example `unsupportedIdentifier`. A name that the decoder does not know reads as `unspecified`. A decoder reads it from a SETUP RESPONSE, SUBSCRIPTION RESPONSE or MESSAGE ACK message |
+| `cause` | the name of the `E3-Cause` value in camel case, for example `unsupportedIdentifier`. A name that the decoder does not know reads as `unspecified`. A decoder reads it from a SETUP RESPONSE, SUBSCRIPTION RESPONSE, MESSAGE ACK or CONTROL RESPONSE message |
 | `detail` | the text, as a JSON string. A decoder also reads the key `message` as `detail`, when `detail` is not there |
 | `timestamp` | written on every message. The value 0 means that there is no timestamp |
-| Payload fields | a JSON object or array. `ranFunctionData`, `actionData`, `reportData` and `xAppControlData` shall be an object or an array. An empty payload does not encode. `protocolData` may be any valid JSON value |
+| Payload fields | a JSON object or array. `ranFunctionData`, `actionData`, `reportData`, `xAppControlData` and `controlOutcome` shall be an object or an array. An empty payload does not encode, and an empty `controlOutcome` is not written. `protocolData` may be any valid JSON value |
+| `requestAck` | the JSON value `true`, written only when it is true. A decoder reads a missing member and `false` as "false" |
 | Wrapper | a message with a nested `data` wrapper is refused |
 | Granted lists | `telemetryIdentifierList` and `controlIdentifierList` of a SUBSCRIPTION RESPONSE are present when the E3 Agent reports them. A missing list means "not reported". An empty list means "none granted". A decoder may also read the names `telemetryGrantedList` and `controlGrantedList` |
 | Missing fields | a decoder sets a missing field to 0 or to the empty string. It does not refuse the message |
@@ -196,10 +227,11 @@ Table: Rules of the Protobuf encoding
 |---|---|
 | Names | the field names are the ASN.1 names in snake case, for example `dapp_identifier` |
 | Optional fields | `optional` fields keep their presence |
-| Zero values | `timestamp` and `sequence_id` of a dApp CONTROL ACTION message use the value 0 for "absent" |
+| Zero values | `timestamp` and `sequence_id` of a dApp CONTROL ACTION message use the value 0 for "absent", and `request_ack` the value false |
+| Control outcome | `optional bytes control_outcome` of CONTROL RESPONSE. The `oneof` case 13 of the envelope is the deprecated MESSAGE ACK and case 14 the CONTROL RESPONSE |
 | Granted lists | a wrapper message `IdentifierList` makes "not reported" differ from "none granted" |
 | Response code | an enumeration with the values "positive" (0) and "negative" (1). A value that is not "negative" reads as "positive" |
-| Cause | an enumeration `Cause` with the values of `E3-Cause`, and an `optional string detail`, on the three messages that carry them. A value that is not in the enumeration reads as unspecified |
+| Cause | an enumeration `Cause` with the values of `E3-Cause`, and an `optional string detail`, on the four messages that carry them (SETUP RESPONSE, SUBSCRIPTION RESPONSE, MESSAGE ACK and CONTROL RESPONSE). A value that is not in the enumeration reads as unspecified |
 | Unknown fields | a decoder ignores them |
 | Empty envelope | an envelope with no `oneof` case does not decode |
 
@@ -241,7 +273,7 @@ Table: Size limits
 
 | Item | Limit | Where it is enforced |
 |---|---|---|
-| Payload (`protocolData`, `actionData`, `reportData`, `xAppControlData`) | 1 to 32768 octets | APER |
+| Payload (`protocolData`, `actionData`, `reportData`, `xAppControlData`, `controlOutcome`) | 1 to 32768 octets | APER |
 | `ranFunctionData` | 1 to 262144 octets in the grammar | APER |
 | Name | 1 to 64 octets | APER |
 | Version | 1 to 32 octets | APER |
@@ -341,7 +373,11 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         -- it. Absent on a control the dApp decided on its own.
         sequenceId              E3-SequenceID OPTIONAL,
         actionData              OCTET STRING (SIZE (1..32768)),
-        ...
+        ...,
+        -- True when the dApp wants an E3-ControlResponse for this control. Absent
+        -- reads as false. An extension addition, so a control that does not ask
+        -- is encoded as it always was.
+        requestAck              BOOLEAN OPTIONAL
     }
 
     E3-DAppReport ::= SEQUENCE {
@@ -364,7 +400,10 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         -- never be matched to the control acknowledge the RAN owes the xApp.
         sequenceId              E3-SequenceID,
         xAppControlData         OCTET STRING (SIZE (1..32768)),
-        ...
+        ...,
+        -- True when the RAN wants an E3-ControlResponse from the dApp for this
+        -- control. Absent reads as false.
+        requestAck              BOOLEAN OPTIONAL
     }
 
     E3-ReleaseMessage ::= SEQUENCE {
@@ -372,12 +411,35 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
         ...
     }
 
+    -- DEPRECATED TO BE REMOVED. libe3 no longer sends it: the answer to a control
+    -- is E3-ControlResponse. It stays in the grammar so that its index, and with it
+    -- the index of controlResponse, is the one OCUDU's grammar has, and so that a
+    -- libe3 dApp still reads the one that another RAN sends.
     E3-MessageAck ::= SEQUENCE {
         requestId            E3-MessageID,
         responseCode         E3-ResponseCode,
         ...,
         cause                E3-Cause OPTIONAL,
         detail               E3-Text OPTIONAL
+    }
+
+    -- The answer to a dApp control or an xApp control that carried requestAck
+    -- true, sent by the receiver of the control: the RAN for a dApp control, the
+    -- dApp for an xApp control. requestId is the id of the control's E3-PDU.
+    -- The fields and their order are those of OCUDU's E3-ControlResponse minus
+    -- fragmentIndex, fragmentCount and payloadBytes, which libe3 does not carry,
+    -- so the encoding differs from OCUDU's. controlOutcome is service-model
+    -- content and opaque here.
+    E3-ControlResponse ::= SEQUENCE {
+        requestId             E3-MessageID,
+        dAppIdentifier        E3-DAppID,
+        ranFunctionIdentifier INTEGER (1..65535),
+        controlIdentifier     INTEGER (1..65535),
+        responseCode          E3-ResponseCode,
+        cause                 E3-Cause OPTIONAL,
+        detail                E3-Text OPTIONAL,
+        controlOutcome        OCTET STRING (SIZE (1..32768)) OPTIONAL,
+        ...
     }
 
     -- Correlation identifier for one detection-to-mitigation procedure, assigned
@@ -401,7 +463,7 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
     -- response code is a wire change we are willing to pay for explicitly.
     E3-ResponseCode ::= ENUMERATED { positive(0), negative(1) }
 
-    -- Why a RAN refused a request. Sent with a negative response next to a
+    -- Why a request was refused. Sent with a negative response next to a
     -- free-text detail. The names, the values and the text bound are OCUDU's,
     -- so a refusal reads the same on every RAN; the enumeration is extensible
     -- as it is there, and a receiver reads a value it does not know as
@@ -449,7 +511,8 @@ E3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
             dAppReport            [7]  E3-DAppReport,
             xAppControlAction     [8]  E3-XAppControlAction,
             releaseMessage        [9]  E3-ReleaseMessage,
-            messageAck            [10] E3-MessageAck,
+            messageAck            [10] E3-MessageAck,   -- DEPRECATED TO BE REMOVED
+            controlResponse       [11] E3-ControlResponse,
             ...
         },
         ...

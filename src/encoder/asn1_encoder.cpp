@@ -26,6 +26,7 @@ extern "C" {
 #include "E3-XAppControlAction.h"
 #include "E3-ReleaseMessage.h"
 #include "E3-MessageAck.h"
+#include "E3-ControlResponse.h"
 #include "E3-Timestamp.h"
 }
 
@@ -101,7 +102,7 @@ bool is_utf8(const char* text, size_t size) {
 }
 
 // `cause` and `detail` are the same two optional members on E3-SetupResponse,
-// E3-SubscriptionResponse and E3-MessageAck, hence the template.
+// E3-SubscriptionResponse, E3-MessageAck and E3-ControlResponse, hence the template.
 template <typename Resp>
 void set_reason(Resp* out, const std::optional<Cause>& cause, const std::optional<std::string>& detail) {
     if (cause) {
@@ -495,6 +496,18 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.dAppControlAction->actionData,
                 reinterpret_cast<const char*>(action->action_data.data()),
                 static_cast<int>(action->action_data.size()));
+
+            // requestAck is an extension addition, written only when true, so a
+            // control that does not ask is encoded as it always was.
+            if (action->request_ack) {
+                asn1_pdu->msg.choice.dAppControlAction->requestAck =
+                    static_cast<BOOLEAN_t*>(calloc(1, sizeof(BOOLEAN_t)));
+                if (!asn1_pdu->msg.choice.dAppControlAction->requestAck) {
+                    ASN_STRUCT_FREE(asn_DEF_E3_PDU, asn1_pdu);
+                    return nullptr;
+                }
+                *asn1_pdu->msg.choice.dAppControlAction->requestAck = 1;
+            }
             break;
         }
         
@@ -535,22 +548,63 @@ E3_PDU* Asn1E3Encoder::pdu_to_asn1(const Pdu& pdu) const {
             OCTET_STRING_fromBuf(&asn1_pdu->msg.choice.xAppControlAction->xAppControlData,
                 reinterpret_cast<const char*>(action->xapp_control_data.data()),
                 static_cast<int>(action->xapp_control_data.size()));
+
+            if (action->request_ack) {
+                asn1_pdu->msg.choice.xAppControlAction->requestAck =
+                    static_cast<BOOLEAN_t*>(calloc(1, sizeof(BOOLEAN_t)));
+                if (!asn1_pdu->msg.choice.xAppControlAction->requestAck) {
+                    ASN_STRUCT_FREE(asn_DEF_E3_PDU, asn1_pdu);
+                    return nullptr;
+                }
+                *asn1_pdu->msg.choice.xAppControlAction->requestAck = 1;
+            }
             break;
         }
         
         case PduType::MESSAGE_ACK: {
+            // DEPRECATED TO BE REMOVED: libe3 does not send one; kept so the index of
+            // controlResponse is OCUDU's and a message from another RAN is read.
             const auto* ack = std::get_if<MessageAck>(&pdu.choice);
             if (!ack) { free(asn1_pdu); return nullptr; }
-            
+
             asn1_pdu->msg.present = E3_PDU__msg_PR_messageAck;
             asn1_pdu->msg.choice.messageAck = static_cast<E3_MessageAck_t*>(
                 calloc(1, sizeof(E3_MessageAck_t)));
             if (!asn1_pdu->msg.choice.messageAck) { free(asn1_pdu); return nullptr; }
-            
+
             asn1_pdu->msg.choice.messageAck->requestId = ack->request_id;
-            asn1_pdu->msg.choice.messageAck->responseCode = 
+            asn1_pdu->msg.choice.messageAck->responseCode =
                 (ack->response_code == ResponseCode::POSITIVE) ? 0 : 1;
             set_reason(asn1_pdu->msg.choice.messageAck, ack->cause, ack->detail);
+            break;
+        }
+
+        case PduType::CONTROL_RESPONSE: {
+            const auto* resp = std::get_if<ControlResponse>(&pdu.choice);
+            if (!resp) { free(asn1_pdu); return nullptr; }
+
+            asn1_pdu->msg.present = E3_PDU__msg_PR_controlResponse;
+            asn1_pdu->msg.choice.controlResponse = static_cast<E3_ControlResponse_t*>(
+                calloc(1, sizeof(E3_ControlResponse_t)));
+            if (!asn1_pdu->msg.choice.controlResponse) { free(asn1_pdu); return nullptr; }
+
+            E3_ControlResponse_t* out = asn1_pdu->msg.choice.controlResponse;
+            out->requestId = resp->request_id;
+            out->dAppIdentifier = resp->dapp_identifier;
+            out->ranFunctionIdentifier = resp->ran_function_identifier;
+            out->controlIdentifier = resp->control_identifier;
+            out->responseCode = (resp->response_code == ResponseCode::POSITIVE) ? 0 : 1;
+            set_reason(out, resp->cause, resp->detail);
+            if (resp->control_outcome && !resp->control_outcome->empty()) {
+                out->controlOutcome = static_cast<OCTET_STRING_t*>(calloc(1, sizeof(OCTET_STRING_t)));
+                if (!out->controlOutcome) {
+                    ASN_STRUCT_FREE(asn_DEF_E3_PDU, asn1_pdu);
+                    return nullptr;
+                }
+                OCTET_STRING_fromBuf(out->controlOutcome,
+                    reinterpret_cast<const char*>(resp->control_outcome->data()),
+                    static_cast<int>(resp->control_outcome->size()));
+            }
             break;
         }
         
@@ -782,6 +836,9 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
                                      ? static_cast<uint32_t>(*asn1_pdu->msg.choice.dAppControlAction->sequenceId)
                                      : 0;
 
+            action.request_ack = asn1_pdu->msg.choice.dAppControlAction->requestAck
+                                     && *asn1_pdu->msg.choice.dAppControlAction->requestAck;
+
             const OCTET_STRING_t* data = &asn1_pdu->msg.choice.dAppControlAction->actionData;
             action.action_data.assign(data->buf, data->buf + data->size);
             
@@ -812,6 +869,9 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
             action.ran_function_identifier = static_cast<uint32_t>(asn1_pdu->msg.choice.xAppControlAction->ranFunctionIdentifier);
             action.sequence_id = static_cast<uint32_t>(asn1_pdu->msg.choice.xAppControlAction->sequenceId);
 
+            action.request_ack = asn1_pdu->msg.choice.xAppControlAction->requestAck
+                                     && *asn1_pdu->msg.choice.xAppControlAction->requestAck;
+
             const OCTET_STRING_t* data = &asn1_pdu->msg.choice.xAppControlAction->xAppControlData;
             action.xapp_control_data.assign(data->buf, data->buf + data->size);
             
@@ -821,14 +881,35 @@ Pdu Asn1E3Encoder::asn1_to_pdu(const E3_PDU* asn1_pdu) const {
         
         case E3_PDU__msg_PR_messageAck: {
             pdu.type = PduType::MESSAGE_ACK;
-            
+
             MessageAck ack;
             ack.request_id = static_cast<uint32_t>(asn1_pdu->msg.choice.messageAck->requestId);
             ack.response_code = (asn1_pdu->msg.choice.messageAck->responseCode == 0)
                 ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
             get_reason(asn1_pdu->msg.choice.messageAck, ack.cause, ack.detail);
-            
+
             pdu.choice = ack;
+            break;
+        }
+
+        case E3_PDU__msg_PR_controlResponse: {
+            pdu.type = PduType::CONTROL_RESPONSE;
+
+            const E3_ControlResponse_t* in = asn1_pdu->msg.choice.controlResponse;
+            ControlResponse resp;
+            resp.request_id = static_cast<uint32_t>(in->requestId);
+            resp.dapp_identifier = static_cast<uint32_t>(in->dAppIdentifier);
+            resp.ran_function_identifier = static_cast<uint32_t>(in->ranFunctionIdentifier);
+            resp.control_identifier = static_cast<uint32_t>(in->controlIdentifier);
+            resp.response_code = (in->responseCode == 0)
+                ? ResponseCode::POSITIVE : ResponseCode::NEGATIVE;
+            get_reason(in, resp.cause, resp.detail);
+            if (in->controlOutcome && in->controlOutcome->buf && in->controlOutcome->size > 0) {
+                resp.control_outcome = std::vector<uint8_t>(
+                    in->controlOutcome->buf, in->controlOutcome->buf + in->controlOutcome->size);
+            }
+
+            pdu.choice = resp;
             break;
         }
         

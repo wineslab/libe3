@@ -219,6 +219,16 @@ Pdu build(PduType t, const Params& p, bool json) {
         pdu.choice = a;
         break;
     }
+    case PduType::CONTROL_RESPONSE: {
+        ControlResponse r;
+        r.request_id = p.req;
+        r.dapp_identifier = p.dapp;
+        r.ran_function_identifier = 1;
+        r.control_identifier = 1;
+        r.response_code = ResponseCode::POSITIVE;
+        pdu.choice = r;
+        break;
+    }
     default:
         break;
     }
@@ -241,6 +251,7 @@ const TypeName kTypes[] = {
     {PduType::XAPP_CONTROL_ACTION, "XAppControlAction"},
     {PduType::RELEASE_MESSAGE, "ReleaseMessage"},
     {PduType::MESSAGE_ACK, "MessageAck"},
+    {PduType::CONTROL_RESPONSE, "ControlResponse"},
 };
 const PduType kPayloadTypes[] = {PduType::INDICATION_MESSAGE, PduType::DAPP_CONTROL_ACTION,
                                  PduType::DAPP_REPORT, PduType::XAPP_CONTROL_ACTION};

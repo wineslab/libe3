@@ -9,7 +9,7 @@ procedures that use these messages are in [03-procedure-flow.md](03-procedure-fl
 
 ## The messages at a glance
 
-E3AP has eleven messages. Each one travels inside one `E3-PDU`.
+E3AP has twelve messages, one of them deprecated. Each one travels inside one `E3-PDU`.
 
 Table: Messages of E3AP
 
@@ -25,7 +25,8 @@ Table: Messages of E3AP
 | E3-DAppReport | 7 | dApp to E3 Agent | dApp Report |
 | E3-XAppControlAction | 8 | E3 Agent to dApp | xApp Control |
 | E3-ReleaseMessage | 9 | either | Release |
-| E3-MessageAck | 10 | E3 Agent to dApp | acknowledgement of a dApp control action |
+| E3-MessageAck | 10 | E3 Agent to dApp | deprecated, see below. No E3 Agent of this version sends it |
+| E3-ControlResponse | 11 | E3 Agent to dApp for a dApp control, dApp to E3 Agent for an xApp control | the answer to a dApp control action or to an xApp control action |
 
 ## Common types
 
@@ -84,7 +85,7 @@ Table: E3-PDU
 |---|---|---|---|---|
 | `id` | M | | E3-MessageID | The identifier of this message. |
 | `timestamp` | O | | E3-Timestamp | The time at which the sender made the message. A sender that does not want to read the clock may omit it. A missing timestamp is a normal message. |
-| `msg` | M | | CHOICE | One of the eleven messages. The CHOICE has an extension marker. |
+| `msg` | M | | CHOICE | One of the twelve messages. The CHOICE has an extension marker. |
 
 ## E3-SetupRequest
 
@@ -199,6 +200,7 @@ Table: E3-DAppControlAction
 | `controlIdentifier` | M | | INTEGER (1 to 65535) | The control action. |
 | `sequenceId` | O | | E3-SequenceID | The sequence identifier of the E3-XAppControlAction that the dApp re-issues. It is missing when the dApp decided on the action itself. |
 | `actionData` | M | 1 to 32768 octets | OCTET STRING | The payload. Only the service model can read it. |
+| `requestAck` | O | | BOOLEAN | "true" when the dApp wants an E3-ControlResponse for this action. A missing field reads as "false". A sender writes the field only when it is "true". This field is an extension addition. |
 
 ## E3-DAppReport
 
@@ -225,6 +227,7 @@ Table: E3-XAppControlAction
 | `ranFunctionIdentifier` | M | | INTEGER (1 to 65535) | The RAN function that the decision is about. |
 | `sequenceId` | M | | E3-SequenceID | The sequence identifier that the RIC side carried. The E3 Agent copies it without change. |
 | `xAppControlData` | M | 1 to 32768 octets | OCTET STRING | The payload. Only the service model can read it. |
+| `requestAck` | O | | BOOLEAN | "true" when the E3 Agent wants an E3-ControlResponse from the dApp for this decision. A missing field reads as "false". A sender writes the field only when it is "true". This field is an extension addition. |
 
 ## E3-ReleaseMessage
 
@@ -238,16 +241,37 @@ Table: E3-ReleaseMessage
 
 ## E3-MessageAck
 
-The E3 Agent, or the service model behind it, sends it to say what happened to a dApp control action. The E3 Agent sends it with "negative" when it cannot hand the control to a service model. The message has no dApp identifier. A dApp shall ignore a MESSAGE ACK message whose `requestId` is not the identifier of a message that it sent.
+DEPRECATED TO BE REMOVED. An E3 Agent of this version does not send it: the answer to a control action is the E3-ControlResponse. The message stays in the grammar so that E3-ControlResponse has the index that it has in OCUDU's grammar, and so that a dApp can read the one that another E3 Agent sends. It has no dApp identifier. An E3 Agent shall drop one that a dApp sends.
 
 Table: E3-MessageAck
 
 | IE/Group Name | Presence | Range | IE type and reference | Semantics description |
 |---|---|---|---|---|
-| `requestId` | M | | E3-MessageID | The `id` of the E3-PDU of the dApp control action. |
+| `requestId` | M | | E3-MessageID | The `id` of the E3-PDU of the request that it answers. |
 | `responseCode` | M | | E3-ResponseCode | The result. |
-| `cause` | O | | E3-Cause | Why the control was refused. It is present only when the response code is "negative". This field is an extension addition. |
+| `cause` | O | | E3-Cause | Why the request was refused. It is present only when the response code is "negative". This field is an extension addition. |
 | `detail` | O | | E3-Text | Text for the cause. This field is an extension addition. |
+
+## E3-ControlResponse
+
+The answer to a dApp control action or to an xApp control action. The E3 Agent sends it for a dApp control action: the service model behind it gives the result, and the E3 Agent itself gives a refusal when it cannot hand the control to a service model. A dApp sends it for an xApp control action. The message has a dApp identifier, so on a link that broadcasts a dApp reads only the messages that name it.
+
+The fields and their order are those of the E3-ControlResponse of OCUDU without `fragmentIndex`, `fragmentCount` and `payloadBytes`. An encoding of this message is not the encoding of OCUDU's message. See [../interop.md](../interop.md#control-answer).
+
+Table: E3-ControlResponse
+
+| IE/Group Name | Presence | Range | IE type and reference | Semantics description |
+|---|---|---|---|---|
+| `requestId` | M | | E3-MessageID | The `id` of the E3-PDU of the control action that this answers. |
+| `dAppIdentifier` | M | | E3-DAppID | The dApp that sent the dApp control action, or that receives the xApp control action. |
+| `ranFunctionIdentifier` | M | | INTEGER (1 to 65535) | The RAN function of the control action. |
+| `controlIdentifier` | M | | INTEGER (1 to 65535) | The control that the answer is about. An xApp control action names none, so the dApp gives the control that it applied, from the list that the RAN function advertises. |
+| `responseCode` | M | | E3-ResponseCode | "positive" when the control was applied, "negative" when it was not. |
+| `cause` | O | | E3-Cause | Why the control was not applied. It is present only when the response code is "negative". |
+| `detail` | O | | E3-Text | Text for the cause. |
+| `controlOutcome` | O | 1 to 32768 octets | OCTET STRING | What the service model reports about the control. Only the service model can read it. It is missing when the service model has nothing to report. |
+
+The message has an extension marker.
 
 ## Presence notation
 
