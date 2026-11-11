@@ -16,6 +16,7 @@
  */
 
 #include "test_framework.hpp"
+#include "link_under_test.hpp"
 #include "libe3/libe3.hpp"
 #include "libe3/e3_agent.hpp"
 #include "libe3/e3_connector.hpp"
@@ -54,10 +55,7 @@ EncodingFormat pick_encoding() {
 #endif
 }
 
-uint16_t unique_port() {
-    static std::atomic<int> next{0};
-    return static_cast<uint16_t>(34000 + (getpid() % 2000) * 8 + (next.fetch_add(1) % 8));
-}
+uint16_t unique_port() { return libe3_test::free_port(); }
 
 std::string make_tmpdir() {
     char tmpl[] = "/tmp/libe3_refused_XXXXXX";
@@ -251,6 +249,17 @@ TEST(refused_setup_is_retried_posix_ipc) {
 
 TEST(refused_setup_is_retried_posix_tcp) {
     run({E3LinkLayer::POSIX, E3TransportLayer::TCP, "", unique_port()});
+}
+
+TEST(refused_setup_is_retried_uring_ipc) {
+    if (!libe3_test::uring_runs_here()) return;
+    mkdir("/tmp/dapps", 0777);
+    run({E3LinkLayer::URING, E3TransportLayer::IPC, "ipc://" + make_tmpdir() + "/e3", 0});
+}
+
+TEST(refused_setup_is_retried_uring_tcp) {
+    if (!libe3_test::uring_runs_here()) return;
+    run({E3LinkLayer::URING, E3TransportLayer::TCP, "", unique_port()});
 }
 
 #if LIBE3_HAS_ZMQ

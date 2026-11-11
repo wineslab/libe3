@@ -14,15 +14,18 @@
  * is the same property that matters when each E3Agent connects to a
  * different remote RAN.
  *
- * The scenario runs over BOTH link layers: ZMQ (PUB/SUB broadcast) and
- * POSIX (multi-peer accept loops + broadcast fan-out), which must deliver
- * the same no-crosstalk semantics.
+ * The scenario runs over every link layer: ZMQ (PUB/SUB broadcast), POSIX
+ * (multi-peer accept loops + broadcast fan-out) and io_uring (the same wire as
+ * POSIX, one submission for the fan-out), which must deliver the same
+ * no-crosstalk semantics. The io_uring cases say URING NOT RUN where this
+ * build or kernel has no io_uring (link_under_test.hpp).
  *
  * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 
 #include "test_framework.hpp"
+#include "link_under_test.hpp"
 #include <libe3/libe3.hpp>
 #include <libe3/e3_encoder.hpp>
 #include "sm_simple/e3sm_simple_wrapper.hpp"
@@ -58,17 +61,16 @@ std::string make_tmpdir() {
     return std::string(d);
 }
 
-// A literal base port collides across concurrent CTest runs on a shared,
-// multi-session machine (this repo's normal state). LIBE3_TEST_PORT_OFFSET
+// A fixed base port collides across concurrent CTest runs on a shared,
+// multi-session machine (this repo's normal state), and a base derived from the
+// pid collides with the other tests' own derivations. LIBE3_TEST_PORT_OFFSET
 // lets a CI runner assign each parallel job a disjoint range explicitly;
-// absent that, spread by pid so co-resident local runs don't collide either.
-// *3 keeps one process's whole triple (base, base+1, base+2) from
-// overlapping another process's triple.
+// absent that, the triple (base, base+1, base+2) is reserved by free_ports().
 uint16_t unique_base_port(uint16_t default_base) {
     if (const char* env = std::getenv("LIBE3_TEST_PORT_OFFSET")) {
         return static_cast<uint16_t>(default_base + std::atoi(env));
     }
-    return static_cast<uint16_t>(default_base + (static_cast<unsigned>(getpid()) % 1000) * 3);
+    return libe3_test::free_ports(3);
 }
 
 // Connects to 127.0.0.1:port, retrying with a short bounded backoff. Needed
@@ -448,26 +450,31 @@ TEST(multi_peer_two_dapps_distinct_rfs_no_crosstalk_posix_ipc) {
 }
 
 TEST(multi_peer_two_dapps_distinct_rfs_no_crosstalk_posix_tcp) {
-    // Unique port triple: 23990-23992 and 24990-24992 are used by other POSIX
-    // tests; 25990-25992 is free. unique_base_port() also keeps it distinct
-    // across concurrent runs on a shared machine.
+    // unique_base_port() reserves a port triple of its own.
     run_multi_peer_two_dapps(E3LinkLayer::POSIX, E3TransportLayer::TCP,
                              /*base_port=*/unique_base_port(25990));
+}
+
+TEST(multi_peer_two_dapps_distinct_rfs_no_crosstalk_uring_ipc) {
+    if (!libe3_test::uring_runs_here()) return;
+    run_multi_peer_two_dapps(E3LinkLayer::URING, E3TransportLayer::IPC);
+}
+
+TEST(multi_peer_two_dapps_distinct_rfs_no_crosstalk_uring_tcp) {
+    if (!libe3_test::uring_runs_here()) return;
+    run_multi_peer_two_dapps(E3LinkLayer::URING, E3TransportLayer::TCP,
+                             /*base_port=*/unique_base_port(27990));
 }
 
 // Regression test for the multi-peer blocker: a dApp that registers, subscribes and then
 // stops reading must NOT stall delivery to the other peers, and must NOT hang stop().
 // Before the SO_SNDTIMEO fix, the RAN's outbound thread blocked forever in send() once the
 // stalled peer's TCP buffer filled, starving every other peer and wedging stop().
-TEST(multi_peer_slow_peer_does_not_stall_others_posix_tcp) {
-    // distinct from the port triples above; unique_base_port() also keeps it
-    // distinct across concurrent runs on a shared machine.
-    const uint16_t base = unique_base_port(26990);
-
+void run_slow_peer_does_not_stall_others(E3LinkLayer link, uint16_t base) {
     E3Config ran_cfg;
     ran_cfg.role = E3Role::RAN;
     ran_cfg.ran_identifier = "test-ran-slow";
-    ran_cfg.link_layer = E3LinkLayer::POSIX;
+    ran_cfg.link_layer = link;
     ran_cfg.transport_layer = E3TransportLayer::TCP;
     ran_cfg.encoding = EncodingFormat::ASN1;
     ran_cfg.log_level = 0;
@@ -515,6 +522,16 @@ TEST(multi_peer_slow_peer_does_not_stall_others_posix_tcp) {
     ASSERT_TRUE(elapsed < 5s);
 
     close(stalled);
+}
+
+TEST(multi_peer_slow_peer_does_not_stall_others_posix_tcp) {
+    // A port triple of its own, like each test above.
+    run_slow_peer_does_not_stall_others(E3LinkLayer::POSIX, unique_base_port(26990));
+}
+
+TEST(multi_peer_slow_peer_does_not_stall_others_uring_tcp) {
+    if (!libe3_test::uring_runs_here()) return;
+    run_slow_peer_does_not_stall_others(E3LinkLayer::URING, unique_base_port(28990));
 }
 
 int main() {

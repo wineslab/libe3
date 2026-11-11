@@ -3,7 +3,8 @@
  * @brief A POSIX RAN acts on a message that names a dApp only if it came on that dApp's connection.
  *
  * A real RAN E3Agent and a real dApp E3Agent over POSIX IPC, and a second,
- * bare connection that registers as another dApp. Properties verified:
+ * bare connection that registers as another dApp. CTest runs it again over
+ * the io_uring link and mixed (link_under_test.hpp). Properties verified:
  *   (1) a release that names the dApp but comes on another connection is
  *       dropped: the dApp keeps its registration, its subscription and its
  *       RAN function, and is told nothing;
@@ -16,6 +17,7 @@
  */
 
 #include "test_framework.hpp"
+#include "link_under_test.hpp"
 #include "libe3/libe3.hpp"
 #include "libe3/e3_agent.hpp"
 #include "libe3/e3_connector.hpp"
@@ -102,7 +104,7 @@ struct Endpoints {
 E3Config make_config(E3Role role, const Endpoints& ep) {
     E3Config c;
     c.role                = role;
-    c.link_layer          = E3LinkLayer::POSIX;
+    c.link_layer          = libe3_test::link_for(role);
     c.transport_layer     = E3TransportLayer::IPC;
     c.setup_endpoint      = ep.setup;
     c.subscriber_endpoint = ep.sub;
@@ -121,7 +123,7 @@ E3Config make_config(E3Role role, const Endpoints& ep) {
 struct OtherConnection {
     explicit OtherConnection(const Endpoints& ep)
         : encoder(create_encoder(pick_encoding())),
-          connector(create_connector(E3LinkLayer::POSIX, E3TransportLayer::IPC, ep.setup, ep.sub,
+          connector(create_connector(libe3_test::dapp_link(), E3TransportLayer::IPC, ep.setup, ep.sub,
                                      ep.pub, 0, 0, 0, 1, E3Role::DAPP)) {}
 
     bool open() {
@@ -291,6 +293,7 @@ TEST(DAppBound_posix_aControlAndAReportFromAnotherConnectionAreDropped) {
     ran.stop();
 }
 
-int main() {
+int main(int argc, char** argv) {
+    if (const int rc = libe3_test::select_links(argc, argv); rc >= 0) return rc;
     return RUN_ALL_TESTS();
 }
