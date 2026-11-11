@@ -39,6 +39,12 @@ constexpr uint32_t SCTP_PPID = 0x00E3A001;    ///< Project-private; no payload p
 constexpr int SCTP_PROCEDURE_STREAM = 0;      ///< SCTP stream of everything but an indication
 constexpr int SCTP_INDICATION_STREAM = 1;     ///< SCTP stream of the indications a RAN sends
 constexpr size_t TCP_PREFIX_BYTES = 4;        ///< TCP: each PDU follows its length, big-endian
+/// SCTP retransmission timeout of each association, in ms: first, smallest and largest. Linux's own
+/// smallest, 1 s, is longer than SEND_TIMEOUT_MS, so a burst of large PDUs that closes the peer's
+/// window could stall a send until the RAN dropped the dApp; E3 runs between neighbours.
+constexpr uint32_t SCTP_RTO_INITIAL_MS = 120;
+constexpr uint32_t SCTP_RTO_MIN_MS = 20;      ///< See SCTP_RTO_INITIAL_MS
+constexpr uint32_t SCTP_RTO_MAX_MS = 250;     ///< Half SEND_TIMEOUT_MS: one backed-off wait cannot reach it
 
 /// Which end of a connection a socket is, as the options it needs differ.
 enum class SocketKind {

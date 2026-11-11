@@ -175,6 +175,13 @@ void tune_socket(const SocketSpec& spec, int fd, SocketKind kind) {
             }
         }
     }
+    struct sctp_rtoinfo rto{};
+    rto.srto_initial = SCTP_RTO_INITIAL_MS;
+    rto.srto_min = SCTP_RTO_MIN_MS;
+    rto.srto_max = SCTP_RTO_MAX_MS;
+    if (setsockopt(fd, IPPROTO_SCTP, SCTP_RTOINFO, &rto, sizeof(rto)) != 0) {
+        E3_LOG_WARN(tag) << "Failed to set the SCTP retransmission timeout: " << strerror(errno);
+    }
     if (kind != SocketKind::LISTENER) {
         if (setsockopt(fd, IPPROTO_SCTP, SCTP_NODELAY, &one, sizeof(one)) != 0) {
             E3_LOG_WARN(tag) << "Failed to set SCTP_NODELAY: " << strerror(errno);
