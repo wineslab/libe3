@@ -51,6 +51,16 @@ uint32_t dapp_id_of(const Pdu& pdu) {
     return 0;
 }
 
+/// The dApp that an outbound @p pdu is for, or 0 for a PDU that names none.
+uint32_t target_dapp_of(const Pdu& pdu) {
+    if (const auto* m = std::get_if<SubscriptionResponse>(&pdu.choice)) return m->dapp_identifier;
+    if (const auto* m = std::get_if<IndicationMessage>(&pdu.choice)) return m->dapp_identifier;
+    if (const auto* m = std::get_if<XAppControlAction>(&pdu.choice)) return m->dapp_identifier;
+    if (const auto* m = std::get_if<ReleaseMessage>(&pdu.choice)) return m->dapp_identifier;
+    if (const auto* m = std::get_if<ControlResponse>(&pdu.choice)) return m->dapp_identifier;
+    return 0;
+}
+
 /**
  * @brief Build the default log-file path for a given role/identifier.
  *
@@ -293,7 +303,9 @@ ErrorCode E3Interface::create_connector_from_config() {
         config_.subscriber_port,
         config_.publisher_port,
         config_.io_threads,
-        config_.role
+        config_.role,
+        PosixOptions{config_.socket_buffer_bytes, config_.sctp_delayed_sack,
+                     config_.allowed_peers, config_.maximum_associations}
     );
 
     if (!connector_) {
@@ -626,13 +638,12 @@ void E3Interface::inbound_loop_ran() {
     }
     
     std::vector<uint8_t> buffer;
-    PeerBindings peer_bindings;
     
     while (!should_stop_.load()) {
         int ret = connector_->receive(buffer);
 
         // After the receive, which delivers what a peer sent before it closed.
-        remove_dapps_of_closed_peers(peer_bindings);
+        remove_dapps_of_closed_peers();
         
         if (ret <= 0) {
             if (should_stop_.load()) break;
@@ -656,7 +667,7 @@ void E3Interface::inbound_loop_ran() {
         
         // Before the dispatch, so a report that the queue then drops still counts.
         if (const uint32_t sender = dapp_id_of(pdu); sender != 0) {
-            if (!admit_dapp_message(peer_bindings, connector_->last_peer_token(), sender)) {
+            if (!admit_dapp_message(connector_->last_peer_token(), sender)) {
                 E3_LOG_WARN(LOG_TAG) << "Dropping " << pdu_type_to_string(pdu.type)
                                      << " that names dApp " << sender
                                      << ", which belongs to another connection";
@@ -795,7 +806,14 @@ void E3Interface::outbound_loop_ran() {
         latrec_tstamp(pdu_opt->enqueue_seq, LATREC_ENCODE_E3AP_DONE, encode_result->buffer.size(), 0);
         
         latrec_ctx_set(pdu_opt->enqueue_seq);   // for the connector's LC stamps
-        ErrorCode send_result = connector_->send(encode_result->buffer);
+        // To the connection of the dApp the PDU is for. A dApp that is not bound to one (the
+        // connector cannot tell its peers apart, or the connection is gone) gets the broadcast,
+        // and each dApp filters by its own identifier.
+        const uint32_t target = target_dapp_of(*pdu_opt);
+        const uint64_t peer = target != 0 ? connection_of(target) : 0;
+        const PduClass kind = pdu_opt->type == PduType::INDICATION_MESSAGE
+            ? PduClass::INDICATION : PduClass::PROCEDURE;
+        ErrorCode send_result = connector_->send_to(peer, encode_result->buffer, kind);
         if (send_result != ErrorCode::SUCCESS) {
             E3_LOG_ERROR(LOG_TAG) << "Failed to send PDU";
             // CANCELLED means the connector's shutdown() had already run,
@@ -1000,6 +1018,8 @@ void E3Interface::handle_setup_request(const SetupRequest& request, uint32_t req
     
     if (result == ErrorCode::SUCCESS) {
         response_code = ResponseCode::POSITIVE;
+        // The connection that sent the request is the dApp's, from now on.
+        bind_dapp_to_connection(assigned_dapp_id, connector_->last_setup_peer_token());
         E3_LOG_INFO(LOG_TAG) << "dApp '" << request.dapp_name << "' registered with assigned ID " << assigned_dapp_id;
         notify_dapp_status_changed();
     } else {
@@ -1441,7 +1461,32 @@ void E3Interface::handle_dapp_disconnection(uint32_t dapp_id) {
     }
 }
 
-bool E3Interface::admit_dapp_message(PeerBindings& bindings, uint64_t peer, uint32_t dapp_id) {
+void E3Interface::bind_dapp_to_connection(uint32_t dapp_id, uint64_t peer) {
+    if (peer == 0) {
+        return;  // a connector that cannot tell its peers apart
+    }
+    const auto generation = subscription_manager_->dapp_generation(dapp_id);
+    if (!generation) {
+        return;
+    }
+    std::lock_guard<std::mutex> lock(bindings_mu_);
+    if (auto owner = peer_bindings_.owner.find(dapp_id); owner != peer_bindings_.owner.end()) {
+        // The id was handed out again: the record is of the registration before.
+        if (auto old = peer_bindings_.by_peer.find(owner->second.first); old != peer_bindings_.by_peer.end()) {
+            old->second.erase(dapp_id);
+        }
+    }
+    peer_bindings_.owner[dapp_id] = {peer, *generation};
+    peer_bindings_.by_peer[peer][dapp_id] = *generation;
+}
+
+uint64_t E3Interface::connection_of(uint32_t dapp_id) {
+    std::lock_guard<std::mutex> lock(bindings_mu_);
+    auto owner = peer_bindings_.owner.find(dapp_id);
+    return owner == peer_bindings_.owner.end() ? 0 : owner->second.first;
+}
+
+bool E3Interface::admit_dapp_message(uint64_t peer, uint32_t dapp_id) {
     if (peer == 0) {
         return true;  // a connector that cannot tell its peers apart
     }
@@ -1449,40 +1494,37 @@ bool E3Interface::admit_dapp_message(PeerBindings& bindings, uint64_t peer, uint
     if (!generation) {
         return true;  // not registered: the handler refuses it, as for any unknown id
     }
-    auto owner = bindings.owner.find(dapp_id);
-    if (owner != bindings.owner.end()) {
-        if (owner->second.second == *generation) {
-            return owner->second.first == peer;
-        }
-        // The id was handed out again: the record is of the registration before.
-        auto old = bindings.by_peer.find(owner->second.first);
-        if (old != bindings.by_peer.end()) {
-            old->second.erase(dapp_id);
-        }
+    std::lock_guard<std::mutex> lock(bindings_mu_);
+    auto owner = peer_bindings_.owner.find(dapp_id);
+    if (owner == peer_bindings_.owner.end() || owner->second.second != *generation) {
+        return true;  // not bound to a connection: nothing to compare with
     }
-    bindings.owner[dapp_id] = {peer, *generation};
-    bindings.by_peer[peer][dapp_id] = *generation;
-    return true;
+    return owner->second.first == peer;
 }
 
-void E3Interface::remove_dapps_of_closed_peers(PeerBindings& bindings) {
+void E3Interface::remove_dapps_of_closed_peers() {
+    std::vector<std::pair<uint32_t, uint64_t>> gone;  // dApp id, generation
     for (uint64_t peer : connector_->take_closed_peers()) {
-        auto bound = bindings.by_peer.find(peer);
-        if (bound == bindings.by_peer.end()) {
-            continue;  // it never sent a message that names a dApp
+        std::lock_guard<std::mutex> lock(bindings_mu_);
+        auto bound = peer_bindings_.by_peer.find(peer);
+        if (bound == peer_bindings_.by_peer.end()) {
+            continue;  // no dApp was bound to it
         }
         for (const auto& [dapp_id, generation] : bound->second) {
-            auto owner = bindings.owner.find(dapp_id);
-            if (owner != bindings.owner.end() && owner->second.first == peer) {
-                bindings.owner.erase(owner);
+            auto owner = peer_bindings_.owner.find(dapp_id);
+            if (owner != peer_bindings_.owner.end() && owner->second.first == peer) {
+                peer_bindings_.owner.erase(owner);
             }
-            if (subscription_manager_->dapp_generation(dapp_id) != generation) {
-                continue;  // released, removed as idle, or the id is someone else's now
-            }
-            E3_LOG_INFO(LOG_TAG) << "Connection of dApp " << dapp_id << " closed without a release";
-            handle_dapp_disconnection(dapp_id);
+            gone.emplace_back(dapp_id, generation);
         }
-        bindings.by_peer.erase(bound);
+        peer_bindings_.by_peer.erase(bound);
+    }
+    for (const auto& [dapp_id, generation] : gone) {
+        if (subscription_manager_->dapp_generation(dapp_id) != generation) {
+            continue;  // released, removed as idle, or the id is someone else's now
+        }
+        E3_LOG_INFO(LOG_TAG) << "Connection of dApp " << dapp_id << " closed without a release";
+        handle_dapp_disconnection(dapp_id);
     }
 }
 
@@ -1612,7 +1654,9 @@ void E3Interface::setup_loop_dapp() {
             if (n > 0) {
                 auto decoded = encoder_->decode(resp_buf.data(), static_cast<size_t>(n));
                 if (!decoded) {
-                    E3_LOG_ERROR(LOG_TAG) << "Failed to decode SetupResponse";
+                    E3_LOG_ERROR(LOG_TAG) << "Failed to decode SetupResponse. If the RAN is a libe3 built before "
+                                             "0.6, it speaks the old POSIX layout (three connections, "
+                                             "unframed messages) and has to be upgraded together with the dApp.";
                     break;
                 }
                 if (decoded->type != PduType::SETUP_RESPONSE) {

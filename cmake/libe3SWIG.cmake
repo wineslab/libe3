@@ -72,3 +72,19 @@ if(LIBE3_BUILD_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_swig_lat
         LABELS "swig"
     )
 endif()
+
+# A Python dApp against a RAN whose Service Model keeps no interval, so that the
+# subscription response carries no periodicity. Needs the shipped example agent, which is
+# only built with the examples; without it the test says so and passes as skipped.
+if(LIBE3_BUILD_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_swig_subscription_no_periodicity.py")
+    add_test(
+        NAME test_swig_subscription_no_periodicity
+        COMMAND ${Python3_EXECUTABLE}
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_swig_subscription_no_periodicity.py"
+                "${CMAKE_BINARY_DIR}/example_simple_agent"
+    )
+    set_tests_properties(test_swig_subscription_no_periodicity PROPERTIES
+        ENVIRONMENT "PYTHONPATH=${LIBE3_SWIG_OUTPUT_DIR}"
+        LABELS "swig"
+    )
+endif()
