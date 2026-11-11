@@ -508,6 +508,33 @@ struct E3Config {
     uint32_t connect_timeout_ms{5000}; ///< Connection establishment timeout in milliseconds
     uint32_t recv_timeout_ms{1000};    ///< Receive operation timeout in milliseconds
     uint32_t send_timeout_ms{1000};    ///< Send operation timeout in milliseconds
+
+    /**
+     * @brief Seconds a RAN waits for a message from a dApp before it removes the dApp.
+     *
+     * RAN role only. A dApp that sends nothing for this long is told with a
+     * ReleaseMessage, then its registration and subscriptions are dropped and
+     * a RAN function it was the last subscriber of is stopped. Only what the
+     * dApp sends counts, never what the RAN sends to it. A dApp that registered
+     * and never spoke counts from its registration. 0 never removes a dApp for
+     * being quiet. The default is Aerial's 1800 s.
+     */
+    uint32_t dapp_idle_timeout_s{1800};
+
+    /**
+     * @brief Milliseconds a dApp waits before it registers with the RAN again (dApp role).
+     *
+     * When the RAN releases the dApp or the connection to it is lost, or setup
+     * did not complete, a dApp that was started with start() stops and starts
+     * itself again after this long, and again every this long until the RAN
+     * answers. The new session has a new dApp id and none of the subscriptions
+     * of the old one: the application subscribes again, and learns that the
+     * dApp is back from the setup response handler. A dApp that called
+     * release(), or stop(), is not restarted. 0 turns it off, so a dApp stays
+     * down until the program calls stop() and start(). The default is
+     * Aerial's one second.
+     */
+    uint32_t reconnect_interval_ms{1000};
     
     // Buffer sizes
     size_t receive_buffer_size{DEFAULT_BUFFER_SIZE}; ///< Size of the receive buffer in bytes
@@ -568,6 +595,8 @@ using Timestamp = std::chrono::time_point<std::chrono::steady_clock>;
 struct DAppEntry {
     uint32_t dapp_identifier{0};  ///< Assigned dApp identifier (1–100)
     Timestamp registered_time;     ///< Monotonic timestamp of when the dApp registered
+    Timestamp last_seen;           ///< Monotonic timestamp of the last message from the dApp, or of its registration
+    uint64_t generation{0};        ///< Counts registrations: an id handed out again gets a higher one
 };
 
 /**

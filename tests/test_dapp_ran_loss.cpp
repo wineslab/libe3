@@ -81,6 +81,8 @@ E3Config make_config(E3Role role, E3LinkLayer link, const Endpoints& ep) {
     c.ran_identifier      = "ranloss-test";
     c.dapp_name           = "RanLossDApp";
     c.dapp_version        = "1.0.0";
+    // These tests restart the dApp by hand; test_dapp_reconnect.cpp covers it doing so itself.
+    c.reconnect_interval_ms = 0;
     return c;
 }
 

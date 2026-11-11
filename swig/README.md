@@ -67,6 +67,14 @@ DAppSession(cfg)          # ctor registers all inbound handlers
   → stop()                # tear down; unblocks any poll_events
 ```
 
+If the RAN releases the dApp or the connection is lost, `poll_events` returns an
+`E3_EVENT_DISCONNECT` event, the dApp id and the subscriptions are gone, and unless
+`cfg.reconnect_interval_ms` is 0 the session registers again by itself after that many
+milliseconds. It gets a new `dapp_id()` and an `E3_EVENT_SETUP_RESPONSE`; subscribe again
+from there. `release()` and `stop()` end it for good. A RAN also releases a dApp that has
+sent nothing for `dapp_idle_timeout_s` (default 1800), so a dApp that only listens comes
+back about that often.
+
 ## Minimal Python example
 
 ```python

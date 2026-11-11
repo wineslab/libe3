@@ -33,11 +33,17 @@ using DAppReportHandler = std::function<void(const DAppReport&)>;
 using DAppStatusChangedHandler = std::function<void()>;
 
 // dApp-side handlers (used when role==DAPP).
+/** Callback for a SetupResponse (RAN → dApp). */
 using SetupResponseHandler = std::function<void(const SetupResponse&)>;
+/** Callback for a SubscriptionResponse (RAN → dApp). */
 using SubscriptionResponseHandler = std::function<void(const SubscriptionResponse&)>;
+/** Callback for an IndicationMessage (RAN → dApp). */
 using IndicationHandler = std::function<void(const IndicationMessage&)>;
+/** Callback for an XAppControlAction (xApp → dApp via the RAN). */
 using XAppControlHandler = std::function<void(const XAppControlAction&)>;
+/** Callback for a MessageAck (RAN → dApp). */
 using MessageAckHandler = std::function<void(const MessageAck&)>;
+/** Callback for the end of the dApp's session with the RAN, with the reason. */
 using DisconnectHandler = std::function<void(DisconnectReason)>;
 
 /**
@@ -100,7 +106,12 @@ public:
     // Non-copyable, movable
     E3Agent(const E3Agent&) = delete;
     E3Agent& operator=(const E3Agent&) = delete;
+    /** @brief Move constructor. */
     E3Agent(E3Agent&&) noexcept;
+    /**
+     * @brief Move assignment.
+     * @return This agent
+     */
     E3Agent& operator=(E3Agent&&) noexcept;
 
     // =========================================================================
@@ -138,11 +149,13 @@ public:
 
     /**
      * @brief Get current agent state
+     * @return The state the agent is in
      */
     AgentState state() const noexcept;
 
     /**
      * @brief Check if agent is running
+     * @return true while the agent is running
      */
     bool is_running() const noexcept;
 
@@ -167,12 +180,14 @@ public:
      * @brief Get available RAN function IDs
      *
      * Returns the RAN function IDs from all registered Service Models.
+     * @return The RAN function IDs
      */
     std::vector<uint32_t> get_available_ran_functions() const;
 
     /**
      * @brief Set callback for incoming dApp reports (dApp → RAN).
      * Call before start(). When a dApp sends a DApp report, this callback is invoked.
+     * @param handler Called with each dApp report
      */
     void set_dapp_report_handler(DAppReportHandler handler);
 
@@ -180,6 +195,7 @@ public:
      * @brief Set callback for dApp status changes.
      * Called when a dApp connects, disconnects, subscribes, or unsubscribes.
      * Call before start().
+     * @param handler Called after each change
      */
     void set_dapp_status_changed_handler(DAppStatusChangedHandler handler);
 
@@ -235,20 +251,38 @@ public:
     // once init() runs.
     // =========================================================================
 
-    /** Set callback for incoming SetupResponse (RAN → dApp). */
+    /**
+     * Set callback for incoming SetupResponse (RAN → dApp).
+     * @param handler Called on every setup, so also when the dApp registers again
+     */
     void set_setup_response_handler(SetupResponseHandler handler);
-    /** Set callback for incoming SubscriptionResponse (RAN → dApp). */
+    /**
+     * Set callback for incoming SubscriptionResponse (RAN → dApp).
+     * @param handler Called with each response
+     */
     void set_subscription_response_handler(SubscriptionResponseHandler handler);
-    /** Set callback for incoming IndicationMessage (RAN → dApp). */
+    /**
+     * Set callback for incoming IndicationMessage (RAN → dApp).
+     * @param handler Called with each indication
+     */
     void set_indication_handler(IndicationHandler handler);
-    /** Set callback for incoming XAppControlAction (xApp → dApp via RAN). */
+    /**
+     * Set callback for incoming XAppControlAction (xApp → dApp via RAN).
+     * @param handler Called with each control action
+     */
     void set_xapp_control_handler(XAppControlHandler handler);
-    /** Set callback for incoming MessageAck (RAN → dApp). */
+    /**
+     * Set callback for incoming MessageAck (RAN → dApp).
+     * @param handler Called with each acknowledgement
+     */
     void set_message_ack_handler(MessageAckHandler handler);
     /**
      * Set callback for the end of the dApp's session with the RAN: a release for
      * this dApp, or a closed or failed connection. Fires once, after dapp_id()
-     * has been cleared. The dApp does not reconnect; call stop() then start().
+     * has been cleared. Unless E3Config::reconnect_interval_ms is 0 the dApp then
+     * registers again by itself, with a new dapp_id() and no subscriptions: subscribe
+     * again from the setup response handler. It does not after release() or stop().
+     * @param handler Called once per ended session, with the reason
      */
     void set_disconnect_handler(DisconnectHandler handler);
 
@@ -258,16 +292,25 @@ public:
      */
     std::optional<uint32_t> dapp_id() const noexcept;
 
-    /** RAN functions this dApp is currently subscribed to. */
+    /**
+     * RAN functions this dApp is currently subscribed to.
+     *
+     * @return The RAN function IDs
+     */
     std::vector<uint32_t> subscribed_ran_functions() const;
 
-    /** Subscription IDs this dApp currently holds. */
+    /**
+     * Subscription IDs this dApp currently holds.
+     *
+     * @return The subscription IDs
+     */
     std::vector<uint32_t> active_subscription_ids() const;
 
     /**
      * @brief Block until the dApp setup handshake completes.
      * @return SUCCESS on positive SetupResponse, CONNECTION_FAILED on negative,
      *         TIMEOUT if the wait elapses, INVALID_PARAM on RAN-role.
+     * @param timeout How long to wait at most
      */
     ErrorCode wait_for_setup(std::chrono::milliseconds timeout);
 
@@ -295,7 +338,12 @@ public:
                         std::optional<uint32_t> periodicity = std::nullopt,
                         uint32_t* out_request_id = nullptr);
 
-    /** Send a SubscriptionDelete for a previously subscribed RAN function. */
+    /**
+     * Send a SubscriptionDelete for a previously subscribed RAN function.
+     *
+     * @param ran_function_id RAN function to unsubscribe from
+     * @return ErrorCode::SUCCESS if the delete was queued, an error code otherwise
+     */
     ErrorCode unsubscribe(uint32_t ran_function_id);
 
     /**
@@ -309,6 +357,7 @@ public:
      * @param out_message_id when non-null, receives the assigned E3-MessageID on
      *        success, so the caller can correlate a later ack/response back to
      *        this send.
+     * @return ErrorCode::SUCCESS if the control was queued, an error code otherwise
      */
     ErrorCode send_control(uint32_t ran_function_id,
                            uint32_t control_id,
@@ -326,17 +375,23 @@ public:
      * @param out_message_id when non-null, receives the assigned E3-MessageID on
      *        success, so the caller can correlate a later ack/response back to
      *        this send.
+     * @return ErrorCode::SUCCESS if the report was queued, an error code otherwise
      */
     ErrorCode send_report(uint32_t ran_function_id,
                           std::vector<uint8_t> report_data,
                           uint32_t sequence_id,
                           uint32_t* out_message_id = nullptr);
 
-    /** Send a ReleaseMessage. The dApp stays running until stop() is called. */
+    /**
+     * Send a ReleaseMessage. The dApp stays running until stop() is called.
+     *
+     * @return ErrorCode::SUCCESS if the release was queued, an error code otherwise
+     */
     ErrorCode release();
 
     /**
      * @brief Get list of registered dApp IDs
+     * @return The dApp IDs
      */
     std::vector<uint32_t> get_registered_dapps() const;
 
@@ -373,6 +428,8 @@ public:
      * @brief Get the reporting periodicity a dApp requested for a RAN function
      *
      * @return periodicity in microseconds, 0 if not set or subscription not found
+     * @param dapp_id The dApp
+     * @param ran_function_id The RAN function
      */
     uint32_t get_subscription_periodicity(
         uint32_t dapp_id, uint32_t ran_function_id
@@ -382,6 +439,8 @@ public:
      * @brief Get the telemetry IDs a dApp requested for a RAN function
      *
      * @return vector of telemetry IDs (empty if none requested or subscription not found)
+     * @param dapp_id The dApp
+     * @param ran_function_id The RAN function
      */
     std::vector<uint32_t> get_subscription_telemetry_ids(
         uint32_t dapp_id, uint32_t ran_function_id
@@ -391,6 +450,8 @@ public:
      * @brief Get the control IDs a dApp requested for a RAN function
      *
      * @return vector of control IDs (empty if none requested or subscription not found)
+     * @param dapp_id The dApp
+     * @param ran_function_id The RAN function
      */
     std::vector<uint32_t> get_subscription_control_ids(
         uint32_t dapp_id, uint32_t ran_function_id
@@ -402,6 +463,7 @@ public:
 
     /**
      * @brief Get current configuration
+     * @return The configuration the agent was created with
      */
     const E3Config& config() const noexcept;
 
@@ -411,11 +473,13 @@ public:
 
     /**
      * @brief Get number of registered dApps
+     * @return The number of dApps
      */
     size_t dapp_count() const;
 
     /**
      * @brief Get total number of active subscriptions
+     * @return The number of subscriptions
      */
     size_t subscription_count() const;
 

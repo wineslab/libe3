@@ -80,15 +80,15 @@ e3_error_t e3_agent_set_dapp_status_changed_handler(
  * - Callbacks are invoked by the C++ adapter and receive `user_data`.
  */
 typedef struct {
-    const char* name;                // Service Model name (null-terminated string)
-    uint32_t version;                // Service Model version
-    uint32_t ran_function_id;        // RAN function ID for this SM
+    const char* name;             ///< Service Model name (null-terminated string)
+    uint32_t version;             ///< Service Model version
+    uint32_t ran_function_id;     ///< RAN function ID for this SM
 
-    const uint32_t* telemetry_ids;   // Array of supported telemetry IDs (copied by library)
-    size_t telemetry_ids_len;        // Number of telemetry IDs
+    const uint32_t* telemetry_ids; ///< Array of supported telemetry IDs (copied by library)
+    size_t telemetry_ids_len;     ///< Number of telemetry IDs
 
-    const uint32_t* control_ids;     // Array of supported control IDs (copied by library)
-    size_t control_ids_len;          // Number of control IDs
+    const uint32_t* control_ids;  ///< Array of supported control IDs (copied by library)
+    size_t control_ids_len;       ///< Number of control IDs
 
     /* Opaque RAN function data (E3SM-encoded, advertised in the setup response).
      * Required, not optional: E3AP declares ranFunctionData as a mandatory
@@ -98,14 +98,14 @@ typedef struct {
     size_t ran_function_data_len;     ///< Length in bytes; must be 1..32768
 
     /* Callbacks */
-    e3_sm_init_cb sm_init;                   // Called on SM registration
-    e3_sm_destroy_cb sm_destroy;             // Called on SM destruction
-    e3_sm_start_cb sm_start;                 // Called when SM should start
-    e3_sm_stop_cb sm_stop;                   // Called when SM should stop
-    e3_sm_is_running_cb sm_is_running;       // Called to query running state
-    e3_sm_process_control_cb sm_process_control; // Called to process control actions
+    e3_sm_init_cb sm_init;        ///< Called on SM registration
+    e3_sm_destroy_cb sm_destroy;  ///< Called on SM destruction
+    e3_sm_start_cb sm_start;      ///< Called when SM should start
+    e3_sm_stop_cb sm_stop;        ///< Called when SM should stop
+    e3_sm_is_running_cb sm_is_running; ///< Called to query running state
+    e3_sm_process_control_cb sm_process_control; ///< Called to process control actions
 
-    void* sm_context;                 // Opaque pointer passed to all callbacks
+    void* sm_context;             ///< Opaque pointer passed to all callbacks
 } e3_c_service_model_desc_t;
 
 /* Create/destroy a C-backed ServiceModel */
@@ -164,24 +164,28 @@ e3_error_t e3_service_model_emit_message_ack(
  * Enum values: link_layer: 0=ZMQ, 1=POSIX. transport_layer: 0=SCTP, 1=TCP, 2=IPC.
  * encoding: 0=ASN1, 1=JSON. Use -1 for link_layer, transport_layer, encoding, log_level
  * to keep defaults. Use 0 for setup_port, subscriber_port, publisher_port to keep defaults.
+ * Set `set_dapp_idle_timeout` to apply `dapp_idle_timeout_s`; a zeroed struct keeps the default.
  */
 typedef struct {
-    const char* ran_identifier;
-    int link_layer;       /* 0=ZMQ, 1=POSIX, -1=default */
-    int transport_layer;  /* 0=SCTP, 1=TCP, 2=IPC, -1=default */
-    uint16_t setup_port;
-    uint16_t subscriber_port;
-    uint16_t publisher_port;
-    const char* setup_endpoint;
-    const char* subscriber_endpoint;
-    const char* publisher_endpoint;
-    int encoding;         /* 0=ASN1, 1=JSON, 2=PROTOBUF, -1=default */
-    size_t io_threads;    /* 0=default */
-    int log_level;        /* -1=default */
-    const char* log_path; /* NULL=auto (/tmp/e3_<role>[_<id>]_<euid>.log) */
+    const char* ran_identifier;  ///< RAN identifier; NULL keeps the default
+    int link_layer;       ///< 0=ZMQ, 1=POSIX, -1=default
+    int transport_layer;  ///< 0=SCTP, 1=TCP, 2=IPC, -1=default
+    uint16_t setup_port;       ///< Port of the setup channel (SCTP and TCP); 0 keeps the default
+    uint16_t subscriber_port;  ///< Port of the subscriber channel (SCTP and TCP); 0 keeps the default
+    uint16_t publisher_port;   ///< Port of the publisher channel (SCTP and TCP); 0 keeps the default
+    const char* setup_endpoint;       ///< Endpoint of the setup channel; NULL keeps the default
+    const char* subscriber_endpoint;  ///< Endpoint of the subscriber channel; NULL keeps the default
+    const char* publisher_endpoint;   ///< Endpoint of the publisher channel; NULL keeps the default
+    int encoding;         ///< 0=ASN1, 1=JSON, 2=PROTOBUF, -1=default
+    size_t io_threads;    ///< Number of I/O threads; 0=default
+    int log_level;        ///< Logging level; -1=default
+    const char* log_path; ///< Log file; NULL=auto (`/tmp/e3_ROLE[_ID]_EUID.log`)
     /* A flag rather than a sentinel: core 0 is a legitimate target. */
-    int pin_io_threads;      /* 0=no pinning */
-    int io_thread_affinity;  /* logical core; Linux only, best-effort */
+    int pin_io_threads;      ///< Pin the I/O threads when non-zero; 0=no pinning
+    int io_thread_affinity;  ///< Logical core to pin to; Linux only, best-effort
+    /* A flag too, because 0 is a legitimate timeout: it never removes a dApp. */
+    int set_dapp_idle_timeout;    ///< Apply `dapp_idle_timeout_s` when non-zero; 0=keep the library default (1800 s)
+    uint32_t dapp_idle_timeout_s; ///< Seconds without a message from a dApp before the RAN releases and removes it; 0=never
 } e3_config_t;
 
 /**

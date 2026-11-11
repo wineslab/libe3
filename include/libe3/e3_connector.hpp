@@ -37,7 +37,12 @@ public:
     // Non-copyable, movable
     E3Connector(const E3Connector&) = delete;
     E3Connector& operator=(const E3Connector&) = delete;
+    /** @brief Move constructor. */
     E3Connector(E3Connector&&) = default;
+    /**
+     * @brief Move assignment.
+     * @return This connector
+     */
     E3Connector& operator=(E3Connector&&) = default;
 
     /**
@@ -108,6 +113,7 @@ public:
 
     /**
      * @brief Connect the setup channel (dApp role: REQ connect).
+     * @return ErrorCode::SUCCESS on success, ErrorCode::INVALID_PARAM if the connector has no dApp role
      */
     virtual ErrorCode setup_initial_connection_client() {
         return ErrorCode::INVALID_PARAM;
@@ -115,6 +121,7 @@ public:
 
     /**
      * @brief Send a SetupRequest on the setup channel (dApp role).
+     * @return ErrorCode::SUCCESS on success, an error code otherwise
      */
     virtual ErrorCode send_setup_request_client(const std::vector<uint8_t>& /*data*/) {
         return ErrorCode::INVALID_PARAM;
@@ -122,6 +129,7 @@ public:
 
     /**
      * @brief Receive a SetupResponse on the setup channel (dApp role).
+     * @return Number of bytes received, 0 on timeout, a negative ErrorCode on error
      */
     virtual int recv_setup_response_client(std::vector<uint8_t>& /*buffer*/) {
         return static_cast<int>(ErrorCode::INVALID_PARAM);
@@ -130,6 +138,7 @@ public:
     /**
      * @brief Connect the inbound channel (dApp role: SUB connect to the
      * RAN's publisher endpoint).
+     * @return ErrorCode::SUCCESS on success, an error code otherwise
      */
     virtual ErrorCode setup_inbound_connection_client() {
         return ErrorCode::INVALID_PARAM;
@@ -138,6 +147,7 @@ public:
     /**
      * @brief Connect the outbound channel (dApp role: PUB connect to the
      * RAN's subscriber endpoint).
+     * @return ErrorCode::SUCCESS on success, an error code otherwise
      */
     virtual ErrorCode setup_outbound_connection_client() {
         return ErrorCode::INVALID_PARAM;
@@ -157,53 +167,85 @@ public:
     virtual void shutdown() {}
 
     /**
+     * @brief Which peer supplied the bytes the last receive() returned (RAN role)
+     *
+     * Call it on the thread that calls receive(), right after a receive() that
+     * returned bytes. A token names one accepted connection and is never reused
+     * by the same connector, so a closed peer's token cannot name a later one.
+     *
+     * @return The peer's token, or 0 for a connector that cannot tell its
+     *         peers apart (the default, and ZeroMQ)
+     */
+    virtual uint64_t last_peer_token() const { return 0; }
+
+    /**
+     * @brief Peers whose connection has closed since the last call (RAN role)
+     *
+     * Call it on the thread that calls receive(). Each token is returned once,
+     * and only after the bytes that peer sent before closing were delivered.
+     * The default returns nothing: a connector that cannot tell its peers apart
+     * cannot tell that one left.
+     *
+     * @return The tokens of the peers that closed, oldest first
+     */
+    virtual std::vector<uint64_t> take_closed_peers() { return {}; }
+
+    /**
      * @brief Get the link layer type
+     * @return The link layer this connector runs on
      */
     virtual E3LinkLayer link_layer() const noexcept = 0;
 
     /**
      * @brief Get the transport layer type
+     * @return The transport layer this connector runs on
      */
     virtual E3TransportLayer transport_layer() const noexcept = 0;
 
     /**
      * @brief Check if connector is connected
+     * @return true once the connector has set up its connections
      */
     virtual bool is_connected() const noexcept = 0;
 
     /**
      * @brief Set role (RAN or DAPP). Affects bind vs connect direction and
      * cleanup behaviour. Must be set before any setup_* call. Default RAN.
+     * @param role The role of this peer
      */
     void set_role(E3Role role) noexcept { role_ = role; }
 
     /**
      * @brief Get current role.
+     * @return The role of this peer
      */
     E3Role role() const noexcept { return role_; }
 
     /**
      * @brief Get setup endpoint
+     * @return The endpoint of the setup channel
      */
     const std::string& setup_endpoint() const noexcept { return setup_endpoint_; }
 
     /**
      * @brief Get inbound endpoint
+     * @return The endpoint of the inbound channel
      */
     const std::string& inbound_endpoint() const noexcept { return inbound_endpoint_; }
 
     /**
      * @brief Get outbound endpoint
+     * @return The endpoint of the outbound channel
      */
     const std::string& outbound_endpoint() const noexcept { return outbound_endpoint_; }
 
 protected:
     E3Connector() = default;
 
-    std::string setup_endpoint_;
-    std::string inbound_endpoint_;
-    std::string outbound_endpoint_;
-    E3Role role_{E3Role::RAN};
+    std::string setup_endpoint_;     ///< Endpoint of the setup channel
+    std::string inbound_endpoint_;   ///< Endpoint of the inbound channel
+    std::string outbound_endpoint_;  ///< Endpoint of the outbound channel
+    E3Role role_{E3Role::RAN};       ///< Role of this peer
 };
 
 /**
