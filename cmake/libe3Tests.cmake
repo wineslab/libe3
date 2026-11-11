@@ -137,6 +137,11 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
             LIBE3_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures")
     endif()
 
+    if(simple_name STREQUAL "socket_link")
+        # It reaches into the connectors' own header: the framing.
+        target_include_directories(${target_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    endif()
+
     add_test(NAME ${target_name} COMMAND ${target_name})
 endforeach()
 

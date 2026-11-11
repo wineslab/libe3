@@ -40,6 +40,7 @@ set(LIBE3_SOURCES
     # Connector
     src/connector/connector_factory.cpp
     src/connector/posix_connector.cpp
+    src/connector/socket_link.cpp
     src/c_api.cpp
 )
 
