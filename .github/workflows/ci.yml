@@ -1,0 +1,102 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
+# SPDX-License-Identifier: Apache-2.0
+
+name: CI
+
+# The stages of CI, in order. A stage starts only when every stage before it passed, so a PR
+# that fails the commit policy does not spend the time of the end-to-end tests:
+#
+#   Commit policy
+#     -> Unit Tests
+#       -> Wheels, latrec portability, MPMC benchmark         (in parallel; the gate follows)
+#         -> E2E dApp Integration, E2E Topologies, Full-loop benchmark   (in parallel)
+#
+# Wheels, latrec portability and the MPMC benchmark run only when the PR changes what they
+# test (.github/scripts/detect_changes.sh); a stage that did not run does not hold up the next.
+# Every build and test stage is skipped when no changed file is code. Docs runs beside this
+# workflow, and CI report (ci-report.yml) waits for both and is the one required check.
+#
+# Each stage is a workflow of its own that this file calls, so it can also be run by hand where
+# it offers workflow_dispatch. Add a stage here with `needs`, never as a workflow that starts on
+# pull_request: .github/scripts/test_ci_gates.py checks the order drawn above.
+
+on:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+      wheels: ${{ steps.filter.outputs.wheels }}
+      latrec: ${{ steps.filter.outputs.latrec }}
+      mpmc: ${{ steps.filter.outputs.mpmc }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - id: filter
+        shell: bash
+        run: |
+          bash .github/scripts/detect_changes.sh \
+            "${{ github.event.pull_request.base.sha }}" \
+            "${{ github.event.pull_request.head.sha }}" | tee -a "$GITHUB_OUTPUT"
+
+  commit-policy:
+    name: Commit policy
+    uses: ./.github/workflows/commit-trailers.yml
+
+  unit-tests:
+    name: Unit Tests
+    needs: [changes, commit-policy]
+    if: needs.changes.outputs.code == 'true'
+    uses: ./.github/workflows/pr-tests.yml
+
+  # Second stage. Wheels, latrec and the MPMC benchmark each run only when their files change,
+  # so the stages after them use `!failure() && !cancelled()`: a skipped stage passes the gate,
+  # a failed or cancelled one stops it.
+  wheels:
+    name: Wheels
+    needs: [changes, unit-tests]
+    if: ${{ !failure() && !cancelled() && needs.changes.outputs.wheels == 'true' }}
+    uses: ./.github/workflows/build-wheels.yml
+
+  latrec-portability:
+    name: latrec portability
+    needs: [changes, unit-tests]
+    if: ${{ !failure() && !cancelled() && needs.changes.outputs.latrec == 'true' }}
+    uses: ./.github/workflows/latrec-portability.yml
+
+  mpmc-bench:
+    name: MPMC benchmark
+    needs: [changes, unit-tests]
+    if: ${{ !failure() && !cancelled() && needs.changes.outputs.mpmc == 'true' }}
+    uses: ./.github/workflows/mpmc-bench.yml
+
+  # Third stage, behind the gate: the second stage's three jobs.
+  e2e-dapp:
+    name: E2E dApp Integration
+    needs: [changes, wheels, latrec-portability, mpmc-bench]
+    if: ${{ !failure() && !cancelled() && needs.changes.outputs.code == 'true' }}
+    uses: ./.github/workflows/e2e-dapp-test.yml
+
+  e2e-topologies:
+    name: E2E Topologies
+    needs: [changes, wheels, latrec-portability, mpmc-bench]
+    if: ${{ !failure() && !cancelled() && needs.changes.outputs.code == 'true' }}
+    uses: ./.github/workflows/e2e-topologies.yml
+
+  full-loop-bench:
+    name: Full-loop benchmark
+    needs: [changes, wheels, latrec-portability, mpmc-bench]
+    if: ${{ !failure() && !cancelled() && needs.changes.outputs.code == 'true' }}
+    uses: ./.github/workflows/full-loop-bench.yml

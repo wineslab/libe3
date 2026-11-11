@@ -10,11 +10,7 @@ name: latrec portability
 # aarch64 keeps both honest without needing an aarch64 runner.
 
 on:
-  pull_request:
-    paths:
-      - 'include/libe3/latrec.h'
-      - 'src/core/latrec.c'
-      - '.github/workflows/latrec-portability.yml'
+  workflow_call:
   workflow_dispatch:
 
 jobs:

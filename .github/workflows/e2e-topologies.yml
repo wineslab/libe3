@@ -18,29 +18,8 @@ name: E2E Topologies (multi-dApp / multi-RAN)
 # dApps, and these tests surface any resulting queueing growth (flagged >1ms).
 
 on:
-  pull_request:
-    # Started only when a changed file is code. The last pattern brings back this
-    # workflow's own file, so a PR that edits it is tested by it.
-    paths:
-      - '**'
-      - '!**.md'
-      - '!**.docx'
-      - '!docs/**'
-      - '!.github/**'
-      - '!tools/oran_docx/**'
-      - '!tools/e3sm_l1kpm_v2/**'
-      - '!LICENSE'
-      - '!NOTICE'
-      - '!CONTRIBUTORS'
-      - '!CITATION.cff'
-      - '!REUSE.toml'
-      - '!.gitignore'
-      - '.github/workflows/e2e-topologies.yml'
+  workflow_call:
   workflow_dispatch:
-
-concurrency:
-  group: e2e-topologies-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   asn1c-cache:

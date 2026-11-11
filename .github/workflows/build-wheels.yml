@@ -6,24 +6,11 @@
 # cibuildwheel (configuration in pyproject.toml), then installed into a bare python
 # image that has no libzmq or libprotobuf, to prove the wheel carries everything.
 #
-# Runs on pull requests that touch the packaging, and is reused by tag-and-release.yml.
+# ci.yml runs it on pull requests that touch the packaging; tag-and-release.yml reuses it.
 
 name: Build libe3py wheels
 
 on:
-  pull_request:
-    paths:
-      - pyproject.toml
-      - build_libe3
-      - scripts/wheel_deps.sh
-      - cmake/**
-      - swig/**
-      - python/**
-      - src/**
-      - include/**
-      - messages/**
-      - tests/test_swig_smoke.py
-      - .github/workflows/build-wheels.yml
   workflow_call:
 
 concurrency:

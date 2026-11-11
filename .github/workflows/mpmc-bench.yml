@@ -4,21 +4,14 @@
 name: MPMC Queue Benchmark
 
 # Runs the lock-free MPMC ring-buffer benchmark and publishes the results for
-# the consolidated CI report. Gated by `paths`: it only runs when the queue's
-# core file changes (or the workflow itself), so unrelated PRs don't pay the
+# the consolidated CI report. ci.yml starts it only when a PR changes the queue
+# (include/libe3/mpmc_queue.hpp) or CI itself, so unrelated PRs don't pay the
 # benchmark cost.
 # Use the "Run workflow" button (workflow_dispatch) to run it on demand.
 
 on:
-  pull_request:
-    paths:
-      - include/libe3/mpmc_queue.hpp
-      - .github/workflows/mpmc-bench.yml
+  workflow_call:
   workflow_dispatch:
-
-concurrency:
-  group: mpmc-bench-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   benchmark:

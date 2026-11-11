@@ -16,7 +16,7 @@ name: Commit policy
 # for every required check instead of polling for them from inside this workflow.
 
 on:
-  pull_request:
+  workflow_call:
   push:
     branches:
       - main

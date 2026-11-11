@@ -11,29 +11,8 @@ name: E2E dApp Integration
 # module. The code path is still built; only the CI matrix excludes it.
 
 on:
-  pull_request:
-    # Started only when a changed file is code. The last pattern brings back this
-    # workflow's own file, so a PR that edits it is tested by it.
-    paths:
-      - '**'
-      - '!**.md'
-      - '!**.docx'
-      - '!docs/**'
-      - '!.github/**'
-      - '!tools/oran_docx/**'
-      - '!tools/e3sm_l1kpm_v2/**'
-      - '!LICENSE'
-      - '!NOTICE'
-      - '!CONTRIBUTORS'
-      - '!CITATION.cff'
-      - '!REUSE.toml'
-      - '!.gitignore'
-      - '.github/workflows/e2e-dapp-test.yml'
+  workflow_call:
   workflow_dispatch:
-
-concurrency:
-  group: e2e-dapp-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   asn1c-cache:

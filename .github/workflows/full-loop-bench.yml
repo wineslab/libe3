@@ -9,29 +9,8 @@ name: Full-loop Latency Benchmark
 # benchmark workflow.
 
 on:
-  pull_request:
-    # Started only when a changed file is code. The last pattern brings back this
-    # workflow's own file, so a PR that edits it is tested by it.
-    paths:
-      - '**'
-      - '!**.md'
-      - '!**.docx'
-      - '!docs/**'
-      - '!.github/**'
-      - '!tools/oran_docx/**'
-      - '!tools/e3sm_l1kpm_v2/**'
-      - '!LICENSE'
-      - '!NOTICE'
-      - '!CONTRIBUTORS'
-      - '!CITATION.cff'
-      - '!REUSE.toml'
-      - '!.gitignore'
-      - '.github/workflows/full-loop-bench.yml'
+  workflow_call:
   workflow_dispatch:
-
-concurrency:
-  group: full-loop-bench-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   bench:
