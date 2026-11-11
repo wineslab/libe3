@@ -34,7 +34,7 @@ void signal_handler(int) {
 void print_usage(const char* program_name) {
     std::cout << "Usage: " << program_name << " [OPTIONS]\n\n"
               << "Options:\n"
-              << "  -l, --link <layer>       Link layer: zmq, posix (default: zmq)\n"
+              << "  -l, --link <layer>       Link layer: zmq, posix, uring (default: zmq)\n"
               << "  -t, --transport <layer>  Transport layer: sctp, tcp, ipc (default: ipc)\n"
               << "  -e, --encoding <format>  Encoding format: asn1, json, protobuf (default: asn1)\n"
               << "  -r, --ran_id <id>        RAN identifier advertised in setup (default: example-ran-001)\n"
@@ -52,6 +52,7 @@ void print_usage(const char* program_name) {
 libe3::E3LinkLayer parse_link_layer(const char* str) {
     if (std::strcmp(str, "zmq") == 0) return libe3::E3LinkLayer::ZMQ;
     if (std::strcmp(str, "posix") == 0) return libe3::E3LinkLayer::POSIX;
+    if (std::strcmp(str, "uring") == 0) return libe3::E3LinkLayer::URING;
     std::cerr << "Invalid link layer: " << str << ". Using default (zmq).\n";
     return libe3::E3LinkLayer::POSIX;
 }

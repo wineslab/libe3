@@ -48,7 +48,7 @@ static void signal_handler(int) {
 static void print_usage(const char* program_name) {
     std::cout << "Usage: " << program_name << " [OPTIONS]\n\n"
               << "Options:\n"
-              << "  -l, --link <layer>       Link layer: zmq, posix (default: zmq)\n"
+              << "  -l, --link <layer>       Link layer: zmq, posix, uring (default: zmq)\n"
               << "  -t, --transport <layer>  Transport: sctp, tcp, ipc (default: ipc)\n"
               << "  -e, --encoding <format>  Encoding: asn1, json, protobuf (default: asn1)\n"
               << "  -c, --control            Send a Simple-Control every 5th indication\n"
@@ -101,6 +101,7 @@ static std::string peer_label(const std::string& dir, int offset) {
 static libe3::E3LinkLayer parse_link_layer(const char* str) {
     if (std::strcmp(str, "zmq") == 0)   return libe3::E3LinkLayer::ZMQ;
     if (std::strcmp(str, "posix") == 0) return libe3::E3LinkLayer::POSIX;
+    if (std::strcmp(str, "uring") == 0) return libe3::E3LinkLayer::URING;
     std::cerr << "Invalid link layer: " << str << " (using zmq)\n";
     return libe3::E3LinkLayer::ZMQ;
 }
