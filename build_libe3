@@ -35,6 +35,7 @@ ENABLE_ASN1=1
 ENABLE_JSON=1
 ENABLE_PROTOBUF=0
 ENABLE_SCTP=0
+ENABLE_URING=1
 ENABLE_ASAN=0
 ENABLE_TSAN=0
 ENABLE_SWIG=0
@@ -121,6 +122,11 @@ Features:
                           --install-deps does NOT install them; SCTP is optional
                           and the deployed E3 links are IPC or TCP.
   --disable-sctp          Disable the SCTP transport
+  --enable-uring          Build the io_uring link (--link uring) when it can be built: on Linux
+                          with liburing (default: ON). Without liburing the build goes on
+                          without the link. --install-deps installs liburing-dev
+                          (Debian/Ubuntu), liburing-devel (Fedora/RHEL) or liburing (Arch).
+  --disable-uring         Never build the io_uring link
   --enable-swig           Build the Python (SWIG) binding, libe3py, in build/swig to develop and
                           test it (default: OFF). It is not installed with the library: install
                           it with pip (pip install libe3py, or pip install . in this checkout)
@@ -295,6 +301,7 @@ install_dependencies() {
             cmake \
             pkg-config \
             libzmq3-dev \
+            liburing-dev \
             ninja-build \
             git \
             autoconf \
@@ -318,6 +325,7 @@ install_dependencies() {
             cmake \
             pkg-config \
             zeromq-devel \
+            liburing-devel \
             ninja-build \
             git \
             asn1c \
@@ -333,6 +341,7 @@ install_dependencies() {
             cmake \
             pkg-config \
             zeromq \
+            liburing \
             ninja \
             git \
             asn1c \
@@ -346,6 +355,7 @@ install_dependencies() {
         echo "  - C++17 compiler (gcc >= 7, clang >= 5)"
         echo "  - pkg-config"
         echo "  - libzmq (optional, for ZMQ transport)"
+        echo "  - liburing >= 2.0 (optional, Linux, for the io_uring link)"
         echo "  - ninja (optional, for faster builds)"
         exit 1
     fi
@@ -386,6 +396,7 @@ configure_cmake() {
         "-DLIBE3_ENABLE_JSON=$([ $ENABLE_JSON -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_ENABLE_PROTOBUF=$([ $ENABLE_PROTOBUF -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_ENABLE_SCTP=$([ $ENABLE_SCTP -eq 1 ] && echo ON || echo OFF)"
+        "-DLIBE3_ENABLE_URING=$([ $ENABLE_URING -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_ENABLE_ASAN=$([ $ENABLE_ASAN -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_ENABLE_TSAN=$([ $ENABLE_TSAN -eq 1 ] && echo ON || echo OFF)"
         "-DLIBE3_ENABLE_SWIG=$([ $ENABLE_SWIG -eq 1 ] && echo ON || echo OFF)"
@@ -612,6 +623,7 @@ print_summary() {
     echo "  Tests:          $([ $BUILD_TESTS -eq 1 ] && echo 'enabled' || echo 'disabled')"
     echo "  Examples:       $([ $BUILD_EXAMPLES -eq 1 ] && echo 'enabled' || echo 'disabled')"
     echo "  ZMQ Support:    $([ $ENABLE_ZMQ -eq 1 ] && echo 'enabled' || echo 'disabled')"
+    echo "  io_uring Link:  $([ $ENABLE_URING -eq 1 ] && echo 'when liburing is found' || echo 'disabled')"
     echo "  ASN.1 Encoding: $([ $ENABLE_ASN1 -eq 1 ] && echo 'enabled' || echo 'disabled')"
     echo "  AddressSan:     $([ $ENABLE_ASAN -eq 1 ] && echo 'enabled' || echo 'disabled')"
     echo "  ThreadSan:      $([ $ENABLE_TSAN -eq 1 ] && echo 'enabled' || echo 'disabled')"
@@ -713,6 +725,14 @@ main() {
                 ;;
             --disable-sctp)
                 ENABLE_SCTP=0
+                shift
+                ;;
+            --enable-uring)
+                ENABLE_URING=1
+                shift
+                ;;
+            --disable-uring)
+                ENABLE_URING=0
                 shift
                 ;;
             --disable-protobuf)
