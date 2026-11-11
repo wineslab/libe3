@@ -34,7 +34,7 @@ enum class PduClass : uint8_t {
 };
 
 /**
- * @brief Socket and admission options of the POSIX link
+ * @brief Socket and admission options of the POSIX and the io_uring link
  *
  * The ZeroMQ link ignores all of them. The defaults are those of E3Config.
  */
@@ -59,6 +59,8 @@ struct PosixOptions {
  * Derived classes:
  * - PosixE3Connector: POSIX socket-based transport (TCP, SCTP, IPC); one
  *   endpoint per dApp carries the setup, inbound and outbound traffic
+ * - UringE3Connector: the same sockets and wire as PosixE3Connector, with
+ *   the waiting and the sends done through io_uring (Linux, liburing)
  * - ZmqE3Connector: ZeroMQ-based transport
  */
 class E3Connector {
@@ -313,7 +315,7 @@ protected:
  *
  * Creates a connector instance based on the link and transport layers specified.
  *
- * @param link_layer Link layer to use (ZMQ or POSIX)
+ * @param link_layer Link layer to use (ZMQ, POSIX or URING)
  * @param transport_layer Transport layer to use (SCTP, TCP, or IPC)
  * @param setup_endpoint Endpoint for setup channel
  * @param inbound_endpoint Endpoint for inbound channel
@@ -323,11 +325,14 @@ protected:
  * @param outbound_port Port of the outbound channel (SCTP and TCP)
  * @param io_threads Number of I/O threads (for ZMQ)
  * @param role Role of the peer (RAN or dApp)
- * @param posix Socket and admission options of the POSIX link (ignored by ZMQ)
- * @return Unique pointer to created connector, nullptr on failure
+ * @param posix Socket and admission options of the POSIX and io_uring links (ignored by ZMQ)
+ * @return Unique pointer to created connector, nullptr on failure: the link was not built
+ *         (ZMQ without libzmq, URING without liburing or off Linux), or the kernel refuses
+ *         io_uring here (seccomp, kernel.io_uring_disabled, a kernel before 5.11); the
+ *         reason is logged
  *
- * The POSIX link serves everything on the setup endpoint and port, and ignores
- * the inbound and outbound ones.
+ * The POSIX and io_uring links serve everything on the setup endpoint and port, and
+ * ignore the inbound and outbound ones.
  */
 std::unique_ptr<E3Connector> create_connector(
     E3LinkLayer link_layer,
