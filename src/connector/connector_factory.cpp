@@ -11,6 +11,9 @@
 #include "zmq_connector.hpp"
 #endif
 #include "posix_connector.hpp"
+#if LIBE3_HAS_URING
+#include "uring_connector.hpp"
+#endif
 #include "libe3/logger.hpp"
 
 namespace libe3 {
@@ -52,6 +55,22 @@ std::unique_ptr<E3Connector> create_connector(
             // One endpoint serves setup, inbound and outbound traffic.
             conn = std::make_unique<PosixE3Connector>(transport_layer, setup_endpoint, setup_port, posix);
             break;
+
+        case E3LinkLayer::URING:
+#if LIBE3_HAS_URING
+            // The POSIX link's endpoint and wire. Null when the kernel refuses io_uring; it logs why.
+            conn = UringE3Connector::create(transport_layer, setup_endpoint, setup_port, posix);
+            if (!conn) {
+                return nullptr;
+            }
+            break;
+#else
+            // As for ZMQ above: the value can arrive from a configuration the build knows nothing about.
+            E3_LOG_ERROR("ConnFactory")
+                << "io_uring link layer requested but libe3 was built without it (LIBE3_ENABLE_URING=OFF, "
+                   "liburing not found, or not Linux). Use the POSIX link, which speaks the same wire.";
+            return nullptr;
+#endif
 
         default:
             E3_LOG_ERROR("ConnFactory") << "Unsupported link layer: "

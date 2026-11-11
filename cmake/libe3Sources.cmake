@@ -49,6 +49,14 @@ if(LIBE3_ENABLE_ZMQ)
     list(APPEND LIBE3_SOURCES src/connector/zmq_connector.cpp)
 endif()
 
+# The io_uring connector; uring_ring.cpp is the only file that includes <liburing.h>.
+if(LIBE3_WITH_URING)
+    list(APPEND LIBE3_SOURCES
+        src/connector/uring_connector.cpp
+        src/connector/uring_ring.cpp
+    )
+endif()
+
 # Backs latrec.h's TLS convenience API; excluded when the recorder is off, where
 # latrec.h falls back to inline no-op stubs. See docs/utilities/latrec.md.
 if(LIBE3_ENABLE_LATREC)

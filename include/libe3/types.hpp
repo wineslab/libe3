@@ -61,7 +61,8 @@ enum class EncodingFormat : uint8_t {
  */
 enum class E3LinkLayer : uint8_t {
     ZMQ = 0,     ///< ZeroMQ-based transport
-    POSIX = 1    ///< POSIX socket-based transport
+    POSIX = 1,   ///< POSIX socket-based transport
+    URING = 2    ///< The POSIX link's wire driven through io_uring (Linux, built with liburing)
 };
 
 /**
@@ -523,14 +524,15 @@ struct E3Config {
     // it would make every default-constructed config fail to initialise. The
     // POSIX connector accepts the same ZMQ-style endpoint URIs (it strips the
     // scheme), so the endpoint defaults below need no counterpart.
-    E3LinkLayer link_layer{E3LinkLayer::POSIX};            ///< Link-layer transport (ZMQ or POSIX)
+    E3LinkLayer link_layer{E3LinkLayer::POSIX};            ///< Link-layer transport (ZMQ, POSIX or URING)
 #else
-    E3LinkLayer link_layer{E3LinkLayer::ZMQ};             ///< Link-layer transport (ZMQ or POSIX)
+    E3LinkLayer link_layer{E3LinkLayer::ZMQ};             ///< Link-layer transport (ZMQ, POSIX or URING)
 #endif
     E3TransportLayer transport_layer{E3TransportLayer::IPC}; ///< Transport-layer protocol (SCTP, TCP, IPC)
     
     // Ports. The POSIX link serves everything on setup_port and ignores the other two;
-    // the ZeroMQ link uses all three.
+    // the ZeroMQ link uses all three. The io_uring link is the POSIX link's wire: whatever
+    // this structure says of the POSIX link holds for it too.
     uint16_t setup_port{9990};       ///< Port of the setup channel; the one port of the POSIX link
     uint16_t subscriber_port{9999};  ///< Port of the inbound control/subscription channel (ZeroMQ)
     uint16_t publisher_port{9991};   ///< Port of the outbound indication/publication channel (ZeroMQ)
@@ -859,12 +861,13 @@ inline const char* role_to_string(E3Role role) noexcept {
 /**
  * @brief Convert E3LinkLayer to string representation
  * @param layer Link layer
- * @return "zmq" or "posix", "unknown" for a value outside the enumeration
+ * @return "zmq", "posix" or "uring", "unknown" for a value outside the enumeration
  */
 inline const char* link_layer_to_string(E3LinkLayer layer) noexcept {
     switch (layer) {
         case E3LinkLayer::ZMQ: return "zmq";
         case E3LinkLayer::POSIX: return "posix";
+        case E3LinkLayer::URING: return "uring";
         default: return "unknown";
     }
 }
