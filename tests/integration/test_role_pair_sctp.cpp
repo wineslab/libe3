@@ -15,6 +15,9 @@
  *   - the RAN accepts payload protocol id 0 on stream 0, closes an association whose messages
  *     carry another id, requests two streams, and sets the socket buffers it was told to.
  *
+ * CTest runs it again over the io_uring link, and with a RAN of one link and a dApp of the
+ * other (link_under_test.hpp): both links put the same id and streams on the association.
+ *
  * Needs the sctp kernel module. Without it the test says so and exits with the code CTest
  * reads as "skipped" (77), unless LIBE3_REQUIRE_SCTP is set: then it fails, so that a machine
  * that is meant to run SCTP cannot pass by skipping.
@@ -24,6 +27,7 @@
  */
 
 #include "test_framework.hpp"
+#include "link_under_test.hpp"
 #include <libe3/libe3.hpp>
 #include <libe3/e3_connector.hpp>
 #include <libe3/e3_encoder.hpp>
@@ -65,10 +69,7 @@ namespace {
 
 constexpr uint32_t PPID = 0x00E3A001;
 
-uint16_t unique_port() {
-    static std::atomic<int> next{0};
-    return static_cast<uint16_t>(31000 + (getpid() % 2000) * 8 + (next.fetch_add(1) % 8));
-}
+uint16_t unique_port() { return libe3_test::free_port(); }
 
 bool wait_until(const std::function<bool()>& pred, std::chrono::milliseconds timeout) {
     const auto deadline = std::chrono::steady_clock::now() + timeout;
@@ -326,7 +327,7 @@ E3Config ran_config(uint16_t port) {
     E3Config c;
     c.role = E3Role::RAN;
     c.ran_identifier = "sctp-test-ran";
-    c.link_layer = E3LinkLayer::POSIX;
+    c.link_layer = libe3_test::ran_link();
     c.transport_layer = E3TransportLayer::SCTP;
     c.encoding = EncodingFormat::ASN1;
     c.log_level = 0;
@@ -345,6 +346,7 @@ struct DAppLog {
 
 std::unique_ptr<E3Agent> make_dapp(E3Config config, const char* name, DAppLog& log) {
     config.role = E3Role::DAPP;
+    config.link_layer = libe3_test::dapp_link();
     config.dapp_name = name;
     auto dapp = std::make_unique<E3Agent>(config);
     dapp->set_indication_handler([&log](const IndicationMessage&) {
@@ -515,7 +517,7 @@ TEST(sctp_pair_two_dapps_each_association_carries_only_its_own_indications) {
 
 TEST(sctp_ran_accepts_ppid_zero_on_stream_zero_and_requests_two_streams) {
     const uint16_t port = unique_port();
-    auto ran = create_connector(E3LinkLayer::POSIX, E3TransportLayer::SCTP, "", "", "", port, 0, 0, 1, E3Role::RAN);
+    auto ran = create_connector(libe3_test::ran_link(), E3TransportLayer::SCTP, "", "", "", port, 0, 0, 1, E3Role::RAN);
     ASSERT_TRUE(ran->setup_initial_connection() == ErrorCode::SUCCESS);
 
     // A peer that asks for ten streams gets two: the RAN's listener allows two.
@@ -549,7 +551,7 @@ TEST(sctp_ran_accepts_ppid_zero_on_stream_zero_and_requests_two_streams) {
 
 TEST(sctp_ran_closes_an_association_whose_messages_carry_another_ppid) {
     const uint16_t port = unique_port();
-    auto ran = create_connector(E3LinkLayer::POSIX, E3TransportLayer::SCTP, "", "", "", port, 0, 0, 1, E3Role::RAN);
+    auto ran = create_connector(libe3_test::ran_link(), E3TransportLayer::SCTP, "", "", "", port, 0, 0, 1, E3Role::RAN);
     ASSERT_TRUE(ran->setup_initial_connection() == ErrorCode::SUCCESS);
 
     int peer = connect_to(port, 2);
@@ -577,7 +579,7 @@ TEST(sctp_ran_closes_an_association_whose_messages_carry_another_ppid) {
 
 TEST(sctp_ran_takes_a_pdu_of_sixty_thousand_bytes_whole) {
     const uint16_t port = unique_port();
-    auto ran = create_connector(E3LinkLayer::POSIX, E3TransportLayer::SCTP, "", "", "", port, 0, 0, 1, E3Role::RAN);
+    auto ran = create_connector(libe3_test::ran_link(), E3TransportLayer::SCTP, "", "", "", port, 0, 0, 1, E3Role::RAN);
     ASSERT_TRUE(ran->setup_initial_connection() == ErrorCode::SUCCESS);
     int peer = connect_to(port, 2);
     ASSERT_TRUE(peer >= 0);
@@ -597,7 +599,8 @@ TEST(sctp_ran_takes_a_pdu_of_sixty_thousand_bytes_whole) {
     ran->dispose();
 }
 
-int main() {
+int main(int argc, char** argv) {
+    if (const int rc = libe3_test::select_links(argc, argv); rc >= 0) return rc;
     // The kernel module may be missing even when the headers are there.
     int probe = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
     if (probe < 0) {
@@ -615,7 +618,7 @@ int main() {
 
 #else  // LIBE3_ENABLE_SCTP
 
-int main() {
+int main(int, char**) {
     const char* require = std::getenv("LIBE3_REQUIRE_SCTP");
     if (require != nullptr && *require != '\0' && *require != '0') {
         std::cerr << "FAIL: SCTP is required (LIBE3_REQUIRE_SCTP) and libe3 was built without it\n";
