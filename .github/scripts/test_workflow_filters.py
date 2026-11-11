@@ -18,8 +18,7 @@ sys.path.insert(0, HERE)
 import workflow_triggers as wt  # noqa: E402
 
 # The workflows that build or test and so start only when a changed file is code.
-CODE_WORKFLOWS = ("pr-tests.yml", "e2e-dapp-test.yml", "e2e-topologies.yml", "full-loop-bench.yml",
-                  "cluster-ci.yml")
+CODE_WORKFLOWS = ("pr-tests.yml", "e2e-dapp-test.yml", "e2e-topologies.yml", "full-loop-bench.yml")
 # The pull request workflows that start for every PR. A new unfiltered workflow
 # has to be added here on purpose, because it will run on documentation PRs too.
 ALWAYS_ON = ("ci-report.yml", "commit-trailers.yml", "docs.yml")
@@ -48,7 +47,7 @@ def starting(files: list[str]) -> set[str]:
 
 
 class CodeFilters(unittest.TestCase):
-    def test_the_filters_are_identical_apart_from_the_workflow_itself(self):
+    def test_the_four_filters_are_identical_apart_from_the_workflow_itself(self):
         found = triggers()
         shared = None
         for file in CODE_WORKFLOWS:
@@ -70,7 +69,7 @@ class CodeFilters(unittest.TestCase):
     def test_a_mixed_pr_starts_them(self):
         self.assertEqual(starting(["docs/a.md", "src/a.cpp"]) & set(CODE_WORKFLOWS), set(CODE_WORKFLOWS))
 
-    def test_editing_a_workflow_starts_only_that_one_of_them(self):
+    def test_editing_a_workflow_starts_only_that_one_of_the_four(self):
         for file in CODE_WORKFLOWS:
             self.assertEqual(starting([f".github/workflows/{file}"]) & set(CODE_WORKFLOWS), {file})
 
