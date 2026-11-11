@@ -96,7 +96,7 @@ import libe3py as e3
 
 cfg = e3.E3Config()
 cfg.role = e3.E3Role_DAPP
-cfg.link_layer = e3.E3LinkLayer_ZMQ
+cfg.link_layer = e3.E3LinkLayer_ZMQ   # or E3LinkLayer_POSIX, or E3LinkLayer_URING (Linux, built with liburing)
 cfg.transport_layer = e3.E3TransportLayer_IPC
 cfg.encoding = e3.EncodingFormat_ASN1        # must match the RAN's E3Configuration
 cfg.dapp_name = "MyDApp"

@@ -276,6 +276,11 @@ The POSIX link layer uses one connection for each dApp, to one endpoint. The set
 channel, the inbound channel and the outbound channel all travel on it. The E3 Agent
 listens, and the dApp connects.
 
+The present document defines what travels on the sockets, not how an implementation
+waits for them or writes to them. An implementation may drive them with ordinary system
+calls or through an asynchronous interface of the operating system, such as io_uring on
+Linux; to a peer the two are the same link.
+
 The first E3-PDU of a connection is the SETUP REQUEST message of the dApp. Every
 later E3-PDU of the connection belongs to the dApp that sent it. A dApp that sends
 its SETUP REQUEST again, after a refusal, uses a new connection. The E3 Agent ties the

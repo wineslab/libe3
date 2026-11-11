@@ -111,6 +111,19 @@ happens later on ZeroMQ's internal I/O thread. The `SEND_DONE` to `RECV`
 segment therefore contains that hop for ZeroMQ but not for the POSIX
 connectors, and any comparison between the two shall say so.
 
+The io_uring connector returns from `send()` once the kernel has the bytes, as
+the POSIX one does (the calling thread submits the write and waits for its
+completion), so A6, A15 and the wire hops compare row by row between those two
+links. With busy polling (`LIBE3_URING_BUSY_POLL_US`) the receiving thread does
+not sleep, which is what shortens the wire hop; with a kernel submission thread
+(`LIBE3_URING_SQPOLL`) the write is issued by that thread. See
+[docs/connectors/uring.md](../connectors/uring.md).
+
+`SEND_DONE` is stamped after `send()` has returned, and a receiver that polls can have the PDU, and
+stamp `RECV`, before that: SCTP over loopback delivers inside the sender's system call, and io_uring
+completes a send on a kernel thread. Such a hop reads a little below zero (a microsecond or two);
+the benchmark reports it as it is and does not take it for a misaligned pairing.
+
 ## Return leg: dApp to RAN (`leg=ctrl_down` for control, `report_up` for reports)
 
 | # | Box | Owner | Segment |
