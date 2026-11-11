@@ -11,7 +11,7 @@ FROM ${BUILD_IMAGE} AS build
 FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
- && apt-get install -y --no-install-recommends libzmq5 libsctp1 libprotobuf32t64 \
+ && apt-get install -y --no-install-recommends libzmq5 libsctp1 libprotobuf32t64 liburing2 \
  && rm -rf /var/lib/apt/lists/* \
  && mkdir -p -m 0777 /tmp/dapps
 COPY --from=build /src/build/example_simple_dapp /usr/local/bin/example_simple_dapp

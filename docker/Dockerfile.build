@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Builds libe3, the examples, the integration tests and the latency benchmark
-# with every encoding and SCTP. The other images copy their binaries from it.
+# with every encoding, SCTP and the io_uring link (build_libe3 -I installs
+# liburing-dev). The other images copy their binaries from it.
 #
 #   docker build -f docker/Dockerfile.build -t libe3-build .
 
