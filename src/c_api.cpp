@@ -236,7 +236,7 @@ e3_agent_handle_t* e3_agent_create_with_config(const e3_config_t* config) {
         E3Config cfg;
         if (config) {
             if (config->ran_identifier) cfg.ran_identifier = config->ran_identifier;
-            if (config->link_layer >= 0 && config->link_layer <= 1)
+            if (config->link_layer >= 0 && config->link_layer <= 2)
                 cfg.link_layer = static_cast<E3LinkLayer>(config->link_layer);
             if (config->transport_layer >= 0 && config->transport_layer <= 2)
                 cfg.transport_layer = static_cast<E3TransportLayer>(config->transport_layer);

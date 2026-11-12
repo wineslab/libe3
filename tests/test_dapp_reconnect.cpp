@@ -19,6 +19,7 @@
  */
 
 #include "test_framework.hpp"
+#include "link_under_test.hpp"
 #include "libe3/libe3.hpp"
 #include "libe3/e3_agent.hpp"
 #include "libe3/types.hpp"
@@ -331,6 +332,11 @@ TEST(DAppReconnect_zmq_zeroKeepsTheDAppDown) {
 
 TEST(DAppReconnect_posix_registersWithANewRanByItself) {
     run_ran_restart(E3LinkLayer::POSIX);
+}
+
+TEST(DAppReconnect_uring_registersWithANewRanByItself) {
+    if (!libe3_test::uring_runs_here()) return;
+    run_ran_restart(E3LinkLayer::URING);
 }
 
 int main() {

@@ -21,6 +21,7 @@
  */
 
 #include "test_framework.hpp"
+#include "link_under_test.hpp"
 #include "libe3/libe3.hpp"
 #include "libe3/e3_agent.hpp"
 #include "libe3/e3_encoder.hpp"
@@ -277,6 +278,11 @@ TEST(DAppRanLoss_zmq_stoppedRanReportsConnectionLost) {
 
 TEST(DAppRanLoss_posix_stoppedRanReportsConnectionLost) {
     run_ran_loss(E3LinkLayer::POSIX);
+}
+
+TEST(DAppRanLoss_uring_stoppedRanReportsConnectionLost) {
+    if (!libe3_test::uring_runs_here()) return;
+    run_ran_loss(E3LinkLayer::URING);
 }
 
 #if LIBE3_HAS_ZMQ && defined(LIBE3_ENABLE_JSON)

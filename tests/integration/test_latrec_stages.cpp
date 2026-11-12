@@ -18,6 +18,7 @@
 #include "sm_simple/simple_service_model.hpp"
 #include "latrec_ring_reader.hpp"
 #include "test_framework.hpp"
+#include "link_under_test.hpp"
 
 #include <algorithm>
 #include <atomic>
@@ -438,12 +439,21 @@ int main() {
     // The POSIX RAN send() accepts new peers and broadcasts to all of them,
     // which the ZMQ one does not; JSON and Protobuf change what L1->L2 and
     // L4->L5 measure.
-    const Combo combos[] = {
+    // The io_uring link stamps SEND_DONE when the kernel has the bytes, as POSIX does.
+    std::vector<Combo> combos = {
         {"zmq-ipc-asn1",     E3LinkLayer::ZMQ,   E3TransportLayer::IPC, EncodingFormat::ASN1},
         {"posix-ipc-asn1",   E3LinkLayer::POSIX, E3TransportLayer::IPC, EncodingFormat::ASN1},
         {"zmq-ipc-json",     E3LinkLayer::ZMQ,   E3TransportLayer::IPC, EncodingFormat::JSON},
         {"zmq-ipc-protobuf", E3LinkLayer::ZMQ,   E3TransportLayer::IPC, EncodingFormat::PROTOBUF},
     };
+    if (libe3_test::uring_available()) {
+        combos.push_back({"uring-ipc-asn1", E3LinkLayer::URING, E3TransportLayer::IPC, EncodingFormat::ASN1});
+    } else if (libe3_test::uring_required()) {
+        std::fprintf(stderr, "FAIL: io_uring is required (LIBE3_REQUIRE_URING) and cannot be used here\n");
+        return 1;
+    } else {
+        std::printf("URING NOT RUN: this build or this kernel cannot create an io_uring ring\n");
+    }
 
     for (const Combo& c : combos) {
         const size_t before = read_ring_dir(trace_dir).size();

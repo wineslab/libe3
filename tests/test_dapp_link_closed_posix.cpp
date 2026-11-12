@@ -4,6 +4,7 @@
  *
  * A real RAN E3Agent and real dApp E3Agents over POSIX IPC. A dApp that is
  * stopped without release() closes its sockets, which is all a crash does.
+ * CTest runs it again over the io_uring link and mixed (link_under_test.hpp).
  * Properties verified:
  *   (1) the RAN removes it at once, with its idle limit off, so it is the
  *       closed connection and not the idle time that does it: no registration,
@@ -22,6 +23,7 @@
  */
 
 #include "test_framework.hpp"
+#include "link_under_test.hpp"
 #include "libe3/libe3.hpp"
 #include "libe3/e3_agent.hpp"
 #include "libe3/types.hpp"
@@ -105,7 +107,7 @@ struct Endpoints {
 E3Config make_config(E3Role role, const Endpoints& ep, uint32_t idle_s) {
     E3Config c;
     c.role                = role;
-    c.link_layer          = E3LinkLayer::POSIX;
+    c.link_layer          = libe3_test::link_for(role);
     c.transport_layer     = E3TransportLayer::IPC;
     c.setup_endpoint      = ep.setup;
     c.subscriber_endpoint = ep.sub;
@@ -241,6 +243,7 @@ TEST(DAppLinkClosed_posix_aDAppThatReleasedIsNotRemovedAgainAndAnIdIsNotTakenOve
     next->stop();
 }
 
-int main() {
+int main(int argc, char** argv) {
+    if (const int rc = libe3_test::select_links(argc, argv); rc >= 0) return rc;
     return RUN_ALL_TESTS();
 }

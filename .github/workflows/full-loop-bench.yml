@@ -6,7 +6,9 @@ name: Full-loop Latency Benchmark
 # Runs the full-loop control-loop latency benchmark (tests/integration/
 # bench_full_loop_latency.cpp) on every PR and publishes the per-phase
 # markdown table for the consolidated CI report, mirroring the MPMC queue
-# benchmark workflow.
+# benchmark workflow. It also runs the benchmark over every link (ZeroMQ,
+# POSIX, io_uring and two io_uring variants) and transport on this one runner,
+# interleaved (tools/bench_matrix.py), and reports which link is fastest.
 
 on:
   workflow_call:
@@ -39,13 +41,15 @@ jobs:
         run: |
           chmod +x ./build_libe3
           ./build_libe3 -I
+          sudo apt-get install -y libsctp-dev
 
       - name: Build Release with integration tests
         run: |
           cmake -S . -B build \
             -DCMAKE_BUILD_TYPE=Release \
             -DLIBE3_BUILD_INTEGRATION_TESTS=ON \
-            -DLIBE3_ENABLE_LATREC=ON
+            -DLIBE3_ENABLE_LATREC=ON \
+            -DLIBE3_ENABLE_SCTP=ON
           cmake --build build --target test_bench_full_loop_latency -j $(nproc)
 
       - name: Run benchmark
@@ -54,6 +58,14 @@ jobs:
           ./build/test_bench_full_loop_latency 2>/dev/null \
             | grep -v "^\[20" > bench_results.md
           cat bench_results.md
+
+      - name: Compare the links
+        run: |
+          uname -r
+          echo "kernel.io_uring_disabled=$(cat /proc/sys/kernel/io_uring_disabled 2>/dev/null || echo absent)"
+          python3 tools/bench_matrix.py --bench ./build/test_bench_full_loop_latency \
+            --links zmq,posix,uring,uring-busy,uring-sqpoll-busy --transports ipc,tcp,sctp \
+            --rounds 3 --iterations 1000 --out-md bench_matrix.md --out-csv bench_matrix.csv
 
       - name: Assemble report fragment
         if: ${{ always() }}
@@ -66,6 +78,10 @@ jobs:
             echo ""
             echo "_ubuntu-latest, Release build, ZMQ + IPC, ASN.1 APER._"
             echo ""
+            if [ -f bench_matrix.md ]; then
+              sed 's/^## /#### /; s/^### /#### /' bench_matrix.md
+              echo ""
+            fi
             echo "_These numbers are measured inside a GitHub Actions container and should be treated as an upper bound on E3AP's and the library's own latency, not a representative deployment measurement._"
           } > ci-report-full-loop.md
 

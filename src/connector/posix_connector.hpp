@@ -10,6 +10,7 @@
 #define LIBE3_POSIX_CONNECTOR_HPP
 
 #include "libe3/e3_connector.hpp"
+#include "socket_link.hpp"
 #include <atomic>
 #include <condition_variable>
 #include <cstddef>
@@ -100,25 +101,7 @@ private:
     struct Peer;
     struct Queued;
 
-    /// Which end of a connection a socket is, as the options it needs differ.
-    enum class SocketKind {
-        LISTENER,  ///< A RAN's listening socket
-        CLIENT,    ///< A dApp's socket, before it connects
-        ACCEPTED   ///< A RAN's socket for one accepted connection
-    };
-
-    /// Where the endpoint string says to listen or connect.
-    struct Target {
-        std::string host;  ///< Empty: the default (any address to listen, loopback to connect)
-        std::string port;  ///< Decimal port
-    };
-
-    Target target() const;
-    int make_socket(int family) const;
-    void tune_socket(int fd, SocketKind kind) const;
-    int listen_on(const Target& where);
-    int connect_to(const Target& where);
-    bool admit(const void* address) const;
+    socket_link::SocketSpec spec() const;
     void accept_pending();
     std::shared_ptr<Peer> find_peer(uint64_t token);
     bool pump(std::vector<uint8_t>& out, uint64_t& token, int timeout_ms);

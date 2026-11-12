@@ -206,14 +206,14 @@ e3_error_t e3_service_model_emit_control_response(
  * All string pointers are copied by the library; the caller may free them
  * after the call. Use NULL for optional strings to keep library defaults.
  *
- * Enum values: link_layer: 0=ZMQ, 1=POSIX. transport_layer: 0=SCTP, 1=TCP, 2=IPC.
+ * Enum values: link_layer: 0=ZMQ, 1=POSIX, 2=URING. transport_layer: 0=SCTP, 1=TCP, 2=IPC.
  * encoding: 0=ASN1, 1=JSON. Use -1 for link_layer, transport_layer, encoding, log_level
  * to keep defaults. Use 0 for setup_port, subscriber_port, publisher_port to keep defaults.
  * Set `set_dapp_idle_timeout` to apply `dapp_idle_timeout_s`; a zeroed struct keeps the default.
  */
 typedef struct {
     const char* ran_identifier;  ///< RAN identifier; NULL keeps the default
-    int link_layer;       ///< 0=ZMQ, 1=POSIX, -1=default
+    int link_layer;       ///< 0=ZMQ, 1=POSIX, 2=URING (io_uring), -1=default
     int transport_layer;  ///< 0=SCTP, 1=TCP, 2=IPC, -1=default
     uint16_t setup_port;       ///< Port of the setup channel (SCTP and TCP); 0 keeps the default
     uint16_t subscriber_port;  ///< Port of the subscriber channel (SCTP and TCP); 0 keeps the default

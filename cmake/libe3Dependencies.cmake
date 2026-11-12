@@ -67,6 +67,29 @@ if(LIBE3_ENABLE_SCTP)
     endif()
 endif()
 
+# Optional: liburing, for the io_uring link. Auto: a missing liburing, or a system other than
+# Linux, leaves the link out with a status line instead of failing the configure.
+set(LIBE3_WITH_URING OFF CACHE INTERNAL "The io_uring link is built")
+if(LIBE3_ENABLE_URING)
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        message(STATUS "io_uring link: not built (io_uring is Linux only)")
+    else()
+        find_package(PkgConfig QUIET)
+        if(PkgConfig_FOUND)
+            pkg_check_modules(URING QUIET IMPORTED_TARGET liburing>=2.0)
+        endif()
+        if(URING_FOUND)
+            set(LIBE3_WITH_URING ON CACHE INTERNAL "The io_uring link is built")
+            message(STATUS "io_uring link: built (liburing ${URING_VERSION})")
+        else()
+            message(STATUS "io_uring link: not built (liburing >= 2.0 not found; install liburing-dev "
+                           "or liburing-devel, or configure with -DLIBE3_ENABLE_URING=OFF to silence this)")
+        endif()
+    endif()
+else()
+    message(STATUS "io_uring link: not built (LIBE3_ENABLE_URING=OFF)")
+endif()
+
 # Optional: Google Benchmark for the integration micro-benchmarks
 # (dev-only; never linked into the shipped library)
 if(LIBE3_BUILD_INTEGRATION_TESTS)

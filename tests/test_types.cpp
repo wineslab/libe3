@@ -193,6 +193,8 @@ TEST(E3Config_zmq) {
 TEST(E3LinkLayer_to_string) {
     ASSERT_STREQ(link_layer_to_string(E3LinkLayer::ZMQ), "zmq");
     ASSERT_STREQ(link_layer_to_string(E3LinkLayer::POSIX), "posix");
+    ASSERT_STREQ(link_layer_to_string(E3LinkLayer::URING), "uring");
+    ASSERT_EQ(static_cast<int>(E3LinkLayer::URING), 2);  // the C API and the Python binding pass the number
 }
 
 TEST(E3TransportLayer_to_string) {

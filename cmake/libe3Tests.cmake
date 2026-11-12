@@ -44,6 +44,49 @@ set(LIBE3_ZMQ_ONLY_TESTS
     setup_bad_request
 )
 
+# Tests that drive the io_uring connector itself (it includes src/connector/uring_connector.hpp):
+# built only where the io_uring link is (LIBE3_WITH_URING, see libe3Dependencies.cmake).
+set(LIBE3_URING_ONLY_TESTS
+    uring_connector
+)
+
+# The POSIX and the io_uring link speak the same wire, so these tests of the one-endpoint wire
+# run once per pair of links: both POSIX (the plain test), both io_uring, and each mixed pair.
+# The binary takes --ran-link/--dapp-link (tests/link_under_test.hpp) and exits 77, which CTest
+# reports as skipped, where the kernel refuses io_uring; LIBE3_REQUIRE_URING turns that into a
+# failure. Unit tests here; the integration ones are in LIBE3_LINK_MATRIX_INTEGRATION_TESTS.
+set(LIBE3_LINK_MATRIX_TESTS
+    dapp_bound_to_connection_posix
+    dapp_link_closed_posix
+    role_aware_connector_posix
+)
+set(LIBE3_LINK_MATRIX_INTEGRATION_TESTS
+    role_pair_posix
+    role_pair_sctp
+)
+
+# Adds <target>_uring, <target>_uring_ran_posix_dapp and <target>_posix_ran_uring_dapp.
+function(libe3_add_link_matrix target_name)
+    if(NOT LIBE3_WITH_URING)
+        return()
+    endif()
+    get_test_property(${target_name} LABELS _labels)
+    foreach(_pair "uring;uring;_uring" "uring;posix;_uring_ran_posix_dapp" "posix;uring;_posix_ran_uring_dapp")
+        list(GET _pair 0 _ran)
+        list(GET _pair 1 _dapp)
+        list(GET _pair 2 _suffix)
+        add_test(NAME ${target_name}${_suffix}
+                 COMMAND ${target_name} --ran-link ${_ran} --dapp-link ${_dapp})
+        # A latrec build leaves a ring per agent thread in the build tree (pre-faulted, 8 MiB by
+        # default) and these runs read none of them: small rings keep the matrix from piling up disk.
+        set_tests_properties(${target_name}${_suffix} PROPERTIES SKIP_RETURN_CODE 77
+                             ENVIRONMENT "LATREC_ENTRIES_LOG2=12")
+        if(_labels)
+            set_tests_properties(${target_name}${_suffix} PROPERTIES LABELS "${_labels}")
+        endif()
+    endforeach()
+endfunction()
+
 # E2SM-DAPP codec tests (tests/test_e2sm_dapp_*.cpp). They link libe3::e2sm_dapp
 # alone, which is the point: the codec must work without libe3, so only the
 # link-coexist test also links libe3. Each of encode/decode/roundtrip/c_api is
@@ -84,6 +127,10 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
     endif()
     if(NOT LIBE3_ENABLE_ZMQ AND simple_name IN_LIST LIBE3_ZMQ_ONLY_TESTS)
         message(STATUS "Skipping test_${simple_name}: ZeroMQ support disabled")
+        continue()
+    endif()
+    if(NOT LIBE3_WITH_URING AND simple_name IN_LIST LIBE3_URING_ONLY_TESTS)
+        message(STATUS "Skipping test_${simple_name}: io_uring link not built")
         continue()
     endif()
     if(simple_name MATCHES "^e2sm_dapp_")
@@ -137,7 +184,18 @@ foreach(test_src IN LISTS LIBE3_TEST_SOURCES)
             LIBE3_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures")
     endif()
 
+    if(simple_name IN_LIST LIBE3_URING_ONLY_TESTS OR simple_name STREQUAL "socket_link")
+        # They reach into the connectors' own headers: the ring settings in effect, the framing.
+        target_include_directories(${target_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    endif()
+
     add_test(NAME ${target_name} COMMAND ${target_name})
+    if(simple_name IN_LIST LIBE3_URING_ONLY_TESTS)
+        set_tests_properties(${target_name} PROPERTIES SKIP_RETURN_CODE 77)
+    endif()
+    if(simple_name IN_LIST LIBE3_LINK_MATRIX_TESTS)
+        libe3_add_link_matrix(${target_name})
+    endif()
 endforeach()
 
 # Integration tests in tests/integration/ are opt-in via
@@ -200,6 +258,9 @@ if(LIBE3_BUILD_INTEGRATION_TESTS AND LIBE3_ENABLE_ASN1)
         if(simple_name MATCHES "sctp")
             set_tests_properties(${target_name} PROPERTIES SKIP_RETURN_CODE 77)
         endif()
+        if(simple_name IN_LIST LIBE3_LINK_MATRIX_INTEGRATION_TESTS)
+            libe3_add_link_matrix(${target_name})
+        endif()
     endforeach()
 endif()
 
@@ -219,6 +280,16 @@ if(Python3_Interpreter_FOUND)
                      "${CMAKE_CURRENT_SOURCE_DIR}/include/libe3/latrec.h")
 else()
     message(STATUS "Skipping test_latrec_reader: no Python 3 interpreter")
+endif()
+
+# --- the link comparison of the full-loop benchmark ---------------------------
+# tools/bench_matrix.py names the fastest link in the CI report; its parsing and its verdict are
+# checked on canned benchmark output, so they do not depend on a benchmark run.
+if(Python3_Interpreter_FOUND)
+    add_test(NAME test_bench_matrix
+             COMMAND ${Python3_EXECUTABLE}
+                     "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_bench_matrix.py"
+                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/bench_matrix.py")
 endif()
 
 # --- latrec2csv against injected ground truth ---------------------------------
