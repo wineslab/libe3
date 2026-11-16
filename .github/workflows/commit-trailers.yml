@@ -150,6 +150,9 @@ jobs:
           base="${{ github.event.pull_request.base.sha }}"
           head="${{ github.event.pull_request.head.sha }}"
           set -e
+          # The dependencies installed above are those of the checked-out build_libe3. A
+          # commit with another build_libe3 installs its own before it is built.
+          deps="$(sha256sum < build_libe3)"
           # A commit that changes only documentation cannot break the build, so it
           # is not built. The script is copied out first: checking out an older
           # commit would remove it from the work tree.
@@ -163,6 +166,10 @@ jobs:
             echo "::group::Building commit $sha"
             git -c advice.detachedHead=false checkout --quiet --detach "$sha"
             chmod +x ./build_libe3 || true
+            if [ "$(sha256sum < build_libe3)" != "$deps" ]; then
+              ./build_libe3 -I
+              deps="$(sha256sum < build_libe3)"
+            fi
             ./build_libe3 -c -d build -j "$(nproc)" -r -t
             echo "::endgroup::"
           done
