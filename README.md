@@ -351,6 +351,37 @@ private:
 agent.register_sm(std::make_unique<MyKpmServiceModel>());
 ```
 
+### The io_uring link
+
+Set `link_layer = E3LinkLayer::URING` (`--link uring` in the examples, `2` in the C API). It speaks the POSIX
+wire, so it works against a RAN or a dApp on `posix`. It needs a libe3 built with liburing (`liburing-dev`),
+Linux 5.11 or later, and a kernel that lets the process create a ring. Where it does not, `create_connector`
+returns null and the log says which of these is missing; nothing falls back to another link.
+
+With nothing else set it performs like the POSIX link. The faster settings, busy polling and a kernel
+submission thread, are opt-in because they spend CPU for latency and the fastest of them is the slowest
+on a machine with few cores; the page below says which to use when:
+[docs/connectors/uring.md](docs/connectors/uring.md#which-setting-to-use-and-what-it-costs).
+
+Red Hat Enterprise Linux 9 and OpenShift's nodes ship with io_uring switched off for everyone
+(`kernel.io_uring_disabled=2`). The least that has to be opened is one group, for the length of the run, as root
+on the host or in a privileged pod:
+
+```bash
+GID=61234                                   # a group nothing else on the node uses
+sysctl -w kernel.io_uring_group=$GID        # set it first
+sysctl -w kernel.io_uring_disabled=1        # 0 = everyone, 1 = root and that group, 2 = nobody
+
+setpriv --reuid=$UID --regid=$GID --groups=$GID --inh-caps=-all --bounding-set=-all --no-new-privs \
+    ./example_simple_agent --link uring --transport tcp --encoding asn1    # a member of the group needs no capability
+
+sysctl -w kernel.io_uring_disabled=2 kernel.io_uring_group=-1              # close it again: the values you read before
+```
+
+The setting is the host kernel's, not the container's, and it applies to every container on the node. Ring
+options, the checks that it took, a `trap` that closes it when a run fails, pods, and persisting it are in
+[docs/connectors/uring.md](docs/connectors/uring.md#enabling-io_uring-on-a-host-that-disables-it).
+
 ### Notes on Simulation / Local Testing
 
 The library exposes IPC endpoints by default (see `E3Config` defaults) so

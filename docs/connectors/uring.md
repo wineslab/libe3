@@ -206,6 +206,58 @@ which keeps the two links the same; `test_socket_link` reads the values back fro
 The tests that need io_uring say `URING NOT RUN` and exit 77 (CTest's "skipped") where it is
 refused, unless `LIBE3_REQUIRE_URING` is set: then they fail, so that CI cannot pass by skipping.
 
+## Enabling io_uring on a host that disables it
+
+Red Hat Enterprise Linux 9 and the OpenShift nodes built on it ship `kernel.io_uring_disabled=2`, and
+some other distributions do too. While it is 2, nothing can create a ring, not even root, and the
+connector says so and refuses to start (`create_connector` returns null; the POSIX link needs none of this).
+The setting belongs to the host kernel and is not namespaced: a pod cannot carry it in its
+`securityContext.sysctls`, and whoever changes it changes it for every container on the node. So the
+least exposure is to allow one group, for as long as the run takes:
+
+```sh
+# 1. What the host has now. 0 = everyone, 1 = root and the members of io_uring_group, 2 = nobody.
+cat /proc/sys/kernel/io_uring_disabled /proc/sys/kernel/io_uring_group      # RHEL: 2 and -1
+
+# 2. Open it for one group (as root on the host, or in a privileged pod). Set the group first.
+GID=61234                                   # a group nothing else on the node uses
+sysctl -w kernel.io_uring_group=$GID
+sysctl -w kernel.io_uring_disabled=1
+
+# 3. Run the RAN or the dApp as a member of that group. It needs no capability.
+setpriv --reuid=$UID --regid=$GID --groups=$GID --inh-caps=-all --bounding-set=-all --no-new-privs \
+    ./example_simple_agent --link uring --transport tcp --encoding asn1
+
+# 4. Close it again: the values step 1 printed.
+sysctl -w kernel.io_uring_disabled=2 kernel.io_uring_group=-1
+```
+
+(`sysctl`, from procps, writes `/proc/sys`; `echo 1 > /proc/sys/kernel/io_uring_disabled` does the same.)
+Do step 4 from a `trap` when the run is a script, so that a failed run does not leave the node open:
+
+```sh
+orig_dis=$(cat /proc/sys/kernel/io_uring_disabled); orig_grp=$(cat /proc/sys/kernel/io_uring_group)
+trap 'echo $orig_dis > /proc/sys/kernel/io_uring_disabled; echo $orig_grp > /proc/sys/kernel/io_uring_group' EXIT INT TERM HUP
+```
+
+To check that it took, and that it stayed closed to everyone else: run `LIBE3_REQUIRE_URING=1
+./test_link_availability` as a member of the group (it passes) and as another user (it says `URING NOT RUN`
+and exits 77). After the run, read the two files from an unprivileged process on the node, a pod for
+instance, to see the original values are back.
+
+- **In a pod.** Writing `/proc/sys` needs a privileged container, which on OpenShift needs the
+  `privileged` security context constraint and, where Pod Security is enforced, a namespace that allows
+  `privileged`. A privileged container is not under seccomp either, so there is nothing else to change.
+  A pod that is not privileged cannot write the sysctl, so the node has to be opened from outside it; its
+  own seccomp profile then has to allow `io_uring_setup`, `io_uring_enter` and `io_uring_register`
+  (`Unconfined`, or a `Localhost` profile that does).
+- **To keep it open across reboots**, put the two lines in a file under `/etc/sysctl.d/`, or in whatever
+  your platform uses for node settings (on OpenShift a MachineConfig); not tried here. That makes the
+  allowance permanent for the group, so keep the group narrow.
+- **What it costs in exposure.** io_uring is a large part of the kernel's attack surface, which is why it
+  is off by default; the group form limits it to the processes you put in the group (and to root, as the
+  kernel documents `1`). Everything else on the node stays refused.
+
 ## Ring options
 
 Read from the environment when the connector is made (`E3Interface::init()`, or each restart of a
@@ -265,7 +317,8 @@ settings with each other on that runner, not as a measurement of a deployment.
   as well; one per connector, so two for a RAN and a dApp in one process.
 - In a container: allow io_uring in the seccomp profile. In Kubernetes and OpenShift that is a
   `seccompProfile` of type `Localhost` (or `Unconfined`), and on a node whose kernel ships
-  `kernel.io_uring_disabled=2`, a node-level sysctl change.
+  `kernel.io_uring_disabled=2`, a node-level sysctl change (see "Enabling io_uring on a host that
+  disables it" above for the least that has to be opened).
 - An SM control handler that makes socket calls with a timeout on the RAN's inbound thread should
   retry on `EINTR` (decision 6), or the deployment should use the kernel submission thread.
 
