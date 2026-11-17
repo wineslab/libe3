@@ -102,6 +102,7 @@ extern "C" {
  * to avoid collisions with C++ symbols.
  */
 enum e3_error_code_e {
+/// One enumerator per LIBE3_ERROR_CODE_LIST entry, named E3_<name>.
 #define X(name, val) E3_##name = val,
     LIBE3_ERROR_CODE_LIST
 #undef X
