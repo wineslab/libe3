@@ -3,9 +3,8 @@
 
 name: Docs
 
-# Doxygen must report no warning in a file the pull request changes (issue #132),
-# counting every undocumented member, parameter and return value
-# (LIBE3_DOCS_STRICT). Gaps in files it does not change are listed, not failed on.
+# Doxygen must report no warning anywhere in the tree (issue #132), counting every
+# undocumented member, parameter and return value (LIBE3_DOCS_STRICT).
 # Builds only the `docs` target, so it does not compile the library.
 #
 # The job always runs and reports success, and only its steps are skipped when no
@@ -62,11 +61,9 @@ jobs:
             -DLIBE3_BUILD_TESTS=OFF -DLIBE3_BUILD_EXAMPLES=OFF
           cmake --build build --target docs
 
-      - name: Fail on Doxygen warnings in the changed files
+      - name: Fail on any Doxygen warning
         if: steps.filter.outputs.docs == 'true'
-        run: |
-          python3 .github/scripts/check_docs_warnings.py build/docs/doxygen_warnings.txt ci-report-docs.md \
-            --base "${{ github.event.pull_request.base.sha }}" --head "${{ github.event.pull_request.head.sha }}"
+        run: python3 .github/scripts/check_docs_warnings.py build/docs/doxygen_warnings.txt ci-report-docs.md
 
       - name: Upload the full warning list
         if: ${{ always() && hashFiles('build/docs/doxygen_warnings.txt') != '' }}

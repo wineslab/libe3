@@ -23,6 +23,17 @@ namespace libe3 {
  */
 class ZmqE3Connector : public E3Connector {
 public:
+    /**
+     * @brief Create a connector; nothing is opened until the setup_* calls.
+     * @param transport_layer TCP or IPC
+     * @param setup_endpoint endpoint of the setup socket (IPC path)
+     * @param inbound_endpoint endpoint of the inbound socket (IPC path)
+     * @param outbound_endpoint endpoint of the outbound socket (IPC path)
+     * @param setup_port port of the setup socket (TCP)
+     * @param inbound_port port of the inbound socket (TCP)
+     * @param outbound_port port of the outbound socket (TCP)
+     * @param io_threads number of ZeroMQ I/O threads
+     */
     ZmqE3Connector(
         E3TransportLayer transport_layer,
         const std::string& setup_endpoint,
@@ -34,6 +45,7 @@ public:
         size_t io_threads
     );
     
+    /// Closes the sockets and the ZeroMQ context.
     ~ZmqE3Connector() override;
 
     ErrorCode setup_initial_connection() override;

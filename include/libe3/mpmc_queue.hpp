@@ -74,6 +74,7 @@ public:
         }
     }
 
+    /// Destroys the slots and frees the buffer; no thread may use the queue any more.
     ~MpmcQueue() {
         for (size_t i = 0; i < capacity_; ++i) {
             buffer_[i].~Slot();
@@ -89,6 +90,7 @@ public:
 
     /**
      * @brief Try to enqueue an item (non-blocking, move semantics).
+     * @param data item to enqueue, moved from only when the call returns true
      * @return true on success; false if the queue is full.
      */
     bool try_push(T&& data) {
@@ -120,6 +122,8 @@ public:
 
     /**
      * @brief Try to enqueue an item (copy overload).
+     * @param data item to enqueue, copied
+     * @return true on success; false if the queue is full.
      */
     bool try_push(const T& data) {
         T copy = data;
@@ -164,6 +168,8 @@ public:
      *
      * Due to concurrent modifications this value may be slightly stale,
      * but is always in [0, capacity()].
+     *
+     * @return the number of items that look queued
      */
     size_t size_approx() const noexcept {
         size_t h = head_.load(std::memory_order_relaxed);
@@ -171,10 +177,16 @@ public:
         return h >= t ? h - t : 0;
     }
 
-    /** @brief Return true if the queue appears empty (approximate). */
+    /**
+     * @brief Tell whether the queue appears empty (approximate).
+     * @return true when no item looks queued
+     */
     bool empty_approx() const noexcept { return size_approx() == 0; }
 
-    /** @brief Actual slot capacity (always a power of two). */
+    /**
+     * @brief Actual slot capacity.
+     * @return the number of slots, always a power of two
+     */
     size_t capacity() const noexcept { return capacity_; }
 
 private:

@@ -30,6 +30,7 @@ namespace libe3 {
 
 /**
  * @brief Get library version string
+ * @return the version, e.g. "0.5.0", as a static NUL-terminated string
  */
 inline const char* version() noexcept {
     return LIBE3_VERSION_STRING;
