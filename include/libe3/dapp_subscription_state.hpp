@@ -33,6 +33,13 @@
 
 namespace libe3 {
 
+/**
+ * @brief What a dApp knows about its session with the RAN: the identifier it was
+ *        assigned, the RAN functions on offer and its active subscriptions.
+ *
+ * Every helper takes the lock. The public members are for callers that hold
+ * `mu` themselves.
+ */
 class DAppSubscriptionState {
 public:
     DAppSubscriptionState() = default;
@@ -43,6 +50,9 @@ public:
     /**
      * @brief Store the assignment from a SetupResponse.
      * Called once after a positive SetupResponse arrives.
+     *
+     * @param dapp_id identifier the RAN assigned to this dApp
+     * @param functions RAN functions the RAN advertised
      */
     void record_setup_response(uint32_t dapp_id,
                                std::vector<RanFunctionDef> functions) {
@@ -114,6 +124,7 @@ public:
 
     /**
      * @brief Remove the subscription for a given RAN function.
+     * @param ran_function_id RAN function whose subscription is removed
      * @return true if a subscription was removed; false if none existed.
      */
     bool remove_subscription_by_rf(uint32_t ran_function_id) {
@@ -131,6 +142,7 @@ public:
 
     /**
      * @brief Remove the subscription with a given subscription ID.
+     * @param subscription_id ID of the subscription to remove
      * @return true if a subscription was removed; false if none existed.
      */
     bool remove_subscription_by_id(uint32_t subscription_id) {
@@ -148,6 +160,7 @@ public:
 
     /**
      * @brief Snapshot of active subscription IDs.
+     * @return the IDs of the active subscriptions, in no particular order
      */
     std::vector<uint32_t> active_subscriptions() const {
         std::lock_guard<std::mutex> lock(mu_);
@@ -162,6 +175,7 @@ public:
 
     /**
      * @brief Snapshot of RAN function IDs this dApp is currently subscribed to.
+     * @return the RAN function IDs, in no particular order
      */
     std::vector<uint32_t> subscribed_ran_functions() const {
         std::lock_guard<std::mutex> lock(mu_);
@@ -176,6 +190,8 @@ public:
 
     /**
      * @brief Look up subscription ID for a RAN function.
+     * @param ran_function_id RAN function to look up
+     * @return the subscription ID, or nullopt when there is no subscription
      */
     std::optional<uint32_t> subscription_id_for(uint32_t ran_function_id) const {
         std::lock_guard<std::mutex> lock(mu_);
@@ -191,6 +207,7 @@ public:
     // directly; the helpers above already take the lock.
     // -----------------------------------------------------------------------
 
+    /// Guards every member below; hold it when reading or writing them directly.
     mutable std::mutex mu;
 
     /// Assigned by the RAN in SetupResponse. nullopt until setup completes.

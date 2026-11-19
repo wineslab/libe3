@@ -56,6 +56,7 @@ class Logger {
 public:
     /**
      * @brief Get the singleton logger instance
+     * @return the one logger of the process
      */
     static Logger& instance() {
         static Logger logger;
@@ -64,6 +65,7 @@ public:
 
     /**
      * @brief Set the log level
+     * @param level most verbose level that is still logged
      */
     void set_level(LogLevel level) noexcept {
         level_.store(level, std::memory_order_relaxed);
@@ -71,6 +73,7 @@ public:
 
     /**
      * @brief Set the log level from integer
+     * @param level a LogLevel value, 0 (NONE) to 5 (TRACE)
      */
     void set_level(int level) noexcept {
         level_.store(static_cast<LogLevel>(level), std::memory_order_relaxed);
@@ -78,6 +81,7 @@ public:
 
     /**
      * @brief Get current log level
+     * @return the most verbose level that is still logged
      */
     LogLevel level() const noexcept {
         return level_.load(std::memory_order_relaxed);
@@ -88,6 +92,8 @@ public:
      *
      * If set, all log messages will be forwarded to this callback
      * instead of being written to stderr.
+     *
+     * @param callback receiver of every message that passes the level
      */
     void set_callback(LogCallback callback) {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -107,6 +113,8 @@ public:
      *
      * If set, logs are written to this file instead of stderr
      * when no callback is configured.
+     *
+     * @param path file to append to; empty closes the current file and goes back to stderr
      */
     void set_log_file(const std::string& path) {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -128,6 +136,8 @@ public:
 
     /**
      * @brief Check if a level should be logged
+     * @param level level of the message about to be written
+     * @return true when the current level lets the message through
      */
     bool should_log(LogLevel level) const noexcept {
         return static_cast<int>(level) <= static_cast<int>(level_.load(std::memory_order_relaxed));
@@ -135,6 +145,9 @@ public:
 
     /**
      * @brief Log a message
+     * @param level level of the message, dropped when above the current level
+     * @param component component that logs, e.g. "E3Agent"
+     * @param message text to log
      */
     void log(LogLevel level, const std::string& component, const std::string& message) {
         if (!should_log(level)) {
@@ -194,15 +207,27 @@ private:
  */
 class LogStream {
 public:
+    /**
+     * @brief Start a message.
+     * @param level level of the message
+     * @param component component that logs
+     */
     LogStream(LogLevel level, std::string component)
         : level_(level), component_(std::move(component)) {}
     
+    /// Writes the message, unless nothing was streamed into it.
     ~LogStream() {
         if (!message_.str().empty()) {
             Logger::instance().log(level_, component_, message_.str());
         }
     }
 
+    /**
+     * @brief Append a value to the message.
+     * @tparam T any type that `std::ostream` can print
+     * @param value value to append
+     * @return this stream, so appends chain
+     */
     template<typename T>
     LogStream& operator<<(const T& value) {
         message_ << value;
@@ -218,14 +243,21 @@ private:
 } // namespace libe3
 
 // Convenience macros for logging
+
+/// Stream a message at `level` for `component`; nothing is built when the level is filtered out.
 #define E3_LOG(level, component) \
     if (::libe3::Logger::instance().should_log(level)) \
         ::libe3::LogStream(level, component)
 
+/// Stream a error message for `component`.
 #define E3_LOG_ERROR(component) E3_LOG(::libe3::LogLevel::ERROR, component)
+/// Stream a warn message for `component`.
 #define E3_LOG_WARN(component)  E3_LOG(::libe3::LogLevel::WARN, component)
+/// Stream a info message for `component`.
 #define E3_LOG_INFO(component)  E3_LOG(::libe3::LogLevel::INFO, component)
+/// Stream a debug message for `component`.
 #define E3_LOG_DEBUG(component) E3_LOG(::libe3::LogLevel::DEBUG, component)
+/// Stream a trace message for `component`.
 #define E3_LOG_TRACE(component) E3_LOG(::libe3::LogLevel::TRACE, component)
 
 #endif // LIBE3_LOGGER_HPP

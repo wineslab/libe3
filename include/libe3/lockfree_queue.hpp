@@ -75,6 +75,7 @@ public:
 
     /**
      * @brief Enqueue an item (non-blocking, lock-free).
+     * @param item item to enqueue, moved into the queue
      * @return ErrorCode::SUCCESS on success.
      * @return ErrorCode::BUFFER_TOO_SMALL if the ring buffer is full.
      * @return ErrorCode::NOT_INITIALIZED if shutdown() has been called.
@@ -107,7 +108,7 @@ public:
     /**
      * @brief Dequeue an item, blocking indefinitely until one is available.
      *
-     * Returns a default-constructed T{} if shutdown() is called while waiting.
+     * @return the item, or a default-constructed T{} if shutdown() is called while waiting.
      */
     T pop() {
         T item;
@@ -143,6 +144,7 @@ public:
 
     /**
      * @brief Dequeue an item with a maximum wait duration.
+     * @param timeout longest time to wait for an item
      * @return The item on success; std::nullopt on timeout or shutdown.
      */
     std::optional<T> pop(std::chrono::milliseconds timeout) {
@@ -191,13 +193,22 @@ public:
         return std::nullopt;
     }
 
-    /** @brief Return true if the queue appears empty (approximate). */
+    /**
+     * @brief Tell whether the queue appears empty (approximate).
+     * @return true when no item looks queued
+     */
     bool empty() const { return ring_.empty_approx(); }
 
-    /** @brief Return the approximate number of items in the queue. */
+    /**
+     * @brief Count the queued items (approximate).
+     * @return the number of items that look queued
+     */
     size_t size() const { return ring_.size_approx(); }
 
-    /** @brief Return the ring buffer capacity (always a power of two). */
+    /**
+     * @brief Get the ring buffer capacity.
+     * @return the capacity, always a power of two
+     */
     size_t capacity() const noexcept { return ring_.capacity(); }
 
     /** @brief Discard all items currently in the queue. */
@@ -221,7 +232,10 @@ public:
         E3_LOG_DEBUG(LOG_TAG) << "Queue shutdown signalled";
     }
 
-    /** @brief Return true if shutdown() has been called. */
+    /**
+     * @brief Tell whether shutdown() has been called.
+     * @return true after shutdown(), until rearm()
+     */
     bool is_shutdown() const {
         return shutdown_.load(std::memory_order_relaxed);
     }
