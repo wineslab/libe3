@@ -72,3 +72,16 @@ if(LIBE3_BUILD_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_swig_lat
         LABELS "swig"
     )
 endif()
+
+# A refused subscription reaches Python with the RAN's cause and text. It runs a
+# RAN agent (serving nothing) and a DAppSession in one process over ZMQ IPC.
+if(LIBE3_BUILD_TESTS AND LIBE3_ENABLE_ZMQ AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_swig_refusal.py")
+    add_test(
+        NAME test_swig_refusal
+        COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_swig_refusal.py"
+    )
+    set_tests_properties(test_swig_refusal PROPERTIES
+        ENVIRONMENT "PYTHONPATH=${LIBE3_SWIG_OUTPUT_DIR}"
+        LABELS "swig"
+    )
+endif()

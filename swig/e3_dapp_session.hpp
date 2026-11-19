@@ -76,6 +76,11 @@ enum E3EventKind {
  *
  * A subscription response also carries the grant: `ran_function_id` (0 = not
  * reported), `periodicity`, and the id lists, valid only when their has_* flag is set.
+ *
+ * A negative subscription response, setup response or message ack also carries why:
+ * `cause` (a @ref libe3::Cause value, -1 when the RAN gave none, as Aerial does) and
+ * `detail` (the RAN's text, empty when there is none). A dApp reads them to decide what
+ * to do, for example to drop a control the RAN function does not offer and subscribe again.
  */
 struct E3Event {
     int kind{E3_EVENT_NONE};        ///< one of @ref E3EventKind
@@ -88,6 +93,8 @@ struct E3Event {
     int disconnect_reason{-1};      ///< disconnect: 0=released by RAN, 1=connection lost, -1=n/a
     std::vector<uint8_t> payload;   ///< opaque E3SM bytes (indication / xApp control)
     long periodicity{-1};           ///< least microseconds the RAN keeps between two indications (subscription response), -1 = not reported
+    int cause{-1};                  ///< why a negative response was refused, a libe3::Cause value; -1 = none given
+    std::string detail;             ///< the RAN's text for the refusal; empty = none given
     bool has_telemetry_granted{false};          ///< telemetry_granted was reported
     bool has_control_granted{false};            ///< control_granted was reported
     std::vector<uint32_t> telemetry_granted;    ///< granted telemetry ids

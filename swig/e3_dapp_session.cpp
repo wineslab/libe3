@@ -27,6 +27,13 @@ inline std::optional<uint32_t> opt_u32(int v) {
     if (v < 0) return std::nullopt;
     return static_cast<uint32_t>(v);
 }
+
+// Copy why a response was negative onto the event; a positive one has neither.
+inline void set_refusal(E3Event& ev, const std::optional<libe3::Cause>& cause,
+                        const std::optional<std::string>& detail) {
+    if (cause) ev.cause = static_cast<int>(*cause);
+    if (detail) ev.detail = *detail;
+}
 }  // namespace
 
 /// What a DAppSession holds: the agent, the event queue and the setup snapshot.
@@ -108,6 +115,7 @@ DAppSession::DAppSession(libe3::E3Config config, std::size_t queue_capacity) {
         ev.response_code = static_cast<int>(r.response_code);
         ev.ran_function_id = r.ran_function_identifier.value_or(0);
         ev.periodicity = r.periodicity ? static_cast<long>(*r.periodicity) : -1;
+        set_refusal(ev, r.cause, r.detail);
         if (r.telemetry_identifier_list) {
             ev.has_telemetry_granted = true;
             ev.telemetry_granted = *r.telemetry_identifier_list;
@@ -130,6 +138,7 @@ DAppSession::DAppSession(libe3::E3Config config, std::size_t queue_capacity) {
         ev.dapp_id = r.dapp_identifier.value_or(0);
         ev.request_id = r.request_id;
         ev.response_code = static_cast<int>(r.response_code);
+        set_refusal(ev, r.cause, r.detail);
         impl->enqueue(std::move(ev));
     });
 
@@ -145,6 +154,7 @@ DAppSession::DAppSession(libe3::E3Config config, std::size_t queue_capacity) {
         ev.kind = E3_EVENT_MESSAGE_ACK;
         ev.request_id = ack.request_id;
         ev.response_code = static_cast<int>(ack.response_code);
+        set_refusal(ev, ack.cause, ack.detail);
         impl->enqueue(std::move(ev));
     });
 }

@@ -51,6 +51,15 @@ inbound thread under the GIL (serialises dispatch, deadlock-prone if Python
 re-enters libe3); a *per-message* poll pays one GIL round-trip per message and
 caps throughput with no latency benefit over batching.
 
+## Refusals
+
+A negative subscription response, setup response or message ack arrives as an `E3Event`
+with `response_code == 1`, and `cause` and `detail` say why: `cause` is a `libe3py.Cause_*`
+value (for example `Cause_UNSUPPORTED_IDENTIFIER` when a control id is not one the RAN
+function advertises) or -1 when the RAN gave none, as Aerial does, and `detail` is its text
+or empty. libe3py does not raise: the dApp reads the event and decides, for example to drop
+the control and subscribe again.
+
 ## Lifecycle
 
 ```
