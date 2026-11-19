@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.1</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.2</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -194,7 +194,7 @@ Procedure</h2>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md288"></a>
 Successful operation</h2>
 <p>The SUBSCRIPTION RESPONSE message has <span class="tt">responseCode</span> "positive" and holds <span class="tt">subscriptionId</span>. It also lists the telemetry identifiers and control identifiers that the E3 Agent grants, the RAN function identifier and the interval that it grants. The dApp keeps the subscription identifier. A grant list that is missing means that the E3 Agent does not report the grant. A grant list that is empty means that it grants nothing.</p>
-<p>A second SUBSCRIPTION REQUEST message for the same RAN function from the same dApp returns the existing subscription identifier and "positive". It does not create a second subscription.</p>
+<p>A second SUBSCRIPTION REQUEST message for the same RAN function from the same dApp returns the existing subscription identifier and "positive". It does not create a second subscription and it does not change the existing one: the grant lists and the interval in the response are those that the E3 Agent holds, not those of the second request. A dApp that wants other lists or another interval sends a SUBSCRIPTION DELETE message and then a new SUBSCRIPTION REQUEST message. That is the only way that all known E3 Agents handle alike. A second request that the E3 Agent refuses leaves the existing subscription as it was.</p>
 <p>The E3 Agent sends the interval in microseconds. The value 0 means one indication for each event. A missing interval means that the service model sets the rate.</p>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md289"></a>
 Unsuccessful operation</h2>
