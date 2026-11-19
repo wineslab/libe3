@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,14 +92,14 @@ $(function(){initNavTree('md_docs_2e3sm_2spectrum_207-examples.html','',''); });
   <div class="headertitle"><div class="title">E3SM-SPEC: example message exchange </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md626"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md627"></a></p>
 <p>A complete exchange of the Spectrum service model in APER and in JSON, from the setup to the PRB block that an xApp asked for.</p>
 <p>This is Annex A of the specification. It is informative.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md627"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md628"></a>
 General</h1>
 <p>This annex gives examples of the use of the service model. Each E3AP message and each service model message was encoded in APER with the grammar of [1] and of clause 8, decoded back and compared with the input. The JSON forms follow the JSON encoding of [1] and clause 8. The identifiers, names and values are examples.</p>
 <p>Hexadecimal dumps show the offset of the first octet of each line, then 16 octets.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md628"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md629"></a>
 PRB block loop with an xApp</h1>
 <p>A dApp on the host of the RAN subscribes to RAN function 1. It receives the configuration of the uplink carrier and the sensing indications, finds four PRBs occupied and reports them. An xApp asks to block them, and the dApp sends the PRB block control. Table B-1 lists the messages.</p>
 <p>Table: Messages of the example</p>
@@ -127,7 +127,7 @@ PRB block loop with an xApp</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">10  </td><td class="markdownTableBodyNone">RAN to dApp  </td><td class="markdownTableBodyNone">E3 MESSAGE ACK  </td><td class="markdownTableBodyNone">14  </td><td class="markdownTableBodyNone">none  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md629"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md630"></a>
 Step 1: E3 SETUP REQUEST</h2>
 <p>The dApp registers. The message has no service model payload.</p>
 <p>The message in JSON:</p>
@@ -145,7 +145,7 @@ Step 1: E3 SETUP REQUEST</h2>
 <div class="line">0010  2e 30 3c 73 70 65 63 74 72 75 6d 2d 73 65 6e 73</div>
 <div class="line">0020  69 6e 67 20 30 2e 31 2e 30 34 65 78 61 6d 70 6c</div>
 <div class="line">0030  65 2d 76 65 6e 64 6f 72</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md630"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md631"></a>
 Step 2: E3 SETUP RESPONSE</h2>
 <p>The RAN lists RAN function 1 with the telemetry identifiers 1 to 5 and the control identifiers 1 and 2.</p>
 <p>The RAN function data in APER has 104 octets:</p>
@@ -191,7 +191,7 @@ Step 2: E3 SETUP RESPONSE</h2>
 <div class="line">0080  62 6c 6f 63 6b 20 61 6e 64 20 73 65 6e 73 69 6e</div>
 <div class="line">0090  67 20 70 6f 6c 69 63 79 20 63 6f 6e 74 72 6f 6c</div>
 </div><!-- fragment --><p>The octets 56 to 159 of the message are the RAN function data, unchanged.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md631"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md632"></a>
 Step 3: E3 SUBSCRIPTION REQUEST</h2>
 <p>The dApp asks for the five telemetry identifiers and for the PRB block control. It sets no <span class="tt">periodicity</span>, so it receives one sensing indication for each sensing publish.</p>
 <p>The message in JSON:</p>
@@ -207,7 +207,7 @@ Step 3: E3 SUBSCRIPTION REQUEST</h2>
 </div><!-- fragment --><p>The message in APER has 32 octets:</p>
 <div class="fragment"><div class="line">0000  40 0b 08 18 74 2a 6c 91 e1 42 40 10 00 02 00 00</div>
 <div class="line">0010  00 05 00 00 00 01 00 02 00 03 00 04 00 01 00 00</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md632"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md633"></a>
 Step 4: E3 SUBSCRIPTION RESPONSE</h2>
 <p>The RAN grants the request. The service model starts and creates the sensing ring.</p>
 <p>The message in JSON:</p>
@@ -227,7 +227,7 @@ Step 4: E3 SUBSCRIPTION RESPONSE</h2>
 <div class="fragment"><div class="line">0000  40 33 08 18 74 2a 6c 91 e5 12 d0 27 80 0b 00 02</div>
 <div class="line">0010  00 00 00 00 05 00 00 00 01 00 02 00 03 00 04 00</div>
 <div class="line">0020  01 00 00 03 00 02 00 00</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md633"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md634"></a>
 Step 5: E3 INDICATION MESSAGE, cell configuration</h2>
 <p>The uplink carrier has 273 PRBs at 30 kHz, starts at point A, and point A is NR-ARFCN 620000, that is 3300 MHz. The TDD pattern has a period of 10 slots, so a frame of 20 slots holds it twice. The RAN sends this indication about once a second.</p>
 <p>The indication in APER has 31 octets:</p>
@@ -260,7 +260,7 @@ Step 5: E3 INDICATION MESSAGE, cell configuration</h2>
 <div class="line">0020  09 75 e0 13 09 44 44 44 44 44 44 44 53 55 55 00</div>
 <div class="line">0030  01</div>
 </div><!-- fragment --><p>The octets 18 to 48 of the message are the indication, unchanged.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md634"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md635"></a>
 Step 6: E3 INDICATION MESSAGE, sensing</h2>
 <p>The scheduler published three sensing ranges for slot 8 of frame 513, an uplink slot, and the RAN wrote them into ring slot 17. The <span class="tt">timestamp</span> of the indication is on the monotonic clock of the RAN host. The <span class="tt">timestamp</span> of the E3AP message is on the realtime clock (UTC) [1]. The two are not compared.</p>
 <p>The indication in APER has 32 octets:</p>
@@ -295,7 +295,7 @@ Step 6: E3 INDICATION MESSAGE, sensing</h2>
 <div class="line">0030  11 03</div>
 </div><!-- fragment --><p>The octets 18 to 49 of the message are the indication, unchanged.</p>
 <p>The dApp reads ring slot 17 at octet offset 64 + 17 x 2072 = 35288 of the region. It checks that the <span class="tt">sfn</span> and the <span class="tt">slot</span> of the ring slot are 513 and 8, then reads the first three of its sensing ranges.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md635"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md636"></a>
 Step 7: E3 dApp REPORT</h2>
 <p>The dApp found PRBs 120 to 123 occupied and reports them with a new <span class="tt">sequenceId</span>, 41. The RAN does not decode the report. It relays the octets to the xApp.</p>
 <p>The dApp report in APER has 21 octets:</p>
@@ -324,7 +324,7 @@ Step 7: E3 dApp REPORT</h2>
 <div class="line">0010  00 28 00 14 80 08 18 74 2a 6c 9a 2a 3b 00 00 00</div>
 <div class="line">0020  04 00 78 00 79 00 7a 00 7b</div>
 </div><!-- fragment --><p>The octets 20 to 40 of the message are the dApp report, unchanged.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md636"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md637"></a>
 Step 8: E3 xApp CONTROL ACTION</h2>
 <p>The xApp asks to block the four PRBs. The RAN relays its control with the <span class="tt">sequenceId</span> 41 of the report. The <span class="tt">timestamp</span> of the xApp control is on the realtime clock of the xApp host.</p>
 <p>The xApp control in APER has 21 octets:</p>
@@ -353,7 +353,7 @@ Step 8: E3 xApp CONTROL ACTION</h2>
 <div class="line">0010  00 28 00 14 80 08 18 74 2a 6c 9a e1 56 00 00 00</div>
 <div class="line">0020  04 00 78 00 79 00 7a 00 7b</div>
 </div><!-- fragment --><p>The octets 20 to 40 of the message are the xApp control, unchanged.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md637"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md638"></a>
 Step 9: E3 dApp CONTROL ACTION</h2>
 <p>The dApp sends the complete list of PRBs to block, with control identifier 1 and the <span class="tt">sequenceId</span> 41 of the xApp control.</p>
 <p>The dApp control in APER has 11 octets:</p>
@@ -381,7 +381,7 @@ Step 9: E3 dApp CONTROL ACTION</h2>
 <div class="line">0010  00 00 00 28 00 0a 00 00 04 00 78 00 79 00 7a 00</div>
 <div class="line">0020  7b</div>
 </div><!-- fragment --><p>The octets 22 to 32 of the message are the dApp control, unchanged.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md638"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md639"></a>
 Step 10: E3 MESSAGE ACK</h2>
 <p>The RAN has installed the block in the scheduler.</p>
 <p>The message in JSON:</p>
@@ -394,7 +394,7 @@ Step 10: E3 MESSAGE ACK</h2>
 <div class="line">}</div>
 </div><!-- fragment --><p>The message in APER has 14 octets:</p>
 <div class="fragment"><div class="line">0000  40 37 08 18 74 2a 6c 9a f8 39 60 50 0d 00</div>
-</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md639"></a>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md640"></a>
 Apply outcome</h1>
 <p>The RAN tells the xApp when the block of the procedure with <span class="tt">sequenceId</span> 41 is in effect. The E2 control outcome carries the apply outcome. It has no E3AP message and no JSON form, so this example shows the APER encoding only.</p>
 <p>Table: Values of the apply outcome</p>

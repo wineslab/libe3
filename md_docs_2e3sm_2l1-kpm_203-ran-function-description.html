@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,8 +92,8 @@ $(function(){initNavTree('md_docs_2e3sm_2l1-kpm_203-ran-function-description.htm
   <div class="headertitle"><div class="title">RAN function description </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md403"></a></p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md404"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md404"></a></p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md405"></a>
 Description</h1>
 <p>The E3 Agent describes the RAN function of the present document in one entry of the RAN function list of the SETUP RESPONSE message (E3-RanFunctionDefinition, clause 6.6 of [1]). Table 7-1 gives the content of the entry.</p>
 <p>Table: Content of the RAN function definition</p>
@@ -109,7 +109,7 @@ Description</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">ranFunctionData</span>  </td><td class="markdownTableBodyNone">The RAN FUNCTION DATA IE of clause 8.2.2.1, encoded as clause 8.5 defines.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md405"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md406"></a>
 RAN function identity</h1>
 <p>Table: Identity of E3SM-L1-KPM</p>
 <table class="markdownTable">
@@ -124,9 +124,9 @@ RAN function identity</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Description  </td><td class="markdownTableBodyNone">Free text, for example <span class="tt">L1-KPM: post-FFT IQ, PUSCH and SRS telemetry</span>  </td><td class="markdownTableBodyNone"><span class="tt">description</span> of the RAN FUNCTION DATA IE  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md406"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md407"></a>
 Telemetry identifiers</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md407"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md408"></a>
 General</h2>
 <p>A telemetry identifier names one stream of the service model. The dApp lists the identifiers in the SUBSCRIPTION REQUEST message. The E3 Agent grants them as clause 6.6.2 defines. Each identifier maps to one field of the INDICATION DATA IE, of the CELL DATA IE or of the UE DATA IE.</p>
 <p>The identifiers are allocated as follows.</p>
@@ -136,7 +136,7 @@ General</h2>
 <li><span class="tt">1000</span> to <span class="tt">65535</span>: additional identifiers. Clause 7.3.5 allocates <span class="tt">1000</span>. The other values are reserved.</li>
 </ul>
 <p>The tables of clauses 7.3.2 to 7.3.5 give, for each identifier, the name of the stream, the scope, the data type in the stream descriptor, and the meaning. The name of the stream is the JSON key of its field and the <span class="tt">streamId</span> of its stream descriptor. The ASN.1 field of each identifier and its range are given in clause 8.2.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md408"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md409"></a>
 Shared identifiers</h2>
 <p>The identifiers of Table 7-3 are present on the PUSCH path and on the SRS path.</p>
 <p>Table: Shared telemetry identifiers</p>
@@ -160,7 +160,7 @@ Shared identifiers</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">78  </td><td class="markdownTableBodyNone"><span class="tt">timestamp_tai</span>  </td><td class="markdownTableBodyNone">Slot  </td><td class="markdownTableBodyNone">uint64  </td><td class="markdownTableBodyNone">Start of the slot on the air interface, derived from <span class="tt">sfn</span> and <span class="tt">slot</span> and the time synchronization of the RAN node. Nanoseconds since 1970-01-01T00:00:00 TAI.  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md409"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md410"></a>
 PUSCH path identifiers</h2>
 <p>The identifiers of Table 7-4 are present only on the PUSCH path. A value "of the UE
 group" is the same for every UE of the group (clause 3.1).</p>
@@ -246,7 +246,7 @@ group" is the same for every UE of the group (clause 3.1).</p>
 <blockquote class="doxtable">
 <p>NOTE: A RAN node measures <span class="tt">noiseVar</span> and <span class="tt">sinr</span> either before or after equalization. The <span class="tt">description</span> of the stream descriptor of ID 19 and ID 39 should say which. </p>
 </blockquote>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md410"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md411"></a>
 SRS path identifiers</h2>
 <p>The identifiers of Table 7-5 are present only on the SRS path. The SRS parameters are those of the SRS resource of the UE [7], [10].</p>
 <p>Table: SRS path telemetry identifiers</p>
@@ -322,7 +322,7 @@ SRS path identifiers</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">77  </td><td class="markdownTableBodyNone"><span class="tt">srs_prg_size</span>  </td><td class="markdownTableBodyNone">UE  </td><td class="markdownTableBodyNone">uint16  </td><td class="markdownTableBodyNone">Number of PRBs in one PRG.  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md411"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md412"></a>
 Additional identifiers</h2>
 <p>Table: Additional telemetry identifiers</p>
 <table class="markdownTable">
@@ -333,7 +333,7 @@ Additional identifiers</h2>
 </table>
 <p>The <span class="tt">validSymbolMask</span> follows the TDD configuration of the cell. All bits are set for FDD and for a slot that is uplink only. In a slot that mixes downlink and uplink, the downlink and guard symbols have their bit clear. The shared memory streams of identifiers 1 and 44 hold every symbol of their range, whatever the mask. In a mixed slot, the samples of a downlink symbol hold the transmit signal of the RAN node that leaks into its receiver. A dApp shall ignore the samples of a symbol whose bit is clear. Bits 14 and 15 are not used. A dApp that receives no <span class="tt">validSymbolMask</span> for a cell should treat every symbol of the slot as an uplink symbol.</p>
 <p>Examples with a normal CP: <span class="tt">0x3FFF</span> for an uplink slot; <span class="tt">0x3000</span> for a slot with 10 downlink, 2 guard and 2 uplink symbols. With an extended CP the slot has 12 symbols and an uplink slot gives <span class="tt">0x0FFF</span>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md412"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md413"></a>
 Shared memory streams</h1>
 <p>Six identifiers name shared memory streams. Table 7-7 lists them. The CELL DATA IE carries a shared memory reference for each of them. To read a stream, a dApp needs the values of the locator identifiers of the table. The E3 Agent does not add a locator identifier that the dApp has not requested.</p>
 <p>Table: Shared memory streams</p>
@@ -353,7 +353,7 @@ Shared memory streams</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">49  </td><td class="markdownTableBodyNone"><span class="tt">srs_rb_snr</span>  </td><td class="markdownTableBodyNone">IEEE 754 binary32  </td><td class="markdownTableBodyNone">one UE, one slot  </td><td class="markdownTableBodyNone">50, 51, 76  </td><td class="markdownTableBodyNone">Annex A.6.6  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md413"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md414"></a>
 Control identifiers</h1>
 <p>Table: Control identifiers</p>
 <table class="markdownTable">
@@ -363,7 +363,7 @@ Control identifiers</h1>
 <td class="markdownTableBodyNone">1  </td><td class="markdownTableBodyNone">Set Subscription Data  </td><td class="markdownTableBodyNone">CONTROL DATA IE, alternative <span class="tt">setSubscriptionData</span>  </td><td class="markdownTableBodyNone">clause 6.6.4  </td></tr>
 </table>
 <p>The values <span class="tt">2</span> to <span class="tt">65535</span> are reserved.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md414"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md415"></a>
 Supported E3AP messages and service model IEs</h1>
 <p>Table: E3AP fields that carry the IEs of the present document</p>
 <table class="markdownTable">

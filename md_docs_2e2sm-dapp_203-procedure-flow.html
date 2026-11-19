@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_203-procedure-flow.html','',''); })
   <div class="headertitle"><div class="title">E2SM-DAPP: procedure flow </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md67"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md68"></a></p>
 <p>This chapter describes how an xApp learns which dApps exist, subscribes, receives reports, sends a control and gets the acknowledge. It places every E2SM-DAPP message on the E2AP message that carries it.</p>
 <p>The index is <a class="el" href="dir_24c5afd111e6aa944685a569bf5db165.html">README.md</a>. The field lists are in <a class="el" href="md_docs_2e2sm-dapp_202-ie-mapping.html">02-ie-mapping.md</a>. The E2-E3 loop and its box numbers (<span class="tt">A1</span> to <span class="tt">A20</span>, <span class="tt">B1</span> to <span class="tt">B19</span>) are defined in <a class="el" href="md_docs_2control-loops_2path-a-e3-loop.html">../control-loops/path-a-e3-loop.md</a> and <a class="el" href="md_docs_2control-loops_2path-b-e2-e3-loop.html">../control-loops/path-b-e2-e3-loop.md</a>. Code references for each step are in <a class="el" href="md_docs_2e2sm-dapp_2integrator-guide.html">integrator-guide.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md68"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md69"></a>
 Roles</h1>
 <p>Table: Roles in the E2SM-DAPP flow</p>
 <table class="markdownTable">
@@ -111,7 +111,7 @@ Roles</h1>
 <td class="markdownTableBodyNone"><b>xApp</b>  </td><td class="markdownTableBodyNone">An application on the RIC, for example a decision engine  </td><td class="markdownTableBodyNone">E2SM-DAPP, wrapped in E2AP by the RIC  </td></tr>
 </table>
 <p>The E2 RAN function id of E2SM-DAPP is <b>255</b>. All E2SM-DAPP traffic is RIC Subscription, RIC Indication, RIC Control and the RAN function advertisement. No dApp-to-RIC path bypasses the RAN.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md69"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md70"></a>
 Messages on the flow</h1>
 <p>Table: E2AP messages that carry E2SM-DAPP content</p>
 <table class="markdownTable">
@@ -144,10 +144,10 @@ Messages on the flow</h1>
 </table>
 <p>The RAN shall not send a RIC Control Failure for E2SM-DAPP. Every control ends in a RIC Control Acknowledge, even a control that the RAN refused or that timed out.</p>
 <p>E2SM-DAPP uses no other E2AP procedure. In particular it has no RIC Query, no insert and no policy. The reasons are in <a class="el" href="md_docs_2e2sm-dapp_202-ie-mapping.html">02-ie-mapping.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md70"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md71"></a>
 Discovery: how an xApp learns the dApp ids</h1>
 <p>An xApp needs a <span class="tt">dapp-id</span> and an E3 RAN function id for the control header. Both come from the <b>dApp E3 subscription map</b>. The map lists the dApps connected to the RAN, each with the E3 RAN functions it has subscribed to. The map reaches the xApp in three ways.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md71"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md72"></a>
 In the RAN function definition</h2>
 <p>The map is the optional <span class="tt">dappE3Subscriptions</span> field of the report item (style 1) and of the control item (style 1) in the RAN function definition. The field list is in <a class="el" href="md_docs_2e2sm-dapp_202-ie-mapping.html">02-ie-mapping.md</a>.</p>
 <p>Table: How the definition reaches the xApp</p>
@@ -172,7 +172,7 @@ In the RAN function definition</h2>
 <li>If no dApp has a subscribed function, the RAN shall omit <span class="tt">dappE3Subscriptions</span>. The RAN shall not send an empty list in the definition, because some encoders cannot encode it.</li>
 <li>An xApp shall treat an absent field and an empty list in the same way: no dApp is connected.</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md72"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md73"></a>
 When the set of dApps changes</h2>
 <p>When a dApp connects or disconnects, the RAN does two things on the thread of the E3 agent.</p>
 <ol type="1">
@@ -180,17 +180,17 @@ When the set of dApps changes</h2>
 <li><b>Format 2 indication (R2).</b> For every style-2 subscription, the RAN sends a RIC Indication with header format 2 and message format 2. The message holds the <b>current</b> map. The list holds every dApp that has at least one function. The list can be <b>empty</b>: all dApps left.</li>
 </ol>
 <p>The revision in the RIC Service Update starts at <span class="tt">1</span> and increases by one per update. The E2 Setup Request already announced revision <span class="tt">1</span>, so the first update repeats it. See <a class="el" href="md_docs_2e2sm-dapp_201-identity-and-registration.html">01-identity-and-registration.md</a>.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md73"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md74"></a>
 In every report header</h2>
 <p>Each style-1 indication names the <span class="tt">dapp-id</span> that sent the report (indication header format 1). An xApp that only answers reports does not need the map. It shall echo the <span class="tt">dapp-id</span> and the <span class="tt">ran-function-id</span> of the header that it just received. A decision engine that stores the <span class="tt">dapp-id</span> with each detection and puts it in the control follows this method.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md74"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md75"></a>
 What discovery does not do</h2>
 <ul>
 <li><b>Subscribing to style 2 does not return the current map.</b> The RAN only records the RIC request id. The first format 2 indication arrives at the next dApp connect or disconnect. To learn the current map, an xApp reads it from the definition, or subscribes before the dApps start.</li>
 <li><b>No initial indication exists</b> for style 1. Reports flow when dApps send them.</li>
 <li><b>A cached definition goes stale.</b> An xApp that caches the decoded definition does not see a later RIC Service Update. This does not matter for an xApp that takes the <span class="tt">dapp-id</span> from the reports.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md75"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md76"></a>
 Subscription: pairing the xApp with the report stream</h1>
 <p>E2SM-DAPP has no per-dApp subscription. A subscription picks a <b>report style</b> and receives that style's indications from <b>every</b> dApp.</p>
 <p>Table: Subscription steps</p>
@@ -216,7 +216,7 @@ Subscription: pairing the xApp with the report stream</h1>
 <li>The RAN shall admit the single action when the action definition has style 1 or 2.</li>
 </ul>
 <p><b>Pairing with a dApp happens at control time, not at subscription time.</b> The xApp chooses a <span class="tt">(dapp-id, ran-function-id)</span> pair from what it learned during discovery and puts it in the control header. The RAN does not check that the dApp exists or has subscribed to that function before it relays the control. The RAN only learns whether its E3 library accepted the call.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md76"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md77"></a>
 Indication delivery (report up)</h1>
 <p>This is the report-up leg of <a href="../control-loops/path-b-e2-e3-loop.md#report-up-leg-legreport_up">Path B</a>, boxes <span class="tt">B1</span> to <span class="tt">B4</span>, entered from <span class="tt">A20</span>.</p>
 <p>Table: Report-up boxes</p>
@@ -245,10 +245,10 @@ Indication delivery (report up)</h1>
 <li>A style-2 indication follows the same path with R2 and a different trigger (see Discovery). It has no <span class="tt">A20</span>: the RAN generates it from the E3 subscription map.</li>
 <li>A RIC side that cannot decode the inner payload of a format 1 message, or that meets an unknown format, can fail.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md77"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md78"></a>
 Control relay and the deferred acknowledge</h1>
 <p>This covers boxes <span class="tt">B5</span> to <span class="tt">B19</span>.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md78"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md79"></a>
 Policy down: from the xApp to the dApp</h2>
 <p>Table: Policy-down boxes</p>
 <table class="markdownTable">
@@ -277,7 +277,7 @@ Policy down: from the xApp to the dApp</h2>
 <li>If the <span class="tt">sequence-id</span> is absent or <span class="tt">0</span>, the RAN shall acknowledge at once and shall not apply the control. The control cannot be matched to a procedure.</li>
 <li>If the table of pending controls is full, or the E3 send fails, the RAN shall acknowledge at once and shall not apply the control.</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md79"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md80"></a>
 Mitigation: from the dApp back to the air</h2>
 <p>Table: Mitigation boxes</p>
 <table class="markdownTable">
@@ -294,7 +294,7 @@ Mitigation: from the dApp back to the air</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">A mask replaced before any tick ran  </td><td class="markdownTableBodyNone">The RAN retires the control as <em>superseded</em>. The control is installed and has no on-air instant.  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md80"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md81"></a>
 The E2 acknowledge is deferred to B19</h2>
 <p><b>The RAN shall send the RIC Control Acknowledge when the mitigation lands (B19).</b> It shall not send it when it receives the request (B7). An acknowledge sent at <span class="tt">B7</span> would say only that the request was forwarded. It would leave before the dApp has seen the control and long before any mask exists. A reader could not take it as completion.</p>
 <p>Table: Steps of the deferred acknowledge</p>
@@ -326,7 +326,7 @@ The E2 acknowledge is deferred to B19</h2>
 <td class="markdownTableBodyNone">E2 agent pending-control timeout  </td><td class="markdownTableBodyNone">200 ms  </td><td class="markdownTableBodyNone">The timer would send an acknowledge without an outcome. The reference E2 agent never starts the sweep that runs it, so only the RAN timer is in effect.  </td></tr>
 </table>
 <p>The RAN timer shall stay shorter than the E2 agent timer. The RAN then gives up first, and the acknowledge still carries information.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md81"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md82"></a>
 The mitigation figure</h2>
 <p>The xApp computes detection-to-mitigation from numbers that all come from the RAN side clock, <span class="tt">CLOCK_REALTIME</span> at the gNB:</p>
 <div class="fragment"><div class="line">origin_ts_ns   dApp report timestamp, inside the report payload (Spectrum-DAppReportData.timestamp)</div>
@@ -336,7 +336,7 @@ The mitigation figure</h2>
 <div class="line">mitigation_latency_ns = on_air_ts_ns   - origin_ts_ns</div>
 <div class="line">install_latency_ns    = installed_ts_ns - origin_ts_ns</div>
 </div><!-- fragment --><p>The xApp adds no clock of its own to these two values. It moves the numbers and subtracts them. The fields <span class="tt">control_sent_ts_ns</span> and <span class="tt">de_read_ts_ns</span> in the same record use the xApp's own clock, and the xApp uses them only against each other. See <a class="el" href="md_docs_2e2sm-dapp_205-semantics-and-constraints.html">05-semantics-and-constraints.md</a> for why the dApp, gNB and payload stamps can be subtracted and the latency recorder's stamps cannot.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md82"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md83"></a>
 The loop on the boxes</h1>
 <p>This section shows the same boxes as <a href="../control-loops/path-b-e2-e3-loop.md#box-order">Path B</a>, with each E2SM-DAPP message on the box that produces or consumes it. Solid boxes are in the E2-E3 loop. The three E2SM-DAPP-only boxes on the right are discovery and teardown, outside the loop.</p>
 <div class="fragment"><div class="line">flowchart LR</div>
@@ -386,7 +386,7 @@ The loop on the boxes</h1>
 <div class="line">    B16 -.-&gt;|E3 wire| B17</div>
 <div class="line">    B19 -.-&gt;|E2 wire| B4</div>
 </div><!-- fragment --><p>The last edge goes back to the xApp. The acknowledge arrives at the same process that decided (<span class="tt">B4</span>) and closes the procedure.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md83"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md84"></a>
 The sequence-id chain</h2>
 <p>One identifier joins every hop. It starts at the dApp. No component reassigns it.</p>
 <div class="fragment"><div class="line">flowchart LR</div>
@@ -415,7 +415,7 @@ The sequence-id chain</h2>
 <td class="markdownTableBodyNone">outcome  </td><td class="markdownTableBodyNone"><span class="tt">ControlOutcome-Format1.sequence-id</span>  </td><td class="markdownTableBodyNone">set by the RAN; also the key under which the E2 agent parked the request  </td></tr>
 </table>
 <p>The two E3 messages in the middle use an id of <span class="tt">1..4294967295</span>. The <span class="tt">SequenceId</span> of E2SM-DAPP is an unbounded <span class="tt">INTEGER</span>. A value of <span class="tt">0</span> or an absent field means "no procedure". The RAN cannot match such a control, and it acknowledges the control at once without applying it.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md84"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md85"></a>
 The same flow as a sequence</h2>
 <div class="fragment"><div class="line">sequenceDiagram</div>
 <div class="line">    participant D as dApp</div>
@@ -442,7 +442,7 @@ The same flow as a sequence</h2>
 <div class="line">    D--&gt;&gt;R: dApp connects or leaves</div>
 <div class="line">    R-&gt;&gt;C: RIC Service Update (fresh definition)</div>
 <div class="line">    R-&gt;&gt;C: RIC Indication, style 2 (header F2, message F2 with the map)</div>
-</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md85"></a>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md86"></a>
 Differences between implementations</h1>
 <p>Implementations share the E2SM-DAPP messages and differ in what they do around them. Two kinds exist. Implementation A has both the E2 side and the E3 side in the RAN. Implementation B has the E2 side only, and it reaches the E3 side through two interfaces: a source of indications and a sink for controls. The code references and the product names are in <a class="el" href="md_docs_2e2sm-dapp_2integrator-guide.html">integrator-guide.md</a>.</p>
 <p>Table: Behavior of implementation B</p>

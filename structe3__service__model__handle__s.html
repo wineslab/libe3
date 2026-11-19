@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -131,6 +131,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a16540e54d119a941a2fc531a928c8131"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop the SM processing.  <br /></td></tr>
 <tr class="memitem:a89e98c39a2307701b741313faae30265" id="r_a89e98c39a2307701b741313faae30265"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a89e98c39a2307701b741313faae30265">is_running</a> () const override</td></tr>
 <tr class="memdesc:a89e98c39a2307701b741313faae30265"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if SM is currently running.  <br /></td></tr>
+<tr class="memitem:af61968c22be7622710a5252d9f000712" id="r_af61968c22be7622710a5252d9f000712"><td class="memItemLeft" align="right" valign="top">std::optional&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af61968c22be7622710a5252d9f000712">granted_periodicity</a> (uint32_t requested_us) const override</td></tr>
+<tr class="memdesc:af61968c22be7622710a5252d9f000712"><td class="mdescLeft">&#160;</td><td class="mdescRight">The least time between two indications that this SM keeps for a subscription.  <br /></td></tr>
 <tr class="memitem:a5593452cfbbd466c6bcac6f8a8e325fd" id="r_a5593452cfbbd466c6bcac6f8a8e325fd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5593452cfbbd466c6bcac6f8a8e325fd">handle_control_action</a> (uint32_t request_message_id, const <a class="el" href="structlibe3_1_1DAppControlAction.html">DAppControlAction</a> &amp;action) override</td></tr>
 <tr class="memdesc:a5593452cfbbd466c6bcac6f8a8e325fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process a control action from a dApp.  <br /></td></tr>
 <tr class="memitem:ae2f834f8b32ad8732abaa4718aced2f1" id="r_ae2f834f8b32ad8732abaa4718aced2f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae2f834f8b32ad8732abaa4718aced2f1">emit_pdu</a> (<a class="el" href="structlibe3_1_1Pdu.html">Pdu</a> &amp;&amp;pdu)</td></tr>
@@ -164,6 +166,8 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:ad5f77dd0bd785f368f2962bbbd05a11f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called to ask whether the SM runs.  <br /></td></tr>
 <tr class="memitem:a1becfeb1e328b5e10fc1a21ca352f751" id="r_a1becfeb1e328b5e10fc1a21ca352f751"><td class="memItemLeft" align="right" valign="top"><a class="el" href="c__api_8h.html#a33b166f895d0bd44df009228d8ecbec2">e3_sm_process_control_cb</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1becfeb1e328b5e10fc1a21ca352f751">sm_process_control</a> = nullptr</td></tr>
 <tr class="memdesc:a1becfeb1e328b5e10fc1a21ca352f751"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called for each control action.  <br /></td></tr>
+<tr class="memitem:aa6065ac812b0afbe3b2c503e23c56502" id="r_aa6065ac812b0afbe3b2c503e23c56502"><td class="memItemLeft" align="right" valign="top"><a class="el" href="c__api_8h.html#a8fa570e51aa24f92a16d8f3991897cf8">e3_sm_granted_periodicity_cb</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa6065ac812b0afbe3b2c503e23c56502">sm_granted_periodicity</a> = nullptr</td></tr>
+<tr class="memdesc:aa6065ac812b0afbe3b2c503e23c56502"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asked for the interval it keeps.  <br /></td></tr>
 <tr class="memitem:a3cbbb4947a3024d5f9adc7c61358a247" id="r_a3cbbb4947a3024d5f9adc7c61358a247"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3cbbb4947a3024d5f9adc7c61358a247">sm_context</a> = nullptr</td></tr>
 <tr class="memdesc:a3cbbb4947a3024d5f9adc7c61358a247"><td class="mdescLeft">&#160;</td><td class="mdescRight">Passed to every callback.  <br /></td></tr>
 <tr class="memitem:a9622e81e2ea89ddddea1d0141519ca5c" id="r_a9622e81e2ea89ddddea1d0141519ca5c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9622e81e2ea89ddddea1d0141519ca5c">transferred_to_agent</a> = false</td></tr>
@@ -223,7 +227,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00057">57</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00058">58</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -252,10 +256,11 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get control IDs supported by this SM. </p>
+<dl class="section return"><dt>Returns</dt><dd>The control identifiers the SM supports </dd></dl>
 
 <p>Implements <a class="el" href="classlibe3_1_1ServiceModel.html#ad8da981e910f19aa2730c7a40cc74158">libe3::ServiceModel</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00085">85</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00086">86</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -287,7 +292,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1ServiceModel.html#a509d11a31eaa21d4ecba7c270c288f21">libe3::ServiceModel</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00091">91</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00092">92</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -323,7 +328,46 @@ Additional Inherited Members</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS if it was queued </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00131">131</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00137">137</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+
+</div>
+</div>
+<a id="af61968c22be7622710a5252d9f000712" name="af61968c22be7622710a5252d9f000712"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af61968c22be7622710a5252d9f000712">&#9670;&#160;</a></span>granted_periodicity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; uint32_t &gt; e3_service_model_handle_s::granted_periodicity </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>requested_us</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The least time between two indications that this SM keeps for a subscription. </p>
+<p>Sent to the dApp as the granted periodicity of its <a class="el" href="structlibe3_1_1SubscriptionResponse.html" title="E3AP Subscription Response structure.">SubscriptionResponse</a>. Override it only when the SM itself keeps its indications at least that far apart. The base implementation reports nothing, so the response then carries no periodicity ("not reported").</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">requested_us</td><td>Periodicity the dApp asked for, in microseconds. 0 when it asked for none or for one indication per event. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Microseconds between two indications. std::nullopt or 0 when the SM keeps no interval or does not say; the response then has none. </dd></dl>
+
+<p>Reimplemented from <a class="el" href="classlibe3_1_1ServiceModel.html#a40a725aa3c7096155b846d7447d48e21">libe3::ServiceModel</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00107">107</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -355,11 +399,18 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Process a control action from a dApp. </p>
-<p>Called by the E3 interface when a <a class="el" href="structlibe3_1_1DAppControlAction.html" title="E3AP dApp Control Action structure.">DAppControlAction</a> is received for this service model. Implementations can emit outbound PDUs (e.g. <a class="el" href="structlibe3_1_1MessageAck.html" title="E3AP Message Acknowledgment structure.">MessageAck</a>, <a class="el" href="structlibe3_1_1IndicationMessage.html" title="E3AP Indication Message structure.">IndicationMessage</a>) via <a class="el" href="classlibe3_1_1ServiceModel.html#a979d55be233ccf00829259a9b276c773" title="Emit an outbound PDU produced by the SM.">emit_outbound()</a>. </p>
+<p>Called by the E3 interface when a <a class="el" href="structlibe3_1_1DAppControlAction.html" title="E3AP dApp Control Action structure.">DAppControlAction</a> is received for this service model. Implementations can emit outbound PDUs (e.g. <a class="el" href="structlibe3_1_1MessageAck.html" title="E3AP Message Acknowledgment structure.">MessageAck</a>, <a class="el" href="structlibe3_1_1IndicationMessage.html" title="E3AP Indication Message structure.">IndicationMessage</a>) via <a class="el" href="classlibe3_1_1ServiceModel.html#a979d55be233ccf00829259a9b276c773" title="Emit an outbound PDU produced by the SM.">emit_outbound()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">request_message_id</td><td>Message identifier of the <a class="el" href="structlibe3_1_1DAppControlAction.html" title="E3AP dApp Control Action structure.">DAppControlAction</a> </td></tr>
+    <tr><td class="paramname">action</td><td>The control action </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS if the SM took the action </dd></dl>
 
 <p>Implements <a class="el" href="classlibe3_1_1ServiceModel.html#a9db06b14342c2e140d1a0df72a174ef3">libe3::ServiceModel</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00106">106</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00112">112</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -391,7 +442,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1ServiceModel.html#ae72911e55ced46ac00c628d1696c5a97">libe3::ServiceModel</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00087">87</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00088">88</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -419,10 +470,11 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Check if SM is currently running. </p>
+<dl class="section return"><dt>Returns</dt><dd>True while the SM is processing </dd></dl>
 
 <p>Implements <a class="el" href="classlibe3_1_1ServiceModel.html#ae10f43ca27d5ae47d93d6fde0c2dd014">libe3::ServiceModel</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00101">101</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00102">102</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -450,10 +502,11 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get SM name. </p>
+<dl class="section return"><dt>Returns</dt><dd>The name of the SM </dd></dl>
 
 <p>Implements <a class="el" href="classlibe3_1_1ServiceModel.html#a003eae4bbac3dadb42613b2c71c21476">libe3::ServiceModel</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00081">81</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00082">82</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -487,7 +540,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1ServiceModel.html#accba27a2f8aafac0209c088d06afbb2d">libe3::ServiceModel</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00086">86</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00087">87</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -515,10 +568,11 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get RAN function ID for this SM. </p>
+<dl class="section return"><dt>Returns</dt><dd>The RAN function this SM serves </dd></dl>
 
 <p>Implements <a class="el" href="classlibe3_1_1ServiceModel.html#a0e5af990ce382e6c1970290d2336631e">libe3::ServiceModel</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00083">83</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00084">84</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -550,7 +604,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1ServiceModel.html#ab8d84fad0e14000328cccf3ed35aa4bc">libe3::ServiceModel</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00094">94</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00095">95</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -582,7 +636,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1ServiceModel.html#acbdba718c7d39a05c3a50e316e04604b">libe3::ServiceModel</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00098">98</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00099">99</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -610,10 +664,11 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get telemetry IDs supported by this SM. </p>
+<dl class="section return"><dt>Returns</dt><dd>The telemetry identifiers the SM supports </dd></dl>
 
 <p>Implements <a class="el" href="classlibe3_1_1ServiceModel.html#a16412ef9eee5a294e63620b9db5c273f">libe3::ServiceModel</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00084">84</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00085">85</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -641,10 +696,11 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get SM version. </p>
+<dl class="section return"><dt>Returns</dt><dd>The version number of the SM </dd></dl>
 
 <p>Implements <a class="el" href="classlibe3_1_1ServiceModel.html#a2d17ab4667c5ccfff19d5079a47f7677">libe3::ServiceModel</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00082">82</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00083">83</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -735,7 +791,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Passed to every callback. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00048">48</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00049">49</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -754,6 +810,24 @@ Additional Inherited Members</h2></td></tr>
 <p>Called on destruction. </p>
 
 <p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00043">43</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+
+</div>
+</div>
+<a id="aa6065ac812b0afbe3b2c503e23c56502" name="aa6065ac812b0afbe3b2c503e23c56502"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6065ac812b0afbe3b2c503e23c56502">&#9670;&#160;</a></span>sm_granted_periodicity</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="c__api_8h.html#a8fa570e51aa24f92a16d8f3991897cf8">e3_sm_granted_periodicity_cb</a> e3_service_model_handle_s::sm_granted_periodicity = nullptr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Asked for the interval it keeps. </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00048">48</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -879,7 +953,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Whether ownership was transferred to an agent. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00051">51</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00052">52</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>

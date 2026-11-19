@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,12 +92,12 @@ $(function(){initNavTree('md_docs_2e3sm_2l1-kpm_2annex-c-open-items.html','','')
   <div class="headertitle"><div class="title">Open items </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md492"></a></p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md493"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md493"></a></p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md494"></a>
 General</h1>
 <p>This annex lists the points of the present version that need a decision or a check against implementations. Each item names the clause that it affects.</p>
 <p>Some items describe where existing E3 Agents of the service model differ from the present document. Such an item may end with its severity: "wrong" means a wrong result with no error, "latent" means that only a corner case triggers it, and "doc" means that only a comment or the documentation is affected. The <a class="el" href="md_docs_2e3sm_2l1-kpm_2integrator-guide.html">integrator guide</a>, which is not part of the present document, gives the evidence in the code.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md494"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md495"></a>
 Interaction with E3AP</h1>
 <p>Table: Open items on the interaction with E3AP</p>
 <table class="markdownTable">
@@ -114,7 +114,7 @@ Interaction with E3AP</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">C.17  </td><td class="markdownTableBodyNone">Rate of the indications in existing E3 Agents. They apply the smallest <span class="tt">periodicity</span> of all the dApps subscribed to RAN function <span class="tt">2</span> to every dApp, send the same payload to all of them, and compute the rate again when a dApp joins or leaves. A dApp with a longer interval receives the indications at the rate of the fastest dApp. They write a row and send an indication for every uplink or mixed slot, whether or not a cell receives PUSCH in it. With a period, they keep the latest row and send it when the period has passed.  </td><td class="markdownTableBodyNone">6.3, 6.6.2  </td><td class="markdownTableBodyNone">The E3 Agent applies the <span class="tt">periodicity</span> of each subscription to that subscription. The PUSCH path fires on a slot in which at least one cell receives PUSCH. When the interval has passed, the E3 Agent sends the indication of the next matching slot.  </td><td class="markdownTableBodyNone">Align the implementations with clauses 6.3 and 6.6.2.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md495"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md496"></a>
 Content of the service model</h1>
 <p>Table: Open items on the content of the service model</p>
 <table class="markdownTable">
@@ -153,7 +153,7 @@ Content of the service model</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">C.27  </td><td class="markdownTableBodyNone">RAN FUNCTION DATA IE of existing E3 Agents. It holds only <span class="tt">name</span> <span class="tt">L1-KPM</span>, <span class="tt">version</span> <span class="tt">1</span> and <span class="tt">description</span> <span class="tt">L1-KPM SM: post-FFT IQ telemetry.</span>, with no <span class="tt">streams</span> and no extension marker. Its JSON form has 79 octets. A dApp of the present document cannot decode its APER form with the grammar of clause 8.4, and finds no <span class="tt">streams</span> in its JSON form. Severity: wrong.  </td><td class="markdownTableBodyNone">8.2.2.1  </td><td class="markdownTableBodyNone"><span class="tt">streams</span> is mandatory, with one stream descriptor for each identifier of clause 7.3.  </td><td class="markdownTableBodyNone">Align the implementations with clause 8.2.2.1.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md496"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md497"></a>
 Shared memory region</h1>
 <p>Table: Open items on the shared memory region</p>
 <table class="markdownTable">
@@ -172,7 +172,7 @@ Shared memory region</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">C.26  </td><td class="markdownTableBodyNone">Antennas in existing E3 Agents. A row holds 4 antennas. When the cell has more, the E3 Agent keeps the first 4 and sets <span class="tt">nRxAnt</span> to <span class="tt">4</span>. It writes only the first <span class="tt">nRxAnt</span> antennas, and writes zero to the subcarriers above the bandwidth of the cell. The antennas from <span class="tt">nRxAnt</span> up keep the content that the region had when it was created. Severity: latent.  </td><td class="markdownTableBodyNone">A.6.1  </td><td class="markdownTableBodyNone">Antennas from <span class="tt">nRxAnt</span> up, and subcarriers above the bandwidth of the cell, have no defined content.  </td><td class="markdownTableBodyNone">Confirm. A dApp of the present document ignores that content.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md497"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md498"></a>
 Protocol Buffers form of existing E3 Agents</h1>
 <p>Existing E3 Agents define the messages of Table C-4 in the proto2 syntax [i.4], in the package <span class="tt">e3sm.l1kpm.v1</span>, for the flat indication of item C.18. The octets of L1KPMIndication go in the E3AP bytes field <span class="tt">protocol_data</span>. Every field is optional. They set every field of L1KPMIndication and do not use L1KPMRanFunctionData. An E3 Agent built without Protocol Buffers support sends no indication on a Protocol Buffers session, and records an error. A Protocol Buffers form of the present document (item C.4) can start from these messages.</p>
 <p>Table: Protocol Buffers messages of existing E3 Agents</p>

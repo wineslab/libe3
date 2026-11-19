@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -119,7 +119,11 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a8ff1b9dde582b8f8ca87d7cd025507fe" id="r_a8ff1b9dde582b8f8ca87d7cd025507fe"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8ff1b9dde582b8f8ca87d7cd025507fe">payload</a></td></tr>
 <tr class="memdesc:a8ff1b9dde582b8f8ca87d7cd025507fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">opaque E3SM bytes (indication / xApp control)  <br /></td></tr>
 <tr class="memitem:a65b8808594a54a9d0a41ac0e6b45c3d9" id="r_a65b8808594a54a9d0a41ac0e6b45c3d9"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a65b8808594a54a9d0a41ac0e6b45c3d9">periodicity</a> {-1}</td></tr>
-<tr class="memdesc:a65b8808594a54a9d0a41ac0e6b45c3d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">granted interval in microseconds (subscription response), -1 = not reported  <br /></td></tr>
+<tr class="memdesc:a65b8808594a54a9d0a41ac0e6b45c3d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">least microseconds the RAN keeps between two indications (subscription response), -1 = not reported  <br /></td></tr>
+<tr class="memitem:aa1362f0239582e5c336df0835b9620a9" id="r_aa1362f0239582e5c336df0835b9620a9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa1362f0239582e5c336df0835b9620a9">cause</a> {-1}</td></tr>
+<tr class="memdesc:aa1362f0239582e5c336df0835b9620a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">why a negative response was refused, a <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" title="Why a RAN refused a request (E3-Cause).">libe3::Cause</a> value; -1 = none given  <br /></td></tr>
+<tr class="memitem:aff820a78fbb4276d7b5277a17c2bb672" id="r_aff820a78fbb4276d7b5277a17c2bb672"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff820a78fbb4276d7b5277a17c2bb672">detail</a></td></tr>
+<tr class="memdesc:aff820a78fbb4276d7b5277a17c2bb672"><td class="mdescLeft">&#160;</td><td class="mdescRight">the RAN's text for the refusal; empty = none given  <br /></td></tr>
 <tr class="memitem:ab2aab3fcd79b103ea8141453bbc71a14" id="r_ab2aab3fcd79b103ea8141453bbc71a14"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab2aab3fcd79b103ea8141453bbc71a14">has_telemetry_granted</a> {false}</td></tr>
 <tr class="memdesc:ab2aab3fcd79b103ea8141453bbc71a14"><td class="mdescLeft">&#160;</td><td class="mdescRight">telemetry_granted was reported  <br /></td></tr>
 <tr class="memitem:a71647ce850dc53f08c86ecfa570be735" id="r_a71647ce850dc53f08c86ecfa570be735"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a71647ce850dc53f08c86ecfa570be735">has_control_granted</a> {false}</td></tr>
@@ -134,10 +138,29 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>One inbound E3AP event, POD-flat for a clean SWIG crossing. </p>
 <p><span class="tt"><a class="el" href="#a8ff1b9dde582b8f8ca87d7cd025507fe" title="opaque E3SM bytes (indication / xApp control)">payload</a></span> carries the opaque E3SM bytes for indications (protocol_data) and xApp controls (xapp_control_data); it is empty for subscription/setup responses and acks. Fields not relevant to a given <span class="tt"><a class="el" href="#a32878e95b8bbe48ae73fa982f348ce81" title="one of E3EventKind">kind</a></span> are left zero, except where noted.</p>
-<p>A subscription response also carries the grant: <span class="tt"><a class="el" href="#a071306a89dfa8d87ac9d61875ca17463" title="RAN function (indication / xApp control / subscription response).">ran_function_id</a></span> (0 = not reported), <span class="tt"><a class="el" href="#a65b8808594a54a9d0a41ac0e6b45c3d9" title="granted interval in microseconds (subscription response), -1 = not reported">periodicity</a></span>, and the id lists, valid only when their has_* flag is set. </p>
+<p>A subscription response also carries the grant: <span class="tt"><a class="el" href="#a071306a89dfa8d87ac9d61875ca17463" title="RAN function (indication / xApp control / subscription response).">ran_function_id</a></span> (0 = not reported), <span class="tt"><a class="el" href="#a65b8808594a54a9d0a41ac0e6b45c3d9" title="least microseconds the RAN keeps between two indications (subscription response), -1 = not reported">periodicity</a></span>, and the id lists, valid only when their has_* flag is set.</p>
+<p>A negative subscription response, setup response or message ack also carries why: <span class="tt"><a class="el" href="#aa1362f0239582e5c336df0835b9620a9" title="why a negative response was refused, a libe3::Cause value; -1 = none given">cause</a></span> (a <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">libe3::Cause</a> value, -1 when the RAN gave none, as Aerial does) and <span class="tt"><a class="el" href="#aff820a78fbb4276d7b5277a17c2bb672" title="the RAN&#39;s text for the refusal; empty = none given">detail</a></span> (the RAN's text, empty when there is none). A dApp reads them to decide what to do, for example to drop a control the RAN function does not offer and subscribe again. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00080">80</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00085">85</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="aa1362f0239582e5c336df0835b9620a9" name="aa1362f0239582e5c336df0835b9620a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1362f0239582e5c336df0835b9620a9">&#9670;&#160;</a></span>cause</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int libe3::py::E3Event::cause {-1}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>why a negative response was refused, a <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" title="Why a RAN refused a request (E3-Cause).">libe3::Cause</a> value; -1 = none given </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00096">96</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+
+</div>
+</div>
 <a id="a36b0e37e84a5b2d9af93d9c5e2f15d1d" name="a36b0e37e84a5b2d9af93d9c5e2f15d1d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a36b0e37e84a5b2d9af93d9c5e2f15d1d">&#9670;&#160;</a></span>control_granted</h2>
 
@@ -152,7 +175,7 @@ Public Attributes</h2></td></tr>
 
 <p>granted control ids </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00094">94</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00101">101</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -170,7 +193,25 @@ Public Attributes</h2></td></tr>
 
 <p>dApp identifier the message targets </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00082">82</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00087">87</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+
+</div>
+</div>
+<a id="aff820a78fbb4276d7b5277a17c2bb672" name="aff820a78fbb4276d7b5277a17c2bb672"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff820a78fbb4276d7b5277a17c2bb672">&#9670;&#160;</a></span>detail</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string libe3::py::E3Event::detail</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>the RAN's text for the refusal; empty = none given </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00097">97</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -188,7 +229,7 @@ Public Attributes</h2></td></tr>
 
 <p>disconnect: 0=released by RAN, 1=connection lost, -1=n/a </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00088">88</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00093">93</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -206,7 +247,7 @@ Public Attributes</h2></td></tr>
 
 <p>control_granted was reported </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00092">92</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00099">99</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -224,7 +265,7 @@ Public Attributes</h2></td></tr>
 
 <p>telemetry_granted was reported </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00091">91</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00098">98</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -242,7 +283,7 @@ Public Attributes</h2></td></tr>
 
 <p>one of <a class="el" href="namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917">E3EventKind</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00081">81</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00086">86</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -260,7 +301,7 @@ Public Attributes</h2></td></tr>
 
 <p>opaque E3SM bytes (indication / xApp control) </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00089">89</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00094">94</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -276,9 +317,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>granted interval in microseconds (subscription response), -1 = not reported </p>
+<p>least microseconds the RAN keeps between two indications (subscription response), -1 = not reported </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00090">90</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00095">95</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -296,7 +337,7 @@ Public Attributes</h2></td></tr>
 
 <p>RAN function (indication / xApp control / subscription response). </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00083">83</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00088">88</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -314,7 +355,7 @@ Public Attributes</h2></td></tr>
 
 <p>request/message id (subscription response / ack / xApp control) </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00085">85</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00090">90</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -332,7 +373,7 @@ Public Attributes</h2></td></tr>
 
 <p>0=positive, 1=negative, -1=n/a </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00087">87</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00092">92</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -350,7 +391,7 @@ Public Attributes</h2></td></tr>
 
 <p>loop correlation id (xApp control); echo it on the control you re-issue </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00086">86</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00091">91</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -368,7 +409,7 @@ Public Attributes</h2></td></tr>
 
 <p>subscription id (subscription response) </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00084">84</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00089">89</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -386,7 +427,7 @@ Public Attributes</h2></td></tr>
 
 <p>granted telemetry ids </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00093">93</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00100">100</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>
@@ -404,7 +445,7 @@ Public Attributes</h2></td></tr>
 
 <p>set when queued; keys the [latrec] LQ-stage records </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00095">95</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00102">102</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 
 </div>
 </div>

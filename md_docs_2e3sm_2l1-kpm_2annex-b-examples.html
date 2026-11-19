@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,12 +92,12 @@ $(function(){initNavTree('md_docs_2e3sm_2l1-kpm_2annex-b-examples.html','',''); 
   <div class="headertitle"><div class="title">Example message exchange </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md480"></a></p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md481"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md481"></a></p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md482"></a>
 General</h1>
 <p>This annex gives examples of the use of the service model. Each E3AP message and each service model IE was encoded in APER with the grammar of [1] and of clause 8.4, decoded back and compared with the input. The JSON forms follow clause 8.3 of [1] and clause 8.6. The identifiers, names and values are examples.</p>
 <p>Hexadecimal dumps show the offset of the first octet of each line, then 16 octets.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md482"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md483"></a>
 IQ samples of one cell</h1>
 <p>A dApp asks for the IQ samples of each PUSCH slot, with the time, the frame and slot numbers, the cell, the number of antennas and the uplink symbols: identifiers 1, 4, 5, 6, 7, 8 and 1000, with <span class="tt">periodicity</span> <span class="tt">0</span>.</p>
 <p>The SUBSCRIPTION REQUEST message carries no service model payload. Its JSON form is:</p>
@@ -155,7 +155,7 @@ IQ samples of one cell</h1>
 <td class="markdownTableBodyNone">In-phase word of antenna 2, symbol 3, subcarrier 100  </td><td class="markdownTableBodyNone">row + <span class="tt">2 x ((2 x 14 + 3) x 3276 + 100) x 2</span>  </td><td class="markdownTableBodyNone"><span class="tt">31227432</span>  </td></tr>
 </table>
 <p>The mask <span class="tt">16383</span> says that all 14 symbols are uplink symbols.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md483"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md484"></a>
 UE metrics with a UE filter</h1>
 <p>A dApp asks for PUSCH metrics of each UE every 10 ms, for 60 s. It then keeps one UE with the Set Subscription Data control action. Table B-2 lists the messages.</p>
 <p>Table: Messages of the UE metrics example</p>
@@ -179,7 +179,7 @@ UE metrics with a UE filter</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">8  </td><td class="markdownTableBodyNone">E3 Agent to dApp  </td><td class="markdownTableBodyNone">INDICATION MESSAGE  </td><td class="markdownTableBodyNone">61  </td><td class="markdownTableBodyNone">INDICATION DATA IE, 43 octets  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md484"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md485"></a>
 Step 1: SETUP REQUEST</h2>
 <p>The dApp registers. The message has no service model payload.</p>
 <p>The message in JSON:</p>
@@ -197,7 +197,7 @@ Step 1: SETUP REQUEST</h2>
 <div class="line">0010  2e 30 24 75 65 2d 6d 65 74 72 69 63 73 20 30 2e</div>
 <div class="line">0020  31 2e 30 34 65 78 61 6d 70 6c 65 2d 76 65 6e 64</div>
 <div class="line">0030  6f 72</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md485"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md486"></a>
 Step 2: SETUP RESPONSE</h2>
 <p>The E3 Agent lists RAN function 2 with the identifiers that it can produce, and control identifier 1. The RAN FUNCTION DATA IE is cut to three stream descriptors here. A complete one has a descriptor for each identifier of clause 7.3. ID 36 is "unavailable", so it is not in <span class="tt">telemetryIdentifierList</span>.</p>
 <p>The RAN FUNCTION DATA IE in APER has 150 octets:</p>
@@ -283,7 +283,7 @@ Step 2: SETUP RESPONSE</h2>
 <div class="line">00d0  70 00 00 23 24 75 65 5f 67 72 70 5f 69 64 78 28</div>
 <div class="line">00e0  75 69 6e 74 31 36 80</div>
 </div><!-- fragment --><p>The octets 81 to 230 of the message are the RAN FUNCTION DATA IE, unchanged.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md486"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md487"></a>
 Step 3: SUBSCRIPTION REQUEST</h2>
 <p>The dApp asks for identifiers 4, 5, 6, 7, 16, 18, 23, 25, 26, 33, 34, 36, 39 and 41, and control identifier 1, every 10 ms for 60 s. All the identifiers are shared or of the PUSCH path, so only the PUSCH path fires (Table 6-1).</p>
 <p>The message in JSON:</p>
@@ -303,7 +303,7 @@ Step 3: SUBSCRIPTION REQUEST</h2>
 <div class="line">0010  00 0e 00 03 00 04 00 05 00 06 00 0f 00 11 00 16</div>
 <div class="line">0020  00 18 00 19 00 20 00 21 00 23 00 26 00 28 00 01</div>
 <div class="line">0030  00 00 00 3c 40 27 10</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md487"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md488"></a>
 Step 4: SUBSCRIPTION RESPONSE</h2>
 <p>The E3 Agent grants the requested identifiers that are available. ID 36 is not granted.</p>
 <p>The message in JSON:</p>
@@ -325,7 +325,7 @@ Step 4: SUBSCRIPTION RESPONSE</h2>
 <div class="line">0010  00 00 03 00 0d 00 03 00 04 00 05 00 06 00 0f 00</div>
 <div class="line">0020  11 00 16 00 18 00 19 00 20 00 21 00 26 00 28 00</div>
 <div class="line">0030  01 00 00 03 80 02 00 01 03 40 27 10</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md488"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md489"></a>
 Step 5: INDICATION MESSAGE</h2>
 <p>A PUSCH slot with two UEs in cell 1. Only the granted fields are present. The <span class="tt">timestamp</span> of the INDICATION DATA IE (ID 4) is the time of the slot data, on the monotonic clock of the E3 Agent host. The <span class="tt">timestamp</span> of the E3AP message is the time at which the E3 Agent created the message, on the realtime clock (UTC) [1]. The two are not compared.</p>
 <p>The INDICATION DATA IE in APER has 67 octets:</p>
@@ -383,7 +383,7 @@ Step 5: INDICATION MESSAGE</h2>
 <div class="line">0040  52 00 00 00 00 46 02 00 33 00 17 4c 00 66 66 c0</div>
 <div class="line">0050  c2 33 33 83 40</div>
 </div><!-- fragment --><p>The octets 18 to 84 of the message are the INDICATION DATA IE, unchanged.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md489"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md490"></a>
 Step 6: dApp CONTROL ACTION</h2>
 <p>The dApp keeps only the UE with RNTI 17921 in cell 1.</p>
 <p>The CONTROL DATA IE in APER has 6 octets:</p>
@@ -411,7 +411,7 @@ Step 6: dApp CONTROL ACTION</h2>
 <div class="fragment"><div class="line">0000  40 08 08 18 74 2a 6c 9a 2a 3b 00 30 00 01 00 01</div>
 <div class="line">0010  00 00 00 05 10 10 00 01 46 01</div>
 </div><!-- fragment --><p>The octets 20 to 25 of the message are the CONTROL DATA IE, unchanged.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md490"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md491"></a>
 Step 7: MESSAGE ACK</h2>
 <p>The E3 Agent applies the subscription data.</p>
 <p>The message in JSON:</p>
@@ -424,7 +424,7 @@ Step 7: MESSAGE ACK</h2>
 <div class="line">}</div>
 </div><!-- fragment --><p>The message in APER has 14 octets:</p>
 <div class="fragment"><div class="line">0000  40 1f 08 18 74 2a 6c 9a 2d 48 40 50 08 00</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md491"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md492"></a>
 Step 8: INDICATION MESSAGE</h2>
 <p>10 ms later only UE 17921 is present, and <span class="tt">nUe</span> counts the entries that the indication carries.</p>
 <p>The INDICATION DATA IE in APER has 43 octets:</p>

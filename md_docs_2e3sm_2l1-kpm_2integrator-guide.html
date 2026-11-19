@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,11 +92,11 @@ $(function(){initNavTree('md_docs_2e3sm_2l1-kpm_2integrator-guide.html','',''); 
   <div class="headertitle"><div class="title">E3SM-L1-KPM: integrator guide </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md498"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md499"></a></p>
 <p>A practical guide for an engineer who adds E3SM-L1-KPM to a RAN stack or reads it in a dApp. It is not part of the specification. Where it and the specification differ, the specification wins. Code pointers are allowed here and only here.</p>
 <p>The index of the specification is <a class="el" href="dir_75429917a6ddd2daabca8d27e432849a.html">README.md</a>.</p>
 <p>The implementation described here predates the present draft of the specification. <a class="el" href="md_docs_2e3sm_2l1-kpm_2annex-c-open-items.html">Annex C</a> lists where it differs from the draft, and the last two clauses of this guide give the evidence in the code.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md499"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md500"></a>
 Code roots</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -107,7 +107,7 @@ Code roots</h1>
 <td class="markdownTableBodyNone"><span class="tt">libe3/</span>  </td><td class="markdownTableBodyNone">this repository: the E3AP library that carries the indications  </td><td class="markdownTableBodyNone">the branch that introduced these files  </td></tr>
 </table>
 <p>Line numbers drift. Function names are the stable reference. Paths under <span class="tt">oai/</span> start at <span class="tt">openair2/E3AP/</span> unless a full path is given.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md500"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md501"></a>
 Where the pieces are</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -137,9 +137,9 @@ Where the pieces are</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Configuration of the scale factor  </td><td class="markdownTableBodyNone"><span class="tt">config/e3_config.c</span> (<span class="tt">fp16_beta</span>), default <span class="tt">E3_FP16_BETA_DEFAULT</span> in <span class="tt">config/e3_config.h</span>  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md501"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md502"></a>
 For a RAN</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md502"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md503"></a>
 Steps</h2>
 <ol type="1">
 <li>Build a service model descriptor with RAN function ID <span class="tt">2</span>, the telemetry identifiers <span class="tt">1</span>, <span class="tt">4</span>, <span class="tt">5</span>, <span class="tt">6</span>, no control identifiers and no <span class="tt">sm_process_control</span> (<span class="tt">l1_kpm_sm.c</span>, <span class="tt">create_l1_kpm_sm_model</span>). <a class="el" href="namespacelibe3.html">libe3</a> answers a control action with a negative acknowledgment when the callback is not set.</li>
@@ -152,7 +152,7 @@ Steps</h2>
 <li>In the worker, encode once and send to each subscriber with <span class="tt">e3_sm_worker_emit_to_dapp</span> (<span class="tt">l1_kpm_sm.c</span>, <span class="tt">emit_batch</span>). <span class="tt">emit_batch</span> gets the list of subscribers once for the batch.</li>
 <li>Set the cadence from the subscriptions (<span class="tt">min_subscription_period_us</span>). <span class="tt">0</span> means one indication for each publish. In the periodic mode the worker keeps the latest snapshot and sends it when the period has passed (<span class="tt">e3_sm_worker.c</span>, <span class="tt">e3_sm_worker_thread</span>).</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md503"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md504"></a>
 Things that bite</h2>
 <ul>
 <li>The payload buffer is 512 bytes. A new field can overflow it. The encoder then returns an error and the worker silences the warning after the first one.</li>
@@ -161,7 +161,7 @@ Things that bite</h2>
 <li>Change the layout only with a new header <span class="tt">version</span>.</li>
 <li><span class="tt">e3_ran_buffers_destroy</span> is called from the destroy hook of the service model, not from the stop hook. The region stays after the last release.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md504"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md505"></a>
 For a dApp</h1>
 <ol type="1">
 <li>Subscribe with <span class="tt">ranFunctionIdentifier</span> <span class="tt">2</span> and an empty control list. Set <span class="tt">periodicity</span> if you want a slower rate. Remember the RAN sends the fastest rate of all dApps to everyone (Annex C, item C.17).</li>
@@ -172,7 +172,7 @@ For a dApp</h1>
 <li>Retry <span class="tt">shm_open</span> for a short time after the subscription. The RAN creates the object at the first uplink slot.</li>
 <li>In a container, share <span class="tt">/dev/shm</span> with the RAN container.</li>
 </ol>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md505"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md506"></a>
 Evidence for the items of Annex C</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -194,7 +194,7 @@ Evidence for the items of Annex C</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">C.16  </td><td class="markdownTableBodyNone"><span class="tt">e3_ran_buffers.c:207-213</span> and <span class="tt">:300-306</span>: init is retried at each call  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md506"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md507"></a>
 Code notes</h1>
 <p>Findings in the code that do not change what the specification says. Severity as in Annex C.</p>
 <table class="markdownTable">

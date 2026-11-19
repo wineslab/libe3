@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_204-encoding.html','',''); });
   <div class="headertitle"><div class="title">E2SM-DAPP: encoding </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md86"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md87"></a></p>
 <p>This chapter describes how an implementation turns every E2SM-DAPP information element into bytes. It gives worked examples that an implementer can check against the reference test vectors, the size limits and the type map.</p>
 <p>The index is <a class="el" href="dir_24c5afd111e6aa944685a569bf5db165.html">README.md</a>. The field lists are in <a class="el" href="md_docs_2e2sm-dapp_202-ie-mapping.html">02-ie-mapping.md</a>. The validation rules are in <a class="el" href="md_docs_2e2sm-dapp_205-semantics-and-constraints.html">05-semantics-and-constraints.md</a>. Code references, product names and build switches are in <a class="el" href="md_docs_2e2sm-dapp_2integrator-guide.html">integrator-guide.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md87"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md88"></a>
 What is on the wire</h1>
 <p>An implementation shall encode each E2SM-DAPP information element as one ASN.1 value with <b>APER (ASN.1 Packed Encoding Rules, aligned variant, X.691)</b>. It shall carry the value as the content of an <span class="tt">OCTET STRING</span> in the E2AP message. E2AP does the framing. E2SM-DAPP adds no header, no length prefix, no checksum and no version byte of its own.</p>
 <p>Table: ASN.1 type that each E2AP field carries</p>
@@ -121,14 +121,14 @@ What is on the wire</h1>
 </table>
 <p>The grammar is in the last clause of this chapter. Its module identifier is <span class="tt">E2SM-DAPP-IEs {... oran(53148) e2(1) version1(1) e2sm(255) e2sm-DAPP-IEs (3)}</span>, so the OID is <span class="tt">1.3.6.1.4.1.53148.1.1.255.3</span>.</p>
 <p>Plain and FlatBuffers encodings <b>do not exist</b>. A conforming stack encodes APER. Some implementations ship unused stubs for the other encodings.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md88"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md89"></a>
 The three rules that decide almost every byte</h2>
 <ol type="1">
 <li><b>Alignment.</b> In aligned PER a value that needs whole octets (an integer longer than a byte, an octet string, a character string, a length determinant of more than 8 bits) first skips to the next octet boundary. The skipped bits are zero. Bit fields (extension bits, presence bits, small counts, choice indices) are not aligned and are packed MSB first.</li>
 <li><b>Every <span class="tt">SEQUENCE</span> and <span class="tt">CHOICE</span> here has an extension marker (<span class="tt">...</span>)</b>, and so do the constrained integers except <span class="tt">data-size</span>. An encoder always writes the extension bit as <span class="tt">0</span>. Each marker costs one bit.</li>
 <li><b><span class="tt">OPTIONAL</span> fields cost one presence bit each</b>, written before the first component, in the order the fields are declared. A cleared bit means the field is absent and takes no further space.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md89"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md90"></a>
 Encoding rules, by ASN.1 construct</h2>
 <p>Table: APER bits for each ASN.1 construct</p>
 <table class="markdownTable">
@@ -174,7 +174,7 @@ Encoding rules, by ASN.1 construct</h2>
 <li><b>Octet-string content is never bit-shifted.</b> Because octet strings are aligned, the payload inside <span class="tt">data</span> and <span class="tt">e3-control-outcome</span> is byte-identical to what the sender passed in. A receiver can hand a pointer into the E2SM-DAPP buffer to the inner decoder.</li>
 <li>The outer E2AP <span class="tt">OCTET STRING</span> length is E2AP's, not E2SM-DAPP's. The encoded length of an E2SM-DAPP element is whatever the APER value occupies, rounded up to a whole octet (see the single-byte examples below).</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md90"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md91"></a>
 Byte order, packing, length prefixes</h2>
 <p>Table: Byte order, padding and length prefixes</p>
 <table class="markdownTable">
@@ -193,7 +193,7 @@ Byte order, packing, length prefixes</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Trailing data  </td><td class="markdownTableBodyNone">APER has no end marker. A decoder checks that the decode succeeded. It does not need to check that it consumed every octet, and several implementations ignore trailing octets. A receiver should not rely on a sender to append nothing.  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md91"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md92"></a>
 A receiver that sees extension additions</h2>
 <p>The grammar has no extension additions yet, so every extension bit that a conforming sender writes is <span class="tt">0</span>. A future version could add fields after the <span class="tt">...</span> marker. A decoder that meets extension bit <span class="tt">1</span> has three options, and implementations pick differently.</p>
 <p>Table: Handling of extension bit 1 on a SEQUENCE</p>
@@ -207,7 +207,7 @@ A receiver that sees extension additions</h2>
 </table>
 <p>A <span class="tt">CHOICE</span> alternative beyond the defined ones (a future format 3) is not skipped by any implementation. The decode fails.</p>
 <p>An extension bit of <span class="tt">1</span> on a constrained <span class="tt">INTEGER (0..4294967295, ...)</span> means that the value is outside the root range and uses a different encoding. Implementations reject it. See <a class="el" href="md_docs_2e2sm-dapp_205-semantics-and-constraints.html">05-semantics-and-constraints.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md92"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md93"></a>
 Maximum sizes</h1>
 <p>Table: Size constants of the grammar</p>
 <table class="markdownTable">
@@ -254,11 +254,11 @@ Maximum sizes</h1>
 </table>
 <p>Format 2 is the one element that can be larger than 32768 octets, because the grammar bounds only the number of items, not the encoded size of the list.</p>
 <p><b>Implementation limits are tighter than the grammar.</b> An implementation can encode into fixed buffers and fail when an element does not fit. The buffers range from 1 KiB for an action definition to 512 KiB for an event trigger, and one implementation limits a control message to about 16 KiB, although the grammar allows 32768 octets. For this reason the reference test vector <span class="tt">cm1_large</span> stops at 16000 octets. A sender that wants to work with every implementation should keep a control message below 16 KiB. The details are in <a class="el" href="md_docs_2e2sm-dapp_2integrator-guide.html">integrator-guide.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md93"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md94"></a>
 Worked examples</h1>
 <p>All the bytes below are reference test vectors. They were produced by the encoder of a reference implementation. Every example here was re-derived by hand from the grammar and the encoding rules. All 31 vectors (27 inline and 4 by length and hash) were also reproduced by an independent bit-level encoder, which agreed byte for byte.</p>
 <p>Reading the tables: a row is a run of bits in stream order. <span class="tt">pad</span> is alignment padding. Bit groups are written MSB first.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md94"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md95"></a>
 <span class="tt">et_f1</span> = <span class="tt">00</span> (event trigger)</h2>
 <p>One octet. The event trigger has one format and no fields.</p>
 <p>Table: Bits of the event trigger <span class="tt">et_f1</span></p>
@@ -274,7 +274,7 @@ Worked examples</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">00000</span>  </td><td class="markdownTableBodyNone">pad to the octet boundary  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md95"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md96"></a>
 <span class="tt">ad_style1</span> = <span class="tt">00 01 01 00</span> (action definition, report style 1)</h2>
 <p>Table: Octets of the action definition <span class="tt">ad_style1</span></p>
 <table class="markdownTable">
@@ -290,7 +290,7 @@ Worked examples</h1>
 <td class="markdownTableBodyNone">3  </td><td class="markdownTableBodyNone"><span class="tt">0</span> <span class="tt">0</span> <span class="tt">000000</span>  </td><td class="markdownTableBodyNone"><span class="tt">actionDefinition-formats</span> CHOICE extension bit, <span class="tt">Format1</span> SEQUENCE extension bit, pad  </td></tr>
 </table>
 <p><span class="tt">ad_style2</span> is the same with <span class="tt">02</span> in octet 2. <span class="tt">ad_style_max</span> = <span class="tt">00 05 00 ff ff ff ff 00</span> has length 5 and the value <span class="tt">00 ff ff ff ff</span> (4294967295 needs a leading zero octet in two's complement), then the same closing octet.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md96"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md97"></a>
 <span class="tt">ih1_min</span> = <span class="tt">00 00 ff 00 01 00 00 13 00 14 00 00</span> (indication header format 1, only mandatory fields)</h2>
 <p>Input: <span class="tt">ran-function-id</span> 255, <span class="tt">dapp-id</span> 1, <span class="tt">node-type</span> 0, <span class="tt">node-plmn-id</span> <span class="tt">13 00 14</span>, <span class="tt">node-nb-id</span> 0, no <span class="tt">node-cu-du-id</span>, no <span class="tt">timestamp</span>, no <span class="tt">sequence-id</span>.</p>
 <p>Table: Octets of the indication header <span class="tt">ih1_min</span></p>
@@ -329,7 +329,7 @@ Worked examples</h1>
 <td class="markdownTableBodyNone">11  </td><td class="markdownTableBodyNone"><span class="tt">00</span>  </td><td class="markdownTableBodyNone"><span class="tt">node-nb-id</span> = 0  </td></tr>
 </table>
 <p>Total 12 octets. The first octet is entirely header bits: the whole presence map and the first extension bit of the first integer fit in it.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md97"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md98"></a>
 <span class="tt">ih1_full</span> = <span class="tt">0e 00 ff 00 07 00 02 00 f1 10 20 04 d2 00 05 08 17 97 9c fe 3d 85 cd 15 01 2a</span></h2>
 <p>Same shape, with all three optional fields present. Differences from <span class="tt">ih1_min</span>:</p>
 <p>Table: Octets of the indication header <span class="tt">ih1_full</span></p>
@@ -355,7 +355,7 @@ Worked examples</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">24-25  </td><td class="markdownTableBodyNone"><span class="tt">01 2a</span>  </td><td class="markdownTableBodyNone"><span class="tt">sequence-id</span> = 42  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md98"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md99"></a>
 <span class="tt">ch1_min</span> = <span class="tt">00 01 00 02</span> (control header, no timestamp, no sequence-id)</h2>
 <p>Input: <span class="tt">ran-function-id</span> 1, <span class="tt">dapp-id</span> 2.</p>
 <p>Table: Octets of the control header <span class="tt">ch1_min</span></p>
@@ -382,7 +382,7 @@ Worked examples</h1>
 <td class="markdownTableBodyNone">3  </td><td class="markdownTableBodyNone"><span class="tt">02</span>  </td><td class="markdownTableBodyNone"><span class="tt">dapp-id</span> = 2  </td></tr>
 </table>
 <p>Compare with <span class="tt">ih1_min</span>: the control header has one choice alternative and two <span class="tt">OPTIONAL</span> fields, so the preamble is 5 bits instead of 7 and the first octet is completely full.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md99"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md100"></a>
 <span class="tt">co1_full</span> = <span class="tt">1c 08 17979cfe3d85cd15 01 2a 0a 10 20 30 40 50 60 70 80 90 a0</span> (control outcome, everything present)</h2>
 <p>This is the outcome that carries the Service-Model payload.</p>
 <p>Table: Octets of the control outcome <span class="tt">co1_full</span></p>
@@ -420,7 +420,7 @@ Worked examples</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">co1_payload</span>  </td><td class="markdownTableBodyNone"><span class="tt">04 0a 10 20 30 40 50 60 70 80 90 a0</span>  </td><td class="markdownTableBodyNone"><span class="tt">001</span>  </td><td class="markdownTableBodyNone">octet 0 = <span class="tt">000 001 00</span>  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md100"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md101"></a>
 Two APER layers nest in the control outcome</h2>
 <p><span class="tt">e3-control-outcome</span> is an <span class="tt">OCTET STRING</span>, and the Spectrum Service Model fills it with its own APER encoding of <span class="tt">Spectrum-ApplyOutcomeData</span> (<a class="el" href="md_docs_2e2sm-dapp_202-ie-mapping.html">02-ie-mapping.md</a>). So a received outcome has two independent APER values, one inside the other:</p>
 <div class="fragment"><div class="line">E2SM-DAPP-ControlOutcome            (APER, this specification)</div>
@@ -428,7 +428,7 @@ Two APER layers nest in the control outcome</h2>
 <div class="line">  e3-control-outcome OCTET STRING   (octet-aligned, copied as is)</div>
 <div class="line">    Spectrum-ApplyOutcomeData       (APER, owned by the Spectrum Service Model)</div>
 </div><!-- fragment --><p>The inner value starts on an octet boundary and its bit alignment is its own: it is decoded from its first octet as if it were a standalone message. The same tunnel is used by <span class="tt">ControlMessage-Format1.data</span> (xApp to RAN) and <span class="tt">IndicationMessage-Format1.data</span> (RAN to xApp).</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md101"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md102"></a>
 <span class="tt">im1_small</span> = <span class="tt">00 00 04 00 03 de ad be ef</span> (indication message format 1, 4 octets of payload)</h2>
 <p>Table: Octets of the indication message <span class="tt">im1_small</span></p>
 <table class="markdownTable">
@@ -444,7 +444,7 @@ Two APER layers nest in the control outcome</h2>
 <td class="markdownTableBodyNone">5-8  </td><td class="markdownTableBodyNone"><span class="tt">de ad be ef</span>  </td><td class="markdownTableBodyNone"><span class="tt">data</span>  </td></tr>
 </table>
 <p><span class="tt">data-size</span> and the octet-string length both carry the payload size.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md102"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md103"></a>
 <span class="tt">im2_one</span> = <span class="tt">20 00 01 00 01 00 00 01</span> (indication message format 2, one dApp, one function)</h2>
 <p>Table: Octets of the indication message <span class="tt">im2_one</span></p>
 <table class="markdownTable">
@@ -464,7 +464,7 @@ Two APER layers nest in the control outcome</h2>
 <td class="markdownTableBodyNone">7  </td><td class="markdownTableBodyNone"><span class="tt">01</span>  </td><td class="markdownTableBodyNone">function id = 1  </td></tr>
 </table>
 <p>Octets 5 and 6 show a bit field spanning the octet boundary: the first length bit is the last bit of octet 5 and the second is the first bit of octet 6.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md103"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md104"></a>
 <span class="tt">fd_min</span>, the smallest RAN function definition</h2>
 <p><span class="tt">00 10 45 32 53 4d 2d 44 41 50 50 00 00 1a 31 2e 33 2e 36 2e 31 2e 34 2e 31 2e 35 33 31 34 38 2e 31 2e 31 2e 32 35 35 2e 33 11 00 44 41 50 50 20 53 65 72 76 69 63 65 20 4d 6f 64 65 6c 20 66 6f 72 20 45 32 2f 45 33 20 62 72 69 64 67 65</span></p>
 <p>Table: Octets of the RAN function definition <span class="tt">fd_min</span></p>
@@ -502,7 +502,7 @@ Two APER layers nest in the control outcome</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">fd_full</span>  </td><td class="markdownTableBodyNone">175  </td><td class="markdownTableBodyNone">name, empty event trigger section, two report styles (style 2 with a map), one control style with a map  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md104"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md105"></a>
 Reference test vectors (full list)</h1>
 <p>The reference test vectors are encoded values with the inputs that produce them. An implementer uses them to check a codec. Vectors too large to inline carry a length and an FNV-1a 64-bit hash instead. The offset basis is <span class="tt">14695981039346656037</span>, and the prime is <span class="tt">1099511628211</span>.</p>
 <p>Table: Reference test vectors</p>
@@ -580,7 +580,7 @@ Reference test vectors (full list)</h1>
 <li>A subscription list of 0, 1, 2, 255 and 256 items.</li>
 </ul>
 <p>The vectors do <b>not</b> cover: extension bit <span class="tt">1</span>, a <span class="tt">ranFunction-Instance</span>, an <span class="tt">e3-control-outcome</span> longer than 127 octets (two-octet length form), a PLMN that is not three bytes, a timestamp with the top bit set, and any invalid input.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md105"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md106"></a>
 Native types for the grammar types</h1>
 <p>Implementations hold the grammar types in different native types. This clause lists the typical choices and the traps. Field names in the C++ and the C structures of a codec can follow the grammar names exactly, so that the same names work across implementations.</p>
 <p>Table: Typical native types for the fields</p>
@@ -617,10 +617,10 @@ Native types for the grammar types</h1>
 <li><b>A native format enumeration can start at 0 while the wire format numbers start at 1.</b> The enumeration value is not the <span class="tt">RIC-Format-Type</span> that the definition carries, which is <span class="tt">1</span> and <span class="tt">2</span>. A code that mirrors the enumeration in another language shall use the same numbering as the library.</li>
 <li><b>A zero-initialized structure can read as a valid format 1.</b> An all-zero indication message reads as "format 1, no data" when the first enumeration value is <span class="tt">0</span>. An encoder should guard against this.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md106"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md107"></a>
 Checking an encoding</h1>
 <p>To check a stack, an implementer encodes every input of the reference test vectors and compares the output with the expected bytes. Then the implementer decodes every expected value and compares the result with the input. The checklist and the way to regenerate the vectors are in <a class="el" href="md_docs_2e2sm-dapp_2integrator-guide.html">integrator-guide.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md107"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md108"></a>
 Abstract syntax</h1>
 <p>The ASN.1 definition of E2SM-DAPP conforms to ITU-T Rec. X.680 and ITU-T Rec. X.681. If the ASN.1 definition contradicts a table in this specification, the ASN.1 definition takes precedence.</p>
 <div class="fragment"><div class="line">-- ASN1START</div>

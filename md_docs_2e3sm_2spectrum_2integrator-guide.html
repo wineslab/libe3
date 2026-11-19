@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e3sm_2spectrum_2integrator-guide.html','','')
   <div class="headertitle"><div class="title">E3SM-SPEC: integrator guide </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md640"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md641"></a></p>
 <p>For an engineer who adds the Spectrum service model to a RAN, a dApp or an xApp. This guide is not part of the specification. It holds the code pointers that the specification leaves out.</p>
 <p>The specification is in <a class="el" href="dir_bf4e70bd8af5703d8fd0ae314deb09dd.html">README.md</a>. Read <a class="el" href="md_docs_2e3sm_2spectrum_202-ie-mapping.html">02-ie-mapping.md</a> and <a class="el" href="md_docs_2e3sm_2spectrum_203-procedure-flow.html">03-procedure-flow.md</a> first.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md641"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md642"></a>
 Where the code references point</h1>
 <p>Code references are <span class="tt">path:line</span> or a function name that was opened while writing. Function names are the stable reference. Line numbers drift. A path without a root belongs to <span class="tt">oai/</span> (the later revision).</p>
 <p>Table: Roots and the revisions read</p>
@@ -114,7 +114,7 @@ Where the code references point</h1>
 <td class="markdownTableBodyNone"><span class="tt">dapp-app/</span>  </td><td class="markdownTableBodyNone">a dApp that uses the service model (<span class="tt">dapps/applications/adaptive_cpu/</span>)  </td><td class="markdownTableBodyNone">the same revision as <span class="tt">dapp/</span>  </td></tr>
 </table>
 <p>The OpenAirInterface implementation is also the subject of <a href="https://github.com/duranta-project/openairinterface5g/pull/729">https://github.com/duranta-project/openairinterface5g/pull/729</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md642"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md643"></a>
 Artifacts</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -148,13 +148,13 @@ Artifacts</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Pending control records and the apply outcome relay  </td><td class="markdownTableBodyNone"><span class="tt">oai/openair2/E3AP/e3_pending_ctrl.c</span>, <span class="tt">oai/openair2/E3AP/e3_ctrl_ack_relay.c</span>  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md643"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md644"></a>
 The RAN side</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md644"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md645"></a>
 Register the service model</h2>
 <p><span class="tt">create_spectrum_sm_model</span> (<span class="tt">spectrum_sm.c:441</span>) builds the descriptor. It encodes the RAN function data first, with <span class="tt">spectrum_encode_ran_function_data</span> (<span class="tt">spectrum_enc.c:154</span>), and returns NULL if that fails. The description text is <span class="tt">SPECTRUM_RAN_FUNCTION_DESCRIPTION</span> (<span class="tt">spectrum_enc.c:26</span>). The agent registers the service model only if its id is in the <span class="tt">enabled_sms</span> list, or if the list is empty (<span class="tt">oai/openair2/E3AP/e3_agent.c:195</span>). The descriptor holds the name <span class="tt">spectrum_sm</span>, the version 1, the telemetry identifiers 1 to 5 and the control identifiers 1 to 4 (<span class="tt">spectrum_sm.c:71-127</span>).</p>
 <p>The specification defines the control identifiers 1 and 2. Identifiers 3 (sensing reservation) and 4 (PUSCH slots) exist only in this RAN. A dApp written from the specification does not send them.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md645"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md646"></a>
 Telemetry</h2>
 <p>The service model runs two workers on the shared driver <span class="tt">e3_sm_worker.c</span>. <span class="tt">spectrum_sm_start</span> (<span class="tt">spectrum_sm.c:489</span>) starts both.</p>
 <ul>
@@ -164,7 +164,7 @@ Telemetry</h2>
 <p><span class="tt">nr_mac_get_cell_config</span> takes the downlink point A when the uplink has none (<span class="tt">gNB_scheduler_ul_sensing.c:552-557</span>), and writes one letter for each slot of the TDD period (lines 539-545). The cell configuration encoder has an APER and a JSON form. With Protocol Buffers it logs an error and sends nothing (<span class="tt">spectrum_enc.c:291-293</span>).</p>
 <p>The period of the sensing indication comes from <span class="tt">min_subscription_period_us</span> (<span class="tt">e3_agent.c:63</span>): the smallest periodicity of the subscribers, in microseconds, with "0" for any subscriber that wants every event. <span class="tt">on_dapp_status_changed</span> (<span class="tt">e3_agent.c:81</span>) recomputes it and sets it with <span class="tt">spectrum_telemetry_set_period_us</span> (<span class="tt">e3_agent.c:94</span>). The period of the cell configuration indication is fixed.</p>
 <p>The ring is created by <span class="tt">spectrum_sensing_ring_init</span> (<span class="tt">spectrum_sensing_ring.c:42</span>) through <span class="tt">e3_shm_region_create</span> (<span class="tt">e3_shm_region.c:20</span>). That removes any old region and creates a new one with the mode 0644. The ring init then zeroes it and writes the header. The layout is in <span class="tt">spectrum_sensing_ring.h</span>.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md646"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md647"></a>
 Controls</h2>
 <p><span class="tt">spectrum_sm_process_control</span> (<span class="tt">spectrum_sm.c:861</span>) is the dispatcher. It checks, in this order, the RAN function id, that the service model runs, and that the payload is not empty (lines 877-900). Then it switches on the control identifier (line 903).</p>
 <ul>
@@ -174,13 +174,13 @@ Controls</h2>
 </ul>
 <p>The decoders pick the codec with <span class="tt">e3_get_encoding</span> (<span class="tt">e3_agent.c:28</span>). The JSON envelope check is <span class="tt">spectrum_json_envelope_extract</span> (<span class="tt">spectrum_dec.c:179</span>). The ASN.1 range checks are in <span class="tt">spectrum_extract_prb_control</span> (<span class="tt">spectrum_dec.c:41</span>) and <span class="tt">spectrum_extract_sensing_policy</span> (<span class="tt">spectrum_dec.c:104</span>).</p>
 <p><span class="tt">spectrum_sm_stop</span> (<span class="tt">spectrum_sm.c:519</span>) stops both workers, which removes the ring (lines 531-532). Then it clears the sensing policy (line 544), restores the configured sensing reservation and PUSCH slots (lines 550-551), and clears the PRB block in both directions with one call (line 552). In the first revision it clears the two directions one after the other (<span class="tt">oai-first</span> <span class="tt">spectrum_sm.c:421-422</span>).</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md647"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md648"></a>
 The report and the xApp control</h2>
 <p><span class="tt">e2_e3_bridge</span> (<span class="tt">e3_agent.c:33</span>) is the dApp report handler. It calls <span class="tt">generate_e2_indication_from_e3_dapp_report</span> (line 49) when the build has an E2 agent. Without an E2 agent it does nothing. <span class="tt">e3_send_xapp_control</span> (<span class="tt">e3_agent.c:288</span>) sends an xApp control to a dApp. The E2 side that calls it is in <span class="tt">oai/openair2/E2AP/RAN_FUNCTION/O-RAN/ran_func_dapp.c:533-539</span>. It first opens a pending record with <span class="tt">e3_pending_ctrl_open</span> (<span class="tt">e3_pending_ctrl.c:60</span>).</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md648"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md649"></a>
 The apply outcome</h2>
 <p>The record table is <span class="tt">oai/openair2/E3AP/e3_pending_ctrl.c</span>. It holds 64 records (<span class="tt">E3_PENDING_CTRL_MAX</span>, <span class="tt">e3_pending_ctrl.h:32</span>). The timeout is <span class="tt">E3_PENDING_CTRL_TIMEOUT_NS</span> (<span class="tt">e3_pending_ctrl.c:24</span>), 150 ms. The install is recorded at <span class="tt">spectrum_sm.c:705</span>. The MAC calls <span class="tt">prb_block_on_air_hook</span> (<span class="tt">e3_ctrl_ack_relay.c:48</span>) on the first tick that uses the block (<span class="tt">gNB_scheduler_prb_block.c:598</span>), and <span class="tt">prb_block_superseded_hook</span> when a later block replaces it (<span class="tt">gNB_scheduler_prb_block.c:165,196</span>). The relay thread turns each finished record into an outcome with <span class="tt">send_deferred_ctrl_ack</span> (<span class="tt">e3_ctrl_ack_relay.c:64</span>), which encodes it with <span class="tt">spectrum_encode_apply_outcome</span> (<span class="tt">spectrum_enc.c:443</span>).</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md649"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md650"></a>
 The dApp side</h1>
 <ol type="1">
 <li>Send an E3 Setup Request and look for <span class="tt">ranFunctionIdentifier</span> 1 in the response.</li>
@@ -194,13 +194,13 @@ The dApp side</h1>
 <li>For an xApp control, decode <span class="tt">Spectrum-XAppControlData</span>, then send the PRB block control with the same <span class="tt">sequenceId</span> in the E3 dApp Control Action.</li>
 </ol>
 <p>The dApp side codec is in <span class="tt">dapp/spectrum_control_codec.c</span>. It decodes the xApp control with APER only (<span class="tt">spectrum_sm_dec_blocked_control</span>, line 20). The comment at the top of its header says that the dApp sends the PRB block control as JSON, because the RAN decodes with the encoding of its build. The application builds that JSON in <span class="tt">BuildPrbBlockControlJson</span> (<span class="tt">dapp-app/subcarrier_power_app.cpp:1080</span>) and reads the cell configuration in <span class="tt">HandleCellConfig</span> (line 2301).</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md650"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md651"></a>
 The xApp side</h1>
 <p>The xApp codec is in <span class="tt">xapp/asn/</span>. <span class="tt">spectrum_sm_enc_control</span> (<span class="tt">encoder.c:13</span>) builds a <span class="tt">Spectrum-XAppControlData</span> with a <span class="tt">prbBlockedControl</span>. It refuses more than 273 PRBs or an index above</p><ol type="1">
 <li>A timestamp of "0" is sent as absent. <span class="tt">spectrum_sm_dec_report</span> (<span class="tt">decoder.c:11</span>) decodes the dApp report. <span class="tt">spectrum_sm_dec_apply_outcome</span> (<span class="tt">decoder.c:80</span>) decodes the apply outcome and returns the two realtime timestamps, the frame and the slot. An xApp has to remember which RAN function it sent the control to, because the E2 control outcome has no RAN function identifier.</li>
 </ol>
 <p>The xApp-side build of the grammar compiles only the report and xApp control chain, and the apply outcome. The other types are generated and not used (<span class="tt">xapp/asn/defs/CMakeLists.txt</span>). Its copy of the grammar has no cell configuration indication. The xApp does not decode indications, so this does not matter today.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md651"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md652"></a>
 Evidence for the discrepancies</h1>
 <p>The discrepancies are listed in <a href="../../interop.md#e3-service-models">interop.md</a>. This is where each one comes from.</p>
 <p>Table: Where each discrepancy comes from</p>
@@ -228,7 +228,7 @@ Evidence for the discrepancies</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">First revision has no sequence identifier in the control handler  </td><td class="markdownTableBodyNone"><span class="tt">oai-first</span> <span class="tt">spectrum_sm.c:92-100</span> has no <span class="tt">sequence_id</span> parameter  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md652"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md653"></a>
 Tests</h1>
 <p>No test or golden vector for this service model was found in the E3AP library tree or in <span class="tt">oai/</span>. The CI test script of the OpenAirInterface tree runs the service model against a radio simulator, and this guide did not read its result. <a class="el" href="md_docs_2e3sm_2spectrum_207-examples.html">Annex A</a> gives one exchange generated from the grammar. It was not run against an implementation. Treat the encodings as untested against a second implementation. </p>
 </div></div><!-- contents -->

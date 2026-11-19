@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -115,7 +115,7 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a1abb4bea69600906228598c53780c766" id="r_a1abb4bea69600906228598c53780c766"><td class="memItemLeft" align="right" valign="top">std::optional&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1abb4bea69600906228598c53780c766">ran_function_identifier</a></td></tr>
 <tr class="memdesc:a1abb4bea69600906228598c53780c766"><td class="mdescLeft">&#160;</td><td class="mdescRight">RAN function the grant is for.  <br /></td></tr>
 <tr class="memitem:ac590bf9d5b22396af90c5bc4ca266af7" id="r_ac590bf9d5b22396af90c5bc4ca266af7"><td class="memItemLeft" align="right" valign="top">std::optional&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac590bf9d5b22396af90c5bc4ca266af7">periodicity</a></td></tr>
-<tr class="memdesc:ac590bf9d5b22396af90c5bc4ca266af7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Granted interval, same unit and range as the request.  <br /></td></tr>
+<tr class="memdesc:ac590bf9d5b22396af90c5bc4ca266af7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Least microseconds the RAN keeps between two indications (absent = not reported).  <br /></td></tr>
 <tr class="memitem:a04ccd6a56ec8e054e0c753321a308e9d" id="r_a04ccd6a56ec8e054e0c753321a308e9d"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a04ccd6a56ec8e054e0c753321a308e9d">cause</a></td></tr>
 <tr class="memdesc:a04ccd6a56ec8e054e0c753321a308e9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why the subscription was refused (negative only).  <br /></td></tr>
 <tr class="memitem:a83007ce2a58575599224ff53c2d98fa3" id="r_a83007ce2a58575599224ff53c2d98fa3"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a83007ce2a58575599224ff53c2d98fa3">detail</a></td></tr>
@@ -210,7 +210,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Granted interval, same unit and range as the request. </p>
+<p>Least microseconds the RAN keeps between two indications (absent = not reported). </p>
 
 <p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00312">312</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 

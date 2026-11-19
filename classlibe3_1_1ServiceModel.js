@@ -6,6 +6,7 @@ var classlibe3_1_1ServiceModel =
     [ "destroy", "classlibe3_1_1ServiceModel.html#a509d11a31eaa21d4ecba7c270c288f21", null ],
     [ "emit_outbound", "classlibe3_1_1ServiceModel.html#a979d55be233ccf00829259a9b276c773", null ],
     [ "get_subscribers", "classlibe3_1_1ServiceModel.html#a29fc96ee477223cb4a6c76e1b03bebb4", null ],
+    [ "granted_periodicity", "classlibe3_1_1ServiceModel.html#a40a725aa3c7096155b846d7447d48e21", null ],
     [ "handle_control_action", "classlibe3_1_1ServiceModel.html#a9db06b14342c2e140d1a0df72a174ef3", null ],
     [ "init", "classlibe3_1_1ServiceModel.html#ae72911e55ced46ac00c628d1696c5a97", null ],
     [ "is_running", "classlibe3_1_1ServiceModel.html#ae10f43ca27d5ae47d93d6fde0c2dd014", null ],

@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,7 +92,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_202-ie-mapping.html','',''); });
   <div class="headertitle"><div class="title">E2SM-DAPP: E2AP information element mapping </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md39"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md40"></a></p>
 <p>This chapter defines every information element of E2SM-DAPP, in the shape of an O-RAN E2SM specification. It shows where each element sits in E2AP. It gives the fields with types, ranges and presence. It lists the formats and styles. It says which E2 service uses which format.</p>
 <p>The index is <a class="el" href="dir_24c5afd111e6aa944685a569bf5db165.html">README.md</a>. The bytes of each element are in <a class="el" href="md_docs_2e2sm-dapp_204-encoding.html">04-encoding.md</a>. The message order is in <a class="el" href="md_docs_2e2sm-dapp_203-procedure-flow.html">03-procedure-flow.md</a>. The meaning of the values and the checks on them are in <a class="el" href="md_docs_2e2sm-dapp_205-semantics-and-constraints.html">05-semantics-and-constraints.md</a>.</p>
 <p>How to read the field tables:</p>
@@ -101,7 +101,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_202-ie-mapping.html','',''); });
 <li><b>Presence</b> is <span class="tt">optional</span> for an <span class="tt">OPTIONAL</span> field. Otherwise it is <span class="tt">mandatory</span>.</li>
 <li>Every <span class="tt">SEQUENCE</span> and <span class="tt">CHOICE</span> has an extension marker (<span class="tt">...</span>). No extension additions exist yet.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md40"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md41"></a>
 1. The elements at a glance</h1>
 <p>Table: E2SM-DAPP elements and the E2AP fields that carry them</p>
 <table class="markdownTable">
@@ -130,7 +130,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_202-ie-mapping.html','',''); });
 </table>
 <p>All payload IEs are APER encodings of the ASN.1 type. E2AP tunnels them in an <span class="tt">OCTET STRING</span>. The ASN.1 grammar is in <a class="el" href="md_docs_2e2sm-dapp_204-encoding.html">04-encoding.md</a>.</p>
 <p><a class="anchor" id="e2-service-formats"></a></p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md41"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md42"></a>
 2. Which E2 service uses which format</h1>
 <p>E2SM-DAPP implements two of the E2 services: <b>REPORT</b> and <b>CONTROL</b>. The table lists the report styles and the control style that the RAN advertises. It gives the format that each IE uses under each style.</p>
 <p>Table: Styles and the formats of their IEs</p>
@@ -170,7 +170,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_202-ie-mapping.html','',''); });
 <ul>
 <li><b>Selection by name.</b> Some xApps find the control style <b>by name</b>. They look for the string <span class="tt">DAPP-CONTROL-STYLE-1</span> in the definition. They refuse to send a control if the string is not there. A RAN that works with such xApps shall use that name.</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md42"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md43"></a>
 2.1 Why INSERT, POLICY and QUERY are "not used"</h2>
 <p>E2SM-DAPP defines none of them.</p>
 <p>Table: Why the other E2 services are not used</p>
@@ -191,7 +191,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_202-ie-mapping.html','',''); });
 <td class="markdownTableBodyNone">The event trigger needs no timer.  </td><td class="markdownTableBodyNone">The service model answers every subscription with an aperiodic outcome. The RAN drives the reports, not a period.  </td></tr>
 </table>
 <p>The reasons were checked in the implementations. The evidence is in the integrator guide.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md43"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md44"></a>
 2.2 Why there is no call process ID</h2>
 <p>E2AP carries an optional Call Process ID on an indication and on a control request. E2SM-DAPP does not use it.</p>
 <p>Table: Why the call process ID is not used</p>
@@ -207,7 +207,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_202-ie-mapping.html','',''); });
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">A sender may still put one.  </td><td class="markdownTableBodyNone">One xApp framework sends the string <span class="tt">1</span> in every control request. The receiver ignores it. A conforming sender omits it.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md44"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md45"></a>
 3. Common types</h1>
 <p>Several elements use these types.</p>
 <p>Table: Common ASN.1 types</p>
@@ -233,9 +233,9 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_202-ie-mapping.html','',''); });
 </table>
 <p>The standard has two identifier spaces besides the identifiers of E2. The first is the <b>E3 RAN function id</b>. It says which E3 service model a report or a control belongs to, for example Spectrum. The second is the <b>dApp id</b>. It says which dApp. Both come from the E3 interface. They are not E2 identifiers. The E2 RAN function id of E2SM-DAPP is 255. See <a class="el" href="md_docs_2e2sm-dapp_201-identity-and-registration.html">01-identity-and-registration.md</a>.</p>
 <p>The E2SM-DAPP ids relate to the E3AP ids as follows. In E2SM-DAPP, <span class="tt">ran-function-id</span> and <span class="tt">dapp-id</span> are <span class="tt">INTEGER (0..4294967295, ...)</span>. In E3AP, <span class="tt">E3-DAppID</span> is <span class="tt">INTEGER (1..65535)</span> and <span class="tt">ranFunctionIdentifier</span> is <span class="tt">INTEGER (1..65535)</span>. Every E3 value is valid in E2SM-DAPP. The reverse is not true. E2SM-DAPP can carry <span class="tt">0</span> and values above <span class="tt">65535</span>. The E3 link cannot deliver them. See <a class="el" href="md_docs_2e2sm-dapp_205-semantics-and-constraints.html">05-semantics-and-constraints.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md45"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md46"></a>
 4. Event trigger and action definition</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md46"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md47"></a>
 4.1 <span class="tt">E2SM-DAPP-EventTrigger</span></h2>
 <div class="fragment"><div class="line">E2SM-DAPP-EventTrigger ::= SEQUENCE {</div>
 <div class="line">    ric-eventTrigger-formats CHOICE {</div>
@@ -255,7 +255,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_202-ie-mapping.html','',''); });
 <td class="markdownTableBodyNone"><span class="tt">eventTrigger-Format1</span>  </td><td class="markdownTableBodyNone">empty <span class="tt">SEQUENCE</span>  </td><td class="markdownTableBodyNone">no fields  </td><td class="markdownTableBodyNone">mandatory  </td><td class="markdownTableBodyNone">The subscription has no trigger condition. The RAN sends indications when it has something to report.  </td></tr>
 </table>
 <p>A subscriber shall always send the empty trigger. The agent decodes it and ignores it.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md47"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md48"></a>
 4.2 <span class="tt">E2SM-DAPP-ActionDefinition</span></h2>
 <div class="fragment"><div class="line">E2SM-DAPP-ActionDefinition ::= SEQUENCE {</div>
 <div class="line">    ric-Style-Type             RIC-Style-Type,</div>
@@ -279,7 +279,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_202-ie-mapping.html','',''); });
 </table>
 <p>Style 1 receives indication header and message format 1 only. Style 2 receives format 2 only. To get both, the subscriber sends two RIC Subscription Requests with different RIC request ids. Both implementations behave this way.</p>
 <p>The action definition is optional in E2AP. Some agents cope with its absence. Other agents require it and abort without one. A subscription with a style number other than 1 or 2 can abort the E2 node: the RAN answers with an empty result, and an agent with assertions on rejects that result. A subscriber shall send an action definition with style 1 or 2.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md48"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md49"></a>
 5. RAN function definition</h1>
 <p>The RAN sends the RAN function definition in E2 Setup and in RIC Service Update. It advertises the styles. For dApp discovery, it also advertises the current <b>dApp E3 subscription map</b>.</p>
 <div class="fragment"><div class="line">E2SM-DAPP-RANFunctionDefinition ::= SEQUENCE {</div>
@@ -302,7 +302,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_202-ie-mapping.html','',''); });
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">ranFunctionDefinition-Control</span>  </td><td class="markdownTableBodyNone"><span class="tt">RANFunctionDefinition-Control</span>  </td><td class="markdownTableBodyNone">optional  </td><td class="markdownTableBodyNone">see 5.3  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md49"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md50"></a>
 5.1 <span class="tt">RANfunction-Name</span></h2>
 <p>Table: Fields of RANfunction-Name</p>
 <table class="markdownTable">
@@ -317,7 +317,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_202-ie-mapping.html','',''); });
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">ranFunction-Instance</span>  </td><td class="markdownTableBodyNone"><span class="tt">INTEGER</span>  </td><td class="markdownTableBodyNone">unbounded  </td><td class="markdownTableBodyNone">optional  </td><td class="markdownTableBodyNone">not used. A sender shall not set it. One encoder refuses to encode it, and one decoder never reads it.  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md50"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md51"></a>
 5.2 <span class="tt">RANFunctionDefinition-Report</span></h2>
 <div class="fragment"><div class="line">RANFunctionDefinition-Report ::= SEQUENCE {</div>
 <div class="line">    ric-ReportStyle-List  SEQUENCE (SIZE(1..maxnoofDAPPReportStyles)) OF RANFunctionDefinition-Report-Item,</div>
@@ -348,7 +348,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_202-ie-mapping.html','',''); });
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">dappE3Subscriptions</span>  </td><td class="markdownTableBodyNone"><span class="tt">DAppE3Subscription-List</span>  </td><td class="markdownTableBodyNone">0..256 items  </td><td class="markdownTableBodyNone">optional  </td><td class="markdownTableBodyNone">the dApp E3 subscription map at the time the RAN built the definition. A RAN should attach it to report style 1 only. It should attach it only when at least one dApp has at least one subscribed function.  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md51"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md52"></a>
 5.3 <span class="tt">RANFunctionDefinition-Control</span></h2>
 <div class="fragment"><div class="line">RANFunctionDefinition-Control ::= SEQUENCE {</div>
 <div class="line">    ric-ControlStyle-List  SEQUENCE (SIZE(1..maxnoofDAPPControlStyles)) OF RANFunctionDefinition-Control-Item,</div>
@@ -382,7 +382,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_202-ie-mapping.html','',''); });
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">dappE3Subscriptions</span>  </td><td class="markdownTableBodyNone"><span class="tt">DAppE3Subscription-List</span>  </td><td class="markdownTableBodyNone">0..256 items  </td><td class="markdownTableBodyNone">optional  </td><td class="markdownTableBodyNone">the same map as in the report item. A RAN should copy it from report style 1.  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md52"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md53"></a>
 5.4 dApp E3 subscription list</h2>
 <div class="fragment"><div class="line">DAppE3Subscription-Item ::= SEQUENCE {</div>
 <div class="line">    dapp-id                      INTEGER (0..4294967295, ...),</div>
@@ -406,9 +406,9 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_202-ie-mapping.html','',''); });
 <p>The same list type appears in three places: the report item, the control item and indication message format 2. The list means the same in all three: "these dApps are
 connected, and each has subscribed to these E3 RAN functions". How an xApp uses it is in <a href="03-procedure-flow.md#discovery-how-an-xapp-learns-the-dapp-ids">03-procedure-flow.md</a>.</p>
 <p>A RAN shall build the list from the subscription map of its E3 agent. It shall drop every dApp with zero subscribed functions. This keeps the one-or-more rule of the grammar.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md53"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md54"></a>
 6. Indication header and message</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md54"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md55"></a>
 6.1 <span class="tt">E2SM-DAPP-IndicationHeader</span></h2>
 <div class="fragment"><div class="line">E2SM-DAPP-IndicationHeader ::= SEQUENCE {</div>
 <div class="line">    ric-indicationHeader-formats CHOICE {</div>
@@ -460,7 +460,7 @@ connected, and each has subscribed to these E3 RAN functions". How an xApp uses 
 <td class="markdownTableBodyNone"><span class="tt">sequence-id</span>  </td><td class="markdownTableBodyNone"><span class="tt">SequenceId</span>  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">optional  </td><td class="markdownTableBodyNone">No procedure is behind a subscription map. A RAN should leave the field absent.  </td></tr>
 </table>
 <p>Format 2 has no <span class="tt">ran-function-id</span> and no <span class="tt">dapp-id</span>. The map names the dApps itself.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md55"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md56"></a>
 6.2 <span class="tt">E2SM-DAPP-IndicationMessage</span></h2>
 <div class="fragment"><div class="line">E2SM-DAPP-IndicationMessage ::= SEQUENCE {</div>
 <div class="line">    ric-indicationMessage-formats CHOICE {</div>
@@ -489,9 +489,9 @@ connected, and each has subscribed to these E3 RAN functions". How an xApp uses 
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">dappE3Subscriptions</span>  </td><td class="markdownTableBodyNone"><span class="tt">DAppE3Subscription-List</span>  </td><td class="markdownTableBodyNone"><span class="tt">SIZE(0..256)</span>  </td><td class="markdownTableBodyNone">mandatory  </td><td class="markdownTableBodyNone">the current dApp E3 subscription map. It can be empty when no dApp is connected.  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md56"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md57"></a>
 7. Control header, message, outcome</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md57"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md58"></a>
 7.1 <span class="tt">E2SM-DAPP-ControlHeader</span></h2>
 <div class="fragment"><div class="line">E2SM-DAPP-ControlHeader ::= SEQUENCE {</div>
 <div class="line">    ric-controlHeader-formats CHOICE {</div>
@@ -513,7 +513,7 @@ connected, and each has subscribed to these E3 RAN functions". How an xApp uses 
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">sequence-id</span>  </td><td class="markdownTableBodyNone"><span class="tt">SequenceId</span>  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">optional  </td><td class="markdownTableBodyNone">the id of the procedure. The xApp echoes it from the indication header that prompted this control. <b>If it is absent or <span class="tt">0</span>, the RAN cannot defer the acknowledge.</b> The RAN then answers immediately and applies nothing.  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md58"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md59"></a>
 7.2 <span class="tt">E2SM-DAPP-ControlMessage</span></h2>
 <div class="fragment"><div class="line">E2SM-DAPP-ControlMessage ::= SEQUENCE {</div>
 <div class="line">    ric-controlMessage-formats CHOICE {</div>
@@ -531,7 +531,7 @@ connected, and each has subscribed to these E3 RAN functions". How an xApp uses 
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">data</span>  </td><td class="markdownTableBodyNone"><span class="tt">OCTET STRING</span>  </td><td class="markdownTableBodyNone"><span class="tt">SIZE(1..maxE2SMDAPPCtrlMsgSize)</span> (1..32768)  </td><td class="markdownTableBodyNone">mandatory  </td><td class="markdownTableBodyNone">the encoding of the xApp control by the service model. The RAN delivers it unchanged to the dApp as the <span class="tt">xAppControlData</span> of an <span class="tt">E3-XAppControlAction</span>. E2SM-DAPP does not interpret it.  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md59"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md60"></a>
 7.3 <span class="tt">E2SM-DAPP-ControlOutcome</span></h2>
 <div class="fragment"><div class="line">E2SM-DAPP-ControlOutcome ::= SEQUENCE {</div>
 <div class="line">    ric-controlOutcome-formats CHOICE {</div>
@@ -559,10 +559,10 @@ connected, and each has subscribed to these E3 RAN functions". How an xApp uses 
 </table>
 <p>The outcome has <b>no <span class="tt">ran-function-id</span></b>. The xApp shall remember, for each <span class="tt">sequence-id</span>, the E3 RAN function to which it sent the control. That tells the xApp which service model decodes <span class="tt">e3-control-outcome</span>. The Spectrum example below assumes an xApp that talks only to Spectrum.</p>
 <p><a class="anchor" id="e3-control-outcome-payload"></a></p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md60"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md61"></a>
 8. The <span class="tt">e3-control-outcome</span> payload</h1>
 <p><span class="tt">e3-control-outcome</span> is the payload of the control outcome. E2SM-DAPP defines the envelope (the three fields above). It defines nothing about the content. The same tunnelling is used for the control itself (<span class="tt">ControlMessage-Format1.data</span>) and for the report (<span class="tt">IndicationMessage-Format1.data</span>).</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md61"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md62"></a>
 8.1 Who owns what</h2>
 <p>Table: Ownership of the layers of the control outcome</p>
 <table class="markdownTable">
@@ -574,7 +574,7 @@ connected, and each has subscribed to these E3 RAN functions". How an xApp uses 
 <td class="markdownTableBodyNone">the bytes in <span class="tt">e3-control-outcome</span>  </td><td class="markdownTableBodyNone">the <b>service model named by the <span class="tt">ran-function-id</span> of the control</b>  </td><td class="markdownTableBodyNone">the PDU, its encoding, its units, and what "applied" means for that service model  </td></tr>
 </table>
 <p>"Applied" has a different meaning for each service model. For a spectrum control, a PRB block is in effect only after the scheduler puts the mask on the air. That instant is later than the instant at which the control handler returns. For another service model, "applied" can be a single instant, a verdict or a set of counters. E2SM-DAPP cannot say which. It does not try.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md62"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md63"></a>
 8.2 Worked example: the Spectrum service model</h2>
 <p>The Spectrum service model owns the apply outcome. It does not belong to this standard. The grammar is in the Spectrum specification (<a class="el" href="dir_bf4e70bd8af5703d8fd0ae314deb09dd.html">E3SM Spectrum</a>). Do not implement the outcome from this document. This section shows what an outcome can contain.</p>
 <p>Spectrum defines an apply-outcome PDU, <span class="tt">Spectrum-ApplyOutcomeData</span>. It is a <span class="tt">SEQUENCE</span> with no extension marker. It has an optional <span class="tt">timestamp</span> and an <span class="tt">applyOutcomePayload</span>. The payload is a <span class="tt">CHOICE</span> with an extension marker. It has one alternative today, <span class="tt">prbBlockApplyOutcome</span>. That alternative is a <span class="tt">SEQUENCE</span> with an extension marker and four optional fields. Both timestamps are <span class="tt">INTEGER</span> values in nanoseconds on the realtime clock of the gNB. The xApp can therefore subtract them from the timestamp of the Spectrum dApp report, which is on the same clock. They are payload fields. They are not latency recorder records, because the latency recorder uses the monotonic clock. Never subtract one from the other. The outcome <span class="tt">timestamp</span> is the time at which the outcome was built. The applied instants are in the payload.</p>
@@ -626,7 +626,7 @@ connected, and each has subscribed to these E3 RAN functions". How an xApp uses 
 </ul>
 <p>A superseded control was installed and never on the air. It has presence bits <span class="tt">1000</span> and ends after <span class="tt">installedTimestamp</span>: <span class="tt">80 08 17979cfe4215c200 20 08 17979cfe3c1fe100</span>.</p>
 <p>The bytes were derived by hand with the rules in <a class="el" href="md_docs_2e2sm-dapp_204-encoding.html">04-encoding.md</a>. They are <b>not</b> golden vectors. No Spectrum codec was run on them.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md63"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md64"></a>
 8.3 How a consumer reads it</h2>
 <p>A consumer decodes in two steps. The first step belongs to E2SM-DAPP. The second belongs to the service model.</p>
 <p><b>Step 1, E2SM-DAPP.</b> The consumer decodes <span class="tt">E2SM-DAPP-ControlOutcome</span>. It reads four values: the timestamp, the sequence id, the payload and the payload size. A decoder that stores "absent" as <span class="tt">0</span> gives the consumer a <span class="tt">0</span>. The consumer shall map that <span class="tt">0</span> back to "absent" for the timestamp and the sequence id. When the E2AP outcome field is empty, or the decode fails, the consumer shall treat all four values as absent.</p>
@@ -644,7 +644,7 @@ connected, and each has subscribed to these E3 RAN functions". How an xApp uses 
 <li>Decode with the service model that matches the E3 RAN function id <b>that you put in the control header</b>. The outcome does not say.</li>
 <li>Free the payload buffer, if the decoder allocates one.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md64"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md65"></a>
 8.4 How another service model adds its own outcome</h2>
 <p>A service model with E3 RAN function id <span class="tt">N</span> needs no change to E2SM-DAPP. It does the following.</p>
 <ol type="1">
@@ -655,7 +655,7 @@ connected, and each has subscribed to these E3 RAN functions". How an xApp uses 
 <li>It states its clock and units in its own grammar. If it wants the xApp to compute a latency against a dApp report timestamp, both timestamps shall be in nanoseconds on the realtime clock of one host, as the Spectrum ones are.</li>
 </ol>
 <p>E2SM-DAPP has no registry of E3 RAN function ids. The RAN stack assigns them. A RIC-side decoder can hard-code the id of a service model. A new service model therefore needs its id agreed between the RAN stack, the dApp and the xApp.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md65"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md66"></a>
 9. Where the elements are produced and consumed</h1>
 <p>Table: Producers and consumers of the elements</p>
 <table class="markdownTable">
@@ -673,7 +673,7 @@ connected, and each has subscribed to these E3 RAN functions". How an xApp uses 
 <td class="markdownTableBodyNone">Control outcome  </td><td class="markdownTableBodyNone">the RAN  </td><td class="markdownTableBodyNone">the xApp  </td></tr>
 </table>
 <p>The step-by-step account is in <a class="el" href="md_docs_2e2sm-dapp_203-procedure-flow.html">03-procedure-flow.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md66"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md67"></a>
 10. Other representations of the elements</h1>
 <p>Other implementations mirror the elements one to one in their own types. The names and the differences are in <a class="el" href="md_docs_2e2sm-dapp_204-encoding.html">04-encoding.md</a> and in the <a class="el" href="md_docs_2e2sm-dapp_2integrator-guide.html">integrator guide</a>. </p>
 </div></div><!-- contents -->

@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.2</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -128,7 +128,7 @@ Static Public Member Functions</h2></td></tr>
 <div class="textblock"><p>SM Registry for managing registered Service Models. </p>
 <p>This class provides a central registry for Service Models. It's used by the <a class="el" href="classlibe3_1_1E3Agent.html" title="E3Agent - Main façade for RAN vendor integration.">E3Agent</a> to find and manage SMs. </p>
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00231">231</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00271">271</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="af90bd5ce3f692a3a4ae050da8d8901ed" name="af90bd5ce3f692a3a4ae050da8d8901ed"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af90bd5ce3f692a3a4ae050da8d8901ed">&#9670;&#160;</a></span>clear()</h2>
@@ -167,6 +167,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get all available RAN function IDs. </p>
+<dl class="section return"><dt>Returns</dt><dd>The RAN functions that have an SM or a factory </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="sm__registry_8cpp_source.html#l00157">157</a> of file <a class="el" href="sm__registry_8cpp_source.html">sm_registry.cpp</a>.</p>
 
@@ -224,6 +225,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get the singleton instance. </p>
+<dl class="section return"><dt>Returns</dt><dd>The registry </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="sm__registry_8cpp_source.html#l00019">19</a> of file <a class="el" href="sm__registry_8cpp_source.html">sm_registry.cpp</a>.</p>
 
@@ -245,6 +247,13 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Check if SM is running. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ran_function_id</td><td>RAN function whose SM is asked about </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if its SM is running </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="sm__registry_8cpp_source.html#l00221">221</a> of file <a class="el" href="sm__registry_8cpp_source.html">sm_registry.cpp</a>.</p>
 
@@ -302,7 +311,14 @@ ErrorCode::INVALID_PARAM if the SM lists more than 256 telemetry or control ids,
 </div><div class="memdoc">
 
 <p>Register a Service Model factory. </p>
-<p>Use this to defer SM creation until needed. </p>
+<p>Use this to defer SM creation until needed. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ran_function_id</td><td>RAN function the factory serves </td></tr>
+    <tr><td class="paramname">factory</td><td>Creates the SM </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="sm__registry_8cpp_source.html#l00082">82</a> of file <a class="el" href="sm__registry_8cpp_source.html">sm_registry.cpp</a>.</p>
 
@@ -324,6 +340,13 @@ ErrorCode::INVALID_PARAM if the SM lists more than 256 telemetry or control ids,
 </div><div class="memdoc">
 
 <p>Start SM for a RAN function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ran_function_id</td><td>RAN function whose SM is started </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success, an error code otherwise </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="sm__registry_8cpp_source.html#l00175">175</a> of file <a class="el" href="sm__registry_8cpp_source.html">sm_registry.cpp</a>.</p>
 
@@ -345,6 +368,13 @@ ErrorCode::INVALID_PARAM if the SM lists more than 256 telemetry or control ids,
 </div><div class="memdoc">
 
 <p>Stop SM for a RAN function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ran_function_id</td><td>RAN function whose SM is stopped </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success, an error code otherwise </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="sm__registry_8cpp_source.html#l00202">202</a> of file <a class="el" href="sm__registry_8cpp_source.html">sm_registry.cpp</a>.</p>
 
@@ -366,6 +396,13 @@ ErrorCode::INVALID_PARAM if the SM lists more than 256 telemetry or control ids,
 </div><div class="memdoc">
 
 <p>Unregister a Service Model by RAN function ID. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ran_function_id</td><td>RAN function of the SM to remove </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success, an error code otherwise </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="sm__registry_8cpp_source.html#l00106">106</a> of file <a class="el" href="sm__registry_8cpp_source.html">sm_registry.cpp</a>.</p>
 

@@ -7,6 +7,7 @@ var c__api_8h =
     [ "e3_dapp_status_changed_cb", "c__api_8h.html#a00b319809607dc028d264694d29e3885", null ],
     [ "e3_service_model_handle_t", "c__api_8h.html#ab93aed3c068f547baa9c94304d9ec42e", null ],
     [ "e3_sm_destroy_cb", "c__api_8h.html#a34e4488ba57cd9a216c1ad8e97dbef9c", null ],
+    [ "e3_sm_granted_periodicity_cb", "c__api_8h.html#a8fa570e51aa24f92a16d8f3991897cf8", null ],
     [ "e3_sm_init_cb", "c__api_8h.html#ad3b117c68d80d452d00867c43e0a1e81", null ],
     [ "e3_sm_is_running_cb", "c__api_8h.html#a72c20da5e3514bd4d91e1873244edea1", null ],
     [ "e3_sm_process_control_cb", "c__api_8h.html#a33b166f895d0bd44df009228d8ecbec2", null ],
@@ -40,5 +41,6 @@ var c__api_8h =
     [ "e3_service_model_create_from_c", "c__api_8h.html#a0e39e77de8b23fb40dd275c361331cb7", null ],
     [ "e3_service_model_destroy", "c__api_8h.html#a82d2681971d7244733f568ea830f6a1c", null ],
     [ "e3_service_model_emit_indication", "c__api_8h.html#ada87ed89ce33a65047b678d470d9329d", null ],
-    [ "e3_service_model_emit_message_ack", "c__api_8h.html#a6c434273a0d8f243cd004c7437a3150e", null ]
+    [ "e3_service_model_emit_message_ack", "c__api_8h.html#a6c434273a0d8f243cd004c7437a3150e", null ],
+    [ "e3_service_model_set_granted_periodicity_cb", "c__api_8h.html#a0c486f82c75ce3ad6bd914662ff62cf6", null ]
 ];

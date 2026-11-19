@@ -33,5 +33,6 @@ var c__api_8cpp =
     [ "e3_service_model_create_from_c", "c__api_8cpp.html#a0e39e77de8b23fb40dd275c361331cb7", null ],
     [ "e3_service_model_destroy", "c__api_8cpp.html#a82d2681971d7244733f568ea830f6a1c", null ],
     [ "e3_service_model_emit_indication", "c__api_8cpp.html#ada87ed89ce33a65047b678d470d9329d", null ],
-    [ "e3_service_model_emit_message_ack", "c__api_8cpp.html#a6c434273a0d8f243cd004c7437a3150e", null ]
+    [ "e3_service_model_emit_message_ack", "c__api_8cpp.html#a6c434273a0d8f243cd004c7437a3150e", null ],
+    [ "e3_service_model_set_granted_periodicity_cb", "c__api_8cpp.html#a0c486f82c75ce3ad6bd914662ff62cf6", null ]
 ];

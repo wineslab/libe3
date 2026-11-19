@@ -14,5 +14,6 @@ var searchData=
   ['get_5fsubscription_5fcontrol_5fids_11',['get_subscription_control_ids',['../classlibe3_1_1E3Agent.html#a981396ba0e4de0d5f264b806ad2b978f',1,'libe3::E3Agent']]],
   ['get_5fsubscription_5fdetails_12',['get_subscription_details',['../classlibe3_1_1SubscriptionManager.html#ad96e3ee79dd3e2f8530bf00fe8e97965',1,'libe3::SubscriptionManager']]],
   ['get_5fsubscription_5fperiodicity_13',['get_subscription_periodicity',['../classlibe3_1_1E3Agent.html#a5b9b0158cd26e9e3f85b4410b04ed342',1,'libe3::E3Agent']]],
-  ['get_5fsubscription_5ftelemetry_5fids_14',['get_subscription_telemetry_ids',['../classlibe3_1_1E3Agent.html#a1b61ca8643b457c111afcec81cfdc75a',1,'libe3::E3Agent']]]
+  ['get_5fsubscription_5ftelemetry_5fids_14',['get_subscription_telemetry_ids',['../classlibe3_1_1E3Agent.html#a1b61ca8643b457c111afcec81cfdc75a',1,'libe3::E3Agent']]],
+  ['granted_5fperiodicity_15',['granted_periodicity',['../classlibe3_1_1ServiceModel.html#a40a725aa3c7096155b846d7447d48e21',1,'libe3::ServiceModel::granted_periodicity()'],['../structe3__service__model__handle__s.html#af61968c22be7622710a5252d9f000712',1,'e3_service_model_handle_s::granted_periodicity()']]]
 ];
