@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.1</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -383,9 +383,10 @@ Procedure from the E3 Agent</h2>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md325"></a>
 Abnormal conditions</h2>
 <ul>
-<li>The link is lost with no RELEASE message. The dApp reports the reason "connection lost". The dApp does not reconnect by itself. The application stops the session and starts it again.</li>
-<li>An E3 Agent that does not detect the end of a dApp keeps its dApp identifier, its subscriptions and its running service models.</li>
-<li>A RELEASE message from a dApp that names another dApp identifier is not authenticated. The E3 Agent removes that dApp.</li>
+<li>The link is lost with no RELEASE message. The dApp reports the reason "connection lost".</li>
+<li>After a RELEASE message from the E3 Agent or a lost link, a dApp may run the Setup procedure again by itself. It gets a new dApp identifier and none of its earlier subscriptions. The application subscribes again. A dApp that sent its own RELEASE message does not.</li>
+<li>An E3 Agent that does not detect the end of a dApp keeps its dApp identifier, its subscriptions and its running service models. An E3 Agent detects it from a closed connection, or from a dApp that has sent nothing for a long time. Only what the dApp sends shows that the dApp is there: a message the E3 Agent sends to a dApp is broadcast and proves nothing.</li>
+<li>A RELEASE message from a dApp that names another dApp identifier is not authenticated by the protocol. An E3 Agent that can tell its connections apart should bind each dApp identifier to the connection that first sent a message naming it, and ignore a message that names the identifier on another connection. An E3 Agent that does not bind removes the named dApp.</li>
 </ul>
 <h1 class="doxsection"><a class="anchor" id="autotoc_md326"></a>
 The sequence identifier chain</h1>

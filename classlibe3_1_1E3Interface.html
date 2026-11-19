@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.1</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -204,7 +204,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00187">187</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00198">198</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -225,7 +225,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Destructor - ensures clean shutdown. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00208">208</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00219">219</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -296,7 +296,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>The subscription identifiers the RAN granted and that have not ended </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01650">1650</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01838">1838</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -324,7 +324,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>The dApp identifier the RAN assigned, or nothing before setup completes </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01644">1644</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01832">1832</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -347,7 +347,7 @@ Public Member Functions</h2></td></tr>
 <p>Wraps a lock-free counter into the ASN.1 E3-MessageID range, skipping 0. Monotonic (not random) so an id is unique, letting a caller correlate a response by the id it was assigned.</p>
 <dl class="section return"><dt>Returns</dt><dd>The next message id </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00156">156</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00167">167</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -369,7 +369,7 @@ Public Member Functions</h2></td></tr>
 <p>Get available RAN functions. </p>
 <dl class="section return"><dt>Returns</dt><dd>The identifiers of the registered Service Models, sorted </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00471">471</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00515">515</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -391,7 +391,7 @@ Public Member Functions</h2></td></tr>
 <p>Initialize the interface. </p>
 <p>Creates connector, encoder, and initializes internal state. </p><dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00213">213</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00224">224</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -421,7 +421,7 @@ Public Member Functions</h2></td></tr>
 <p>Check if interface is running. </p>
 <dl class="section return"><dt>Returns</dt><dd>True while the state is RUNNING </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00119">119</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00121">121</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -442,7 +442,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Tell the status handler that a dApp connected, subscribed, unsubscribed or left. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00507">507</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00551">551</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -541,7 +541,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SUCCESS once queued; otherwise the queueing error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01728">1728</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01916">1916</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -584,7 +584,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SUCCESS once queued; INVALID_PARAM for a sequence id of 0; otherwise the queueing error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01761">1761</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01949">1949</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -612,7 +612,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SUCCESS once queued; the queueing error otherwise </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00442">442</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00486">486</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -632,7 +632,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Queue a <a class="el" href="structlibe3_1_1ReleaseMessage.html" title="E3AP Release Message structure.">ReleaseMessage</a> that ends this dApp's session. </p><dl class="section return"><dt>Returns</dt><dd>SUCCESS once queued; otherwise the queueing error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01794">1794</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01982">1982</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -658,7 +658,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SUCCESS once queued; STATE_ERROR on a RAN-role agent; NOT_INITIALIZED before setup has assigned a dApp id; SUBSCRIPTION_NOT_FOUND when the dApp holds none for it; otherwise the queueing error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01704">1704</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01892">1892</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -715,7 +715,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SUCCESS once queued; STATE_ERROR on a RAN-role agent; NOT_INITIALIZED before setup has assigned a dApp id; otherwise the queueing error. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01666">1666</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01854">1854</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -743,7 +743,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SUCCESS, or the registry's error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00475">475</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00519">519</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -763,7 +763,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>The RAN functions the RAN advertised in its setup response </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01660">1660</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01848">1848</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -793,7 +793,7 @@ Public Member Functions</h2></td></tr>
 <p>Get the response queue for outbound messages. </p>
 <dl class="section return"><dt>Returns</dt><dd>The queue the outbound loop drains </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00135">135</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00137">137</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -822,7 +822,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The same id when it is not 0, a fresh one otherwise </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00178">178</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00189">189</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -857,7 +857,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00164">164</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00166">166</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -892,7 +892,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00169">169</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00171">171</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -925,7 +925,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00196">196</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00198">198</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -960,7 +960,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00183">183</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00185">185</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -995,7 +995,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00191">191</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00193">193</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1030,7 +1030,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00175">175</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00177">177</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1065,7 +1065,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00179">179</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00181">181</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1100,7 +1100,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00187">187</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00189">189</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1122,7 +1122,7 @@ Public Member Functions</h2></td></tr>
 <p>Start the interface processing loops. </p>
 <p>Spawns the setup, inbound, and outbound threads, plus the report worker on the RAN role. </p><dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00291">291</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00302">302</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -1152,7 +1152,7 @@ Public Member Functions</h2></td></tr>
 <p>Get current state. </p>
 <dl class="section return"><dt>Returns</dt><dd>The lifecycle state of the interface </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00113">113</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00115">115</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1172,9 +1172,9 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Stop the interface. </p>
-<p>Signals all threads to stop and waits for them to finish. </p>
+<p>Signals all threads to stop and waits for them to finish. It also ends the dApp's reconnecting, so the dApp stays down. Not to be called from the disconnect handler, which runs on a thread <a class="el" href="#ac92e4083c118369e4dc35cfed37efa64" title="Stop the interface.">stop()</a> joins. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00365">365</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00391">391</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -1194,7 +1194,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>The RAN functions this dApp holds a subscription to </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01655">1655</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01843">1843</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -1224,7 +1224,7 @@ Public Member Functions</h2></td></tr>
 <p>Get the subscription manager. </p>
 <dl class="section return"><dt>Returns</dt><dd>The manager that holds the dApps and their subscriptions </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00127">127</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00129">129</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1250,7 +1250,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SUCCESS when setup completed; TIMEOUT when it did not complete in time; CONNECTION_FAILED when it failed; INVALID_PARAM on a RAN-role interface </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01810">1810</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01998">1998</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>

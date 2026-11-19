@@ -840,17 +840,17 @@ var NAVTREEINDEX =
 [
 "annotated.html",
 "classlibe3_1_1E3Agent.html#af5f062ab236a0693446a98fad7512dd9",
-"classlibe3_1_1Logger.html",
-"classlibe3_1_1ZmqE3Connector.html#aea801c0333dfa5368343917c23e8fb0d",
-"functions_f.html",
-"md_docs_2e2sm-dapp_202-ie-mapping.html",
-"md_docs_2e3ap_203-procedure-flow.html#autotoc_md304",
-"md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md585",
-"protobuf__encoder_8cpp.html",
-"structlibe3_1_1Pdu.html",
-"structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ctrl__hdr__s_1_1ric__ctrl__hdr__formats__c___1_1types__opts.html#a89895fff752dd2587ae52b25bc56fe67",
-"structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__hdr__s_1_1ric__ind__hdr__formats__c___1_1types__opts.html",
-"structlibe3__e2sm__dapp__ctrl__hdr__t.html#a418613b99e4d53bebf91bb8f5c7a9c07"
+"classlibe3_1_1LogStream.html#a42908f56829b9546e15834e8ec064a38",
+"classlibe3_1_1ZmqE3Connector.html#ab174110e2c8518390afd7ad617650603",
+"error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8ae7e2cb456b9f2ab568b681d883d793ba",
+"md_docs_2control-loops_2path-b-e2-e3-loop.html#autotoc_md24",
+"md_docs_2e3ap_203-procedure-flow.html#autotoc_md289",
+"md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md570",
+"namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917a63006cca26c089f40fab3d45e3ff9a79",
+"structlibe3_1_1ExpiredSubscription.html#a2f21c1a1eb3c332573a37e6f83a61e32",
+"structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ctrl__hdr__s.html#acbe53e3d31cc7567e9c67963a643d7b6",
+"structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__ind__hdr__s.html#aed05bb9a8ce553ac7bc47ae9fb220352",
+"structlibe3_1_1py_1_1E3Event.html#a64a96173f6ad562b36604c04025a21be"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';

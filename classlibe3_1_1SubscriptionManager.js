@@ -7,6 +7,7 @@ var classlibe3_1_1SubscriptionManager =
     [ "add_subscription", "classlibe3_1_1SubscriptionManager.html#a4ebba3f95a3969a342e5c4b2e0eef3b9", null ],
     [ "clear", "classlibe3_1_1SubscriptionManager.html#a96a2a474462b36a169a6e4a8de89a6f4", null ],
     [ "dapp_count", "classlibe3_1_1SubscriptionManager.html#aefc0102e2cad5b605199b90970367ecb", null ],
+    [ "dapp_generation", "classlibe3_1_1SubscriptionManager.html#a23926abe47dac8d6eab56385c054d26a", null ],
     [ "expire_subscriptions", "classlibe3_1_1SubscriptionManager.html#a27cb1d5bfa4d2b66c5b39ca3d1f99a70", null ],
     [ "get_active_ran_functions", "classlibe3_1_1SubscriptionManager.html#a015c211dcd70ae1b15945d679957c4d6", null ],
     [ "get_dapp_subscriptions", "classlibe3_1_1SubscriptionManager.html#a96adf8c847a0fe3e793d8725de0e76b3", null ],
@@ -15,6 +16,7 @@ var classlibe3_1_1SubscriptionManager =
     [ "get_subscriber_count", "classlibe3_1_1SubscriptionManager.html#a563617597d3818bea37f3b5264865ef9", null ],
     [ "get_subscription_details", "classlibe3_1_1SubscriptionManager.html#ad96e3ee79dd3e2f8530bf00fe8e97965", null ],
     [ "has_subscribers", "classlibe3_1_1SubscriptionManager.html#a7e4ec70e51cc5798d2c83db91f623da4", null ],
+    [ "idle_dapps", "classlibe3_1_1SubscriptionManager.html#ab0469f7a71fab35abab9741f53570f3f", null ],
     [ "is_dapp_registered", "classlibe3_1_1SubscriptionManager.html#ab440c737e6f76f61fc7b9f816c0f14e2", null ],
     [ "is_subscribed", "classlibe3_1_1SubscriptionManager.html#a1d9fdebb79e14be61fceab2f570e2f85", null ],
     [ "operator=", "classlibe3_1_1SubscriptionManager.html#a505e92917fb5ec25f9168ea5092c4580", null ],
@@ -24,5 +26,6 @@ var classlibe3_1_1SubscriptionManager =
     [ "remove_subscription_by_id", "classlibe3_1_1SubscriptionManager.html#adcb208cbd820542d08064c15e257998c", null ],
     [ "set_sm_lifecycle_callback", "classlibe3_1_1SubscriptionManager.html#a2ba8a28aa9453ae42750d5dfdcf4cdb3", null ],
     [ "subscription_count", "classlibe3_1_1SubscriptionManager.html#ad43f6bf14f1ab8e82e4820b19993a4b5", null ],
+    [ "touch_dapp", "classlibe3_1_1SubscriptionManager.html#a4bedb8cd2352e45db18e1eb54b0adc24", null ],
     [ "unregister_dapp", "classlibe3_1_1SubscriptionManager.html#a31b2b3b526c1205edd5e8f0e7548d5df", null ]
 ];

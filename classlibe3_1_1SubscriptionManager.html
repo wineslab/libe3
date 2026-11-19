@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.1</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -130,6 +130,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a1d9fdebb79e14be61fceab2f570e2f85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if dApp is subscribed to a RAN function.  <br /></td></tr>
 <tr class="memitem:a96adf8c847a0fe3e793d8725de0e76b3" id="r_a96adf8c847a0fe3e793d8725de0e76b3"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a96adf8c847a0fe3e793d8725de0e76b3">get_dapp_subscriptions</a> (uint32_t dapp_id) const</td></tr>
 <tr class="memdesc:a96adf8c847a0fe3e793d8725de0e76b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all RAN functions a dApp is subscribed to.  <br /></td></tr>
+<tr class="memitem:a4bedb8cd2352e45db18e1eb54b0adc24" id="r_a4bedb8cd2352e45db18e1eb54b0adc24"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4bedb8cd2352e45db18e1eb54b0adc24">touch_dapp</a> (uint32_t dapp_id)</td></tr>
+<tr class="memdesc:a4bedb8cd2352e45db18e1eb54b0adc24"><td class="mdescLeft">&#160;</td><td class="mdescRight">Record that a message from a dApp has just arrived.  <br /></td></tr>
+<tr class="memitem:a23926abe47dac8d6eab56385c054d26a" id="r_a23926abe47dac8d6eab56385c054d26a"><td class="memItemLeft" align="right" valign="top">std::optional&lt; uint64_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a23926abe47dac8d6eab56385c054d26a">dapp_generation</a> (uint32_t dapp_id) const</td></tr>
+<tr class="memdesc:a23926abe47dac8d6eab56385c054d26a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which registration of a dApp id is current.  <br /></td></tr>
+<tr class="memitem:ab0469f7a71fab35abab9741f53570f3f" id="r_ab0469f7a71fab35abab9741f53570f3f"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab0469f7a71fab35abab9741f53570f3f">idle_dapps</a> (std::chrono::seconds idle_for) const</td></tr>
+<tr class="memdesc:ab0469f7a71fab35abab9741f53570f3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registered dApps that have not sent a message for at least <code class="param">idle_for</code>.  <br /></td></tr>
 <tr class="memitem:ac689fd298f04ba0b021ba62bb283fecd" id="r_ac689fd298f04ba0b021ba62bb283fecd"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac689fd298f04ba0b021ba62bb283fecd">get_subscribed_dapps</a> (uint32_t ran_function_id) const</td></tr>
 <tr class="memdesc:ac689fd298f04ba0b021ba62bb283fecd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all dApps subscribed to a RAN function.  <br /></td></tr>
 <tr class="memitem:ad96e3ee79dd3e2f8530bf00fe8e97965" id="r_ad96e3ee79dd3e2f8530bf00fe8e97965"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="structlibe3_1_1SubscriptionDetails.html">SubscriptionDetails</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad96e3ee79dd3e2f8530bf00fe8e97965">get_subscription_details</a> (uint32_t dapp_id, uint32_t ran_function_id) const</td></tr>
@@ -189,7 +195,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00032">32</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00034">34</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -210,7 +216,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Destructor. </p>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00037">37</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00039">39</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -326,7 +332,7 @@ ErrorCode::DAPP_NOT_REGISTERED if dApp not registered </dd>
 <dd>
 ErrorCode::SUBSCRIPTION_EXISTS if already subscribed. A subscription that has run out but not yet been removed does not count: the request starts a new one under the same subscription ID. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00155">155</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00159">159</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -347,7 +353,7 @@ ErrorCode::SUBSCRIPTION_EXISTS if already subscribed. A subscription that has ru
 
 <p>Clear all registrations and subscriptions. </p>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00483">483</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00520">520</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -367,8 +373,38 @@ ErrorCode::SUBSCRIPTION_EXISTS if already subscribed. A subscription that has ru
 </div><div class="memdoc">
 
 <p>Get total number of registered dApps. </p>
+<dl class="section return"><dt>Returns</dt><dd>The number of registered dApps </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00468">468</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00505">505</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a23926abe47dac8d6eab56385c054d26a" name="a23926abe47dac8d6eab56385c054d26a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a23926abe47dac8d6eab56385c054d26a">&#9670;&#160;</a></span>dapp_generation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; uint64_t &gt; libe3::SubscriptionManager::dapp_generation </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>dapp_id</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Which registration of a dApp id is current. </p>
+<p>An id is handed out again after its dApp is removed, so a record that names a dApp by id alone can end up naming a later one. Remember the generation next to the id and compare before acting on it.</p>
+<dl class="section return"><dt>Returns</dt><dd>The registration's generation, or nothing if the id is not registered </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dapp_id</td><td>The dApp </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00412">412</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -391,7 +427,7 @@ ErrorCode::SUBSCRIPTION_EXISTS if already subscribed. A subscription that has ru
 <p>Removal is silent towards the dApp: E3AP has no "subscription expired" PDU. The SM lifecycle callback fires for a RAN function that loses its last subscriber. Call this periodically; <a class="el" href="#ac689fd298f04ba0b021ba62bb283fecd" title="Get all dApps subscribed to a RAN function.">get_subscribed_dapps()</a> already leaves out an expired subscription in between.</p>
 <dl class="section return"><dt>Returns</dt><dd>the subscriptions that were removed </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00242">242</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00246">246</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -411,8 +447,9 @@ ErrorCode::SUBSCRIPTION_EXISTS if already subscribed. A subscription that has ru
 </div><div class="memdoc">
 
 <p>Get all RAN functions that have at least one subscriber. </p>
+<dl class="section return"><dt>Returns</dt><dd>The RAN function IDs with a subscriber </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00445">445</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00482">482</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -432,8 +469,15 @@ ErrorCode::SUBSCRIPTION_EXISTS if already subscribed. A subscription that has ru
 </div><div class="memdoc">
 
 <p>Get all RAN functions a dApp is subscribed to. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dapp_id</td><td>The dApp </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The RAN function IDs </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00389">389</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00393">393</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -453,8 +497,9 @@ ErrorCode::SUBSCRIPTION_EXISTS if already subscribed. A subscription that has ru
 </div><div class="memdoc">
 
 <p>Get list of registered dApp IDs. </p>
+<dl class="section return"><dt>Returns</dt><dd>The dApp IDs </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00141">141</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00145">145</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -483,7 +528,7 @@ ErrorCode::SUBSCRIPTION_EXISTS if already subscribed. A subscription that has ru
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>ids of the dApps with a live subscription to it </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00399">399</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00436">436</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -503,8 +548,15 @@ ErrorCode::SUBSCRIPTION_EXISTS if already subscribed. A subscription that has ru
 </div><div class="memdoc">
 
 <p>Get count of subscribers for a RAN function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ran_function_id</td><td>The RAN function </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The number of dApps subscribed to it </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00431">431</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00468">468</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -537,7 +589,7 @@ ErrorCode::SUBSCRIPTION_EXISTS if already subscribed. A subscription that has ru
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A copy taken under the lock, or nullopt if no such subscription exists. A copy, not a pointer: the subscription can be removed or renewed by another thread (including the expiry sweep) at any time. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00420">420</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00457">457</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -557,8 +609,44 @@ ErrorCode::SUBSCRIPTION_EXISTS if already subscribed. A subscription that has ru
 </div><div class="memdoc">
 
 <p>Check if any dApp is subscribed to a RAN function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ran_function_id</td><td>The RAN function </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true if a dApp is subscribed to it </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00457">457</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00494">494</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ab0469f7a71fab35abab9741f53570f3f" name="ab0469f7a71fab35abab9741f53570f3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0469f7a71fab35abab9741f53570f3f">&#9670;&#160;</a></span>idle_dapps()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; uint32_t &gt; libe3::SubscriptionManager::idle_dapps </td>
+          <td>(</td>
+          <td class="paramtype">std::chrono::seconds</td>          <td class="paramname"><span class="paramname"><em>idle_for</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Registered dApps that have not sent a message for at least <code class="param">idle_for</code>. </p>
+<p>A dApp that registered and never spoke counts from its registration. Nothing is removed; the caller decides, then calls <a class="el" href="#a31b2b3b526c1205edd5e8f0e7548d5df" title="Unregister a dApp and clean up all its subscriptions.">unregister_dapp()</a>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">idle_for</td><td>Time without a message from the dApp </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Identifiers of the idle dApps, lowest first </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00422">422</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -586,7 +674,7 @@ ErrorCode::SUBSCRIPTION_EXISTS if already subscribed. A subscription that has ru
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if registered </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00136">136</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00140">140</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -610,8 +698,16 @@ ErrorCode::SUBSCRIPTION_EXISTS if already subscribed. A subscription that has ru
 </div><div class="memdoc">
 
 <p>Check if dApp is subscribed to a RAN function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dapp_id</td><td>The dApp </td></tr>
+    <tr><td class="paramname">ran_function_id</td><td>The RAN function </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true if the dApp is subscribed to the RAN function </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00379">379</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00383">383</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -690,7 +786,7 @@ ErrorCode::SUBSCRIPTION_EXISTS if already subscribed. A subscription that has ru
 <dd>
 ErrorCode::INTERNAL_ERROR if no IDs available (max 101 dApps) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00056">56</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00058">58</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -725,7 +821,7 @@ ErrorCode::INTERNAL_ERROR if no IDs available (max 101 dApps) </dd></dl>
 <dd>
 ErrorCode::SUBSCRIPTION_NOT_FOUND if subscription doesn't exist </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00288">288</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00292">292</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -760,7 +856,7 @@ ErrorCode::SUBSCRIPTION_NOT_FOUND if subscription doesn't exist </dd></dl>
 <dd>
 ErrorCode::SUBSCRIPTION_NOT_FOUND if subscription doesn't exist </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00330">330</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00334">334</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -780,8 +876,14 @@ ErrorCode::SUBSCRIPTION_NOT_FOUND if subscription doesn't exist </dd></dl>
 </div><div class="memdoc">
 
 <p>Set callback for SM lifecycle events. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">callback</td><td>Called when a RAN function gains its first or loses its last subscriber </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00047">47</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00049">49</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -801,8 +903,37 @@ ErrorCode::SUBSCRIPTION_NOT_FOUND if subscription doesn't exist </dd></dl>
 </div><div class="memdoc">
 
 <p>Get total number of active subscriptions. </p>
+<dl class="section return"><dt>Returns</dt><dd>The number of subscriptions </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00473">473</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00510">510</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a4bedb8cd2352e45db18e1eb54b0adc24" name="a4bedb8cd2352e45db18e1eb54b0adc24"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4bedb8cd2352e45db18e1eb54b0adc24">&#9670;&#160;</a></span>touch_dapp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void libe3::SubscriptionManager::touch_dapp </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>dapp_id</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Record that a message from a dApp has just arrived. </p>
+<p>Only messages the dApp sends count. A message to the dApp proves nothing: the RAN broadcasts, so it is sent whether or not the dApp is still there.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dapp_id</td><td>dApp identifier; an id that is not registered is ignored </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00403">403</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -832,7 +963,7 @@ ErrorCode::SUBSCRIPTION_NOT_FOUND if subscription doesn't exist </dd></dl>
 <dd>
 ErrorCode::DAPP_NOT_REGISTERED if dApp not found </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00080">80</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subscription__manager_8cpp_source.html#l00084">84</a> of file <a class="el" href="subscription__manager_8cpp_source.html">subscription_manager.cpp</a>.</p>
 
 </div>
 </div>

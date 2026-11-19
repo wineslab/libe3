@@ -1,5 +1,6 @@
 var structe3__config__t =
 [
+    [ "dapp_idle_timeout_s", "structe3__config__t.html#abad0b17f9c0141ea1926cbb1cf364984", null ],
     [ "encoding", "structe3__config__t.html#a1f725c95b3b4ac1a9a415ec53eb0f08c", null ],
     [ "io_thread_affinity", "structe3__config__t.html#a8775d3b13e77510139eb9caaf1677a20", null ],
     [ "io_threads", "structe3__config__t.html#a68afe4dc7c7b6edaacdb8a5ce4a57b60", null ],
@@ -10,6 +11,7 @@ var structe3__config__t =
     [ "publisher_endpoint", "structe3__config__t.html#acb3565511ce8a820d64c1594bb1ea0a4", null ],
     [ "publisher_port", "structe3__config__t.html#a7b34fbceaf7917bc7348788069028908", null ],
     [ "ran_identifier", "structe3__config__t.html#a9875bcc2adc66eb4aa21b8d4d1f95092", null ],
+    [ "set_dapp_idle_timeout", "structe3__config__t.html#af4f59b8298dea2a3ee8683339ae20d26", null ],
     [ "setup_endpoint", "structe3__config__t.html#a2b25719aa14bbd80f8f69383a97ff5db", null ],
     [ "setup_port", "structe3__config__t.html#a7b14b7c2008c0fa5102f445f7904a98b", null ],
     [ "subscriber_endpoint", "structe3__config__t.html#a9b42065af6ce60ef4516f0e0c313bab2", null ],

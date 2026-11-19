@@ -1,6 +1,7 @@
 var structlibe3_1_1E3Config =
 [
     [ "connect_timeout_ms", "structlibe3_1_1E3Config.html#a7be1447c4784864a79a118e172c224a9", null ],
+    [ "dapp_idle_timeout_s", "structlibe3_1_1E3Config.html#ab5c9eeb0a3cb8fe1a9be8b2a0200576a", null ],
     [ "dapp_name", "structlibe3_1_1E3Config.html#abb5028cf948af60a47e76ffdf182c4a3", null ],
     [ "dapp_version", "structlibe3_1_1E3Config.html#a1597f7d8745dcc5fe99570e9a2f20147", null ],
     [ "e3ap_version", "structlibe3_1_1E3Config.html#a21ce67d3d04792c7d4c42343f1a8d226", null ],
@@ -15,6 +16,7 @@ var structlibe3_1_1E3Config =
     [ "publisher_port", "structlibe3_1_1E3Config.html#af70da70b2892c05d4c85f45f80246df3", null ],
     [ "ran_identifier", "structlibe3_1_1E3Config.html#ad2753835626e34f72103c1a5f6f2b198", null ],
     [ "receive_buffer_size", "structlibe3_1_1E3Config.html#ae3b5e07e651f71ab413d4791e3458ca9", null ],
+    [ "reconnect_interval_ms", "structlibe3_1_1E3Config.html#a02e8e746e4fe2c86b56cd47cbc12f480", null ],
     [ "recv_timeout_ms", "structlibe3_1_1E3Config.html#acf888c5db2f504e618d3e31dddca9f89", null ],
     [ "role", "structlibe3_1_1E3Config.html#a348b15e9a72856994dee4b87e520da01", null ],
     [ "send_buffer_size", "structlibe3_1_1E3Config.html#ad5ec01b9a6f427f65953c35a0b32f980", null ],

@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.1</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -289,7 +289,7 @@ Basic E3 Agent</h2>
 <div class="line">    agent.stop();</div>
 <div class="line">    <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
-<div class="ttc" id="aclasslibe3_1_1E3Agent_html"><div class="ttname"><a href="classlibe3_1_1E3Agent.html">libe3::E3Agent</a></div><div class="ttdoc">E3Agent - Main façade for RAN vendor integration.</div><div class="ttdef"><b>Definition</b> <a href="e3__agent_8hpp_source.html#l00086">e3_agent.hpp:86</a></div></div>
+<div class="ttc" id="aclasslibe3_1_1E3Agent_html"><div class="ttname"><a href="classlibe3_1_1E3Agent.html">libe3::E3Agent</a></div><div class="ttdoc">E3Agent - Main façade for RAN vendor integration.</div><div class="ttdef"><b>Definition</b> <a href="e3__agent_8hpp_source.html#l00092">e3_agent.hpp:92</a></div></div>
 <div class="ttc" id="alibe3_2libe3_8hpp_html"><div class="ttname"><a href="libe3_2libe3_8hpp.html">libe3.hpp</a></div><div class="ttdoc">libe3 umbrella header - includes all public headers</div></div>
 <div class="ttc" id="anamespacelibe3_html_a24bf966c6225dc47ac47d7a8a1986c40ac8660c6d72e7323867ec800d6bb953df"><div class="ttname"><a href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40ac8660c6d72e7323867ec800d6bb953df">libe3::E3TransportLayer::IPC</a></div><div class="ttdeci">@ IPC</div><div class="ttdoc">Unix Domain Sockets / IPC.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00088">types.hpp:88</a></div></div>
 <div class="ttc" id="anamespacelibe3_html_a6cf81048dab516aa29417bb0dc741d0ea0028405011724c5677faba466637b1e5"><div class="ttname"><a href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0ea0028405011724c5677faba466637b1e5">libe3::E3LinkLayer::POSIX</a></div><div class="ttdeci">@ POSIX</div><div class="ttdoc">POSIX socket-based transport.</div><div class="ttdef"><b>Definition</b> <a href="types_8hpp_source.html#l00064">types.hpp:64</a></div></div>
@@ -471,26 +471,28 @@ E3Agent</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">set_message_ack_handler(handler)</span>  </td><td class="markdownTableBodyNone">(dApp) Callback for incoming <span class="tt">MessageAck</span>  </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">set_disconnect_handler(handler)</span>  </td><td class="markdownTableBodyNone">(dApp) Callback when the RAN released the dApp or the connection to it was lost. The dApp then registers again by itself unless <span class="tt">reconnect_interval_ms</span> is 0  </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">wait_for_setup(timeout)</span>  </td><td class="markdownTableBodyNone">(dApp) Block until setup handshake completes  </td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">subscribe(ran_function_id, telemetry, control, ...)</span>  </td><td class="markdownTableBodyNone">(dApp) Subscribe to a RAN function  </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">unsubscribe(ran_function_id)</span>  </td><td class="markdownTableBodyNone">(dApp) Tear down a subscription  </td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">send_control(ran_function_id, control_id, data)</span>  </td><td class="markdownTableBodyNone">(dApp) Send a control action to the RAN  </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">send_report(ran_function_id, data)</span>  </td><td class="markdownTableBodyNone">(dApp) Send a dApp report to the RAN  </td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">release()</span>  </td><td class="markdownTableBodyNone">(dApp) Send <span class="tt">ReleaseMessage</span> to the RAN  </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">dapp_id()</span>  </td><td class="markdownTableBodyNone">(dApp) Identifier assigned by the RAN in <span class="tt">SetupResponse</span>  </td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">subscribed_ran_functions()</span> / <span class="tt">active_subscription_ids()</span>  </td><td class="markdownTableBodyNone">(dApp) Per-instance subscription state  </td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">config()</span>  </td><td class="markdownTableBodyNone">Access current <span class="tt">E3Config</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">dapp_count()</span>  </td><td class="markdownTableBodyNone">(RAN) Number of registered dApps. (dApp) 0/1 based on assignment  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">config()</span>  </td><td class="markdownTableBodyNone">Access current <span class="tt">E3Config</span>  </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">dapp_count()</span>  </td><td class="markdownTableBodyNone">(RAN) Number of registered dApps. (dApp) 0/1 based on assignment  </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">subscription_count()</span>  </td><td class="markdownTableBodyNone">Number of active subscriptions on this side  </td></tr>
 </table>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md716"></a>
@@ -529,6 +531,10 @@ E3Config</h2>
 <td class="markdownTableBodyNone"><span class="tt">recv_timeout_ms</span>  </td><td class="markdownTableBodyNone">uint32_t  </td><td class="markdownTableBodyNone">Receive timeout (ms)  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">send_timeout_ms</span>  </td><td class="markdownTableBodyNone">uint32_t  </td><td class="markdownTableBodyNone">Send timeout (ms)  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">dapp_idle_timeout_s</span>  </td><td class="markdownTableBodyNone">uint32_t  </td><td class="markdownTableBodyNone">RAN: seconds without a message from a dApp before it is released and removed (default 1800, 0 never). Only what the dApp sends counts. In the C API, <span class="tt"><a class="el" href="structe3__config__t.html" title="Configuration for creating an E3Agent from C.">e3_config_t</a></span> has <span class="tt">dapp_idle_timeout_s</span> and the flag <span class="tt">set_dapp_idle_timeout</span>, since 0 is a legitimate value  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">reconnect_interval_ms</span>  </td><td class="markdownTableBodyNone">uint32_t  </td><td class="markdownTableBodyNone">dApp: milliseconds between attempts to register again after a release, a lost link or a failed setup (default 1000, 0 never). The new session has a new dApp id and no subscriptions  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">receive_buffer_size</span>  </td><td class="markdownTableBodyNone">size_t  </td><td class="markdownTableBodyNone">Receive buffer size (bytes)  </td></tr>
 <tr class="markdownTableRowOdd">

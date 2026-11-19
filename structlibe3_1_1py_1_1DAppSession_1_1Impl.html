@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.1</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,24 +92,36 @@ $(function(){initNavTree('structlibe3_1_1py_1_1DAppSession_1_1Impl.html','','str
   <div class="headertitle"><div class="title">libe3::py::DAppSession::Impl Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>What a <a class="el" href="classlibe3_1_1py_1_1DAppSession.html" title="dApp-role E3AP session with a batched, lock-free inbound ring.">DAppSession</a> holds: the agent, the event queue and the setup snapshot.  
+ <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ad78fb8c60fbb51d42640253b1b80b019" id="r_ad78fb8c60fbb51d42640253b1b80b019"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad78fb8c60fbb51d42640253b1b80b019">Impl</a> (<a class="el" href="structlibe3_1_1E3Config.html">libe3::E3Config</a> config, std::size_t queue_capacity)</td></tr>
+<tr class="memdesc:ad78fb8c60fbb51d42640253b1b80b019"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create the agent and the event queue.  <br /></td></tr>
 <tr class="memitem:a3d0aaa1b6a8081d97f2ce9422c2b5b95" id="r_a3d0aaa1b6a8081d97f2ce9422c2b5b95"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3d0aaa1b6a8081d97f2ce9422c2b5b95">enqueue</a> (<a class="el" href="structlibe3_1_1py_1_1E3Event.html">E3Event</a> ev)</td></tr>
+<tr class="memdesc:a3d0aaa1b6a8081d97f2ce9422c2b5b95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queue an event for <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#a3401f5d4e563d6518ec7d97b92f864a7" title="Drain up to max_batch inbound events, waiting up to timeout_ms for the first.">poll_events()</a>.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:ad32b342805aa0d7ae52fd8e6e6e0ec18" id="r_ad32b342805aa0d7ae52fd8e6e6e0ec18"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classlibe3_1_1E3Agent.html">libe3::E3Agent</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad32b342805aa0d7ae52fd8e6e6e0ec18">agent</a></td></tr>
+<tr class="memdesc:ad32b342805aa0d7ae52fd8e6e6e0ec18"><td class="mdescLeft">&#160;</td><td class="mdescRight">The dApp agent.  <br /></td></tr>
 <tr class="memitem:ae07c60694289d36f291a7c21c8c281e8" id="r_ae07c60694289d36f291a7c21c8c281e8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classlibe3_1_1LockFreeQueue.html">libe3::LockFreeQueue</a>&lt; <a class="el" href="structlibe3_1_1py_1_1E3Event.html">E3Event</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae07c60694289d36f291a7c21c8c281e8">queue</a></td></tr>
+<tr class="memdesc:ae07c60694289d36f291a7c21c8c281e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Events waiting for <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#a3401f5d4e563d6518ec7d97b92f864a7" title="Drain up to max_batch inbound events, waiting up to timeout_ms for the first.">poll_events()</a>.  <br /></td></tr>
 <tr class="memitem:ab95aae0df6ca13374254ba3d39e46117" id="r_ab95aae0df6ca13374254ba3d39e46117"><td class="memItemLeft" align="right" valign="top">std::atomic&lt; unsigned long long &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab95aae0df6ca13374254ba3d39e46117">dropped</a> {0}</td></tr>
+<tr class="memdesc:ab95aae0df6ca13374254ba3d39e46117"><td class="mdescLeft">&#160;</td><td class="mdescRight">Events dropped because the queue was full.  <br /></td></tr>
 <tr class="memitem:a67e9a6f067390b53cfda7e024bf9c876" id="r_a67e9a6f067390b53cfda7e024bf9c876"><td class="memItemLeft" align="right" valign="top">std::mutex&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a67e9a6f067390b53cfda7e024bf9c876">setup_mu</a></td></tr>
+<tr class="memdesc:a67e9a6f067390b53cfda7e024bf9c876"><td class="mdescLeft">&#160;</td><td class="mdescRight">Guards have_setup and setup.  <br /></td></tr>
 <tr class="memitem:a72a87722470c8a3deb9228e8e616da34" id="r_a72a87722470c8a3deb9228e8e616da34"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a72a87722470c8a3deb9228e8e616da34">have_setup</a> {false}</td></tr>
+<tr class="memdesc:a72a87722470c8a3deb9228e8e616da34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a setup response has been seen.  <br /></td></tr>
 <tr class="memitem:a7bd7865148ec56abb8de145ea6ba1dce" id="r_a7bd7865148ec56abb8de145ea6ba1dce"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structlibe3_1_1SetupResponse.html">libe3::SetupResponse</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7bd7865148ec56abb8de145ea6ba1dce">setup</a></td></tr>
+<tr class="memdesc:a7bd7865148ec56abb8de145ea6ba1dce"><td class="mdescLeft">&#160;</td><td class="mdescRight">The latest setup response.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00032">32</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<div class="textblock"><p>What a <a class="el" href="classlibe3_1_1py_1_1DAppSession.html" title="dApp-role E3AP session with a batched, lock-free inbound ring.">DAppSession</a> holds: the agent, the event queue and the setup snapshot. </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00033">33</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ad78fb8c60fbb51d42640253b1b80b019" name="ad78fb8c60fbb51d42640253b1b80b019"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad78fb8c60fbb51d42640253b1b80b019">&#9670;&#160;</a></span>Impl()</h2>
@@ -138,7 +150,16 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00033">33</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p>Create the agent and the event queue. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">config</td><td>The agent's configuration </td></tr>
+    <tr><td class="paramname">queue_capacity</td><td>Number of events the queue holds </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00039">39</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -166,7 +187,15 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00049">49</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p>Queue an event for <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#a3401f5d4e563d6518ec7d97b92f864a7" title="Drain up to max_batch inbound events, waiting up to timeout_ms for the first.">poll_events()</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ev</td><td>The event; it is dropped, and counted, if the queue is full </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00059">59</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -183,7 +212,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00037">37</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p>The dApp agent. </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00043">43</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -199,7 +230,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00042">42</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p>Events dropped because the queue was full. </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00048">48</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -215,7 +248,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00046">46</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p>Whether a setup response has been seen. </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00052">52</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -231,7 +266,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00041">41</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p>Events waiting for <a class="el" href="classlibe3_1_1py_1_1DAppSession.html#a3401f5d4e563d6518ec7d97b92f864a7" title="Drain up to max_batch inbound events, waiting up to timeout_ms for the first.">poll_events()</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00047">47</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -247,7 +284,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00047">47</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p>The latest setup response. </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00053">53</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -271,7 +310,9 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00045">45</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p>Guards have_setup and setup. </p>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00051">51</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>

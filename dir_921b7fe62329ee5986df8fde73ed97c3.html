@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.1</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -144,7 +144,8 @@ Lifecycle</h1>
 <div class="line">      send_control(rfid, cid, payload_bytes)   # or send_report(...)</div>
 <div class="line">  → release()             # tell the RAN we are leaving</div>
 <div class="line">  → stop()                # tear down; unblocks any poll_events</div>
-</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md5"></a>
+</div><!-- fragment --><p>If the RAN releases the dApp or the connection is lost, <span class="tt">poll_events</span> returns an <span class="tt">E3_EVENT_DISCONNECT</span> event, the dApp id and the subscriptions are gone, and unless <span class="tt">cfg.reconnect_interval_ms</span> is 0 the session registers again by itself after that many milliseconds. It gets a new <span class="tt">dapp_id()</span> and an <span class="tt">E3_EVENT_SETUP_RESPONSE</span>; subscribe again from there. <span class="tt">release()</span> and <span class="tt">stop()</span> end it for good. A RAN also releases a dApp that has sent nothing for <span class="tt">dapp_idle_timeout_s</span> (default 1800), so a dApp that only listens comes back about that often.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md5"></a>
 Minimal Python example</h1>
 <div class="fragment"><div class="line"><span class="keyword">import</span> libe3py <span class="keyword">as</span> e3</div>
 <div class="line"> </div>

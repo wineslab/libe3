@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.1</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -101,28 +101,65 @@ $(function(){initNavTree('structe3__config__t.html','','structe3__config__t-memb
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a9875bcc2adc66eb4aa21b8d4d1f95092" id="r_a9875bcc2adc66eb4aa21b8d4d1f95092"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9875bcc2adc66eb4aa21b8d4d1f95092">ran_identifier</a></td></tr>
+<tr class="memdesc:a9875bcc2adc66eb4aa21b8d4d1f95092"><td class="mdescLeft">&#160;</td><td class="mdescRight">RAN identifier; NULL keeps the default.  <br /></td></tr>
 <tr class="memitem:a2fa01fda5689c80e7e8cfda843f54203" id="r_a2fa01fda5689c80e7e8cfda843f54203"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2fa01fda5689c80e7e8cfda843f54203">link_layer</a></td></tr>
+<tr class="memdesc:a2fa01fda5689c80e7e8cfda843f54203"><td class="mdescLeft">&#160;</td><td class="mdescRight">0=ZMQ, 1=POSIX, -1=default  <br /></td></tr>
 <tr class="memitem:aa557fe2747b281f32da76f48a894291b" id="r_aa557fe2747b281f32da76f48a894291b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa557fe2747b281f32da76f48a894291b">transport_layer</a></td></tr>
+<tr class="memdesc:aa557fe2747b281f32da76f48a894291b"><td class="mdescLeft">&#160;</td><td class="mdescRight">0=SCTP, 1=TCP, 2=IPC, -1=default  <br /></td></tr>
 <tr class="memitem:a7b14b7c2008c0fa5102f445f7904a98b" id="r_a7b14b7c2008c0fa5102f445f7904a98b"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7b14b7c2008c0fa5102f445f7904a98b">setup_port</a></td></tr>
+<tr class="memdesc:a7b14b7c2008c0fa5102f445f7904a98b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Port of the setup channel (SCTP and TCP); 0 keeps the default.  <br /></td></tr>
 <tr class="memitem:a2845151ffd1280b112d7e69c762f06d4" id="r_a2845151ffd1280b112d7e69c762f06d4"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2845151ffd1280b112d7e69c762f06d4">subscriber_port</a></td></tr>
+<tr class="memdesc:a2845151ffd1280b112d7e69c762f06d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Port of the subscriber channel (SCTP and TCP); 0 keeps the default.  <br /></td></tr>
 <tr class="memitem:a7b34fbceaf7917bc7348788069028908" id="r_a7b34fbceaf7917bc7348788069028908"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7b34fbceaf7917bc7348788069028908">publisher_port</a></td></tr>
+<tr class="memdesc:a7b34fbceaf7917bc7348788069028908"><td class="mdescLeft">&#160;</td><td class="mdescRight">Port of the publisher channel (SCTP and TCP); 0 keeps the default.  <br /></td></tr>
 <tr class="memitem:a2b25719aa14bbd80f8f69383a97ff5db" id="r_a2b25719aa14bbd80f8f69383a97ff5db"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2b25719aa14bbd80f8f69383a97ff5db">setup_endpoint</a></td></tr>
+<tr class="memdesc:a2b25719aa14bbd80f8f69383a97ff5db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Endpoint of the setup channel; NULL keeps the default.  <br /></td></tr>
 <tr class="memitem:a9b42065af6ce60ef4516f0e0c313bab2" id="r_a9b42065af6ce60ef4516f0e0c313bab2"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9b42065af6ce60ef4516f0e0c313bab2">subscriber_endpoint</a></td></tr>
+<tr class="memdesc:a9b42065af6ce60ef4516f0e0c313bab2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Endpoint of the subscriber channel; NULL keeps the default.  <br /></td></tr>
 <tr class="memitem:acb3565511ce8a820d64c1594bb1ea0a4" id="r_acb3565511ce8a820d64c1594bb1ea0a4"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acb3565511ce8a820d64c1594bb1ea0a4">publisher_endpoint</a></td></tr>
+<tr class="memdesc:acb3565511ce8a820d64c1594bb1ea0a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Endpoint of the publisher channel; NULL keeps the default.  <br /></td></tr>
 <tr class="memitem:a1f725c95b3b4ac1a9a415ec53eb0f08c" id="r_a1f725c95b3b4ac1a9a415ec53eb0f08c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1f725c95b3b4ac1a9a415ec53eb0f08c">encoding</a></td></tr>
+<tr class="memdesc:a1f725c95b3b4ac1a9a415ec53eb0f08c"><td class="mdescLeft">&#160;</td><td class="mdescRight">0=ASN1, 1=JSON, 2=PROTOBUF, -1=default  <br /></td></tr>
 <tr class="memitem:a68afe4dc7c7b6edaacdb8a5ce4a57b60" id="r_a68afe4dc7c7b6edaacdb8a5ce4a57b60"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a68afe4dc7c7b6edaacdb8a5ce4a57b60">io_threads</a></td></tr>
+<tr class="memdesc:a68afe4dc7c7b6edaacdb8a5ce4a57b60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of I/O threads; 0=default.  <br /></td></tr>
 <tr class="memitem:a2535720ff7b2f8c0a1f7e3af8a8b5d4d" id="r_a2535720ff7b2f8c0a1f7e3af8a8b5d4d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2535720ff7b2f8c0a1f7e3af8a8b5d4d">log_level</a></td></tr>
+<tr class="memdesc:a2535720ff7b2f8c0a1f7e3af8a8b5d4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Logging level; -1=default.  <br /></td></tr>
 <tr class="memitem:a537dc596a0dd2bdfb3af8c42384703aa" id="r_a537dc596a0dd2bdfb3af8c42384703aa"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a537dc596a0dd2bdfb3af8c42384703aa">log_path</a></td></tr>
+<tr class="memdesc:a537dc596a0dd2bdfb3af8c42384703aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Log file; NULL=auto (<span class="tt">/tmp/e3_ROLE[_ID]_EUID.log</span>).  <br /></td></tr>
 <tr class="memitem:a2a715b93d5db667ce28f7150b4dffd61" id="r_a2a715b93d5db667ce28f7150b4dffd61"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2a715b93d5db667ce28f7150b4dffd61">pin_io_threads</a></td></tr>
+<tr class="memdesc:a2a715b93d5db667ce28f7150b4dffd61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pin the I/O threads when non-zero; 0=no pinning.  <br /></td></tr>
 <tr class="memitem:a8775d3b13e77510139eb9caaf1677a20" id="r_a8775d3b13e77510139eb9caaf1677a20"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8775d3b13e77510139eb9caaf1677a20">io_thread_affinity</a></td></tr>
+<tr class="memdesc:a8775d3b13e77510139eb9caaf1677a20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Logical core to pin to; Linux only, best-effort.  <br /></td></tr>
+<tr class="memitem:af4f59b8298dea2a3ee8683339ae20d26" id="r_af4f59b8298dea2a3ee8683339ae20d26"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af4f59b8298dea2a3ee8683339ae20d26">set_dapp_idle_timeout</a></td></tr>
+<tr class="memdesc:af4f59b8298dea2a3ee8683339ae20d26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply <span class="tt"><a class="el" href="#abad0b17f9c0141ea1926cbb1cf364984" title="Seconds without a message from a dApp before the RAN releases and removes it; 0=never.">dapp_idle_timeout_s</a></span> when non-zero; 0=keep the library default (1800 s).  <br /></td></tr>
+<tr class="memitem:abad0b17f9c0141ea1926cbb1cf364984" id="r_abad0b17f9c0141ea1926cbb1cf364984"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abad0b17f9c0141ea1926cbb1cf364984">dapp_idle_timeout_s</a></td></tr>
+<tr class="memdesc:abad0b17f9c0141ea1926cbb1cf364984"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seconds without a message from a dApp before the RAN releases and removes it; 0=never.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Configuration for creating an E3Agent from C. </p>
 <p>All string pointers are copied by the library; the caller may free them after the call. Use NULL for optional strings to keep library defaults.</p>
-<p>Enum values: link_layer: 0=ZMQ, 1=POSIX. transport_layer: 0=SCTP, 1=TCP, 2=IPC. encoding: 0=ASN1, 1=JSON. Use -1 for link_layer, transport_layer, encoding, log_level to keep defaults. Use 0 for setup_port, subscriber_port, publisher_port to keep defaults. </p>
+<p>Enum values: link_layer: 0=ZMQ, 1=POSIX. transport_layer: 0=SCTP, 1=TCP, 2=IPC. encoding: 0=ASN1, 1=JSON. Use -1 for link_layer, transport_layer, encoding, log_level to keep defaults. Use 0 for setup_port, subscriber_port, publisher_port to keep defaults. Set <span class="tt"><a class="el" href="#af4f59b8298dea2a3ee8683339ae20d26" title="Apply dapp_idle_timeout_s when non-zero; 0=keep the library default (1800 s).">set_dapp_idle_timeout</a></span> to apply <span class="tt"><a class="el" href="#abad0b17f9c0141ea1926cbb1cf364984" title="Seconds without a message from a dApp before the RAN releases and removes it; 0=never.">dapp_idle_timeout_s</a></span>; a zeroed struct keeps the default. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00168">168</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00169">169</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="abad0b17f9c0141ea1926cbb1cf364984" name="abad0b17f9c0141ea1926cbb1cf364984"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abad0b17f9c0141ea1926cbb1cf364984">&#9670;&#160;</a></span>dapp_idle_timeout_s</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t e3_config_t::dapp_idle_timeout_s</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Seconds without a message from a dApp before the RAN releases and removes it; 0=never. </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00188">188</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+
+</div>
+</div>
 <a id="a1f725c95b3b4ac1a9a415ec53eb0f08c" name="a1f725c95b3b4ac1a9a415ec53eb0f08c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1f725c95b3b4ac1a9a415ec53eb0f08c">&#9670;&#160;</a></span>encoding</h2>
 
@@ -135,7 +172,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00178">178</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p>0=ASN1, 1=JSON, 2=PROTOBUF, -1=default </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00179">179</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -151,7 +190,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00184">184</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p>Logical core to pin to; Linux only, best-effort. </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00185">185</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -167,7 +208,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00179">179</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p>Number of I/O threads; 0=default. </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00180">180</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -183,7 +226,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00170">170</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p>0=ZMQ, 1=POSIX, -1=default </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00171">171</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -199,7 +244,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00180">180</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p>Logging level; -1=default. </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00181">181</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -215,7 +262,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00181">181</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p>Log file; NULL=auto (<span class="tt">/tmp/e3_ROLE[_ID]_EUID.log</span>). </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00182">182</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -231,7 +280,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00183">183</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p>Pin the I/O threads when non-zero; 0=no pinning. </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00184">184</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -247,7 +298,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00177">177</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p>Endpoint of the publisher channel; NULL keeps the default. </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00178">178</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -263,7 +316,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00174">174</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p>Port of the publisher channel (SCTP and TCP); 0 keeps the default. </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00175">175</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -279,7 +334,27 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00169">169</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p>RAN identifier; NULL keeps the default. </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00170">170</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+
+</div>
+</div>
+<a id="af4f59b8298dea2a3ee8683339ae20d26" name="af4f59b8298dea2a3ee8683339ae20d26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4f59b8298dea2a3ee8683339ae20d26">&#9670;&#160;</a></span>set_dapp_idle_timeout</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int e3_config_t::set_dapp_idle_timeout</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Apply <span class="tt"><a class="el" href="#abad0b17f9c0141ea1926cbb1cf364984" title="Seconds without a message from a dApp before the RAN releases and removes it; 0=never.">dapp_idle_timeout_s</a></span> when non-zero; 0=keep the library default (1800 s). </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00187">187</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -295,7 +370,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00175">175</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p>Endpoint of the setup channel; NULL keeps the default. </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00176">176</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -311,7 +388,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00172">172</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p>Port of the setup channel (SCTP and TCP); 0 keeps the default. </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00173">173</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -327,7 +406,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00176">176</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p>Endpoint of the subscriber channel; NULL keeps the default. </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00177">177</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -343,7 +424,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00173">173</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p>Port of the subscriber channel (SCTP and TCP); 0 keeps the default. </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00174">174</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -359,7 +442,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00171">171</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p>0=SCTP, 1=TCP, 2=IPC, -1=default </p>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00172">172</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>

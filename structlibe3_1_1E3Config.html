@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.1</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -136,6 +136,10 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:acf888c5db2f504e618d3e31dddca9f89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receive operation timeout in milliseconds.  <br /></td></tr>
 <tr class="memitem:a549fadb5656fe7e7c9831bb3d6e9519c" id="r_a549fadb5656fe7e7c9831bb3d6e9519c"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a549fadb5656fe7e7c9831bb3d6e9519c">send_timeout_ms</a> {1000}</td></tr>
 <tr class="memdesc:a549fadb5656fe7e7c9831bb3d6e9519c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send operation timeout in milliseconds.  <br /></td></tr>
+<tr class="memitem:ab5c9eeb0a3cb8fe1a9be8b2a0200576a" id="r_ab5c9eeb0a3cb8fe1a9be8b2a0200576a"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab5c9eeb0a3cb8fe1a9be8b2a0200576a">dapp_idle_timeout_s</a> {1800}</td></tr>
+<tr class="memdesc:ab5c9eeb0a3cb8fe1a9be8b2a0200576a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seconds a RAN waits for a message from a dApp before it removes the dApp.  <br /></td></tr>
+<tr class="memitem:a02e8e746e4fe2c86b56cd47cbc12f480" id="r_a02e8e746e4fe2c86b56cd47cbc12f480"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a02e8e746e4fe2c86b56cd47cbc12f480">reconnect_interval_ms</a> {1000}</td></tr>
+<tr class="memdesc:a02e8e746e4fe2c86b56cd47cbc12f480"><td class="mdescLeft">&#160;</td><td class="mdescRight">Milliseconds a dApp waits before it registers with the RAN again (dApp role).  <br /></td></tr>
 <tr class="memitem:ae3b5e07e651f71ab413d4791e3458ca9" id="r_ae3b5e07e651f71ab413d4791e3458ca9"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae3b5e07e651f71ab413d4791e3458ca9">receive_buffer_size</a> {<a class="el" href="namespacelibe3.html#a809598c8d63a2bdce0d447411324a2b5">DEFAULT_BUFFER_SIZE</a>}</td></tr>
 <tr class="memdesc:ae3b5e07e651f71ab413d4791e3458ca9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Size of the receive buffer in bytes.  <br /></td></tr>
 <tr class="memitem:ad5ec01b9a6f427f65953c35a0b32f980" id="r_ad5ec01b9a6f427f65953c35a0b32f980"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad5ec01b9a6f427f65953c35a0b32f980">send_buffer_size</a> {<a class="el" href="namespacelibe3.html#a809598c8d63a2bdce0d447411324a2b5">DEFAULT_BUFFER_SIZE</a>}</td></tr>
@@ -171,6 +175,25 @@ Public Attributes</h2></td></tr>
 <p>Connection establishment timeout in milliseconds. </p>
 
 <p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00508">508</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ab5c9eeb0a3cb8fe1a9be8b2a0200576a" name="ab5c9eeb0a3cb8fe1a9be8b2a0200576a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5c9eeb0a3cb8fe1a9be8b2a0200576a">&#9670;&#160;</a></span>dapp_idle_timeout_s</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t libe3::E3Config::dapp_idle_timeout_s {1800}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Seconds a RAN waits for a message from a dApp before it removes the dApp. </p>
+<p>RAN role only. A dApp that sends nothing for this long is told with a <a class="el" href="structlibe3_1_1ReleaseMessage.html" title="E3AP Release Message structure.">ReleaseMessage</a>, then its registration and subscriptions are dropped and a RAN function it was the last subscriber of is stopped. Only what the dApp sends counts, never what the RAN sends to it. A dApp that registered and never spoke counts from its registration. 0 never removes a dApp for being quiet. The default is Aerial's 1800 s. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00522">522</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -262,7 +285,7 @@ Public Attributes</h2></td></tr>
 <p>When set to a non-negative value the subscriber_loop and publisher_loop threads will be pinned to this logical CPU core via pthread_setaffinity_np (Linux only; ignored on other platforms). This eliminates cache-migration overhead and reduces scheduling jitter in sub-millisecond control loops.</p>
 <p>-1 (default) disables core pinning. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00530">530</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00557">557</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -282,7 +305,7 @@ Public Attributes</h2></td></tr>
 <p>Range -20 (highest priority) to 19 (lowest priority), 0 = system default. A negative value reduces OS scheduling latency at the cost of slightly less CPU time for other processes. Requires appropriate privileges for negative values (CAP_SYS_NICE on Linux).</p>
 <p>Applied via setpriority(PRIO_PROCESS, tid, value) on Linux. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00542">542</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00569">569</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -300,7 +323,7 @@ Public Attributes</h2></td></tr>
 
 <p>Number of I/O threads (used by ZMQ context). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00517">517</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00544">544</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -336,7 +359,7 @@ Public Attributes</h2></td></tr>
 
 <p>Logging verbosity: 0=none, 1=error, 2=warn, 3=info, 4=debug, 5=trace. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00545">545</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00572">572</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -355,7 +378,7 @@ Public Attributes</h2></td></tr>
 <p>Path of the shared log file. Empty (default) =&gt; auto-generated. </p>
 <p>When left empty the library derives a per-process path of the form <span class="tt">/tmp/e3_&lt;<a class="el" href="#a348b15e9a72856994dee4b87e520da01" title="Role: RAN (today&#39;s default — binds sockets) or DAPP (connects).">role</a>&gt;[_&lt;sanitized-id&gt;]_&lt;euid&gt;.log</span> (see <a class="el" href="classlibe3_1_1E3Interface.html" title="E3Interface - Internal protocol coordination.">E3Interface</a> ctor). The trailing effective-uid keeps the file owned by whoever opens it, which avoids <span class="tt">fs.protected_regular</span> blocking an O_CREAT re-open of a /tmp file owned by a different user (e.g. a root gNB vs. a prior non-sudo run). Set this explicitly to override the location entirely. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00557">557</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00584">584</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -427,7 +450,26 @@ Public Attributes</h2></td></tr>
 
 <p>Size of the receive buffer in bytes. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00513">513</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00540">540</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a02e8e746e4fe2c86b56cd47cbc12f480" name="a02e8e746e4fe2c86b56cd47cbc12f480"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02e8e746e4fe2c86b56cd47cbc12f480">&#9670;&#160;</a></span>reconnect_interval_ms</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t libe3::E3Config::reconnect_interval_ms {1000}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Milliseconds a dApp waits before it registers with the RAN again (dApp role). </p>
+<p>When the RAN releases the dApp or the connection to it is lost, or setup did not complete, a dApp that was started with start() stops and starts itself again after this long, and again every this long until the RAN answers. The new session has a new dApp id and none of the subscriptions of the old one: the application subscribes again, and learns that the dApp is back from the setup response handler. A dApp that called release(), or stop(), is not restarted. 0 turns it off, so a dApp stays down until the program calls stop() and start(). The default is Aerial's one second. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00537">537</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -481,7 +523,7 @@ Public Attributes</h2></td></tr>
 
 <p>Size of the send buffer in bytes. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00514">514</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00541">541</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

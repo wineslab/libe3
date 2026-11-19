@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.1</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -208,7 +208,7 @@ Queues that are full</h2>
 <p>The E3 Agent has a queue for outbound messages and a queue for reports. A full queue drops the new message. The sender gets no notice, except a failed call on the E3 Agent side.</p>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md357"></a>
 Lost links</h2>
-<p>A dApp that loses its link reports the reason "connection lost". It does not reconnect by itself. An E3 Agent that loses a dApp should remove the registration and the subscriptions of that dApp. Some implementations do not detect this, so the registration stays.</p>
+<p>A dApp that loses its link reports the reason "connection lost". It may run the Setup procedure again by itself, and then has a new dApp identifier and no subscriptions. An E3 Agent that loses a dApp, or that has heard nothing from it for a long time, should send a RELEASE message where the link is still there, and should remove the registration and the subscriptions of that dApp. Some implementations do not detect this, so the registration stays.</p>
 <h1 class="doxsection"><a class="anchor" id="autotoc_md358"></a>
 Identifiers over time</h1>
 <ul>

@@ -4,6 +4,7 @@ var classlibe3_1_1PosixE3Connector =
     [ "~PosixE3Connector", "classlibe3_1_1PosixE3Connector.html#a09050e9c1adc050d26d7d345e0ca130d", null ],
     [ "dispose", "classlibe3_1_1PosixE3Connector.html#a5583b230f5ffe39460c6373bd5d49453", null ],
     [ "is_connected", "classlibe3_1_1PosixE3Connector.html#afc4fe724c4cc6029681ec6c11a03e382", null ],
+    [ "last_peer_token", "classlibe3_1_1PosixE3Connector.html#a4773f04fe5c6f3655c5372a4784e8718", null ],
     [ "link_layer", "classlibe3_1_1PosixE3Connector.html#a00b3eb462edc5ba4216db2d11034149c", null ],
     [ "receive", "classlibe3_1_1PosixE3Connector.html#a78be8b3116078571b637153efb88b96d", null ],
     [ "recv_setup_request", "classlibe3_1_1PosixE3Connector.html#a522da91e27c5c45d132a08fdda32fba9", null ],
@@ -18,5 +19,6 @@ var classlibe3_1_1PosixE3Connector =
     [ "setup_outbound_connection", "classlibe3_1_1PosixE3Connector.html#af87b02230d7feff391c9eba51a568814", null ],
     [ "setup_outbound_connection_client", "classlibe3_1_1PosixE3Connector.html#ad733335f58c2b16785cfbe6b03ce78b5", null ],
     [ "shutdown", "classlibe3_1_1PosixE3Connector.html#ad24cf60976a943de987c1cb0e3f64b8f", null ],
+    [ "take_closed_peers", "classlibe3_1_1PosixE3Connector.html#ae00ef6909c6a7c3c379d0740777a3039", null ],
     [ "transport_layer", "classlibe3_1_1PosixE3Connector.html#a8853039ece3574b0ad72f7cc27fcf8c8", null ]
 ];
