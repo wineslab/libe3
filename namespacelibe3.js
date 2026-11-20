@@ -5,6 +5,7 @@ var namespacelibe3 =
     [ "py", "namespacelibe3_1_1py.html", "namespacelibe3_1_1py" ],
     [ "DAppSubscriptionState", "classlibe3_1_1DAppSubscriptionState.html", "classlibe3_1_1DAppSubscriptionState" ],
     [ "E3Agent", "classlibe3_1_1E3Agent.html", "classlibe3_1_1E3Agent" ],
+    [ "PosixOptions", "structlibe3_1_1PosixOptions.html", "structlibe3_1_1PosixOptions" ],
     [ "E3Connector", "classlibe3_1_1E3Connector.html", "classlibe3_1_1E3Connector" ],
     [ "E3Encoder", "classlibe3_1_1E3Encoder.html", "classlibe3_1_1E3Encoder" ],
     [ "E3Interface", "classlibe3_1_1E3Interface.html", "classlibe3_1_1E3Interface" ],
@@ -125,6 +126,10 @@ var namespacelibe3 =
       [ "DEBUG", "namespacelibe3.html#a509338e1414d84a610f21816d04940a0adc30ec20708ef7b0f641ef78b7880a15", null ],
       [ "TRACE", "namespacelibe3.html#a509338e1414d84a610f21816d04940a0a2d3e4144aa384b18849ab9a8abad74d6", null ]
     ] ],
+    [ "PduClass", "namespacelibe3.html#a8af01c5e56889bf41490a02000ff5f80", [
+      [ "PROCEDURE", "namespacelibe3.html#a8af01c5e56889bf41490a02000ff5f80a6c4d52355c694ee12dcd648562757f52", null ],
+      [ "INDICATION", "namespacelibe3.html#a8af01c5e56889bf41490a02000ff5f80a9b696f04ae1628a090bc980fdd99441d", null ]
+    ] ],
     [ "PduType", "namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185", [
       [ "SETUP_REQUEST", "namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185a721631a8a97cce9342eb0771e8085031", null ],
       [ "SETUP_RESPONSE", "namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185a77ecb9bae0c94f343765c1ca8b28cde9", null ],
@@ -149,7 +154,7 @@ var namespacelibe3 =
     [ "cause_from_value", "namespacelibe3.html#ab9079f464bfd858520f4bbce5386384b", null ],
     [ "cause_to_string", "namespacelibe3.html#a289413885a89ed74d969b7723f8e012e", null ],
     [ "cpu_relax", "namespacelibe3.html#a979479d8033aec7c1268d3a5af3223c7", null ],
-    [ "create_connector", "namespacelibe3.html#aa9ff798ade0521070e6332830f7d35bd", null ],
+    [ "create_connector", "namespacelibe3.html#a0ae46c52a51f72753d07fa244ad371d9", null ],
     [ "create_encoder", "namespacelibe3.html#a3fd9e4c182481cd094c35bab83ede638", null ],
     [ "error_code_to_string", "namespacelibe3.html#aee2a6ca3a33bc7c111aa5256811a61eb", null ],
     [ "ErrorCodeToString", "namespacelibe3.html#a1e67547ed0251e57fee673a53a8e935f", null ],

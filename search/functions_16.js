@@ -10,9 +10,10 @@ var searchData=
   ['_7elockfreequeue_7',['~LockFreeQueue',['../classlibe3_1_1LockFreeQueue.html#ac29617658ee49864ae1f951dfdc0622f',1,'libe3::LockFreeQueue']]],
   ['_7elogstream_8',['~LogStream',['../classlibe3_1_1LogStream.html#a2a4a53729988364f1694d1097015dc74',1,'libe3::LogStream']]],
   ['_7empmcqueue_9',['~MpmcQueue',['../classlibe3_1_1MpmcQueue.html#a7985bb0c1eb33e8dca373439a64f3444',1,'libe3::MpmcQueue']]],
-  ['_7eposixe3connector_10',['~PosixE3Connector',['../classlibe3_1_1PosixE3Connector.html#a09050e9c1adc050d26d7d345e0ca130d',1,'libe3::PosixE3Connector']]],
-  ['_7eprotobufe3encoder_11',['~ProtobufE3Encoder',['../classlibe3_1_1ProtobufE3Encoder.html#a63f5ae3b5b4166e7f5353f65014a560e',1,'libe3::ProtobufE3Encoder']]],
-  ['_7eservicemodel_12',['~ServiceModel',['../classlibe3_1_1ServiceModel.html#a4e7def12f11c843da1581d69cb5d6b9b',1,'libe3::ServiceModel']]],
-  ['_7esubscriptionmanager_13',['~SubscriptionManager',['../classlibe3_1_1SubscriptionManager.html#a8a2372bc4da0b3ddac68c26634d214d7',1,'libe3::SubscriptionManager']]],
-  ['_7ezmqe3connector_14',['~ZmqE3Connector',['../classlibe3_1_1ZmqE3Connector.html#aaa68eb185549c7b2094b8cdecb813ed7',1,'libe3::ZmqE3Connector']]]
+  ['_7epeer_10',['~Peer',['../structlibe3_1_1PosixE3Connector_1_1Peer.html#a98eee05c6499e7934b43f81c4a778715',1,'libe3::PosixE3Connector::Peer']]],
+  ['_7eposixe3connector_11',['~PosixE3Connector',['../classlibe3_1_1PosixE3Connector.html#a09050e9c1adc050d26d7d345e0ca130d',1,'libe3::PosixE3Connector']]],
+  ['_7eprotobufe3encoder_12',['~ProtobufE3Encoder',['../classlibe3_1_1ProtobufE3Encoder.html#a63f5ae3b5b4166e7f5353f65014a560e',1,'libe3::ProtobufE3Encoder']]],
+  ['_7eservicemodel_13',['~ServiceModel',['../classlibe3_1_1ServiceModel.html#a4e7def12f11c843da1581d69cb5d6b9b',1,'libe3::ServiceModel']]],
+  ['_7esubscriptionmanager_14',['~SubscriptionManager',['../classlibe3_1_1SubscriptionManager.html#a8a2372bc4da0b3ddac68c26634d214d7',1,'libe3::SubscriptionManager']]],
+  ['_7ezmqe3connector_15',['~ZmqE3Connector',['../classlibe3_1_1ZmqE3Connector.html#aaa68eb185549c7b2094b8cdecb813ed7',1,'libe3::ZmqE3Connector']]]
 ];

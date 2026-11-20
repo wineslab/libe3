@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.6.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -104,6 +104,8 @@ Classes</h2></td></tr>
 <tr class="memitem:DAppSubscriptionState" id="r_DAppSubscriptionState"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1DAppSubscriptionState.html">DAppSubscriptionState</a></td></tr>
 <tr class="memitem:E3Agent" id="r_E3Agent"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Agent.html">E3Agent</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classlibe3_1_1E3Agent.html" title="E3Agent - Main façade for RAN vendor integration.">E3Agent</a> - Main façade for RAN vendor integration.  <a href="classlibe3_1_1E3Agent.html#details">More...</a><br /></td></tr>
+<tr class="memitem:PosixOptions" id="r_PosixOptions"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1PosixOptions.html">PosixOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Socket and admission options of the POSIX link.  <a href="structlibe3_1_1PosixOptions.html#details">More...</a><br /></td></tr>
 <tr class="memitem:E3Connector" id="r_E3Connector"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Connector.html">E3Connector</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract base class for E3AP transport connectors.  <a href="classlibe3_1_1E3Connector.html#details">More...</a><br /></td></tr>
 <tr class="memitem:E3Encoder" id="r_E3Encoder"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Encoder.html">E3Encoder</a></td></tr>
@@ -169,7 +171,7 @@ Classes</h2></td></tr>
 <tr class="memitem:SubscriptionEntry" id="r_SubscriptionEntry"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1SubscriptionEntry.html">SubscriptionEntry</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscription entry representing dApp-RAN function association.  <a href="structlibe3_1_1SubscriptionEntry.html#details">More...</a><br /></td></tr>
 <tr class="memitem:PosixE3Connector" id="r_PosixE3Connector"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1PosixE3Connector.html">PosixE3Connector</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">POSIX socket-based E3 connector.  <a href="classlibe3_1_1PosixE3Connector.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">POSIX socket-based E3 connector: one endpoint per dApp.  <a href="classlibe3_1_1PosixE3Connector.html#details">More...</a><br /></td></tr>
 <tr class="memitem:ZmqE3Connector" id="r_ZmqE3Connector"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1ZmqE3Connector.html">ZmqE3Connector</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">ZeroMQ-based E3 connector.  <a href="classlibe3_1_1ZmqE3Connector.html#details">More...</a><br /></td></tr>
 <tr class="memitem:Asn1E3Encoder" id="r_Asn1E3Encoder"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1Asn1E3Encoder.html">Asn1E3Encoder</a></td></tr>
@@ -214,6 +216,10 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
+<tr class="memitem:a8af01c5e56889bf41490a02000ff5f80" id="r_a8af01c5e56889bf41490a02000ff5f80"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8af01c5e56889bf41490a02000ff5f80">PduClass</a> : uint8_t { <a class="el" href="#a8af01c5e56889bf41490a02000ff5f80a6c4d52355c694ee12dcd648562757f52">PROCEDURE</a> = 0
+, <a class="el" href="#a8af01c5e56889bf41490a02000ff5f80a9b696f04ae1628a090bc980fdd99441d">INDICATION</a> = 1
+ }</td></tr>
+<tr class="memdesc:a8af01c5e56889bf41490a02000ff5f80"><td class="mdescLeft">&#160;</td><td class="mdescRight">What a PDU is for, so that a link that has streams can pick one.  <a href="#a8af01c5e56889bf41490a02000ff5f80">More...</a><br /></td></tr>
 <tr class="memitem:a509338e1414d84a610f21816d04940a0" id="r_a509338e1414d84a610f21816d04940a0"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a509338e1414d84a610f21816d04940a0">LogLevel</a> : int { <br />
 &#160;&#160;<a class="el" href="#a509338e1414d84a610f21816d04940a0ab50339a10e1de285ac99d4c3990b8693">NONE</a> = 0
 , <a class="el" href="#a509338e1414d84a610f21816d04940a0abb1ca97ec761fc37101737ba0aa2e7c5">ERROR</a> = 1
@@ -319,8 +325,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:a85c33a76111e517c006df1b1fc0411bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get <a class="el" href="namespacelibe3.html">libe3</a> version string.  <br /></td></tr>
 <tr class="memitem:acf6808999eb4ab8698c77b30b933b284" id="r_acf6808999eb4ab8698c77b30b933b284"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acf6808999eb4ab8698c77b30b933b284">version</a> (int &amp;major, int &amp;minor, int &amp;patch) noexcept</td></tr>
 <tr class="memdesc:acf6808999eb4ab8698c77b30b933b284"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get <a class="el" href="namespacelibe3.html">libe3</a> version as components.  <br /></td></tr>
-<tr class="memitem:aa9ff798ade0521070e6332830f7d35bd" id="r_aa9ff798ade0521070e6332830f7d35bd"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classlibe3_1_1E3Connector.html">E3Connector</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa9ff798ade0521070e6332830f7d35bd">create_connector</a> (<a class="el" href="#a6cf81048dab516aa29417bb0dc741d0e">E3LinkLayer</a> link_layer, <a class="el" href="#a24bf966c6225dc47ac47d7a8a1986c40">E3TransportLayer</a> transport_layer, const std::string &amp;setup_endpoint, const std::string &amp;inbound_endpoint, const std::string &amp;outbound_endpoint, uint16_t setup_port, uint16_t inbound_port, uint16_t outbound_port, size_t io_threads=2, <a class="el" href="#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a> role=<a class="el" href="#a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c">E3Role::RAN</a>)</td></tr>
-<tr class="memdesc:aa9ff798ade0521070e6332830f7d35bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory function to create appropriate connector.  <br /></td></tr>
+<tr class="memitem:a0ae46c52a51f72753d07fa244ad371d9" id="r_a0ae46c52a51f72753d07fa244ad371d9"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classlibe3_1_1E3Connector.html">E3Connector</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0ae46c52a51f72753d07fa244ad371d9">create_connector</a> (<a class="el" href="#a6cf81048dab516aa29417bb0dc741d0e">E3LinkLayer</a> link_layer, <a class="el" href="#a24bf966c6225dc47ac47d7a8a1986c40">E3TransportLayer</a> transport_layer, const std::string &amp;setup_endpoint, const std::string &amp;inbound_endpoint, const std::string &amp;outbound_endpoint, uint16_t setup_port, uint16_t inbound_port, uint16_t outbound_port, size_t io_threads=2, <a class="el" href="#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a> role=<a class="el" href="#a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c">E3Role::RAN</a>, const <a class="el" href="structlibe3_1_1PosixOptions.html">PosixOptions</a> &amp;posix=<a class="el" href="structlibe3_1_1PosixOptions.html">PosixOptions</a>{})</td></tr>
+<tr class="memdesc:a0ae46c52a51f72753d07fa244ad371d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory function to create appropriate connector.  <br /></td></tr>
 <tr class="memitem:a3fd9e4c182481cd094c35bab83ede638" id="r_a3fd9e4c182481cd094c35bab83ede638"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classlibe3_1_1E3Encoder.html">E3Encoder</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3fd9e4c182481cd094c35bab83ede638">create_encoder</a> (<a class="el" href="#a7f13391272eb5ca90bf9d7f86b841444">EncodingFormat</a> format)</td></tr>
 <tr class="memdesc:a3fd9e4c182481cd094c35bab83ede638"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory function to create appropriate encoder.  <br /></td></tr>
 <tr class="memitem:a979479d8033aec7c1268d3a5af3223c7" id="r_a979479d8033aec7c1268d3a5af3223c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a979479d8033aec7c1268d3a5af3223c7">cpu_relax</a> () noexcept</td></tr>
@@ -729,7 +735,7 @@ template&lt;typename T&gt; </div>
 
 <p><a class="el" href="#a6dc96978d420b62130fbd1e5c17497aa" title="Timestamp type using steady_clock for monotonic time.">Timestamp</a> type using steady_clock for monotonic time. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00634">634</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00673">673</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1117,6 +1123,39 @@ template&lt;typename T&gt; </div>
 
 </div>
 </div>
+<a id="a8af01c5e56889bf41490a02000ff5f80" name="a8af01c5e56889bf41490a02000ff5f80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8af01c5e56889bf41490a02000ff5f80">&#9670;&#160;</a></span>PduClass</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#a8af01c5e56889bf41490a02000ff5f80">libe3::PduClass</a> : uint8_t</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>What a PDU is for, so that a link that has streams can pick one. </p>
+<p>A connector does not decode the PDUs it carries. The caller says which kind a PDU is, and a link with more than one stream (SCTP) sends indications on one and everything else on the other. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a8af01c5e56889bf41490a02000ff5f80a6c4d52355c694ee12dcd648562757f52" name="a8af01c5e56889bf41490a02000ff5f80a6c4d52355c694ee12dcd648562757f52"></a>PROCEDURE&#160;</td><td class="fielddoc"><p>A request, a response, a control, a release: anything but an indication. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a8af01c5e56889bf41490a02000ff5f80a9b696f04ae1628a090bc980fdd99441d" name="a8af01c5e56889bf41490a02000ff5f80a9b696f04ae1628a090bc980fdd99441d"></a>INDICATION&#160;</td><td class="fielddoc"><p>An indication message. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00031">31</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+
+</div>
+</div>
 <a id="a675f37e2936d707807212fcd3cfa8185" name="a675f37e2936d707807212fcd3cfa8185"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a675f37e2936d707807212fcd3cfa8185">&#9670;&#160;</a></span>PduType</h2>
 
@@ -1223,7 +1262,7 @@ template&lt;typename T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A static name, "unknown" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00685">685</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00724">724</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1259,7 +1298,7 @@ template&lt;typename T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A static name, "Unknown" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00793">793</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00832">832</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1295,7 +1334,7 @@ template&lt;typename T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The cause; <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a1c04cc3823d476c3017238679a0fdf52" title="No more specific cause applies.">Cause::UNSPECIFIED</a> for a name this version does not know, so a peer that adds a cause is still read as a refusal </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00739">739</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00778">778</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1331,7 +1370,7 @@ template&lt;typename T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The cause; <a class="el" href="#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7a1c04cc3823d476c3017238679a0fdf52" title="No more specific cause applies.">Cause::UNSPECIFIED</a> for a value this version does not know </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00751">751</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00790">790</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1367,7 +1406,7 @@ template&lt;typename T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The camelCase name, for example "unsupportedIdentifier"; "unspecified" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00712">712</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00751">751</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1401,8 +1440,8 @@ template&lt;typename T&gt; </div>
 
 </div>
 </div>
-<a id="aa9ff798ade0521070e6332830f7d35bd" name="aa9ff798ade0521070e6332830f7d35bd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa9ff798ade0521070e6332830f7d35bd">&#9670;&#160;</a></span>create_connector()</h2>
+<a id="a0ae46c52a51f72753d07fa244ad371d9" name="a0ae46c52a51f72753d07fa244ad371d9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ae46c52a51f72753d07fa244ad371d9">&#9670;&#160;</a></span>create_connector()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1455,7 +1494,12 @@ template&lt;typename T&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a></td>          <td class="paramname"><span class="paramname"><em>role</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="#a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c">E3Role::RAN</a></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a></td>          <td class="paramname"><span class="paramname"><em>role</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="#a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c">E3Role::RAN</a></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structlibe3_1_1PosixOptions.html">PosixOptions</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>posix</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="structlibe3_1_1PosixOptions.html">PosixOptions</a>{}</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -1474,10 +1518,12 @@ template&lt;typename T&gt; </div>
     <tr><td class="paramname">outbound_port</td><td>Port of the outbound channel (SCTP and TCP) </td></tr>
     <tr><td class="paramname">io_threads</td><td>Number of I/O threads (for ZMQ) </td></tr>
     <tr><td class="paramname">role</td><td>Role of the peer (RAN or dApp) </td></tr>
+    <tr><td class="paramname">posix</td><td>Socket and admission options of the POSIX link (ignored by ZMQ) </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Unique pointer to created connector, nullptr on failure </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Unique pointer to created connector, nullptr on failure</dd></dl>
+<p>The POSIX link serves everything on the setup endpoint and port, and ignores the inbound and outbound ones. </p>
 
 <p class="definition">Definition at line <a class="el" href="connector__factory_8cpp_source.html#l00018">18</a> of file <a class="el" href="connector__factory_8cpp_source.html">connector_factory.cpp</a>.</p>
 
@@ -1544,7 +1590,7 @@ template&lt;typename T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A short description, "Unknown error" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00761">761</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00800">800</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1617,7 +1663,7 @@ template&lt;typename T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>"zmq" or "posix", "unknown" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00825">825</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00864">864</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1685,7 +1731,7 @@ template&lt;typename T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A static name, "unknown" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00662">662</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00701">701</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1721,7 +1767,7 @@ template&lt;typename T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>"positive" or "negative", "unknown" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00699">699</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00738">738</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1757,7 +1803,7 @@ template&lt;typename T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>"ran" or "dapp", "unknown" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00812">812</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00851">851</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -1793,7 +1839,7 @@ template&lt;typename T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>"sctp", "tcp" or "ipc", "unknown" for a value outside the enumeration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00838">838</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00877">877</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

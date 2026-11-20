@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.6.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -93,7 +93,7 @@ $(function(){initNavTree('classlibe3_1_1PosixE3Connector.html','','classlibe3_1_
 </div><!--header-->
 <div class="contents">
 
-<p>POSIX socket-based E3 connector.  
+<p>POSIX socket-based E3 connector: one endpoint per dApp.  
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>&gt;</code></p>
@@ -107,10 +107,17 @@ Inheritance diagram for libe3::PosixE3Connector:</div>
   </map>
 </div></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:Peer" id="r_Peer"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1PosixE3Connector_1_1Peer.html">Peer</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One accepted connection of a RAN. Closes its socket when the last reference goes.  <a href="structlibe3_1_1PosixE3Connector_1_1Peer.html#details">More...</a><br /></td></tr>
+<tr class="memitem:Queued" id="r_Queued"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1PosixE3Connector_1_1Queued.html">Queued</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A PDU read from a peer and waiting for the thread that takes it.  <a href="structlibe3_1_1PosixE3Connector_1_1Queued.html#details">More...</a><br /></td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aa615ce435e73e3f417376560be582d7f" id="r_aa615ce435e73e3f417376560be582d7f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa615ce435e73e3f417376560be582d7f">PosixE3Connector</a> (<a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40">E3TransportLayer</a> <a class="el" href="#a8853039ece3574b0ad72f7cc27fcf8c8">transport_layer</a>, const std::string &amp;<a class="el" href="classlibe3_1_1E3Connector.html#a51b45f40452e21a57d900cb036da692e">setup_endpoint</a>, const std::string &amp;<a class="el" href="classlibe3_1_1E3Connector.html#a2f46a122e9292b11a6413a30ce9ecd1c">inbound_endpoint</a>, const std::string &amp;<a class="el" href="classlibe3_1_1E3Connector.html#ab2c0330eabd5cc80d98497fcf1929301">outbound_endpoint</a>, uint16_t setup_port, uint16_t inbound_port, uint16_t outbound_port)</td></tr>
-<tr class="memdesc:aa615ce435e73e3f417376560be582d7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a POSIX connector.  <br /></td></tr>
+<tr class="memitem:abc6463d0c260cd97dc69794b4973989a" id="r_abc6463d0c260cd97dc69794b4973989a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abc6463d0c260cd97dc69794b4973989a">PosixE3Connector</a> (<a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40">E3TransportLayer</a> <a class="el" href="#a8853039ece3574b0ad72f7cc27fcf8c8">transport_layer</a>, const std::string &amp;endpoint, uint16_t port, const <a class="el" href="structlibe3_1_1PosixOptions.html">PosixOptions</a> &amp;options)</td></tr>
+<tr class="memdesc:abc6463d0c260cd97dc69794b4973989a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a POSIX connector.  <br /></td></tr>
 <tr class="memitem:a09050e9c1adc050d26d7d345e0ca130d" id="r_a09050e9c1adc050d26d7d345e0ca130d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a09050e9c1adc050d26d7d345e0ca130d">~PosixE3Connector</a> () override</td></tr>
 <tr class="memdesc:a09050e9c1adc050d26d7d345e0ca130d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close every socket.  <br /></td></tr>
 <tr class="memitem:ae0b5bed5d0bde736bfc8cee16bb57bb7" id="r_ae0b5bed5d0bde736bfc8cee16bb57bb7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae0b5bed5d0bde736bfc8cee16bb57bb7">setup_initial_connection</a> () override</td></tr>
@@ -127,6 +134,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:af87b02230d7feff391c9eba51a568814"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up the outbound connection (PUB channel).  <br /></td></tr>
 <tr class="memitem:a7a3d61abfe45806f412e20aeaeaeb4a9" id="r_a7a3d61abfe45806f412e20aeaeaeb4a9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7a3d61abfe45806f412e20aeaeaeb4a9">send</a> (const std::vector&lt; uint8_t &gt; &amp;data) override</td></tr>
 <tr class="memdesc:a7a3d61abfe45806f412e20aeaeaeb4a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send data on the outbound channel.  <br /></td></tr>
+<tr class="memitem:a90d25b63717193647dcf0691be6ec4b2" id="r_a90d25b63717193647dcf0691be6ec4b2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a90d25b63717193647dcf0691be6ec4b2">send_to</a> (uint64_t peer_token, const std::vector&lt; uint8_t &gt; &amp;data, <a class="el" href="namespacelibe3.html#a8af01c5e56889bf41490a02000ff5f80">PduClass</a> kind) override</td></tr>
+<tr class="memdesc:a90d25b63717193647dcf0691be6ec4b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send data to one peer, or to all of them (RAN role).  <br /></td></tr>
 <tr class="memitem:a821510b86a0d1aec24a7feafc3309c01" id="r_a821510b86a0d1aec24a7feafc3309c01"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a821510b86a0d1aec24a7feafc3309c01">setup_initial_connection_client</a> () override</td></tr>
 <tr class="memdesc:a821510b86a0d1aec24a7feafc3309c01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connect the setup channel (dApp role: REQ connect).  <br /></td></tr>
 <tr class="memitem:a050f26143b9390d56ff01ec94eebfead" id="r_a050f26143b9390d56ff01ec94eebfead"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a050f26143b9390d56ff01ec94eebfead">send_setup_request_client</a> (const std::vector&lt; uint8_t &gt; &amp;data) override</td></tr>
@@ -143,6 +152,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ad24cf60976a943de987c1cb0e3f64b8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interrupt blocking operations for shutdown.  <br /></td></tr>
 <tr class="memitem:a4773f04fe5c6f3655c5372a4784e8718" id="r_a4773f04fe5c6f3655c5372a4784e8718"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4773f04fe5c6f3655c5372a4784e8718">last_peer_token</a> () const override</td></tr>
 <tr class="memdesc:a4773f04fe5c6f3655c5372a4784e8718"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which peer supplied the bytes the last <a class="el" href="#a78be8b3116078571b637153efb88b96d" title="Receive data from the inbound channel.">receive()</a> returned (RAN role).  <br /></td></tr>
+<tr class="memitem:a535c2512e1cef6a76c0825bceefe4da5" id="r_a535c2512e1cef6a76c0825bceefe4da5"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a535c2512e1cef6a76c0825bceefe4da5">last_setup_peer_token</a> () const override</td></tr>
+<tr class="memdesc:a535c2512e1cef6a76c0825bceefe4da5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which peer sent the setup request the last <a class="el" href="#a522da91e27c5c45d132a08fdda32fba9" title="Receive a setup request.">recv_setup_request()</a> returned (RAN role).  <br /></td></tr>
 <tr class="memitem:ae00ef6909c6a7c3c379d0740777a3039" id="r_ae00ef6909c6a7c3c379d0740777a3039"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint64_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae00ef6909c6a7c3c379d0740777a3039">take_closed_peers</a> () override</td></tr>
 <tr class="memdesc:ae00ef6909c6a7c3c379d0740777a3039"><td class="mdescLeft">&#160;</td><td class="mdescRight">Peers whose connection has closed since the last call (RAN role).  <br /></td></tr>
 <tr class="memitem:a00b3eb462edc5ba4216db2d11034149c" id="r_a00b3eb462edc5ba4216db2d11034149c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0e">E3LinkLayer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a00b3eb462edc5ba4216db2d11034149c">link_layer</a> () const noexcept override</td></tr>
@@ -185,14 +196,15 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memdesc:a15706dd6a95c019900ab528e39b4760d inherit pro_attribs_classlibe3_1_1E3Connector"><td class="mdescLeft">&#160;</td><td class="mdescRight">Role of this peer.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>POSIX socket-based E3 connector. </p>
-<p>Provides transport using POSIX sockets. Supports TCP, SCTP, and IPC transports. Ported from the original C implementation's posix_* functions.</p>
-<p>RAN role serves multiple dApp peers: both data listeners keep accepting for the connector's lifetime, <a class="el" href="#a78be8b3116078571b637153efb88b96d" title="Receive data from the inbound channel.">receive()</a> polls every accepted subscriber socket, and <a class="el" href="#a7a3d61abfe45806f412e20aeaeaeb4a9" title="Send data on the outbound channel.">send()</a> broadcasts each framed message to every accepted indication socket (mirroring the ZMQ PUB/SUB semantics, where the RAN broadcasts and each dApp filters by its own dApp identifier). Peer sockets are only touched by their owning I/O thread: inbound sockets by the inbound loop, outbound sockets by the outbound loop. </p>
+<div class="textblock"><p>POSIX socket-based E3 connector: one endpoint per dApp. </p>
+<p>Supports TCP, SCTP and IPC. A dApp opens one connection to the RAN's single endpoint and the setup, inbound and outbound traffic all use it; the three channels of <a class="el" href="classlibe3_1_1E3Connector.html" title="Abstract base class for E3AP transport connectors.">E3Connector</a> are logical. The first PDU on a connection is the dApp's setup request and goes to <a class="el" href="#a522da91e27c5c45d132a08fdda32fba9" title="Receive a setup request.">recv_setup_request()</a>; every later PDU goes to <a class="el" href="#a78be8b3116078571b637153efb88b96d" title="Receive data from the inbound channel.">receive()</a>. The inbound thread is the only reader of the sockets, so the receive path costs the same as with one channel per socket.</p>
+<p>Each PDU is one message. SCTP and IPC (a sequenced-packet socket) keep message boundaries and carry no prefix. TCP is a byte stream and prefixes each PDU with its length as four bytes in network order, in both directions. SCTP stamps payload protocol id 0x00E3A001 and sends indications on stream 1, everything else on stream 0.</p>
+<p>The RAN names each accepted connection with a token that is never reused (see <a class="el" href="classlibe3_1_1E3Connector.html#a5a41d42c96740aa4f0f70c77bd83f910" title="Which peer supplied the bytes the last receive() returned (RAN role).">E3Connector::last_peer_token</a>) and can send to one peer or to all. </p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00034">34</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00042">42</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="aa615ce435e73e3f417376560be582d7f" name="aa615ce435e73e3f417376560be582d7f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa615ce435e73e3f417376560be582d7f">&#9670;&#160;</a></span>PosixE3Connector()</h2>
+<a id="abc6463d0c260cd97dc69794b4973989a" name="abc6463d0c260cd97dc69794b4973989a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc6463d0c260cd97dc69794b4973989a">&#9670;&#160;</a></span>PosixE3Connector()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -205,32 +217,17 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>setup_endpoint</em></span>, </td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>endpoint</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>inbound_endpoint</em></span>, </td>
+          <td class="paramtype">uint16_t</td>          <td class="paramname"><span class="paramname"><em>port</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>outbound_endpoint</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint16_t</td>          <td class="paramname"><span class="paramname"><em>setup_port</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint16_t</td>          <td class="paramname"><span class="paramname"><em>inbound_port</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint16_t</td>          <td class="paramname"><span class="paramname"><em>outbound_port</em></span>&#160;)</td>
+          <td class="paramtype">const <a class="el" href="structlibe3_1_1PosixOptions.html">PosixOptions</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>options</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -239,17 +236,14 @@ Additional Inherited Members</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">transport_layer</td><td>SCTP, TCP or IPC </td></tr>
-    <tr><td class="paramname">setup_endpoint</td><td>Endpoint of the setup channel </td></tr>
-    <tr><td class="paramname">inbound_endpoint</td><td>Endpoint of the inbound channel </td></tr>
-    <tr><td class="paramname">outbound_endpoint</td><td>Endpoint of the outbound channel </td></tr>
-    <tr><td class="paramname">setup_port</td><td>Port of the setup channel (SCTP and TCP) </td></tr>
-    <tr><td class="paramname">inbound_port</td><td>Port of the inbound channel (SCTP and TCP) </td></tr>
-    <tr><td class="paramname">outbound_port</td><td>Port of the outbound channel (SCTP and TCP) </td></tr>
+    <tr><td class="paramname">endpoint</td><td>Endpoint of the link. IPC: a path, "ipc://" prefix optional, and the library's shared default is replaced by /tmp/dapps/e3. TCP and SCTP: "tcp://host:port" or "sctp://host:port" (a host in brackets for IPv6); anything else means the default host and <code class="param">port</code> </td></tr>
+    <tr><td class="paramname">port</td><td>Port of the link (SCTP and TCP) when the endpoint names none </td></tr>
+    <tr><td class="paramname">options</td><td>Socket and admission options </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00208">208</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00380">380</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -278,7 +272,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Close every socket. </p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00238">238</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00400">400</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -310,7 +304,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a7742bb39d7c324eff95c0ca2f60e26c5">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00876">876</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l01139">1139</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -342,7 +336,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a274eb381d4386c9c398b43d8714bbdbd">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00088">88</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00095">95</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -375,7 +369,40 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#a5a41d42c96740aa4f0f70c77bd83f910">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00584">584</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00963">963</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a535c2512e1cef6a76c0825bceefe4da5" name="a535c2512e1cef6a76c0825bceefe4da5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a535c2512e1cef6a76c0825bceefe4da5">&#9670;&#160;</a></span>last_setup_peer_token()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t libe3::PosixE3Connector::last_setup_peer_token </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Which peer sent the setup request the last <a class="el" href="#a522da91e27c5c45d132a08fdda32fba9" title="Receive a setup request.">recv_setup_request()</a> returned (RAN role). </p>
+<p>Call it on the thread that calls <a class="el" href="#a522da91e27c5c45d132a08fdda32fba9" title="Receive a setup request.">recv_setup_request()</a>, right after a call that returned bytes. The token is the one <a class="el" href="#a4773f04fe5c6f3655c5372a4784e8718" title="Which peer supplied the bytes the last receive() returned (RAN role).">last_peer_token()</a> gives for the same peer's later bytes, so a RAN can tie a dApp to its connection at setup.</p>
+<dl class="section return"><dt>Returns</dt><dd>The peer's token, or 0 for a connector that cannot tell its peers apart (the default, and ZeroMQ) </dd></dl>
+
+<p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#a61ff50a518daf8bb08f234aecad18474">libe3::E3Connector</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00967">967</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -407,7 +434,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a799a30389abe8a7ed32628f74acf42d4">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00080">80</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00087">87</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -445,7 +472,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a9963f7ca5b31c539904853ad27e471a9">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00462">462</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00840">840</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -483,7 +510,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a0ab089ce40dd51cecbd8faf39aceb771">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00313">313</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00867">867</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -515,7 +542,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#ad3e7eb321d9d16ec223a12f9ad4d31b9">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00807">807</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l01034">1034</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -553,7 +580,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#ad97ada69d4a0ef8a6c4b7085f048d03e">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00663">663</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00914">914</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -591,7 +618,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a97d282b7213769e360ed861bb31cf662">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00375">375</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00905">905</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -623,7 +650,57 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#af9ada1094b5a7755b7e8f0ae9dcc324c">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00793">793</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l01017">1017</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a90d25b63717193647dcf0691be6ec4b2" name="a90d25b63717193647dcf0691be6ec4b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90d25b63717193647dcf0691be6ec4b2">&#9670;&#160;</a></span>send_to()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> libe3::PosixE3Connector::send_to </td>
+          <td>(</td>
+          <td class="paramtype">uint64_t</td>          <td class="paramname"><span class="paramname"><em>peer_token</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; uint8_t &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacelibe3.html#a8af01c5e56889bf41490a02000ff5f80">PduClass</a></td>          <td class="paramname"><span class="paramname"><em>kind</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send data to one peer, or to all of them (RAN role). </p>
+<p>The default broadcasts with <a class="el" href="#a7a3d61abfe45806f412e20aeaeaeb4a9" title="Send data on the outbound channel.">send()</a>, which is what a connector that cannot tell its peers apart does.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">peer_token</td><td>The peer named by <a class="el" href="#a4773f04fe5c6f3655c5372a4784e8718" title="Which peer supplied the bytes the last receive() returned (RAN role).">last_peer_token()</a> or <a class="el" href="#a535c2512e1cef6a76c0825bceefe4da5" title="Which peer sent the setup request the last recv_setup_request() returned (RAN role).">last_setup_peer_token()</a>; 0 sends to every peer </td></tr>
+    <tr><td class="paramname">data</td><td>Data to send </td></tr>
+    <tr><td class="paramname">kind</td><td>What the PDU is for </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success, an error code otherwise </dd></dl>
+
+<p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#a537dbece322e1b320996b6a4f8fbc096">libe3::E3Connector</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00918">918</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -655,7 +732,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a01a61ff0e6aef94ac217231b3844b277">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00389">389</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00680">680</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -687,7 +764,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#ae506107a0cb3901bec193ba928238973">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00818">818</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l01068">1068</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -719,7 +796,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#ade5a39793a7868d70c809323fabe0929">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00242">242</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00670">670</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -751,7 +828,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#ac64419ab3462491e8256634c9e4582db">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00772">772</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00982">982</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -783,7 +860,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#a46ec267c4c5c30bd078c644dbe3c1805">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00594">594</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00685">685</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -815,7 +892,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#adfba946cbc267f9380d541de0525adef">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00838">838</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l01072">1072</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -847,7 +924,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#a553d5da93e1cf9ac15e5d2aea433be7c">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00858">858</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l01120">1120</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -880,7 +957,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classlibe3_1_1E3Connector.html#ace749e165ca1eb797ba2f1eb4e4e38eb">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00588">588</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8cpp_source.html#l00971">971</a> of file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>
 
 </div>
 </div>
@@ -912,7 +989,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classlibe3_1_1E3Connector.html#aac74457370377b4f2e1c061a225cb6b3">libe3::E3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00084">84</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="posix__connector_8hpp_source.html#l00091">91</a> of file <a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>.</p>
 
 </div>
 </div>

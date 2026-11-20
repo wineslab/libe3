@@ -1,5 +1,6 @@
 var structlibe3_1_1E3Config =
 [
+    [ "allowed_peers", "structlibe3_1_1E3Config.html#a00ac30577910f26715efd01e7d290611", null ],
     [ "connect_timeout_ms", "structlibe3_1_1E3Config.html#a7be1447c4784864a79a118e172c224a9", null ],
     [ "dapp_idle_timeout_s", "structlibe3_1_1E3Config.html#ab5c9eeb0a3cb8fe1a9be8b2a0200576a", null ],
     [ "dapp_name", "structlibe3_1_1E3Config.html#abb5028cf948af60a47e76ffdf182c4a3", null ],
@@ -12,6 +13,7 @@ var structlibe3_1_1E3Config =
     [ "link_layer", "structlibe3_1_1E3Config.html#a7b709230e627834bc85cd5cb8749c3fa", null ],
     [ "log_level", "structlibe3_1_1E3Config.html#a38f5a15184eb32679fcdaeba7f1dfaa9", null ],
     [ "log_path", "structlibe3_1_1E3Config.html#a2520f863a22b6fc52b5390262f36c946", null ],
+    [ "maximum_associations", "structlibe3_1_1E3Config.html#a15aa71c731e7b26da20f6b8ad2130240", null ],
     [ "publisher_endpoint", "structlibe3_1_1E3Config.html#aa187882329d11f91fcbfbfcf664e76ec", null ],
     [ "publisher_port", "structlibe3_1_1E3Config.html#af70da70b2892c05d4c85f45f80246df3", null ],
     [ "ran_identifier", "structlibe3_1_1E3Config.html#ad2753835626e34f72103c1a5f6f2b198", null ],
@@ -19,10 +21,12 @@ var structlibe3_1_1E3Config =
     [ "reconnect_interval_ms", "structlibe3_1_1E3Config.html#a02e8e746e4fe2c86b56cd47cbc12f480", null ],
     [ "recv_timeout_ms", "structlibe3_1_1E3Config.html#acf888c5db2f504e618d3e31dddca9f89", null ],
     [ "role", "structlibe3_1_1E3Config.html#a348b15e9a72856994dee4b87e520da01", null ],
+    [ "sctp_delayed_sack", "structlibe3_1_1E3Config.html#ae8742196674d35f0638e6a744d5c6be0", null ],
     [ "send_buffer_size", "structlibe3_1_1E3Config.html#ad5ec01b9a6f427f65953c35a0b32f980", null ],
     [ "send_timeout_ms", "structlibe3_1_1E3Config.html#a549fadb5656fe7e7c9831bb3d6e9519c", null ],
     [ "setup_endpoint", "structlibe3_1_1E3Config.html#aebc866b403f4b53580604449e8723e32", null ],
     [ "setup_port", "structlibe3_1_1E3Config.html#a3fc9dc881ea37e50dcd917eb51e251ab", null ],
+    [ "socket_buffer_bytes", "structlibe3_1_1E3Config.html#a3fbee32775c1602bb41d4ff9b5bc5ac4", null ],
     [ "subscriber_endpoint", "structlibe3_1_1E3Config.html#a30c8f1a31e49813e0859f12f4a783706", null ],
     [ "subscriber_port", "structlibe3_1_1E3Config.html#aafe3a17bf8b25e2a1d4c3bf217fa59cb", null ],
     [ "transport_layer", "structlibe3_1_1E3Config.html#adb8d8ed2e71bcf6289b002c00d83e335", null ],

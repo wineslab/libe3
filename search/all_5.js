@@ -11,7 +11,7 @@ var searchData=
   ['5_20what_20is_20mandatory_8',['5. What is mandatory',['../md_docs_2e2sm-dapp_205-semantics-and-constraints.html#autotoc_md116',1,'']]],
   ['5_20what_20the_20code_20treats_20as_20mandatory_9',['5. What the code treats as mandatory',['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md194',1,'']]],
   ['50_2060_2070_2080_2090_20a0_20control_20outcome_20everything_20present_10',['&lt;span class=&quot;tt&quot;&gt;co1_full&lt;/span&gt; = &lt;span class=&quot;tt&quot;&gt;1c 08 17979cfe3d85cd15 01 2a 0a 10 20 30 40 50 60 70 80 90 a0&lt;/span&gt; (control outcome, everything present)',['../md_docs_2e2sm-dapp_204-encoding.html#autotoc_md101',1,'']]],
-  ['5_3a_20e3_20indication_20message_20cell_20configuration_11',['Step 5: E3 INDICATION MESSAGE, cell configuration',['../md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md636',1,'']]],
-  ['5_3a_20indication_20message_12',['Step 5: INDICATION MESSAGE',['../md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md491',1,'']]],
+  ['5_3a_20e3_20indication_20message_20cell_20configuration_11',['Step 5: E3 INDICATION MESSAGE, cell configuration',['../md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md639',1,'']]],
+  ['5_3a_20indication_20message_12',['Step 5: INDICATION MESSAGE',['../md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md494',1,'']]],
   ['5_3a_20semantics_20and_20constraints_13',['Chapter 5: Semantics and constraints',['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md188',1,'']]]
 ];

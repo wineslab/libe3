@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.6.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,8 +92,8 @@ $(function(){initNavTree('md_docs_2e3sm_2l1-kpm_202-service-model-description.ht
   <div class="headertitle"><div class="title">RAN function service model description </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md392"></a></p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md393"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md395"></a></p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md396"></a>
 RAN function overview</h1>
 <p>The RAN function of the present document is the uplink layer 1 of a RAN node. The E3 Agent of the same RAN node hosts it (clause 4.2). The RAN function receives the uplink slots of one or more cells. For each slot it can make the following data available to dApps.</p>
 <ul>
@@ -106,15 +106,15 @@ RAN function overview</h1>
 <li>For each slot: the time, the frame and slot numbers, and the uplink symbols of the slot.</li>
 </ul>
 <p>One E3 Agent serves all the cells of the RAN function. One indication carries the data of all the cells that have data for the slot.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md394"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md397"></a>
 Supported E3 services</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md395"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md398"></a>
 Telemetry</h2>
 <p>The E3 Agent supports the Subscription, Subscription delete and Indication procedures of [1] for RAN function <span class="tt">2</span>. The INDICATION DATA IE carries the data. The E3 Agent sends an indication only for a slot that has data for the subscription (clause 6.3).</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md396"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md399"></a>
 Control</h2>
 <p>The E3 Agent may support the dApp Control procedure of [1] for RAN function <span class="tt">2</span>, with control identifier <span class="tt">1</span> (Set Subscription Data). An E3 Agent that supports it lists control identifier <span class="tt">1</span> in the RAN function list. An E3 Agent that does not support it gives an empty control identifier list.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md397"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md400"></a>
 Indication paths</h1>
 <p>The data of a slot comes from two independent parts of the uplink processing.</p>
 <ul>
@@ -141,7 +141,7 @@ Indication paths</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Only SRS identifiers  </td><td class="markdownTableBodyNone">no  </td><td class="markdownTableBodyNone">yes  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md398"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md401"></a>
 Structure of an indication</h1>
 <p>An indication has three scopes.</p>
 <ul>
@@ -158,7 +158,7 @@ Structure of an indication</h1>
 <div class="line">      ues: one entry for each UE</div>
 <div class="line">        UE DATA (UE scope)</div>
 <div class="line">          rnti, rbStart, rbSize, mcsIndex, rsrp, sinr, srsWidebandSnr, ...</div>
-</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md399"></a>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md402"></a>
 Data delivery</h1>
 <p>A stream is delivered in one of two ways.</p>
 <ul>
@@ -167,9 +167,9 @@ Data delivery</h1>
 </ul>
 <p>Six streams use shared memory. They are listed in clause 7.4. The region is a POSIX shared memory object [6] on the host of the RAN node that runs the E3 Agent. An indication can reach a dApp on another host, but the shared memory reference that it carries cannot. A dApp that uses a shared memory stream shall run on the same host, or share the IPC namespace of the E3 Agent.</p>
 <p>The RAN FUNCTION DATA IE describes the delivery of each stream (clause 8.2.2.2).</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md400"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md403"></a>
 Procedures</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md401"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md404"></a>
 Setup</h2>
 <p>The E3 Agent shall list RAN function <span class="tt">2</span> in the RAN function list of each SETUP RESPONSE message (clause 7.3 of [1]) while the service model runs. The entry shall hold the following.</p>
 <ul>
@@ -179,7 +179,7 @@ Setup</h2>
 </ul>
 <p>The RAN FUNCTION DATA IE does not change while the service model runs. A dApp may keep it for the whole association.</p>
 <p>E3AP [1] does not accept an empty <span class="tt">ranFunctionData</span>. If the E3 Agent cannot build the RAN FUNCTION DATA IE, it shall not list RAN function <span class="tt">2</span>.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md402"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md405"></a>
 Subscription</h2>
 <p>The dApp sends a SUBSCRIPTION REQUEST message (clause 7.4 of [1]) with the following content.</p>
 <ul>
@@ -198,7 +198,7 @@ Subscription</h2>
 <p>The E3 Agent shall report the interval that it applies in the <span class="tt">periodicity</span> field of the SUBSCRIPTION RESPONSE message.</p>
 <p>A new subscription has no subscription data. It covers every cell and every UE.</p>
 <p>A dApp holds at most one subscription for RAN function <span class="tt">2</span> (clause 7.4 of [1]). To use other telemetry identifiers, the dApp deletes its subscription and subscribes again.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md403"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md406"></a>
 Indication</h2>
 <p>For each slot of a path that matches a subscription, the E3 Agent shall send one INDICATION MESSAGE message (clause 7.6 of [1]) to the dApp of the subscription, with <span class="tt">ranFunctionIdentifier</span> <span class="tt">2</span> and the INDICATION DATA IE in <span class="tt">protocolData</span>.</p>
 <p>The INDICATION DATA IE shall hold:</p>
@@ -213,7 +213,7 @@ Indication</h2>
 <blockquote class="doxtable">
 <p>NOTE: In the timing model of the <a class="el" href="md_docs_2control-loops_2path-a-e3-loop.html">Path A loop</a>, the E3 Agent records the data of the slot in box A1. The start of its processing ends box A1 and starts box A2. It encodes the INDICATION DATA IE in box A3. The dApp decodes the indication in box A9 and reads the shared memory streams in box A10. </p>
 </blockquote>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md404"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md407"></a>
 Set Subscription Data</h2>
 <p>The dApp sends a dApp CONTROL ACTION message (clause 7.7 of [1]) with <span class="tt">ranFunctionIdentifier</span> <span class="tt">2</span>, <span class="tt">controlIdentifier</span> <span class="tt">1</span>, and the CONTROL DATA IE in <span class="tt">actionData</span>, with the alternative <span class="tt">setSubscriptionData</span>.</p>
 <p>The E3 Agent applies the SUBSCRIPTION DATA IE to the subscription that the dApp holds for RAN function <span class="tt">2</span>. The pair of <span class="tt">dAppIdentifier</span> and <span class="tt">ranFunctionIdentifier</span> names that subscription. The new subscription data replaces the old one as a whole. A SUBSCRIPTION DATA IE without filters selects every cell and every UE again.</p>
@@ -225,7 +225,7 @@ Set Subscription Data</h2>
 <blockquote class="doxtable">
 <p>NOTE: E3AP [1] has no field that carries a service model payload in the SUBSCRIPTION REQUEST message. The present document therefore carries the subscription data in a dApp Control procedure. Annex C lists this as an open item. </p>
 </blockquote>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md405"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md408"></a>
 Subscription delete and release</h2>
 <p>When the dApp deletes its subscription (clause 7.5 of [1]), or when the association ends (clause 7.10 of [1]), the E3 Agent stops the indications for that dApp and discards its subscription data. The region stays in place while the service model runs. The E3 Agent may stop writing a shared memory stream when no subscription grants it. </p>
 </div></div><!-- contents -->

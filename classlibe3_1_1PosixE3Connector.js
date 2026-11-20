@@ -1,10 +1,13 @@
 var classlibe3_1_1PosixE3Connector =
 [
-    [ "PosixE3Connector", "classlibe3_1_1PosixE3Connector.html#aa615ce435e73e3f417376560be582d7f", null ],
+    [ "Peer", "structlibe3_1_1PosixE3Connector_1_1Peer.html", "structlibe3_1_1PosixE3Connector_1_1Peer" ],
+    [ "Queued", "structlibe3_1_1PosixE3Connector_1_1Queued.html", "structlibe3_1_1PosixE3Connector_1_1Queued" ],
+    [ "PosixE3Connector", "classlibe3_1_1PosixE3Connector.html#abc6463d0c260cd97dc69794b4973989a", null ],
     [ "~PosixE3Connector", "classlibe3_1_1PosixE3Connector.html#a09050e9c1adc050d26d7d345e0ca130d", null ],
     [ "dispose", "classlibe3_1_1PosixE3Connector.html#a5583b230f5ffe39460c6373bd5d49453", null ],
     [ "is_connected", "classlibe3_1_1PosixE3Connector.html#afc4fe724c4cc6029681ec6c11a03e382", null ],
     [ "last_peer_token", "classlibe3_1_1PosixE3Connector.html#a4773f04fe5c6f3655c5372a4784e8718", null ],
+    [ "last_setup_peer_token", "classlibe3_1_1PosixE3Connector.html#a535c2512e1cef6a76c0825bceefe4da5", null ],
     [ "link_layer", "classlibe3_1_1PosixE3Connector.html#a00b3eb462edc5ba4216db2d11034149c", null ],
     [ "receive", "classlibe3_1_1PosixE3Connector.html#a78be8b3116078571b637153efb88b96d", null ],
     [ "recv_setup_request", "classlibe3_1_1PosixE3Connector.html#a522da91e27c5c45d132a08fdda32fba9", null ],
@@ -12,6 +15,7 @@ var classlibe3_1_1PosixE3Connector =
     [ "send", "classlibe3_1_1PosixE3Connector.html#a7a3d61abfe45806f412e20aeaeaeb4a9", null ],
     [ "send_response", "classlibe3_1_1PosixE3Connector.html#aba3ef581574f53cc9831325dc6cb1ec9", null ],
     [ "send_setup_request_client", "classlibe3_1_1PosixE3Connector.html#a050f26143b9390d56ff01ec94eebfead", null ],
+    [ "send_to", "classlibe3_1_1PosixE3Connector.html#a90d25b63717193647dcf0691be6ec4b2", null ],
     [ "setup_inbound_connection", "classlibe3_1_1PosixE3Connector.html#aebc794e9cf5f6e92a817610fc1c1a202", null ],
     [ "setup_inbound_connection_client", "classlibe3_1_1PosixE3Connector.html#adbe1526c1f351a3e6e6bf971ac94ee53", null ],
     [ "setup_initial_connection", "classlibe3_1_1PosixE3Connector.html#ae0b5bed5d0bde736bfc8cee16bb57bb7", null ],

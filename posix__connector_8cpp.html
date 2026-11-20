@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.6.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -96,35 +96,40 @@ $(function(){initNavTree('posix__connector_8cpp.html','',''); });
 <p>POSIX socket connector implementation.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="posix__connector_8hpp_source.html">posix_connector.hpp</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="latrec_8h_source.html">libe3/latrec.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="logger_8hpp_source.html">libe3/logger.hpp</a>&quot;</code><br />
 <code>#include &lt;sys/socket.h&gt;</code><br />
-<code>#include &lt;sys/uio.h&gt;</code><br />
-<code>#include &lt;sys/un.h&gt;</code><br />
 <code>#include &lt;sys/stat.h&gt;</code><br />
+<code>#include &lt;sys/time.h&gt;</code><br />
+<code>#include &lt;sys/un.h&gt;</code><br />
+<code>#include &lt;netdb.h&gt;</code><br />
 <code>#include &lt;netinet/in.h&gt;</code><br />
 <code>#include &lt;netinet/tcp.h&gt;</code><br />
 <code>#include &lt;arpa/inet.h&gt;</code><br />
-<code>#include &lt;unistd.h&gt;</code><br />
-<code>#include &lt;grp.h&gt;</code><br />
 <code>#include &lt;fcntl.h&gt;</code><br />
-<code>#include &lt;sys/time.h&gt;</code><br />
-<code>#include &lt;algorithm&gt;</code><br />
-<code>#include &lt;cstring&gt;</code><br />
-<code>#include &lt;cerrno&gt;</code><br />
 <code>#include &lt;poll.h&gt;</code><br />
-<code>#include &lt;thread&gt;</code><br />
+<code>#include &lt;unistd.h&gt;</code><br />
+<code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;array&gt;</code><br />
+<code>#include &lt;cerrno&gt;</code><br />
 <code>#include &lt;chrono&gt;</code><br />
+<code>#include &lt;cstring&gt;</code><br />
+<code>#include &lt;thread&gt;</code><br />
 </div>
 <p><a href="posix__connector_8cpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:libe3_3A_3APosixE3Connector_3A_3APeer" id="r_libe3_3A_3APosixE3Connector_3A_3APeer"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1PosixE3Connector_1_1Peer.html">libe3::PosixE3Connector::Peer</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One accepted connection of a RAN. Closes its socket when the last reference goes.  <a href="structlibe3_1_1PosixE3Connector_1_1Peer.html#details">More...</a><br /></td></tr>
+<tr class="memitem:libe3_3A_3APosixE3Connector_3A_3AQueued" id="r_libe3_3A_3APosixE3Connector_3A_3AQueued"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1PosixE3Connector_1_1Queued.html">libe3::PosixE3Connector::Queued</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A PDU read from a peer and waiting for the thread that takes it.  <a href="structlibe3_1_1PosixE3Connector_1_1Queued.html#details">More...</a><br /></td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:libe3" id="r_libe3"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html">libe3</a></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>POSIX socket connector implementation. </p>
-<p>Ported from the original C implementation's posix_* functions in e3_connector.c</p>
 <p>SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University SPDX-License-Identifier: Apache-2.0 </p>
 
 <p class="definition">Definition in file <a class="el" href="posix__connector_8cpp_source.html">posix_connector.cpp</a>.</p>

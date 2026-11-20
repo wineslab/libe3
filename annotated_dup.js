@@ -40,6 +40,7 @@ var annotated_dup =
       ] ],
       [ "DAppSubscriptionState", "classlibe3_1_1DAppSubscriptionState.html", "classlibe3_1_1DAppSubscriptionState" ],
       [ "E3Agent", "classlibe3_1_1E3Agent.html", "classlibe3_1_1E3Agent" ],
+      [ "PosixOptions", "structlibe3_1_1PosixOptions.html", "structlibe3_1_1PosixOptions" ],
       [ "E3Connector", "classlibe3_1_1E3Connector.html", "classlibe3_1_1E3Connector" ],
       [ "E3Encoder", "classlibe3_1_1E3Encoder.html", "classlibe3_1_1E3Encoder" ],
       [ "E3Interface", "classlibe3_1_1E3Interface.html", "classlibe3_1_1E3Interface" ],

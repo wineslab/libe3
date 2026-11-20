@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.6.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -189,7 +189,8 @@ Build &amp; install</h1>
 <p>On Linux (x86_64 and aarch64, glibc 2.28 or newer, Python 3.10 to 3.13) the binding is a prebuilt wheel that contains <a class="el" href="namespacelibe3.html">libe3</a>, so one command in any virtual environment is enough, with no <a class="el" href="namespacelibe3.html">libe3</a> installed:</p>
 <div class="fragment"><div class="line">pip install libe3py</div>
 <div class="line">python -c &quot;import libe3py; print(&#39;libe3py OK&#39;, libe3py.__version__)&quot;</div>
-</div><!-- fragment --><p>Elsewhere, and from a checkout (<span class="tt">pip install .</span>), install <a class="el" href="namespacelibe3.html">libe3</a> once (<span class="tt">./build_libe3 --all-encodings --install</span>, see the main README) and pip builds the module from these sources against the installed <a class="el" href="namespacelibe3.html">libe3</a> (<span class="tt">python/CMakeLists.txt</span>); it needs <span class="tt">swig &gt;= 4.0</span>, the Python headers and a C++17 compiler (<span class="tt">./build_libe3 -I</span> installs them), and it stops with an error if the installed <a class="el" href="namespacelibe3.html">libe3</a> is not the same version. For a <a class="el" href="namespacelibe3.html">libe3</a> outside <span class="tt">/usr</span> and <span class="tt">/usr/local</span>: <span class="tt">pip install --no-binary libe3py libe3py --config-settings=cmake.define.CMAKE_PREFIX_PATH=&lt;prefix&gt;</span>.</p>
+</div><!-- fragment --><p>The wheel includes the SCTP transport (<span class="tt">link=posix</span>, <span class="tt">transport=sctp</span>); it needs the <span class="tt">sctp</span> kernel module on the machine at run time (<span class="tt">modprobe sctp</span>) and nothing else.</p>
+<p>Elsewhere, and from a checkout (<span class="tt">pip install .</span>), install <a class="el" href="namespacelibe3.html">libe3</a> once (<span class="tt">./build_libe3 --all-encodings --enable-sctp --install</span>, see the main README; without <span class="tt">--enable-sctp</span> the module has no SCTP) and pip builds the module from these sources against the installed <a class="el" href="namespacelibe3.html">libe3</a> (<span class="tt">python/CMakeLists.txt</span>); it needs <span class="tt">swig &gt;= 4.0</span>, the Python headers and a C++17 compiler (<span class="tt">./build_libe3 -I</span> installs them), and it stops with an error if the installed <a class="el" href="namespacelibe3.html">libe3</a> is not the same version. For a <a class="el" href="namespacelibe3.html">libe3</a> outside <span class="tt">/usr</span> and <span class="tt">/usr/local</span>: <span class="tt">pip install --no-binary libe3py libe3py --config-settings=cmake.define.CMAKE_PREFIX_PATH=&lt;prefix&gt;</span>.</p>
 <p>For development, <span class="tt">./build_libe3 --enable-swig</span> builds the module in <span class="tt">build/swig</span> (run the smoke test with <span class="tt">PYTHONPATH=build/swig python3 tests/test_swig_smoke.py</span>); <span class="tt">cmake --install</span> installs it only if <span class="tt">-DLIBE3_PYTHON_INSTALL_DIR=&lt;dir&gt;</span> is given.</p>
 <h1 class="doxsection"><a class="anchor" id="autotoc_md9"></a>
 Service-model definitions</h1>

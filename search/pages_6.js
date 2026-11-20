@@ -10,7 +10,7 @@ var searchData=
   ['6_20what_20each_20implementation_20checks_7',['6. What each implementation checks',['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md195',1,'']]],
   ['6_20what_20the_20golden_20vectors_20prove_20and_20what_20they_20do_20not_8',['6. What the golden vectors prove and what they do not',['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md213',1,'']]],
   ['60_2070_2080_2090_20a0_20control_20outcome_20everything_20present_9',['&lt;span class=&quot;tt&quot;&gt;co1_full&lt;/span&gt; = &lt;span class=&quot;tt&quot;&gt;1c 08 17979cfe3d85cd15 01 2a 0a 10 20 30 40 50 60 70 80 90 a0&lt;/span&gt; (control outcome, everything present)',['../md_docs_2e2sm-dapp_204-encoding.html#autotoc_md101',1,'']]],
-  ['6_3a_20dapp_20control_20action_10',['Step 6: dApp CONTROL ACTION',['../md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md492',1,'']]],
+  ['6_3a_20dapp_20control_20action_10',['Step 6: dApp CONTROL ACTION',['../md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md495',1,'']]],
   ['6_3a_20discrepancies_20todos_20and_20dead_20code_11',['Chapter 6: Discrepancies, TODOs and dead code',['../md_docs_2e2sm-dapp_2code-pointers.html#autotoc_md205',1,'']]],
-  ['6_3a_20e3_20indication_20message_20sensing_12',['Step 6: E3 INDICATION MESSAGE, sensing',['../md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md637',1,'']]]
+  ['6_3a_20e3_20indication_20message_20sensing_12',['Step 6: E3 INDICATION MESSAGE, sensing',['../md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md640',1,'']]]
 ];

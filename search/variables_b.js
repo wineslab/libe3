@@ -15,11 +15,12 @@ var searchData=
   ['max_5fprotocol_5fdata_5fsize_12',['MAX_PROTOCOL_DATA_SIZE',['../namespacelibe3.html#a581a3bc9ba0fad9e97f52c00fdce32b9',1,'libe3']]],
   ['max_5fran_5ffunctions_13',['MAX_RAN_FUNCTIONS',['../namespacelibe3.html#aa385e749637e30801ce6405782b0c699',1,'libe3']]],
   ['max_5fxapp_5fctrl_5fdata_5fsize_14',['MAX_XAPP_CTRL_DATA_SIZE',['../namespacelibe3.html#a058435e96914a52e2830d4c403b1d541',1,'libe3']]],
-  ['maxnoof_5fdapp_5fcontrol_5fstyles_15',['maxnoof_dapp_control_styles',['../namespacelibe3_1_1e2sm__dapp.html#a63527c0026fe799cd26cf79d9c324a14',1,'libe3::e2sm_dapp']]],
-  ['maxnoof_5fdapp_5freport_5fstyles_16',['maxnoof_dapp_report_styles',['../namespacelibe3_1_1e2sm__dapp.html#a9a1588be8ef46ea186686938fd08069b',1,'libe3::e2sm_dapp']]],
-  ['maxnoof_5fdapps_17',['maxnoof_dapps',['../namespacelibe3_1_1e2sm__dapp.html#a723e1d1c9c234c2d071c68bb158aab30',1,'libe3::e2sm_dapp']]],
-  ['maxnoof_5fsubscribed_5fe3_5fran_5ffunctions_18',['maxnoof_subscribed_e3_ran_functions',['../namespacelibe3_1_1e2sm__dapp.html#a8c299821680e41595af139dd4f20e9ba',1,'libe3::e2sm_dapp']]],
-  ['message_5fack_5fhandler_19',['message_ack_handler',['../structlibe3_1_1E3Agent_1_1Impl.html#a2c5a77e7da257d7d8bae9eb44408a621',1,'libe3::E3Agent::Impl']]],
-  ['message_5fid_20',['message_id',['../structlibe3_1_1XAppControlAction.html#a59024a36d00aa7ae6a123ed0871b6758',1,'libe3::XAppControlAction::message_id'],['../structlibe3_1_1Pdu.html#ae79d9b2b3abd495a8f694c5884ba841e',1,'libe3::Pdu::message_id']]],
-  ['mu_21',['mu',['../classlibe3_1_1DAppSubscriptionState.html#a68a31bb303c90eb6c8b00f070b3d3371',1,'libe3::DAppSubscriptionState']]]
+  ['maximum_5fassociations_15',['maximum_associations',['../structlibe3_1_1PosixOptions.html#a3b9108eaeea69ca139a301fcc3bfea1d',1,'libe3::PosixOptions::maximum_associations'],['../structlibe3_1_1E3Config.html#a15aa71c731e7b26da20f6b8ad2130240',1,'libe3::E3Config::maximum_associations']]],
+  ['maxnoof_5fdapp_5fcontrol_5fstyles_16',['maxnoof_dapp_control_styles',['../namespacelibe3_1_1e2sm__dapp.html#a63527c0026fe799cd26cf79d9c324a14',1,'libe3::e2sm_dapp']]],
+  ['maxnoof_5fdapp_5freport_5fstyles_17',['maxnoof_dapp_report_styles',['../namespacelibe3_1_1e2sm__dapp.html#a9a1588be8ef46ea186686938fd08069b',1,'libe3::e2sm_dapp']]],
+  ['maxnoof_5fdapps_18',['maxnoof_dapps',['../namespacelibe3_1_1e2sm__dapp.html#a723e1d1c9c234c2d071c68bb158aab30',1,'libe3::e2sm_dapp']]],
+  ['maxnoof_5fsubscribed_5fe3_5fran_5ffunctions_19',['maxnoof_subscribed_e3_ran_functions',['../namespacelibe3_1_1e2sm__dapp.html#a8c299821680e41595af139dd4f20e9ba',1,'libe3::e2sm_dapp']]],
+  ['message_5fack_5fhandler_20',['message_ack_handler',['../structlibe3_1_1E3Agent_1_1Impl.html#a2c5a77e7da257d7d8bae9eb44408a621',1,'libe3::E3Agent::Impl']]],
+  ['message_5fid_21',['message_id',['../structlibe3_1_1XAppControlAction.html#a59024a36d00aa7ae6a123ed0871b6758',1,'libe3::XAppControlAction::message_id'],['../structlibe3_1_1Pdu.html#ae79d9b2b3abd495a8f694c5884ba841e',1,'libe3::Pdu::message_id']]],
+  ['mu_22',['mu',['../classlibe3_1_1DAppSubscriptionState.html#a68a31bb303c90eb6c8b00f070b3d3371',1,'libe3::DAppSubscriptionState']]]
 ];

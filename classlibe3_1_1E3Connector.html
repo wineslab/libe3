@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.6.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -103,7 +103,7 @@ Inheritance diagram for libe3::E3Connector:</div>
  <div class="center">
   <img src="classlibe3_1_1E3Connector.png" usemap="#libe3_3A_3AE3Connector_map" alt=""/>
   <map id="libe3_3A_3AE3Connector_map" name="libe3_3A_3AE3Connector_map">
-<area href="classlibe3_1_1PosixE3Connector.html" title="POSIX socket-based E3 connector." alt="libe3::PosixE3Connector" shape="rect" coords="0,56,149,80"/>
+<area href="classlibe3_1_1PosixE3Connector.html" title="POSIX socket-based E3 connector: one endpoint per dApp." alt="libe3::PosixE3Connector" shape="rect" coords="0,56,149,80"/>
 <area href="classlibe3_1_1ZmqE3Connector.html" title="ZeroMQ-based E3 connector." alt="libe3::ZmqE3Connector" shape="rect" coords="159,56,308,80"/>
   </map>
 </div></div>
@@ -131,6 +131,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a46ec267c4c5c30bd078c644dbe3c1805"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up the outbound connection (PUB channel).  <br /></td></tr>
 <tr class="memitem:ad97ada69d4a0ef8a6c4b7085f048d03e" id="r_ad97ada69d4a0ef8a6c4b7085f048d03e"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad97ada69d4a0ef8a6c4b7085f048d03e">send</a> (const std::vector&lt; uint8_t &gt; &amp;data)=0</td></tr>
 <tr class="memdesc:ad97ada69d4a0ef8a6c4b7085f048d03e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send data on the outbound channel.  <br /></td></tr>
+<tr class="memitem:a537dbece322e1b320996b6a4f8fbc096" id="r_a537dbece322e1b320996b6a4f8fbc096"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a537dbece322e1b320996b6a4f8fbc096">send_to</a> (uint64_t peer_token, const std::vector&lt; uint8_t &gt; &amp;data, <a class="el" href="namespacelibe3.html#a8af01c5e56889bf41490a02000ff5f80">PduClass</a> kind)</td></tr>
+<tr class="memdesc:a537dbece322e1b320996b6a4f8fbc096"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send data to one peer, or to all of them (RAN role).  <br /></td></tr>
 <tr class="memitem:ac64419ab3462491e8256634c9e4582db" id="r_ac64419ab3462491e8256634c9e4582db"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac64419ab3462491e8256634c9e4582db">setup_initial_connection_client</a> ()</td></tr>
 <tr class="memdesc:ac64419ab3462491e8256634c9e4582db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connect the setup channel (dApp role: REQ connect).  <br /></td></tr>
 <tr class="memitem:af9ada1094b5a7755b7e8f0ae9dcc324c" id="r_af9ada1094b5a7755b7e8f0ae9dcc324c"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af9ada1094b5a7755b7e8f0ae9dcc324c">send_setup_request_client</a> (const std::vector&lt; uint8_t &gt; &amp;)</td></tr>
@@ -147,6 +149,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a553d5da93e1cf9ac15e5d2aea433be7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interrupt blocking operations for shutdown.  <br /></td></tr>
 <tr class="memitem:a5a41d42c96740aa4f0f70c77bd83f910" id="r_a5a41d42c96740aa4f0f70c77bd83f910"><td class="memItemLeft" align="right" valign="top">virtual uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5a41d42c96740aa4f0f70c77bd83f910">last_peer_token</a> () const</td></tr>
 <tr class="memdesc:a5a41d42c96740aa4f0f70c77bd83f910"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which peer supplied the bytes the last <a class="el" href="#a9963f7ca5b31c539904853ad27e471a9" title="Receive data from the inbound channel.">receive()</a> returned (RAN role).  <br /></td></tr>
+<tr class="memitem:a61ff50a518daf8bb08f234aecad18474" id="r_a61ff50a518daf8bb08f234aecad18474"><td class="memItemLeft" align="right" valign="top">virtual uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a61ff50a518daf8bb08f234aecad18474">last_setup_peer_token</a> () const</td></tr>
+<tr class="memdesc:a61ff50a518daf8bb08f234aecad18474"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which peer sent the setup request the last <a class="el" href="#a0ab089ce40dd51cecbd8faf39aceb771" title="Receive a setup request.">recv_setup_request()</a> returned (RAN role).  <br /></td></tr>
 <tr class="memitem:ace749e165ca1eb797ba2f1eb4e4e38eb" id="r_ace749e165ca1eb797ba2f1eb4e4e38eb"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; uint64_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ace749e165ca1eb797ba2f1eb4e4e38eb">take_closed_peers</a> ()</td></tr>
 <tr class="memdesc:ace749e165ca1eb797ba2f1eb4e4e38eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Peers whose connection has closed since the last call (RAN role).  <br /></td></tr>
 <tr class="memitem:a799a30389abe8a7ed32628f74acf42d4" id="r_a799a30389abe8a7ed32628f74acf42d4"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0e">E3LinkLayer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a799a30389abe8a7ed32628f74acf42d4">link_layer</a> () const noexcept=0</td></tr>
@@ -185,11 +189,11 @@ Protected Attributes</h2></td></tr>
 <div class="textblock"><p>Abstract base class for E3AP transport connectors. </p>
 <p>This class defines the transport-agnostic interface that all connectors must implement. The design mirrors the original C implementation's function pointer approach, but uses virtual methods for type safety.</p>
 <p>Derived classes:</p><ul>
-<li><a class="el" href="classlibe3_1_1PosixE3Connector.html" title="POSIX socket-based E3 connector.">PosixE3Connector</a>: POSIX socket-based transport (TCP, SCTP, IPC)</li>
+<li><a class="el" href="classlibe3_1_1PosixE3Connector.html" title="POSIX socket-based E3 connector: one endpoint per dApp.">PosixE3Connector</a>: POSIX socket-based transport (TCP, SCTP, IPC); one endpoint per dApp carries the setup, inbound and outbound traffic</li>
 <li><a class="el" href="classlibe3_1_1ZmqE3Connector.html" title="ZeroMQ-based E3 connector.">ZmqE3Connector</a>: ZeroMQ-based transport </li>
 </ul>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00033">33</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00064">64</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a07d2a7aee506f2669b88f7e2e39e64cb" name="a07d2a7aee506f2669b88f7e2e39e64cb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a07d2a7aee506f2669b88f7e2e39e64cb">&#9670;&#160;</a></span>~E3Connector()</h2>
@@ -349,7 +353,7 @@ Protected Attributes</h2></td></tr>
 <p>Get inbound endpoint. </p>
 <dl class="section return"><dt>Returns</dt><dd>The endpoint of the inbound channel </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00234">234</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00294">294</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -412,7 +416,40 @@ Protected Attributes</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#a4773f04fe5c6f3655c5372a4784e8718">libe3::PosixE3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00179">179</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00227">227</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a61ff50a518daf8bb08f234aecad18474" name="a61ff50a518daf8bb08f234aecad18474"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61ff50a518daf8bb08f234aecad18474">&#9670;&#160;</a></span>last_setup_peer_token()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual uint64_t libe3::E3Connector::last_setup_peer_token </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Which peer sent the setup request the last <a class="el" href="#a0ab089ce40dd51cecbd8faf39aceb771" title="Receive a setup request.">recv_setup_request()</a> returned (RAN role). </p>
+<p>Call it on the thread that calls <a class="el" href="#a0ab089ce40dd51cecbd8faf39aceb771" title="Receive a setup request.">recv_setup_request()</a>, right after a call that returned bytes. The token is the one <a class="el" href="#a5a41d42c96740aa4f0f70c77bd83f910" title="Which peer supplied the bytes the last receive() returned (RAN role).">last_peer_token()</a> gives for the same peer's later bytes, so a RAN can tie a dApp to its connection at setup.</p>
+<dl class="section return"><dt>Returns</dt><dd>The peer's token, or 0 for a connector that cannot tell its peers apart (the default, and ZeroMQ) </dd></dl>
+
+<p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#a535c2512e1cef6a76c0825bceefe4da5">libe3::PosixE3Connector</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00239">239</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -525,7 +562,7 @@ Protected Attributes</h2></td></tr>
 <p>Get outbound endpoint. </p>
 <dl class="section return"><dt>Returns</dt><dd>The endpoint of the outbound channel </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00240">240</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00300">300</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -629,7 +666,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#aa1148301c1383f0a68681a6e529efc9b">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#aeaa674b75ad9c9ac9e8509e4c2a1c668">libe3::ZmqE3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00134">134</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00182">182</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -659,7 +696,7 @@ Protected Attributes</h2></td></tr>
 <p>Get current role. </p>
 <dl class="section return"><dt>Returns</dt><dd>The role of this peer </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00222">222</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00282">282</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -763,7 +800,57 @@ Protected Attributes</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#a050f26143b9390d56ff01ec94eebfead">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#a5d8b4a806fb8bac843e01884652c62bd">libe3::ZmqE3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00126">126</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00174">174</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a537dbece322e1b320996b6a4f8fbc096" name="a537dbece322e1b320996b6a4f8fbc096"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a537dbece322e1b320996b6a4f8fbc096">&#9670;&#160;</a></span>send_to()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> libe3::E3Connector::send_to </td>
+          <td>(</td>
+          <td class="paramtype">uint64_t</td>          <td class="paramname"><span class="paramname"><em>peer_token</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; uint8_t &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacelibe3.html#a8af01c5e56889bf41490a02000ff5f80">PduClass</a></td>          <td class="paramname"><span class="paramname"><em>kind</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send data to one peer, or to all of them (RAN role). </p>
+<p>The default broadcasts with <a class="el" href="#ad97ada69d4a0ef8a6c4b7085f048d03e" title="Send data on the outbound channel.">send()</a>, which is what a connector that cannot tell its peers apart does.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">peer_token</td><td>The peer named by <a class="el" href="#a5a41d42c96740aa4f0f70c77bd83f910" title="Which peer supplied the bytes the last receive() returned (RAN role).">last_peer_token()</a> or <a class="el" href="#a61ff50a518daf8bb08f234aecad18474" title="Which peer sent the setup request the last recv_setup_request() returned (RAN role).">last_setup_peer_token()</a>; 0 sends to every peer </td></tr>
+    <tr><td class="paramname">data</td><td>Data to send </td></tr>
+    <tr><td class="paramname">kind</td><td>What the PDU is for </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success, an error code otherwise </dd></dl>
+
+<p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#a90d25b63717193647dcf0691be6ec4b2">libe3::PosixE3Connector</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00146">146</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -798,7 +885,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00216">216</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00276">276</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -828,7 +915,7 @@ Protected Attributes</h2></td></tr>
 <p>Get setup endpoint. </p>
 <dl class="section return"><dt>Returns</dt><dd>The endpoint of the setup channel </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00228">228</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00288">288</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -890,7 +977,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#adbe1526c1f351a3e6e6bf971ac94ee53">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#ac4011323bb13d364a645b970d64540d0">libe3::ZmqE3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00143">143</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00191">191</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -952,7 +1039,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#a821510b86a0d1aec24a7feafc3309c01">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#a96fe3afe2ba766b96fb795daca3f4d66">libe3::ZmqE3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00118">118</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00166">166</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -1014,7 +1101,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#ad733335f58c2b16785cfbe6b03ce78b5">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#a0b0349e33978730857f5f2be77ce6313">libe3::ZmqE3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00152">152</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00200">200</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -1046,7 +1133,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#ad24cf60976a943de987c1cb0e3f64b8f">libe3::PosixE3Connector</a>, and <a class="el" href="classlibe3_1_1ZmqE3Connector.html#aec115f18a6d0df057b6da23624d2c04f">libe3::ZmqE3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00167">167</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00215">215</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -1079,7 +1166,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classlibe3_1_1PosixE3Connector.html#ae00ef6909c6a7c3c379d0740777a3039">libe3::PosixE3Connector</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00191">191</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00251">251</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -1136,7 +1223,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Endpoint of the inbound channel. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00246">246</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00306">306</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -1162,7 +1249,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Endpoint of the outbound channel. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00247">247</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00307">307</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -1188,7 +1275,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Role of this peer. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00248">248</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00308">308</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>
@@ -1214,7 +1301,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Endpoint of the setup channel. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00245">245</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__connector_8hpp_source.html#l00305">305</a> of file <a class="el" href="e3__connector_8hpp_source.html">e3_connector.hpp</a>.</p>
 
 </div>
 </div>

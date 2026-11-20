@@ -58,5 +58,6 @@ var searchData=
   ['ric_5fstyle_5ftype_55',['ric_style_type',['../structlibe3_1_1e2sm__dapp_1_1e2sm__dapp__action__definition__s.html#a60a1ddd228f624039c757dd21621f9ac',1,'libe3::e2sm_dapp::e2sm_dapp_action_definition_s::ric_style_type'],['../structlibe3__e2sm__dapp__action__definition__t.html#a798281d992fc759c609ebb7859903bcf',1,'libe3_e2sm_dapp_action_definition_t::ric_style_type']]],
   ['rings_5fmu_56',['rings_mu',['../latrec_8c.html#a0760f518b35c613e5e02108901629fa8',1,'latrec.c']]],
   ['role_57',['role',['../structlibe3_1_1E3Config.html#a348b15e9a72856994dee4b87e520da01',1,'libe3::E3Config']]],
-  ['role_5f_58',['role_',['../classlibe3_1_1E3Connector.html#a15706dd6a95c019900ab528e39b4760d',1,'libe3::E3Connector']]]
+  ['role_5f_58',['role_',['../classlibe3_1_1E3Connector.html#a15706dd6a95c019900ab528e39b4760d',1,'libe3::E3Connector']]],
+  ['rx_59',['rx',['../structlibe3_1_1PosixE3Connector_1_1Peer.html#a421175c4a68d8f0424a9b281b4c1ac10',1,'libe3::PosixE3Connector::Peer']]]
 ];

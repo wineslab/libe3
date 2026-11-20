@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.6.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,8 +92,8 @@ $(function(){initNavTree('md_docs_2e3sm_2l1-kpm_204-elements.html','',''); });
   <div class="headertitle"><div class="title">Elements for E3SM service model </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md418"></a></p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md419"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md421"></a></p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md422"></a>
 General</h1>
 <p>The tables of this clause use the conventions of clause 6 of [1]. If a table and the grammar of clause 8.4 disagree, the grammar takes precedence, except for the conditions of presence, where the table takes precedence.</p>
 <p>Most fields of the indication are optional in the grammar. Their presence follows the subscription. The following rules apply to the INDICATION DATA IE, the CELL DATA IE and the UE DATA IE.</p>
@@ -107,11 +107,11 @@ General</h1>
 </ol>
 <p>An absent field means that the value is not reported. It does not mean zero.</p>
 <p>In the semantics description, "ID" followed by a number gives the telemetry identifier of the field, followed by its JSON key. The meaning of the value is in clause 7.3.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md420"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md423"></a>
 Message functional definition and content</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md421"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md424"></a>
 Messages for E3 functional procedures</h2>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md422"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md425"></a>
 INDICATION DATA IE</h3>
 <p>The INDICATION DATA IE (L1KPM-Indication) is the content of <span class="tt">protocolData</span> of an INDICATION MESSAGE message for RAN function <span class="tt">2</span>. It carries the slot scope.</p>
 <p>Table: INDICATION DATA IE</p>
@@ -131,7 +131,7 @@ INDICATION DATA IE</h3>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">cells</span>  </td><td class="markdownTableBodyNone">C  </td><td class="markdownTableBodyNone">1 to 16  </td><td class="markdownTableBodyNone">SEQUENCE OF CELL DATA IE, 8.2.1.2  </td><td class="markdownTableBodyNone">Present when a granted identifier has cell scope or UE scope.  </td></tr>
 </table>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md423"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md426"></a>
 CELL DATA IE</h3>
 <p>The CELL DATA IE (L1KPM-CellData) carries the cell scope of one cell.</p>
 <p>Table: CELL DATA IE</p>
@@ -171,7 +171,7 @@ CELL DATA IE</h3>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">validSymbolMask</span>  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Symbol Bitmap, 8.3.7  </td><td class="markdownTableBodyNone">ID 1000, <span class="tt">valid_symbol_mask</span>. Shared.  </td></tr>
 </table>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md424"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md427"></a>
 UE DATA IE</h3>
 <p>The UE DATA IE (L1KPM-UeData) carries the UE scope of one UE in one cell. On the PUSCH path it holds the fields of Table 8-3. On the SRS path it holds the fields of Table 8-4. <span class="tt">rnti</span> is shared and appears in both tables. Both tables describe one ASN.1 type.</p>
 <p>Table: UE DATA IE, shared and PUSCH path fields</p>
@@ -304,7 +304,7 @@ UE DATA IE</h3>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">srsUsage</span>  </td><td class="markdownTableBodyNone">O  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">INTEGER (0..15)  </td><td class="markdownTableBodyNone">ID 75, <span class="tt">srs_usage</span>.  </td></tr>
 </table>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md425"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md428"></a>
 CONTROL DATA IE</h3>
 <p>The CONTROL DATA IE (L1KPM-ControlData) is the content of <span class="tt">actionData</span> of a dApp CONTROL ACTION message for RAN function <span class="tt">2</span>. The alternative matches the control identifier of the message.</p>
 <p>Table: CONTROL DATA IE</p>
@@ -317,7 +317,7 @@ CONTROL DATA IE</h3>
 <td class="markdownTableBodyNone">&gt; <span class="tt">setSubscriptionData</span>  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">SUBSCRIPTION DATA IE, 8.2.1.5  </td><td class="markdownTableBodyNone">Control identifier <span class="tt">1</span>. Clause 6.6.4.  </td></tr>
 </table>
 <p>A CONTROL DATA IE whose alternative does not match the <span class="tt">controlIdentifier</span> of the message is an error (clause 9).</p>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md426"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md429"></a>
 SUBSCRIPTION DATA IE</h3>
 <p>The SUBSCRIPTION DATA IE (L1KPM-SubscriptionData) selects the cells and the UEs of a subscription. Telemetry identifiers select fields. The subscription data selects rows.</p>
 <p>Table: SUBSCRIPTION DATA IE</p>
@@ -341,9 +341,9 @@ SUBSCRIPTION DATA IE</h3>
 <blockquote class="doxtable">
 <p>NOTE: An RNTI identifies a UE only in its cell and only while the RNTI is assigned. It changes, for example, at handover and at RRC re-establishment. A UE filter does not follow the UE when its RNTI changes. </p>
 </blockquote>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md427"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md430"></a>
 Messages for E3 global procedures</h2>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md428"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md431"></a>
 RAN FUNCTION DATA IE</h3>
 <p>The RAN FUNCTION DATA IE (L1KPM-RanFunctionData) is the content of <span class="tt">ranFunctionData</span> of the entry for RAN function <span class="tt">2</span> in the SETUP RESPONSE message.</p>
 <p>Table: RAN FUNCTION DATA IE</p>
@@ -360,7 +360,7 @@ RAN FUNCTION DATA IE</h3>
 <td class="markdownTableBodyNone"><span class="tt">streams</span>  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone">1 to 128  </td><td class="markdownTableBodyNone">SEQUENCE OF STREAM DESCRIPTOR IE, 8.2.2.2  </td><td class="markdownTableBodyNone">One entry for each telemetry identifier of clause 7.3, in any order.  </td></tr>
 </table>
 <p>The text fields hold ASCII characters.</p>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md429"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md432"></a>
 STREAM DESCRIPTOR IE</h3>
 <p>The STREAM DESCRIPTOR IE (L1KPM-StreamDescriptor) describes one stream.</p>
 <p>Table: STREAM DESCRIPTOR IE</p>
@@ -380,15 +380,15 @@ STREAM DESCRIPTOR IE</h3>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">delivery</span>  </td><td class="markdownTableBodyNone">C  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Delivery, 8.3.13  </td><td class="markdownTableBodyNone">How the stream is delivered. Present when <span class="tt">status</span> is "available".  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md430"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md433"></a>
 Information element definitions</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md431"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md434"></a>
 General</h2>
 <p>This clause defines the information elements that the IEs of clause 8.2 use.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md432"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md435"></a>
 Float32</h2>
 <p>A real number as an IEEE 754 binary32 value [5], in 4 octets, least significant octet first. In APER it is an OCTET STRING of size 4 (L1KPM-Float32). In JSON it is a number. A value that is not finite shall not be sent: the field is left out.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md433"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md436"></a>
 Complex32</h2>
 <p>A complex number with two Float32 parts.</p>
 <p>Table: Complex32</p>
@@ -401,22 +401,22 @@ Complex32</h2>
 <td class="markdownTableBodyNone"><span class="tt">im</span>  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Float32, 8.3.2  </td><td class="markdownTableBodyNone">Imaginary part.  </td></tr>
 </table>
 <p>In JSON a Complex32 is an array of two numbers, the real part first.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md434"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md437"></a>
 Uint32</h2>
 <p>An unsigned integer, INTEGER (0..4294967295) (L1KPM-Uint32).</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md435"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md438"></a>
 RNTI</h2>
 <p>An RNTI [10], INTEGER (0..65535) (L1KPM-Rnti).</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md436"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md439"></a>
 Physical Cell ID</h2>
 <p>A physical cell identity [7], INTEGER (0..1007) (L1KPM-PhysCellId).</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md437"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md440"></a>
 Symbol Bitmap</h2>
 <p>A bit map of the OFDM symbols of a slot, INTEGER (0..16383) (L1KPM-SymbolBitmap). Bit <span class="tt">s</span>, of value 2^s, stands for OFDM symbol <span class="tt">s</span> of the slot, <span class="tt">s</span> from <span class="tt">0</span> to <span class="tt">13</span>.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md438"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md441"></a>
 Telemetry Identifier</h2>
 <p>A telemetry identifier of clause 7.3, INTEGER (1..65535) (L1KPM-TelemetryId). The range is the range of the telemetry identifiers of [1].</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md439"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md442"></a>
 Timestamp</h2>
 <p>A time in nanoseconds since an epoch, as an unconstrained INTEGER (L1KPM-TimestampNs). The epoch and the clock are those of the field that uses it (clause 7.3). The value shall be in the range 0 to 2^63 - 1.</p>
 <blockquote class="doxtable">
@@ -426,7 +426,7 @@ Timestamp</h2>
 <blockquote class="doxtable">
 <p>NOTE: On Linux, a process in another time namespace than the E3 Agent reads the monotonic clock with an offset. It cannot compare its readings with ID 4. </p>
 </blockquote>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md440"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md443"></a>
 Shared Memory Reference</h2>
 <p>The Shared Memory Reference (L1KPM-ShmRef) locates the data of one cell in a buffer of the region. The field that carries it names the stream.</p>
 <p>Table: Shared Memory Reference</p>
@@ -443,7 +443,7 @@ Shared Memory Reference</h2>
 <td class="markdownTableBodyNone"><span class="tt">rowByteOffset</span>  </td><td class="markdownTableBodyNone">C  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Uint32, 8.3.4  </td><td class="markdownTableBodyNone">Offset of the data of the cell from the start of the buffer, in bytes. Present for ID 3 and ID 44. Absent for the other streams.  </td></tr>
 </table>
 <p>Annex A gives the address of the data from these values.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md441"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md444"></a>
 UE Reference</h2>
 <p>The UE Reference (L1KPM-UeRef) names a UE in a UE filter.</p>
 <p>Table: UE Reference</p>
@@ -455,14 +455,14 @@ UE Reference</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">rnti</span>  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">RNTI, 8.3.5  </td><td class="markdownTableBodyNone">The RNTI of the UE.  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md442"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md445"></a>
 Stream Status</h2>
 <p>ENUMERATED (available, unavailable) (L1KPM-StreamStatus).</p>
 <ul>
 <li>"available": the RAN node produces the stream. The E3 Agent lists the identifier in <span class="tt">telemetryIdentifierList</span> and may grant it.</li>
 <li>"unavailable": the RAN node cannot produce the stream. The E3 Agent does not list the identifier and shall not grant it.</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md443"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md446"></a>
 Delivery</h2>
 <p>The Delivery (L1KPM-Delivery) says how a stream is delivered.</p>
 <p>Table: Delivery</p>
@@ -476,7 +476,7 @@ Delivery</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">&gt; <span class="tt">protocolData</span>  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Inline Information, 8.3.15  </td><td class="markdownTableBodyNone">The stream is a field of the indication.  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md444"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md447"></a>
 Shared Memory Information</h2>
 <p>Table: Shared Memory Information</p>
 <table class="markdownTable">
@@ -489,7 +489,7 @@ Shared Memory Information</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">numRows</span>  </td><td class="markdownTableBodyNone">M  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">INTEGER (1..65535)  </td><td class="markdownTableBodyNone">Number of rows of one buffer of the stream.  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md445"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md448"></a>
 Inline Information</h2>
 <p>Table: Inline Information</p>
 <table class="markdownTable">

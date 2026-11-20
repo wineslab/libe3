@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.6.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e3sm_2l1-kpm_206-encoding.html','',''); });
   <div class="headertitle"><div class="title">Encoding of the service model IEs </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md449"></a></p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md450"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md452"></a></p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md453"></a>
 Encoding</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md451"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md454"></a>
 Choice of encoding</h2>
 <p>The IEs of the present document use the encoding of the E3AP session that carries them (clause 8.1 of [1]). Table 8-15 gives the form of each IE in each encoding.</p>
 <p>Table: Form of the service model IEs in each E3AP encoding</p>
@@ -113,7 +113,7 @@ Choice of encoding</h2>
 <blockquote class="doxtable">
 <p>NOTE: Annex C lists a Protocol Buffers form as an open item. </p>
 </blockquote>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md452"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md455"></a>
 APER</h2>
 <p>The IEs are encoded with the aligned variant of the basic PER [3], as complete encodings. The encoding of an IE is the octet string that E3AP carries. E3AP does not add a length or a tag inside the octet string.</p>
 <p>The following rules decide the size of most encodings.</p>
@@ -127,9 +127,9 @@ APER</h2>
 <li>An OCTET STRING with a size constraint takes a length of the bits of its range, then its octets, octet aligned. For example, <span class="tt">shmName</span> (1 to 63 octets) takes a length of 6 bits, <span class="tt">name</span> (1 to 32 octets) 5 bits and the <span class="tt">description</span> of the RAN FUNCTION DATA IE (1 to 128 octets) 7 bits.</li>
 </ul>
 <p>An E3 Agent may encode an INDICATION DATA IE once and send the same octets to all the dApps with the same granted identifiers and the same subscription data.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md453"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md456"></a>
 JSON encoding</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md454"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md457"></a>
 General</h2>
 <p>In an E3AP session with the JSON encoding, each IE of the present document is one JSON value [4], nested in the E3AP message. The value of <span class="tt">protocolData</span> is the JSON object of the INDICATION DATA IE. The value of <span class="tt">ranFunctionData</span> is the JSON object of the RAN FUNCTION DATA IE. The value of <span class="tt">actionData</span> is the JSON object of the CONTROL DATA IE. The service model payload is never a string that holds JSON text.</p>
 <p>The following rules apply to every IE.</p>
@@ -147,7 +147,7 @@ General</h2>
 <li>The form of each CHOICE is given in clauses 8.6.3 and 8.6.4.</li>
 </ul>
 <p>The JSON encoding does not check the ranges of the grammar. A receiver should check the values that it uses.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md455"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md458"></a>
 INDICATION DATA, CELL DATA and UE DATA</h2>
 <p>The keys of the fields with a telemetry identifier are those of Tables 7-3 to 7-6. The lists use the keys of Table 8-16.</p>
 <p>Table: JSON keys of the lists of the indication</p>
@@ -200,7 +200,7 @@ INDICATION DATA, CELL DATA and UE DATA</h2>
 <div class="line">    }</div>
 <div class="line">  ]</div>
 <div class="line">}</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md456"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md459"></a>
 RAN FUNCTION DATA</h2>
 <p>Table: JSON keys of the RAN FUNCTION DATA IE and its parts</p>
 <table class="markdownTable">
@@ -260,7 +260,7 @@ RAN FUNCTION DATA</h2>
 <div class="line">      &quot;status&quot;: &quot;unavailable&quot; }</div>
 <div class="line">  ]</div>
 <div class="line">}</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md457"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md460"></a>
 SUBSCRIPTION DATA and CONTROL DATA</h2>
 <p>Table: JSON keys of the SUBSCRIPTION DATA IE and the CONTROL DATA IE</p>
 <table class="markdownTable">
@@ -280,9 +280,9 @@ SUBSCRIPTION DATA and CONTROL DATA</h2>
 <p>The CONTROL DATA object has exactly one member, the key of its alternative. The following object is the <span class="tt">actionData</span> that keeps one UE of cell 1.</p>
 <div class="fragment"><div class="line">{ &quot;set_subscription_data&quot;: { &quot;ue_filter&quot;: [ { &quot;cell_id&quot;: 1, &quot;rnti&quot;: 17921 } ] } }</div>
 </div><!-- fragment --><p>An empty object <span class="tt">{}</span> as the value of <span class="tt">set_subscription_data</span> selects every cell and every UE.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md458"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md461"></a>
 Size limits</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md459"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md462"></a>
 Limits</h2>
 <p>Table: Size limits of the service model IEs</p>
 <table class="markdownTable">
@@ -308,7 +308,7 @@ Limits</h2>
 <blockquote class="doxtable">
 <p>NOTE: Some E3AP implementations accept at most 32768 octets of <span class="tt">ranFunctionData</span>, less than [1] allows. The RAN FUNCTION DATA IEs of Table 8-21 fit in that limit. </p>
 </blockquote>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md460"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md463"></a>
 Indications above the limits</h2>
 <p>The E3 Agent shall not send an INDICATION DATA IE above the limits of Table 8-20. When the data of one slot on one path would exceed them, the E3 Agent shall split the data over several indications of the same path, in this order of preference.</p>
 <ol type="1">
@@ -316,7 +316,7 @@ Indications above the limits</h2>
 <li>When the entry of one cell alone exceeds the limit, split its <span class="tt">ues</span> over several indications. Each of them repeats the cell scope fields of the cell.</li>
 </ol>
 <p>Each indication of the split carries the same slot scope fields. <span class="tt">nCells</span>, <span class="tt">nUe</span> and <span class="tt">nSrsUe</span> count the entries of the indication that carries them. A dApp recognizes the indications of one slot by equal <span class="tt">sfn</span> and <span class="tt">slot</span> values.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md461"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md464"></a>
 Typical sizes</h2>
 <p>Table 8-21 gives encoded sizes computed with the grammar of clause 8.4, with every field present and the largest values. The JSON sizes are those of compact JSON text without white space. They are informative.</p>
 <p>Table: Encoded sizes of the service model IEs (informative)</p>

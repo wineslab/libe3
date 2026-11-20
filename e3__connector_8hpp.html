@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.6.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -96,14 +96,18 @@ $(function(){initNavTree('e3__connector_8hpp.html','',''); });
 <p>Abstract E3 Connector interface for transport layer.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="types_8hpp_source.html">types.hpp</a>&quot;</code><br />
+<code>#include &lt;cstdint&gt;</code><br />
 <code>#include &lt;memory&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
 <code>#include &lt;functional&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
 </div>
 <p><a href="e3__connector_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:libe3_3A_3APosixOptions" id="r_libe3_3A_3APosixOptions"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1PosixOptions.html">libe3::PosixOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Socket and admission options of the POSIX link.  <a href="structlibe3_1_1PosixOptions.html#details">More...</a><br /></td></tr>
 <tr class="memitem:libe3_3A_3AE3Connector" id="r_libe3_3A_3AE3Connector"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlibe3_1_1E3Connector.html">libe3::E3Connector</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract base class for E3AP transport connectors.  <a href="classlibe3_1_1E3Connector.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
@@ -111,10 +115,17 @@ Classes</h2></td></tr>
 Namespaces</h2></td></tr>
 <tr class="memitem:libe3" id="r_libe3"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html">libe3</a></td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a8af01c5e56889bf41490a02000ff5f80" id="r_a8af01c5e56889bf41490a02000ff5f80"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a8af01c5e56889bf41490a02000ff5f80">libe3::PduClass</a> : uint8_t { <a class="el" href="namespacelibe3.html#a8af01c5e56889bf41490a02000ff5f80a6c4d52355c694ee12dcd648562757f52">libe3::PROCEDURE</a> = 0
+, <a class="el" href="namespacelibe3.html#a8af01c5e56889bf41490a02000ff5f80a9b696f04ae1628a090bc980fdd99441d">libe3::INDICATION</a> = 1
+ }</td></tr>
+<tr class="memdesc:a8af01c5e56889bf41490a02000ff5f80"><td class="mdescLeft">&#160;</td><td class="mdescRight">What a PDU is for, so that a link that has streams can pick one.  <a href="namespacelibe3.html#a8af01c5e56889bf41490a02000ff5f80">More...</a><br /></td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aa9ff798ade0521070e6332830f7d35bd" id="r_aa9ff798ade0521070e6332830f7d35bd"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classlibe3_1_1E3Connector.html">E3Connector</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#aa9ff798ade0521070e6332830f7d35bd">libe3::create_connector</a> (<a class="el" href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0e">E3LinkLayer</a> link_layer, <a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40">E3TransportLayer</a> transport_layer, const std::string &amp;setup_endpoint, const std::string &amp;inbound_endpoint, const std::string &amp;outbound_endpoint, uint16_t setup_port, uint16_t inbound_port, uint16_t outbound_port, size_t io_threads=2, <a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a> role=<a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c">E3Role::RAN</a>)</td></tr>
-<tr class="memdesc:aa9ff798ade0521070e6332830f7d35bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory function to create appropriate connector.  <br /></td></tr>
+<tr class="memitem:a0ae46c52a51f72753d07fa244ad371d9" id="r_a0ae46c52a51f72753d07fa244ad371d9"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classlibe3_1_1E3Connector.html">E3Connector</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a0ae46c52a51f72753d07fa244ad371d9">libe3::create_connector</a> (<a class="el" href="namespacelibe3.html#a6cf81048dab516aa29417bb0dc741d0e">E3LinkLayer</a> link_layer, <a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40">E3TransportLayer</a> transport_layer, const std::string &amp;setup_endpoint, const std::string &amp;inbound_endpoint, const std::string &amp;outbound_endpoint, uint16_t setup_port, uint16_t inbound_port, uint16_t outbound_port, size_t io_threads=2, <a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2ec">E3Role</a> role=<a class="el" href="namespacelibe3.html#a42d84c47e47cdcae78a4214ab412b2eca76fd9d0957bea1e9be70ead21603222c">E3Role::RAN</a>, const <a class="el" href="structlibe3_1_1PosixOptions.html">PosixOptions</a> &amp;posix=<a class="el" href="structlibe3_1_1PosixOptions.html">PosixOptions</a>{})</td></tr>
+<tr class="memdesc:a0ae46c52a51f72753d07fa244ad371d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory function to create appropriate connector.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Abstract E3 Connector interface for transport layer. </p>

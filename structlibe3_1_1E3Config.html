@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.6.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -117,17 +117,25 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:adb8d8ed2e71bcf6289b002c00d83e335" id="r_adb8d8ed2e71bcf6289b002c00d83e335"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40">E3TransportLayer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adb8d8ed2e71bcf6289b002c00d83e335">transport_layer</a> {<a class="el" href="namespacelibe3.html#a24bf966c6225dc47ac47d7a8a1986c40ac8660c6d72e7323867ec800d6bb953df">E3TransportLayer::IPC</a>}</td></tr>
 <tr class="memdesc:adb8d8ed2e71bcf6289b002c00d83e335"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transport-layer protocol (SCTP, TCP, IPC).  <br /></td></tr>
 <tr class="memitem:a3fc9dc881ea37e50dcd917eb51e251ab" id="r_a3fc9dc881ea37e50dcd917eb51e251ab"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3fc9dc881ea37e50dcd917eb51e251ab">setup_port</a> {9990}</td></tr>
-<tr class="memdesc:a3fc9dc881ea37e50dcd917eb51e251ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Port used for E3AP setup channel.  <br /></td></tr>
+<tr class="memdesc:a3fc9dc881ea37e50dcd917eb51e251ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Port of the setup channel; the one port of the POSIX link.  <br /></td></tr>
 <tr class="memitem:aafe3a17bf8b25e2a1d4c3bf217fa59cb" id="r_aafe3a17bf8b25e2a1d4c3bf217fa59cb"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aafe3a17bf8b25e2a1d4c3bf217fa59cb">subscriber_port</a> {9999}</td></tr>
-<tr class="memdesc:aafe3a17bf8b25e2a1d4c3bf217fa59cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Port used for inbound control/subscription channel.  <br /></td></tr>
+<tr class="memdesc:aafe3a17bf8b25e2a1d4c3bf217fa59cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Port of the inbound control/subscription channel (ZeroMQ).  <br /></td></tr>
 <tr class="memitem:af70da70b2892c05d4c85f45f80246df3" id="r_af70da70b2892c05d4c85f45f80246df3"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af70da70b2892c05d4c85f45f80246df3">publisher_port</a> {9991}</td></tr>
-<tr class="memdesc:af70da70b2892c05d4c85f45f80246df3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Port used for outbound indication/publication channel.  <br /></td></tr>
+<tr class="memdesc:af70da70b2892c05d4c85f45f80246df3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Port of the outbound indication/publication channel (ZeroMQ).  <br /></td></tr>
 <tr class="memitem:aebc866b403f4b53580604449e8723e32" id="r_aebc866b403f4b53580604449e8723e32"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aebc866b403f4b53580604449e8723e32">setup_endpoint</a> {&quot;ipc:///tmp/dapps/setup&quot;}</td></tr>
-<tr class="memdesc:aebc866b403f4b53580604449e8723e32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Endpoint URI for setup channel.  <br /></td></tr>
+<tr class="memdesc:aebc866b403f4b53580604449e8723e32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Endpoint URI of the setup channel; the one endpoint of the POSIX link.  <br /></td></tr>
 <tr class="memitem:a30c8f1a31e49813e0859f12f4a783706" id="r_a30c8f1a31e49813e0859f12f4a783706"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a30c8f1a31e49813e0859f12f4a783706">subscriber_endpoint</a> {&quot;ipc:///tmp/dapps/dapp_socket&quot;}</td></tr>
-<tr class="memdesc:a30c8f1a31e49813e0859f12f4a783706"><td class="mdescLeft">&#160;</td><td class="mdescRight">Endpoint URI for inbound channel.  <br /></td></tr>
+<tr class="memdesc:a30c8f1a31e49813e0859f12f4a783706"><td class="mdescLeft">&#160;</td><td class="mdescRight">Endpoint URI of the inbound channel (ZeroMQ).  <br /></td></tr>
 <tr class="memitem:aa187882329d11f91fcbfbfcf664e76ec" id="r_aa187882329d11f91fcbfbfcf664e76ec"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa187882329d11f91fcbfbfcf664e76ec">publisher_endpoint</a> {&quot;ipc:///tmp/dapps/e3_socket&quot;}</td></tr>
-<tr class="memdesc:aa187882329d11f91fcbfbfcf664e76ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Endpoint URI for outbound channel.  <br /></td></tr>
+<tr class="memdesc:aa187882329d11f91fcbfbfcf664e76ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Endpoint URI of the outbound channel (ZeroMQ).  <br /></td></tr>
+<tr class="memitem:a3fbee32775c1602bb41d4ff9b5bc5ac4" id="r_a3fbee32775c1602bb41d4ff9b5bc5ac4"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3fbee32775c1602bb41d4ff9b5bc5ac4">socket_buffer_bytes</a> {2 * 1024 * 1024}</td></tr>
+<tr class="memdesc:a3fbee32775c1602bb41d4ff9b5bc5ac4"><td class="mdescLeft">&#160;</td><td class="mdescRight">SO_SNDBUF and SO_RCVBUF of the SCTP sockets of the POSIX link, in bytes.  <br /></td></tr>
+<tr class="memitem:ae8742196674d35f0638e6a744d5c6be0" id="r_ae8742196674d35f0638e6a744d5c6be0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae8742196674d35f0638e6a744d5c6be0">sctp_delayed_sack</a> {false}</td></tr>
+<tr class="memdesc:ae8742196674d35f0638e6a744d5c6be0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether SCTP may delay the SACK of a message (POSIX link).  <br /></td></tr>
+<tr class="memitem:a00ac30577910f26715efd01e7d290611" id="r_a00ac30577910f26715efd01e7d290611"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a00ac30577910f26715efd01e7d290611">allowed_peers</a></td></tr>
+<tr class="memdesc:a00ac30577910f26715efd01e7d290611"><td class="mdescLeft">&#160;</td><td class="mdescRight">Literal addresses a dApp may connect from (POSIX link, RAN role, TCP and SCTP).  <br /></td></tr>
+<tr class="memitem:a15aa71c731e7b26da20f6b8ad2130240" id="r_a15aa71c731e7b26da20f6b8ad2130240"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a15aa71c731e7b26da20f6b8ad2130240">maximum_associations</a> {0}</td></tr>
+<tr class="memdesc:a15aa71c731e7b26da20f6b8ad2130240"><td class="mdescLeft">&#160;</td><td class="mdescRight">Most dApps connected at once (POSIX link, RAN role).  <br /></td></tr>
 <tr class="memitem:a7198ffc275e41485cf084b9e20f44c4e" id="r_a7198ffc275e41485cf084b9e20f44c4e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444">EncodingFormat</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7198ffc275e41485cf084b9e20f44c4e">encoding</a> {<a class="el" href="namespacelibe3.html#a7f13391272eb5ca90bf9d7f86b841444a4638457c14ad3dac251404cf286de87c">EncodingFormat::ASN1</a>}</td></tr>
 <tr class="memdesc:a7198ffc275e41485cf084b9e20f44c4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">PDU encoding format (ASN.1 PER or JSON).  <br /></td></tr>
 <tr class="memitem:a7be1447c4784864a79a118e172c224a9" id="r_a7be1447c4784864a79a118e172c224a9"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7be1447c4784864a79a118e172c224a9">connect_timeout_ms</a> {5000}</td></tr>
@@ -160,6 +168,25 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00506">506</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a00ac30577910f26715efd01e7d290611" name="a00ac30577910f26715efd01e7d290611"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00ac30577910f26715efd01e7d290611">&#9670;&#160;</a></span>allowed_peers</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::string&gt; libe3::E3Config::allowed_peers</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Literal addresses a dApp may connect from (POSIX link, RAN role, TCP and SCTP). </p>
+<p>A connection from any other address is closed at once. Empty accepts every address, which is the default. An IPv4 address is written in dotted form whether the RAN listens on IPv4 or on both families. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00572">572</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
 <a id="a7be1447c4784864a79a118e172c224a9" name="a7be1447c4784864a79a118e172c224a9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7be1447c4784864a79a118e172c224a9">&#9670;&#160;</a></span>connect_timeout_ms</h2>
 
@@ -174,7 +201,7 @@ Public Attributes</h2></td></tr>
 
 <p>Connection establishment timeout in milliseconds. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00552">552</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00591">591</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -193,7 +220,7 @@ Public Attributes</h2></td></tr>
 <p>Seconds a RAN waits for a message from a dApp before it removes the dApp. </p>
 <p>RAN role only. A dApp that sends nothing for this long is told with a <a class="el" href="structlibe3_1_1ReleaseMessage.html" title="E3AP Release Message structure.">ReleaseMessage</a>, then its registration and subscriptions are dropped and a RAN function it was the last subscriber of is stopped. Only what the dApp sends counts, never what the RAN sends to it. A dApp that registered and never spoke counts from its registration. 0 never removes a dApp for being quiet. The default is Aerial's 1800 s. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00566">566</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00605">605</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -265,7 +292,7 @@ Public Attributes</h2></td></tr>
 
 <p>PDU encoding format (ASN.1 PER or JSON). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00544">544</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00583">583</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -285,7 +312,7 @@ Public Attributes</h2></td></tr>
 <p>When set to a non-negative value the subscriber_loop and publisher_loop threads will be pinned to this logical CPU core via pthread_setaffinity_np (Linux only; ignored on other platforms). This eliminates cache-migration overhead and reduces scheduling jitter in sub-millisecond control loops.</p>
 <p>-1 (default) disables core pinning. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00601">601</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00640">640</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -305,7 +332,7 @@ Public Attributes</h2></td></tr>
 <p>Range -20 (highest priority) to 19 (lowest priority), 0 = system default. A negative value reduces OS scheduling latency at the cost of slightly less CPU time for other processes. Requires appropriate privileges for negative values (CAP_SYS_NICE on Linux).</p>
 <p>Applied via setpriority(PRIO_PROCESS, tid, value) on Linux. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00613">613</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00652">652</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -323,7 +350,7 @@ Public Attributes</h2></td></tr>
 
 <p>Number of I/O threads (used by ZMQ context). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00588">588</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00627">627</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -359,7 +386,7 @@ Public Attributes</h2></td></tr>
 
 <p>Logging verbosity: 0=none, 1=error, 2=warn, 3=info, 4=debug, 5=trace. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00616">616</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00655">655</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -378,7 +405,26 @@ Public Attributes</h2></td></tr>
 <p>Path of the shared log file. Empty (default) =&gt; auto-generated. </p>
 <p>When left empty the library derives a per-process path of the form <span class="tt">/tmp/e3_&lt;<a class="el" href="#a348b15e9a72856994dee4b87e520da01" title="Role: RAN (today&#39;s default — binds sockets) or DAPP (connects).">role</a>&gt;[_&lt;sanitized-id&gt;]_&lt;euid&gt;.log</span> (see <a class="el" href="classlibe3_1_1E3Interface.html" title="E3Interface - Internal protocol coordination.">E3Interface</a> ctor). The trailing effective-uid keeps the file owned by whoever opens it, which avoids <span class="tt">fs.protected_regular</span> blocking an O_CREAT re-open of a /tmp file owned by a different user (e.g. a root gNB vs. a prior non-sudo run). Set this explicitly to override the location entirely. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00628">628</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00667">667</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a15aa71c731e7b26da20f6b8ad2130240" name="a15aa71c731e7b26da20f6b8ad2130240"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15aa71c731e7b26da20f6b8ad2130240">&#9670;&#160;</a></span>maximum_associations</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t libe3::E3Config::maximum_associations {0}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Most dApps connected at once (POSIX link, RAN role). </p>
+<p>A connection beyond it is closed at once. 0 is unlimited, the default. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00579">579</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -394,9 +440,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Endpoint URI for outbound channel. </p>
+<p>Endpoint URI of the outbound channel (ZeroMQ). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00540">540</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00545">545</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -412,9 +458,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Port used for outbound indication/publication channel. </p>
+<p>Port of the outbound indication/publication channel (ZeroMQ). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00535">535</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00536">536</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -450,7 +496,7 @@ Public Attributes</h2></td></tr>
 
 <p>Size of the receive buffer in bytes. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00584">584</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00623">623</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -469,7 +515,7 @@ Public Attributes</h2></td></tr>
 <p>Milliseconds a dApp waits before it registers with the RAN again (dApp role). </p>
 <p>When the RAN releases the dApp or the connection to it is lost, or setup did not complete, a dApp that was started with start() stops and starts itself again after this long, and again every this long until the RAN answers. The new session has a new dApp id and none of the subscriptions of the old one: the application subscribes again, and learns that the dApp is back from the setup response handler. A dApp that called release(), or stop(), is not restarted. 0 turns it off, so a dApp stays down until the program calls stop() and start(). The default is Aerial's one second. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00581">581</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00620">620</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -487,7 +533,7 @@ Public Attributes</h2></td></tr>
 
 <p>Receive operation timeout in milliseconds. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00553">553</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00592">592</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -509,6 +555,25 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="ae8742196674d35f0638e6a744d5c6be0" name="ae8742196674d35f0638e6a744d5c6be0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8742196674d35f0638e6a744d5c6be0">&#9670;&#160;</a></span>sctp_delayed_sack</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool libe3::E3Config::sctp_delayed_sack {false}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Whether SCTP may delay the SACK of a message (POSIX link). </p>
+<p>false, the default, turns delayed SACK off, which is what OCUDU does on both peers. Ignored by TCP, IPC and ZeroMQ. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00563">563</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
 <a id="ad5ec01b9a6f427f65953c35a0b32f980" name="ad5ec01b9a6f427f65953c35a0b32f980"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad5ec01b9a6f427f65953c35a0b32f980">&#9670;&#160;</a></span>send_buffer_size</h2>
 
@@ -523,7 +588,7 @@ Public Attributes</h2></td></tr>
 
 <p>Size of the send buffer in bytes. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00585">585</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00624">624</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -541,7 +606,7 @@ Public Attributes</h2></td></tr>
 
 <p>Send operation timeout in milliseconds. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00554">554</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00593">593</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -557,9 +622,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Endpoint URI for setup channel. </p>
+<p>Endpoint URI of the setup channel; the one endpoint of the POSIX link. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00538">538</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00543">543</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -575,9 +640,28 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Port used for E3AP setup channel. </p>
+<p>Port of the setup channel; the one port of the POSIX link. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00533">533</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00534">534</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a3fbee32775c1602bb41d4ff9b5bc5ac4" name="a3fbee32775c1602bb41d4ff9b5bc5ac4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fbee32775c1602bb41d4ff9b5bc5ac4">&#9670;&#160;</a></span>socket_buffer_bytes</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t libe3::E3Config::socket_buffer_bytes {2 * 1024 * 1024}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>SO_SNDBUF and SO_RCVBUF of the SCTP sockets of the POSIX link, in bytes. </p>
+<p>Set on both peers before the association exists. With the Linux defaults an SCTP message of megabytes waits seconds for the send buffer and the delayed SACK; the library caps a PDU well below that today, so the setting shows only once it grows. 0 keeps the kernel's size. Ignored by TCP, IPC and ZeroMQ. </p>
+
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00555">555</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -593,9 +677,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Endpoint URI for inbound channel. </p>
+<p>Endpoint URI of the inbound channel (ZeroMQ). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00539">539</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00544">544</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -611,9 +695,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Port used for inbound control/subscription channel. </p>
+<p>Port of the inbound control/subscription channel (ZeroMQ). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00534">534</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00535">535</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

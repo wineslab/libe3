@@ -1,13 +1,13 @@
 var searchData=
 [
   ['x_0',['X',['../error__codes_8h.html#a874ed6a0d72190fc26699b18a6e0432c',1,'X:&#160;error_codes.h'],['../types_8hpp.html#a874ed6a0d72190fc26699b18a6e0432c',1,'X:&#160;types.hpp'],['../types_8hpp.html#a526b755eddfcd2e01b18ac2e06b175f6',1,'X:&#160;types.hpp'],['../c__api_8cpp.html#a874ed6a0d72190fc26699b18a6e0432c',1,'X:&#160;c_api.cpp']]],
-  ['xapp_1',['PRB block loop with an xApp',['../md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md631',1,'']]],
+  ['xapp_1',['PRB block loop with an xApp',['../md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md634',1,'']]],
   ['xapp_20control_2',['xApp Control',['../md_docs_2e3ap_203-procedure-flow.html#autotoc_md318',1,'']]],
-  ['xapp_20control_3',['xApp control',['../md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md612',1,'dApp report and xApp control'],['../md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md650',1,'The report and the xApp control'],['../md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md545',1,'xApp control']]],
-  ['xapp_20control_20action_4',['Step 8: E3 xApp CONTROL ACTION',['../md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md639',1,'']]],
-  ['xapp_20control_20relay_5',['xApp control relay',['../md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md587',1,'']]],
+  ['xapp_20control_3',['xApp control',['../md_docs_2e3sm_2spectrum_204-encoding.html#autotoc_md615',1,'dApp report and xApp control'],['../md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md653',1,'The report and the xApp control'],['../md_docs_2e3sm_2spectrum_202-ie-mapping.html#autotoc_md548',1,'xApp control']]],
+  ['xapp_20control_20action_4',['Step 8: E3 xApp CONTROL ACTION',['../md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md642',1,'']]],
+  ['xapp_20control_20relay_5',['xApp control relay',['../md_docs_2e3sm_2spectrum_203-procedure-flow.html#autotoc_md590',1,'']]],
   ['xapp_20learns_20the_20dapp_20ids_6',['Discovery: how an xApp learns the dApp ids',['../md_docs_2e2sm-dapp_203-procedure-flow.html#autotoc_md72',1,'']]],
-  ['xapp_20side_7',['The xApp side',['../md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md653',1,'']]],
+  ['xapp_20side_7',['The xApp side',['../md_docs_2e3sm_2spectrum_2integrator-guide.html#autotoc_md656',1,'']]],
   ['xapp_20to_20the_20dapp_8',['Policy down: from the xApp to the dApp',['../md_docs_2e2sm-dapp_203-procedure-flow.html#autotoc_md80',1,'']]],
   ['xapp_20with_20the_20report_20stream_9',['Subscription: pairing the xApp with the report stream',['../md_docs_2e2sm-dapp_203-procedure-flow.html#autotoc_md77',1,'']]],
   ['xapp_5fcontrol_5faction_10',['XAPP_CONTROL_ACTION',['../namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185a5f134d2b30d5786bd2d7f021ee0ef3e0',1,'libe3']]],

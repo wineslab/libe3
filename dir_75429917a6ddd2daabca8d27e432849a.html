@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.6.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -93,7 +93,7 @@ $(function(){initNavTree('dir_75429917a6ddd2daabca8d27e432849a.html','',''); });
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md510"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md513"></a>
 E3SM-L1-KPM</h1>
 <p>E3SM-L1-KPM is the E3 service model for the uplink layer 1 of a RAN node. It gives a dApp the data of each uplink slot: the post-FFT IQ samples, the PUSCH channel estimates and PDUs, the PUSCH decoding and signal quality figures of each UE, and the SRS samples, estimates and measurements of each UE. Small values travel inside the E3 indication. Large arrays stay in a shared memory region on the RAN host, and the indication tells the dApp where to read them.</p>
 <p>The service model rides on the E3 Application Protocol (E3AP) [1]. Every message of this service model is an E3AP message. The service model defines only the content of the E3AP fields that E3AP leaves to the service model.</p>
@@ -120,7 +120,7 @@ E3SM-L1-KPM</h1>
 <td class="markdownTableBodyNone">Open items  </td><td class="markdownTableBodyNone">Annex C (informative), <a class="el" href="md_docs_2e3sm_2l1-kpm_2annex-c-open-items.html">annex-c-open-items.md</a>  </td></tr>
 </table>
 <p>For an engineer who adds E3SM-L1-KPM to a RAN or a dApp there is a separate guide: <a class="el" href="md_docs_2e3sm_2l1-kpm_2integrator-guide.html">integrator-guide.md</a>. It is not part of the specification.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md511"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md514"></a>
 Scope</h1>
 <p>The present document specifies the E3 Service Model "L1 KPM" (E3SM-L1-KPM). The service model lets a dApp subscribe to the uplink layer 1 data of the cells that the E3 Agent of a RAN node serves, and receive that data slot by slot.</p>
 <p>The present document defines the following:</p>
@@ -133,9 +133,9 @@ Scope</h1>
 </ul>
 <p>The present document does not define E3AP messages or procedures. They are defined in [1]. It does not define how a RAN node computes the values that it reports. It does not define the transport between the dApp and the E3 Agent.</p>
 <p>This document is generated from the codebase and protocol definitions for the <a class="el" href="namespacelibe3.html">libe3</a> implementation in <a href="https://github.com/wineslab/libe3">https://github.com/wineslab/libe3</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md512"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md515"></a>
 References</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md513"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md516"></a>
 Normative references</h2>
 <p>References are specific. Only the cited version applies.</p>
 <p>The following referenced documents are necessary for the application of the present document.</p>
@@ -149,16 +149,16 @@ Normative references</h2>
 <p>[8] 3GPP TS 38.212: "NR; Multiplexing and channel coding".</p>
 <p>[9] 3GPP TS 38.214: "NR; Physical layer procedures for data".</p>
 <p>[10] 3GPP TS 38.331: "NR; Radio Resource Control (RRC); Protocol specification".</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md514"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md517"></a>
 Informative references</h2>
 <p>The following referenced documents are not necessary for the application of the present document, but they assist the user with regard to a particular subject area.</p>
 <p>[i.1] 3GPP TS 38.213: "NR; Physical layer procedures for control".</p>
 <p>[i.2] 3GPP TS 38.215: "NR; Physical layer measurements".</p>
 <p>[i.3] 3GPP TS 38.300: "NR; NR and NG-RAN Overall description; Stage 2".</p>
 <p>[i.4] Google: "Protocol Buffers, Language Guide (proto 2)".</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md515"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md518"></a>
 Terms, symbols and abbreviations</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md516"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md519"></a>
 Terms</h2>
 <p>For the purposes of the present document, the terms given in [1] and the following apply.</p>
 <p><b>Blob</b>: a contiguous run of bytes in a buffer of the shared memory region that holds the data of one cell or of one UE for one slot.</p>
@@ -178,10 +178,10 @@ Terms</h2>
 <p><b>Subscription data</b>: the selection of cells and UEs that applies to the subscription of a dApp.</p>
 <p><b>UE group</b>: a set of UEs that the receiver of the RAN node processes together, for example UEs that share PRBs in MU-MIMO.</p>
 <p><b>UE scope</b>: the place of a value in an entry of the UE list of a cell. The value describes one UE in one cell in one slot.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md517"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md520"></a>
 Symbols</h2>
 <p>Void.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md518"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md521"></a>
 Abbreviations</h2>
 <p>For the purposes of the present document, the abbreviations given in [1] and the following apply.</p>
 <table class="markdownTable">
@@ -250,9 +250,9 @@ Abbreviations</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">UTC  </td><td class="markdownTableBodyNone">Coordinated Universal Time  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md519"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md522"></a>
 General</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md520"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md523"></a>
 Notations</h2>
 <p>For the purposes of the present document, the notations of [1] apply, with the following additions.</p>
 <table class="markdownTable">
@@ -270,7 +270,7 @@ Notations</h2>
 <td class="markdownTableBodyNone">Range  </td><td class="markdownTableBodyNone"><span class="tt">a..b</span> is an inclusive integer range.  </td></tr>
 </table>
 <p>The presence column of the tables uses "M" for mandatory, "O" for optional and "C" for conditional, as in [1].</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md521"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md524"></a>
 Entities</h2>
 <p>The present document uses the entities of [1] as follows (Figure 5-1).</p>
 <ul>
@@ -278,7 +278,7 @@ Entities</h2>
 <li>The dApp runs in the RAN node or next to it, as [1] allows. It reaches the RAN function only through E3AP and the shared memory region. A dApp that reads shared memory streams runs on the host of the RAN node (clause 6.5).</li>
 </ul>
 <p>How the E3 Agent obtains the data from the layer 1 inside the RAN node is out of the scope of the present document.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md522"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md525"></a>
 Relation to E3AP</h2>
 <p>The present document follows [1] in every respect that [1] defines. It adds no message, no procedure and no field to E3AP. When the present document and [1] disagree on a matter that [1] defines, [1] applies.</p>
 <p>E3AP [1] offers a dApp a set of procedures to reach a RAN function. A service model gives a meaning to the payloads that those procedures carry. E3SM-L1-KPM uses the following E3AP procedures.</p>
@@ -301,7 +301,7 @@ Relation to E3AP</h2>
 </table>
 <p>The dApp Report procedure and the xApp Control procedure of [1] are not used by the present document.</p>
 <p>E3AP carries the payloads of the present document in its octet string fields and does not read them. The service model selects its payload by the field that carries it, as Table 4-1 lists. In an E3AP session with the JSON encoding, the payloads are JSON values nested in the E3AP message, as clause 8.3 of [1] defines.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md523"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md526"></a>
 Forwards and backwards compatibility</h2>
 <p>The service model uses these means to stay compatible when it grows.</p>
 <ol type="1">

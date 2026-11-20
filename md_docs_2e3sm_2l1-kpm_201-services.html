@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.6.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,8 +92,8 @@ $(function(){initNavTree('md_docs_2e3sm_2l1-kpm_201-services.html','',''); });
   <div class="headertitle"><div class="title">E3SM services </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md387"></a></p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md388"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md390"></a></p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md391"></a>
 General</h1>
 <p>The present clause describes the E3 services that E3SM-L1-KPM supports. The service model supports two services:</p>
 <ul>
@@ -101,14 +101,14 @@ General</h1>
 <li>the control service, in clause 5.3.</li>
 </ul>
 <p>The service model supports no other service. Clause 5.4 shows the messages of a typical use of both services. Clause 4.3 lists the E3AP procedures that carry them.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md389"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md392"></a>
 Telemetry service</h1>
 <p>The telemetry service delivers the data of the uplink slots of the cells that the E3 Agent serves. A dApp subscribes with the telemetry identifiers of clause 7.3. For each slot of an indication path that matches the subscription, the E3 Agent sends one INDICATION MESSAGE message that carries the values of the granted identifiers.</p>
 <p>The telemetry service is the only source of data of the service model. It plays the role that the REPORT service plays in an E2 service model.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md390"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md393"></a>
 Control service</h1>
 <p>The control service lets a dApp narrow its subscription to some cells and some UEs. It has one control action, Set Subscription Data (clause 7.5). The control service does not change the behavior of the RAN node.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md391"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md394"></a>
 Message flow</h1>
 <p>Figure 5-1 shows the messages of a typical use of the service model. The E3 Agent and the shared memory region are part of the RAN node (clause 4.2). The figure draws the dApp outside the RAN node; it may also run inside it. An arrow between the dApp and the E3 Agent is an E3AP message, and the box under it names the service model payload that the message carries. An arrow to the shared memory region is a write or a read of the region, not a message.</p>
 <p><img src="figures/message-flow.png" alt="Message flow of E3SM-L1-KPM over E3AP" class="inline"/></p>

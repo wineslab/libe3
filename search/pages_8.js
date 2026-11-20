@@ -15,6 +15,6 @@ var searchData=
   ['8_20the_20e3_20control_20outcome_20payload_12',['8. The &lt;span class=&quot;tt&quot;&gt;e3-control-outcome&lt;/span&gt; payload',['../md_docs_2e2sm-dapp_202-ie-mapping.html#autotoc_md62',1,'']]],
   ['80_2090_20a0_20control_20outcome_20everything_20present_13',['&lt;span class=&quot;tt&quot;&gt;co1_full&lt;/span&gt; = &lt;span class=&quot;tt&quot;&gt;1c 08 17979cfe3d85cd15 01 2a 0a 10 20 30 40 50 60 70 80 90 a0&lt;/span&gt; (control outcome, everything present)',['../md_docs_2e2sm-dapp_204-encoding.html#autotoc_md101',1,'']]],
   ['85_20cd_2015_2001_202a_14',['&lt;span class=&quot;tt&quot;&gt;ih1_full&lt;/span&gt; = &lt;span class=&quot;tt&quot;&gt;0e 00 ff 00 07 00 02 00 f1 10 20 04 d2 00 05 08 17 97 9c fe 3d 85 cd 15 01 2a&lt;/span&gt;',['../md_docs_2e2sm-dapp_204-encoding.html#autotoc_md99',1,'']]],
-  ['8_3a_20e3_20xapp_20control_20action_15',['Step 8: E3 xApp CONTROL ACTION',['../md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md639',1,'']]],
-  ['8_3a_20indication_20message_16',['Step 8: INDICATION MESSAGE',['../md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md494',1,'']]]
+  ['8_3a_20e3_20xapp_20control_20action_15',['Step 8: E3 xApp CONTROL ACTION',['../md_docs_2e3sm_2spectrum_207-examples.html#autotoc_md642',1,'']]],
+  ['8_3a_20indication_20message_16',['Step 8: INDICATION MESSAGE',['../md_docs_2e3sm_2l1-kpm_2annex-b-examples.html#autotoc_md497',1,'']]]
 ];
