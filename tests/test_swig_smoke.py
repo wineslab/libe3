@@ -42,6 +42,12 @@ def main() -> int:
         print("FAIL: libe3py.E3Role_DAPP not exposed", file=sys.stderr)
         return 1
 
+    # Every link layer is exposed, with the number the C API uses
+    for name, value in (("E3LinkLayer_ZMQ", 0), ("E3LinkLayer_POSIX", 1), ("E3LinkLayer_URING", 2)):
+        if getattr(libe3py, name, None) != value:
+            print(f"FAIL: libe3py.{name} = {getattr(libe3py, name, None)!r}, expected {value}", file=sys.stderr)
+            return 1
+
     # E3Config is constructible and has the role field
     cfg = libe3py.E3Config()
     if cfg.role != libe3py.E3Role_RAN:

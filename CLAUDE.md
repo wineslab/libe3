@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What libe3 is
 
-libe3 is a vendor-neutral C++17 library that implements the E3AP (E3 Application Protocol) on both sides of the O-RAN E3 interface: the RAN function (server) and the dApp (client). A single entry-point class backs both roles, switched by one config field. Transport (ZeroMQ or POSIX TCP/SCTP/Unix-domain IPC) and encoding (ASN.1 APER, JSON, and Protocol Buffers) are pluggable and selected at runtime. The data path is built for sub-millisecond, inference-driven control loops (lock-free queues, dedicated I/O threads, optional CPU pinning). It ships a C API and Python (SWIG) bindings.
+libe3 is a vendor-neutral C++17 library that implements the E3AP (E3 Application Protocol) on both sides of the O-RAN E3 interface: the RAN function (server) and the dApp (client). A single entry-point class backs both roles, switched by one config field. Transport (ZeroMQ, or POSIX TCP/SCTP/Unix-domain IPC driven by plain system calls or by io_uring) and encoding (ASN.1 APER, JSON, and Protocol Buffers) are pluggable and selected at runtime. The data path is built for sub-millisecond, inference-driven control loops (lock-free queues, dedicated I/O threads, optional CPU pinning). It ships a C API and Python (SWIG) bindings.
 
 ## Build & test commands
 
@@ -49,7 +49,7 @@ ctest -LE integration      # only unit tests
 PYTHONPATH=build/swig python3 tests/test_swig_smoke.py   # SWIG bindings smoke test
 ```
 
-**Build options** live in `cmake/libe3Options.cmake`: `LIBE3_BUILD_TESTS` (ON), `LIBE3_BUILD_EXAMPLES` (ON), `LIBE3_BUILD_INTEGRATION_TESTS` (OFF), `LIBE3_ENABLE_SWIG` (OFF), `LIBE3_ENABLE_ZMQ` (ON), `LIBE3_ENABLE_ASN1` (ON), `LIBE3_ENABLE_E2SM_DAPP` (ON, needs ASN1; builds the E2SM-DAPP codec libraries, see `docs/e2sm-dapp/`), `LIBE3_ENABLE_JSON` (OFF), `LIBE3_ENABLE_PROTOBUF` (OFF), `LIBE3_ENABLE_ASAN`/`LIBE3_ENABLE_TSAN` (OFF), `LIBE3_BUILD_DOCS` (OFF). **At least one of `LIBE3_ENABLE_ASN1` / `LIBE3_ENABLE_JSON` / `LIBE3_ENABLE_PROTOBUF` must be ON**; any combination can be built together and the encoder is chosen at runtime. `build_libe3` has a dedicated `--enable-protobuf` flag; JSON and SWIG use `--cmake-opt`.
+**Build options** live in `cmake/libe3Options.cmake`: `LIBE3_BUILD_TESTS` (ON), `LIBE3_BUILD_EXAMPLES` (ON), `LIBE3_BUILD_INTEGRATION_TESTS` (OFF), `LIBE3_ENABLE_SWIG` (OFF), `LIBE3_ENABLE_ZMQ` (ON), `LIBE3_ENABLE_URING` (ON when Linux and liburing allow it), `LIBE3_ENABLE_ASN1` (ON), `LIBE3_ENABLE_E2SM_DAPP` (ON, needs ASN1; builds the E2SM-DAPP codec libraries, see `docs/e2sm-dapp/`), `LIBE3_ENABLE_JSON` (OFF), `LIBE3_ENABLE_PROTOBUF` (OFF), `LIBE3_ENABLE_ASAN`/`LIBE3_ENABLE_TSAN` (OFF), `LIBE3_BUILD_DOCS` (OFF). **At least one of `LIBE3_ENABLE_ASN1` / `LIBE3_ENABLE_JSON` / `LIBE3_ENABLE_PROTOBUF` must be ON**; any combination can be built together and the encoder is chosen at runtime. `build_libe3` has a dedicated `--enable-protobuf` flag; JSON and SWIG use `--cmake-opt`.
 
 ## Architecture (big picture)
 
@@ -58,7 +58,7 @@ The design has one façade over three pluggable seams, plus a real-time data pat
 **Dual-role façade.** `E3Agent` (`include/libe3/e3_agent.hpp`) is the single public class for **both** the RAN and dApp roles; the role is chosen by `E3Config.role` (RAN vs DAPP), not by a separate class. It is a Pimpl over the internal `E3Interface` (`src/core/e3_interface.cpp`), which coordinates the full protocol lifecycle (Setup → Subscription → Control/Indication → Release) and owns the worker threads and queues. `E3Config` (in `types.hpp`) is the one struct that selects role, transport, encoding, endpoints, and real-time tuning.
 
 **Three pluggable seams**, each behind an interface with a factory:
-- **Transport** — `E3Connector` (`include/libe3/e3_connector.hpp`), implemented by the ZeroMQ and POSIX (TCP/SCTP/IPC) connectors in `src/connector/`, built by `connector_factory.cpp`.
+- **Transport** — `E3Connector` (`include/libe3/e3_connector.hpp`), implemented by the ZeroMQ, POSIX and io_uring (TCP/SCTP/IPC) connectors in `src/connector/`, built by `connector_factory.cpp`. The POSIX and io_uring connectors share `socket_link.{hpp,cpp}` (endpoint, socket options, framing) so they stay the same wire; `uring_ring.cpp` is the only file that includes `<liburing.h>`. See `docs/connectors/uring.md`.
 - **Encoding** — `E3Encoder` (`include/libe3/e3_encoder.hpp`), implemented by the encoders in `src/encoder/` (ASN.1 APER, JSON, and Protocol Buffers), built by `encoder_factory.cpp`.
 - **Service Model** — `ServiceModel` (`include/libe3/sm_interface.hpp`) is the RAN-side extension point for opaque, application-defined payload semantics. Its lifecycle is subscription-driven (`start()` on first subscriber to a RAN function, `stop()` on the last), managed via `SmRegistry` (`src/core/sm_registry.cpp`).
 

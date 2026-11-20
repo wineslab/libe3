@@ -9,7 +9,8 @@
 #   docker/run-pair.sh [LINK] [TRANSPORT] [ENCODING]     e.g. posix sctp asn1
 #
 # TAG picks the image tag (default: local). SECONDS_TO_RUN is how long the dApp
-# runs (default: 8).
+# runs (default: 8). The uring link runs both containers with seccomp unconfined:
+# Docker's default profile refuses the io_uring system calls.
 
 set -euo pipefail
 
@@ -23,6 +24,10 @@ suffix=$$
 ran=libe3-ran-$suffix
 ipc=libe3-ipc-$suffix
 args=(--link "$link" --transport "$transport" --encoding "$encoding")
+security=()
+if [ "$link" = uring ]; then
+    security=(--security-opt seccomp=unconfined)
+fi
 
 cleanup() {
     docker rm -f "$ran" >/dev/null 2>&1 || true
@@ -31,11 +36,11 @@ cleanup() {
 trap cleanup EXIT
 
 docker volume create "$ipc" >/dev/null
-docker run -d --name "$ran" -v "$ipc:/tmp/dapps" "libe3-ran-sim:$tag" "${args[@]}" >/dev/null
+docker run -d --name "$ran" "${security[@]}" -v "$ipc:/tmp/dapps" "libe3-ran-sim:$tag" "${args[@]}" >/dev/null
 sleep 1
 
 set +e
-dapp_log=$(timeout -k 10 $((run_for + 15)) docker run --rm --network "container:$ran" \
+dapp_log=$(timeout -k 10 $((run_for + 15)) docker run --rm --network "container:$ran" "${security[@]}" \
     -v "$ipc:/tmp/dapps" "libe3-dapp-sim:$tag" \
     "${args[@]}" --control --timed "$run_for" 2>&1)
 dapp_exit=$?

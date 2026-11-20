@@ -72,6 +72,14 @@
  * chronological position instead, the same technique this file has always
  * used for DELIVER_BEGIN.
  *
+ * Options: --link zmq|posix|uring, --transport ipc|tcp|sctp, --encoding asn1|json|protobuf,
+ * --iterations N (default 1000) and --warmup N (default 50), and --ran-cpu/--dapp-cpu to pin
+ * each agent's I/O threads (E3Config::io_thread_affinity). The io_uring link reads its ring
+ * options from LIBE3_URING_* (docs/connectors/uring.md); the ones set are printed under the
+ * table, with the CPU time the process spent per round trip, both ends together, because a
+ * link that polls instead of sleeping buys latency with CPU. tools/bench_matrix.py runs this
+ * over links, transports and encodings and compares them.
+ *
  * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -93,6 +101,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <sys/resource.h>
 #include <sys/stat.h>
 #include <thread>
 #include <unistd.h>
@@ -104,8 +113,8 @@ using clk = steady_clock;
 
 namespace {
 
-constexpr int kIterations = 1000;
-constexpr int kWarmupIterations = 50;
+int kIterations = 1000;
+int kWarmupIterations = 50;
 constexpr uint32_t kRanFunctionId = 1;
 constexpr uint32_t kControlId = 1;
 
@@ -147,6 +156,7 @@ std::string make_trace_dir() {
 E3LinkLayer parse_link(const char* s) {
     if (std::strcmp(s, "posix") == 0) return E3LinkLayer::POSIX;
     if (std::strcmp(s, "zmq")   == 0) return E3LinkLayer::ZMQ;
+    if (std::strcmp(s, "uring") == 0) return E3LinkLayer::URING;
     std::fprintf(stderr, "Unknown link layer '%s'; using zmq\n", s);
     return E3LinkLayer::ZMQ;
 }
@@ -310,8 +320,15 @@ std::vector<RoundTrip> reconstruct(const std::string& dir) {
                   return a.decode_e3ap_done < b.decode_e3ap_done;
               });
 
+    // The sender stamps SEND_DONE when its send call has returned, and a receiver that polls can have
+    // the PDU and stamp RECV before that: over loopback, SCTP delivers inside the sender's system call,
+    // and io_uring completes a send on a kernel thread. Such a hop is a little below zero. The
+    // pairing check below tolerates it by this much; a pairing that is off by one round trip is off by
+    // the whole round trip, 12 us or more even for the fastest link, so it is still caught.
+    constexpr uint64_t kStampSkewNs = 5000;
     std::vector<RoundTrip> out;
     size_t skipped_misaligned = 0;
+    char first_misaligned[400] = "";
     size_t ind_inbound_idx = 0, ctrl_inbound_idx = 0;
     // std::map iterates in ascending key order, i.e. ascending business seq,
     // i.e. emission order -- the same order PingPong pacing guarantees the
@@ -356,9 +373,24 @@ std::vector<RoundTrip> reconstruct(const std::string& dir) {
         // one -- checking that the two joins agree on basic time ordering
         // catches that and drops just the affected round trip, the same
         // tolerance this file already extends to an incomplete tail.
-        const bool ind_ok = io.send_done <= ii.recv && ii.deliver_begin <= *t5;
-        const bool ctrl_ok = co.send_done <= ci.recv && ci.decode_e3ap_done <= *t8;
+        const bool ind_ok = io.send_done <= ii.recv + kStampSkewNs && ii.deliver_begin <= *t5;
+        const bool ctrl_ok = co.send_done <= ci.recv + kStampSkewNs && ci.decode_e3ap_done <= *t8;
         if (!ind_ok || !ctrl_ok) {
+            if (skipped_misaligned == 0) {
+                // The first one tells a lost or extra inbound group (every later round trip is off by
+                // one) from one whose two stamps merely landed in the other order. Microseconds from
+                // the indication's emission.
+                const auto rel = [&](uint64_t t) {
+                    return static_cast<double>(static_cast<int64_t>(t) - static_cast<int64_t>(io.emit_enter)) / 1000.0;
+                };
+                std::snprintf(first_misaligned, sizeof(first_misaligned),
+                              "first at business seq %llu (indication #%zu, control #%zu): ind send_done %.2f recv %.2f "
+                              "deliver_begin %.2f decode_e3sm_done %.2f | ctrl send_done %.2f recv %.2f "
+                              "decode_e3ap_done %.2f decode_e3sm_begin %.2f",
+                              static_cast<unsigned long long>(seq), ind_inbound_idx, ctrl_inbound_idx,
+                              rel(io.send_done), rel(ii.recv), rel(ii.deliver_begin), rel(*t5),
+                              rel(co.send_done), rel(ci.recv), rel(ci.decode_e3ap_done), rel(*t8));
+            }
             ++skipped_misaligned;
             continue;
         }
@@ -396,8 +428,10 @@ std::vector<RoundTrip> reconstruct(const std::string& dir) {
     if (skipped_misaligned > 0) {
         std::fprintf(stderr,
                       "WARNING: dropped %zu round trip(s) with a misaligned "
-                      "inbound position (see reconstruct()'s comment)\n",
-                      skipped_misaligned);
+                      "inbound position (see reconstruct()'s comment)\n"
+                      "  groups: %zu indications and %zu controls out, %zu indications and %zu controls in; %s\n",
+                      skipped_misaligned, ind_outbound.size(), ctrl_outbound.size(), ind_inbound.size(),
+                      ctrl_inbound.size(), first_misaligned);
     }
     return out;
 }
@@ -409,23 +443,34 @@ int main(int argc, char* argv[]) {
     E3LinkLayer     link     = E3LinkLayer::ZMQ;
     E3TransportLayer transport = E3TransportLayer::IPC;
     EncodingFormat  encoding = EncodingFormat::ASN1;
+    int ran_cpu = -1;
+    int dapp_cpu = -1;
 
     static const struct option long_opts[] = {
-        {"link",      required_argument, nullptr, 'l'},
-        {"transport", required_argument, nullptr, 't'},
-        {"encoding",  required_argument, nullptr, 'e'},
-        {"help",      no_argument,       nullptr, 'h'},
-        {nullptr,     0,                 nullptr,  0},
+        {"link",       required_argument, nullptr, 'l'},
+        {"transport",  required_argument, nullptr, 't'},
+        {"encoding",   required_argument, nullptr, 'e'},
+        {"iterations", required_argument, nullptr, 'n'},
+        {"warmup",     required_argument, nullptr, 'w'},
+        {"ran-cpu",    required_argument, nullptr, 'r'},
+        {"dapp-cpu",   required_argument, nullptr, 'd'},
+        {"help",       no_argument,       nullptr, 'h'},
+        {nullptr,      0,                 nullptr,  0},
     };
     int opt;
-    while ((opt = getopt_long(argc, argv, "l:t:e:h", long_opts, nullptr)) != -1) {
+    while ((opt = getopt_long(argc, argv, "l:t:e:n:w:r:d:h", long_opts, nullptr)) != -1) {
         switch (opt) {
             case 'l': link      = parse_link(optarg);      break;
             case 't': transport = parse_transport(optarg); break;
             case 'e': encoding  = parse_encoding(optarg);  break;
+            case 'n': kIterations = std::max(1, std::atoi(optarg)); break;
+            case 'w': kWarmupIterations = std::max(0, std::atoi(optarg)); break;
+            case 'r': ran_cpu = std::atoi(optarg); break;
+            case 'd': dapp_cpu = std::atoi(optarg); break;
             case 'h':
-                std::printf("Usage: %s [--link zmq|posix] [--transport ipc|tcp|sctp]"
-                            " [--encoding asn1|json|protobuf]\n", argv[0]);
+                std::printf("Usage: %s [--link zmq|posix|uring] [--transport ipc|tcp|sctp]"
+                            " [--encoding asn1|json|protobuf] [--iterations N] [--warmup N]"
+                            " [--ran-cpu CPU] [--dapp-cpu CPU]\n", argv[0]);
                 return 0;
             default:
                 std::fprintf(stderr, "Unknown option; use --help\n");
@@ -441,7 +486,10 @@ int main(int argc, char* argv[]) {
     // count, against the default 4M-record capacity.
     const std::string trace_dir = make_trace_dir();
     latrec_set_output_dir(trace_dir.c_str());
-    setenv("LATREC_ENTRIES_LOG2", "16", 1);
+    // About 30 records per round trip land in the busiest ring; keep the ring from wrapping.
+    int entries_log2 = 16;
+    while (entries_log2 < 22 && (1L << entries_log2) < 40L * (kIterations + kWarmupIterations)) ++entries_log2;
+    setenv("LATREC_ENTRIES_LOG2", std::to_string(entries_log2).c_str(), 1);
 
     E3Config ran_cfg;
     ran_cfg.role = E3Role::RAN;
@@ -450,6 +498,7 @@ int main(int argc, char* argv[]) {
     ran_cfg.transport_layer = transport;
     ran_cfg.encoding = encoding;
     ran_cfg.log_level = 0;
+    ran_cfg.io_thread_affinity = ran_cpu;
 
     // IPC transport: use a private tmpdir so the benchmark is self-contained.
     // TCP/SCTP: both sides run in the same process on localhost; the default
@@ -465,6 +514,7 @@ int main(int argc, char* argv[]) {
     auto dapp_cfg = ran_cfg;
     dapp_cfg.role = E3Role::DAPP;
     dapp_cfg.dapp_name = "BenchDApp";
+    dapp_cfg.io_thread_affinity = dapp_cpu;
     // For IPC the dApp inherits the same explicit endpoints from ran_cfg.
     // For TCP/SCTP the dApp connects to localhost on the default ports,
     // which is correct since both sides run in the same process.
@@ -538,7 +588,10 @@ int main(int argc, char* argv[]) {
     // an incomplete tail; reconstruct() below drops it rather than treat it
     // as a real sample, which costs at most one sample out of the total.
     const int total = kIterations + kWarmupIterations;
-    auto deadline = clk::now() + std::chrono::seconds(60);
+    struct rusage usage_before{};
+    getrusage(RUSAGE_SELF, &usage_before);
+    const int handled_before = handled.load();
+    auto deadline = clk::now() + std::chrono::seconds(60 + total / 500);
     while (true) {
         if (handled.load(std::memory_order_relaxed) >= total) break;
         if (clk::now() > deadline) {
@@ -548,6 +601,10 @@ int main(int argc, char* argv[]) {
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
+
+    struct rusage usage_after{};
+    getrusage(RUSAGE_SELF, &usage_after);
+    const int handled_in_window = handled.load() - handled_before;
 
     dapp.stop();
     ran.stop();
@@ -574,8 +631,9 @@ int main(int argc, char* argv[]) {
         p14, p15, p16, p17, p18, total_us;
     for (const auto& t : round_trips) {
         if (t.seq < static_cast<uint64_t>(kWarmupIterations)) continue;
+        // Signed: a hop can come out below zero (see kStampSkewNs).
         auto us = [](uint64_t a, uint64_t b) {
-            return static_cast<double>(b - a) / 1000.0;
+            return static_cast<double>(static_cast<int64_t>(b) - static_cast<int64_t>(a)) / 1000.0;
         };
         p1.push_back(us(t.t1, t.t2));
         p2.push_back(us(t.t2, t.t3));
@@ -663,6 +721,29 @@ int main(int argc, char* argv[]) {
     emit_row("18", "Decode & handle control",
              "`DECODE_E3SM_BEGIN` to `DECODE_E3SM_DONE`", p18);
     emit_row("Total", "**Total round-trip**", "", total_us);
+    std::printf("\n");
+
+    auto tv_us = [](const timeval& tv) {
+        return static_cast<double>(tv.tv_sec) * 1e6 + static_cast<double>(tv.tv_usec);
+    };
+    const double rounds = std::max(1, handled_in_window);
+    const double user_us = (tv_us(usage_after.ru_utime) - tv_us(usage_before.ru_utime)) / rounds;
+    const double sys_us = (tv_us(usage_after.ru_stime) - tv_us(usage_before.ru_stime)) / rounds;
+    const double voluntary = static_cast<double>(usage_after.ru_nvcsw - usage_before.ru_nvcsw) / rounds;
+    const double involuntary = static_cast<double>(usage_after.ru_nivcsw - usage_before.ru_nivcsw) / rounds;
+    std::printf("CPU per round trip, both ends: %.2f us user, %.2f us system; "
+                "context switches per round trip: %.2f voluntary, %.2f involuntary.\n",
+                user_us, sys_us, voluntary, involuntary);
+    std::string ring_options;
+    for (const char* name : {"LIBE3_URING_DEPTH", "LIBE3_URING_FIXED_FILES", "LIBE3_URING_FIXED_BUFFERS",
+                             "LIBE3_URING_SQPOLL", "LIBE3_URING_SQPOLL_CPU", "LIBE3_URING_BUSY_POLL_US"}) {
+        if (const char* value = std::getenv(name)) {
+            ring_options += std::string(ring_options.empty() ? "" : ", ") + name + "=" + value;
+        }
+    }
+    if (link == E3LinkLayer::URING) {
+        std::printf("io_uring ring options: %s.\n", ring_options.empty() ? "the defaults" : ring_options.c_str());
+    }
     std::printf("\n");
     return p1.empty() ? 1 : 0;
 }

@@ -14,6 +14,14 @@ if(@LIBE3_ENABLE_ZMQ@)
     endif()
 endif()
 
+# The static library links liburing privately, so a consumer of libe3::libe3 needs it to link.
+if(@LIBE3_WITH_URING@)
+    find_dependency(PkgConfig)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(URING IMPORTED_TARGET liburing)
+    endif()
+endif()
+
 # nlohmann/json is intentionally NOT a find_dependency: it is header-only and
 # used only inside libe3's implementation (compiled into the library, scoped to
 # the BUILD interface in libe3Targets.cmake), so consumers of the installed

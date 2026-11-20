@@ -3,14 +3,16 @@
  * @brief End-to-end RAN + dApp pair over POSIX sockets (IPC + TCP).
  *
  * Same scenario as test_role_pair_zmq_ipc.cpp but using the POSIX
- * connector. SCTP is not exercised (CI runners lack the sctp kernel
- * module).
+ * connector. SCTP is in test_role_pair_sctp.cpp. CTest runs it again over the
+ * io_uring link, and with a RAN of one link and a dApp of the other
+ * (link_under_test.hpp), since both links speak the same wire.
  *
  * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
  */
 
 #include "test_framework.hpp"
+#include "link_under_test.hpp"
 #include <libe3/libe3.hpp>
 #include "sm_simple/e3sm_simple_wrapper.hpp"
 
@@ -102,7 +104,7 @@ void run_pair(E3TransportLayer transport, uint16_t base_port,
         E3Config c;
         c.role = E3Role::RAN;
         c.ran_identifier = "posix-test-ran";
-        c.link_layer = E3LinkLayer::POSIX;
+        c.link_layer = libe3_test::ran_link();
         c.transport_layer = transport;
         c.encoding = EncodingFormat::ASN1;
         c.log_level = 0;
@@ -119,6 +121,7 @@ void run_pair(E3TransportLayer transport, uint16_t base_port,
     auto ran_cfg = make_ran_cfg();
     auto dapp_cfg = ran_cfg;
     dapp_cfg.role = E3Role::DAPP;
+    dapp_cfg.link_layer = libe3_test::dapp_link();
     dapp_cfg.dapp_name = "PosixTestDApp";
 
     E3Agent ran(ran_cfg);
@@ -210,9 +213,11 @@ TEST(role_pair_posix_ipc_end_to_end) {
 }
 
 TEST(role_pair_posix_tcp_end_to_end) {
-    run_pair(E3TransportLayer::TCP, /*base_port=*/24990, "");
+    // Per process: CTest runs this binary once per pair of links, at the same time.
+    run_pair(E3TransportLayer::TCP, libe3_test::free_ports(3), "");
 }
 
-int main() {
+int main(int argc, char** argv) {
+    if (const int rc = libe3_test::select_links(argc, argv); rc >= 0) return rc;
     return RUN_ALL_TESTS();
 }

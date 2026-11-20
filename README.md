@@ -12,7 +12,9 @@
 - **Vendor-Neutral API**: Clean E3Agent facade that hides implementation details
 - **Both Roles**: Single `E3Agent` class acts as either **RAN** (server, binds sockets) or **dApp** (client, connects to a remote RAN), switched by `E3Config.role`
 - **Multi-Peer dApps**: One dApp process can hold N `E3Agent` instances connecting to N different RAN agents (e.g. a DU-HIGH and a DU-LOW)
-- **Multiple Transports**: Support for ZeroMQ and POSIX sockets (TCP, SCTP, Unix Domain)
+- **Multiple Transports**: Support for ZeroMQ and POSIX sockets (TCP, SCTP, Unix Domain), the latter
+  also driven through io_uring on Linux (`E3LinkLayer::URING`, the same wire; see
+  [docs/connectors/uring.md](docs/connectors/uring.md))
 - **Multiple Encodings**: ASN.1 APER (primary), JSON, and Protocol Buffers encoders
 - **Service Model Extensions**: Easy-to-implement SM interface for custom functionality
 - **Python Bindings**: Optional SWIG bindings (`LIBE3_ENABLE_SWIG=ON`) so the same C++ library can back Python dApp clients
@@ -34,7 +36,7 @@
           ▼                                                    ▼
   ┌───────────────────┐  ◄─── E3AP PDUs ───►       ┌──────────────────────┐
   │     E3Agent       │◄──────────────────────────►│     E3Agent          │
-  │                   │  ZMQ / POSIX               │                      │
+  │                   │  ZMQ / POSIX / io_uring    │                      │
   │  register_sm(...) │  IPC · TCP · SCTP          │  set_indication_     │
   │  send_indication  │  ASN.1 · JSON · Protobuf   │    handler(fn)       │
   │  send_xapp_ctrl   │                            │  subscribe(rfid, …)  │
@@ -63,7 +65,8 @@
 ├────────────────────┤     ├──────────────────────┤    │    extension     │
 │  ZmqConnector      │     │  Asn1Encoder         │    │    point)        │
 │  PosixConnector    │     │  JsonEncoder         │    ├──────────────────┤
-└────────────────────┘     └──────────────────────┘    │  SimpleSM        │
+│  UringConnector    │     │  ProtobufEncoder     │    │  SimpleSM        │
+└────────────────────┘     └──────────────────────┘    │                  │
                                                        │  custom SMs …    │
                                                        └──────────────────┘
 ```
@@ -80,6 +83,7 @@
 - `protobuf-compiler` + `libprotobuf-dev` — `protoc` and the Protocol Buffers runtime (only when `LIBE3_ENABLE_PROTOBUF=ON`)
 - `libzmq3-dev` for ZMQ transport
 - `libsctp-dev` — SCTP headers for the POSIX/SCTP transport (only when `LIBE3_ENABLE_SCTP=ON`; **not installed by `./build_libe3 -I`**)
+- `liburing-dev` (2.0 or later, Linux) for the io_uring link; without it the build goes on without the link
 
 ### Install Dependencies
 
@@ -170,6 +174,7 @@ pkg-config --modversion libe3
 | `LIBE3_ENABLE_TSAN` | OFF | Enable ThreadSanitizer |
 | `LIBE3_ENABLE_SWIG` | OFF | Build the SWIG-generated Python bindings (`_libe3py.so` + `libe3py.py`) |
 | `LIBE3_ENABLE_SCTP` | OFF | Enable the SCTP POSIX transport (needs `libsctp-dev`) |
+| `LIBE3_ENABLE_URING` | ON | Build the io_uring link when it can be: on Linux with liburing found, otherwise the configure says so and goes on without it. `LIBE3_HAS_URING` (0 or 1) tells code and consumers which happened |
 
 > **Note on SCTP:** the transport is **off by default**. It is the only dependency that needs a
 > kernel module plus a distro `-dev` package for a single system header, and the deployed E3 links
@@ -346,6 +351,32 @@ private:
 agent.register_sm(std::make_unique<MyKpmServiceModel>());
 ```
 
+### The io_uring link
+
+Set `link_layer = E3LinkLayer::URING` (`--link uring` in the examples, `2` in the C API). It speaks the POSIX
+wire, so it works against a RAN or a dApp on `posix`. It needs a libe3 built with liburing (`liburing-dev`),
+Linux 5.11 or later, and a kernel that lets the process create a ring. Where it does not, `create_connector`
+returns null and the log says which of these is missing; nothing falls back to another link.
+
+Red Hat Enterprise Linux 9 and OpenShift's nodes ship with io_uring switched off for everyone
+(`kernel.io_uring_disabled=2`). The least that has to be opened is one group, for the length of the run, as root
+on the host or in a privileged pod:
+
+```bash
+GID=61234                                   # a group nothing else on the node uses
+sysctl -w kernel.io_uring_group=$GID        # set it first
+sysctl -w kernel.io_uring_disabled=1        # 0 = everyone, 1 = root and that group, 2 = nobody
+
+setpriv --reuid=$UID --regid=$GID --groups=$GID --inh-caps=-all --bounding-set=-all --no-new-privs \
+    ./example_simple_agent --link uring --transport tcp --encoding asn1    # a member of the group needs no capability
+
+sysctl -w kernel.io_uring_disabled=2 kernel.io_uring_group=-1              # close it again: the values you read before
+```
+
+The setting is the host kernel's, not the container's, and it applies to every container on the node. Ring
+options, the checks that it took, a `trap` that closes it when a run fails, pods, and persisting it are in
+[docs/connectors/uring.md](docs/connectors/uring.md#enabling-io_uring-on-a-host-that-disables-it).
+
 ### Notes on Simulation / Local Testing
 
 The library exposes IPC endpoints by default (see `E3Config` defaults) so
@@ -410,7 +441,7 @@ for local development (IPC) or production deployments.
 | `dapp_version` | string | dApp version advertised in `SetupRequest` |
 | `vendor` | string | Vendor name for `SetupRequest` |
 | `e3ap_version` | string | E3AP protocol version string |
-| `link_layer` | E3LinkLayer | ZMQ or POSIX |
+| `link_layer` | E3LinkLayer | ZMQ, POSIX or URING. URING is the POSIX link's wire driven through io_uring: every field below that names the POSIX link applies to it too, and its ring options come from `LIBE3_URING_*` environment variables ([docs/connectors/uring.md](docs/connectors/uring.md)) |
 | `transport_layer` | E3TransportLayer | SCTP, TCP, IPC |
 | `setup_endpoint` | string | Setup connection endpoint (default: ipc:///tmp/dapps/setup). The POSIX link serves everything on this one endpoint, with the IPC path /tmp/dapps/e3 while the field keeps its default; for TCP and SCTP `tcp://host:port` or `sctp://host:port` names the host and port |
 | `subscriber_endpoint` | string | Subscriber endpoint, ZeroMQ only (default: ipc:///tmp/dapps/dapp_socket) |
