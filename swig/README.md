@@ -142,8 +142,11 @@ pip install libe3py
 python -c "import libe3py; print('libe3py OK', libe3py.__version__)"
 ```
 
-Elsewhere, and from a checkout (`pip install .`), install libe3 once (`./build_libe3 --all-encodings --install`,
-see the main README) and pip builds the module from these sources against the installed libe3 (`python/CMakeLists.txt`); it
+The wheel includes the SCTP transport (`link=posix`, `transport=sctp`); it needs the `sctp` kernel module on the machine
+at run time (`modprobe sctp`) and nothing else.
+
+Elsewhere, and from a checkout (`pip install .`), install libe3 once (`./build_libe3 --all-encodings --enable-sctp --install`,
+see the main README; without `--enable-sctp` the module has no SCTP) and pip builds the module from these sources against the installed libe3 (`python/CMakeLists.txt`); it
 needs `swig >= 4.0`, the Python headers and a C++17 compiler (`./build_libe3 -I` installs them), and it
 stops with an error if the installed libe3 is not the same version. For a libe3 outside `/usr` and
 `/usr/local`: `pip install --no-binary libe3py libe3py --config-settings=cmake.define.CMAKE_PREFIX_PATH=<prefix>`.

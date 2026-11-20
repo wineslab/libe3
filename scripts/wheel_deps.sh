@@ -10,6 +10,8 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 yum install -y epel-release
 yum install -y pkgconfig git curl cmake autoconf automake libtool bison flex m4
+# the SCTP header (libe3 calls no libsctp function, so nothing is linked)
+yum install -y lksctp-tools-devel
 
 # libzmq: static, without CURVE, GSSAPI, PGM and NORM, so the wheel does not drag in
 # libsodium, libkrb5 and friends (the EPEL package would).

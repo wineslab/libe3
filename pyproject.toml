@@ -62,6 +62,7 @@ environment = { CMAKE_PREFIX_PATH = "/opt/protobuf", PATH = "/opt/protobuf/bin:$
 "cmake.define.LIBE3_ENABLE_ASN1" = "ON"
 "cmake.define.LIBE3_ENABLE_JSON" = "ON"
 "cmake.define.LIBE3_ENABLE_PROTOBUF" = "ON"
+"cmake.define.LIBE3_ENABLE_SCTP" = "ON"
 "cmake.define.LIBE3_BUILD_TESTS" = "OFF"
 "cmake.define.LIBE3_BUILD_EXAMPLES" = "OFF"
 "install.components" = "libe3py"
