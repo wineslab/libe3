@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_205-semantics-and-constraints.html'
   <div class="headertitle"><div class="title">E2SM-DAPP: semantics and constraints </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md109"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md110"></a></p>
 <p>This clause defines what the numbers mean, the units and clocks, the rules a message shall satisfy, and what a sender and a receiver shall do when the input is wrong or unknown.</p>
 <p>This is section 5 of the specification. The index is <a class="el" href="dir_24c5afd111e6aa944685a569bf5db165.html">README.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md110"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md111"></a>
 1. Numbering: formats and styles</h1>
 <p>Three different numberings exist. They share the digits <span class="tt">1</span> and <span class="tt">2</span> and mean different things.</p>
 <p>Table: Numberings that share the digits 1 and 2</p>
@@ -123,7 +123,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_205-semantics-and-constraints.html'
 <td class="markdownTableBodyNone">control 1  </td><td class="markdownTableBodyNone">dApp control  </td><td class="markdownTableBodyNone">header 1, message 1, outcome 1  </td><td class="markdownTableBodyNone">the control  </td></tr>
 </table>
 <p>Style names are free text. The names in use are in <a href="02-ie-mapping.md#2-which-e2-service-uses-which-format">02-ie-mapping.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md111"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md112"></a>
 2. Identifiers</h1>
 <p>Table: Identifiers and their ranges</p>
 <table class="markdownTable">
@@ -142,7 +142,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_205-semantics-and-constraints.html'
 </table>
 <p><b>A sender should keep the E2SM-DAPP ids inside the E3 ranges.</b> E2SM-DAPP can carry <span class="tt">0</span> and values above <span class="tt">65535</span>. A RAN that relays a control over E3 cannot deliver them, because <span class="tt">dAppIdentifier</span> and <span class="tt">ranFunctionIdentifier</span> are <span class="tt">1..65535</span> on E3. The reference test vectors include such values on purpose (an indication header with <span class="tt">ran-function-id</span> 0 and <span class="tt">dapp-id</span> 4294967295). They test the codec. A RAN does not send them.</p>
 <p>By convention, <span class="tt">0</span> is reserved in two other fields. One implementation treats a <span class="tt">sequence-id</span> of <span class="tt">0</span> and a timestamp of <span class="tt">0</span> as absent (section 4).</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md112"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md113"></a>
 3. Clocks and units</h1>
 <p>Table: Quantities, units and clocks</p>
 <table class="markdownTable">
@@ -159,7 +159,7 @@ $(function(){initNavTree('md_docs_2e2sm-dapp_205-semantics-and-constraints.html'
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">node-nb-id</span>, <span class="tt">node-cu-du-id</span>, ids  </td><td class="markdownTableBodyNone">dimensionless  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone"></td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md113"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md114"></a>
 Whose clock is each timestamp on</h2>
 <p>Table: Timestamps, their source and their clock</p>
 <table class="markdownTable">
@@ -184,7 +184,7 @@ Whose clock is each timestamp on</h2>
 <li><span class="tt">Spectrum-SensingIndication.timestamp</span> is <span class="tt">CLOCK_MONOTONIC</span>, not realtime. It never leaves the host. A receiver shall not compare it with a <span class="tt">Timestamp</span> of E2SM-DAPP.</li>
 <li>All three known implementations hold a timestamp in a signed 64-bit integer. The largest value is <span class="tt">2^63 - 1</span> (in 2262). The reference test vectors cover it.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md114"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md115"></a>
 4. Optional fields: absent is not an error</h1>
 <p><span class="tt">timestamp</span> and <span class="tt">sequence-id</span> are <span class="tt">OPTIONAL</span> in every message that has them. So are <span class="tt">node-cu-du-id</span>, <span class="tt">ranFunction-Instance</span>, <span class="tt">e3-control-outcome</span> and the <span class="tt">dappE3Subscriptions</span> of the definition items. <b>An absent <span class="tt">timestamp</span> or <span class="tt">sequence-id</span> is a normal message.</b> A decoder shall not reject it. A consumer shall treat it as "the producer did not stamp" and not as an error.</p>
 <p>How "absent" is represented in memory differs. It is the one place where implementations can disagree about a value.</p>
@@ -213,7 +213,7 @@ Whose clock is each timestamp on</h2>
 <td class="markdownTableBodyNone">Spectrum <span class="tt">onAirTimestamp</span>, <span class="tt">sfn</span>, <span class="tt">slot</span>  </td><td class="markdownTableBodyNone">the control installed but never reached a scheduler tick (superseded or timed out)  </td><td class="markdownTableBodyNone">the first tick that put it on the air  </td></tr>
 </table>
 <p>In implementation A, the <span class="tt">e3_control_outcome</span> is a pointer and a size. <b><span class="tt">NULL</span> and <span class="tt">0</span> mean absent</b>. An empty octet string (present, length 0) cannot be sent through that representation.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md115"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md116"></a>
 5. What is mandatory</h1>
 <p>The grammar defines what shall be present. The table adds what implementations require on top of it, so a sender knows what breaks at the receiver.</p>
 <p>Table: Rules that implementations enforce in addition to the grammar</p>
@@ -240,9 +240,9 @@ Whose clock is each timestamp on</h2>
 <td class="markdownTableBodyNone">The control's <span class="tt">ran-function-id</span> shall name a service model <b>the RAN can decode</b>  </td><td class="markdownTableBodyNone">an unknown id: the E3 relay still sends the control and the dApp decides  </td></tr>
 </table>
 <p>These fields are not mandatory, although they look so: <span class="tt">node-cu-du-id</span>, <span class="tt">timestamp</span> and <span class="tt">sequence-id</span> on a report, <span class="tt">timestamp</span> on a control, the event trigger section, and the report and control sections of the definition.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md116"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md117"></a>
 6. Validation and error handling</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md117"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md118"></a>
 6.1 On encode</h2>
 <p>A sender shall satisfy these rules. The right column says how the known implementations treat a breach. Implementation A encodes some of them without any check.</p>
 <p>Table: Checks on encode</p>
@@ -278,7 +278,7 @@ Whose clock is each timestamp on</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">unbounded <span class="tt">OCTET STRING</span> above 16383 octets  </td><td class="markdownTableBodyNone">shall not be sent  </td><td class="markdownTableBodyNone">A has a 16 KiB buffer. B hands it to the ASN.1 runtime without a test. C rejects it.  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md118"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md119"></a>
 6.2 On decode</h2>
 <p>A receiver shall not abort on bad input. It shall return an error to its caller and shall leave the output untouched or zeroed.</p>
 <p>Table: Checks on decode</p>
@@ -312,7 +312,7 @@ Whose clock is each timestamp on</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">e3-control-outcome</span>  </td><td class="markdownTableBodyNone">the receiver shall read an empty or absent value as absent  </td><td class="markdownTableBodyNone">A copies it and reads empty as absent. B and C keep a presence flag and the bytes.  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md119"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md120"></a>
 6.3 Error paths in summary</h2>
 <p>Table: How each implementation reports a failure</p>
 <table class="markdownTable">
@@ -328,7 +328,7 @@ Whose clock is each timestamp on</h2>
 <td class="markdownTableBodyNone">C  </td><td class="markdownTableBodyNone"><span class="tt">pack</span> and <span class="tt">unpack</span> return a success code, an encoding failure code or a decoding failure code. A log line says why.  </td><td class="markdownTableBodyNone">check the code  </td></tr>
 </table>
 <p>The failure codes of implementation B have the same values as those of implementation C.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md120"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md121"></a>
 7. Behavior on unknown ids and formats</h1>
 <p>Table: Behavior on unknown ids and formats</p>
 <table class="markdownTable">
@@ -354,9 +354,9 @@ Whose clock is each timestamp on</h2>
 <td class="markdownTableBodyNone">Style 2 subscription when no dApp has ever connected  </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">the RAN accepts it. It sends no indication until the set changes (see <a href="03-procedure-flow.md#what-discovery-does-not-do">03-procedure-flow.md</a>).  </td></tr>
 </table>
 <p>A new RIC or xApp implementation shall be stricter than implementation A. Decoding failures shall return errors. An unknown id shall be logged and ignored.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md121"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md122"></a>
 8. Control semantics</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md122"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md123"></a>
 8.1 What "applied" means, and what the acknowledge says</h2>
 <ul>
 <li>The acknowledge is a <b>RIC Control Acknowledge</b> that carries an <span class="tt">E2SM-DAPP-ControlOutcome</span>. The RAN shall send it when the procedure ends, at B19, and not when it received the request, at B7 (<a href="03-procedure-flow.md#the-e2-acknowledge-is-deferred-to-b19">03-procedure-flow.md</a>).</li>
@@ -378,7 +378,7 @@ Whose clock is each timestamp on</h2>
 <td class="markdownTableBodyNone">the control could not be relayed (no <span class="tt">sequence-id</span>, table full, E3 send failed)  </td><td class="markdownTableBodyNone"><span class="tt">timestamp</span> and <span class="tt">sequence-id</span>, no payload, sent at once  </td></tr>
 </table>
 <p><b>A rejected control never installed. A control that installed but never reached a scheduler tick has no on-air instant. Either way the acknowledge is real.</b> The acknowledge never means failure. The agent of implementation A has no code path that sends a RIC Control Failure for this service model.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md123"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md124"></a>
 8.2 What a consumer shall do</h2>
 <ol type="1">
 <li>A consumer shall treat an absent or undecodable payload as "no values", never as an error. An example is a decision engine that logs a warning that "the control was
@@ -387,14 +387,14 @@ Whose clock is each timestamp on</h2>
 <li>A consumer shall not compute a latency from a payload instant that is absent. A helper shall report the Spectrum <span class="tt">sfn</span> and <span class="tt">slot</span> as "none" unless an on-air timestamp is present.</li>
 <li>A consumer should expect the acknowledge to arrive after a delay of a few milliseconds, and up to the timeout of the RAN (150 ms in the OpenAirInterface implementation). The consumer keeps its own pending-control timeout.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md124"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md125"></a>
 8.3 Ordering and replacement</h2>
 <ul>
 <li>An agent cannot tell apart two controls in flight with the same <span class="tt">sequence-id</span>. Its pending table uses <span class="tt">sequence-id</span> alone as the key. A completion releases the first slot with that key. The other slot stays until a timeout sweep retires it. In implementation A, nothing runs that sweep.</li>
 <li>A later Spectrum install replaces an earlier mask. This retires the earlier control as superseded. The RAN does not queue controls per dApp.</li>
 <li>A re-installed subscription under the same RIC request id replaces the old one.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md125"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md126"></a>
 9. Rules that cross elements</h1>
 <p>Table: Rules between elements</p>
 <table class="markdownTable">

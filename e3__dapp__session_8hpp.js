@@ -9,6 +9,7 @@ var e3__dapp__session_8hpp =
       [ "libe3::py::E3_EVENT_SUBSCRIPTION_RESPONSE", "namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917a126a9ae5d43bb4ed4eb4be7e275918aa", null ],
       [ "libe3::py::E3_EVENT_SETUP_RESPONSE", "namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917a309848e87c263317c238e6d2d52e1261", null ],
       [ "libe3::py::E3_EVENT_MESSAGE_ACK", "namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917ac5d04a75d1529303a79d4d069256aa57", null ],
-      [ "libe3::py::E3_EVENT_DISCONNECT", "namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917a63006cca26c089f40fab3d45e3ff9a79", null ]
+      [ "libe3::py::E3_EVENT_DISCONNECT", "namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917a63006cca26c089f40fab3d45e3ff9a79", null ],
+      [ "libe3::py::E3_EVENT_CONTROL_RESPONSE", "namespacelibe3_1_1py.html#a53a0cad66e191bf7ea9824cfc9029917aa66dbc95396235c138b34167ebab8e77", null ]
     ] ]
 ];

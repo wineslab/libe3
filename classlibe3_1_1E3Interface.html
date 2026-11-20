@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -141,7 +141,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab1dd8aca1400af166e03debf6f8e940e" id="r_ab1dd8aca1400af166e03debf6f8e940e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab1dd8aca1400af166e03debf6f8e940e">set_xapp_control_handler</a> (<a class="el" href="namespacelibe3.html#a15a6f3a49aff0213073cb7873683f41e">XAppControlHandler</a> handler)</td></tr>
 <tr class="memdesc:ab1dd8aca1400af166e03debf6f8e940e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the callback for an <a class="el" href="structlibe3_1_1XAppControlAction.html" title="E3AP xApp Control Action structure.">XAppControlAction</a>.  <br /></td></tr>
 <tr class="memitem:ac17e59984d9bb8aeb583bf7afb7d9b3f" id="r_ac17e59984d9bb8aeb583bf7afb7d9b3f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac17e59984d9bb8aeb583bf7afb7d9b3f">set_message_ack_handler</a> (<a class="el" href="namespacelibe3.html#a9136029904b3422547399ad8854ceea0">MessageAckHandler</a> handler)</td></tr>
-<tr class="memdesc:ac17e59984d9bb8aeb583bf7afb7d9b3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the callback for a <a class="el" href="structlibe3_1_1MessageAck.html" title="E3AP Message Acknowledgment structure.">MessageAck</a>.  <br /></td></tr>
+<tr class="memdesc:ac17e59984d9bb8aeb583bf7afb7d9b3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the callback for a <a class="el" href="structlibe3_1_1MessageAck.html" title="E3AP Message Acknowledgment structure.">MessageAck</a>. DEPRECATED TO BE REMOVED.  <br /></td></tr>
+<tr class="memitem:a90ed13b258578299d42b5f4cde79183a" id="r_a90ed13b258578299d42b5f4cde79183a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a90ed13b258578299d42b5f4cde79183a">set_control_response_handler</a> (<a class="el" href="namespacelibe3.html#a8ed7cb64917a19ae154f8d9e47737f9e">ControlResponseHandler</a> handler)</td></tr>
+<tr class="memdesc:a90ed13b258578299d42b5f4cde79183a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the callback for a <a class="el" href="structlibe3_1_1ControlResponse.html" title="E3AP Control Response structure.">ControlResponse</a> (either role).  <br /></td></tr>
 <tr class="memitem:a671cf78acf7a2ba49bcb3660a5dbe611" id="r_a671cf78acf7a2ba49bcb3660a5dbe611"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a671cf78acf7a2ba49bcb3660a5dbe611">set_disconnect_handler</a> (<a class="el" href="namespacelibe3.html#adae81936974f9ce540c4eb62eb58ce2a">DisconnectHandler</a> handler)</td></tr>
 <tr class="memitem:ae3aded77184e9a6681a0645b1e97e3fb" id="r_ae3aded77184e9a6681a0645b1e97e3fb"><td class="memItemLeft" align="right" valign="top">std::optional&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae3aded77184e9a6681a0645b1e97e3fb">dapp_id</a> () const noexcept</td></tr>
 <tr class="memitem:ad476cf72e7d567bccc5bd842bece7d34" id="r_ad476cf72e7d567bccc5bd842bece7d34"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad476cf72e7d567bccc5bd842bece7d34">active_subscription_ids</a> () const</td></tr>
@@ -150,7 +152,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6fcfc65385c63d4f9d6a2ae6b784732b" id="r_a6fcfc65385c63d4f9d6a2ae6b784732b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6fcfc65385c63d4f9d6a2ae6b784732b">queue_subscription_request</a> (uint32_t ran_function_id, std::vector&lt; uint32_t &gt; telemetry_ids, std::vector&lt; uint32_t &gt; control_ids, std::optional&lt; uint32_t &gt; sub_time=std::nullopt, std::optional&lt; uint32_t &gt; periodicity=std::nullopt, uint32_t *out_request_id=nullptr)</td></tr>
 <tr class="memdesc:a6fcfc65385c63d4f9d6a2ae6b784732b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queue a <a class="el" href="structlibe3_1_1SubscriptionRequest.html" title="E3AP Subscription Request structure.">SubscriptionRequest</a> for the outbound loop to send.  <br /></td></tr>
 <tr class="memitem:a3fdfe171dd195854bfeaf8ebb8f17e9a" id="r_a3fdfe171dd195854bfeaf8ebb8f17e9a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3fdfe171dd195854bfeaf8ebb8f17e9a">queue_subscription_delete</a> (uint32_t ran_function_id)</td></tr>
-<tr class="memitem:a1db861313d63dd2a8efa457e9bd27637" id="r_a1db861313d63dd2a8efa457e9bd27637"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1db861313d63dd2a8efa457e9bd27637">queue_dapp_control_action</a> (uint32_t ran_function_id, uint32_t control_id, std::vector&lt; uint8_t &gt; action_data, uint32_t sequence_id=0, uint32_t *out_message_id=nullptr)</td></tr>
+<tr class="memitem:ada577ce7f1ab741a191e5854100456ac" id="r_ada577ce7f1ab741a191e5854100456ac"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ada577ce7f1ab741a191e5854100456ac">queue_dapp_control_action</a> (uint32_t ran_function_id, uint32_t control_id, std::vector&lt; uint8_t &gt; action_data, uint32_t sequence_id=0, uint32_t *out_message_id=nullptr, bool request_ack=false)</td></tr>
+<tr class="memitem:a3c09104f6edd02c3b51fa59dfa7caab9" id="r_a3c09104f6edd02c3b51fa59dfa7caab9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3c09104f6edd02c3b51fa59dfa7caab9">queue_control_response</a> (uint32_t request_id, uint32_t ran_function_id, uint32_t control_id, const <a class="el" href="structlibe3_1_1ControlResult.html">ControlResult</a> &amp;result)</td></tr>
+<tr class="memitem:a3b730d55894ddd20eb8879de1086a364" id="r_a3b730d55894ddd20eb8879de1086a364"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3b730d55894ddd20eb8879de1086a364">respond_to_control</a> (uint32_t <a class="el" href="#ae3aded77184e9a6681a0645b1e97e3fb">dapp_id</a>, uint32_t request_id, const <a class="el" href="structlibe3_1_1ControlResult.html">ControlResult</a> &amp;result)</td></tr>
 <tr class="memitem:a045f9aefa46d5d0d5ad0a8a1c645d458" id="r_a045f9aefa46d5d0d5ad0a8a1c645d458"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a045f9aefa46d5d0d5ad0a8a1c645d458">queue_dapp_report</a> (uint32_t ran_function_id, std::vector&lt; uint8_t &gt; report_data, uint32_t sequence_id, uint32_t *out_message_id=nullptr)</td></tr>
 <tr class="memitem:a984d9c37598005a57fc37df1b3dc6381" id="r_a984d9c37598005a57fc37df1b3dc6381"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a984d9c37598005a57fc37df1b3dc6381">queue_release_message</a> ()</td></tr>
 <tr class="memitem:a94329838748dfc298bc7032abc3687f0" id="r_a94329838748dfc298bc7032abc3687f0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a94329838748dfc298bc7032abc3687f0">wait_for_setup</a> (std::chrono::milliseconds timeout)</td></tr>
@@ -171,7 +175,7 @@ Public Member Functions</h2></td></tr>
 </ul>
 <p>This class is NOT directly exposed to library users. Users interact with the <a class="el" href="classlibe3_1_1E3Agent.html" title="E3Agent - Main façade for RAN vendor integration.">E3Agent</a> facade which owns an <a class="el" href="classlibe3_1_1E3Interface.html" title="E3Interface - Internal protocol coordination.">E3Interface</a> instance. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00067">67</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00070">70</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a9f3f31d57b5ee24cf0c99bc8a677e957" name="a9f3f31d57b5ee24cf0c99bc8a677e957"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9f3f31d57b5ee24cf0c99bc8a677e957">&#9670;&#160;</a></span>E3Interface() <span class="overload">[1/3]</span></h2>
@@ -204,7 +208,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00201">201</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00202">202</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -225,7 +229,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Destructor - ensures clean shutdown. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00222">222</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00223">223</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -296,7 +300,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>The subscription identifiers the RAN granted and that have not ended </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01861">1861</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l02008">2008</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -324,7 +328,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>The dApp identifier the RAN assigned, or nothing before setup completes </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01855">1855</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l02002">2002</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -347,7 +351,7 @@ Public Member Functions</h2></td></tr>
 <p>Wraps a lock-free counter into the ASN.1 E3-MessageID range, skipping 0. Monotonic (not random) so an id is unique, letting a caller correlate a response by the id it was assigned.</p>
 <dl class="section return"><dt>Returns</dt><dd>The next message id </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00170">170</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00171">171</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -369,7 +373,7 @@ Public Member Functions</h2></td></tr>
 <p>Get available RAN functions. </p>
 <dl class="section return"><dt>Returns</dt><dd>The identifiers of the registered Service Models, sorted </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00518">518</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00519">519</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -391,7 +395,7 @@ Public Member Functions</h2></td></tr>
 <p>Initialize the interface. </p>
 <p>Creates connector, encoder, and initializes internal state. </p><dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00227">227</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00228">228</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -421,7 +425,7 @@ Public Member Functions</h2></td></tr>
 <p>Check if interface is running. </p>
 <dl class="section return"><dt>Returns</dt><dd>True while the state is RUNNING </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00121">121</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00124">124</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -442,7 +446,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Tell the status handler that a dApp connected, subscribed, unsubscribed or left. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00554">554</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00558">558</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -496,8 +500,51 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a1db861313d63dd2a8efa457e9bd27637" name="a1db861313d63dd2a8efa457e9bd27637"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1db861313d63dd2a8efa457e9bd27637">&#9670;&#160;</a></span>queue_dapp_control_action()</h2>
+<a id="a3c09104f6edd02c3b51fa59dfa7caab9" name="a3c09104f6edd02c3b51fa59dfa7caab9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c09104f6edd02c3b51fa59dfa7caab9">&#9670;&#160;</a></span>queue_control_response()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> libe3::E3Interface::queue_control_response </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>request_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>ran_function_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>control_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structlibe3_1_1ControlResult.html">ControlResult</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>result</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Queue a <a class="el" href="structlibe3_1_1ControlResponse.html" title="E3AP Control Response structure.">ControlResponse</a> that answers an xApp control (dApp role). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">request_id</td><td>message id of the xApp control this answers </td></tr>
+    <tr><td class="paramname">ran_function_id</td><td>RAN function of the control </td></tr>
+    <tr><td class="paramname">control_id</td><td>control the answer is about </td></tr>
+    <tr><td class="paramname">result</td><td>code, reason and outcome to send </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>SUCCESS once queued; STATE_ERROR on a RAN-role agent; NOT_INITIALIZED before setup has assigned a dApp id; INVALID_PARAM for an outcome over MAX_CONTROL_OUTCOME_SIZE; otherwise the queueing error </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l02121">2121</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ada577ce7f1ab741a191e5854100456ac" name="ada577ce7f1ab741a191e5854100456ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada577ce7f1ab741a191e5854100456ac">&#9670;&#160;</a></span>queue_dapp_control_action()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -525,7 +572,12 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint32_t *</td>          <td class="paramname"><span class="paramname"><em>out_message_id</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>&#160;)</td>
+          <td class="paramtype">uint32_t *</td>          <td class="paramname"><span class="paramname"><em>out_message_id</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>request_ack</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -535,13 +587,14 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">control_id</td><td>control identifier granted by the RAN </td></tr>
     <tr><td class="paramname">action_data</td><td>opaque payload of the Service Model </td></tr>
     <tr><td class="paramname">sequence_id</td><td>correlation id of the xApp procedure this control re-issues; 0 for none </td></tr>
-    <tr><td class="paramname">out_message_id</td><td>when non-null, receives the assigned E3-MessageID on success, so the caller can correlate a later ack/response back to this send </td></tr>
+    <tr><td class="paramname">out_message_id</td><td>when non-null, receives the assigned E3-MessageID on success, so the caller can correlate a later response back to this send </td></tr>
+    <tr><td class="paramname">request_ack</td><td>true to ask the RAN for a <a class="el" href="structlibe3_1_1ControlResponse.html" title="E3AP Control Response structure.">ControlResponse</a> </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SUCCESS once queued; otherwise the queueing error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01939">1939</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l02086">2086</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -584,7 +637,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SUCCESS once queued; INVALID_PARAM for a sequence id of 0; otherwise the queueing error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01972">1972</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l02149">2149</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -612,7 +665,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SUCCESS once queued; the queueing error otherwise </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00489">489</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00490">490</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -632,7 +685,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Queue a <a class="el" href="structlibe3_1_1ReleaseMessage.html" title="E3AP Release Message structure.">ReleaseMessage</a> that ends this dApp's session. </p><dl class="section return"><dt>Returns</dt><dd>SUCCESS once queued; otherwise the queueing error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l02005">2005</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l02182">2182</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -658,7 +711,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SUCCESS once queued; STATE_ERROR on a RAN-role agent; NOT_INITIALIZED before setup has assigned a dApp id; SUBSCRIPTION_NOT_FOUND when the dApp holds none for it; otherwise the queueing error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01915">1915</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l02062">2062</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -715,7 +768,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SUCCESS once queued; STATE_ERROR on a RAN-role agent; NOT_INITIALIZED before setup has assigned a dApp id; otherwise the queueing error. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01877">1877</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l02024">2024</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -743,7 +796,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SUCCESS, or the registry's error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00522">522</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00523">523</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -763,7 +816,44 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>The RAN functions the RAN advertised in its setup response </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01871">1871</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l02018">2018</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a3b730d55894ddd20eb8879de1086a364" name="a3b730d55894ddd20eb8879de1086a364"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b730d55894ddd20eb8879de1086a364">&#9670;&#160;</a></span>respond_to_control()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> libe3::E3Interface::respond_to_control </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>dapp_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>request_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structlibe3_1_1ControlResult.html">ControlResult</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>result</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Answer a dApp control the RAN holds an answer for (RAN role, called by Service Models). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dapp_id</td><td>dApp whose control is answered </td></tr>
+    <tr><td class="paramname">request_id</td><td>message id of the dApp control </td></tr>
+    <tr><td class="paramname">result</td><td>code, reason and outcome to send </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>SUCCESS once queued; NOT_FOUND when no answer is owed: the dApp did not ask for one, or the control was answered already; INVALID_PARAM for an outcome over MAX_CONTROL_OUTCOME_SIZE </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01368">1368</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -793,7 +883,7 @@ Public Member Functions</h2></td></tr>
 <p>Get the response queue for outbound messages. </p>
 <dl class="section return"><dt>Returns</dt><dd>The queue the outbound loop drains </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00137">137</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00140">140</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -822,7 +912,42 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The same id when it is not 0, a fresh one otherwise </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00192">192</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00193">193</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a90ed13b258578299d42b5f4cde79183a" name="a90ed13b258578299d42b5f4cde79183a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90ed13b258578299d42b5f4cde79183a">&#9670;&#160;</a></span>set_control_response_handler()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void libe3::E3Interface::set_control_response_handler </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacelibe3.html#a8ed7cb64917a19ae154f8d9e47737f9e">ControlResponseHandler</a></td>          <td class="paramname"><span class="paramname"><em>handler</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set the callback for a <a class="el" href="structlibe3_1_1ControlResponse.html" title="E3AP Control Response structure.">ControlResponse</a> (either role). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">handler</td><td>Callback to call </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00200">200</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -857,7 +982,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00166">166</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00169">169</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -892,7 +1017,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00171">171</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00174">174</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -925,7 +1050,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00198">198</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00205">205</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -960,7 +1085,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00185">185</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00188">188</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -987,7 +1112,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Set the callback for a <a class="el" href="structlibe3_1_1MessageAck.html" title="E3AP Message Acknowledgment structure.">MessageAck</a>. </p>
+<p>Set the callback for a <a class="el" href="structlibe3_1_1MessageAck.html" title="E3AP Message Acknowledgment structure.">MessageAck</a>. DEPRECATED TO BE REMOVED. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">handler</td><td>Callback to call </td></tr>
@@ -995,7 +1120,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00193">193</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00196">196</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1030,7 +1155,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00177">177</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00180">180</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1065,7 +1190,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00181">181</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00184">184</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1100,7 +1225,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00189">189</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00192">192</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1122,7 +1247,7 @@ Public Member Functions</h2></td></tr>
 <p>Start the interface processing loops. </p>
 <p>Spawns the setup, inbound, and outbound threads, plus the report worker on the RAN role. </p><dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS on success </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00305">305</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00306">306</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -1152,7 +1277,7 @@ Public Member Functions</h2></td></tr>
 <p>Get current state. </p>
 <dl class="section return"><dt>Returns</dt><dd>The lifecycle state of the interface </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00115">115</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00118">118</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1174,7 +1299,7 @@ Public Member Functions</h2></td></tr>
 <p>Stop the interface. </p>
 <p>Signals all threads to stop and waits for them to finish. It also ends the dApp's reconnecting, so the dApp stays down. Not to be called from the disconnect handler, which runs on a thread <a class="el" href="#ac92e4083c118369e4dc35cfed37efa64" title="Stop the interface.">stop()</a> joins. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00394">394</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l00395">395</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -1194,7 +1319,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>The RAN functions this dApp holds a subscription to </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l01866">1866</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l02013">2013</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>
@@ -1224,7 +1349,7 @@ Public Member Functions</h2></td></tr>
 <p>Get the subscription manager. </p>
 <dl class="section return"><dt>Returns</dt><dd>The manager that holds the dApps and their subscriptions </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00129">129</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8hpp_source.html#l00132">132</a> of file <a class="el" href="e3__interface_8hpp_source.html">e3_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1250,7 +1375,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SUCCESS when setup completed; TIMEOUT when it did not complete in time; CONNECTION_FAILED when it failed; INVALID_PARAM on a RAN-role interface </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l02021">2021</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__interface_8cpp_source.html#l02198">2198</a> of file <a class="el" href="e3__interface_8cpp_source.html">e3_interface.cpp</a>.</p>
 
 </div>
 </div>

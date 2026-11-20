@@ -1,6 +1,7 @@
 var structe3__service__model__handle__s =
 [
     [ "e3_service_model_handle_s", "structe3__service__model__handle__s.html#af9de8fb92161ea5635a52fd2782fa273", null ],
+    [ "answer_control", "structe3__service__model__handle__s.html#af1df8c3190a84b9519903b3688eccca1", null ],
     [ "control_ids", "structe3__service__model__handle__s.html#aa700bce11840cd6628437da0cd8d835d", null ],
     [ "destroy", "structe3__service__model__handle__s.html#a198c005824e4936ccc878eb7b22c308b", null ],
     [ "emit_pdu", "structe3__service__model__handle__s.html#ae2f834f8b32ad8732abaa4718aced2f1", null ],

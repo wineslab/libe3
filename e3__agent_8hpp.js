@@ -1,6 +1,7 @@
 var e3__agent_8hpp =
 [
     [ "libe3::E3Agent", "classlibe3_1_1E3Agent.html", "classlibe3_1_1E3Agent" ],
+    [ "libe3::ControlResponseHandler", "namespacelibe3.html#a8ed7cb64917a19ae154f8d9e47737f9e", null ],
     [ "libe3::DAppReportHandler", "namespacelibe3.html#a55f022248ffc81789cb641121fea1e45", null ],
     [ "libe3::DAppStatusChangedHandler", "namespacelibe3.html#a3b9104521ca1196dc4cf2d64fd99cf83", null ],
     [ "libe3::DisconnectHandler", "namespacelibe3.html#adae81936974f9ce540c4eb62eb58ce2a", null ],

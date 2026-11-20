@@ -17,8 +17,9 @@ var searchData=
   ['remove_5fsubscription_14',['remove_subscription',['../classlibe3_1_1SubscriptionManager.html#a158ea9fd46a1e1f6d57f04e1b9e56635',1,'libe3::SubscriptionManager']]],
   ['remove_5fsubscription_5fby_5fid_15',['remove_subscription_by_id',['../classlibe3_1_1DAppSubscriptionState.html#aa4737e22c5fb53ba2dc58dab54b798bc',1,'libe3::DAppSubscriptionState::remove_subscription_by_id()'],['../classlibe3_1_1SubscriptionManager.html#adcb208cbd820542d08064c15e257998c',1,'libe3::SubscriptionManager::remove_subscription_by_id()']]],
   ['remove_5fsubscription_5fby_5frf_16',['remove_subscription_by_rf',['../classlibe3_1_1DAppSubscriptionState.html#ab07738ac6a61949470222328046eef0d',1,'libe3::DAppSubscriptionState']]],
-  ['response_5fcode_5fto_5fstring_17',['response_code_to_string',['../namespacelibe3.html#a91f7245a15a8f381b892d146355c0429',1,'libe3']]],
-  ['response_5fqueue_18',['response_queue',['../classlibe3_1_1E3Interface.html#a2fbf2c3d0241b8d50fb93a4318f4fa17',1,'libe3::E3Interface']]],
-  ['role_19',['role',['../classlibe3_1_1E3Connector.html#ae18788c3f11f5bbbe1fbfbb7ba49a7af',1,'libe3::E3Connector']]],
-  ['role_5fto_5fstring_20',['role_to_string',['../namespacelibe3.html#a7f2cb4f48ecbef9a7aeb214aaf885202',1,'libe3']]]
+  ['respond_5fto_5fcontrol_17',['respond_to_control',['../classlibe3_1_1E3Interface.html#a3b730d55894ddd20eb8879de1086a364',1,'libe3::E3Interface::respond_to_control()'],['../classlibe3_1_1ServiceModel.html#a0b963a5b6344fd9c65815ead7fe85128',1,'libe3::ServiceModel::respond_to_control()']]],
+  ['response_5fcode_5fto_5fstring_18',['response_code_to_string',['../namespacelibe3.html#a91f7245a15a8f381b892d146355c0429',1,'libe3']]],
+  ['response_5fqueue_19',['response_queue',['../classlibe3_1_1E3Interface.html#a2fbf2c3d0241b8d50fb93a4318f4fa17',1,'libe3::E3Interface']]],
+  ['role_20',['role',['../classlibe3_1_1E3Connector.html#ae18788c3f11f5bbbe1fbfbb7ba49a7af',1,'libe3::E3Connector']]],
+  ['role_5fto_5fstring_21',['role_to_string',['../namespacelibe3.html#a7f2cb4f48ecbef9a7aeb214aaf885202',1,'libe3']]]
 ];

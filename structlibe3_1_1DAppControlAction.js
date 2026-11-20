@@ -4,5 +4,6 @@ var structlibe3_1_1DAppControlAction =
     [ "control_identifier", "structlibe3_1_1DAppControlAction.html#afbbf5fc44f0b37b33bb397394bb396ac", null ],
     [ "dapp_identifier", "structlibe3_1_1DAppControlAction.html#ad174c1722093dde8319b1425644e3840", null ],
     [ "ran_function_identifier", "structlibe3_1_1DAppControlAction.html#a235c14dc7d3e0cd4764f9bc0d8513966", null ],
+    [ "request_ack", "structlibe3_1_1DAppControlAction.html#aa42d632bbe3334506bcd5284261f3c52", null ],
     [ "sequence_id", "structlibe3_1_1DAppControlAction.html#a5297338ef071d07200b9bc667fc26641", null ]
 ];

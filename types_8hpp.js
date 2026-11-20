@@ -11,6 +11,8 @@ var types_8hpp =
     [ "libe3::IndicationMessage", "structlibe3_1_1IndicationMessage.html", "structlibe3_1_1IndicationMessage" ],
     [ "libe3::DAppControlAction", "structlibe3_1_1DAppControlAction.html", "structlibe3_1_1DAppControlAction" ],
     [ "libe3::MessageAck", "structlibe3_1_1MessageAck.html", "structlibe3_1_1MessageAck" ],
+    [ "libe3::ControlResponse", "structlibe3_1_1ControlResponse.html", "structlibe3_1_1ControlResponse" ],
+    [ "libe3::ControlResult", "structlibe3_1_1ControlResult.html", "structlibe3_1_1ControlResult" ],
     [ "libe3::DAppReport", "structlibe3_1_1DAppReport.html", "structlibe3_1_1DAppReport" ],
     [ "libe3::XAppControlAction", "structlibe3_1_1XAppControlAction.html", "structlibe3_1_1XAppControlAction" ],
     [ "libe3::ReleaseMessage", "structlibe3_1_1ReleaseMessage.html", "structlibe3_1_1ReleaseMessage" ],
@@ -20,7 +22,7 @@ var types_8hpp =
     [ "libe3::SubscriptionEntry", "structlibe3_1_1SubscriptionEntry.html", "structlibe3_1_1SubscriptionEntry" ],
     [ "X", "types_8hpp.html#a526b755eddfcd2e01b18ac2e06b175f6", null ],
     [ "X", "types_8hpp.html#a874ed6a0d72190fc26699b18a6e0432c", null ],
-    [ "libe3::PduChoice", "namespacelibe3.html#a11f15651dcc49a68494f8215477e18fc", null ],
+    [ "libe3::PduChoice", "namespacelibe3.html#a26cb84f67a97fed4556479d2f5174661", null ],
     [ "libe3::Timestamp", "namespacelibe3.html#a6dc96978d420b62130fbd1e5c17497aa", null ],
     [ "libe3::ActionType", "namespacelibe3.html#ac1c5533fc81586565ca7822bf00eee90", [
       [ "libe3::ActionType::INSERT", "namespacelibe3.html#ac1c5533fc81586565ca7822bf00eee90a61ee777e7f71dc466c3b2c685d8d313b", null ],
@@ -90,7 +92,8 @@ var types_8hpp =
       [ "libe3::PduType::DAPP_REPORT", "namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185ac83232e8433bacdad22aa0a893a011d4", null ],
       [ "libe3::PduType::XAPP_CONTROL_ACTION", "namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185a5f134d2b30d5786bd2d7f021ee0ef3e0", null ],
       [ "libe3::PduType::RELEASE_MESSAGE", "namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185a1adeabff195cdcfd5509625aa7aac7d0", null ],
-      [ "libe3::PduType::MESSAGE_ACK", "namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185ae63ef0287e5a1f4b52c19f8f12b247ca", null ]
+      [ "libe3::PduType::MESSAGE_ACK", "namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185ae63ef0287e5a1f4b52c19f8f12b247ca", null ],
+      [ "libe3::PduType::CONTROL_RESPONSE", "namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185ae5ace417608d1f7ed09f8abcd1198eef", null ]
     ] ],
     [ "libe3::ResponseCode", "namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5", [
       [ "libe3::ResponseCode::POSITIVE", "namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5aab6c31432785221bae58327ef5f6ea58", null ],
@@ -112,9 +115,11 @@ var types_8hpp =
     [ "libe3::DEFAULT_BUFFER_SIZE", "namespacelibe3.html#a809598c8d63a2bdce0d447411324a2b5", null ],
     [ "libe3::LIBE3_PROTOCOL_VERSION", "namespacelibe3.html#ac69f2e5f639ef2bdb04445cf7ac2b408", null ],
     [ "libe3::MAX_ACTION_DATA_SIZE", "namespacelibe3.html#aca224e72d9af7089c4d9c1a150a705db", null ],
+    [ "libe3::MAX_CONTROL_OUTCOME_SIZE", "namespacelibe3.html#acd78dc25c1bc7733b80f7ad5bc8e8547", null ],
     [ "libe3::MAX_DAPP_REPORT_DATA_SIZE", "namespacelibe3.html#a1fdb0c4f4c6f3060e3b0448610c7a289", null ],
     [ "libe3::MAX_DETAIL_SIZE", "namespacelibe3.html#ab9fd4d0a2f9f4256043102de4b108d0b", null ],
     [ "libe3::MAX_IDENTIFIER_LIST_SIZE", "namespacelibe3.html#af4b3cf6c64a692090cd6b7d26f62b6bf", null ],
+    [ "libe3::MAX_PENDING_CONTROLS", "namespacelibe3.html#a39f9b1736e99fe6eb0005056a8a7deac", null ],
     [ "libe3::MAX_PROTOCOL_DATA_SIZE", "namespacelibe3.html#a581a3bc9ba0fad9e97f52c00fdce32b9", null ],
     [ "libe3::MAX_RAN_FUNCTIONS", "namespacelibe3.html#aa385e749637e30801ce6405782b0c699", null ],
     [ "libe3::MAX_XAPP_CTRL_DATA_SIZE", "namespacelibe3.html#a058435e96914a52e2830d4c403b1d541", null ]

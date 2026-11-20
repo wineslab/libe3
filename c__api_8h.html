@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -118,6 +118,7 @@ Typedefs</h2></td></tr>
 <tr class="memdesc:a8fa570e51aa24f92a16d8f3991897cf8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interval a C Service Model keeps between two indications of a subscription.  <br /></td></tr>
 <tr class="memitem:a33b166f895d0bd44df009228d8ecbec2" id="r_a33b166f895d0bd44df009228d8ecbec2"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a>(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a33b166f895d0bd44df009228d8ecbec2">e3_sm_process_control_cb</a>) (<a class="el" href="#ab93aed3c068f547baa9c94304d9ec42e">e3_service_model_handle_t</a> *sm_handle, void *sm_context, uint32_t request_message_id, uint32_t dapp_id, uint32_t ran_function_id, uint32_t control_id, const uint8_t *data, size_t data_len, uint32_t sequence_id)</td></tr>
 <tr class="memitem:a1639de21f25e2810250ab1ee23ca9623" id="r_a1639de21f25e2810250ab1ee23ca9623"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1639de21f25e2810250ab1ee23ca9623">e3_dapp_report_cb</a>) (uint32_t dapp_id, uint32_t ran_function_id, const uint8_t *report_data, size_t report_data_len, uint32_t sequence_id)</td></tr>
+<tr class="memitem:adaa851bc25563aabd722d5de81bddaad" id="r_adaa851bc25563aabd722d5de81bddaad"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adaa851bc25563aabd722d5de81bddaad">e3_control_response_cb</a>) (uint32_t dapp_id, uint32_t request_id, uint32_t ran_function_id, uint32_t control_id, int response_code, int cause, const char *detail, const uint8_t *outcome, size_t outcome_len)</td></tr>
 <tr class="memitem:a00b319809607dc028d264694d29e3885" id="r_a00b319809607dc028d264694d29e3885"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a00b319809607dc028d264694d29e3885">e3_dapp_status_changed_cb</a>) (void)</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
@@ -134,6 +135,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:ada87ed89ce33a65047b678d470d9329d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emit an indication message from a ServiceModel to the outbound queue.  <br /></td></tr>
 <tr class="memitem:a6c434273a0d8f243cd004c7437a3150e" id="r_a6c434273a0d8f243cd004c7437a3150e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6c434273a0d8f243cd004c7437a3150e">e3_service_model_emit_message_ack</a> (<a class="el" href="#ab93aed3c068f547baa9c94304d9ec42e">e3_service_model_handle_t</a> *sm, uint32_t request_id, int response_code)</td></tr>
 <tr class="memdesc:a6c434273a0d8f243cd004c7437a3150e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emit a message acknowledgment from a ServiceModel.  <br /></td></tr>
+<tr class="memitem:a5fd18791ced5c74750e2228afc2d3892" id="r_a5fd18791ced5c74750e2228afc2d3892"><td class="memItemLeft" align="right" valign="top"><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5fd18791ced5c74750e2228afc2d3892">e3_service_model_emit_control_response</a> (<a class="el" href="#ab93aed3c068f547baa9c94304d9ec42e">e3_service_model_handle_t</a> *sm, uint32_t dapp_id, uint32_t request_id, int response_code, int cause, const char *detail, const uint8_t *outcome, size_t outcome_len)</td></tr>
+<tr class="memdesc:a5fd18791ced5c74750e2228afc2d3892"><td class="mdescLeft">&#160;</td><td class="mdescRight">Answer a dApp control from a ServiceModel.  <br /></td></tr>
 <tr class="memitem:a5126404feafe0a3049227d94ddb88303" id="r_a5126404feafe0a3049227d94ddb88303"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5126404feafe0a3049227d94ddb88303">e3_agent_create_default</a> ()</td></tr>
 <tr class="memdesc:a5126404feafe0a3049227d94ddb88303"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create/destroy an <span class="tt">E3Agent</span> handle.  <br /></td></tr>
 <tr class="memitem:a8e67f66e5fa7dd18e1df42840fc750f7" id="r_a8e67f66e5fa7dd18e1df42840fc750f7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8e67f66e5fa7dd18e1df42840fc750f7">e3_agent_create_with_config</a> (const <a class="el" href="structe3__config__t.html">e3_config_t</a> *config)</td></tr>
@@ -152,6 +155,10 @@ Functions</h2></td></tr>
 <tr class="memdesc:a5668a84d47bff74634b5baba30874e89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query whether the agent is currently running.  <br /></td></tr>
 <tr class="memitem:a3986384fd2df720f2ebccaba5567fc59" id="r_a3986384fd2df720f2ebccaba5567fc59"><td class="memItemLeft" align="right" valign="top"><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3986384fd2df720f2ebccaba5567fc59">e3_agent_set_dapp_report_handler</a> (<a class="el" href="#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *agent, <a class="el" href="#a1639de21f25e2810250ab1ee23ca9623">e3_dapp_report_cb</a> handler)</td></tr>
 <tr class="memdesc:a3986384fd2df720f2ebccaba5567fc59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set callback for incoming dApp reports (dApp -&gt; RAN).  <br /></td></tr>
+<tr class="memitem:a5239a5675c6fde681d7618f6d42e0b68" id="r_a5239a5675c6fde681d7618f6d42e0b68"><td class="memItemLeft" align="right" valign="top"><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5239a5675c6fde681d7618f6d42e0b68">e3_agent_send_message_ack</a> (<a class="el" href="#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *agent, uint32_t request_id, int response_code)</td></tr>
+<tr class="memdesc:a5239a5675c6fde681d7618f6d42e0b68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a message acknowledgment (e.g. ack a control/request from dApp).  <br /></td></tr>
+<tr class="memitem:a2c92898a165ac84cca94fed3d46a7ac5" id="r_a2c92898a165ac84cca94fed3d46a7ac5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c92898a165ac84cca94fed3d46a7ac5">e3_agent_set_control_response_handler</a> (<a class="el" href="#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *agent, <a class="el" href="#adaa851bc25563aabd722d5de81bddaad">e3_control_response_cb</a> handler)</td></tr>
+<tr class="memdesc:a2c92898a165ac84cca94fed3d46a7ac5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set callback for incoming control responses (dApp -&gt; RAN): a dApp's answer to an xApp control that asked for one.  <br /></td></tr>
 <tr class="memitem:ae8f8f036cb8025b4a299a419e04310f9" id="r_ae8f8f036cb8025b4a299a419e04310f9"><td class="memItemLeft" align="right" valign="top">uint32_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae8f8f036cb8025b4a299a419e04310f9">e3_agent_get_available_ran_functions</a> (<a class="el" href="#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *agent, size_t *out_len)</td></tr>
 <tr class="memdesc:ae8f8f036cb8025b4a299a419e04310f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a newly-allocated array of available RAN function IDs.  <br /></td></tr>
 <tr class="memitem:a5a95d1d7a64d1c710dc1ead6c87d1980" id="r_a5a95d1d7a64d1c710dc1ead6c87d1980"><td class="memItemLeft" align="right" valign="top">uint32_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5a95d1d7a64d1c710dc1ead6c87d1980">e3_agent_get_registered_dapps</a> (<a class="el" href="#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *agent, size_t *out_len)</td></tr>
@@ -172,10 +179,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:a023e8229e71eb379000c3bca1b3337fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free an array previously returned by the e3_agent_get_* helpers.  <br /></td></tr>
 <tr class="memitem:a9ec8f68d8c97d5c64e275c354c4820c0" id="r_a9ec8f68d8c97d5c64e275c354c4820c0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9ec8f68d8c97d5c64e275c354c4820c0">e3_agent_send_indication</a> (<a class="el" href="#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *agent, uint32_t dapp_id, uint32_t ran_function_id, const uint8_t *data, size_t data_len)</td></tr>
 <tr class="memdesc:a9ec8f68d8c97d5c64e275c354c4820c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send an indication message to a specific dApp.  <br /></td></tr>
-<tr class="memitem:ae9efec754e7a7f3a6ed55f46419e4998" id="r_ae9efec754e7a7f3a6ed55f46419e4998"><td class="memItemLeft" align="right" valign="top"><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae9efec754e7a7f3a6ed55f46419e4998">e3_agent_send_xapp_control</a> (<a class="el" href="#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *agent, uint32_t dapp_id, uint32_t ran_function_id, const uint8_t *control_data, size_t control_data_len, uint32_t sequence_id)</td></tr>
-<tr class="memdesc:ae9efec754e7a7f3a6ed55f46419e4998"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send an xApp control action to a specific dApp (e.g. from E2/SM).  <br /></td></tr>
-<tr class="memitem:a5239a5675c6fde681d7618f6d42e0b68" id="r_a5239a5675c6fde681d7618f6d42e0b68"><td class="memItemLeft" align="right" valign="top"><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5239a5675c6fde681d7618f6d42e0b68">e3_agent_send_message_ack</a> (<a class="el" href="#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *agent, uint32_t request_id, int response_code)</td></tr>
-<tr class="memdesc:a5239a5675c6fde681d7618f6d42e0b68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a message acknowledgment (e.g. ack a control/request from dApp).  <br /></td></tr>
+<tr class="memitem:a6c31a995ce684f6f24447154d8cb8e0b" id="r_a6c31a995ce684f6f24447154d8cb8e0b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6c31a995ce684f6f24447154d8cb8e0b">e3_agent_send_xapp_control</a> (<a class="el" href="#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *agent, uint32_t dapp_id, uint32_t ran_function_id, const uint8_t *control_data, size_t control_data_len, uint32_t sequence_id, uint32_t *out_message_id, int request_ack)</td></tr>
+<tr class="memdesc:a6c31a995ce684f6f24447154d8cb8e0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send an xApp control action to a specific dApp (e.g. from E2/SM).  <br /></td></tr>
 <tr class="memitem:adaf92e0d137467869ca91195ea57900a" id="r_adaf92e0d137467869ca91195ea57900a"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adaf92e0d137467869ca91195ea57900a">e3_agent_dapp_count</a> (<a class="el" href="#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *agent)</td></tr>
 <tr class="memdesc:adaf92e0d137467869ca91195ea57900a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of registered dApps known to the agent.  <br /></td></tr>
 <tr class="memitem:a38f1207b8ac908baeb808e16035847cc" id="r_a38f1207b8ac908baeb808e16035847cc"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a38f1207b8ac908baeb808e16035847cc">e3_agent_subscription_count</a> (<a class="el" href="#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *agent)</td></tr>
@@ -197,6 +202,22 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00021">21</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+
+</div>
+</div>
+<a id="adaa851bc25563aabd722d5de81bddaad" name="adaa851bc25563aabd722d5de81bddaad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adaa851bc25563aabd722d5de81bddaad">&#9670;&#160;</a></span>e3_control_response_cb</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(* e3_control_response_cb) (uint32_t dapp_id, uint32_t request_id, uint32_t ran_function_id, uint32_t control_id, int response_code, int cause, const char *detail, const uint8_t *outcome, size_t outcome_len)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00076">76</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -229,7 +250,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Callback when dApp status changes (connect, disconnect, subscribe, unsubscribe). </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00075">75</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8h_source.html#l00089">89</a> of file <a class="el" href="c__api_8h_source.html">c_api.h</a>.</p>
 
 </div>
 </div>
@@ -394,7 +415,7 @@ Functions</h2></td></tr>
 <p>The returned handle must be destroyed with <span class="tt"><a class="el" href="#a315c94d725df914a14bf9ab9906db8e9" title="Destroy an E3Agent handle.">e3_agent_destroy</a></span> when no longer needed.</p>
 <dl class="section return"><dt>Returns</dt><dd>e3_agent_handle_t* on success, NULL on allocation error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00213">213</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00246">246</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -423,7 +444,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>e3_agent_handle_t* on success, NULL on allocation error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00217">217</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00250">250</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -444,7 +465,7 @@ Functions</h2></td></tr>
 
 <p>Number of registered dApps known to the agent. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00448">448</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00517">517</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -466,7 +487,7 @@ Functions</h2></td></tr>
 <p>Destroy an <span class="tt">E3Agent</span> handle. </p>
 <p>This will free the underlying resources. If the agent is currently running, callers should stop it with <span class="tt"><a class="el" href="#a355d02b977bd45e45f3a771dc7c7c689" title="Stop the agent and release runtime resources.">e3_agent_stop</a></span> first. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00252">252</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00285">285</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -487,7 +508,7 @@ Functions</h2></td></tr>
 
 <p>Free an array previously returned by the e3_agent_get_* helpers. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00406">406</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00439">439</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -513,7 +534,7 @@ Functions</h2></td></tr>
 <p>Return a newly-allocated array of RAN function IDs that currently have at least one subscriber (RAN role). </p>
 <p>See <span class="tt"><a class="el" href="#ae8f8f036cb8025b4a299a419e04310f9" title="Return a newly-allocated array of available RAN function IDs.">e3_agent_get_available_ran_functions</a></span> for ownership semantics. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00369">369</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00402">402</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -539,7 +560,7 @@ Functions</h2></td></tr>
 <p>Return a newly-allocated array of available RAN function IDs. </p>
 <p>The returned array is allocated with <span class="tt">malloc</span> and the caller must free it with <span class="tt"><a class="el" href="#a023e8229e71eb379000c3bca1b3337fd" title="Free an array previously returned by the e3_agent_get_* helpers.">e3_agent_free_uint32_array</a></span>. The number of elements is written to <span class="tt">out_len</span> if non-NULL. Returns NULL and sets <span class="tt">out_len</span> to 0 if there are no entries or the handle is invalid. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00345">345</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00378">378</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -577,7 +598,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00357">357</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00390">390</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -615,7 +636,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00363">363</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00396">396</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -641,7 +662,7 @@ Functions</h2></td></tr>
 <p>Return a newly-allocated array of registered dApp IDs. </p>
 <p>See <span class="tt"><a class="el" href="#ae8f8f036cb8025b4a299a419e04310f9" title="Return a newly-allocated array of available RAN function IDs.">e3_agent_get_available_ran_functions</a></span> for ownership semantics. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00351">351</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00384">384</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -663,7 +684,7 @@ Functions</h2></td></tr>
 <p>Get the agent state as an integer matching <span class="tt"><a class="el" href="namespacelibe3.html#a3a6c3d51b9810b103e12fddf0839e1fe" title="Agent state machine states.">libe3::AgentState</a></span>. </p>
 <p>Useful for callers in C to inspect agent status. Returns an <span class="tt">int</span> with the enum value; <span class="tt">AgentState::ERROR</span> is returned on invalid handle. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00298">298</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00331">331</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -709,7 +730,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>newly-allocated array, or NULL if empty/error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00395">395</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00428">428</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -740,7 +761,7 @@ Functions</h2></td></tr>
 <p>Get the reporting periodicity a dApp requested for a RAN function. </p>
 <dl class="section return"><dt>Returns</dt><dd>periodicity in microseconds, 0 if not set or subscription not found </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00375">375</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00408">408</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -786,7 +807,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>newly-allocated array, or NULL if empty/error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00384">384</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00417">417</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -808,7 +829,7 @@ Functions</h2></td></tr>
 <p>Initialize the agent. </p>
 <p>Prepares internal resources; must be called before <a class="el" href="#a799cc0e6e8653202eefaf7d6055d9ec7">e3_agent_start</a>. Returns a <a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a> (see <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">libe3::ErrorCode</a>; 0 == SUCCESS). </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00257">257</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00290">290</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -830,7 +851,7 @@ Functions</h2></td></tr>
 <p>Query whether the agent is currently running. </p>
 <dl class="section return"><dt>Returns</dt><dd>1 if running, 0 otherwise (or on invalid handle) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00303">303</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00336">336</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -858,7 +879,7 @@ Functions</h2></td></tr>
 <p>Fails with <span class="tt"><a class="el" href="error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8ae7e2cb456b9f2ab568b681d883d793ba">E3_INVALID_PARAM</a></span> if the descriptor the handle was built from carried no <span class="tt">ran_function_data</span>, or more than 32768 bytes of it, and with <span class="tt"><a class="el" href="error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8a7eb44a40220c3645fd20677f4c377dc2">E3_SM_ALREADY_REGISTERED</a></span> if another SM already holds the same RAN function id. It also fails with <span class="tt"><a class="el" href="error__codes_8h.html#af5d631a058ca5b6d6166e0651e5bf9f8ae7e2cb456b9f2ab568b681d883d793ba">E3_INVALID_PARAM</a></span> if the SM lists more than 256 telemetry or control ids, or 64 RAN functions are already registered.</p>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9" title="C error type alias.">e3_error_t</a> ErrorCode value (0 == success) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00272">272</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00305">305</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -909,7 +930,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a> (see <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">libe3::ErrorCode</a>; 0 == SUCCESS) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00410">410</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00443">443</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -938,6 +959,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Send a message acknowledgment (e.g. ack a control/request from dApp). </p>
+<p>DEPRECATED TO BE REMOVED. A <a class="el" href="namespacelibe3.html">libe3</a> RAN does not read it, and a dApp does not need it.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">agent</td><td>Agent handle </td></tr>
@@ -948,12 +970,12 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a> (see <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">libe3::ErrorCode</a>; 0 == SUCCESS) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00438">438</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00474">474</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
-<a id="ae9efec754e7a7f3a6ed55f46419e4998" name="ae9efec754e7a7f3a6ed55f46419e4998"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae9efec754e7a7f3a6ed55f46419e4998">&#9670;&#160;</a></span>e3_agent_send_xapp_control()</h2>
+<a id="a6c31a995ce684f6f24447154d8cb8e0b" name="a6c31a995ce684f6f24447154d8cb8e0b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c31a995ce684f6f24447154d8cb8e0b">&#9670;&#160;</a></span>e3_agent_send_xapp_control()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -986,7 +1008,17 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>sequence_id</em></span>&#160;)</td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>sequence_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t *</td>          <td class="paramname"><span class="paramname"><em>out_message_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>request_ack</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -1000,12 +1032,48 @@ Functions</h2></td></tr>
     <tr><td class="paramname">control_data</td><td>Pointer to E3SM-encoded control payload (may be NULL if data_len is 0) </td></tr>
     <tr><td class="paramname">control_data_len</td><td>Length of payload in bytes </td></tr>
     <tr><td class="paramname">sequence_id</td><td>Correlation id from the E2SM-DAPP control header; the dApp carries it back on the control it re-issues, which is how the RAN matches the applied control to the xApp procedure that asked for it. </td></tr>
+    <tr><td class="paramname">out_message_id</td><td>When non-NULL, receives the message id of the control on success: the <span class="tt">request_id</span> of the ControlResponse that answers it. </td></tr>
+    <tr><td class="paramname">request_ack</td><td>Non-zero to ask the dApp for a ControlResponse; it reaches the callback of <a class="el" href="#a2c92898a165ac84cca94fed3d46a7ac5">e3_agent_set_control_response_handler</a>. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a> (see <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">libe3::ErrorCode</a>; 0 == SUCCESS) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00423">423</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00456">456</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a2c92898a165ac84cca94fed3d46a7ac5" name="a2c92898a165ac84cca94fed3d46a7ac5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c92898a165ac84cca94fed3d46a7ac5">&#9670;&#160;</a></span>e3_agent_set_control_response_handler()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a> e3_agent_set_control_response_handler </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#a0add8fb80dbfb57535e357a78a46067e">e3_agent_handle_t</a> *</td>          <td class="paramname"><span class="paramname"><em>agent</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="#adaa851bc25563aabd722d5de81bddaad">e3_control_response_cb</a></td>          <td class="paramname"><span class="paramname"><em>handler</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set callback for incoming control responses (dApp -&gt; RAN): a dApp's answer to an xApp control that asked for one. </p>
+<p>Pass NULL as <code class="param">handler</code> to clear the callback.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">agent</td><td>Agent handle </td></tr>
+    <tr><td class="paramname">handler</td><td>Callback invoked for each incoming response </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a> (see <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">libe3::ErrorCode</a>; 0 == SUCCESS) </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00484">484</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -1039,7 +1107,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a> (see <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">libe3::ErrorCode</a>; 0 == SUCCESS) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00308">308</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00341">341</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -1073,7 +1141,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a> (see <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">libe3::ErrorCode</a>; 0 == SUCCESS) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00467">467</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00536">536</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -1095,7 +1163,7 @@ Functions</h2></td></tr>
 <p>Start the agent processing threads and accept dApp connections. </p>
 <p>Returns a <a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a> (see <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">libe3::ErrorCode</a>; 0 == SUCCESS). </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00262">262</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00295">295</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -1117,7 +1185,7 @@ Functions</h2></td></tr>
 <p>Stop the agent and release runtime resources. </p>
 <p>Safe to call even if the agent is not running. Returns nothing; errors are ignored. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00267">267</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00300">300</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -1138,7 +1206,7 @@ Functions</h2></td></tr>
 
 <p>Total number of active subscriptions tracked by the agent. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00453">453</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00522">522</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -1167,7 +1235,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>e3_service_model_handle_t* on success, NULL on allocation error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00144">144</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00155">155</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -1189,7 +1257,77 @@ Functions</h2></td></tr>
 <p>Destroy a C-backed ServiceModel handle. </p>
 <p>If the model has been registered with an agent (ownership transferred), this function is a no-op and the agent takes responsibility for cleanup. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00163">163</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00174">174</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a5fd18791ced5c74750e2228afc2d3892" name="a5fd18791ced5c74750e2228afc2d3892"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5fd18791ced5c74750e2228afc2d3892">&#9670;&#160;</a></span>e3_service_model_emit_control_response()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a> e3_service_model_emit_control_response </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#ab93aed3c068f547baa9c94304d9ec42e">e3_service_model_handle_t</a> *</td>          <td class="paramname"><span class="paramname"><em>sm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>dapp_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>request_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>response_code</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>cause</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>detail</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>outcome</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>outcome_len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Answer a dApp control from a ServiceModel. </p>
+<p>Call it once per control, when the outcome is known: from the process-control callback or later, from any thread. A ControlResponse goes out only when the dApp asked for one; the RAN function and the control identifier come from the control.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sm</td><td>Service Model handle </td></tr>
+    <tr><td class="paramname">dapp_id</td><td>dApp that sent the control (the <span class="tt">dapp_id</span> the process-control callback received) </td></tr>
+    <tr><td class="paramname">request_id</td><td>Message id of the control (the callback's <span class="tt">request_message_id</span>) </td></tr>
+    <tr><td class="paramname">response_code</td><td>0 = positive (applied), 1 = negative </td></tr>
+    <tr><td class="paramname">cause</td><td>Why the control was refused (negative only): the value of <a class="el" href="namespacelibe3.html">libe3</a>'s Cause, 0 to 14, or -1 for none </td></tr>
+    <tr><td class="paramname">detail</td><td>UTF-8 text for the cause, up to 512 bytes, or NULL for none </td></tr>
+    <tr><td class="paramname">outcome</td><td>What the Service Model reports about the control, or NULL for none </td></tr>
+    <tr><td class="paramname">outcome_len</td><td>Length of <code class="param">outcome</code> in bytes, at most 32768 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="error__codes_8h.html#a5f578656b21ce0f8b5f4e411421b6ff9">e3_error_t</a> (0 == SUCCESS). NOT_FOUND when no answer is owed: the dApp did not ask for one, or the control was answered already. INVALID_PARAM for a NULL handle or an outcome that is too long </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00224">224</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -1230,7 +1368,7 @@ Functions</h2></td></tr>
 <p>Emit an indication message from a ServiceModel to the outbound queue. </p>
 <p>This is intended for C-backed ServiceModels. The message is forwarded by the internal publisher path. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00170">170</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00181">181</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -1259,8 +1397,9 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Emit a message acknowledgment from a ServiceModel. </p>
+<p>DEPRECATED TO BE REMOVED. Answer a control with e3_service_model_emit_control_response. </p>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00197">197</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00208">208</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>
@@ -1294,7 +1433,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS (0), or ErrorCode::INVALID_PARAM if <code class="param">sm</code> is NULL or already registered </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00153">153</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="c__api_8cpp_source.html#l00164">164</a> of file <a class="el" href="c__api_8cpp_source.html">c_api.cpp</a>.</p>
 
 </div>
 </div>

@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -139,12 +139,14 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ae61410ef7c55fcd48334daa1789b7e84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscribe to a RAN function (after a positive setup).  <br /></td></tr>
 <tr class="memitem:a281047a21ea464eaf35816d26b730af1" id="r_a281047a21ea464eaf35816d26b730af1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a281047a21ea464eaf35816d26b730af1">unsubscribe</a> (uint32_t ran_function_id)</td></tr>
 <tr class="memdesc:a281047a21ea464eaf35816d26b730af1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delete a previously created subscription.  <br /></td></tr>
-<tr class="memitem:afeb5b12bd84e5790e0bca72e918272e8" id="r_afeb5b12bd84e5790e0bca72e918272e8"><td class="memItemLeft" align="right" valign="top">int64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afeb5b12bd84e5790e0bca72e918272e8">send_control</a> (uint32_t ran_function_id, uint32_t control_id, std::vector&lt; uint8_t &gt; action_data, uint32_t sequence_id=0)</td></tr>
-<tr class="memdesc:afeb5b12bd84e5790e0bca72e918272e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a dApp control action to the RAN.  <br /></td></tr>
+<tr class="memitem:acdadd6732764f1e2010a03de61634a8c" id="r_acdadd6732764f1e2010a03de61634a8c"><td class="memItemLeft" align="right" valign="top">int64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acdadd6732764f1e2010a03de61634a8c">send_control</a> (uint32_t ran_function_id, uint32_t control_id, std::vector&lt; uint8_t &gt; action_data, uint32_t sequence_id=0, bool request_ack=false)</td></tr>
+<tr class="memdesc:acdadd6732764f1e2010a03de61634a8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a dApp control action to the RAN.  <br /></td></tr>
 <tr class="memitem:acd691f84c7571d77677826d2408e50a5" id="r_acd691f84c7571d77677826d2408e50a5"><td class="memItemLeft" align="right" valign="top">int64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acd691f84c7571d77677826d2408e50a5">send_report</a> (uint32_t ran_function_id, std::vector&lt; uint8_t &gt; report_data, uint32_t sequence_id)</td></tr>
 <tr class="memdesc:acd691f84c7571d77677826d2408e50a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a dApp report to the RAN.  <br /></td></tr>
 <tr class="memitem:aaffdc87d69c80428671e4bf21011476a" id="r_aaffdc87d69c80428671e4bf21011476a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaffdc87d69c80428671e4bf21011476a">send_message_ack</a> (uint32_t request_id, int response_code)</td></tr>
-<tr class="memdesc:aaffdc87d69c80428671e4bf21011476a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Acknowledge a request.  <br /></td></tr>
+<tr class="memdesc:aaffdc87d69c80428671e4bf21011476a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Acknowledge a request. DEPRECATED TO BE REMOVED: answer an xApp control with send_control_response.  <br /></td></tr>
+<tr class="memitem:a1a74f36c81d9e8d9150f98876a095c6e" id="r_a1a74f36c81d9e8d9150f98876a095c6e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1a74f36c81d9e8d9150f98876a095c6e">send_control_response</a> (uint32_t request_id, uint32_t ran_function_id, uint32_t control_id, int response_code, int cause, std::string detail, std::vector&lt; uint8_t &gt; outcome)</td></tr>
+<tr class="memdesc:a1a74f36c81d9e8d9150f98876a095c6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Answer an xApp control that has <span class="tt">request_ack</span> (E3_EVENT_XAPP_CONTROL).  <br /></td></tr>
 <tr class="memitem:a3401f5d4e563d6518ec7d97b92f864a7" id="r_a3401f5d4e563d6518ec7d97b92f864a7"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structlibe3_1_1py_1_1E3Event.html">E3Event</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3401f5d4e563d6518ec7d97b92f864a7">poll_events</a> (std::size_t max_batch, int timeout_ms)</td></tr>
 <tr class="memdesc:a3401f5d4e563d6518ec7d97b92f864a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drain up to <code class="param">max_batch</code> inbound events, waiting up to <code class="param">timeout_ms</code> for the first.  <br /></td></tr>
 <tr class="memitem:a5cdfb9fddf76c03760e9e219f652f7c8" id="r_a5cdfb9fddf76c03760e9e219f652f7c8"><td class="memItemLeft" align="right" valign="top">unsigned long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5cdfb9fddf76c03760e9e219f652f7c8">dropped_events</a> () const</td></tr>
@@ -154,7 +156,7 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p>dApp-role E3AP session with a batched, lock-free inbound ring. </p>
 <p>Thread model: two producers push into the ring — the setup-response handler (<a class="el" href="namespacelibe3.html">libe3</a> setup thread) and the other handlers (<a class="el" href="namespacelibe3.html">libe3</a> inbound thread), which run concurrently at startup; the Python drainer thread is the single consumer via <a class="el" href="#a3401f5d4e563d6518ec7d97b92f864a7">poll_events</a>. The ring is MPMC, so this is safe (do not "optimize" it to SPSC). All outbound verbs are thread-safe (delegated to <a class="el" href="classlibe3_1_1E3Agent.html">libe3::E3Agent</a>). </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00118">118</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8hpp_source.html#l00122">122</a> of file <a class="el" href="e3__dapp__session_8hpp_source.html">e3_dapp_session.hpp</a>.</p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aed26a08d5bdd61f7f21a15cc6fc52654" name="aed26a08d5bdd61f7f21a15cc6fc52654"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aed26a08d5bdd61f7f21a15cc6fc52654">&#9670;&#160;</a></span>DAppSession() <span class="overload">[1/2]</span></h2>
@@ -213,7 +215,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Stops the agent and drops the queue. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00163">163</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00181">181</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -261,7 +263,7 @@ Public Member Functions</h2></td></tr>
 <p>dApp id assigned at setup. </p>
 <dl class="section return"><dt>Returns</dt><dd>the id, or -1 if not yet assigned. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00192">192</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00210">210</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -283,7 +285,7 @@ Public Member Functions</h2></td></tr>
 <p>Total inbound events dropped due to ring overflow (backpressure). </p>
 <dl class="section return"><dt>Returns</dt><dd>the count. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00322">322</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00354">354</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -341,7 +343,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the events, empty on a quiet tick or after stop </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00291">291</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00323">323</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -363,7 +365,7 @@ Public Member Functions</h2></td></tr>
 <p>RAN identifier from the <a class="el" href="structlibe3_1_1SetupResponse.html" title="E3AP Setup Response structure.">SetupResponse</a>. </p>
 <dl class="section return"><dt>Returns</dt><dd>the identifier, or "" if none. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00197">197</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00215">215</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -385,12 +387,12 @@ Public Member Functions</h2></td></tr>
 <p>Send a <a class="el" href="structlibe3_1_1ReleaseMessage.html" title="E3AP Release Message structure.">ReleaseMessage</a> (session keeps running until <a class="el" href="#a6ec5957dc209b80e7157c17e61bfd144">stop</a>). </p>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> as int. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00183">183</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00201">201</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
-<a id="afeb5b12bd84e5790e0bca72e918272e8" name="afeb5b12bd84e5790e0bca72e918272e8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afeb5b12bd84e5790e0bca72e918272e8">&#9670;&#160;</a></span>send_control()</h2>
+<a id="acdadd6732764f1e2010a03de61634a8c" name="acdadd6732764f1e2010a03de61634a8c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acdadd6732764f1e2010a03de61634a8c">&#9670;&#160;</a></span>send_control()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -413,7 +415,12 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>sequence_id</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0</span>&#160;)</td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>sequence_id</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>request_ack</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -425,12 +432,76 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">control_id</td><td>control identifier granted by the RAN </td></tr>
     <tr><td class="paramname">action_data</td><td>opaque E3SM control payload </td></tr>
     <tr><td class="paramname">sequence_id</td><td>correlation id of the xApp procedure this control re-issues; 0 when the dApp decided on its own. </td></tr>
+    <tr><td class="paramname">request_ack</td><td>true to ask the RAN for a control response (an E3_EVENT_CONTROL_RESPONSE event) once it has dealt with the control. The RAN answers a control it refuses itself either way. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the assigned message id (positive, 1..4294967295) on success, so the caller can correlate a later ack/response by id; a negative <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> on failure. Returned as int64_t because a message id now spans the full uint32 range and would alias onto the negative error codes if narrowed to int. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the assigned message id (positive, 1..4294967295) on success, so the caller can correlate a later response by id; a negative <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> on failure. Returned as int64_t because a message id now spans the full uint32 range and would alias onto the negative error codes if narrowed to int. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00259">259</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00277">277</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a1a74f36c81d9e8d9150f98876a095c6e" name="a1a74f36c81d9e8d9150f98876a095c6e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a74f36c81d9e8d9150f98876a095c6e">&#9670;&#160;</a></span>send_control_response()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int libe3::py::DAppSession::send_control_response </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>request_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>ran_function_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>control_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>response_code</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>cause</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>detail</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; uint8_t &gt;</td>          <td class="paramname"><span class="paramname"><em>outcome</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Answer an xApp control that has <span class="tt">request_ack</span> (E3_EVENT_XAPP_CONTROL). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">request_id</td><td>the event's <span class="tt">request_id</span> </td></tr>
+    <tr><td class="paramname">ran_function_id</td><td>the event's <span class="tt">ran_function_id</span> </td></tr>
+    <tr><td class="paramname">control_id</td><td>the control the dApp applied, from the list the RAN advertised for the function </td></tr>
+    <tr><td class="paramname">response_code</td><td>0=applied (positive), 1=not applied (negative) </td></tr>
+    <tr><td class="paramname">cause</td><td>why not, a <a class="el" href="namespacelibe3.html">libe3</a> <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7" title="Why a RAN refused a request (E3-Cause).">Cause</a> value 0 to 14, or -1 for none </td></tr>
+    <tr><td class="paramname">detail</td><td>text for the cause, up to 512 bytes, empty for none </td></tr>
+    <tr><td class="paramname">outcome</td><td>what the dApp reports about the control, up to 32768 bytes, empty for none </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> as int. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00310">310</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -453,7 +524,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Acknowledge a request. </p>
+<p>Acknowledge a request. DEPRECATED TO BE REMOVED: answer an xApp control with send_control_response. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">request_id</td><td>request being acknowledged.</td></tr>
@@ -463,7 +534,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> as int. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00286">286</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00305">305</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -500,9 +571,9 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the assigned message id (positive, 1..4294967295) on success, so the caller can correlate a later ack/response by id; a negative <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> on failure. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the assigned message id (positive, 1..4294967295) on success, so the caller can correlate a later response by id; a negative <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> on failure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00274">274</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00293">293</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -530,7 +601,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the ids. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00225">225</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00243">243</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -552,7 +623,7 @@ Public Member Functions</h2></td></tr>
 <p>Number of RAN functions advertised in the <a class="el" href="structlibe3_1_1SetupResponse.html" title="E3AP Setup Response structure.">SetupResponse</a>. </p>
 <dl class="section return"><dt>Returns</dt><dd>the count. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00208">208</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00226">226</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -580,7 +651,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the bytes. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00231">231</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00249">249</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -608,7 +679,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the id, 0 if out of range. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00213">213</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00231">231</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -636,7 +707,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the ids. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00219">219</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00237">237</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -658,7 +729,7 @@ Public Member Functions</h2></td></tr>
 <p><a class="el" href="structlibe3_1_1SetupResponse.html" title="E3AP Setup Response structure.">SetupResponse</a> code. </p>
 <dl class="section return"><dt>Returns</dt><dd>0=positive, 1=negative, -1=not received. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00202">202</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00220">220</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -680,7 +751,7 @@ Public Member Functions</h2></td></tr>
 <p>Start the agent, re-arming the inbound ring so a <a class="el" href="#a6ec5957dc209b80e7157c17e61bfd144" title="Stop the agent and shut down the ring so a blocked poll_events returns an empty batch (i....">stop()</a>-&gt;<a class="el" href="#ab5954d7cd100c8f3f26c89c59ec06305" title="Start the agent, re-arming the inbound ring so a stop()-&gt;start() cycle works again.">start()</a> cycle works again. </p>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> as int. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00170">170</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00188">188</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -701,7 +772,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Stop the agent and shut down the ring so a blocked <a class="el" href="#a3401f5d4e563d6518ec7d97b92f864a7">poll_events</a> returns an empty batch (i.e. empty-after-stop means "done"). Restartable via <a class="el" href="#ab5954d7cd100c8f3f26c89c59ec06305">start</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00187">187</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00205">205</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -752,7 +823,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the assigned request id (positive, 1..4294967295) on success, so the caller can correlate the <a class="el" href="structlibe3_1_1SubscriptionResponse.html" title="E3AP Subscription Response structure.">SubscriptionResponse</a> by its request_id; a negative <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> on failure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00237">237</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00255">255</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -780,7 +851,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> as int. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00255">255</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00273">273</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>
@@ -808,7 +879,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3" title="Error codes returned by libe3 operations Use shared error-code list (see libe3/error_codes....">ErrorCode</a> as int. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00178">178</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="e3__dapp__session_8cpp_source.html#l00196">196</a> of file <a class="el" href="e3__dapp__session_8cpp_source.html">e3_dapp_session.cpp</a>.</p>
 
 </div>
 </div>

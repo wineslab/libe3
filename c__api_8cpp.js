@@ -23,7 +23,8 @@ var c__api_8cpp =
     [ "e3_agent_register_sm", "c__api_8cpp.html#a05537e2fef7d530691dcd5457aed6e5d", null ],
     [ "e3_agent_send_indication", "c__api_8cpp.html#a9ec8f68d8c97d5c64e275c354c4820c0", null ],
     [ "e3_agent_send_message_ack", "c__api_8cpp.html#a5239a5675c6fde681d7618f6d42e0b68", null ],
-    [ "e3_agent_send_xapp_control", "c__api_8cpp.html#ae9efec754e7a7f3a6ed55f46419e4998", null ],
+    [ "e3_agent_send_xapp_control", "c__api_8cpp.html#a6c31a995ce684f6f24447154d8cb8e0b", null ],
+    [ "e3_agent_set_control_response_handler", "c__api_8cpp.html#a2c92898a165ac84cca94fed3d46a7ac5", null ],
     [ "e3_agent_set_dapp_report_handler", "c__api_8cpp.html#a3986384fd2df720f2ebccaba5567fc59", null ],
     [ "e3_agent_set_dapp_status_changed_handler", "c__api_8cpp.html#af9b1a07dd947ba33b779ea4403e9e605", null ],
     [ "e3_agent_start", "c__api_8cpp.html#a799cc0e6e8653202eefaf7d6055d9ec7", null ],
@@ -32,6 +33,7 @@ var c__api_8cpp =
     [ "e3_error_to_string", "c__api_8cpp.html#a3f30e282e3e14ec6ba778ca4266f51fd", null ],
     [ "e3_service_model_create_from_c", "c__api_8cpp.html#a0e39e77de8b23fb40dd275c361331cb7", null ],
     [ "e3_service_model_destroy", "c__api_8cpp.html#a82d2681971d7244733f568ea830f6a1c", null ],
+    [ "e3_service_model_emit_control_response", "c__api_8cpp.html#a5fd18791ced5c74750e2228afc2d3892", null ],
     [ "e3_service_model_emit_indication", "c__api_8cpp.html#ada87ed89ce33a65047b678d470d9329d", null ],
     [ "e3_service_model_emit_message_ack", "c__api_8cpp.html#a6c434273a0d8f243cd004c7437a3150e", null ],
     [ "e3_service_model_set_granted_periodicity_cb", "c__api_8cpp.html#a0c486f82c75ce3ad6bd914662ff62cf6", null ]

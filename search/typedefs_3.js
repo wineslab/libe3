@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['logcallback_0',['LogCallback',['../namespacelibe3.html#a2516d19ac2e187935aad4c027401e3e0',1,'libe3']]]
+  ['indicationhandler_0',['IndicationHandler',['../namespacelibe3.html#af327eac0d787dfaa03a13398d1be2e0b',1,'libe3']]]
 ];

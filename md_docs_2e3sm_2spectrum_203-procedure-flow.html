@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e3sm_2spectrum_203-procedure-flow.html','',''
   <div class="headertitle"><div class="title">E3SM-SPEC: procedures </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md547"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md549"></a></p>
 <p>The procedures of the Spectrum service model: how a dApp subscribes, how the RAN publishes sensing telemetry, how a control is applied, and how a report or an xApp decision travels.</p>
 <p>This is clause 7 of the specification. The fields are in <a class="el" href="md_docs_2e3sm_2spectrum_202-ie-mapping.html">clause 6</a>. The E3AP procedures that carry the messages are in the <a class="el" href="md_docs_2e3ap_203-procedure-flow.html">E3AP procedure chapter</a>. The numbered boxes of the loops are in <a class="el" href="md_docs_2control-loops_2path-a-e3-loop.html">Path A</a> and <a class="el" href="md_docs_2control-loops_2path-b-e2-e3-loop.html">Path B</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md548"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md550"></a>
 Overview</h1>
 <p>Table: Procedures and the E3AP message that carries each</p>
 <table class="markdownTable">
@@ -108,9 +108,9 @@ Overview</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Cell configuration indication  </td><td class="markdownTableBodyNone">RAN  </td><td class="markdownTableBodyNone">E3 Indication Message  </td><td class="markdownTableBodyNone"><span class="tt">Spectrum-Indication</span>, alternative <span class="tt">cellConfigIndication</span>  </td><td class="markdownTableBodyNone">none  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">PRB block control  </td><td class="markdownTableBodyNone">dApp  </td><td class="markdownTableBodyNone">E3 dApp Control Action, answered by E3 Message Ack  </td><td class="markdownTableBodyNone"><span class="tt">Spectrum-DAppControlData</span>  </td><td class="markdownTableBodyNone">A11 to A19a  </td></tr>
+<td class="markdownTableBodyNone">PRB block control  </td><td class="markdownTableBodyNone">dApp  </td><td class="markdownTableBodyNone">E3 dApp Control Action, answered by E3 Control Response  </td><td class="markdownTableBodyNone"><span class="tt">Spectrum-DAppControlData</span>  </td><td class="markdownTableBodyNone">A11 to A19a  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Sensing policy control  </td><td class="markdownTableBodyNone">dApp  </td><td class="markdownTableBodyNone">E3 dApp Control Action, answered by E3 Message Ack  </td><td class="markdownTableBodyNone"><span class="tt">Spectrum-DAppControlData</span>  </td><td class="markdownTableBodyNone">A11 to A19a  </td></tr>
+<td class="markdownTableBodyNone">Sensing policy control  </td><td class="markdownTableBodyNone">dApp  </td><td class="markdownTableBodyNone">E3 dApp Control Action, answered by E3 Control Response  </td><td class="markdownTableBodyNone"><span class="tt">Spectrum-DAppControlData</span>  </td><td class="markdownTableBodyNone">A11 to A19a  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">dApp report  </td><td class="markdownTableBodyNone">dApp  </td><td class="markdownTableBodyNone">E3 dApp Report  </td><td class="markdownTableBodyNone"><span class="tt">Spectrum-DAppReportData</span>  </td><td class="markdownTableBodyNone">A11 to A20  </td></tr>
 <tr class="markdownTableRowOdd">
@@ -118,12 +118,12 @@ Overview</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Apply outcome  </td><td class="markdownTableBodyNone">RAN  </td><td class="markdownTableBodyNone">none on E3. The E2 control outcome carries it.  </td><td class="markdownTableBodyNone"><span class="tt">Spectrum-ApplyOutcomeData</span>  </td><td class="markdownTableBodyNone">B16 to B19  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md549"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md551"></a>
 Subscription</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md550"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md552"></a>
 Purpose</h2>
 <p>A dApp subscribes to RAN function 1 to receive sensing indications and to be allowed to send controls.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md551"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md553"></a>
 Procedure text</h2>
 <ol type="1">
 <li>The dApp sends an E3 Subscription Request. It names RAN function 1, lists the telemetry identifiers and the control identifiers that it uses, and may set <span class="tt">periodicity</span>.</li>
@@ -131,21 +131,21 @@ Procedure text</h2>
 <li>When the first subscription to RAN function 1 starts, the RAN starts the service model. It creates the sensing ring and starts the telemetry worker. The RAN shall not start the service model before the first subscription. A control that arrives while the service model does not run is dropped.</li>
 <li>When the subscriptions change, the RAN derives the emission period again. The period is the smallest <span class="tt">periodicity</span> of all subscribers. The unit is microseconds. If any subscriber has no <span class="tt">periodicity</span>, or sets "0", the period is "0", which means: send one indication for each sensing publish.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md552"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md554"></a>
 Successful operation</h2>
 <p>The RAN publishes sensing indications and cell configuration indications to the dApp. The RAN accepts the controls of the dApp.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md553"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md555"></a>
 Unsuccessful operation</h2>
-<p>If the E3 Subscription Response is negative, the dApp has no subscription. The dApp shall not send controls. A control without a running service model gets a negative E3 Message Ack.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md554"></a>
+<p>If the E3 Subscription Response is negative, the dApp has no subscription. The dApp shall not send controls. A control without a running service model gets a negative E3 Control Response.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md556"></a>
 Abnormal conditions</h2>
 <p>If the last subscriber leaves, the RAN stops the service model. See "Service model stop" below.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md555"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md557"></a>
 Sensing indication</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md556"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md558"></a>
 Purpose</h2>
 <p>The RAN tells a dApp which resources of a slot are free, so that the dApp can analyze the spectrum.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md557"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md559"></a>
 Procedure text</h2>
 <ol type="1">
 <li>The scheduler of the RAN computes the sensing ranges of a slot and publishes them.</li>
@@ -154,62 +154,62 @@ Procedure text</h2>
 <li>The service model sends the same encoded indication to every dApp that subscribed to RAN function 1, in one E3 Indication Message for each dApp. The <span class="tt">ranFunctionIdentifier</span> is "1".</li>
 <li>With period "0", the service model sends one indication for each publish. With a period greater than "0", it sends one indication for each period. It then uses the latest publish.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md558"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md560"></a>
 Successful operation</h2>
 <p>The dApp receives the indication, checks <span class="tt">sfn</span> and <span class="tt">slot</span> against the ring slot, and reads the sensing ranges.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md559"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md561"></a>
 Unsuccessful operation</h2>
 <p>If the RAN cannot create or write the sensing ring, the RAN shall send no indication. A reference to a ring that does not exist would be useless. If the RAN cannot encode the indication, it sends none.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md560"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md562"></a>
 Abnormal conditions</h2>
 <ul>
 <li>The ring slot has a different <span class="tt">sfn</span> or <span class="tt">slot</span> than the indication. The RAN has overwritten the slot. The dApp shall drop the data of this indication.</li>
 <li>The ring header has other values for <span class="tt">slot_stride</span>, <span class="tt">max_ranges</span> or <span class="tt">range_size</span> than the dApp expects. The dApp shall not read the ring.</li>
 <li>The dApp runs on another host than the RAN. The dApp cannot map the ring. It shall not use the Spectrum sensing telemetry.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md561"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md563"></a>
 Cell configuration indication</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md562"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md564"></a>
 Purpose</h2>
 <p>The RAN tells a dApp the uplink carrier that the PRB indices of the sensing ranges refer to.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md563"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md565"></a>
 Procedure text</h2>
 <ol type="1">
 <li>While the service model runs, the RAN samples the configuration of the uplink carrier about once a second, independently of the sensing publishes.</li>
 <li>The service model builds one <span class="tt">Spectrum-Indication</span> with the alternative <span class="tt">cellConfigIndication</span>.</li>
 <li>The service model sends the same encoded indication to every dApp that subscribed to RAN function 1, in one E3 Indication Message for each dApp. The <span class="tt">ranFunctionIdentifier</span> is "1". The emission period of the sensing indication does not apply to it.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md564"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md566"></a>
 Successful operation</h2>
 <p>The dApp keeps the latest configuration and uses it to place the sensing ranges in frequency.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md565"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md567"></a>
 Unsuccessful operation</h2>
 <p>If the RAN cannot read the configuration or encode the indication, it sends no indication for that period.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md566"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md568"></a>
 Abnormal conditions</h2>
 <ul>
 <li>A value is outside the range of the grammar. The dApp shall ignore the whole indication, and keep the configuration that it had.</li>
 <li>The configuration changes between two indications. The dApp uses the latest one. Sensing ranges that arrive in between may refer to the new carrier.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md567"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md569"></a>
 PRB block control</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md568"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md570"></a>
 Purpose</h2>
 <p>A dApp, or an xApp decision that the dApp re-issues, asks the RAN to stop using a set of PRBs.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md569"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md571"></a>
 Procedure text</h2>
 <ol type="1">
 <li>The dApp builds a <span class="tt">Spectrum-DAppControlData</span> with the alternative <span class="tt">prbBlacklistControl</span>. It lists all PRBs to block.</li>
 <li>The dApp sends an E3 dApp Control Action. The <span class="tt">ranFunctionIdentifier</span> is "1" and the <span class="tt">controlIdentifier</span> is "1". The <span class="tt">actionData</span> field holds the encoded structure. If the dApp re-issues an xApp control, it also sets <span class="tt">sequenceId</span> to the value of that xApp control.</li>
 <li>The RAN checks that the service model runs and that the control has a payload. Then it decodes the structure.</li>
 <li>If the list is empty, the RAN clears the PRB block. Otherwise the RAN installs the block. It marks every listed PRB as occupied for all 14 symbols, in uplink and in downlink. The new list replaces the old one.</li>
-<li>The RAN sends an E3 Message Ack with the response code of the result.</li>
+<li>If the dApp set <span class="tt">requestAck</span> to "true", the RAN sends an E3 Control Response with the response code of the result.</li>
 <li>The scheduler applies the block from the start of a following slot. Every allocation step then treats the blocked PRBs as occupied.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md570"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md572"></a>
 Successful operation</h2>
-<p>The response code of the E3 Message Ack is "positive". The scheduler uses the block from the next slot start.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md571"></a>
+<p>The response code of the E3 Control Response is "positive". The scheduler uses the block from the next slot start.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md573"></a>
 Unsuccessful operation</h2>
 <p>The response code is "negative" when any of these is true.</p>
 <ul>
@@ -220,60 +220,60 @@ Unsuccessful operation</h2>
 <li>The payload does not decode, holds another alternative, has a list longer than 273 entries, or has a PRB index above 272.</li>
 <li>The scheduler refuses to install the block.</li>
 </ul>
-<p>A negative acknowledge leaves the previous block as it was.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md572"></a>
+<p>A negative response leaves the previous block as it was.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md574"></a>
 Abnormal conditions</h2>
 <p>The block affects the cell. The limits of a block are in <a class="el" href="md_docs_2e3sm_2spectrum_205-semantics-and-constraints.html">clause 9</a>. In short: the RAN does not keep the cell common channels clear, and a long block can stall a retransmission.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md573"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md575"></a>
 Sensing policy control</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md574"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md576"></a>
 Purpose</h2>
 <p>A dApp asks the RAN to keep some symbols of the uplink slots free, so that the sensing scan sees clean spectrum.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md575"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md577"></a>
 Procedure text</h2>
 <ol type="1">
 <li>The dApp builds a <span class="tt">Spectrum-DAppControlData</span> with the alternative <span class="tt">sensingPolicyControl</span>. It gives one symbol mask for each slot of a frame.</li>
 <li>The dApp sends an E3 dApp Control Action with <span class="tt">ranFunctionIdentifier</span> "1" and <span class="tt">controlIdentifier</span> "2".</li>
 <li>The RAN decodes the structure.</li>
 <li>If <span class="tt">deactivate</span> is "TRUE", the RAN clears the policy. Otherwise it installs the masks in the uplink scheduler. The uplink scheduler then prefers time domain allocations that do not use the masked symbols.</li>
-<li>The RAN sends an E3 Message Ack.</li>
+<li>If the dApp set <span class="tt">requestAck</span> to "true", the RAN sends an E3 Control Response with the response code of the result.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md576"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md578"></a>
 Successful operation</h2>
 <p>The response code is "positive". The uplink scheduler follows the policy from the next scan.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md577"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md579"></a>
 Unsuccessful operation</h2>
-<p>The response code is "negative" for the cases of the PRB block control. It is also "negative" when the number of masks differs from the number of slots in a frame of the RAN. A negative acknowledge leaves the previous policy as it was.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md578"></a>
+<p>The response code is "negative" for the cases of the PRB block control. It is also "negative" when the number of masks differs from the number of slots in a frame of the RAN. A negative response leaves the previous policy as it was.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md580"></a>
 Abnormal conditions</h2>
 <p>If the dApp leaves without a deactivate control, the RAN clears the policy when the service model stops.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md579"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md581"></a>
 dApp report</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md580"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md582"></a>
 Purpose</h2>
 <p>A dApp tells the RAN, and through the RAN an xApp, which PRBs it found occupied.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md581"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md583"></a>
 Procedure text</h2>
 <ol type="1">
 <li>The dApp builds a <span class="tt">Spectrum-DAppReportData</span> with the alternative <span class="tt">prbBlacklistReport</span>. It may set <span class="tt">timestamp</span> to the time of its own realtime clock.</li>
 <li>The dApp sends an E3 dApp Report. The <span class="tt">ranFunctionIdentifier</span> is "1". The <span class="tt">sequenceId</span> is mandatory in E3AP and the dApp assigns it. The <span class="tt">reportData</span> field holds the encoded structure.</li>
 <li>The RAN does not decode the structure. It hands the octets and the <span class="tt">sequenceId</span> to the E2-E3 bridge, which sends them to the xApp in an E2 indication. See the <a class="el" href="dir_24c5afd111e6aa944685a569bf5db165.html">E2SM-DAPP specification</a>.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md582"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md584"></a>
 Successful operation</h2>
 <p>The xApp receives the report in an E2 indication. It decodes it with the Spectrum decoder, because the E2 header names RAN function 1.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md583"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md585"></a>
 Unsuccessful operation</h2>
 <p>A RAN without an E2 side drops the report. No error goes back to the dApp.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md584"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md586"></a>
 Abnormal conditions</h2>
 <p>An xApp decoder that supports only one encoding cannot read a report in another encoding. See <a class="el" href="md_docs_2e3sm_2spectrum_204-encoding.html">clause 8</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md585"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md587"></a>
 xApp control relay</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md586"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md588"></a>
 Purpose</h2>
 <p>An xApp suggests PRBs to block. The dApp that runs next to the RAN decides what to do.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md587"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md589"></a>
 Procedure text</h2>
 <ol type="1">
 <li>The xApp sends an E2 control request. It holds a <span class="tt">Spectrum-XAppControlData</span> and a sequence identifier.</li>
@@ -282,21 +282,21 @@ Procedure text</h2>
 <li>If the dApp acts on a <span class="tt">prbBlockedControl</span>, it sends a PRB block control to the RAN. The control carries the same <span class="tt">sequenceId</span>. The dApp may add its own PRBs to the list.</li>
 <li>If the dApp does not act, it sends nothing. The RAN answers the xApp after a timeout. See the next clause.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md588"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md590"></a>
 Successful operation</h2>
 <p>The RAN applies the PRB block and answers the xApp with the apply outcome.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md589"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md591"></a>
 Unsuccessful operation</h2>
 <p>If the E2 side cannot start the procedure, for example when the table of open procedures is full, the RAN answers the xApp at once and does not defer the answer.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md590"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md592"></a>
 Abnormal conditions</h2>
 <p>The dApp can reject the control. The dApp can also send nothing back. In both cases the xApp learns the result from the timeout answer.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md591"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md593"></a>
 Apply outcome</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md592"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md594"></a>
 Purpose</h2>
 <p>The xApp learns when the block that it asked for is in effect.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md593"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md595"></a>
 Procedure text</h2>
 <ol type="1">
 <li>When the RAN receives the PRB block control with a <span class="tt">sequenceId</span>, it opens a record for that sequence identifier.</li>
@@ -306,16 +306,16 @@ Procedure text</h2>
 <li>The RAN builds a <span class="tt">Spectrum-ApplyOutcomeData</span> from the record, and the E2-E3 bridge sends it to the xApp in the E2 control outcome. The control outcome also holds the <span class="tt">sequenceId</span>.</li>
 <li>If the record stays open too long, the RAN closes it as failed. It sends an outcome with the values that it knows. The OpenAirInterface implementation waits 150 ms. The value is shorter than the timeout of the xApp side.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md594"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md596"></a>
 Successful operation</h2>
 <p>The outcome holds <span class="tt">installedTimestamp</span>, <span class="tt">onAirTimestamp</span>, <span class="tt">sfn</span> and <span class="tt">slot</span>. The xApp can subtract <span class="tt">installedTimestamp</span> from its own report timestamp, because all of them use the realtime clock.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md595"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md597"></a>
 Unsuccessful operation</h2>
 <p>If the installation failed, the outcome holds no <span class="tt">installedTimestamp</span> and no on-air values. If the RAN timed out, it holds the values that it had.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md596"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md598"></a>
 Abnormal conditions</h2>
 <p>A record exists for a limited number of procedures at one time. The OpenAirInterface implementation holds 64. A control that finds the table full is answered at once.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md597"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md599"></a>
 Service model stop</h1>
 <p>When the last subscription to RAN function 1 ends, the RAN shall:</p>
 <ol type="1">
@@ -323,8 +323,8 @@ Service model stop</h1>
 <li>clear the sensing policy, and</li>
 <li>clear the PRB block in uplink and downlink.</li>
 </ol>
-<p>A held block or policy would otherwise stay in force when no dApp is there to manage it. A control that arrives after the stop gets a negative E3 Message Ack.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md598"></a>
+<p>A held block or policy would otherwise stay in force when no dApp is there to manage it. A control that arrives after the stop gets a negative E3 Control Response.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md600"></a>
 The loop from end to end</h1>
 <p>This is the order of one spectrum control loop with an xApp. The box numbers are those of the two control loop pages.</p>
 <ol type="1">
@@ -334,7 +334,7 @@ The loop from end to end</h1>
 <li>The xApp decides and sends an E2 control with the same <span class="tt">sequenceId</span>. The bridge sends an E3 xApp Control Action to the dApp (B7 to B15).</li>
 <li>The dApp sends a PRB block control with the same <span class="tt">sequenceId</span> (B16, then A12 to A18).</li>
 <li>The RAN installs the block (B17) and the scheduler puts it on air (B18).</li>
-<li>The RAN sends an E3 Message Ack to the dApp and the E2 control outcome to the xApp (B19). </li>
+<li>The RAN sends an E3 Control Response to the dApp, if it asked for one, and the E2 control outcome to the xApp (B19). </li>
 </ol>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->

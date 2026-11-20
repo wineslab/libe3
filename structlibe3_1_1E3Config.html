@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -158,7 +158,7 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Configuration for <a class="el" href="classlibe3_1_1E3Agent.html" title="E3Agent - Main façade for RAN vendor integration.">E3Agent</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00462">462</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00506">506</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
 <a id="a7be1447c4784864a79a118e172c224a9" name="a7be1447c4784864a79a118e172c224a9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7be1447c4784864a79a118e172c224a9">&#9670;&#160;</a></span>connect_timeout_ms</h2>
@@ -174,7 +174,7 @@ Public Attributes</h2></td></tr>
 
 <p>Connection establishment timeout in milliseconds. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00508">508</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00552">552</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -193,7 +193,7 @@ Public Attributes</h2></td></tr>
 <p>Seconds a RAN waits for a message from a dApp before it removes the dApp. </p>
 <p>RAN role only. A dApp that sends nothing for this long is told with a <a class="el" href="structlibe3_1_1ReleaseMessage.html" title="E3AP Release Message structure.">ReleaseMessage</a>, then its registration and subscriptions are dropped and a RAN function it was the last subscriber of is stopped. Only what the dApp sends counts, never what the RAN sends to it. A dApp that registered and never spoke counts from its registration. 0 never removes a dApp for being quiet. The default is Aerial's 1800 s. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00522">522</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00566">566</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -211,7 +211,7 @@ Public Attributes</h2></td></tr>
 
 <p>dApp name advertised in <a class="el" href="structlibe3_1_1SetupRequest.html" title="E3AP Setup Request structure.">SetupRequest</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00470">470</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00514">514</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -229,7 +229,7 @@ Public Attributes</h2></td></tr>
 
 <p>dApp version advertised in <a class="el" href="structlibe3_1_1SetupRequest.html" title="E3AP Setup Request structure.">SetupRequest</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00471">471</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00515">515</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -247,7 +247,7 @@ Public Attributes</h2></td></tr>
 
 <p>E3AP protocol version advertised during setup. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00474">474</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00518">518</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -265,7 +265,7 @@ Public Attributes</h2></td></tr>
 
 <p>PDU encoding format (ASN.1 PER or JSON). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00500">500</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00544">544</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -285,7 +285,7 @@ Public Attributes</h2></td></tr>
 <p>When set to a non-negative value the subscriber_loop and publisher_loop threads will be pinned to this logical CPU core via pthread_setaffinity_np (Linux only; ignored on other platforms). This eliminates cache-migration overhead and reduces scheduling jitter in sub-millisecond control loops.</p>
 <p>-1 (default) disables core pinning. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00557">557</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00601">601</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -305,7 +305,7 @@ Public Attributes</h2></td></tr>
 <p>Range -20 (highest priority) to 19 (lowest priority), 0 = system default. A negative value reduces OS scheduling latency at the cost of slightly less CPU time for other processes. Requires appropriate privileges for negative values (CAP_SYS_NICE on Linux).</p>
 <p>Applied via setpriority(PRIO_PROCESS, tid, value) on Linux. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00569">569</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00613">613</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -323,7 +323,7 @@ Public Attributes</h2></td></tr>
 
 <p>Number of I/O threads (used by ZMQ context). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00544">544</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00588">588</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -341,7 +341,7 @@ Public Attributes</h2></td></tr>
 
 <p>Link-layer transport (ZMQ or POSIX). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00484">484</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00528">528</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -359,7 +359,7 @@ Public Attributes</h2></td></tr>
 
 <p>Logging verbosity: 0=none, 1=error, 2=warn, 3=info, 4=debug, 5=trace. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00572">572</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00616">616</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -378,7 +378,7 @@ Public Attributes</h2></td></tr>
 <p>Path of the shared log file. Empty (default) =&gt; auto-generated. </p>
 <p>When left empty the library derives a per-process path of the form <span class="tt">/tmp/e3_&lt;<a class="el" href="#a348b15e9a72856994dee4b87e520da01" title="Role: RAN (today&#39;s default — binds sockets) or DAPP (connects).">role</a>&gt;[_&lt;sanitized-id&gt;]_&lt;euid&gt;.log</span> (see <a class="el" href="classlibe3_1_1E3Interface.html" title="E3Interface - Internal protocol coordination.">E3Interface</a> ctor). The trailing effective-uid keeps the file owned by whoever opens it, which avoids <span class="tt">fs.protected_regular</span> blocking an O_CREAT re-open of a /tmp file owned by a different user (e.g. a root gNB vs. a prior non-sudo run). Set this explicitly to override the location entirely. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00584">584</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00628">628</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -396,7 +396,7 @@ Public Attributes</h2></td></tr>
 
 <p>Endpoint URI for outbound channel. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00496">496</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00540">540</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -414,7 +414,7 @@ Public Attributes</h2></td></tr>
 
 <p>Port used for outbound indication/publication channel. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00491">491</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00535">535</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -432,7 +432,7 @@ Public Attributes</h2></td></tr>
 
 <p>Unique identifier for this RAN function (e.g. "DU-1"). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00467">467</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00511">511</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -450,7 +450,7 @@ Public Attributes</h2></td></tr>
 
 <p>Size of the receive buffer in bytes. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00540">540</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00584">584</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -469,7 +469,7 @@ Public Attributes</h2></td></tr>
 <p>Milliseconds a dApp waits before it registers with the RAN again (dApp role). </p>
 <p>When the RAN releases the dApp or the connection to it is lost, or setup did not complete, a dApp that was started with start() stops and starts itself again after this long, and again every this long until the RAN answers. The new session has a new dApp id and none of the subscriptions of the old one: the application subscribes again, and learns that the dApp is back from the setup response handler. A dApp that called release(), or stop(), is not restarted. 0 turns it off, so a dApp stays down until the program calls stop() and start(). The default is Aerial's one second. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00537">537</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00581">581</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -487,7 +487,7 @@ Public Attributes</h2></td></tr>
 
 <p>Receive operation timeout in milliseconds. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00509">509</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00553">553</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -505,7 +505,7 @@ Public Attributes</h2></td></tr>
 
 <p>Role: RAN (today's default — binds sockets) or DAPP (connects). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00464">464</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00508">508</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -523,7 +523,7 @@ Public Attributes</h2></td></tr>
 
 <p>Size of the send buffer in bytes. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00541">541</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00585">585</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -541,7 +541,7 @@ Public Attributes</h2></td></tr>
 
 <p>Send operation timeout in milliseconds. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00510">510</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00554">554</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -559,7 +559,7 @@ Public Attributes</h2></td></tr>
 
 <p>Endpoint URI for setup channel. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00494">494</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00538">538</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -577,7 +577,7 @@ Public Attributes</h2></td></tr>
 
 <p>Port used for E3AP setup channel. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00489">489</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00533">533</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -595,7 +595,7 @@ Public Attributes</h2></td></tr>
 
 <p>Endpoint URI for inbound channel. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00495">495</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00539">539</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -613,7 +613,7 @@ Public Attributes</h2></td></tr>
 
 <p>Port used for inbound control/subscription channel. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00490">490</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00534">534</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -631,7 +631,7 @@ Public Attributes</h2></td></tr>
 
 <p>Transport-layer protocol (SCTP, TCP, IPC). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00486">486</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00530">530</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -649,7 +649,7 @@ Public Attributes</h2></td></tr>
 
 <p>Vendor name for <a class="el" href="structlibe3_1_1SetupRequest.html" title="E3AP Setup Request structure.">SetupRequest</a> (optional). </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00472">472</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00516">516</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

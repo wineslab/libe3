@@ -5,6 +5,8 @@ var hierarchy =
       [ "libe3::e2sm_dapp::fixed_octstring< 3, true >", "classlibe3_1_1e2sm__dapp_1_1fixed__octstring.html", null ],
       [ "libe3::e2sm_dapp::fixed_octstring< N, Aligned >", "classlibe3_1_1e2sm__dapp_1_1fixed__octstring.html", null ]
     ] ],
+    [ "libe3::ControlResponse", "structlibe3_1_1ControlResponse.html", null ],
+    [ "libe3::ControlResult", "structlibe3_1_1ControlResult.html", null ],
     [ "libe3::e2sm_dapp::dapp_e3_subscription_item_s", "structlibe3_1_1e2sm__dapp_1_1dapp__e3__subscription__item__s.html", null ],
     [ "libe3::DAppControlAction", "structlibe3_1_1DAppControlAction.html", null ],
     [ "libe3::DAppEntry", "structlibe3_1_1DAppEntry.html", null ],

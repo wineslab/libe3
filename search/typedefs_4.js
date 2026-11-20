@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['messageackhandler_0',['MessageAckHandler',['../namespacelibe3.html#a9136029904b3422547399ad8854ceea0',1,'libe3']]]
+  ['logcallback_0',['LogCallback',['../namespacelibe3.html#a2516d19ac2e187935aad4c027401e3e0',1,'libe3']]]
 ];

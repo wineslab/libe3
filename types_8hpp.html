@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -131,6 +131,10 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">E3AP dApp Control Action structure.  <a href="structlibe3_1_1DAppControlAction.html#details">More...</a><br /></td></tr>
 <tr class="memitem:libe3_3A_3AMessageAck" id="r_libe3_3A_3AMessageAck"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1MessageAck.html">libe3::MessageAck</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">E3AP Message Acknowledgment structure.  <a href="structlibe3_1_1MessageAck.html#details">More...</a><br /></td></tr>
+<tr class="memitem:libe3_3A_3AControlResponse" id="r_libe3_3A_3AControlResponse"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1ControlResponse.html">libe3::ControlResponse</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">E3AP Control Response structure.  <a href="structlibe3_1_1ControlResponse.html#details">More...</a><br /></td></tr>
+<tr class="memitem:libe3_3A_3AControlResult" id="r_libe3_3A_3AControlResult"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1ControlResult.html">libe3::ControlResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">What a Service Model answers to a control (see <a class="el" href="classlibe3_1_1ServiceModel.html#a0b963a5b6344fd9c65815ead7fe85128" title="Answer a dApp control.">ServiceModel::respond_to_control</a>).  <a href="structlibe3_1_1ControlResult.html#details">More...</a><br /></td></tr>
 <tr class="memitem:libe3_3A_3ADAppReport" id="r_libe3_3A_3ADAppReport"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1DAppReport.html">libe3::DAppReport</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">E3AP dApp Report structure.  <a href="structlibe3_1_1DAppReport.html#details">More...</a><br /></td></tr>
 <tr class="memitem:libe3_3A_3AXAppControlAction" id="r_libe3_3A_3AXAppControlAction"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structlibe3_1_1XAppControlAction.html">libe3::XAppControlAction</a></td></tr>
@@ -159,8 +163,8 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a11f15651dcc49a68494f8215477e18fc" id="r_a11f15651dcc49a68494f8215477e18fc"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a11f15651dcc49a68494f8215477e18fc">libe3::PduChoice</a></td></tr>
-<tr class="memdesc:a11f15651dcc49a68494f8215477e18fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic E3AP PDU using std::variant for type-safe union.  <br /></td></tr>
+<tr class="memitem:a26cb84f67a97fed4556479d2f5174661" id="r_a26cb84f67a97fed4556479d2f5174661"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a26cb84f67a97fed4556479d2f5174661">libe3::PduChoice</a></td></tr>
+<tr class="memdesc:a26cb84f67a97fed4556479d2f5174661"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic E3AP PDU using std::variant for type-safe union.  <br /></td></tr>
 <tr class="memitem:a6dc96978d420b62130fbd1e5c17497aa" id="r_a6dc96978d420b62130fbd1e5c17497aa"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a6dc96978d420b62130fbd1e5c17497aa">libe3::Timestamp</a> = std::chrono::time_point&lt;std::chrono::steady_clock&gt;</td></tr>
 <tr class="memdesc:a6dc96978d420b62130fbd1e5c17497aa"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="namespacelibe3.html#a6dc96978d420b62130fbd1e5c17497aa" title="Timestamp type using steady_clock for monotonic time.">Timestamp</a> type using steady_clock for monotonic time.  <br /></td></tr>
 </table><table class="memberdecls">
@@ -233,6 +237,7 @@ Enumerations</h2></td></tr>
 &#160;&#160;<a class="el" href="namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185a5f134d2b30d5786bd2d7f021ee0ef3e0">libe3::XAPP_CONTROL_ACTION</a> = 8
 , <a class="el" href="namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185a1adeabff195cdcfd5509625aa7aac7d0">libe3::RELEASE_MESSAGE</a> = 9
 , <a class="el" href="namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185ae63ef0287e5a1f4b52c19f8f12b247ca">libe3::MESSAGE_ACK</a> = 10
+, <a class="el" href="namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185ae5ace417608d1f7ed09f8abcd1198eef">libe3::CONTROL_RESPONSE</a> = 11
 <br />
  }</td></tr>
 <tr class="memdesc:a675f37e2936d707807212fcd3cfa8185"><td class="mdescLeft">&#160;</td><td class="mdescRight">E3AP PDU types.  <a href="namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185">More...</a><br /></td></tr>
@@ -292,6 +297,10 @@ Variables</h2></td></tr>
 <tr class="memdesc:a1fdb0c4f4c6f3060e3b0448610c7a289"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest <span class="tt">reportData</span> of a dApp report, in bytes.  <br /></td></tr>
 <tr class="memitem:a058435e96914a52e2830d4c403b1d541" id="r_a058435e96914a52e2830d4c403b1d541"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a058435e96914a52e2830d4c403b1d541">libe3::MAX_XAPP_CTRL_DATA_SIZE</a> = 32768</td></tr>
 <tr class="memdesc:a058435e96914a52e2830d4c403b1d541"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest <span class="tt">xAppControlData</span> of an xApp control action, in bytes.  <br /></td></tr>
+<tr class="memitem:a39f9b1736e99fe6eb0005056a8a7deac" id="r_a39f9b1736e99fe6eb0005056a8a7deac"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#a39f9b1736e99fe6eb0005056a8a7deac">libe3::MAX_PENDING_CONTROLS</a> = 1024</td></tr>
+<tr class="memdesc:a39f9b1736e99fe6eb0005056a8a7deac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Most dApp controls a RAN holds an answer for at once.  <br /></td></tr>
+<tr class="memitem:acd78dc25c1bc7733b80f7ad5bc8e8547" id="r_acd78dc25c1bc7733b80f7ad5bc8e8547"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#acd78dc25c1bc7733b80f7ad5bc8e8547">libe3::MAX_CONTROL_OUTCOME_SIZE</a> = 32768</td></tr>
+<tr class="memdesc:acd78dc25c1bc7733b80f7ad5bc8e8547"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest <span class="tt">controlOutcome</span> of a control response, in bytes.  <br /></td></tr>
 <tr class="memitem:aa385e749637e30801ce6405782b0c699" id="r_aa385e749637e30801ce6405782b0c699"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#aa385e749637e30801ce6405782b0c699">libe3::MAX_RAN_FUNCTIONS</a> = 64</td></tr>
 <tr class="memdesc:aa385e749637e30801ce6405782b0c699"><td class="mdescLeft">&#160;</td><td class="mdescRight">ranFunctionList SIZE (0..64)  <br /></td></tr>
 <tr class="memitem:af4b3cf6c64a692090cd6b7d26f62b6bf" id="r_af4b3cf6c64a692090cd6b7d26f62b6bf"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelibe3.html#af4b3cf6c64a692090cd6b7d26f62b6bf">libe3::MAX_IDENTIFIER_LIST_SIZE</a> = 256</td></tr>
@@ -332,7 +341,7 @@ Variables</h2></td></tr>
 </div><!-- fragment -->
 <p>Expands one entry of the shared error-code list to an enumerator. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00178">178</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00179">179</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>
@@ -358,7 +367,7 @@ Variables</h2></td></tr>
 </div><!-- fragment -->
 <p>Expands one entry of the shared error-code list to an enumerator. </p>
 
-<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00178">178</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="types_8hpp_source.html#l00179">179</a> of file <a class="el" href="types_8hpp_source.html">types.hpp</a>.</p>
 
 </div>
 </div>

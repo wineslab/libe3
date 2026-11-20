@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -122,6 +122,11 @@ Two layers</h1>
 </table>
 <p>See <a href="e3_dapp_session.hpp"><span class="tt">e3_dapp_session.hpp</span></a> for the authoritative, Doxygen-documented API.</p>
 <h1 class="doxsection"><a class="anchor" id="autotoc_md3"></a>
+Answers to controls</h1>
+<p><span class="tt">send_control(..., request_ack)</span> asks the RAN for an <span class="tt">E3_EVENT_CONTROL_RESPONSE</span> (7). It carries <span class="tt">request_id</span> (the id <span class="tt">send_control</span> returned), <span class="tt">ran_function_id</span>, <span class="tt">control_id</span>, <span class="tt">response_code</span>, <span class="tt">cause</span> (-1 for none), <span class="tt">detail</span> and, when the Service Model gave one, <span class="tt">has_outcome</span> with the bytes in <span class="tt">get_payload()</span>. The RAN also answers a control that it refuses itself, with a negative response, whether the control asked or not.</p>
+<p><span class="tt">E3_EVENT_MESSAGE_ACK</span> (5) and <span class="tt">send_message_ack</span> are DEPRECATED TO BE REMOVED: <a class="el" href="namespacelibe3.html">libe3</a> sends no <span class="tt">MessageAck</span>, and the event reports one that another RAN sends.</p>
+<p>An <span class="tt">E3_EVENT_XAPP_CONTROL</span> event carries <span class="tt">request_ack</span>. When it is true, answer with <span class="tt">send_control_response(request_id, ran_function_id, control_id, response_code, cause, detail, outcome)</span>, where <span class="tt">request_id</span> is the event's <span class="tt">request_id</span>.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md4"></a>
 Why batched drain + GIL release (not callbacks)</h1>
 <p>E3AP runs at real-time sub-millisecond cadence with very high message throughput, so the binding must not become the bottleneck. At those rates the limiters are the <b>count of GIL acquisitions</b>, the <b>count of Python↔C++ boundary crossings</b>, and <a class="el" href="namespacelibe3.html">libe3</a>'s C++ worker threads <b>stalling on the GIL</b> — not payload copy size (E3AP payloads are small; bulk IQ travels out-of-band in shared memory).</p>
 <p><span class="tt">DAppSession</span> therefore:</p>
@@ -131,10 +136,10 @@ Why batched drain + GIL release (not callbacks)</h1>
 <li>is wrapped with <span class="tt">module(threads="1")</span> (see <a href="libe3.i"><span class="tt">libe3.i</span></a>) so the GIL is <b>released</b> around every call; <a class="el" href="namespacelibe3.html">libe3</a>'s threads run freely while Python waits.</li>
 </ul>
 <p><b>Rejected alternatives:</b> SWIG <em>directors</em> run the Python callback on <a class="el" href="namespacelibe3.html">libe3</a>'s inbound thread under the GIL (serialises dispatch, deadlock-prone if Python re-enters <a class="el" href="namespacelibe3.html">libe3</a>); a <em>per-message</em> poll pays one GIL round-trip per message and caps throughput with no latency benefit over batching.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md4"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md5"></a>
 Refusals</h1>
 <p>A negative subscription response, setup response or message ack arrives as an <span class="tt">E3Event</span> with <span class="tt">response_code == 1</span>, and <span class="tt">cause</span> and <span class="tt">detail</span> say why: <span class="tt">cause</span> is a <span class="tt">libe3py.Cause_*</span> value (for example <span class="tt">Cause_UNSUPPORTED_IDENTIFIER</span> when a control id is not one the RAN function advertises) or -1 when the RAN gave none, as Aerial does, and <span class="tt">detail</span> is its text or empty. libe3py does not raise: the dApp reads the event and decides, for example to drop the control and subscribe again.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md5"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md6"></a>
 Lifecycle</h1>
 <div class="fragment"><div class="line">DAppSession(cfg)          # ctor registers all inbound handlers</div>
 <div class="line">  → start()               # connects; begins the handshake</div>
@@ -144,11 +149,11 @@ Lifecycle</h1>
 <div class="line">  → loop:</div>
 <div class="line">      for ev in poll_events(max_batch, timeout_ms):</div>
 <div class="line">          dispatch(ev)                 # E3_EVENT_INDICATION / _XAPP_CONTROL / ...</div>
-<div class="line">      send_control(rfid, cid, payload_bytes)   # or send_report(...)</div>
+<div class="line">      send_control(rfid, cid, payload_bytes, sequence_id, request_ack)   # or send_report(...)</div>
 <div class="line">  → release()             # tell the RAN we are leaving</div>
 <div class="line">  → stop()                # tear down; unblocks any poll_events</div>
 </div><!-- fragment --><p>If the RAN releases the dApp or the connection is lost, <span class="tt">poll_events</span> returns an <span class="tt">E3_EVENT_DISCONNECT</span> event, the dApp id and the subscriptions are gone, and unless <span class="tt">cfg.reconnect_interval_ms</span> is 0 the session registers again by itself after that many milliseconds. It gets a new <span class="tt">dapp_id()</span> and an <span class="tt">E3_EVENT_SETUP_RESPONSE</span>; subscribe again from there. <span class="tt">release()</span> and <span class="tt">stop()</span> end it for good. A RAN also releases a dApp that has sent nothing for <span class="tt">dapp_idle_timeout_s</span> (default 1800), so a dApp that only listens comes back about that often.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md6"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md7"></a>
 Minimal Python example</h1>
 <div class="fragment"><div class="line"><span class="keyword">import</span> libe3py <span class="keyword">as</span> e3</div>
 <div class="line"> </div>
@@ -178,15 +183,15 @@ Minimal Python example</h1>
 <div class="line">        <span class="keywordflow">elif</span> ev.kind == e3.E3_EVENT_SUBSCRIPTION_RESPONSE:</div>
 <div class="line">            ...</div>
 <div class="line">    <span class="comment"># send an SM-encoded control back when needed:</span></div>
-<div class="line">    <span class="comment"># s.send_control(1, 1, sm_encode(...))</span></div>
-</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md7"></a>
+<div class="line">    <span class="comment"># s.send_control(1, 1, sm_encode(...), 0, True)   # True: ask for an E3_EVENT_CONTROL_RESPONSE</span></div>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md8"></a>
 Build &amp; install</h1>
 <p>On Linux (x86_64 and aarch64, glibc 2.28 or newer, Python 3.10 to 3.13) the binding is a prebuilt wheel that contains <a class="el" href="namespacelibe3.html">libe3</a>, so one command in any virtual environment is enough, with no <a class="el" href="namespacelibe3.html">libe3</a> installed:</p>
 <div class="fragment"><div class="line">pip install libe3py</div>
 <div class="line">python -c &quot;import libe3py; print(&#39;libe3py OK&#39;, libe3py.__version__)&quot;</div>
 </div><!-- fragment --><p>Elsewhere, and from a checkout (<span class="tt">pip install .</span>), install <a class="el" href="namespacelibe3.html">libe3</a> once (<span class="tt">./build_libe3 --all-encodings --install</span>, see the main README) and pip builds the module from these sources against the installed <a class="el" href="namespacelibe3.html">libe3</a> (<span class="tt">python/CMakeLists.txt</span>); it needs <span class="tt">swig &gt;= 4.0</span>, the Python headers and a C++17 compiler (<span class="tt">./build_libe3 -I</span> installs them), and it stops with an error if the installed <a class="el" href="namespacelibe3.html">libe3</a> is not the same version. For a <a class="el" href="namespacelibe3.html">libe3</a> outside <span class="tt">/usr</span> and <span class="tt">/usr/local</span>: <span class="tt">pip install --no-binary libe3py libe3py --config-settings=cmake.define.CMAKE_PREFIX_PATH=&lt;prefix&gt;</span>.</p>
 <p>For development, <span class="tt">./build_libe3 --enable-swig</span> builds the module in <span class="tt">build/swig</span> (run the smoke test with <span class="tt">PYTHONPATH=build/swig python3 tests/test_swig_smoke.py</span>); <span class="tt">cmake --install</span> installs it only if <span class="tt">-DLIBE3_PYTHON_INSTALL_DIR=&lt;dir&gt;</span> is given.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md8"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md9"></a>
 Service-model definitions</h1>
 <p>The Simple SM grammar is installed alongside the library under <span class="tt">&lt;datadir&gt;/libe3/sm/sm_simple/</span> — both <span class="tt">e3sm_simple.asn</span> (ASN.1) and <span class="tt">e3sm_simple.proto</span> (Protobuf) — discoverable via <span class="tt">pkg-config --variable=smdir <a class="el" href="namespacelibe3.html">libe3</a></span>, so Python dApps can reuse the exact grammar their C++ counterpart (<span class="tt">examples/simple_agent.cpp</span>) uses instead of copying it. </p>
 </div><!-- contents -->

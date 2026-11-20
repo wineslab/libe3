@@ -2,6 +2,7 @@ var structlibe3_1_1E3Agent_1_1Impl =
 [
     [ "Impl", "structlibe3_1_1E3Agent_1_1Impl.html#a2bc00ef1919f5149f1fffcb24cca9941", null ],
     [ "config", "structlibe3_1_1E3Agent_1_1Impl.html#aeb369133790baf1224e8ce6dca7cdae0", null ],
+    [ "control_response_handler", "structlibe3_1_1E3Agent_1_1Impl.html#afd21a13122d6ab25d26b60eb0a96e1a3", null ],
     [ "dapp_report_handler", "structlibe3_1_1E3Agent_1_1Impl.html#aa82690957cd24f5104fa183126a7e8ea", null ],
     [ "dapp_status_changed_handler", "structlibe3_1_1E3Agent_1_1Impl.html#aebab35a9ea90d5dc30c40e7dee16f946", null ],
     [ "disconnect_handler", "structlibe3_1_1E3Agent_1_1Impl.html#aeb94050d32ccd5e5d9ec1f7d66895199", null ],

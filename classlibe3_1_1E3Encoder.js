@@ -7,6 +7,7 @@ var classlibe3_1_1E3Encoder =
     [ "decode", "classlibe3_1_1E3Encoder.html#a7307745c5de56ed0a1ef00b314774253", null ],
     [ "decode", "classlibe3_1_1E3Encoder.html#ac1c90f018d3d811304f0f231311c5f04", null ],
     [ "encode", "classlibe3_1_1E3Encoder.html#ad95787cb0ed484b24102bedd2c9fd1a0", null ],
+    [ "encode_control_response", "classlibe3_1_1E3Encoder.html#adbb7030318ca6e8c8575dc7d12d74803", null ],
     [ "encode_dapp_control_action", "classlibe3_1_1E3Encoder.html#a7c198723c6c6ea2098b0fb14accb968d", null ],
     [ "encode_dapp_report", "classlibe3_1_1E3Encoder.html#afdb3ab69fb4c4de694a5c24de7f4555c", null ],
     [ "encode_indication_message", "classlibe3_1_1E3Encoder.html#ad9a06dcaccd5851b728963b80fee7f32", null ],

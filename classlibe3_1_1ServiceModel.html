@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -140,12 +140,16 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a97640236c95acd20dc602a72294af3d4" id="r_a97640236c95acd20dc602a72294af3d4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a97640236c95acd20dc602a72294af3d4">ServiceModel</a> ()=default</td></tr>
+<tr class="memitem:a0b963a5b6344fd9c65815ead7fe85128" id="r_a0b963a5b6344fd9c65815ead7fe85128"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0b963a5b6344fd9c65815ead7fe85128">respond_to_control</a> (uint32_t dapp_id, uint32_t request_message_id, const <a class="el" href="structlibe3_1_1ControlResult.html">ControlResult</a> &amp;result)</td></tr>
+<tr class="memdesc:a0b963a5b6344fd9c65815ead7fe85128"><td class="mdescLeft">&#160;</td><td class="mdescRight">Answer a dApp control.  <br /></td></tr>
 <tr class="memitem:a979d55be233ccf00829259a9b276c773" id="r_a979d55be233ccf00829259a9b276c773"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a979d55be233ccf00829259a9b276c773">emit_outbound</a> (<a class="el" href="structlibe3_1_1Pdu.html">Pdu</a> &amp;&amp;pdu)</td></tr>
 <tr class="memdesc:a979d55be233ccf00829259a9b276c773"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emit an outbound PDU produced by the SM.  <br /></td></tr>
 <tr class="memitem:a29fc96ee477223cb4a6c76e1b03bebb4" id="r_a29fc96ee477223cb4a6c76e1b03bebb4"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a29fc96ee477223cb4a6c76e1b03bebb4">get_subscribers</a> () const</td></tr>
 <tr class="memdesc:a29fc96ee477223cb4a6c76e1b03bebb4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get currently subscribed dApps for this SM's RAN function.  <br /></td></tr>
 <tr class="memitem:a53003f5cdff09e4c249eccffa2a4e6a2" id="r_a53003f5cdff09e4c249eccffa2a4e6a2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a53003f5cdff09e4c249eccffa2a4e6a2">set_outbound_emitter</a> (std::function&lt; <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>(<a class="el" href="structlibe3_1_1Pdu.html">Pdu</a> &amp;&amp;)&gt; emitter)</td></tr>
 <tr class="memdesc:a53003f5cdff09e4c249eccffa2a4e6a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the outbound PDU emitter callback (used by <a class="el" href="classlibe3_1_1E3Interface.html" title="E3Interface - Internal protocol coordination.">E3Interface</a>).  <br /></td></tr>
+<tr class="memitem:a49a596973db92a6417ad80d7e3a8b5a2" id="r_a49a596973db92a6417ad80d7e3a8b5a2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a49a596973db92a6417ad80d7e3a8b5a2">set_control_responder</a> (std::function&lt; <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>(uint32_t, uint32_t, const <a class="el" href="structlibe3_1_1ControlResult.html">ControlResult</a> &amp;)&gt; responder)</td></tr>
+<tr class="memdesc:a49a596973db92a6417ad80d7e3a8b5a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the control responder callback (used by <a class="el" href="classlibe3_1_1E3Interface.html" title="E3Interface - Internal protocol coordination.">E3Interface</a>).  <br /></td></tr>
 <tr class="memitem:a44febc891c10b3c05b520a751c1bdec3" id="r_a44febc891c10b3c05b520a751c1bdec3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a44febc891c10b3c05b520a751c1bdec3">set_subscribers_provider</a> (std::function&lt; std::vector&lt; uint32_t &gt;()&gt; provider)</td></tr>
 <tr class="memdesc:a44febc891c10b3c05b520a751c1bdec3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set subscriber provider callback (used by <a class="el" href="classlibe3_1_1E3Interface.html" title="E3Interface - Internal protocol coordination.">E3Interface</a>).  <br /></td></tr>
 </table><table class="memberdecls">
@@ -314,7 +318,7 @@ Friends</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS if it was queued, ErrorCode::NOT_INITIALIZED if no emitter is set </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00219">219</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00247">247</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -344,7 +348,7 @@ Friends</h2></td></tr>
 <p>Get currently subscribed dApps for this SM's RAN function. </p>
 <dl class="section return"><dt>Returns</dt><dd>The identifiers of the subscribed dApps, empty when no provider is set </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00230">230</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00258">258</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -415,7 +419,7 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Process a control action from a dApp. </p>
-<p>Called by the E3 interface when a <a class="el" href="structlibe3_1_1DAppControlAction.html" title="E3AP dApp Control Action structure.">DAppControlAction</a> is received for this service model. Implementations can emit outbound PDUs (e.g. <a class="el" href="structlibe3_1_1MessageAck.html" title="E3AP Message Acknowledgment structure.">MessageAck</a>, <a class="el" href="structlibe3_1_1IndicationMessage.html" title="E3AP Indication Message structure.">IndicationMessage</a>) via <a class="el" href="#a979d55be233ccf00829259a9b276c773" title="Emit an outbound PDU produced by the SM.">emit_outbound()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Called by the E3 interface when a <a class="el" href="structlibe3_1_1DAppControlAction.html" title="E3AP dApp Control Action structure.">DAppControlAction</a> is received for this service model. Implementations answer it with <a class="el" href="#a0b963a5b6344fd9c65815ead7fe85128" title="Answer a dApp control.">respond_to_control()</a> and can emit outbound PDUs (e.g. <a class="el" href="structlibe3_1_1IndicationMessage.html" title="E3AP Indication Message structure.">IndicationMessage</a>) via <a class="el" href="#a979d55be233ccf00829259a9b276c773" title="Emit an outbound PDU produced by the SM.">emit_outbound()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">request_message_id</td><td>Message identifier of the <a class="el" href="structlibe3_1_1DAppControlAction.html" title="E3AP dApp Control Action structure.">DAppControlAction</a> </td></tr>
     <tr><td class="paramname">action</td><td>The control action </td></tr>
@@ -531,7 +535,7 @@ Friends</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The PDU </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00200">200</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00228">228</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -563,7 +567,7 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Build a <a class="el" href="structlibe3_1_1MessageAck.html" title="E3AP Message Acknowledgment structure.">MessageAck</a> PDU for a control/request message. </p>
-<p>This helper only builds the PDU. Implementations can decide whether to emit it with <a class="el" href="#a979d55be233ccf00829259a9b276c773" title="Emit an outbound PDU produced by the SM.">emit_outbound()</a> or suppress it when protocol semantics allow. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>DEPRECATED TO BE REMOVED. A Service Model answers a control with <a class="el" href="#a0b963a5b6344fd9c65815ead7fe85128" title="Answer a dApp control.">respond_to_control()</a>. This helper only builds the PDU. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">request_message_id</td><td>Message identifier of the message acknowledged </td></tr>
     <tr><td class="paramname">response_code</td><td>Result to report </td></tr>
@@ -670,6 +674,88 @@ Friends</h2></td></tr>
 
 </div>
 </div>
+<a id="a0b963a5b6344fd9c65815ead7fe85128" name="a0b963a5b6344fd9c65815ead7fe85128"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b963a5b6344fd9c65815ead7fe85128">&#9670;&#160;</a></span>respond_to_control()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a> libe3::ServiceModel::respond_to_control </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>dapp_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>request_message_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structlibe3_1_1ControlResult.html">ControlResult</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>result</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Answer a dApp control. </p>
+<p>Call it once per control, from any thread, when the outcome is known: from <a class="el" href="#a9db06b14342c2e140d1a0df72a174ef3" title="Process a control action from a dApp.">handle_control_action()</a> or later, as an SM that applies the control asynchronously does. It sends a <a class="el" href="structlibe3_1_1ControlResponse.html" title="E3AP Control Response structure.">ControlResponse</a> only when the dApp asked for one (<span class="tt">request_ack</span>), so an SM can call it for every control. The RAN function and the control identifier are filled in from the control. An SM that never answers sends nothing: the library does not invent an answer for a control that may still be applied. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dapp_id</td><td>dApp that sent the control (<span class="tt"><a class="el" href="structlibe3_1_1DAppControlAction.html#ad174c1722093dde8319b1425644e3840" title="dApp that sends the control">DAppControlAction::dapp_identifier</a></span>) </td></tr>
+    <tr><td class="paramname">request_message_id</td><td>Message identifier of the control, as passed to <a class="el" href="#a9db06b14342c2e140d1a0df72a174ef3" title="Process a control action from a dApp.">handle_control_action()</a> </td></tr>
+    <tr><td class="paramname">result</td><td>Whether the control was applied, why not, and what the SM reports about it </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>ErrorCode::SUCCESS if the answer was queued; ErrorCode::NOT_FOUND if none is owed (the dApp did not ask, or the control was answered already); ErrorCode::INVALID_PARAM if the outcome is over MAX_CONTROL_OUTCOME_SIZE; ErrorCode::NOT_INITIALIZED if no agent runs the SM </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00207">207</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a49a596973db92a6417ad80d7e3a8b5a2" name="a49a596973db92a6417ad80d7e3a8b5a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49a596973db92a6417ad80d7e3a8b5a2">&#9670;&#160;</a></span>set_control_responder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void libe3::ServiceModel::set_control_responder </td>
+          <td>(</td>
+          <td class="paramtype">std::function&lt; <a class="el" href="namespacelibe3.html#a0f455c3a80f115f8aa8ad664850d6bb3">ErrorCode</a>(uint32_t, uint32_t, const <a class="el" href="structlibe3_1_1ControlResult.html">ControlResult</a> &amp;)&gt;</td>          <td class="paramname"><span class="paramname"><em>responder</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set the control responder callback (used by <a class="el" href="classlibe3_1_1E3Interface.html" title="E3Interface - Internal protocol coordination.">E3Interface</a>). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">responder</td><td>Callback that answers a dApp control </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00277">277</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+
+</div>
+</div>
 <a id="a53003f5cdff09e4c249eccffa2a4e6a2" name="a53003f5cdff09e4c249eccffa2a4e6a2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a53003f5cdff09e4c249eccffa2a4e6a2">&#9670;&#160;</a></span>set_outbound_emitter()</h2>
 
@@ -701,7 +787,7 @@ Friends</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00241">241</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00269">269</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -736,7 +822,7 @@ Friends</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00249">249</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00285">285</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 
 </div>
 </div>
@@ -881,7 +967,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00257">257</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sm__interface_8hpp_source.html#l00294">294</a> of file <a class="el" href="sm__interface_8hpp_source.html">sm_interface.hpp</a>.</p>
 
 </div>
 </div>

@@ -15,6 +15,8 @@ var classlibe3_1_1ServiceModel =
     [ "name", "classlibe3_1_1ServiceModel.html#a003eae4bbac3dadb42613b2c71c21476", null ],
     [ "ran_function_data", "classlibe3_1_1ServiceModel.html#accba27a2f8aafac0209c088d06afbb2d", null ],
     [ "ran_function_id", "classlibe3_1_1ServiceModel.html#a0e5af990ce382e6c1970290d2336631e", null ],
+    [ "respond_to_control", "classlibe3_1_1ServiceModel.html#a0b963a5b6344fd9c65815ead7fe85128", null ],
+    [ "set_control_responder", "classlibe3_1_1ServiceModel.html#a49a596973db92a6417ad80d7e3a8b5a2", null ],
     [ "set_outbound_emitter", "classlibe3_1_1ServiceModel.html#a53003f5cdff09e4c249eccffa2a4e6a2", null ],
     [ "set_subscribers_provider", "classlibe3_1_1ServiceModel.html#a44febc891c10b3c05b520a751c1bdec3", null ],
     [ "start", "classlibe3_1_1ServiceModel.html#ab8d84fad0e14000328cccf3ed35aa4bc", null ],

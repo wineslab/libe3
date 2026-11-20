@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -145,6 +145,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:aadbb82f01267591bfcc42e05261737d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create and encode an xApp Control Action PDU.  <br /></td></tr>
 <tr class="memitem:a8b36491aa951d523adada038f2cb79e9" id="r_a8b36491aa951d523adada038f2cb79e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a9acc43e04a971efeb933961b950d3732">EncodeResult</a>&lt; <a class="el" href="structlibe3_1_1EncodedMessage.html">EncodedMessage</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8b36491aa951d523adada038f2cb79e9">encode_message_ack</a> (uint32_t message_id, uint32_t request_id, <a class="el" href="namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5">ResponseCode</a> response_code, const std::optional&lt; <a class="el" href="namespacelibe3.html#aa5a8f2c5dd74ad4e6a1e12859aa8c6c7">Cause</a> &gt; &amp;cause=std::nullopt, const std::optional&lt; std::string &gt; &amp;detail=std::nullopt)</td></tr>
 <tr class="memdesc:a8b36491aa951d523adada038f2cb79e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create and encode a Message Acknowledgment PDU.  <br /></td></tr>
+<tr class="memitem:adbb7030318ca6e8c8575dc7d12d74803" id="r_adbb7030318ca6e8c8575dc7d12d74803"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelibe3.html#a9acc43e04a971efeb933961b950d3732">EncodeResult</a>&lt; <a class="el" href="structlibe3_1_1EncodedMessage.html">EncodedMessage</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adbb7030318ca6e8c8575dc7d12d74803">encode_control_response</a> (uint32_t message_id, const <a class="el" href="structlibe3_1_1ControlResponse.html">ControlResponse</a> &amp;response)</td></tr>
+<tr class="memdesc:adbb7030318ca6e8c8575dc7d12d74803"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create and encode a Control Response PDU.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -376,6 +378,39 @@ Protected Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="adbb7030318ca6e8c8575dc7d12d74803" name="adbb7030318ca6e8c8575dc7d12d74803"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adbb7030318ca6e8c8575dc7d12d74803">&#9670;&#160;</a></span>encode_control_response()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacelibe3.html#a9acc43e04a971efeb933961b950d3732">EncodeResult</a>&lt; <a class="el" href="structlibe3_1_1EncodedMessage.html">EncodedMessage</a> &gt; libe3::E3Encoder::encode_control_response </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>message_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structlibe3_1_1ControlResponse.html">ControlResponse</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>response</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Create and encode a Control Response PDU. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">message_id</td><td>Unique message ID </td></tr>
+    <tr><td class="paramname">response</td><td>The response; its <span class="tt">request_id</span> is the message ID of the control it answers </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Encoded message on success, error code on failure </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="e3__encoder_8cpp_source.html#l00202">202</a> of file <a class="el" href="e3__encoder_8cpp_source.html">e3_encoder.cpp</a>.</p>
+
+</div>
+</div>
 <a id="a7c198723c6c6ea2098b0fb14accb968d" name="a7c198723c6c6ea2098b0fb14accb968d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7c198723c6c6ea2098b0fb14accb968d">&#9670;&#160;</a></span>encode_dapp_control_action()</h2>
 
@@ -552,7 +587,7 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Create and encode a Message Acknowledgment PDU. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>DEPRECATED TO BE REMOVED. <a class="el" href="namespacelibe3.html">libe3</a> does not send one; use <a class="el" href="#adbb7030318ca6e8c8575dc7d12d74803" title="Create and encode a Control Response PDU.">encode_control_response()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">message_id</td><td>Unique message ID </td></tr>
     <tr><td class="paramname">request_id</td><td>Message ID of the request being acknowledged </td></tr>

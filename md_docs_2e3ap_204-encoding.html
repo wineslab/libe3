@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.4.3</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.5.0</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -92,10 +92,10 @@ $(function(){initNavTree('md_docs_2e3ap_204-encoding.html','',''); });
   <div class="headertitle"><div class="title">E3AP: encoding </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md329"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md331"></a></p>
 <p>How an implementation turns an E3AP message into bytes, how the bytes cross a link, and the limits on their size. Worked examples are checked against the pinned test vectors.</p>
 <p>This is clause 8 of the specification. The index is <a class="el" href="dir_af0c76cc165e127d1e03e322192d98eb.html">README.md</a>. The messages are in <a class="el" href="md_docs_2e3ap_202-ie-mapping.html">02-ie-mapping.md</a>. The validation rules are in <a class="el" href="md_docs_2e3ap_205-semantics-and-constraints.html">05-semantics-and-constraints.md</a>. Code pointers and build switches are in <a class="el" href="md_docs_2e3ap_2integrator-guide.html">integrator-guide.md</a>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md330"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md332"></a>
 What is on the wire</h1>
 <p>Every E3AP message is one <span class="tt">E3-PDU</span>. An implementation shall encode the <span class="tt">E3-PDU</span> with one of three encodings.</p>
 <p>Table: The three encodings of an E3-PDU</p>
@@ -110,17 +110,17 @@ What is on the wire</h1>
 <td class="markdownTableBodyNone">Protobuf  </td><td class="markdownTableBodyNone">One <span class="tt">E3Pdu</span> message of the proto3 schema of E3AP. The <span class="tt">oneof</span> case names the message  </td><td class="markdownTableBodyNone">[i.1]  </td></tr>
 </table>
 <p>The encoding is not part of the message. There is no indicator on the wire. Both sides shall use the same encoding on a link. A receiver that gets bytes in another encoding cannot decode them. An E3 Agent shall answer such a SETUP REQUEST message with a negative SETUP RESPONSE message, if it can still send a response.</p>
-<p>The payloads (<span class="tt">ranFunctionData</span>, <span class="tt">protocolData</span>, <span class="tt">actionData</span>, <span class="tt">reportData</span> and <span class="tt">xAppControlData</span>) follow the encoding of the link. APER carries them as octet strings. JSON carries them as nested JSON values, not as hexadecimal text. Protobuf carries them as <span class="tt">bytes</span>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md331"></a>
+<p>The payloads (<span class="tt">ranFunctionData</span>, <span class="tt">protocolData</span>, <span class="tt">actionData</span>, <span class="tt">reportData</span>, <span class="tt">xAppControlData</span> and <span class="tt">controlOutcome</span>) follow the encoding of the link. APER carries them as octet strings. JSON carries them as nested JSON values, not as hexadecimal text. Protobuf carries them as <span class="tt">bytes</span>.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md333"></a>
 APER</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md332"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md334"></a>
 The rules that decide almost every byte</h2>
 <ol type="1">
 <li><b>Alignment.</b> In aligned PER a value that needs whole octets first skips to the next octet boundary. The skipped bits are zero. Small fields (extension bits, presence bits, choice indices, short length codes) are not aligned. They are packed from the most significant bit.</li>
 <li><b>Extension bit.</b> Every <span class="tt">SEQUENCE</span> and the <span class="tt">CHOICE</span> of <span class="tt">E3-PDU</span> has an extension marker. An encoder writes the extension bit as 0, unless the message carries an extension addition. Each marker costs one bit.</li>
 <li><b>Presence bits.</b> Each <span class="tt">OPTIONAL</span> field costs one bit. The bits come before the first field, in the order of the grammar. A cleared bit means that the field is absent and takes no more space.</li>
 </ol>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md333"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md335"></a>
 Rules for each construct</h2>
 <p>Table: APER bits for each construct of the grammar</p>
 <table class="markdownTable">
@@ -139,7 +139,7 @@ Rules for each construct</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">ENUMERATED</span> with two values and no extension  </td><td class="markdownTableBodyNone">1 bit  </td><td class="markdownTableBodyNone"><span class="tt">E3-ResponseCode</span>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">CHOICE</span> with 11 alternatives and an extension marker  </td><td class="markdownTableBodyNone">1 extension bit, then the index in 4 bits  </td><td class="markdownTableBodyNone"><span class="tt">msg</span>  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">CHOICE</span> with 12 alternatives and an extension marker  </td><td class="markdownTableBodyNone">1 extension bit, then the index in 4 bits  </td><td class="markdownTableBodyNone"><span class="tt">msg</span>  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">SEQUENCE (SIZE (0..256)) OF</span>  </td><td class="markdownTableBodyNone">the count in 16 bits, aligned, then the elements  </td><td class="markdownTableBodyNone">identifier lists  </td></tr>
 <tr class="markdownTableRowOdd">
@@ -154,7 +154,7 @@ Rules for each construct</h2>
 <td class="markdownTableBodyNone"><span class="tt">OCTET STRING (SIZE (1..262144))</span>  </td><td class="markdownTableBodyNone">the length in an aligned length determinant, then the octets  </td><td class="markdownTableBodyNone"><span class="tt">ranFunctionData</span>  </td></tr>
 </table>
 <p>The examples below pin the rows for the identifiers, the time limit, the interval, the response code, the choice index and the short counts. The rows for the long lists and for the payload strings come from X.691. No test vector covers them. They are not checked.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md334"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md336"></a>
 Worked examples</h2>
 <p>Each example is a complete <span class="tt">E3-PDU</span>. The message identifier is 42 and the timestamp is 1756800000123456789 nanoseconds. The bytes equal the pinned test vectors.</p>
 <p><b>Example 1: RELEASE message for dApp 7.</b></p>
@@ -176,22 +176,54 @@ Worked examples</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">00 06</span>  </td><td class="markdownTableBodyNone">dApp identifier 7, sent as 6  </td></tr>
 </table>
-<p><b>Example 2: MESSAGE ACK with request identifier 42 and "negative".</b></p>
-<div class="fragment"><div class="line">40 29 08 18 61 68 4a cc c3 cd 15 50 29 80</div>
-</div><!-- fragment --><p>Table: Message acknowledgement, byte by byte</p>
+<p><b>Example 2: CONTROL RESPONSE, "positive", for the control with message identifier 42, from dApp 7, RAN function 1, control 1.</b> No cause, no detail and no outcome.</p>
+<div class="fragment"><div class="line">40 29 08 18 61 68 4a cc c3 cd 15 58 00 29 00 06 00 00 00 00 00</div>
+</div><!-- fragment --><p>Table: Control response, byte by byte</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Bytes  </th><th class="markdownTableHeadNone">Meaning  </th></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">40 29 08 18 61 68 4a cc c3 cd 15</span>  </td><td class="markdownTableBodyNone">the envelope, as in example 1  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">50</span>  </td><td class="markdownTableBodyNone"><span class="tt">msg</span> extension bit 0, index <span class="tt">1010</span> (10, the MESSAGE ACK message), message extension bit 0, length code <span class="tt">00</span>  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">58</span>  </td><td class="markdownTableBodyNone"><span class="tt">msg</span> extension bit 0, index <span class="tt">1011</span> (11, the CONTROL RESPONSE message), message extension bit 0, presence bits <span class="tt">00</span> for <span class="tt">cause</span> and <span class="tt">detail</span>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">29</span>  </td><td class="markdownTableBodyNone"><span class="tt">requestId</span> 42, sent as 41  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">00</span>  </td><td class="markdownTableBodyNone">presence bit <span class="tt">0</span> for <span class="tt">controlOutcome</span>, length code <span class="tt">00</span> (one octet), 5 padding bits  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">80</span>  </td><td class="markdownTableBodyNone"><span class="tt">responseCode</span> "negative" as bit 1, 7 padding bits  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">29</span>  </td><td class="markdownTableBodyNone"><span class="tt">requestId</span> 42, sent as 41  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">00 06</span>  </td><td class="markdownTableBodyNone"><span class="tt">dAppIdentifier</span> 7, sent as 6  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">00 00</span>  </td><td class="markdownTableBodyNone"><span class="tt">ranFunctionIdentifier</span> 1, sent as 0  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">00 00</span>  </td><td class="markdownTableBodyNone"><span class="tt">controlIdentifier</span> 1, sent as 0  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">00</span>  </td><td class="markdownTableBodyNone"><span class="tt">responseCode</span> "positive" as bit 0, 7 padding bits  </td></tr>
 </table>
-<p><b>Example 3: SUBSCRIPTION REQUEST.</b> dApp 7, RAN function 1, telemetry identifiers 1 and 2, no control identifiers, time limit 60 seconds, interval 100 microseconds.</p>
+<p><b>Example 3: dApp CONTROL ACTION with <span class="tt">requestAck</span>.</b> dApp 7, RAN function 1, control 1, payload <span class="tt">aa bb</span>, no sequence identifier.</p>
+<div class="fragment"><div class="line">40 29 08 18 61 68 4a cc c3 cd 15 34 00 06 00 00 00 00 00 01 aa bb 01 01 80</div>
+</div><!-- fragment --><p>Table: Control action that asks for an answer, byte by byte</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Bytes  </th><th class="markdownTableHeadNone">Meaning  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">40 29 08 18 61 68 4a cc c3 cd 15</span>  </td><td class="markdownTableBodyNone">the envelope, as in example 1  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">34</span>  </td><td class="markdownTableBodyNone"><span class="tt">msg</span> extension bit 0, index <span class="tt">0110</span> (6, the dApp CONTROL ACTION message), message extension bit <span class="tt">1</span> (an extension addition is present), presence bit <span class="tt">0</span> for <span class="tt">sequenceId</span>, 1 padding bit  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">00 06</span>, <span class="tt">00 00</span>, <span class="tt">00 00</span>  </td><td class="markdownTableBodyNone">dApp 7, RAN function 1 and control 1  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">00 01</span>  </td><td class="markdownTableBodyNone"><span class="tt">actionData</span> is 2 octets long, sent as 1  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">aa bb</span>  </td><td class="markdownTableBodyNone">the payload  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">01</span>  </td><td class="markdownTableBodyNone">the number of extension additions minus 1, as 7 bits <span class="tt">0000000</span>, then presence bit <span class="tt">1</span> for <span class="tt">requestAck</span>  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">01</span>  </td><td class="markdownTableBodyNone"><span class="tt">requestAck</span> is 1 octet long  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">80</span>  </td><td class="markdownTableBodyNone"><span class="tt">requestAck</span> "true" as bit 1, 7 padding bits  </td></tr>
+</table>
+<p>A control that does not ask ends after <span class="tt">aa bb</span> and starts with <span class="tt">30</span>: its bytes are the bytes of a control before <span class="tt">requestAck</span> existed.</p>
+<p><b>Example 4: SUBSCRIPTION REQUEST.</b> dApp 7, RAN function 1, telemetry identifiers 1 and 2, no control identifiers, time limit 60 seconds, interval 100 microseconds.</p>
 <div class="fragment"><div class="line">40 29 08 18 61 68 4a cc c3 cd 15 13 00 06 00 00 00 02 00 00 00 01 00 00 00 3c 00 64</div>
 </div><!-- fragment --><p>Table: Subscription request, byte by byte</p>
 <table class="markdownTable">
@@ -216,13 +248,13 @@ Worked examples</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">00 64</span>  </td><td class="markdownTableBodyNone">length code <span class="tt">00</span> with padding, then <span class="tt">periodicity</span> 100  </td></tr>
 </table>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md335"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md337"></a>
 Size of the encoding</h2>
 <p>The envelope with a timestamp of 1756800000123456789 takes 11 octets before the message: 1 octet for the extension, presence and length bits, 1 octet for the message identifier, 1 length octet and 8 octets of timestamp. A message without a timestamp is 9 octets shorter. A message identifier up to 256 takes 1 octet, up to 65536 takes 2, up to 16777216 takes 3, and a larger one takes 4. A long list or a payload grows the message by the size of its elements.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md336"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md338"></a>
 A receiver that sees extension additions</h2>
-<p>A decoder shall ignore an extension addition that it does not know. <span class="tt">cause</span> and <span class="tt">detail</span> are the first extension additions of <span class="tt">E3-SetupResponse</span>, <span class="tt">E3-SubscriptionResponse</span> and <span class="tt">E3-MessageAck</span>, in that order. In <span class="tt">E3-SubscriptionResponse</span> <span class="tt">ranFunctionIdentifier</span> and <span class="tt">periodicity</span> follow them. APER sends one presence bit for each extension addition of the grammar, so the order is part of the encoding: a decoder that has the additions in another order reads one field as another. A change of a constraint is not an extension addition either. It changes the bytes.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md337"></a>
+<p>A decoder shall ignore an extension addition that it does not know. <span class="tt">cause</span> and <span class="tt">detail</span> are the first extension additions of <span class="tt">E3-SetupResponse</span> and <span class="tt">E3-SubscriptionResponse</span> and <span class="tt">E3-MessageAck</span>, in that order. In <span class="tt">E3-SubscriptionResponse</span> <span class="tt">ranFunctionIdentifier</span> and <span class="tt">periodicity</span> follow them. <span class="tt">requestAck</span> is the first and only extension addition of <span class="tt">E3-DAppControlAction</span> and <span class="tt">E3-XAppControlAction</span>. A sender writes it only when it is "true", so the bytes of a control that does not ask do not change. APER sends one presence bit for each extension addition of the grammar, so the order is part of the encoding: a decoder that has the additions in another order reads one field as another. A change of a constraint is not an extension addition either. It changes the bytes.</p>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md339"></a>
 JSON</h1>
 <p>An implementation shall encode an <span class="tt">E3-PDU</span> as one flat JSON object. The object has the members <span class="tt">type</span>, <span class="tt">id</span> and <span class="tt">timestamp</span>. The members of the message follow at the same level.</p>
 <p>Table: Rules of the JSON encoding</p>
@@ -230,24 +262,26 @@ JSON</h1>
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Rule  </th><th class="markdownTableHeadNone">Value  </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">type</span>  </td><td class="markdownTableBodyNone">the name of the message in camel case: <span class="tt">setupRequest</span>, <span class="tt">setupResponse</span>, <span class="tt">subscriptionRequest</span>, <span class="tt">subscriptionDelete</span>, <span class="tt">subscriptionResponse</span>, <span class="tt">indicationMessage</span>, <span class="tt">dAppControlAction</span>, <span class="tt">dAppReport</span>, <span class="tt">xAppControlAction</span>, <span class="tt">releaseMessage</span>, <span class="tt">messageAck</span>  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">type</span>  </td><td class="markdownTableBodyNone">the name of the message in camel case: <span class="tt">setupRequest</span>, <span class="tt">setupResponse</span>, <span class="tt">subscriptionRequest</span>, <span class="tt">subscriptionDelete</span>, <span class="tt">subscriptionResponse</span>, <span class="tt">indicationMessage</span>, <span class="tt">dAppControlAction</span>, <span class="tt">dAppReport</span>, <span class="tt">xAppControlAction</span>, <span class="tt">releaseMessage</span>, <span class="tt">messageAck</span> (deprecated), <span class="tt">controlResponse</span>  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Keys  </td><td class="markdownTableBodyNone">the ASN.1 field names, for example <span class="tt">dAppIdentifier</span>, <span class="tt">ranFunctionIdentifier</span>, <span class="tt">telemetryIdentifierList</span>, <span class="tt">subscriptionTime</span>, <span class="tt">periodicity</span>, <span class="tt">subscriptionId</span>, <span class="tt">requestId</span>, <span class="tt">sequenceId</span>  </td></tr>
+<td class="markdownTableBodyNone">Keys  </td><td class="markdownTableBodyNone">the ASN.1 field names, for example <span class="tt">dAppIdentifier</span>, <span class="tt">ranFunctionIdentifier</span>, <span class="tt">telemetryIdentifierList</span>, <span class="tt">subscriptionTime</span>, <span class="tt">periodicity</span>, <span class="tt">subscriptionId</span>, <span class="tt">requestId</span>, <span class="tt">sequenceId</span>, <span class="tt">controlIdentifier</span>, <span class="tt">requestAck</span>  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">responseCode</span>  </td><td class="markdownTableBodyNone">the string "positive" or the string "negative". An unknown string means "negative"  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">cause</span>  </td><td class="markdownTableBodyNone">the name of the <span class="tt">E3-Cause</span> value in camel case, for example <span class="tt">unsupportedIdentifier</span>. A name that the decoder does not know reads as <span class="tt">unspecified</span>. A decoder reads it from a SETUP RESPONSE, SUBSCRIPTION RESPONSE or MESSAGE ACK message  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">cause</span>  </td><td class="markdownTableBodyNone">the name of the <span class="tt">E3-Cause</span> value in camel case, for example <span class="tt">unsupportedIdentifier</span>. A name that the decoder does not know reads as <span class="tt">unspecified</span>. A decoder reads it from a SETUP RESPONSE, SUBSCRIPTION RESPONSE, MESSAGE ACK or CONTROL RESPONSE message  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">detail</span>  </td><td class="markdownTableBodyNone">the text, as a JSON string. A decoder also reads the key <span class="tt">message</span> as <span class="tt">detail</span>, when <span class="tt">detail</span> is not there  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">timestamp</span>  </td><td class="markdownTableBodyNone">written on every message. The value 0 means that there is no timestamp  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Payload fields  </td><td class="markdownTableBodyNone">a JSON object or array. <span class="tt">ranFunctionData</span>, <span class="tt">actionData</span>, <span class="tt">reportData</span> and <span class="tt">xAppControlData</span> shall be an object or an array. An empty payload does not encode. <span class="tt">protocolData</span> may be any valid JSON value  </td></tr>
+<td class="markdownTableBodyNone">Payload fields  </td><td class="markdownTableBodyNone">a JSON object or array. <span class="tt">ranFunctionData</span>, <span class="tt">actionData</span>, <span class="tt">reportData</span>, <span class="tt">xAppControlData</span> and <span class="tt">controlOutcome</span> shall be an object or an array. An empty payload does not encode, and an empty <span class="tt">controlOutcome</span> is not written. <span class="tt">protocolData</span> may be any valid JSON value  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Wrapper  </td><td class="markdownTableBodyNone">a message with a nested <span class="tt">data</span> wrapper is refused  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">requestAck</span>  </td><td class="markdownTableBodyNone">the JSON value <span class="tt">true</span>, written only when it is true. A decoder reads a missing member and <span class="tt">false</span> as "false"  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Granted lists  </td><td class="markdownTableBodyNone"><span class="tt">telemetryIdentifierList</span> and <span class="tt">controlIdentifierList</span> of a SUBSCRIPTION RESPONSE are present when the E3 Agent reports them. A missing list means "not reported". An empty list means "none granted". A decoder may also read the names <span class="tt">telemetryGrantedList</span> and <span class="tt">controlGrantedList</span>  </td></tr>
+<td class="markdownTableBodyNone">Wrapper  </td><td class="markdownTableBodyNone">a message with a nested <span class="tt">data</span> wrapper is refused  </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Granted lists  </td><td class="markdownTableBodyNone"><span class="tt">telemetryIdentifierList</span> and <span class="tt">controlIdentifierList</span> of a SUBSCRIPTION RESPONSE are present when the E3 Agent reports them. A missing list means "not reported". An empty list means "none granted". A decoder may also read the names <span class="tt">telemetryGrantedList</span> and <span class="tt">controlGrantedList</span>  </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Missing fields  </td><td class="markdownTableBodyNone">a decoder sets a missing field to 0 or to the empty string. It does not refuse the message  </td></tr>
 </table>
 <p>Example of a SUBSCRIPTION REQUEST message (not checked against a pinned vector; the order of the members does not matter):</p>
@@ -263,7 +297,7 @@ JSON</h1>
 <div class="line">  &quot;periodicity&quot;: 100</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>JSON and Protobuf do not check the ranges of the grammar. A sender shall keep every value inside the range of <a class="el" href="md_docs_2e3ap_202-ie-mapping.html">02-ie-mapping.md</a>, so that the same message can move to APER.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md338"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md340"></a>
 Protobuf</h1>
 <p>The proto3 schema of E3AP has one message for each E3AP message and one <span class="tt">E3Pdu</span> envelope. The <span class="tt">oneof</span> case of <span class="tt">E3Pdu</span> follows the order of the <span class="tt">CHOICE</span> tags.</p>
 <p>Table: Rules of the Protobuf encoding</p>
@@ -275,25 +309,27 @@ Protobuf</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Optional fields  </td><td class="markdownTableBodyNone"><span class="tt">optional</span> fields keep their presence  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Zero values  </td><td class="markdownTableBodyNone"><span class="tt">timestamp</span> and <span class="tt">sequence_id</span> of a dApp CONTROL ACTION message use the value 0 for "absent"  </td></tr>
+<td class="markdownTableBodyNone">Zero values  </td><td class="markdownTableBodyNone"><span class="tt">timestamp</span> and <span class="tt">sequence_id</span> of a dApp CONTROL ACTION message use the value 0 for "absent", and <span class="tt">request_ack</span> the value false  </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Control outcome  </td><td class="markdownTableBodyNone"><span class="tt">optional bytes control_outcome</span> of CONTROL RESPONSE. The <span class="tt">oneof</span> case 13 of the envelope is the deprecated MESSAGE ACK and case 14 the CONTROL RESPONSE  </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Granted lists  </td><td class="markdownTableBodyNone">a wrapper message <span class="tt">IdentifierList</span> makes "not reported" differ from "none granted"  </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Response code  </td><td class="markdownTableBodyNone">an enumeration with the values "positive" (0) and "negative" (1). A value that is not "negative" reads as "positive"  </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Cause  </td><td class="markdownTableBodyNone">an enumeration <span class="tt">Cause</span> with the values of <span class="tt">E3-Cause</span>, and an <span class="tt">optional string detail</span>, on the three messages that carry them. A value that is not in the enumeration reads as unspecified  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Unknown fields  </td><td class="markdownTableBodyNone">a decoder ignores them  </td></tr>
+<td class="markdownTableBodyNone">Cause  </td><td class="markdownTableBodyNone">an enumeration <span class="tt">Cause</span> with the values of <span class="tt">E3-Cause</span>, and an <span class="tt">optional string detail</span>, on the four messages that carry them (SETUP RESPONSE, SUBSCRIPTION RESPONSE, MESSAGE ACK and CONTROL RESPONSE). A value that is not in the enumeration reads as unspecified  </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Unknown fields  </td><td class="markdownTableBodyNone">a decoder ignores them  </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Empty envelope  </td><td class="markdownTableBodyNone">an envelope with no <span class="tt">oneof</span> case does not decode  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md339"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md341"></a>
 Framing on each link</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md340"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md342"></a>
 ZeroMQ</h2>
 <p>One E3AP message is one ZeroMQ message. There is no extra framing. The setup channel uses the request and reply pattern, and the two other channels use publish and subscribe. A subscriber shall subscribe to every message (an empty filter).</p>
 <p>On a ZeroMQ link over TCP the E3 Agent listens on the port of each channel. The dApp connects. On a link over IPC the endpoints are the paths of <a href="01-identity-and-registration.md#default-endpoints">01-identity-and-registration.md</a>.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md341"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md343"></a>
 POSIX sockets</h2>
 <p>The POSIX link layer uses stream sockets, one for each channel. The three transport layers differ only in the socket type: Unix domain stream, TCP or SCTP in one-to-one mode.</p>
 <p>Table: Framing on the POSIX link layer</p>
@@ -308,14 +344,14 @@ POSIX sockets</h2>
 <p>A receiver of a framed message shall refuse a length of 0 and a length above 65536.</p>
 <p>The framing is not symmetric. A stream socket does not keep message boundaries, so a receiver of unframed messages can see two messages joined or one message split.</p>
 <p>The E3 Agent sends every message of the outbound channel to every connected dApp. It closes the connection to a dApp whose socket stalls for 500 ms.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md342"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md344"></a>
 Size limits</h1>
 <p>Table: Size limits</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Item  </th><th class="markdownTableHeadNone">Limit  </th><th class="markdownTableHeadNone">Where it is enforced  </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Payload (<span class="tt">protocolData</span>, <span class="tt">actionData</span>, <span class="tt">reportData</span>, <span class="tt">xAppControlData</span>)  </td><td class="markdownTableBodyNone">1 to 32768 octets  </td><td class="markdownTableBodyNone">APER  </td></tr>
+<td class="markdownTableBodyNone">Payload (<span class="tt">protocolData</span>, <span class="tt">actionData</span>, <span class="tt">reportData</span>, <span class="tt">xAppControlData</span>, <span class="tt">controlOutcome</span>)  </td><td class="markdownTableBodyNone">1 to 32768 octets  </td><td class="markdownTableBodyNone">APER  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">ranFunctionData</span>  </td><td class="markdownTableBodyNone">1 to 262144 octets in the grammar  </td><td class="markdownTableBodyNone">APER  </td></tr>
 <tr class="markdownTableRowOdd">
@@ -331,7 +367,7 @@ Size limits</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Framed message on POSIX  </td><td class="markdownTableBodyNone">1 to 65536 octets  </td><td class="markdownTableBodyNone">the receiver  </td></tr>
 </table>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md343"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md345"></a>
 Abstract syntax</h1>
 <p>The ASN.1 definition of E3AP conforms to ITU-T X.680 [1] and X.681 [2]. If a table and the grammar disagree, the grammar takes precedence, except for the conditions of presence, where the table takes precedence.</p>
 <div class="fragment"><div class="line">-- ASN1START</div>
@@ -418,7 +454,11 @@ Abstract syntax</h1>
 <div class="line">        -- it. Absent on a control the dApp decided on its own.</div>
 <div class="line">        sequenceId              E3-SequenceID OPTIONAL,</div>
 <div class="line">        actionData              OCTET STRING (SIZE (1..32768)),</div>
-<div class="line">        ...</div>
+<div class="line">        ...,</div>
+<div class="line">        -- True when the dApp wants an E3-ControlResponse for this control. Absent</div>
+<div class="line">        -- reads as false. An extension addition, so a control that does not ask</div>
+<div class="line">        -- is encoded as it always was.</div>
+<div class="line">        requestAck              BOOLEAN OPTIONAL</div>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">    E3-DAppReport ::= SEQUENCE {</div>
@@ -441,7 +481,10 @@ Abstract syntax</h1>
 <div class="line">        -- never be matched to the control acknowledge the RAN owes the xApp.</div>
 <div class="line">        sequenceId              E3-SequenceID,</div>
 <div class="line">        xAppControlData         OCTET STRING (SIZE (1..32768)),</div>
-<div class="line">        ...</div>
+<div class="line">        ...,</div>
+<div class="line">        -- True when the RAN wants an E3-ControlResponse from the dApp for this</div>
+<div class="line">        -- control. Absent reads as false.</div>
+<div class="line">        requestAck              BOOLEAN OPTIONAL</div>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">    E3-ReleaseMessage ::= SEQUENCE {</div>
@@ -449,12 +492,35 @@ Abstract syntax</h1>
 <div class="line">        ...</div>
 <div class="line">    }</div>
 <div class="line"> </div>
+<div class="line">    -- DEPRECATED TO BE REMOVED. libe3 no longer sends it: the answer to a control</div>
+<div class="line">    -- is E3-ControlResponse. It stays in the grammar so that its index, and with it</div>
+<div class="line">    -- the index of controlResponse, is the one OCUDU&#39;s grammar has, and so that a</div>
+<div class="line">    -- libe3 dApp still reads the one that another RAN sends.</div>
 <div class="line">    E3-MessageAck ::= SEQUENCE {</div>
 <div class="line">        requestId            E3-MessageID,</div>
 <div class="line">        responseCode         E3-ResponseCode,</div>
 <div class="line">        ...,</div>
 <div class="line">        cause                E3-Cause OPTIONAL,</div>
 <div class="line">        detail               E3-Text OPTIONAL</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    -- The answer to a dApp control or an xApp control that carried requestAck</div>
+<div class="line">    -- true, sent by the receiver of the control: the RAN for a dApp control, the</div>
+<div class="line">    -- dApp for an xApp control. requestId is the id of the control&#39;s E3-PDU.</div>
+<div class="line">    -- The fields and their order are those of OCUDU&#39;s E3-ControlResponse minus</div>
+<div class="line">    -- fragmentIndex, fragmentCount and payloadBytes, which libe3 does not carry,</div>
+<div class="line">    -- so the encoding differs from OCUDU&#39;s. controlOutcome is service-model</div>
+<div class="line">    -- content and opaque here.</div>
+<div class="line">    E3-ControlResponse ::= SEQUENCE {</div>
+<div class="line">        requestId             E3-MessageID,</div>
+<div class="line">        dAppIdentifier        E3-DAppID,</div>
+<div class="line">        ranFunctionIdentifier INTEGER (1..65535),</div>
+<div class="line">        controlIdentifier     INTEGER (1..65535),</div>
+<div class="line">        responseCode          E3-ResponseCode,</div>
+<div class="line">        cause                 E3-Cause OPTIONAL,</div>
+<div class="line">        detail                E3-Text OPTIONAL,</div>
+<div class="line">        controlOutcome        OCTET STRING (SIZE (1..32768)) OPTIONAL,</div>
+<div class="line">        ...</div>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">    -- Correlation identifier for one detection-to-mitigation procedure, assigned</div>
@@ -478,7 +544,7 @@ Abstract syntax</h1>
 <div class="line">    -- response code is a wire change we are willing to pay for explicitly.</div>
 <div class="line">    E3-ResponseCode ::= ENUMERATED { positive(0), negative(1) }</div>
 <div class="line"> </div>
-<div class="line">    -- Why a RAN refused a request. Sent with a negative response next to a</div>
+<div class="line">    -- Why a request was refused. Sent with a negative response next to a</div>
 <div class="line">    -- free-text detail. The names, the values and the text bound are OCUDU&#39;s,</div>
 <div class="line">    -- so a refusal reads the same on every RAN; the enumeration is extensible</div>
 <div class="line">    -- as it is there, and a receiver reads a value it does not know as</div>
@@ -526,7 +592,8 @@ Abstract syntax</h1>
 <div class="line">            dAppReport            [7]  E3-DAppReport,</div>
 <div class="line">            xAppControlAction     [8]  E3-XAppControlAction,</div>
 <div class="line">            releaseMessage        [9]  E3-ReleaseMessage,</div>
-<div class="line">            messageAck            [10] E3-MessageAck,</div>
+<div class="line">            messageAck            [10] E3-MessageAck,   -- DEPRECATED TO BE REMOVED</div>
+<div class="line">            controlResponse       [11] E3-ControlResponse,</div>
 <div class="line">            ...</div>
 <div class="line">        },</div>
 <div class="line">        ...</div>

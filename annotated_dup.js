@@ -63,6 +63,8 @@ var annotated_dup =
       [ "IndicationMessage", "structlibe3_1_1IndicationMessage.html", "structlibe3_1_1IndicationMessage" ],
       [ "DAppControlAction", "structlibe3_1_1DAppControlAction.html", "structlibe3_1_1DAppControlAction" ],
       [ "MessageAck", "structlibe3_1_1MessageAck.html", "structlibe3_1_1MessageAck" ],
+      [ "ControlResponse", "structlibe3_1_1ControlResponse.html", "structlibe3_1_1ControlResponse" ],
+      [ "ControlResult", "structlibe3_1_1ControlResult.html", "structlibe3_1_1ControlResult" ],
       [ "DAppReport", "structlibe3_1_1DAppReport.html", "structlibe3_1_1DAppReport" ],
       [ "XAppControlAction", "structlibe3_1_1XAppControlAction.html", "structlibe3_1_1XAppControlAction" ],
       [ "ReleaseMessage", "structlibe3_1_1ReleaseMessage.html", "structlibe3_1_1ReleaseMessage" ],

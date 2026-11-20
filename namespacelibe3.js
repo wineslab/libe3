@@ -28,6 +28,8 @@ var namespacelibe3 =
     [ "IndicationMessage", "structlibe3_1_1IndicationMessage.html", "structlibe3_1_1IndicationMessage" ],
     [ "DAppControlAction", "structlibe3_1_1DAppControlAction.html", "structlibe3_1_1DAppControlAction" ],
     [ "MessageAck", "structlibe3_1_1MessageAck.html", "structlibe3_1_1MessageAck" ],
+    [ "ControlResponse", "structlibe3_1_1ControlResponse.html", "structlibe3_1_1ControlResponse" ],
+    [ "ControlResult", "structlibe3_1_1ControlResult.html", "structlibe3_1_1ControlResult" ],
     [ "DAppReport", "structlibe3_1_1DAppReport.html", "structlibe3_1_1DAppReport" ],
     [ "XAppControlAction", "structlibe3_1_1XAppControlAction.html", "structlibe3_1_1XAppControlAction" ],
     [ "ReleaseMessage", "structlibe3_1_1ReleaseMessage.html", "structlibe3_1_1ReleaseMessage" ],
@@ -40,6 +42,7 @@ var namespacelibe3 =
     [ "Asn1E3Encoder", "classlibe3_1_1Asn1E3Encoder.html", "classlibe3_1_1Asn1E3Encoder" ],
     [ "JsonE3Encoder", "classlibe3_1_1JsonE3Encoder.html", "classlibe3_1_1JsonE3Encoder" ],
     [ "ProtobufE3Encoder", "classlibe3_1_1ProtobufE3Encoder.html", "classlibe3_1_1ProtobufE3Encoder" ],
+    [ "ControlResponseHandler", "namespacelibe3.html#a8ed7cb64917a19ae154f8d9e47737f9e", null ],
     [ "DAppReportHandler", "namespacelibe3.html#a55f022248ffc81789cb641121fea1e45", null ],
     [ "DAppStatusChangedHandler", "namespacelibe3.html#a3b9104521ca1196dc4cf2d64fd99cf83", null ],
     [ "DisconnectHandler", "namespacelibe3.html#adae81936974f9ce540c4eb62eb58ce2a", null ],
@@ -47,7 +50,7 @@ var namespacelibe3 =
     [ "IndicationHandler", "namespacelibe3.html#af327eac0d787dfaa03a13398d1be2e0b", null ],
     [ "LogCallback", "namespacelibe3.html#a2516d19ac2e187935aad4c027401e3e0", null ],
     [ "MessageAckHandler", "namespacelibe3.html#a9136029904b3422547399ad8854ceea0", null ],
-    [ "PduChoice", "namespacelibe3.html#a11f15651dcc49a68494f8215477e18fc", null ],
+    [ "PduChoice", "namespacelibe3.html#a26cb84f67a97fed4556479d2f5174661", null ],
     [ "SetupRequestHandler", "namespacelibe3.html#acb6cb2fab0f7e949eafba33afaa4a469", null ],
     [ "SetupResponseHandler", "namespacelibe3.html#a80645002c05837079944f34dda55d9be", null ],
     [ "SmFactory", "namespacelibe3.html#a81afb109c84fa5b9837d9c509f744a9d", null ],
@@ -133,7 +136,8 @@ var namespacelibe3 =
       [ "DAPP_REPORT", "namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185ac83232e8433bacdad22aa0a893a011d4", null ],
       [ "XAPP_CONTROL_ACTION", "namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185a5f134d2b30d5786bd2d7f021ee0ef3e0", null ],
       [ "RELEASE_MESSAGE", "namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185a1adeabff195cdcfd5509625aa7aac7d0", null ],
-      [ "MESSAGE_ACK", "namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185ae63ef0287e5a1f4b52c19f8f12b247ca", null ]
+      [ "MESSAGE_ACK", "namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185ae63ef0287e5a1f4b52c19f8f12b247ca", null ],
+      [ "CONTROL_RESPONSE", "namespacelibe3.html#a675f37e2936d707807212fcd3cfa8185ae5ace417608d1f7ed09f8abcd1198eef", null ]
     ] ],
     [ "ResponseCode", "namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5", [
       [ "POSITIVE", "namespacelibe3.html#a53bfd79bd9406bfe120864d4eb83b0d5aab6c31432785221bae58327ef5f6ea58", null ],
@@ -161,9 +165,11 @@ var namespacelibe3 =
     [ "DEFAULT_BUFFER_SIZE", "namespacelibe3.html#a809598c8d63a2bdce0d447411324a2b5", null ],
     [ "LIBE3_PROTOCOL_VERSION", "namespacelibe3.html#ac69f2e5f639ef2bdb04445cf7ac2b408", null ],
     [ "MAX_ACTION_DATA_SIZE", "namespacelibe3.html#aca224e72d9af7089c4d9c1a150a705db", null ],
+    [ "MAX_CONTROL_OUTCOME_SIZE", "namespacelibe3.html#acd78dc25c1bc7733b80f7ad5bc8e8547", null ],
     [ "MAX_DAPP_REPORT_DATA_SIZE", "namespacelibe3.html#a1fdb0c4f4c6f3060e3b0448610c7a289", null ],
     [ "MAX_DETAIL_SIZE", "namespacelibe3.html#ab9fd4d0a2f9f4256043102de4b108d0b", null ],
     [ "MAX_IDENTIFIER_LIST_SIZE", "namespacelibe3.html#af4b3cf6c64a692090cd6b7d26f62b6bf", null ],
+    [ "MAX_PENDING_CONTROLS", "namespacelibe3.html#a39f9b1736e99fe6eb0005056a8a7deac", null ],
     [ "MAX_PROTOCOL_DATA_SIZE", "namespacelibe3.html#a581a3bc9ba0fad9e97f52c00fdce32b9", null ],
     [ "MAX_RAN_FUNCTIONS", "namespacelibe3.html#aa385e749637e30801ce6405782b0c699", null ],
     [ "MAX_XAPP_CTRL_DATA_SIZE", "namespacelibe3.html#a058435e96914a52e2830d4c403b1d541", null ]
