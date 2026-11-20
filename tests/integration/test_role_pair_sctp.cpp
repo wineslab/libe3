@@ -430,14 +430,16 @@ TEST(sctp_pair_one_association_with_the_ppid_and_streams_of_the_link) {
     ASSERT_TRUE(wait_for(log, [&] { return log.control_responses >= 1; }));
 
     // The socket buffers the RAN set before the association existed, as the kernel reports them.
-    // It clamps the request to net.core.[wr]mem_max and doubles it.
+    // It clamps the request to net.core.[wr]mem_max and doubles it. Those two files are not
+    // visible in the network namespace of a container, where there is nothing to compare with.
     const auto buffers = association_buffers(ran_port);
-    if (buffers.first > 0) {
+    if (buffers.first > 0 && wmem_max() > 0 && rmem_max() > 0) {
         const long wanted = static_cast<long>(E3Config{}.socket_buffer_bytes);
         ASSERT_EQ(buffers.first, 2 * std::min(wanted, wmem_max()));
         ASSERT_EQ(buffers.second, 2 * std::min(wanted, rmem_max()));
     } else {
-        std::cout << "NOTE: /proc/net/sctp/assocs does not show the association; buffers not checked\n";
+        std::cout << "NOTE: /proc/net/sctp/assocs does not show the association, or net.core.[wr]mem_max "
+                     "is not readable; buffers not checked\n";
     }
 
     ASSERT_TRUE(dapp->release() == ErrorCode::SUCCESS);
