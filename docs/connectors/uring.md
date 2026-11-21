@@ -599,6 +599,5 @@ own and a quiet machine; the second needs neither.
 | Multishot receive, provided-buffer rings, `SEND_ZC` (kernel 6.0 and later) | A receive is re-armed for each PDU; no zero-copy send for large PDUs (which would not help on loopback or IPC anyway) | Not scheduled; the probe is in place |
 | NAPI busy polling (`IORING_REGISTER_NAPI`) | Busy polling stops at the socket; a real NIC still interrupts | Not scheduled; meaningless on loopback and IPC |
 | Connector-level latrec stamps (submission, completion) | The send and wire rows cannot be split into submission, kernel and completion time | Unowned |
-| The io_uring link in the Python wheels | `pip install libe3py` gets a library without the link (manylinux has no recent liburing); a Python dApp needs libe3 built from source | Unowned |
 | A run on bare metal with isolated cores, and across two hosts | The numbers below come from a virtual machine and loopback | Unowned |
 | `uring` in the dApp library and in OAI's E3 agent configuration | Their configuration parsers know `zmq` and `posix` only, so their users cannot pick the link yet; nothing breaks | A few lines in each; the dApp library's was run (its Python dApp over io_uring, against both links); twin pull requests not opened |

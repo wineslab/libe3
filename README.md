@@ -152,7 +152,8 @@ pkg-config --modversion libe3
 - C and C++ projects (the OAI gNB) find it through `pkg-config` or `find_package(libe3)`, with no setup.
 - The Python binding is a separate package, `libe3py`, installed with pip into any virtual environment,
   without root: `pip install libe3py`. On Linux (x86_64, aarch64) that is a prebuilt wheel that contains libe3,
-  so it needs no libe3 on the machine; the dApp library depends on it, so `pip install dapps` brings it in.
+  so it needs no libe3 or liburing on the machine (the wheel carries the `uring` link; the kernel still has to
+  allow io_uring); the dApp library depends on it, so `pip install dapps` brings it in.
   From a checkout (`pip install .`) or on another platform it is built against the installed libe3 and must
   be the same version.
 - To install somewhere else, `--prefix DIR` (no `sudo` if `DIR` is yours); then `PKG_CONFIG_PATH` has to

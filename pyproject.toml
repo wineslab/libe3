@@ -46,7 +46,7 @@ regex = "^(?P<value>\\d+\\.\\d+\\.\\d+)"
 
 # Prebuilt wheels (manylinux_2_28), built by .github/workflows/build-wheels.yml. Unlike the
 # sdist, a wheel is built from the full checkout and contains libe3 itself (all encodings,
-# and libzmq, protobuf linked statically), so `pip install libe3py`
+# and libzmq, protobuf and liburing linked statically), so `pip install libe3py`
 # needs no libe3, compiler or SWIG on the machine.
 [tool.cibuildwheel]
 build = "cp310-* cp311-* cp312-* cp313-*"
@@ -54,7 +54,7 @@ skip = "*-musllinux_*"
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-aarch64-image = "manylinux_2_28"
 before-all = "bash {project}/scripts/wheel_deps.sh"
-environment = { CMAKE_PREFIX_PATH = "/opt/protobuf", PATH = "/opt/protobuf/bin:$PATH", PKG_CONFIG_PATH = "/opt/zeromq/lib64/pkgconfig:/opt/zeromq/lib/pkgconfig" }
+environment = { CMAKE_PREFIX_PATH = "/opt/protobuf", PATH = "/opt/protobuf/bin:$PATH", PKG_CONFIG_PATH = "/opt/zeromq/lib64/pkgconfig:/opt/zeromq/lib/pkgconfig:/opt/liburing/lib/pkgconfig" }
 
 [tool.cibuildwheel.config-settings]
 "cmake.source-dir" = "."
@@ -63,6 +63,7 @@ environment = { CMAKE_PREFIX_PATH = "/opt/protobuf", PATH = "/opt/protobuf/bin:$
 "cmake.define.LIBE3_ENABLE_JSON" = "ON"
 "cmake.define.LIBE3_ENABLE_PROTOBUF" = "ON"
 "cmake.define.LIBE3_ENABLE_SCTP" = "ON"
+"cmake.define.LIBE3_ENABLE_URING" = "ON"
 "cmake.define.LIBE3_BUILD_TESTS" = "OFF"
 "cmake.define.LIBE3_BUILD_EXAMPLES" = "OFF"
 "install.components" = "libe3py"
