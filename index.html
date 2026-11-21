@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">libe3<span id="projectnumber">&#160;0.6.0</span>
+   <div id="projectname">libe3<span id="projectnumber">&#160;0.6.1</span>
    </div>
    <div id="projectbrief">C++ library for E3AP RAN vendor integration</div>
   </td>
@@ -158,7 +158,7 @@ Prerequisites</h2>
 <li>C++17 compiler (GCC 7+, Clang 5+, MSVC 2017+)</li>
 <li>CMake 3.16+</li>
 <li>pthreads</li>
-<li><span class="tt">asn1c</span> — ASN.1 APER encoder, required by <span class="tt">messages/</span></li>
+<li><span class="tt">asn1c</span> — ASN.1 APER encoder, required by <span class="tt">messages/</span>: the <span class="tt">mouse07410/asn1c</span> fork, v1.5.1-44 or newer. <span class="tt">./build_libe3 -I</span> installs the tested one under <span class="tt">/opt/libe3/asn1c</span>; the distribution's package (0.9.29) is refused at configure time</li>
 <li><span class="tt">nlohmann-json3-dev</span> — Header-only JSON library; CMake expects the <span class="tt">nlohmann_json</span> target</li>
 <li><span class="tt">protobuf-compiler</span> + <span class="tt">libprotobuf-dev</span> — <span class="tt">protoc</span> and the Protocol Buffers runtime (only when <span class="tt">LIBE3_ENABLE_PROTOBUF=ON</span>)</li>
 <li><span class="tt">libzmq3-dev</span> for ZMQ transport</li>
@@ -172,7 +172,7 @@ Install Dependencies</h2>
 <div class="line"> </div>
 <div class="line"># Manual (Debian/Ubuntu)</div>
 <div class="line">sudo apt update</div>
-<div class="line">sudo apt install -y build-essential cmake pkg-config libzmq3-dev ninja-build git asn1c nlohmann-json3-dev protobuf-compiler libprotobuf-dev dpkg-dev debhelper fakeroot</div>
+<div class="line">sudo apt install -y build-essential cmake pkg-config libzmq3-dev ninja-build git nlohmann-json3-dev protobuf-compiler libprotobuf-dev dpkg-dev debhelper fakeroot</div>
 </div><!-- fragment --><p>The packaging tools (<span class="tt">dpkg-dev</span>, <span class="tt">debhelper</span>, <span class="tt">fakeroot</span>) are only needed by <span class="tt">scripts/create_deb.sh</span>.</p>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md711"></a>
 Building</h2>
@@ -231,7 +231,7 @@ Build Options</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">LIBE3_ENABLE_E2SM_DAPP</span>  </td><td class="markdownTableBodyNone">ON  </td><td class="markdownTableBodyNone">Build the E2SM-DAPP codec libraries (needs <span class="tt">LIBE3_ENABLE_ASN1</span>, see <a class="el" href="dir_24c5afd111e6aa944685a569bf5db165.html">docs/e2sm-dapp</a>)  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">LIBE3_ENABLE_JSON</span>  </td><td class="markdownTableBodyNone">OFF  </td><td class="markdownTableBodyNone">Enable JSON encoding support  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">LIBE3_ENABLE_JSON</span>  </td><td class="markdownTableBodyNone">OFF  </td><td class="markdownTableBodyNone">Enable JSON encoding support. It also builds the JSON encoding rules (JER) into the asn1c runtime, so a service model that links <span class="tt">libe3::asn1_e3ap</span> is generated with <span class="tt">-gen-JER</span> (<span class="tt">LIBE3_ASN1_JER</span> in <span class="tt">find_package(libe3)</span> says so; <span class="tt">libe3/asn1_layout_check.h</span> refuses a unit generated the other way)  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">LIBE3_ENABLE_PROTOBUF</span>  </td><td class="markdownTableBodyNone">OFF  </td><td class="markdownTableBodyNone">Enable Protocol Buffers encoding support  </td></tr>
 <tr class="markdownTableRowOdd">
