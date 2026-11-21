@@ -188,6 +188,9 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/libe3/version.hpp
 
 # Install ASN.1 generated headers
 if(LIBE3_ENABLE_ASN1)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/libe3/asn1_layout_check.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libe3
+    )
     install(DIRECTORY ${ASN1_GENERATED_DIR}/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libe3/asn1
         FILES_MATCHING PATTERN "*.h"

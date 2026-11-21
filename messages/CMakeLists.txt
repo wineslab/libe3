@@ -24,21 +24,33 @@ if(LIBE3_ENABLE_ASN1)
     endif()
 
     # Find asn1c compiler
-    find_program(ASN1C_EXEC asn1c HINTS /opt/asn1c/bin)
+    libe3_find_asn1c()
     if(NOT ASN1C_EXEC)
         message(FATAL_ERROR "asn1c not found! ASN.1 encoding is required.\n"
-            "Install with: sudo apt install asn1c\n"
+            "Install it with: ./build_libe3 -I\n"
             "Or provide path: cmake -DASN1C_EXEC=/path/to/asn1c")
     endif()
-    message(STATUS "asn1c found: ${ASN1C_EXEC}")
+    libe3_check_asn1c_version()
 
-    # Generate ASN.1 C code using custom_command (on-demand generation)
-    add_custom_command(OUTPUT ${e3ap_source} ${e3ap_headers}
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}
-        COMMAND ${ASN1C_EXEC} -pdu=all -gen-APER -gen-UPER -no-gen-JER -no-gen-BER -no-gen-OER -fno-include-deps -fcompound-names -findirect-choice -no-gen-example -D ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${E3AP_GRAMMAR}
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${E3AP_GRAMMAR}
-        COMMENT "Generating E3AP ASN.1 source files from ${CMAKE_CURRENT_SOURCE_DIR}/${E3AP_GRAMMAR}"
-    )
+    # The runtime carries the JSON encoding rules (JER) whenever libe3 carries JSON, so that a service
+    # model that links libe3::asn1_e3ap gets its JSON codec from its grammar as well as its APER codec.
+    # The E2SM-DAPP codec below follows the same setting.
+    # The layout of the type descriptors depends on it: see libe3/asn1_layout_check.h.
+    if(LIBE3_ENABLE_JSON)
+        set(LIBE3_ASN1C_JER_FLAG -gen-JER)
+        set(LIBE3_ASN1_JER 1)
+    else()
+        set(LIBE3_ASN1C_JER_FLAG -no-gen-JER)
+        set(LIBE3_ASN1_JER 0)
+    endif()
+    set(LIBE3_ASN1_JER "${LIBE3_ASN1_JER}" PARENT_SCOPE)
+    message(STATUS "asn1c: JER ${LIBE3_ASN1C_JER_FLAG} (follows LIBE3_ENABLE_JSON)")
+
+    # asn1c writes the C code now, at configure time: which files it writes depends on its version.
+    libe3_asn1c_generate(e3ap GRAMMAR ${CMAKE_CURRENT_SOURCE_DIR}/${E3AP_GRAMMAR}
+        DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    set(e3ap_source ${e3ap_SOURCES})
+    set(e3ap_headers ${e3ap_HEADERS})
 
     # Optionally generate sources for the simple service model (e3sm_simple.asn)
     if(LIBE3_BUILD_EXAMPLES)
@@ -53,17 +65,32 @@ if(LIBE3_ENABLE_ASN1)
         if(DEFINED E3SM_SIMPLE_GENERATED_HDRS)
             list(APPEND e3ap_headers ${E3SM_SIMPLE_GENERATED_HDRS})
         endif()
+        # Both runs write the runtime files; they are the same files.
+        list(REMOVE_DUPLICATES e3ap_source)
+        list(REMOVE_DUPLICATES e3ap_headers)
     endif()
+    libe3_asn1c_prune(${CMAKE_CURRENT_BINARY_DIR} ${e3ap_source} ${e3ap_headers})
 
     # Create ASN.1 library
+    # The runtime is private to whatever links it: libe3's shared library must not export it, or
+    # a host with an asn1c runtime of its own (OAI links -rdynamic) would be called instead of it.
     add_library(asn1_e3ap ${e3ap_source})
-    set_target_properties(asn1_e3ap PROPERTIES LINKER_LANGUAGE C)
+    set_target_properties(asn1_e3ap PROPERTIES
+        LINKER_LANGUAGE C
+        POSITION_INDEPENDENT_CODE ON
+        C_VISIBILITY_PRESET hidden
+    )
     target_include_directories(asn1_e3ap
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/libe3/asn1>
     )
     target_compile_options(asn1_e3ap PRIVATE -DASN_DISABLE_OER_SUPPORT -w)
+
+    # For the service models that link this library: a unit generated with the other JER setting
+    # is refused at compile time (the file is in the install).
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../include/libe3/asn1_layout_check.h.in"
+        "${PROJECT_BINARY_DIR}/include/libe3/asn1_layout_check.h" @ONLY)
 
     # Export the generated directory for parent to use
     set(ASN1_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}" PARENT_SCOPE)
@@ -86,12 +113,12 @@ if(LIBE3_ENABLE_E2SM_DAPP)
     set(E2SM_DAPP_GENERATED_DIR "${PROJECT_BINARY_DIR}/generated/e2sm_dapp")
     include(asn1/e2sm_dapp/V1/e2sm_dapp-1.0.0.cmake)
 
-    add_custom_command(OUTPUT ${e2sm_dapp_source} ${e2sm_dapp_headers}
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${E2SM_DAPP_GENERATED_DIR}
-        COMMAND ${ASN1C_EXEC} -pdu=all -gen-APER -gen-UPER -no-gen-JER -no-gen-BER -no-gen-OER -fno-include-deps -fcompound-names -findirect-choice -no-gen-example -D ${E2SM_DAPP_GENERATED_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${E2SM_DAPP_GRAMMAR}
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${E2SM_DAPP_GRAMMAR}
-        COMMENT "Generating E2SM-DAPP ASN.1 source files from ${CMAKE_CURRENT_SOURCE_DIR}/${E2SM_DAPP_GRAMMAR}"
-    )
+    # Same JER setting as asn1_e3ap: when libe3.a and the static codec are linked into one executable
+    # their runtime symbols merge, which works only while the two runtimes have one layout.
+    libe3_asn1c_generate(e2sm_dapp GRAMMAR ${CMAKE_CURRENT_SOURCE_DIR}/${E2SM_DAPP_GRAMMAR}
+        DESTINATION ${E2SM_DAPP_GENERATED_DIR})
+    set(e2sm_dapp_source ${e2sm_dapp_SOURCES})
+    libe3_asn1c_prune(${E2SM_DAPP_GENERATED_DIR} ${e2sm_dapp_SOURCES} ${e2sm_dapp_HEADERS})
 
     add_library(asn1_e2sm_dapp OBJECT ${e2sm_dapp_source})
     set_target_properties(asn1_e2sm_dapp PROPERTIES
