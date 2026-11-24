@@ -64,9 +64,9 @@ Line numbers drift. Function names are the stable reference. Paths under `oai/` 
 1. Subscribe with `ranFunctionIdentifier` `2` and an empty control list. Set `periodicity` if you want a slower rate. Remember the RAN sends the fastest rate of all dApps to everyone (Annex C, item C.17).
 2. Decode the indication with the codec of your session. It has the flat form of Annex C, item C.18, and the RAN function data the form of item C.27. Take the reference from `iqSamplesRef`.
 3. Open the region once with `shm_open(name, O_RDONLY, 0)` and `mmap` with `PROT_READ` and `MAP_SHARED`. Map the whole file. Check `version` in the header. The region of this implementation has version `1` and a header of 64 octets (Annex C, item C.25).
-4. Compute the row and sample addresses with the formulas of [Annex A.5](annex-a-shared-memory.md#location-of-the-data) and [Annex A.6.1](annex-a-shared-memory.md#iq-samples), with the header of 64 octets in place of the header of Annex A.3. The row size is `num_fh_samples * 2` bytes, and the buffer size is in the header.
+4. Compute the row and sample addresses with the formulas of [Annex A.5](annex-a-shared-memory.md#location-of-the-data) and [Annex A.6.1](annex-a-shared-memory.md#iq-samples), with the header of 64 octets in place of the header of Annex A.3. The row size is `num_fh_samples * 2` bytes, and the buffer size is in the header. Do not assume 4 ports and 273 PRBs: the E3 Controller sizes a row from its `radio:` section, so take the ports from `nRxAnt` of the indication and compute the subcarriers for each port as `num_fh_samples / 2 / 14 / nRxAnt` (a multiple of 12 when the row is whole PRBs).
 5. Copy the samples you need, convert from binary16, divide by the `beta` of the RAN if you need the FFT scale (Annex C, item C.13), then run the overwrite rules of [Annex A.4](annex-a-shared-memory.md#rows-buffers-and-reuse). One slot fills one row here, so the finer check of Annex A.4 applies.
-6. Retry `shm_open` for a short time after the subscription. The RAN creates the object at the first uplink slot.
+6. Retry `shm_open` for a short time after the subscription. An OAI RAN creates the object at the first uplink slot. The E3 Controller creates it when it starts.
 7. In a container, share `/dev/shm` with the RAN container.
 
 ## Evidence for the items of Annex C
