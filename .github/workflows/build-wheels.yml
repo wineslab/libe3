@@ -77,4 +77,9 @@ jobs:
               fi
               pip install --no-index /w/libe3py-*-${tag}-${tag}-*.whl
               python /src/tests/test_swig_smoke.py
+              # The io_uring link is compiled in (LIBE3_ENABLE_URING is auto: a missing liburing would only
+              # print a status line). This text exists only where it is; the container's seccomp profile
+              # refuses io_uring itself, so the link cannot be started here.
+              grep -rlq IORING_FEAT_EXT_ARG \$(python -c 'import libe3py, os; print(os.path.dirname(libe3py.__file__))') \
+                  || { echo 'the wheel has no io_uring link'; exit 1; }
               python -c 'import libe3py; print(libe3py.__file__)'"

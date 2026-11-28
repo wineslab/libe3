@@ -6,6 +6,9 @@
  * produce bytes. Covers IPC (a sequenced-packet socket) and TCP. SCTP is covered in
  * test_role_pair_sctp, which needs the sctp kernel module.
  *
+ * The io_uring link speaks the same wire, so CTest runs this binary again with
+ * --link uring, and with a RAN of one link and a dApp of the other (link_under_test.hpp).
+ *
  * Properties verified:
  *   - setup request and response round trip on the one endpoint, IPC and TCP;
  *   - a final message sent just before a clean close is delivered, not lost;
@@ -22,6 +25,7 @@
  */
 
 #include "test_framework.hpp"
+#include "link_under_test.hpp"
 #include "libe3/types.hpp"
 #include "libe3/e3_connector.hpp"
 
@@ -55,15 +59,12 @@ std::string make_tmpdir() {
     return std::string(d);
 }
 
-// One port per test, distinct across tests and across concurrent runs.
-uint16_t unique_port() {
-    static std::atomic<int> next{0};
-    return static_cast<uint16_t>(28000 + (getpid() % 2000) * 8 + (next.fetch_add(1) % 8));
-}
+// One port per test: free when asked for, distinct across tests and across concurrent runs.
+uint16_t unique_port() { return libe3_test::free_port(); }
 
 std::unique_ptr<E3Connector> make(E3TransportLayer transport, const std::string& endpoint, uint16_t port,
                                   E3Role role, const PosixOptions& options = PosixOptions{}) {
-    return create_connector(E3LinkLayer::POSIX, transport, endpoint, "", "", port, 0, 0, 1, role, options);
+    return create_connector(libe3_test::link_for(role), transport, endpoint, "", "", port, 0, 0, 1, role, options);
 }
 
 std::vector<uint8_t> bytes(const std::string& text) {
@@ -507,6 +508,7 @@ TEST(posix_tcp_over_ipv6) {
     ran->dispose();
 }
 
-int main() {
+int main(int argc, char** argv) {
+    if (const int rc = libe3_test::select_links(argc, argv); rc >= 0) return rc;
     return RUN_ALL_TESTS();
 }

@@ -26,6 +26,19 @@ cmake --build /tmp/zeromq-build -j"$(nproc)"
 cmake --install /tmp/zeromq-build
 rm -rf /tmp/zeromq-4.3.5 /tmp/zeromq-build
 
+# liburing, for the io_uring link: static and position-independent, so the wheel needs none on the
+# user's machine. manylinux_2_28 has no liburing of the 2.0 the link needs. 2.5 is what the
+# pipeline's Ubuntu 24.04 jobs run the link against.
+git clone --depth 1 --branch liburing-2.5 https://github.com/axboe/liburing /tmp/liburing
+(
+    cd /tmp/liburing
+    ./configure --prefix=/opt/liburing
+    make -C src -j"$(nproc)" CFLAGS="-O2 -fPIC"
+    make install
+    rm -f /opt/liburing/lib/liburing*.so*
+)
+rm -rf /tmp/liburing
+
 # protobuf: the el8 one (3.5) cannot compile the proto3 `optional` fields of the E3AP
 # schema, so build 3.21.12 (the version Ubuntu 24.04 ships), static, into /opt/protobuf.
 curl -fsSL https://github.com/protocolbuffers/protobuf/releases/download/v21.12/protobuf-cpp-3.21.12.tar.gz \

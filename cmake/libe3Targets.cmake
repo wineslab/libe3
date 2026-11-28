@@ -82,6 +82,15 @@ if(LIBE3_ENABLE_SCTP)
     target_compile_definitions(libe3 PUBLIC LIBE3_ENABLE_SCTP)
 endif()
 
+# As for ZeroMQ: always 0 or 1, PUBLIC so a consumer can tell whether E3LinkLayer::URING will
+# work, and liburing PRIVATE (a static libe3 carries it as a link-only dependency).
+if(LIBE3_WITH_URING)
+    target_compile_definitions(libe3 PUBLIC LIBE3_HAS_URING=1)
+    target_link_libraries(libe3 PRIVATE PkgConfig::URING)
+else()
+    target_compile_definitions(libe3 PUBLIC LIBE3_HAS_URING=0)
+endif()
+
 if(LIBE3_ENABLE_LATREC)
     # PUBLIC: any consumer building against this target (OAI, flexric) must
     # see the same define, or its own latrec_* calls silently resolve to the
@@ -167,6 +176,13 @@ endif()
 
 if(LIBE3_ENABLE_SCTP)
     target_compile_definitions(libe3_shared PUBLIC LIBE3_ENABLE_SCTP)
+endif()
+
+if(LIBE3_WITH_URING)
+    target_compile_definitions(libe3_shared PUBLIC LIBE3_HAS_URING=1)
+    target_link_libraries(libe3_shared PRIVATE PkgConfig::URING)
+else()
+    target_compile_definitions(libe3_shared PUBLIC LIBE3_HAS_URING=0)
 endif()
 
 if(LIBE3_ENABLE_LATREC)

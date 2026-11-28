@@ -7,8 +7,8 @@ name: E2E dApp Integration
 # every supported (link, transport) combination, asserts both exit cleanly,
 # and publishes a per-combination summary for the consolidated CI report.
 #
-# POSIX/SCTP is excluded because ubuntu-latest runners lack the sctp kernel
-# module. The code path is still built; only the CI matrix excludes it.
+# The POSIX and the io_uring link run on IPC, TCP and SCTP (the hosted runner
+# opens SCTP sockets; only the headers are installed here). ZeroMQ has no SCTP.
 
 on:
   workflow_call:
@@ -16,7 +16,7 @@ on:
 
 jobs:
   asn1c-cache:
-    # Builds/warms the asn1c cache once, ahead of the 4 matrix legs below, so
+    # Builds/warms the asn1c cache once, ahead of the 8 matrix legs below, so
     # they don't race each other rebuilding it from source on a cold cache.
     name: Warm asn1c cache
     runs-on: ubuntu-latest
@@ -52,11 +52,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # POSIX/SCTP is intentionally excluded — ubuntu-latest runners lack
-        # the sctp kernel module. The code path is built; we just don't
-        # exercise it in CI.
-        link: [zmq, posix]
-        transport: [ipc, tcp]
+        link: [zmq, posix, uring]
+        transport: [ipc, tcp, sctp]
+        exclude:
+          - link: zmq
+            transport: sctp
 
     steps:
       - name: Checkout repository
@@ -77,11 +77,22 @@ jobs:
         run: |
           chmod +x ./build_libe3
           ./build_libe3 -I
+          sudo apt-get install -y libsctp-dev
 
       - name: Build Release with examples
         run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DLIBE3_ENABLE_SCTP=ON
           cmake --build build -j $(nproc)
+          grep -q '^LIBE3_WITH_URING:INTERNAL=ON' build/CMakeCache.txt || {
+            echo "the io_uring link was not built (liburing missing?)"; exit 1; }
+
+      # What a failing uring or sctp cell needs to be read: the kernel, and whether it lets this job use them.
+      - name: Kernel, io_uring and SCTP on this runner
+        run: |
+          uname -r
+          echo "kernel.io_uring_disabled=$(cat /proc/sys/kernel/io_uring_disabled 2>/dev/null || echo absent)"
+          python3 -c "import socket; socket.socket(socket.AF_INET, socket.SOCK_STREAM, 132).close(); print('SCTP sockets: yes')" \
+            || echo "SCTP sockets: no"
 
       - name: Prepare IPC directory
         run: |

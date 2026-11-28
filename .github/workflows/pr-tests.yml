@@ -40,6 +40,10 @@ jobs:
     needs: asn1c-cache
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
+    # The io_uring tests skip (exit 77) where the kernel refuses io_uring; this runner is meant
+    # to run them, so a skip fails here instead of passing unseen.
+    env:
+      LIBE3_REQUIRE_URING: "1"
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -64,6 +68,11 @@ jobs:
           chmod +x ./build_libe3
           ./build_libe3 -I
 
+      - name: Kernel and io_uring on this runner
+        run: |
+          uname -r
+          echo "kernel.io_uring_disabled=$(cat /proc/sys/kernel/io_uring_disabled 2>/dev/null || echo absent)"
+
       - name: Build and test with build_libe3 (${{ matrix.build_type }})
         shell: bash
         run: |
@@ -80,6 +89,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     timeout-minutes: 20
+    env:
+      LIBE3_REQUIRE_URING: "1"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -169,6 +180,19 @@ jobs:
             -DLIBE3_ENABLE_ZMQ=OFF
           cmake --build build-nozmq -j $(nproc)
           cd build-nozmq && ctest --output-on-failure
+
+      # The io_uring link is optional too: without it the library must build, `--link uring`
+      # must fail cleanly (test_link_availability), and no test may need liburing.
+      - name: Configure, build and test with the io_uring link disabled
+        run: |
+          cmake -S . -B build-nouring \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLIBE3_ENABLE_URING=OFF
+          cmake --build build-nouring -j $(nproc)
+          if grep -q '^LIBE3_WITH_URING:INTERNAL=ON' build-nouring/CMakeCache.txt; then
+            echo "LIBE3_ENABLE_URING=OFF still built the io_uring link"; exit 1
+          fi
+          cd build-nouring && ctest --output-on-failure
 
   swig:
     name: SWIG Python Bindings
