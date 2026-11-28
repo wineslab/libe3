@@ -177,7 +177,8 @@ TEST(DAppLinkClosed_posix_aStoppedDAppIsRemovedAtOnceAndANeighbourStays) {
     ASSERT_TRUE(ran.agent.get_ran_function_subscribers(FIRST_RF).empty());
     ASSERT_TRUE(wait_until([&] { return !ran.first->is_running(); }, 10000ms));
     ASSERT_EQ(ran.first->stops.load(), 1);
-    ASSERT_TRUE(ran.status_changes.load() > changes_before);
+    // The notification follows the Service Model's stop, so wait for it.
+    ASSERT_TRUE(wait_until([&] { return ran.status_changes.load() > changes_before; }, 10000ms));
 
     // (2) The other one is as it was.
     ASSERT_TRUE(stays->dapp_id().has_value());
