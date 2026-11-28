@@ -29,6 +29,7 @@
 #include <atomic>
 #include <chrono>
 #include <csignal>
+#include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <iostream>
@@ -52,6 +53,8 @@ static void print_usage(const char* program_name) {
               << "  -t, --transport <layer>  Transport: sctp, tcp, ipc (default: ipc)\n"
               << "  -e, --encoding <format>  Encoding: asn1, json, protobuf (default: asn1)\n"
               << "  -c, --control            Send a Simple-Control every 5th indication\n"
+              << "      --ctrl-prbs <N>      Make each control carry a Spectrum-style PRB block of\n"
+              << "                           N PRBs (2 bytes each; default 0 = none; 273 = 546 B).\n"
               << "  -T, --timed <secs>       Stop after this many seconds (0 = unlimited)\n"
               << "  -d, --socket-dir <dir>   IPC socket dir of a RAN to connect to.\n"
               << "                           Repeatable: one per RAN (default: /tmp/dapps).\n"
@@ -137,10 +140,11 @@ int main(int argc, char* argv[]) {
     bool control_enabled = false;
     bool quiet = false;
     int timed_seconds = 0;
+    unsigned ctrl_prbs = 0;                 // PRBs in each control's payload
     std::vector<std::string> socket_dirs;   // repeated --socket-dir (IPC peers)
     std::vector<int> port_offsets;          // repeated --port-offset (TCP peers)
 
-    // --port-offset is long-only (val 1000).
+    // --port-offset (1000) and --ctrl-prbs (1001) are long-only.
     static struct option long_options[] = {
         {"link",        required_argument, nullptr, 'l'},
         {"transport",   required_argument, nullptr, 't'},
@@ -149,6 +153,7 @@ int main(int argc, char* argv[]) {
         {"timed",       required_argument, nullptr, 'T'},
         {"socket-dir",  required_argument, nullptr, 'd'},
         {"port-offset", required_argument, nullptr, 1000},
+        {"ctrl-prbs",   required_argument, nullptr, 1001},
         {"quiet",       no_argument,       nullptr, 'q'},
         {"help",        no_argument,       nullptr, 'h'},
         {nullptr,       0,                 nullptr,  0 }
@@ -164,11 +169,14 @@ int main(int argc, char* argv[]) {
             case 'T': timed_seconds = std::atoi(optarg); break;
             case 'd': socket_dirs.emplace_back(optarg); break;
             case 1000: port_offsets.push_back(std::atoi(optarg)); break;
+            case 1001: ctrl_prbs = static_cast<unsigned>(std::strtoul(optarg, nullptr, 10)); break;
             case 'q': quiet = true; break;
             case 'h': print_usage(argv[0]); return 0;
             default:  print_usage(argv[0]); return 1;
         }
     }
+
+    const std::vector<uint8_t> control_payload = libe3_examples::make_prb_block_payload(ctrl_prbs);
 
     std::cout << "libe3 Simple dApp Example\n";
     std::cout << "Version: " << LIBE3_VERSION_STRING << "\n\n";
@@ -205,7 +213,8 @@ int main(int argc, char* argv[]) {
               << "  Link: " << libe3::link_layer_to_string(link_layer) << "\n"
               << "  Transport: " << libe3::transport_layer_to_string(transport_layer) << "\n"
               << "  Encoding: " << encoding_to_cstr(encoding) << "\n"
-              << "  Control: " << (control_enabled ? "on" : "off") << "\n"
+              << "  Control: " << (control_enabled ? "on" : "off")
+              << (control_enabled && ctrl_prbs ? " (" + std::to_string(ctrl_prbs) + " PRBs)" : "") << "\n"
               << "  Timed (s): " << timed_seconds << "\n"
               << "  RAN peers: " << peers.size() << "\n\n";
 
@@ -237,7 +246,7 @@ int main(int argc, char* argv[]) {
 
         p->agent = std::make_unique<libe3::E3Agent>(std::move(config));
 
-        p->agent->set_indication_handler([p, control_enabled, quiet, encoding](const libe3::IndicationMessage& msg) {
+        p->agent->set_indication_handler([p, control_enabled, control_payload, quiet, encoding](const libe3::IndicationMessage& msg) {
             libe3_examples::SimpleIndication si;
             if (!libe3_examples::decode_simple_indication(msg.protocol_data, si, encoding)) {
                 std::cerr << "[SIMPLE] peer=" << p->label << " failed to decode indication ("
@@ -288,11 +297,12 @@ int main(int argc, char* argv[]) {
                           << " (RAN function " << msg.ran_function_identifier << ")\n";
             }
 
-            // Every 5th indication, optionally echo back a Simple-Control.
+            // Every 5th indication, optionally echo back a Simple-Control (carrying
+            // a PRB block when --ctrl-prbs is set).
             if (control_enabled && seq % 5 == 0) {
                 const int sampling = static_cast<int>(seq % 101);
                 std::vector<uint8_t> encoded;
-                if (libe3_examples::encode_simple_control(sampling, encoded, encoding)) {
+                if (libe3_examples::encode_simple_control(sampling, encoded, encoding, control_payload)) {
                     // request_ack asks the RAN for a ControlResponse once it has dealt with the control.
                     auto rc = p->agent->send_control(/*ran_function_id=*/1, /*control_id=*/1, encoded,
                                                      /*sequence_id=*/0, /*out_message_id=*/nullptr,

@@ -13,7 +13,10 @@
  *     control with a POSITIVE response code, and emits indications whose
  *     payload carries the monotonic seq in data1 with a populated timestamp,
  *   - an undecodable control payload is answered NEGATIVE (decode-failure branch),
- *   - the trace hook fires the RAN-side phases in order for a round trip.
+ *   - the trace hook fires the RAN-side phases in order for a round trip,
+ *   - the opaque payload the benchmarks use to give the SM a real SM's size
+ *     (37 B indication, PRB-block control) survives every compiled encoding and
+ *     stays absent when not asked for.
  *
  * SPDX-FileCopyrightText: Copyright (c) 2026 Northeastern University
  * SPDX-License-Identifier: Apache-2.0
@@ -317,6 +320,111 @@ TEST(trace_hook_phase_order) {
 
     const std::string rm = "rm -rf '" + std::string(dir) + "'";
     if (std::system(rm.c_str()) != 0) { /* best effort */ }
+}
+
+namespace {
+
+// Every encoding this build has: ASN.1 always, the others when compiled in.
+std::vector<EncodingFormat> compiled_encodings() {
+    std::vector<EncodingFormat> v{EncodingFormat::ASN1};
+#ifdef LIBE3_ENABLE_JSON
+    v.push_back(EncodingFormat::JSON);
+#endif
+#ifdef LIBE3_ENABLE_PROTOBUF
+    v.push_back(EncodingFormat::PROTOBUF);
+#endif
+    return v;
+}
+
+}  // namespace
+
+TEST(indication_payload_round_trips_in_every_encoding) {
+    const std::vector<uint8_t> payload = libe3_examples::make_pseudo_random_payload(37);
+    ASSERT_EQ(payload.size(), 37u);
+    for (EncodingFormat enc : compiled_encodings()) {
+        libe3_examples::SimpleIndication in{7, 1234567u, payload};
+        std::vector<uint8_t> wire_bytes;
+        ASSERT_TRUE(libe3_examples::encode_simple_indication(in, wire_bytes, enc));
+
+        libe3_examples::SimpleIndication out;
+        ASSERT_TRUE(libe3_examples::decode_simple_indication(wire_bytes, out, enc));
+        ASSERT_EQ(out.data1, 7u);
+        ASSERT_TRUE(out.timestamp.has_value());
+        ASSERT_EQ(*out.timestamp, 1234567u);
+        ASSERT_TRUE(out.payload == payload);
+    }
+}
+
+TEST(indication_without_payload_stays_empty_and_smaller) {
+    for (EncodingFormat enc : compiled_encodings()) {
+        libe3_examples::SimpleIndication bare{7, 1234567u, {}};
+        libe3_examples::SimpleIndication loaded{7, 1234567u,
+                                                libe3_examples::make_pseudo_random_payload(37)};
+        std::vector<uint8_t> a, b;
+        ASSERT_TRUE(libe3_examples::encode_simple_indication(bare, a, enc));
+        ASSERT_TRUE(libe3_examples::encode_simple_indication(loaded, b, enc));
+        ASSERT_GT(b.size(), a.size() + 36u);  // at least the 37 payload bytes more
+
+        libe3_examples::SimpleIndication out;
+        out.payload = {1, 2, 3};  // decode must clear a stale payload
+        ASSERT_TRUE(libe3_examples::decode_simple_indication(a, out, enc));
+        ASSERT_TRUE(out.payload.empty());
+    }
+}
+
+TEST(control_prb_block_round_trips_in_every_encoding) {
+    // 0 PRBs (clear), 50 (the r2 mock block), 273 (every PRB of 100 MHz): the
+    // raw payload is 2 bytes per PRB, the PRB indices little-endian.
+    for (unsigned prbs : {0u, 50u, 273u}) {
+        const std::vector<uint8_t> payload = libe3_examples::make_prb_block_payload(prbs);
+        ASSERT_EQ(payload.size(), static_cast<size_t>(prbs) * 2);
+        if (prbs == 273u) {
+            ASSERT_EQ(payload[2 * 272], 272 & 0xFF);
+            ASSERT_EQ(payload[2 * 272 + 1], 272 >> 8);
+        }
+        for (EncodingFormat enc : compiled_encodings()) {
+            std::vector<uint8_t> wire_bytes;
+            ASSERT_TRUE(libe3_examples::encode_simple_control(42, wire_bytes, enc, payload));
+
+            int threshold = -1;
+            std::vector<uint8_t> out{9, 9};  // decode must replace, not append
+            ASSERT_TRUE(libe3_examples::decode_simple_control(wire_bytes, threshold, enc, &out));
+            ASSERT_EQ(threshold, 42);
+            ASSERT_TRUE(out == payload);
+        }
+    }
+}
+
+TEST(sm_emits_payload_when_asked_and_accepts_prb_block_control) {
+    EmitterCounts c;
+    Harness sm(/*period_us=*/0, EncodingFormat::ASN1,
+               SimpleServiceModel::PacingMode::PingPong,
+               /*pingpong_fallback_ms=*/50, /*indication_payload_bytes=*/37);
+    wire(sm, c);
+    sm.start();
+    {
+        std::unique_lock<std::mutex> lk(c.mu);
+        ASSERT_TRUE(c.cv.wait_for(lk, 2s, [&] { return c.indications >= 1; }));
+    }
+
+    DAppControlAction action;
+    action.dapp_identifier = 1;
+    action.ran_function_identifier = SimpleServiceModel::RAN_FUNCTION_ID;
+    action.control_identifier = 1;
+    std::vector<uint8_t> encoded;
+    ASSERT_TRUE(libe3_examples::encode_simple_control(
+        50, encoded, EncodingFormat::ASN1, libe3_examples::make_prb_block_payload(273)));
+    action.action_data = encoded;
+    ASSERT_TRUE(sm.handle_control_action(/*request_message_id=*/1, action) == ErrorCode::SUCCESS);
+    sm.stop();
+
+    std::lock_guard<std::mutex> lk(c.mu);
+    ASSERT_EQ(c.response_codes.size(), 1u);
+    ASSERT_TRUE(c.response_codes[0] == ResponseCode::POSITIVE);
+    ASSERT_GE(c.indication_payloads.size(), 1u);
+    libe3_examples::SimpleIndication si;
+    ASSERT_TRUE(libe3_examples::decode_simple_indication(c.indication_payloads[0], si));
+    ASSERT_EQ(si.payload.size(), 37u);
 }
 
 int main() {

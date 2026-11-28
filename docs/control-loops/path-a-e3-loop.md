@@ -178,7 +178,7 @@ deployments:
 
 | Deployment | A1 to A3 owner | A9 to A12 owner (dApp) | A18 to A19a owner | Notes |
 |---|---|---|---|---|
-| Simple SM | the Simple Service Model shipped in `examples/sm_simple`, self-paced | the same Simple SM on the dApp side | the same Simple SM | Both roles in one process for the coarse benchmark, two processes for a ring capture. The variant where `link` / `transport` / `encoding` can be swept freely. |
+| Simple SM | the Simple Service Model shipped in `examples/sm_simple`, self-paced | the same Simple SM on the dApp side | the same Simple SM | Both roles in one process for the coarse benchmark, two processes for a ring capture. The variant where `link` / `transport` / `encoding` can be swept freely. The full-loop benchmark gives it real-sized payloads: 37 B on the indication (one L1-KPM slot) and a Spectrum PRB block of 0, 100 or 546 B on the control. |
 | RAN stack | a gNB's PHY plus its reporting Service Models | a dApp framework | the RAN's Service Model to its scheduler | The variant that reaches the air, so `LIVE_ON_AIR` is meaningful. |
 | Split capture pipeline | a capture hook feeding a separate controller process | the dApp under test | not necessarily wired | `A1` to `A3` span two processes joined through shared memory. |
 | Accelerated L1 | an L1 data lake feeding an accelerated dApp's E3 manager | accelerated CPU and GPU dApps | not necessarily wired | Can be measured with and without libE3 framing to compare the library against a hand-rolled integration over the same stage set. |

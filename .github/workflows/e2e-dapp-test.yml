@@ -96,10 +96,13 @@ jobs:
           LOG_AGENT=/tmp/agent_${{ matrix.link }}_${{ matrix.transport }}.log
           LOG_DAPP=/tmp/dapp_${{ matrix.link }}_${{ matrix.transport }}.log
 
+          # Real-sized messages: 37 B indication payload (one L1-KPM slot) and a
+          # 273-PRB (546 B) Spectrum block in each control.
           ./build/example_simple_agent \
             --link ${{ matrix.link }} \
             --transport ${{ matrix.transport }} \
-            --encoding asn1 > "$LOG_AGENT" 2>&1 &
+            --encoding asn1 \
+            --ind-payload-bytes 37 > "$LOG_AGENT" 2>&1 &
           AGENT_PID=$!
           sleep 1
 
@@ -107,7 +110,7 @@ jobs:
           timeout -k 10 25s ./build/example_simple_dapp \
             --link ${{ matrix.link }} \
             --transport ${{ matrix.transport }} \
-            --encoding asn1 --control --timed 15 > "$LOG_DAPP" 2>&1
+            --encoding asn1 --control --ctrl-prbs 273 --timed 15 > "$LOG_DAPP" 2>&1
           DAPP_EXIT=$?
           set -e
 

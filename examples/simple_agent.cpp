@@ -46,6 +46,10 @@ void print_usage(const char* program_name) {
               << "      --period-us <N>      Emit one indication every N microseconds\n"
               << "                           (default: 2000000 = 2 s). e.g. 11494 ~= 87 ind/s\n"
               << "                           (one per slot); sub-ms values stress queueing.\n"
+              << "      --ind-payload-bytes <N>\n"
+              << "                           Add N opaque bytes to every indication, to give it a\n"
+              << "                           real SM's payload size (default: 0 = none;\n"
+              << "                           37 = one L1-KPM slot).\n"
               << "  -h, --help               Show this help message\n";
 }
 
@@ -90,8 +94,9 @@ int main(int argc, char* argv[]) {
     std::string socket_dir;   // empty => library default (/tmp/dapps)
     int port_offset = 0;      // TCP: added to the default ports
     uint64_t period_us = 2'000'000;  // indication emission period (default 2s)
+    size_t ind_payload_bytes = 0;    // opaque payload added to each indication
 
-    // Command-line options. --port-offset (1000) and --period-us (1001) are long-only.
+    // Command-line options. --port-offset (1000), --period-us (1001) and --ind-payload-bytes (1002) are long-only.
     static struct option long_options[] = {
         {"link",        required_argument, nullptr, 'l'},
         {"transport",   required_argument, nullptr, 't'},
@@ -100,6 +105,7 @@ int main(int argc, char* argv[]) {
         {"socket-dir",  required_argument, nullptr, 'd'},
         {"port-offset", required_argument, nullptr, 1000},
         {"period-us",   required_argument, nullptr, 1001},
+        {"ind-payload-bytes", required_argument, nullptr, 1002},
         {"help",        no_argument,       nullptr, 'h'},
         {nullptr,       0,                 nullptr,  0 }
     };
@@ -127,6 +133,9 @@ int main(int argc, char* argv[]) {
                 break;
             case 1001:
                 period_us = std::strtoull(optarg, nullptr, 10);  // --period-us
+                break;
+            case 1002:
+                ind_payload_bytes = std::strtoull(optarg, nullptr, 10);  // --ind-payload-bytes
                 break;
             case 'h':
                 print_usage(argv[0]);
@@ -188,7 +197,9 @@ int main(int argc, char* argv[]) {
     }
 
     // Register the simple service model (with the configured emission period)
-    auto sm_result = agent.register_sm(std::make_unique<SimpleServiceModel>(period_us, encoding));
+    auto sm_result = agent.register_sm(std::make_unique<SimpleServiceModel>(
+        period_us, encoding, SimpleServiceModel::PacingMode::FixedRate,
+        /*pingpong_fallback_ms=*/50, ind_payload_bytes));
     if (sm_result != libe3::ErrorCode::SUCCESS) {
         std::cerr << "Failed to register Simple SM: "
                   << libe3::error_code_to_string(sm_result) << "\n";

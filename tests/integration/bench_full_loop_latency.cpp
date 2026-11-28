@@ -18,6 +18,13 @@
  * to earlier runs that used the old inline benchmark SM and must be treated as
  * a fresh baseline.
  *
+ * The messages are real-sized: the Simple SM carries an opaque payload next to
+ * its own fields, 37 B on the indication (the raw size of one L1-KPM slot) and
+ * 2 B per PRB on the control (--ctrl-prbs; 273 PRBs = 546 B, every PRB of a
+ * 100 MHz carrier, as a Spectrum PRB-block control). CI runs 0, 50 and 273
+ * PRBs. Earlier runs, which sent a few bytes each way, are not comparable to
+ * these either. Each run prints the encoded sizes it measured (SM and E3AP).
+ *
  * Phases captured (all read from latrec's CLOCK_MONOTONIC records), aligned
  * with docs/control-loops/path-a-e3-loop.md's box numbering (A1..A18). "SM" is the shipped
  * reference Service Model's own worker ring (sm_simple.<tid>); "dApp" is this
@@ -109,6 +116,14 @@ constexpr int kWarmupIterations = 50;
 constexpr uint32_t kRanFunctionId = 1;
 constexpr uint32_t kControlId = 1;
 
+// Payload sizes the benchmark uses unless told otherwise: a real SM's raw
+// payload, not the Simple SM's own few bytes. The indication stands in for one
+// L1-KPM slot (37 B raw); the control for a Spectrum PRB block of every PRB of
+// a 100 MHz carrier (273 PRBs x 2 B = 546 B). CI runs the control at 0, 50 and
+// 273 PRBs (none / the r2 mock block / all) to show latency against size.
+constexpr size_t kDefaultIndPayloadBytes = 37;
+constexpr unsigned kDefaultCtrlPrbs = 273;
+
 // The 9 business-seq-keyed timestamps of one round trip (unchanged from
 // before this rewrite), plus the 14 libE3-internal ones added by it: 7 per
 // leg (5 outbound + 2 inbound), forward and return.
@@ -127,6 +142,11 @@ struct RoundTrip {
              t_ctrl_encode_e3ap_done = 0, t_ctrl_send_done = 0;
     // Return leg, inbound pair -- positionally paired.
     uint64_t t_ctrl_recv = 0, t_ctrl_decode_e3ap_done = 0;
+
+    // Encoded sizes in bytes, read from the aux of the encode-done stamps:
+    // what the Simple SM produced, and the E3AP wire message that carries it.
+    uint64_t sm_ind_bytes = 0, sm_ctrl_bytes = 0;
+    uint64_t e3ap_ind_bytes = 0, e3ap_ctrl_bytes = 0;
 };
 
 std::string make_ipc_dir() {
@@ -216,6 +236,8 @@ std::vector<RoundTrip> reconstruct(const std::string& dir) {
 
     // (stage, aux2) -> t_ns, per business seq -- unchanged from before.
     std::map<uint64_t, std::map<std::pair<uint8_t, uint64_t>, uint64_t>> by_seq;
+    // (business seq, PduType) -> encoded SM bytes, from ENCODE_E3SM_DONE.aux.
+    std::map<std::pair<uint64_t, uint64_t>, uint64_t> sm_bytes;
 
     // libE3-internal-seq -> stage -> full record. One shared seq per
     // leg-instance (see file header); storing the whole record, not just
@@ -232,6 +254,9 @@ std::vector<RoundTrip> reconstruct(const std::string& dir) {
             case LATREC_DECODE_E3SM_BEGIN:
             case LATREC_DECODE_E3SM_DONE:
                 by_seq[latrec_test::seq_of(r)][{stage, r.aux2}] = r.t_ns;
+                if (stage == LATREC_ENCODE_E3SM_DONE) {
+                    sm_bytes[{latrec_test::seq_of(r), r.aux2}] = r.aux;
+                }
                 break;
             case LATREC_EMIT_ENTER:
             case LATREC_ENQUEUE:
@@ -256,6 +281,7 @@ std::vector<RoundTrip> reconstruct(const std::string& dir) {
     struct Libe3Times {
         uint64_t emit_enter = 0, enqueue = 0, dequeue = 0,
                  encode_e3ap_done = 0, send_done = 0;
+        uint64_t e3ap_bytes = 0;  ///< ENCODE_E3AP_DONE.aux: the wire message size
     };
     std::map<uint64_t, Libe3Times> ind_outbound;   // keyed by business seq
     std::map<uint64_t, Libe3Times> ctrl_outbound;  // keyed by business seq
@@ -276,7 +302,7 @@ std::vector<RoundTrip> reconstruct(const std::string& dir) {
             const latrec_rec* enc = get(LATREC_ENCODE_E3AP_DONE);
             const latrec_rec* snd = get(LATREC_SEND_DONE);
             if (!(enq && deq && enc && snd)) continue;  // incomplete tail
-            const Libe3Times t{emit->t_ns, enq->t_ns, deq->t_ns, enc->t_ns, snd->t_ns};
+            const Libe3Times t{emit->t_ns, enq->t_ns, deq->t_ns, enc->t_ns, snd->t_ns, enc->aux};
             const uint64_t business_seq = emit->aux;
             if (enq->aux2 == kInd)       ind_outbound[business_seq] = t;
             else if (enq->aux2 == kCtrl) ctrl_outbound[business_seq] = t;
@@ -391,6 +417,11 @@ std::vector<RoundTrip> reconstruct(const std::string& dir) {
         rt.t_ctrl_recv = ci.recv;
         rt.t_ctrl_decode_e3ap_done = ci.decode_e3ap_done;
 
+        rt.e3ap_ind_bytes = io.e3ap_bytes;
+        rt.e3ap_ctrl_bytes = co.e3ap_bytes;
+        rt.sm_ind_bytes = sm_bytes[{seq, kInd}];
+        rt.sm_ctrl_bytes = sm_bytes[{seq, kCtrl}];
+
         out.push_back(rt);
     }
     if (skipped_misaligned > 0) {
@@ -409,11 +440,15 @@ int main(int argc, char* argv[]) {
     E3LinkLayer     link     = E3LinkLayer::ZMQ;
     E3TransportLayer transport = E3TransportLayer::IPC;
     EncodingFormat  encoding = EncodingFormat::ASN1;
+    size_t          ind_payload_bytes = kDefaultIndPayloadBytes;
+    unsigned        ctrl_prbs = kDefaultCtrlPrbs;
 
     static const struct option long_opts[] = {
         {"link",      required_argument, nullptr, 'l'},
         {"transport", required_argument, nullptr, 't'},
         {"encoding",  required_argument, nullptr, 'e'},
+        {"ind-payload-bytes", required_argument, nullptr, 1000},
+        {"ctrl-prbs", required_argument, nullptr, 1001},
         {"help",      no_argument,       nullptr, 'h'},
         {nullptr,     0,                 nullptr,  0},
     };
@@ -423,9 +458,14 @@ int main(int argc, char* argv[]) {
             case 'l': link      = parse_link(optarg);      break;
             case 't': transport = parse_transport(optarg); break;
             case 'e': encoding  = parse_encoding(optarg);  break;
+            case 1000: ind_payload_bytes = std::strtoull(optarg, nullptr, 10); break;
+            case 1001: ctrl_prbs = static_cast<unsigned>(std::strtoul(optarg, nullptr, 10)); break;
             case 'h':
                 std::printf("Usage: %s [--link zmq|posix] [--transport ipc|tcp|sctp]"
-                            " [--encoding asn1|json|protobuf]\n", argv[0]);
+                            " [--encoding asn1|json|protobuf]"
+                            " [--ind-payload-bytes N (default %zu)]"
+                            " [--ctrl-prbs N (default %u; 2 bytes each)]\n",
+                            argv[0], kDefaultIndPayloadBytes, kDefaultCtrlPrbs);
                 return 0;
             default:
                 std::fprintf(stderr, "Unknown option; use --help\n");
@@ -477,7 +517,8 @@ int main(int argc, char* argv[]) {
     // prints.
     auto sm = std::make_unique<libe3_examples::SimpleServiceModel>(
         /*period_us=*/0, encoding,
-        libe3_examples::SimpleServiceModel::PacingMode::PingPong);
+        libe3_examples::SimpleServiceModel::PacingMode::PingPong,
+        /*pingpong_fallback_ms=*/50, ind_payload_bytes);
     if (ran.register_sm(std::move(sm)) != ErrorCode::SUCCESS) {
         std::cerr << "register_sm failed\n";
         return 1;
@@ -486,6 +527,11 @@ int main(int argc, char* argv[]) {
         std::cerr << "ran start failed\n";
         return 1;
     }
+
+    // The control carries the PRB indices of a Spectrum block, built once: the
+    // benchmark measures coding and moving the payload, not producing it.
+    const std::vector<uint8_t> ctrl_payload =
+        libe3_examples::make_prb_block_payload(ctrl_prbs);
 
     E3Agent dapp(dapp_cfg);
     std::atomic<int> handled{0};
@@ -499,8 +545,9 @@ int main(int argc, char* argv[]) {
         latrec_tstamp(seq, LATREC_ENCODE_E3SM_BEGIN, 0,
                       static_cast<uint64_t>(PduType::DAPP_CONTROL_ACTION));
         std::vector<uint8_t> ctrl;
-        if (!libe3_examples::encode_simple_control(static_cast<int>(si.data1 % 101), ctrl, encoding)) return;
-        latrec_tstamp(seq, LATREC_ENCODE_E3SM_DONE, 0,
+        if (!libe3_examples::encode_simple_control(static_cast<int>(si.data1 % 101), ctrl, encoding,
+                                                        ctrl_payload)) return;
+        latrec_tstamp(seq, LATREC_ENCODE_E3SM_DONE, ctrl.size(),
                       static_cast<uint64_t>(PduType::DAPP_CONTROL_ACTION));
 
         // Bridges this handler's business seq to libe3's Pdu::enqueue_seq for
@@ -571,7 +618,7 @@ int main(int argc, char* argv[]) {
     // Compute per-phase deltas (fractional microseconds, dropping warmup).
     // Several phases are sub-microsecond; integer us would truncate them to 0.
     std::vector<double> p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13,
-        p14, p15, p16, p17, p18, total_us;
+        p14, p15, p16, p17, p18, total_us, sm_ind, sm_ctrl, e3ap_ind, e3ap_ctrl;
     for (const auto& t : round_trips) {
         if (t.seq < static_cast<uint64_t>(kWarmupIterations)) continue;
         auto us = [](uint64_t a, uint64_t b) {
@@ -598,6 +645,10 @@ int main(int argc, char* argv[]) {
         p17.push_back(us(t.t_ctrl_decode_e3ap_done, t.t8));
         p18.push_back(us(t.t8, t.t9));
         total_us.push_back(us(t.t1, t.t9));
+        sm_ind.push_back(static_cast<double>(t.sm_ind_bytes));
+        sm_ctrl.push_back(static_cast<double>(t.sm_ctrl_bytes));
+        e3ap_ind.push_back(static_cast<double>(t.e3ap_ind_bytes));
+        e3ap_ctrl.push_back(static_cast<double>(t.e3ap_ctrl_bytes));
     }
 
     // Emit markdown (fractional us, two decimals).
@@ -616,8 +667,19 @@ int main(int argc, char* argv[]) {
                     *std::max_element(v.begin(), v.end()));
     };
 
-    std::printf("## Full-loop latency benchmark (N=%d after %d warmup)\n\n",
-                static_cast<int>(p1.size()), kWarmupIterations);
+    // Sizes are reported as p50 (the indication's differ by a byte or two as
+    // the timestamp and counter change width).
+    auto size_p50 = [](std::vector<double>& v) {
+        return static_cast<unsigned long long>(percentile(v, 0.50));
+    };
+    std::printf("## Full-loop latency benchmark, control %u PRBs (N=%d after %d warmup)\n\n",
+                ctrl_prbs, static_cast<int>(p1.size()), kWarmupIterations);
+    std::printf("Payload (raw bytes the Simple SM carries): indication %zu B, control %zu B"
+                " (%u PRBs x 2 B).\n\n",
+                ind_payload_bytes, ctrl_payload.size(), ctrl_prbs);
+    std::printf("Encoded sizes (bytes, p50): indication SM %llu / E3AP %llu;"
+                " control SM %llu / E3AP %llu.\n\n",
+                size_p50(sm_ind), size_p50(e3ap_ind), size_p50(sm_ctrl), size_p50(e3ap_ctrl));
     std::printf("All values in microseconds (us). Link: %s, transport: %s, encoding: %s.\n\n",
                 link_layer_to_string(link), transport_layer_to_string(transport),
                 encoding_str(encoding));

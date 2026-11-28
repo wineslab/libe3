@@ -50,9 +50,15 @@ jobs:
 
       - name: Run benchmark
         run: |
-          # Filter out logger noise — bench prints its markdown to stdout.
-          ./build/test_bench_full_loop_latency 2>/dev/null \
-            | grep -v "^\[20" > bench_results.md
+          # One pass per control size: 0 PRBs (clear), 50 (the r2 mock block) and
+          # 273 (every PRB of a 100 MHz carrier). The indication is 37 B, one L1-KPM
+          # slot, in all three. Filter out logger noise: the bench prints its
+          # markdown to stdout.
+          : > bench_results.md
+          for prbs in 0 50 273; do
+            ./build/test_bench_full_loop_latency --ctrl-prbs "$prbs" 2>/dev/null \
+              | grep -v "^\[20" >> bench_results.md
+          done
           cat bench_results.md
 
       - name: Assemble report fragment
@@ -66,7 +72,9 @@ jobs:
             echo ""
             echo "_ubuntu-latest, Release build, ZMQ + IPC, ASN.1 APER._"
             echo ""
-            echo "_These numbers are measured inside a GitHub Actions container and should be treated as an upper bound on E3AP's and the library's own latency, not a representative deployment measurement._"
+            echo "_Payloads are real-sized: the indication carries 37 B of raw payload (one L1-KPM slot) and the control a Spectrum PRB block of 0, 100 (50 PRBs) or 546 B (273 PRBs), 2 B per PRB. The encoded sizes above include the Simple SM's own fields, so they run a few bytes over the real SMs'. Each table reports mean, p50, p99 and max._"
+            echo ""
+            echo "_Disclaimer: these runs are on general-purpose, unoptimized hardware (a shared GitHub-hosted ubuntu-latest runner in a container: no CPU pinning, no isolation, no tuned kernel or NIC), so they vary from run to run, p99 and max most of all. Treat them as an upper bound on E3AP's and the library's own latency, good for comparing one change with another, not as a representative deployment measurement._"
           } > ci-report-full-loop.md
 
       - name: Upload report fragment

@@ -101,8 +101,11 @@ jobs:
           echo "### zmq/${T}" > "$SUMMARY"
           echo "" >> "$SUMMARY"
 
-          AGENT=./build/example_simple_agent
-          DAPP=./build/example_simple_dapp
+          # Real-sized messages: the indication carries 37 B of payload (one
+          # L1-KPM slot) and each control a 273-PRB Spectrum block (546 B), so the
+          # reported queueing/age is measured on what the real SMs send.
+          AGENT="./build/example_simple_agent --ind-payload-bytes 37"
+          DAPP="./build/example_simple_dapp --ctrl-prbs 273"
           fail=0
 
           # Emit a per-dApp queueing note (report-only) into the summary.

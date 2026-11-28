@@ -276,7 +276,7 @@ int main() {
 }
 ```
 
-See `examples/simple_dapp.cpp` for a complete reference dApp using the Simple service model. It pairs with `examples/simple_agent.cpp` and is wire-compatible with Python dApp clients that implement the same Simple SM encoding.
+See `examples/simple_dapp.cpp` for a complete reference dApp using the Simple service model. It pairs with `examples/simple_agent.cpp` and is wire-compatible with Python dApp clients that implement the same Simple SM encoding (`examples/sm_simple/e3sm_simple.asn`, which carries an optional opaque `payload` the benchmarks use to give the SM a real Service Model's message size: `--ind-payload-bytes` on the agent, `--ctrl-prbs` on the dApp).
 
 #### Multi-peer dApps
 

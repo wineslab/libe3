@@ -21,11 +21,13 @@ message SimpleRanFunctionData {
 message SimpleIndication {
   uint32 data1 = 1;             // Random data / monotonic sequence counter
   optional uint32 timestamp = 2;  // Unix timestamp when samples were captured
+  optional bytes payload = 3;     // Opaque bytes standing in for a real SM's data
 }
 
 // Control payload (dApp -> RAN).
 message SimpleControl {
   optional uint32 sampling_threshold = 1;  // Sampling delivery ratio (0..100)
+  optional bytes payload = 2;              // Opaque bytes standing in for a real SM's data
 }
 
 // Configuration control payload (xApp -> dApp via RAN).

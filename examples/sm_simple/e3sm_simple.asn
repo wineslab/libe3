@@ -22,7 +22,8 @@ Simple-RanFunctionData  ::= SEQUENCE {
 -- Simple Indication (random data from RAN)
 Simple-Indication ::= SEQUENCE {
     data1                   INTEGER (0..2147483647),         -- Random data / monotonic sequence counter (examples)
-    timestamp               INTEGER (0..2147483647) OPTIONAL -- Unix timestamp when samples were captured
+    timestamp               INTEGER (0..2147483647) OPTIONAL, -- Unix timestamp when samples were captured
+    payload                 OCTET STRING (SIZE (0..2048)) OPTIONAL -- Opaque bytes standing in for a real SM's data (size benchmarking)
 }
 
 -- ============================================================================
@@ -31,7 +32,8 @@ Simple-Indication ::= SEQUENCE {
 
 -- Simple Control (main control message used by dApp)
 Simple-Control ::= SEQUENCE {
-    samplingThreshold       INTEGER (0..100) OPTIONAL        -- Sampling delivery ratio
+    samplingThreshold       INTEGER (0..100) OPTIONAL,       -- Sampling delivery ratio
+    payload                 OCTET STRING (SIZE (0..2048)) OPTIONAL -- Opaque bytes standing in for a real SM's data (size benchmarking)
 }
 
 -- ============================================================================

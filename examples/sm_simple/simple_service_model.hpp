@@ -44,6 +44,7 @@
 #include <cstdint>
 #include <iostream>
 #include <mutex>
+#include <cstddef>
 #include <string>
 #include <thread>
 #include <vector>
@@ -68,12 +69,19 @@ public:
     // liveness-fallback timeout (see worker_loop); the 50 ms default keeps the
     // shipped SM snappy, and tests can widen it so a slow-runner wakeup delay
     // stays attributable to the control ack rather than the fallback timer.
+    // indication_payload_bytes: size of the opaque payload each indication
+    // carries next to data1/timestamp (0, the default, leaves the field absent
+    // so the indication is byte-identical to the historical one). The latency
+    // benchmark sets it to 37, the raw size of an L1-KPM slot, so its numbers
+    // are measured on a real SM's payload size.
     explicit SimpleServiceModel(uint64_t period_us = 2'000'000,
                                 libe3::EncodingFormat encoding = libe3::EncodingFormat::ASN1,
                                 PacingMode mode = PacingMode::FixedRate,
-                                uint64_t pingpong_fallback_ms = 50)
+                                uint64_t pingpong_fallback_ms = 50,
+                                size_t indication_payload_bytes = 0)
         : period_us_(period_us), quiet_(period_us < 1000), encoding_(encoding),
-          mode_(mode), pingpong_fallback_ms_(pingpong_fallback_ms) {}
+          mode_(mode), pingpong_fallback_ms_(pingpong_fallback_ms),
+          indication_payload_(libe3_examples::make_pseudo_random_payload(indication_payload_bytes)) {}
 
     ~SimpleServiceModel() override { stop(); }
 
@@ -149,7 +157,9 @@ public:
                       static_cast<uint64_t>(libe3::PduType::DAPP_CONTROL_ACTION));
 
         int sampling = 0;
-        bool decode_ok = libe3_examples::decode_simple_control(action.action_data, sampling, encoding_);
+        std::vector<uint8_t> control_payload;
+        bool decode_ok = libe3_examples::decode_simple_control(action.action_data, sampling,
+                                                               encoding_, &control_payload);
 
         latrec_tstamp(seq, LATREC_DECODE_E3SM_DONE, decode_ok ? 1 : 0,
                       static_cast<uint64_t>(libe3::PduType::DAPP_CONTROL_ACTION));
@@ -194,6 +204,7 @@ private:
     libe3::EncodingFormat encoding_{libe3::EncodingFormat::ASN1};
     PacingMode mode_{PacingMode::FixedRate};
     uint64_t pingpong_fallback_ms_{50};  ///< PingPong liveness-fallback timeout
+    std::vector<uint8_t> indication_payload_;  ///< opaque bytes added to every indication
 
     // PingPong emission gate.
     std::mutex emit_mu_;
@@ -284,6 +295,7 @@ private:
             const auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch()).count();
             si.timestamp = static_cast<uint32_t>(now_ms & 0x7FFFFFFF);
+            si.payload = indication_payload_;
 
             latrec_tstamp(seq, LATREC_ENCODE_E3SM_BEGIN, 0,
                           static_cast<uint64_t>(libe3::PduType::INDICATION_MESSAGE));
